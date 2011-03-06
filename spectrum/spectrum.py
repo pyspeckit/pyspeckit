@@ -17,8 +17,6 @@ class Spectrum(object):
         -perform fourier transforms and operations in fourier space on a spectrum
     """
 
-    import readers,fitters,plotters,baseline
-
     def __init__(self,filename):
         if ".fits" in filename:
             try: 
@@ -35,7 +33,7 @@ class Spectrum(object):
                 # I think this is a typical format?
                 pass
 
-
+        import readers,fitters,plotters,baseline
         self.specfit = fitters.Specfit(self)
         self.plotter = plotters.Plotter(self)
         self.baseline = baseline.Baseline(self)

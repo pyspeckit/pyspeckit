@@ -1,3 +1,4 @@
+import numpy as np
 
 def open_1d_txt(filename):
     import atpy
@@ -49,8 +50,8 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None):
     else:
         dv,v0,p3 = hdr['CDELT1'+wcstype],hdr['CRVAL1'+wcstype],hdr['CRPIX1'+wcstype]
 
-    xconv = lambda v: ((v-p3+1)*dv+v0)/conversion_factor
-    xarr = xconv(arange(len(spec)))
+    xconv = lambda v: ((v-p3+1)*dv+v0)
+    xarr = xconv(np.arange(len(spec)))
 
     return spec,errspec,xarr,hdr
 
