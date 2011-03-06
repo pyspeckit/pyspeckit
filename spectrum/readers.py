@@ -25,6 +25,7 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None):
             is the error spectrum?
 
     """
+    import pyfits
     f = pyfits.open(filename)
     hdr = f[0].header
     spec = f[0].data
