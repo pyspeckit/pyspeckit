@@ -55,32 +55,3 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None):
 
     return spec,errspec,xarr,hdr
 
-def parse_header(self,hdr,specname=None):
-    """
-    Parse parameters from a .fits header into required spectrum structure
-    parameters
-    """
-    if hdr.get('CUNIT1'+wcstype) in ['m/s','M/S']:
-        self.xunits = 'km/s' # change to km/s because you're converting units
-    else:
-        self.xunits = hdr.get('CUNIT1'+wcstype)
-
-    if hdr.get('BUNIT'):
-        self.units = hdr.get('BUNIT').strip()
-    else:
-        self.units = 'undefined'
-
-    if hdr.get('REFFREQ'+wcstype):
-        self.reffreq = hdr.get('REFFREQ'+wcstype)
-    else:
-        self.reffreq = None
-
-    if hdr.get('CTYPE1'+wcstype):
-        self.xtype = hdr.get('CTYPE1'+wcstype)
-    else:
-        self.xtype = 'VLSR'
-
-    if specname is not None:
-        self.specname = specname
-    elif hdr.get('OBJECT'):
-        self.specname = hdr.get('OBJECT')

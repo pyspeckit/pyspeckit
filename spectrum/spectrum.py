@@ -18,24 +18,55 @@ class Spectrum(object):
     """
 
     def __init__(self,filename):
+
+        import readers,fitters,plotters,baseline
+
         if ".fits" in filename:
             try: 
-                self.data,self.error,self.xarr,self.header = self.readers.open_1d_fits(filename)
-                self.readers.parse_header(self.header)
+                self.data,self.error,self.xarr,self.header = readers.open_1d_fits(filename)
+                self.parse_header(self.header)
             except TypeError:
                 # do something else?
                 pass
         elif ".txt" in filename:
             try:
-                self.xarr,self.data,self.error = self.readers.open_1d_txt(filename)
+                self.xarr,self.data,self.error = readers.open_1d_txt(filename)
             except:
                 # try to use readcol to parse it as a wavelength / data / error file?
                 # I think this is a typical format?
                 pass
 
-        import readers,fitters,plotters,baseline
-        self.specfit = fitters.Specfit(self)
         self.plotter = plotters.Plotter(self)
+        self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
 
+    def parse_header(self,hdr,specname=None, wcstype=''):
+        """
+        Parse parameters from a .fits header into required spectrum structure
+        parameters
+        """
+        if hdr.get('CUNIT1'+wcstype) in ['m/s','M/S']:
+            self.xunits = 'km/s' # change to km/s because you're converting units
+        else:
+            self.xunits = hdr.get('CUNIT1'+wcstype)
+
+        if hdr.get('BUNIT'):
+            self.units = hdr.get('BUNIT').strip()
+        else:
+            self.units = 'undefined'
+
+        if hdr.get('REFFREQ'+wcstype):
+            self.reffreq = hdr.get('REFFREQ'+wcstype)
+        else:
+            self.reffreq = None
+
+        if hdr.get('CTYPE1'+wcstype):
+            self.xtype = hdr.get('CTYPE1'+wcstype)
+        else:
+            self.xtype = 'VLSR'
+
+        if specname is not None:
+            self.specname = specname
+        elif hdr.get('OBJECT'):
+            self.specname = hdr.get('OBJECT')
 

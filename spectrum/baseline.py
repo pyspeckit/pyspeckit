@@ -1,10 +1,12 @@
+import numpy as np
+
 class Baseline:
     def __init__(self,Spectrum):
         self.baselinepars  = None
         self.order = None
-        self.basespec = zeros(Spectrum.data.shape[0])
-        self.excludemask = zeros(Spectrum.data.shape[0],dtype='bool')
-        self.OKmask = ones(Spectrum.data.shape[0],dtype='bool')
+        self.basespec = np.zeros(Spectrum.data.shape[0])
+        self.excludemask = np.zeros(Spectrum.data.shape[0],dtype='bool')
+        self.OKmask = np.ones(Spectrum.data.shape[0],dtype='bool')
         self.Spectrum = Spectrum
         self.specplotter = Spectrum.plotter
         self.blleg = None
@@ -39,7 +41,7 @@ class Baseline:
         """
         specfit = self.specplotter.specfit
         self.order = order
-        fitp = zeros(self.order+1)
+        fitp = np.zeros(self.order+1)
         self.spectofit = self.specplotter.spectrum+self.basespec
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:

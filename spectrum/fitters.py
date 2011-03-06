@@ -1,4 +1,5 @@
 import gaussfitter
+import numpy as np
 
 class Specfit:
 
@@ -68,14 +69,14 @@ class Specfit:
         if save: self.savefit()
 
     def seterrspec(self,usestd=None,useresiduals=True):
-        if self.Spectrum.errspec is not None and not usestd:
-            self.errspec = self.Spectrum.errspec
+        if self.Spectrum.error is not None and not usestd:
+            self.errspec = self.Spectrum.error
         elif self.residuals is not None and useresiduals: 
-            self.errspec = ones(self.spectofit.shape[0]) * self.residuals.std()
-        else: self.errspec = ones(self.spectofit.shape[0]) * self.spectofit.std()
+            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
+        else: self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
 
     def setfitspec(self):
-        self.spectofit = copy(self.Spectrum.data)
+        self.spectofit = np.copy(self.Spectrum.data)
         OKmask = (self.spectofit==self.spectofit)
         self.spectofit[(True-OKmask)] = 0
         self.seterrspec()
@@ -149,7 +150,7 @@ class Specfit:
         """
 
         if self.model.shape != self.Spectrum.data.shape:
-            temp = zeros(self.Spectrum.data.shape)
+            temp = np.zeros(self.Spectrum.data.shape)
             temp[self.gx1:self.gx2] = self.model
             self.model = temp
             self.residuals = self.spectofit - self.model
