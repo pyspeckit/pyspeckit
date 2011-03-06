@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.ma as ma
 
 def open_1d_txt(filename):
     import atpy
@@ -29,7 +30,7 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None):
     import pyfits
     f = pyfits.open(filename)
     hdr = f[0].header
-    spec = f[0].data
+    spec = ma.array(f[0].data)
     errspec  = None
     if hdr.get('NAXIS') == 2:
         if errspecnum is not None:

@@ -18,6 +18,15 @@ class Spectrum(object):
     """
 
     def __init__(self,filename):
+        """
+        Initialize the Spectrum.  Accepts files in the following formats:
+            - .fits
+            - .txt (not functional yet)
+
+        Ideally, we'd like to do something where each independent type of data
+        file has its own subclass for file reading, but we haven't figured out
+        how to automatically determine which subclass to use yet.
+        """
 
         import readers,fitters,plotters,baseline
 
@@ -44,11 +53,11 @@ class Spectrum(object):
         """
         Parse parameters from a .fits header into required spectrum structure
         parameters
+
+        This should be moved to the FITSSpectrum subclass when that is available
         """
-        if hdr.get('CUNIT1'+wcstype) in ['m/s','M/S']:
-            self.xunits = 'km/s' # change to km/s because you're converting units
-        else:
-            self.xunits = hdr.get('CUNIT1'+wcstype)
+
+        self.xunits = hdr.get('CUNIT1'+wcstype)
 
         if hdr.get('BUNIT'):
             self.units = hdr.get('BUNIT').strip()

@@ -1,4 +1,6 @@
 import gaussfitter
+import matplotlib
+import matplotlib.cbook as mpcb
 import numpy as np
 
 class Specfit:
@@ -105,7 +107,7 @@ class Specfit:
         if self.autoannotate:
             self.annotate()
     
-    def onedfit(self, usemoments=True, annotate=True, vheight=True, height=0, negamp=None,**kwargs):
+    def onedfit(self, usemoments=True, annotate=True, vheight=True, height=0, negamp=None, **kwargs):
         self.ngauss = 1
         self.auto = True
         self.setfitspec()
@@ -184,7 +186,7 @@ class Specfit:
         pl = matplotlib.collections.CircleCollection([0],edgecolors=['k'])
         self.gaussleg = self.specplotter.axis.legend(
                 tuple([pl]*3*self.ngauss),
-                tuple(flatten(
+                tuple(mpcb.flatten(
                     [("c%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[1+jj*3],self.modelerrs[1+jj*3]),
                       "w%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[2+jj*3],self.modelerrs[2+jj*3]),
                       "a%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[0+jj*3],self.modelerrs[0+jj*3]))
