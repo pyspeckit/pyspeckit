@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib
 
 class Baseline:
     def __init__(self,Spectrum):
