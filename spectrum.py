@@ -34,7 +34,7 @@ class Spectrum:
 
     def _open_1d(filename,specnum=0,wcstype='',errspecnum=None):
         """
-        Grabs all the relevant pieces of a 1d spectrum
+        Grabs all the relevant pieces of a simple FITS-compliant 1d spectrum
 
         Inputs:
             wcstype - the suffix on the WCS type to get to
