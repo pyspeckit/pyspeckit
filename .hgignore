@@ -1,0 +1,6 @@
+build
+tests/ipython*
+
+syntax:glob
+*.png
+tests/*png
