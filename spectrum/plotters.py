@@ -19,6 +19,8 @@ class Plotter(object):
         self.xlabel = ""
         self.ylabel = ""
         self.title  = ""
+        self.errorplot = None
+        self.plotkwargs = {}
 
     def __call__(self, figure=None, axis=None, clear=True , **kwargs):
         """

@@ -12,7 +12,7 @@ help message again.
 """
 
 
-class Specfit:
+class Specfit(object):
 
     def __init__(self,Spectrum):
         self.model = None
@@ -64,7 +64,7 @@ class Specfit:
         self.ngauss = 0
         self.fitkwargs = kwargs
         if interactive:
-            if self.Spectrum.plotter.axis is None:
+            if self.specplotter.axis is None:
                 raise Exception("Interactive fitting requires a plotter.")
             print interactive_help_message
             self.nclicks_b1 = 0
@@ -91,6 +91,20 @@ class Specfit:
             if self.specplotter.autorefresh: self.specplotter.refresh()
         if save: self.savefit()
 
+    def EQW(self):
+        """
+        Returns the equivalent width (integral of "baseline" or "continuum"
+        minus the spectrum) over the selected range
+        """
+        if np.median(self.Spectrum.baseline.basespec) == 0:
+            raise ValueError("Baseline / continuum is zero: equivalent width is undefined.")
+        diffspec = (self.Spectrum.baseline.basespec - self.Spectrum.data)
+        sumofspec = diffspec[self.gx1:self.gx2].sum()
+        # not necessary? dx = np.abs(self.Spectrum.xarr[self.gx2]-self.Spectrum.xarr[self.gx1])
+        eqw = sumofspec / np.median(self.Spectrum.baseline.basespec)
+        return eqw
+
+    
     def seterrspec(self,usestd=None,useresiduals=True):
         """
         Simple wrapper function to set the error spectrum; will either use the
