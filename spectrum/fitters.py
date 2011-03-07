@@ -1,6 +1,7 @@
 import gaussfitter
 import matplotlib
 import matplotlib.cbook as mpcb
+import matplotlib.pyplot as pyplot
 import numpy as np
 
 class Specfit:
@@ -51,6 +52,7 @@ class Specfit:
             self.nclicks_b2 = 0
             self.guesses = []
             self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.makeguess)
+            self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',self.makeguess)
             self.autoannotate = annotate
         elif multifit:
             if guesses is None:
@@ -200,10 +202,10 @@ class Specfit:
 
     def selectregion(self,event):
         if self.nclicks_b1 == 0:
-            self.gx1 = argmin(abs(event.xdata-self.Spectrum.xarr))
+            self.gx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
             self.nclicks_b1 += 1
         elif self.nclicks_b1 == 1:
-            self.gx2 = argmin(abs(event.xdata-self.Spectrum.xarr))
+            self.gx2 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
             self.nclicks_b1 -= 1
             if self.gx1 > self.gx2: self.gx1,self.gx2 = self.gx2,self.gx1
             if abs(self.gx1-self.gx2) > 3: # can't fit w/ fewer data than pars
@@ -250,12 +252,18 @@ class Specfit:
         if legend: self.clearlegend()
 
     def makeguess(self,event):
-        if event.button == 1:
+        if hasattr(event,'button'):
+            button = event.button
+        elif hasattr(event,'key'):
+            button = event.key
+
+        if button in ('p','P','1',1):
             self.selectregion(event)
-        elif event.button == 2:
+        elif button in ('m','M','2',2):
             self.guesspeakwidth(event)
-        elif event.button == 3:
-            disconnect(self.click)
+        elif button in ('d','D','3',3):
+            self.specplotter.figure.canvas.mpl_disconnect(self.click)
+            self.specplotter.figure.canvas.mpl_disconnect(self.keyclick)
             if self.ngauss > 0:
                 print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.gx1,self.gx2
                 if len(self.guesses) % 3 == 0:

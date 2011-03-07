@@ -15,7 +15,10 @@ sp.specfit()
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
-raw_input('Press enter to end code')
+sp.specfit(interactive=True)
+raw_input('Press enter to print guesses and best fit and end code')
+print "Guesses: ", sp.specfit.guesses
+print "Best fit: ", sp.specfit.modelpars
 
 
 #from matplotlib import pyplot
