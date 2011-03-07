@@ -217,7 +217,7 @@ class Specfit(object):
 
     def plot_fit(self):
         if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
-            plotmodel = self.model+self.specplotter.offset+self.Spectrum.baseline.basespec
+            plotmodel = self.model+self.specplotter.offset+self.Spectrum.baseline.basespec[self.gx1:self.gx2]
         else:
             plotmodel = self.model+self.specplotter.offset
         self.modelplot = self.specplotter.axis.plot(

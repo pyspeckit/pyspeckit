@@ -24,6 +24,7 @@ print "Best fit: ", sp.specfit.modelpars
 
 sp.specfit(interactive=True)
 raw_input('Press enter to print guesses and best fit and end code')
+sp.plotter.figure.savefig('fits_interactive_fit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
