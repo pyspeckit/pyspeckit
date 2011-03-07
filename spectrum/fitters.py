@@ -37,6 +37,17 @@ class Specfit:
         Fit gaussians to a spectrum
 
         guesses = [height,amplitude,center,width]
+
+
+        If you pass interactive=True, you can fit n gaussians using the mouse
+        and/or keyboard:
+            Left click or 'p': Set fitting region.  Two clicks sets the region,
+                which will be highlighted.
+            Middle click or 'm': Select peaks and peak widths.  The first click
+                will mark a peak X-location and height with an X, the second
+                click will mark the half-width-half-max location with a red
+                line that represents the full-width-half-max
+            Right click or 'd': Disconnect the plot and perform the fit.
         """
   
         self.fitcolor = fitcolor
