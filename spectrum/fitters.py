@@ -4,6 +4,14 @@ import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
 
+interactive_help_message = """
+Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
+'m' twice to select a peak and width.  When you're done, right-click or hit 'd'
+to perform the fit and disconnect the mouse and keyboard.  '?' will print this
+help message again.
+"""
+
+
 class Specfit:
 
     def __init__(self,Spectrum):
@@ -58,7 +66,7 @@ class Specfit:
         if interactive:
             if self.Spectrum.plotter.axis is None:
                 raise Exception("Interactive fitting requires a plotter.")
-            print "Left-click twice to select a fitting range, then middle-click twice to select a peak and width"
+            print interactive_help_message
             self.nclicks_b1 = 0
             self.nclicks_b2 = 0
             self.guesses = []
@@ -84,6 +92,11 @@ class Specfit:
         if save: self.savefit()
 
     def seterrspec(self,usestd=None,useresiduals=True):
+        """
+        Simple wrapper function to set the error spectrum; will either use the
+        input spectrum or determine the error using the RMS of the residuals,
+        depending on whether the residuals exist.
+        """
         if self.Spectrum.error is not None and not usestd:
             self.errspec = self.Spectrum.error
         elif self.residuals is not None and useresiduals: 
@@ -91,6 +104,15 @@ class Specfit:
         else: self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
 
     def setfitspec(self):
+        """
+        Set the spectrum that will be fit.  This is primarily to remove NANs
+        from consideration: if you simply remove the data from both the X-axis
+        and the Y-axis, it will not be considered for the fit, and a linear
+        X-axis is not needed for fitting.
+
+        However, it may be possible to do this using masked arrays instead of
+        setting errors to be 1e10....
+        """
         self.spectofit = np.copy(self.Spectrum.data)
         OKmask = (self.spectofit==self.spectofit)
         self.spectofit[(True-OKmask)] = 0
@@ -236,6 +258,11 @@ class Specfit:
                 print "Fitting region is too small (channels %i:%i).  Try again." % (self.gx1,self.gx2)
 
     def guesspeakwidth(self,event):
+        """
+        Interactively guess the peak height and width from user input
+
+        Width is assumed to be half-width-half-max
+        """
         if self.nclicks_b2 % 2 == 0:
             if self.auto:
                 self.guesses[:2] = [event.ydata,event.xdata]
@@ -245,7 +272,7 @@ class Specfit:
             self.nclicks_b2 += 1
             self.guessplot += [self.specplotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
         elif self.nclicks_b2 % 2 == 1:
-            self.guesses[-1] = abs(event.xdata-self.guesses[-2])
+            self.guesses[-1] = abs(event.xdata-self.guesses[-2]) / np.sqrt(2*np.log(2))
             self.nclicks_b2 += 1
             self.guessplot += self.specplotter.axis.plot([event.xdata,
                 2*self.guesses[-2]-event.xdata],[event.ydata]*2,
@@ -283,6 +310,8 @@ class Specfit:
                         p.set_visible(False)
                 else: 
                     print "error, wrong # of pars"
+        elif button in ('?'):
+            print interactive_help_message
         if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def clearlegend(self):
