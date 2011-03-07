@@ -60,6 +60,7 @@ class Specfit(object):
   
         self.fitcolor = fitcolor
         self.clear()
+        self.selectregion(**kwargs)
 
         self.ngauss = 0
         self.fitkwargs = kwargs
@@ -224,6 +225,7 @@ class Specfit(object):
                 self.Spectrum.xarr[self.gx1:self.gx2],
                 plotmodel,
                 color=self.fitcolor, linewidth=0.5)
+        self.specplotter.plot(**self.specplotter.plotkwargs)
 
     def fullsizemodel(self):
         """
@@ -280,7 +282,25 @@ class Specfit(object):
         self.specplotter.axis.add_artist(self.gaussleg)
         if self.specplotter.autorefresh: self.specplotter.refresh()
 
-    def selectregion(self,event):
+    def selectregion(self,xmin=None,xmax=None,xtype='wcs',**kwargs):
+        """
+        Pick a fitting region in either WCS units or pixel units
+        """
+        if xmin is not None and xmax is not None:
+            if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
+                self.gx1 = np.argmin(abs(xmin-self.Spectrum.xarr))
+                self.gx2 = np.argmin(abs(xmax-self.Spectrum.xarr))
+            else:
+                self.gx1 = xmin
+                self.gx2 = xmax
+        elif self.specplotter.xmin is not None and self.specplotter.xmax is not None:
+            self.gx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))
+            self.gx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))
+        else:
+            raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
+
+
+    def selectregion_interactive(self,event):
         if self.nclicks_b1 == 0:
             self.gx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
             self.nclicks_b1 += 1
@@ -343,7 +363,7 @@ class Specfit(object):
             button = event.key
 
         if button in ('p','P','1',1):
-            self.selectregion(event)
+            self.selectregion_interactive(event)
         elif button in ('m','M','2',2):
             self.guesspeakwidth(event)
         elif button in ('d','D','3',3):

@@ -21,6 +21,8 @@ class Plotter(object):
         self.title  = ""
         self.errorplot = None
         self.plotkwargs = {}
+        self.xmax = None
+        self.xmin = None
 
     def __call__(self, figure=None, axis=None, clear=True , **kwargs):
         """
@@ -35,15 +37,16 @@ class Plotter(object):
         """
         
         # figure out where to put the plot
-        if isinstance(figure,matplotlib.figure.Figure):
-            self.figure = figure
-        elif isinstance(axis,matplotlib.axes.Axes):
-            self.axis = axis
-            self.figure = axis.figure
-        elif type(figure) is int:
-            self.figure = matplotlib.pyplot.figure(figure)
-        else:
-            self.figure = matplotlib.pyplot.figure()
+        if self.figure is None:
+            if isinstance(figure,matplotlib.figure.Figure):
+                self.figure = figure
+            elif isinstance(axis,matplotlib.axes.Axes):
+                self.axis = axis
+                self.figure = axis.figure
+            elif type(figure) is int:
+                self.figure = matplotlib.pyplot.figure(figure)
+            else:
+                self.figure = matplotlib.pyplot.figure()
         if len(self.figure.axes) > 0 and self.axis is None:
             self.axis = self.figure.axes[0] # default to first axis
         else:
@@ -54,7 +57,7 @@ class Plotter(object):
         self.plot(**kwargs)
 
     def plot(self, offset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
-            vmin=None, vmax=None, **kwargs):
+            xmin=None, xmax=None, **kwargs):
 
         self.offset += offset
 
@@ -62,11 +65,11 @@ class Plotter(object):
                 self.Spectrum.data+self.offset, color=color,
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
 
-        if vmin is not None: xlo = self.vmin
-        else: xlo=self.Spectrum.xarr.min()
-        if vmax is not None: xhi = self.vmax
-        else: xhi=self.Spectrum.xarr.max()
-        self.axis.set_xlim(xlo,xhi)
+        if xmin is not None: self.xmin = xmin
+        elif self.xmin is None: self.xmin=self.Spectrum.xarr.min()
+        if xmax is not None: self.xmax = xmax
+        elif self.xmax is None: self.xmax=self.Spectrum.xarr.max()
+        self.axis.set_xlim(self.xmin,self.xmax)
         
         self.label()
         if self.autorefresh: self.refresh()
