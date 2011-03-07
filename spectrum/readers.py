@@ -6,12 +6,15 @@ def open_1d_txt(filename):
     T = atpy.Table(filename, type='ascii',
             Reader=atpy.asciitables.asciitable.CommentedHeader, masked=True)
     
-    xarr = T.data[T.data.dtype[0]]
-    spectrum = T.data[T.data.dtype[1]]
+    xarr = T.data[T.data.dtype.names[0]]
+    data = T.data[T.data.dtype.names[1]]
     if len(T.columns) > 2:
-        error = T.data[T.data.dtype[2]]
+        error = T.data[T.data.dtype.names[2]]
+    else:
+        # assume uniform, nonzero error
+        error = data*0 + 1.0
 
-    return xarr,spectrum,error
+    return xarr,data,error,T
 
 
 def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None):

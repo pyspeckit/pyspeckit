@@ -91,17 +91,39 @@ class Specfit(object):
             if self.specplotter.autorefresh: self.specplotter.refresh()
         if save: self.savefit()
 
-    def EQW(self):
+    def EQW(self, plot=False, plotcolor='g', annotate=False, alpha=0.5, loc='lower left'):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
         """
         if np.median(self.Spectrum.baseline.basespec) == 0:
             raise ValueError("Baseline / continuum is zero: equivalent width is undefined.")
+        elif np.median(self.Spectrum.baseline.basespec) < 0:
+            print "WARNING: Baseline / continuum is negative: equivalent width is poorly defined."
         diffspec = (self.Spectrum.baseline.basespec - self.Spectrum.data)
-        sumofspec = diffspec[self.gx1:self.gx2].sum()
-        # not necessary? dx = np.abs(self.Spectrum.xarr[self.gx2]-self.Spectrum.xarr[self.gx1])
+        dx = np.abs((self.Spectrum.xarr[self.gx2-1]-self.Spectrum.xarr[self.gx1]) / (self.gx2-self.gx1))
+        sumofspec = diffspec[self.gx1:self.gx2].sum() * dx
         eqw = sumofspec / np.median(self.Spectrum.baseline.basespec)
+        if plot:
+            midpt_pixel = np.round((self.gx1+self.gx2)/2.0)
+            midpt       = self.Spectrum.xarr[midpt_pixel]
+            midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
+            print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
+            self.specplotter.axis.fill_between(
+                    [midpt-eqw/2.0,midpt+eqw/2.0],
+                    [0,0],
+                    [midpt_level,midpt_level],
+                    color=plotcolor,
+                    alpha=alpha,
+                    label='EQW: %0.3g' % eqw)
+            if annotate:
+                self.specplotter.axis.legend(
+                        [(matplotlib.collections.CircleCollection([0],facecolors=[plotcolor],edgecolors=[plotcolor]))],
+                        [('EQW: %0.3g' % eqw)], 
+                        markerscale=0.01, borderpad=0.1, handlelength=0.1,
+                        handletextpad=0.1, loc=loc)
+            if self.specplotter.autorefresh:
+                self.specplotter.refresh()
         return eqw
 
     
@@ -128,6 +150,9 @@ class Specfit(object):
         setting errors to be 1e10....
         """
         self.spectofit = np.copy(self.Spectrum.data)
+        if hasattr(self.Spectrum,'baseline'):
+            if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
+                self.spectofit -= self.Spectrum.baseline.basespec
         OKmask = (self.spectofit==self.spectofit)
         self.spectofit[(True-OKmask)] = 0
         self.seterrspec()
@@ -149,9 +174,8 @@ class Specfit(object):
         self.model = model
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
-        self.modelplot = self.specplotter.axis.plot(
-                self.Spectrum.xarr[self.gx1:self.gx2],
-                self.model+self.specplotter.offset, color=self.fitcolor, linewidth=0.5)
+        if self.specplotter.axis is not None:
+            self.plot_fit()
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.autoannotate:
             self.annotate()
@@ -185,12 +209,21 @@ class Specfit(object):
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         self.modelpars = mpp[1:].tolist()
         self.modelerrs = mpperr[1:].tolist()
-        self.modelplot = self.specplotter.axis.plot(
-                self.Spectrum.xarr[self.gx1:self.gx2],
-                self.model+self.specplotter.offset, color=self.fitcolor, linewidth=0.5)
+        if self.specplotter.axis is not None:
+            self.plot_fit()
         if annotate:
             self.annotate()
             if vheight: self.Spectrum.baseline.annotate()
+
+    def plot_fit(self):
+        if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
+            plotmodel = self.model+self.specplotter.offset+self.Spectrum.baseline.basespec
+        else:
+            plotmodel = self.model+self.specplotter.offset
+        self.modelplot = self.specplotter.axis.plot(
+                self.Spectrum.xarr[self.gx1:self.gx2],
+                plotmodel,
+                color=self.fitcolor, linewidth=0.5)
 
     def fullsizemodel(self):
         """
@@ -336,7 +369,7 @@ class Specfit(object):
         if self.specplotter.autorefresh: self.specplotter.refresh()
     
     def savefit(self):
-        if self.modelpars is not None:
+        if self.modelpars is not None and hasattr(self.Spectrum,'header'):
             for ii,p in enumerate(self.modelpars):
                 if ii % 3 == 0: self.Spectrum.header.update('AMP%1i' % (ii/3),p,comment="Gaussian best fit amplitude #%i" % (ii/3))
                 if ii % 3 == 1: self.Spectrum.header.update('CEN%1i' % (ii/3),p,comment="Gaussian best fit center #%i" % (ii/3))

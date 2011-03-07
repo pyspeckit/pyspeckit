@@ -361,7 +361,8 @@ def onedgaussfit(xax, data, err=None,
 
     mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet)
     mpp = mp.params
-    mpperr = mp.perror
+    if mp.perror is not None: mpperr = mp.perror
+    else: mpperr = mpp*0
     chi2 = mp.fnorm
 
     if mp.status == 0:
@@ -480,7 +481,8 @@ def multigaussfit(xax, data, ngauss=1, err=None, params=[1,0,1],
 
     mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet)
     mpp = mp.params
-    mpperr = mp.perror
+    if mp.perror is not None: mpperr = mp.perror
+    else: mpperr = mpp*0
     chi2 = mp.fnorm
 
     if mp.status == 0:

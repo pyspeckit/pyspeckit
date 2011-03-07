@@ -39,8 +39,11 @@ class Spectrum(object):
                 pass
         elif ".txt" in filename:
             try:
-                self.xarr,self.data,self.error = readers.open_1d_txt(filename)
-            except:
+                self.xarr,self.data,self.error,self.Table = readers.open_1d_txt(filename)
+                self.parse_text_header(self.Table)
+            except Exception as inst:
+                print "Reading txt failed.",inst.args
+                print inst
                 # try to use readcol to parse it as a wavelength / data / error file?
                 # I think this is a typical format?
                 pass
@@ -48,6 +51,15 @@ class Spectrum(object):
         self.plotter = plotters.Plotter(self)
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
+
+    def parse_text_header(self,Table):
+        """
+        Grab relevant parameters from a table header (xaxis type, etc)
+        """
+        self.xtype = Table.data.dtype.names[0]
+        self.xunits = Table.columns[self.xtype].unit
+        self.ytype = Table.data.dtype.names[1]
+        self.units = Table.columns[self.ytype].unit
 
     def parse_header(self,hdr,specname=None, wcstype=''):
         """

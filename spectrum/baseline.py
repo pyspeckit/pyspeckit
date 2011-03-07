@@ -17,6 +17,7 @@ class Baseline:
         self.fitregion=[]
         self.excludevelo = []
         self.excludepix  = []
+        self.subtracted = False
 
     def __call__(self, order=1, annotate=False, excludefit=False, save=True,
             exclude=None, exclusionlevel=0.01, interactive=False, **kwargs):
@@ -68,7 +69,7 @@ class Baseline:
 
         Can specify a region to exclude using velocity units or pixel units
         """
-        if exclude is not None and excludeunits in ['velo','km/s']:
+        if exclude is not None and excludeunits in ['velo','km/s','wavelength','frequency']:
             if len(exclude) % 2 == 0:
                 self.excludevelo = exclude
                 self.excludepix = []
@@ -94,17 +95,22 @@ class Baseline:
         #self.basespec = np.poly1d(self.baselinepars)(self.Spectrum.xarr)
         if subtract:
             self.Spectrum.data -= self.basespec
+            self.subtracted = True
+        else:
+            self.subtracted = False
 
         if self.specplotter.axis is not None:
             self.plot_baseline()
 
-    def plot_baseline(self, annotate=True):
+    def plot_baseline(self, annotate=True, plotcolor='orange'):
         if self.specplotter.axis is not None: 
             [self.specplotter.axis.lines.remove(p) for p in self.specplotter.axis.lines]
         if self.specplotter.errorplot is not None: 
             [self.specplotter.axis.collections.remove(p) for p in self.specplotter.errorplot if isinstance(p,matplotlib.collections.PolyCollection)]
             [self.specplotter.axis.lines.remove(p) for p in self.specplotter.errorplot if isinstance(p,matplotlib.lines.Line2D)]
         self.specplotter.plot(**self.specplotter.plotkwargs)
+        if self.subtracted is False:
+            self.specplotter.axis.plot(self.Spectrum.xarr,self.basespec,color=plotcolor)
         self.specplotter.axis.set_ylim(
                 abs(self.Spectrum.data[self.OKmask].min())*1.1*np.sign(self.Spectrum.data[self.OKmask].min()),
                 abs(self.Spectrum.data[self.OKmask].max())*1.1*np.sign(self.Spectrum.data[self.OKmask].max()))
@@ -165,7 +171,7 @@ class Baseline:
         if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def savefit(self):
-        if self.baselinepars is not None:
+        if self.baselinepars is not None and hasattr(self.Spectrum,'header'):
             for ii,p in enumerate(self.baselinepars):
                 self.Spectrum.header.update('BLCOEF%0.2i' % (ii),p,comment="Baseline power-law best-fit coefficient x^%i" % (self.order-ii-1))
 

@@ -12,13 +12,15 @@ print "How about now? ",sp.plotter.axis
 # background level)
 sp.baseline.order = 0
 sp.specfit()
+sp.plotter.figure.savefig('fits_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
-sp.baseline(exclude=[12000,98000],subtract=False)
-print "Baseline: ",sp.baseline.baselinepars
-print "Excludepix: ",sp.baseline.excludepix
-print "EQW: ",sp.specfit.EQW()
+# # Fit a baseline, excluding the velocities with data, and don't subtract it
+# sp.baseline(exclude=[12000,98000],subtract=False)
+# print "Baseline: ",sp.baseline.baselinepars
+# print "Excludepix: ",sp.baseline.excludepix
+# print "EQW: ",sp.specfit.EQW()
 
 sp.specfit(interactive=True)
 raw_input('Press enter to print guesses and best fit and end code')
