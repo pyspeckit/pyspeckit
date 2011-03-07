@@ -74,7 +74,7 @@ class Specfit(object):
             self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.makeguess)
             self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',self.makeguess)
             self.autoannotate = annotate
-        elif multifit:
+        elif multifit or (len(guesses) % 3 == 0 and len(guesses) > 3):
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
             else:
@@ -205,6 +205,7 @@ class Specfit(object):
         self.dof  = self.gx2-self.gx1-self.ngauss*3-vheight
         if vheight: 
             self.Spectrum.baseline.baselinepars = mpp[:1] # first item in list form
+            self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]
             self.model = model - mpp[0]
         else: self.model = model
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
