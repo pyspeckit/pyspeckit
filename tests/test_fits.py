@@ -29,7 +29,7 @@ sp.plotter.figure.savefig('fits_interactive_fit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
-print "EQW: ",sp.specfit.EQW()
+# don't try this for a zero-baseline spectrum print "EQW: ",sp.specfit.EQW()
 
 
 #from matplotlib import pyplot
