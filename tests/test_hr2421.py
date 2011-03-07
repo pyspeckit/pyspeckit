@@ -20,12 +20,28 @@ raw_input("Wait here a moment")
 # (if you don't do this, the best fit to the spectrum is dominated by the
 # background level)
 #sp.baseline.order = 0
+print "FITTING GAUSSIAN"
 sp.specfit()
+sp.specfit() # Do this twice to get a better estimate of the noise
 print "Plotter min/max: ",sp.plotter.xmin,sp.plotter.xmax," Fitter min/max: ",sp.specfit.gx1,sp.specfit.gx2," Fitregion= ",sp.baseline.fitregion
 sp.plotter.figure.savefig('hr2421_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 print "EQW: ",sp.specfit.EQW()
+print "Chi2: ",sp.specfit.chi2
+gauss_model = sp.specfit.model+sp.baseline.basespec[sp.specfit.gx1:sp.specfit.gx2]
+raw_input("Wait here a moment")
+
+print "FITTING VOIGT"
+sp.specfit(fittype='voigt')
+print "Guesses: ", sp.specfit.guesses
+print "Best fit: ", sp.specfit.modelpars
+print "EQW: ",sp.specfit.EQW()
+print "Chi2: ",sp.specfit.chi2
+sp.plotter.axis.plot(sp.xarr[sp.specfit.gx1:sp.specfit.gx2],gauss_model,color='b',linewidth=0.5)
+sp.plotter.figure.savefig('hr2421_voigtfit.png')
+sp.plotter.plot()
+voigt_model = sp.specfit.model+sp.baseline.basespec[sp.specfit.gx1:sp.specfit.gx2]
 raw_input("Wait here a moment")
 
 sp.specfit(interactive=True)

@@ -44,9 +44,7 @@ class Spectrum(object):
             except Exception as inst:
                 print "Reading txt failed.",inst.args
                 print inst
-                # try to use readcol to parse it as a wavelength / data / error file?
-                # I think this is a typical format?
-                pass
+                raise Exception("Reading text failed.")
 
         self.plotter = plotters.Plotter(self)
         self.specfit = fitters.Specfit(self)

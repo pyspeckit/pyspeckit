@@ -43,7 +43,10 @@ class Baseline:
         specfit = self.Spectrum.specfit
         self.order = order
         fitp = np.zeros(self.order+1)
-        self.spectofit = self.Spectrum.data+self.basespec
+        if self.subtracted:
+            self.spectofit = self.Spectrum.data+self.basespec
+        else:
+            self.spectofit = np.copy(self.Spectrum.data)
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:
             self.excludemask[:] = True

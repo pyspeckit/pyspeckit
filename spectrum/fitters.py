@@ -1,4 +1,5 @@
 import gaussfitter
+import voigtfitter
 import matplotlib
 import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
@@ -11,6 +12,16 @@ to perform the fit and disconnect the mouse and keyboard.  '?' will print this
 help message again.
 """
 
+npars = {'gaussian': 3,
+        'lorentzian': 3,
+        'voigt': 4}
+
+singlefitters = {'gaussian': gaussfitter.onedgaussfit,
+        'voigt': voigtfitter.onedvoigtfit,
+        'lorentzian': None}
+multifitters = {'gaussian': gaussfitter.multigaussfit,
+        'voigt': voigtfitter.multivoigtfit,
+        'lorentzian': None}
 
 class Specfit(object):
 
@@ -36,11 +47,12 @@ class Specfit(object):
         self.gaussleg=None
         self.residuals=None
         self.setfitspec()
+        self.fittype = 'gaussian'
         #self.seterrspec()
 
     def __call__(self, interactive=False, usemoments=True, fitcolor='r',
             multifit=False, guesses=None, annotate=True, save=True,
-            **kwargs):
+            fittype='gaussian', **kwargs):
         """
         Fit gaussians to a spectrum
 
@@ -61,6 +73,12 @@ class Specfit(object):
         self.fitcolor = fitcolor
         self.clear()
         self.selectregion(**kwargs)
+        if self.fittype != fittype: self.fittype = fittype
+
+        # multifit = True if the right number of guesses are passed
+        if guesses is not None:
+            if len(guesses) > 5:
+                multifit = True
 
         self.ngauss = 0
         self.fitkwargs = kwargs
@@ -74,21 +92,22 @@ class Specfit(object):
             self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.makeguess)
             self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',self.makeguess)
             self.autoannotate = annotate
-        elif multifit or (len(guesses) % 3 == 0 and len(guesses) > 3):
+        elif multifit:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
             else:
                 self.guesses = guesses
-                self.multifit()
+                self.multifit(fittype=fittype)
                 self.autoannotate = annotate
         else:
             #print "Non-interactive, 1D fit with automatic guessing"
             if self.Spectrum.baseline.order is None:
                 self.Spectrum.baseline.order=0
-                self.onedfit(usemoments=usemoments,annotate=annotate,**kwargs)
+                self.onedfit(usemoments=usemoments, annotate=annotate,
+                        fittype=fittype, **kwargs)
             else:
-                self.onedfit(usemoments=usemoments,annotate=annotate,
-                        vheight=False,height=0.0,**kwargs)
+                self.onedfit(usemoments=usemoments, annotate=annotate,
+                        vheight=False, height=0.0, fittype=fittype, **kwargs)
             if self.specplotter.autorefresh: self.specplotter.refresh()
         if save: self.savefit()
 
@@ -159,11 +178,15 @@ class Specfit(object):
         self.seterrspec()
         self.errspec[(True-OKmask)] = 1e10
 
-    def multifit(self):
-        self.ngauss = len(self.guesses)/3
+    def multifit(self, fittype='gaussian'):
+        """
+        Fit multiple gaussians (or other profiles)
+        """
+        self.ngauss = len(self.guesses)/npars[fittype]
         self.setfitspec()
         if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp')
-        mpp,model,mpperr,chi2 = gaussfitter.multigaussfit(
+        fitter = multifitters[fittype]
+        mpp,model,mpperr,chi2 = fitter(
                 self.Spectrum.xarr[self.gx1:self.gx2], 
                 self.spectofit[self.gx1:self.gx2], 
                 err=self.errspec[self.gx1:self.gx2],
@@ -181,11 +204,13 @@ class Specfit(object):
         if self.autoannotate:
             self.annotate()
     
-    def onedfit(self, usemoments=True, annotate=True, vheight=True, height=0, negamp=None, **kwargs):
+    def onedfit(self, usemoments=True, annotate=True, vheight=True, height=0,
+            negamp=None, fittype='gaussian', **kwargs):
         self.ngauss = 1
         self.auto = True
         self.setfitspec()
         if usemoments: # this can be done within gaussfit but I want to save them
+            # use this INDEPENDENT of fittype for now (voigt and gauss get same guesses)
             self.guesses = gaussfitter.onedmoments(
                     self.Spectrum.xarr[self.gx1:self.gx2],
                     self.spectofit[self.gx1:self.gx2],
@@ -194,7 +219,10 @@ class Specfit(object):
         else:
             if negamp: self.guesses = [height,-1,0,1]
             else:  self.guesses = [height,1,0,1]
-        mpp,model,mpperr,chi2 = gaussfitter.onedgaussfit(
+        if fittype == 'voigt':
+            self.guesses += [0.0]
+        fitter = singlefitters[fittype]
+        mpp,model,mpperr,chi2 = fitter(
                 self.Spectrum.xarr[self.gx1:self.gx2],
                 self.spectofit[self.gx1:self.gx2],
                 err=self.errspec[self.gx1:self.gx2],
@@ -202,7 +230,7 @@ class Specfit(object):
                 params=self.guesses,
                 **self.fitkwargs)
         self.chi2 = chi2
-        self.dof  = self.gx2-self.gx1-self.ngauss*3-vheight
+        self.dof  = self.gx2-self.gx1-self.ngauss*npars[fittype]-vheight
         if vheight: 
             self.Spectrum.baseline.baselinepars = mpp[:1] # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]
@@ -270,13 +298,18 @@ class Specfit(object):
         #text(xloc,yloc-0.10,"a=%g" % self.modelpars[0],transform = self.specplotter.axis.transAxes)
         self.clearlegend()
         pl = matplotlib.collections.CircleCollection([0],edgecolors=['k'])
+        label_list = [("c%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[1+jj*npars[self.fittype]],self.modelerrs[1+jj*npars[self.fittype]]),
+                      "w%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[2+jj*npars[self.fittype]],self.modelerrs[2+jj*npars[self.fittype]]),
+                      "a%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[0+jj*npars[self.fittype]],self.modelerrs[0+jj*npars[self.fittype]]))
+                      for jj in range(self.ngauss)]
+        if self.fittype in 'voigt':
+            label_list = [
+                L + ("Lw%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[3+jj*npars[self.fittype]],self.modelerrs[3+jj*npars[self.fittype]]),)
+                for jj,L in enumerate(label_list)]
+        labels = tuple(mpcb.flatten(label_list))
         self.gaussleg = self.specplotter.axis.legend(
-                tuple([pl]*3*self.ngauss),
-                tuple(mpcb.flatten(
-                    [("c%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[1+jj*3],self.modelerrs[1+jj*3]),
-                      "w%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[2+jj*3],self.modelerrs[2+jj*3]),
-                      "a%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[0+jj*3],self.modelerrs[0+jj*3]))
-                      for jj in range(self.ngauss)])),
+                tuple([pl]*npars[self.fittype]*self.ngauss),
+                labels,
                 loc=loc,markerscale=0.01,
                 borderpad=0.1, handlelength=0.1, handletextpad=0.1
                 )

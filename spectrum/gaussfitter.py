@@ -199,14 +199,14 @@ def gaussfit(data,err=None,params=[],autoderiv=1,return_all=0,circle=0,
         if params[i] > maxpars[i] and limitedmax[i]: params[i] = maxpars[i]
         if params[i] < minpars[i] and limitedmin[i]: params[i] = minpars[i]
 
-    if err == None:
+    if err is None:
         errorfunction = lambda p: numpy.ravel((twodgaussian(p,circle,rotate,vheight)\
                 (*numpy.indices(data.shape)) - data))
     else:
         errorfunction = lambda p: numpy.ravel((twodgaussian(p,circle,rotate,vheight)\
                 (*numpy.indices(data.shape)) - data)/err)
     def mpfitfun(data,err):
-        if err == None:
+        if err is None:
             def f(p,fjac=None): return [0,numpy.ravel(data-twodgaussian(p,circle,rotate,vheight)\
                     (*numpy.indices(data.shape)))]
         else:
@@ -337,13 +337,13 @@ def onedgaussfit(xax, data, err=None,
     """
 
     def mpfitfun(x,y,err):
-        if err == None:
+        if err is None:
             def f(p,fjac=None): return [0,(y-onedgaussian(x,*p))]
         else:
             def f(p,fjac=None): return [0,(y-onedgaussian(x,*p))/err]
         return f
 
-    if xax == None:
+    if xax is None:
         xax = numpy.arange(len(data))
 
     if vheight is False: 
@@ -458,13 +458,13 @@ def multigaussfit(xax, data, ngauss=1, err=None, params=[1,0,1],
                 parlist[:] = [0,0,0] * ngauss
 
     def mpfitfun(x,y,err):
-        if err == None:
+        if err is None:
             def f(p,fjac=None): return [0,(y-n_gaussian(pars=p)(x))]
         else:
             def f(p,fjac=None): return [0,(y-n_gaussian(pars=p)(x))/err]
         return f
 
-    if xax == None:
+    if xax is None:
         xax = numpy.arange(len(data))
 
     parnames = {0:"AMPLITUDE",1:"SHIFT",2:"WIDTH"}

@@ -5,6 +5,7 @@ def open_1d_txt(filename):
     import atpy
     T = atpy.Table(filename, type='ascii',
             Reader=atpy.asciitables.asciitable.CommentedHeader, masked=True)
+
     
     xarr = T.data[T.data.dtype.names[0]]
     data = T.data[T.data.dtype.names[1]]
