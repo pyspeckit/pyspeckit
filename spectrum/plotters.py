@@ -23,10 +23,10 @@ class Plotter(object):
         self.plotkwargs = {}
         self.xmax = None
         self.xmin = None
-        self.ymin = None
         self.ymax = None
+        self.ymin = None
 
-    def __call__(self, figure=None, axis=None, clear=True , **kwargs):
+    def __call__(self, figure=None, axis=None, clear=True, **kwargs):
         """
         Plot a spectrum
         
@@ -60,6 +60,9 @@ class Plotter(object):
 
     def plot(self, offset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
             xmin=None, xmax=None, ymin=None, ymax=None, **kwargs):
+
+        if self.axis is None:
+            raise Exception("You must call the Plotter class to initiate the canvas before plotting.")
 
         self.offset += offset
 

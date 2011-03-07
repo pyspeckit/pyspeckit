@@ -114,11 +114,10 @@ class Baseline:
 
         if self.subtracted is False:
             self.specplotter.axis.plot(self.Spectrum.xarr,self.basespec,color=plotcolor)
+        self.specplotter.ymin = abs(self.Spectrum.data[self.OKmask].min())*1.1*np.sign(self.Spectrum.data[self.OKmask].min())
+        self.specplotter.ymax = abs(self.Spectrum.data[self.OKmask].max())*1.1*np.sign(self.Spectrum.data[self.OKmask].max())
         self.specplotter.plot(**self.specplotter.plotkwargs)
 
-        self.specplotter.axis.set_ylim(
-                abs(self.Spectrum.data[self.OKmask].min())*1.1*np.sign(self.Spectrum.data[self.OKmask].min()),
-                abs(self.Spectrum.data[self.OKmask].max())*1.1*np.sign(self.Spectrum.data[self.OKmask].max()))
         if annotate: self.annotate() # refreshes automatically
         elif self.specplotter.autorefresh: self.specplotter.refresh()
 
@@ -190,7 +189,7 @@ class Baseline:
                 borderpad=0.1, handlelength=0.1, handletextpad=0.1
                 )
         self.specplotter.axis.add_artist(self.blleg)
-        if self.specplotter.autorefresh: self.specplotter.refresh()
+        if self.specplotter.autorefresh: self.specplotter.plot()
   
     def clearlegend(self):
         if self.blleg is not None: 

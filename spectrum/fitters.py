@@ -314,6 +314,7 @@ class Specfit(object):
                         self.Spectrum.data[self.gx1:self.gx2]+self.specplotter.offset,
                         drawstyle='steps-mid',
                         color='c')
+                self.specplotter.plot(**self.specplotter.plotkwargs)
                 if self.guesses == []:
                     self.guesses = gaussfitter.onedmoments(
                             self.Spectrum.xarr[self.gx1:self.gx2],
@@ -338,12 +339,14 @@ class Specfit(object):
                 self.ngauss += 1
             self.nclicks_b2 += 1
             self.guessplot += [self.specplotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
+            self.specplotter.plot(**self.specplotter.plotkwargs)
         elif self.nclicks_b2 % 2 == 1:
             self.guesses[-1] = abs(event.xdata-self.guesses[-2]) / np.sqrt(2*np.log(2))
             self.nclicks_b2 += 1
             self.guessplot += self.specplotter.axis.plot([event.xdata,
                 2*self.guesses[-2]-event.xdata],[event.ydata]*2,
                 color='r')
+            self.specplotter.plot(**self.specplotter.plotkwargs)
             if self.auto:
                 self.auto = False
             if self.nclicks_b2 / 2 > self.ngauss:

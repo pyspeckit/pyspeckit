@@ -1,7 +1,7 @@
 import spectrum
 
-#sp = spectrum.Spectrum('sample_13CO.fits')
-sp = spectrum.Spectrum('J000805.62+145023.3.fits')
+sp = spectrum.Spectrum('sample_13CO.fits')
+#sp = spectrum.Spectrum('J000805.62+145023.3.fits')
 
 print "Does it have an axis? ",sp.plotter.axis
 sp.plotter()
