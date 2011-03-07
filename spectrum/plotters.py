@@ -23,6 +23,8 @@ class Plotter(object):
         self.plotkwargs = {}
         self.xmax = None
         self.xmin = None
+        self.ymin = None
+        self.ymax = None
 
     def __call__(self, figure=None, axis=None, clear=True , **kwargs):
         """
@@ -57,7 +59,7 @@ class Plotter(object):
         self.plot(**kwargs)
 
     def plot(self, offset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
-            xmin=None, xmax=None, **kwargs):
+            xmin=None, xmax=None, ymin=None, ymax=None, **kwargs):
 
         self.offset += offset
 
@@ -70,6 +72,12 @@ class Plotter(object):
         if xmax is not None: self.xmax = xmax
         elif self.xmax is None: self.xmax=self.Spectrum.xarr.max()
         self.axis.set_xlim(self.xmin,self.xmax)
+        
+        if ymin is not None: self.ymin = ymin
+        elif self.ymin is None: self.ymin=self.Spectrum.data.min()
+        if ymax is not None: self.ymax = ymax
+        elif self.ymax is None: self.ymax=self.Spectrum.data.max()
+        self.axis.set_ylim(self.ymin,self.ymax)
         
         self.label()
         if self.autorefresh: self.refresh()
