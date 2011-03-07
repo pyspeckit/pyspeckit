@@ -242,7 +242,7 @@ class Specfit(object):
             self.model = temp
             self.residuals = self.spectofit - self.model
 
-    def plotresiduals(self,fig=None,axis=None,clear=True,**kwargs):
+    def plotresiduals(self,fig=2,axis=None,clear=True,**kwargs):
         """
         Plot residuals of the fit.  Specify a figure or
         axis; defaults to figure(2).
@@ -250,8 +250,9 @@ class Specfit(object):
         kwargs are passed to matplotlib plot
         """
         if axis is None:
-            fig=figure(2)
-            self.residualaxis = gca()
+            if isinstance(fig,int):
+                fig=matplotlib.pyplot.figure(fig)
+            self.residualaxis = matplotlib.pyplot.gca()
             if clear: self.residualaxis.clear()
         else:
             self.residualaxis = axis
@@ -259,8 +260,8 @@ class Specfit(object):
         self.residualplot = self.residualaxis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
                 self.residuals,drawstyle='steps-mid',
                 linewidth=0.5, color='k', **kwargs)
-        if self.specplotter.vmin is not None and self.specplotter.vmax is not None:
-            self.residualaxis.set_xlim(self.specplotter.vmin,self.specplotter.vmax)
+        if self.specplotter.xmin is not None and self.specplotter.xmax is not None:
+            self.residualaxis.set_xlim(self.specplotter.xmin,self.specplotter.xmax)
         self.residualaxis.figure.canvas.draw()
 
     def annotate(self,loc='upper right'):
