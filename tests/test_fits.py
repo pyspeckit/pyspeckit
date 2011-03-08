@@ -1,6 +1,7 @@
 import spectrum
 
 sp = spectrum.Spectrum('sample_13CO.fits')
+#sp = spectrum.Spectrum('J000805.62+145023.3.fits')
 
 print "Does it have an axis? ",sp.plotter.axis
 sp.plotter()
@@ -24,10 +25,11 @@ print "Best fit: ", sp.specfit.modelpars
 
 sp.specfit(interactive=True)
 raw_input('Press enter to print guesses and best fit and end code')
+sp.plotter.figure.savefig('fits_interactive_fit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
-print "EQW: ",sp.specfit.EQW()
+# don't try this for a zero-baseline spectrum print "EQW: ",sp.specfit.EQW()
 
 
 #from matplotlib import pyplot

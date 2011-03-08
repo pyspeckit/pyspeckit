@@ -43,14 +43,18 @@ class Baseline:
         specfit = self.Spectrum.specfit
         self.order = order
         fitp = np.zeros(self.order+1)
-        self.spectofit = self.Spectrum.data+self.basespec
+        if self.subtracted:
+            self.spectofit = self.Spectrum.data+self.basespec
+        else:
+            self.spectofit = np.copy(self.Spectrum.data)
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:
             self.excludemask[:] = True
             self.excludevelo = []
             self.excludepix  = []
-            self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.selectregion)
+            self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.selectregion_interactive)
         else:
+            self.selectregion(**kwargs)
             if excludefit and specfit.modelpars is not None:
                 #vlo = self.specplotter.specfit.modelpars[1] - 2*self.specplotter.specfit.modelpars[2]
                 #vhi = self.specplotter.specfit.modelpars[1] + 2*self.specplotter.specfit.modelpars[2]
@@ -87,12 +91,13 @@ class Baseline:
                     self.excludemask[xl:xu] = True
                     self.excludepix += [xl,xu]
         self.basespec, self.baselinepars = self._baseline(
-                self.spectofit,
-                xarr=self.Spectrum.xarr,
+                self.spectofit[self.bx1:self.bx2],
+                xarr=self.Spectrum.xarr[self.bx1:self.bx2],
                 order=self.order, exclude=None, 
-                mask=(True-self.OKmask)+self.excludemask,
+                mask=(True-self.OKmask[self.bx1:self.bx2])+self.excludemask[self.bx1:self.bx2],
                 **kwargs)
-        #self.basespec = np.poly1d(self.baselinepars)(self.Spectrum.xarr)
+        # create the full baseline spectrum...
+        self.basespec = np.poly1d(self.baselinepars)(self.Spectrum.xarr)
         if subtract:
             self.Spectrum.data -= self.basespec
             self.subtracted = True
@@ -103,21 +108,23 @@ class Baseline:
             self.plot_baseline()
 
     def plot_baseline(self, annotate=True, plotcolor='orange'):
+
         if self.specplotter.axis is not None: 
             [self.specplotter.axis.lines.remove(p) for p in self.specplotter.axis.lines]
         if self.specplotter.errorplot is not None: 
             [self.specplotter.axis.collections.remove(p) for p in self.specplotter.errorplot if isinstance(p,matplotlib.collections.PolyCollection)]
             [self.specplotter.axis.lines.remove(p) for p in self.specplotter.errorplot if isinstance(p,matplotlib.lines.Line2D)]
-        self.specplotter.plot(**self.specplotter.plotkwargs)
+
         if self.subtracted is False:
             self.specplotter.axis.plot(self.Spectrum.xarr,self.basespec,color=plotcolor)
-        self.specplotter.axis.set_ylim(
-                abs(self.Spectrum.data[self.OKmask].min())*1.1*np.sign(self.Spectrum.data[self.OKmask].min()),
-                abs(self.Spectrum.data[self.OKmask].max())*1.1*np.sign(self.Spectrum.data[self.OKmask].max()))
+        self.specplotter.ymin = abs(self.Spectrum.data[self.OKmask].min())*1.1*np.sign(self.Spectrum.data[self.OKmask].min())
+        self.specplotter.ymax = abs(self.Spectrum.data[self.OKmask].max())*1.1*np.sign(self.Spectrum.data[self.OKmask].max())
+        self.specplotter.plot(**self.specplotter.plotkwargs)
+
         if annotate: self.annotate() # refreshes automatically
         elif self.specplotter.autorefresh: self.specplotter.refresh()
 
-    def selectregion(self,event,annotate=False):
+    def selectregion_interactive(self,event,annotate=False):
         """
         select regions for baseline fitting
         """
@@ -136,6 +143,7 @@ class Baseline:
                         self.Spectrum.data[self.bx1:self.bx2]+self.specplotter.offset,
                         drawstyle='steps-mid',
                         color='g',alpha=0.5)
+                self.specplotter.plot(**self.specplotter.plotkwargs)
                 self.specplotter.refresh()
                 self.excludemask[self.bx1:self.bx2] = False
                 self.excludevelo += [self.Spectrum.xarr]
@@ -149,6 +157,29 @@ class Baseline:
             self.fitregion=[] # I should be able to just remove from the list... but it breaks the loop...
             self.specplotter.refresh()
 
+    def selectregion(self,xmin=None,xmax=None,xtype='wcs', highlight=False, **kwargs):
+        """
+        Pick a fitting region in either WCS units or pixel units
+        """
+        if xmin is not None and xmax is not None:
+            if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
+                self.bx1 = np.argmin(abs(xmin-self.Spectrum.xarr))
+                self.bx2 = np.argmin(abs(xmax-self.Spectrum.xarr))
+            else:
+                self.bx1 = xmin
+                self.bx2 = xmax
+        elif self.specplotter.xmin is not None and self.specplotter.xmax is not None:
+            self.bx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))
+            self.bx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))
+        else:
+            raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
+        if highlight:
+            self.fitregion += self.specplotter.axis.plot(
+                    self.Spectrum.xarr[self.bx1:self.bx2],
+                    self.Spectrum.data[self.bx1:self.bx2]+self.specplotter.offset,
+                    drawstyle='steps-mid',
+                    color='g',alpha=0.5)
+
     def annotate(self,loc='upper left'):
         bltext = "bl: $y=$"+"".join(["$%+6.3gx^{%i}$" % (f,self.order-i)
             for i,f in enumerate(self.baselinepars)])
@@ -161,7 +192,7 @@ class Baseline:
                 borderpad=0.1, handlelength=0.1, handletextpad=0.1
                 )
         self.specplotter.axis.add_artist(self.blleg)
-        if self.specplotter.autorefresh: self.specplotter.refresh()
+        if self.specplotter.autorefresh: self.specplotter.plot()
   
     def clearlegend(self):
         if self.blleg is not None: 
@@ -176,7 +207,7 @@ class Baseline:
                 self.Spectrum.header.update('BLCOEF%0.2i' % (ii),p,comment="Baseline power-law best-fit coefficient x^%i" % (self.order-ii-1))
 
     def _baseline(self,spectrum,xarr=None,xmin='default',xmax='default',order=1,quiet=True,exclude=None,
-            mask=None):
+            mask=None,**kwargs):
         """
         Subtract a baseline from a spectrum
         If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum

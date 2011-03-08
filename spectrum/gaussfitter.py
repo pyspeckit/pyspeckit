@@ -199,14 +199,14 @@ def gaussfit(data,err=None,params=[],autoderiv=1,return_all=0,circle=0,
         if params[i] > maxpars[i] and limitedmax[i]: params[i] = maxpars[i]
         if params[i] < minpars[i] and limitedmin[i]: params[i] = minpars[i]
 
-    if err == None:
+    if err is None:
         errorfunction = lambda p: numpy.ravel((twodgaussian(p,circle,rotate,vheight)\
                 (*numpy.indices(data.shape)) - data))
     else:
         errorfunction = lambda p: numpy.ravel((twodgaussian(p,circle,rotate,vheight)\
                 (*numpy.indices(data.shape)) - data)/err)
     def mpfitfun(data,err):
-        if err == None:
+        if err is None:
             def f(p,fjac=None): return [0,numpy.ravel(data-twodgaussian(p,circle,rotate,vheight)\
                     (*numpy.indices(data.shape)))]
         else:
@@ -337,13 +337,13 @@ def onedgaussfit(xax, data, err=None,
     """
 
     def mpfitfun(x,y,err):
-        if err == None:
+        if err is None:
             def f(p,fjac=None): return [0,(y-onedgaussian(x,*p))]
         else:
             def f(p,fjac=None): return [0,(y-onedgaussian(x,*p))/err]
         return f
 
-    if xax == None:
+    if xax is None:
         xax = numpy.arange(len(data))
 
     if vheight is False: 
@@ -458,13 +458,13 @@ def multigaussfit(xax, data, ngauss=1, err=None, params=[1,0,1],
                 parlist[:] = [0,0,0] * ngauss
 
     def mpfitfun(x,y,err):
-        if err == None:
+        if err is None:
             def f(p,fjac=None): return [0,(y-n_gaussian(pars=p)(x))]
         else:
             def f(p,fjac=None): return [0,(y-n_gaussian(pars=p)(x))/err]
         return f
 
-    if xax == None:
+    if xax is None:
         xax = numpy.arange(len(data))
 
     parnames = {0:"AMPLITUDE",1:"SHIFT",2:"WIDTH"}
@@ -496,4 +496,38 @@ def multigaussfit(xax, data, ngauss=1, err=None, params=[1,0,1],
         print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
     return mpp,n_gaussian(pars=mpp)(xax),mpperr,chi2
+
+def onedlorentzian(x,H,A,dx,w):
+    """
+    Returns a 1-dimensional gaussian of form
+    H+A*numpy.exp(-(x-dx)**2/(2*w**2))
+    """
+    return H+A/(2*pi)*w/((x-dx)**2 + (w/2.0)**2)
+
+def n_lorentzian(pars=None,a=None,dx=None,width=None):
+    """
+    Returns a function that sums over N lorentzians, where N is the length of
+    a,dx,sigma *OR* N = len(pars) / 3
+
+    The background "height" is assumed to be zero (you must "baseline" your
+    spectrum before fitting)
+
+    pars  - a list with len(pars) = 3n, assuming a,dx,sigma repeated
+    dx    - offset (velocity center) values
+    width - line widths (Lorentzian FWHM)
+    a     - amplitudes
+    """
+    if len(pars) % 3 == 0:
+        a = [pars[ii] for ii in xrange(0,len(pars),3)]
+        dx = [pars[ii] for ii in xrange(1,len(pars),3)]
+        width = [pars[ii] for ii in xrange(2,len(pars),3)]
+    elif not(len(dx) == len(width) == len(a)):
+        raise ValueError("Wrong array lengths! dx: %i  width %i  a: %i" % (len(dx),len(width),len(a)))
+
+    def L(x):
+        v = numpy.zeros(len(x))
+        for i in range(len(dx)):
+            v += a[i] / (2*pi) * w / ((x-dx)**2 + (w/2.0)**2)
+        return v
+    return L
 

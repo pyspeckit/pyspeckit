@@ -17,7 +17,7 @@ class Spectrum(object):
         -perform fourier transforms and operations in fourier space on a spectrum
     """
 
-    def __init__(self,filename):
+    def __init__(self,filename, **kwargs):
         """
         Initialize the Spectrum.  Accepts files in the following formats:
             - .fits
@@ -30,23 +30,21 @@ class Spectrum(object):
 
         import readers,fitters,plotters,baseline
 
-        if ".fits" in filename:
+        if ".fit" in filename: # allow .fit or .fits
             try: 
-                self.data,self.error,self.xarr,self.header = readers.open_1d_fits(filename)
+                self.data,self.error,self.xarr,self.header = readers.open_1d_fits(filename, **kwargs)
                 self.parse_header(self.header)
-            except TypeError:
-                # do something else?
-                pass
+            except TypeError as inst:
+                print "Failed to read fits file."
+                print inst
         elif ".txt" in filename:
             try:
-                self.xarr,self.data,self.error,self.Table = readers.open_1d_txt(filename)
+                self.xarr,self.data,self.error,self.Table = readers.open_1d_txt(filename, **kwargs)
                 self.parse_text_header(self.Table)
             except Exception as inst:
                 print "Reading txt failed.",inst.args
                 print inst
-                # try to use readcol to parse it as a wavelength / data / error file?
-                # I think this is a typical format?
-                pass
+                raise Exception("Reading text failed.")
 
         self.plotter = plotters.Plotter(self)
         self.specfit = fitters.Specfit(self)

@@ -5,6 +5,7 @@ def open_1d_txt(filename):
     import atpy
     T = atpy.Table(filename, type='ascii',
             Reader=atpy.asciitables.asciitable.CommentedHeader, masked=True)
+
     
     xarr = T.data[T.data.dtype.names[0]]
     data = T.data[T.data.dtype.names[1]]
@@ -54,8 +55,14 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None):
     else:
         dv,v0,p3 = hdr['CDELT1'+wcstype],hdr['CRVAL1'+wcstype],hdr['CRPIX1'+wcstype]
 
-    xconv = lambda v: ((v-p3+1)*dv+v0)
-    xarr = xconv(np.arange(len(spec)))
+    # Deal with logarithmic wavelength binning if necessary
+    try: 
+        if hdr['WFITTYPE'] == 'LOG-LINEAR':
+            xconv = lambda v: 10**((v-p3+1)*dv+v0)
+            xarr = xconv(np.arange(len(spec)))
+    except KeyError:
+        xconv = lambda v: ((v-p3+1)*dv+v0)
+        xarr = xconv(np.arange(len(spec)))
 
     return spec,errspec,xarr,hdr
 
