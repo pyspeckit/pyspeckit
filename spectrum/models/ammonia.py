@@ -5,6 +5,7 @@ http://svn.ok.ubc.ca/svn/signals/nh3fit/
 import numpy as np
 from mpfit import mpfit
 import spectrum.units as units
+import matplotlib.cbook as mpcb
 
 line_names = ['oneone','twotwo','threethree','fourfour']
 
@@ -61,6 +62,8 @@ tau_wts_dict = {
 class ammonia_model(object):
 
     def __init__(self):
+        self.npeaks = 1
+        self.npars = 6
         pass
 
     def ammonia(self, xarr, xunits='GHz', tkin=20, tex=20, Ntot=1e10, width=1,
@@ -194,19 +197,20 @@ class ammonia_model(object):
            chi2
         """
 
-        npars = 6
+        self.npars = 6
 
-        if len(params) != npeaks and (len(params) / npars) > npeaks:
-            npeaks = len(params) / npars 
+        if len(params) != npeaks and (len(params) / self.npars) > npeaks:
+            npeaks = len(params) / self.npars 
+        self.npeaks = npeaks
 
         if isinstance(params,np.ndarray): params=params.tolist()
 
         # make sure all various things are the right length; if they're not, fix them using the defaults
         for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars):
-            if len(parlist) != npars*npeaks:
+            if len(parlist) != self.npars*self.npeaks:
                 # if you leave the defaults, or enter something that can be multiplied by 3 to get to the
                 # right number of gaussians, it will just replicate
-                if len(parlist) == npars: 
+                if len(parlist) == self.npars: 
                     parlist *= npeaks 
                 elif parlist==params:
                     parlist[:] = [20,20,1e10,1.0,0.0,0.5] * npeaks
@@ -233,7 +237,7 @@ class ammonia_model(object):
         parinfo = [ {'n':ii, 'value':params[ii],
             'limits':[minpars[ii],maxpars[ii]],
             'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-            'parname':parnames[ii%npars]+str(ii/npars), 'error':ii} 
+            'parname':parnames[ii%self.npars]+str(ii/self.npars), 'error':ii} 
             for ii in xrange(len(params)) ]
 
         if veryverbose:
@@ -256,18 +260,22 @@ class ammonia_model(object):
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
+        self.mp = mp
+        self.mpp = mpp
+        self.mpperr = mpperr
+        self.model = self.n_ammonia(pars=mpp,**kwargs)(xax)
         return mpp,self.n_ammonia(pars=mpp,**kwargs)(xax),mpperr,chi2
 
     __call__ = multinh3fit
 
-    def annotations(self,modelpars,modelerrs,npars,npeaks):
+    def annotations(self):
         label_list = [ (
-                "$T_K$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[0+jj*npars],modelerrs[0+jj*npars]),
-                "$T_{ex}$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[1+jj*npars],modelerrs[1+jj*npars]),
-                "$N$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[2+jj*npars],modelerrs[2+jj*npars]),
-                "$w$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[3+jj*npars],modelerrs[3+jj*npars]),
-                "$v$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[4+jj*npars],modelerrs[4+jj*npars]),
-                "$F_o$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[5+jj*npars],modelerrs[5+jj*npars])
-                          ) for jj in range(npeaks)]
+                "$T_K$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[0+jj*self.npars],self.mpperr[0+jj*self.npars]),
+                "$T_{ex}$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
+                "$N$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[2+jj*self.npars],self.mpperr[2+jj*self.npars]),
+                "$w$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[3+jj*self.npars],self.mpperr[3+jj*self.npars]),
+                "$v$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[4+jj*self.npars],self.mpperr[4+jj*self.npars]),
+                "$F_o$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[5+jj*self.npars],self.mpperr[5+jj*self.npars])
+                          ) for jj in range(self.npeaks)]
         labels = tuple(mpcb.flatten(label_list))
         return labels

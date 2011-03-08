@@ -19,7 +19,7 @@ print "Best fit: ", sp.specfit.modelpars
 #print "Plotter min/max: ",sp.plotter.xmin,sp.plotter.xmax," Fitter min/max: ",sp.specfit.gx1,sp.specfit.gx2," Fitregion= ",sp.baseline.excludevelo,sp.baseline.excludepix
 #raw_input('Baseline')
 #sp.specfit(fittype='ammonia',multifit=True,guesses=[20,20,1e16,1.0,-55.0,0.5],quiet=False,xunits='Hz')
-sp.specfit(fittype='ammonia',multifit=True,guesses=[5,5,1e15,1.0,95.0,0.5],quiet=False,xunits=sp.xunits)
+sp.specfit(fittype='ammonia',multifit=True,guesses=[5.9,4.45,8.3e14,0.84,96.2,0.43],quiet=False,xunits=sp.xunits)
 sp.specfit.plotresiduals()
 raw_input('Press enter to print guesses and zoom in.')
 sp.plotter.figure.savefig('nh3_ammonia_fit.png')

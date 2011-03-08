@@ -2,6 +2,7 @@ import numpy
 from numpy.ma import median
 from numpy import pi
 from mpfit import mpfit
+import matplotlib.cbook as mpcb
 
 try:
     import scipy.special
@@ -11,6 +12,8 @@ except ImportError:
 class voigt_fitter(object):
 
     def __init__(self,multisingle='multi'):
+        self.npars = 4
+        self.npeaks = 1
         if multisingle in ('multi','single'):
             self.multisingle = multisingle
         else:
@@ -136,6 +139,10 @@ class voigt_fitter(object):
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
+        self.mp = mp
+        self.mpp = mpp[1:]
+        self.mpperr = mpperr
+        self.model = self.n_voigt(pars=mpp[1:])(xax) 
         return mpp,self.n_voigt(pars=mpp[1:])(xax),mpperr,chi2
 
 
@@ -173,6 +180,7 @@ class voigt_fitter(object):
 
         if len(params) != nvoigt and (len(params) / 4) > nvoigt:
             nvoigt = len(params) / 4 
+        self.npeaks = nvoigt
 
         if isinstance(params,numpy.ndarray): params=params.tolist()
 
@@ -230,5 +238,18 @@ class voigt_fitter(object):
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
+        self.mp = mp
+        self.mpp = mpp
+        self.mpperr = mpperr
+        self.model = self.n_voigt(pars=mpp)(xax) 
         return mpp,self.n_voigt(pars=mpp)(xax),mpperr,chi2
 
+    def annotations(self):
+        label_list = [(
+                "$A$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[0+jj*self.npars],self.mpperr[0+jj*self.npars]),
+                "$v$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
+                "$\\sigma_G$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[2+jj*self.npars],self.mpperr[2+jj*self.npars]),
+                "$\\sigma_L$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[3+jj*self.npars],self.mpperr[3+jj*self.npars]),
+                          ) for jj in range(self.npeaks)]
+        labels = tuple(mpcb.flatten(label_list))
+        return labels

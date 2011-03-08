@@ -6,10 +6,13 @@ import numpy
 from numpy.ma import median
 from numpy import pi
 from mpfit import mpfit
+import matplotlib.cbook as mpcb
 
 class gaussian_fitter(object):
 
     def __init__(self,multisingle='multi'):
+        self.npars = 3
+        self.npeaks = 1
         if multisingle in ('multi','single'):
             self.multisingle = multisingle
         else:
@@ -149,6 +152,10 @@ class gaussian_fitter(object):
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
+        self.mp = mp
+        self.mpp = mpp[1:]
+        self.mpperr = mpperr
+        self.model = self.onedgaussian(xax,*mpp)
         return mpp,self.onedgaussian(xax,*mpp),mpperr,chi2
 
 
@@ -211,25 +218,27 @@ class gaussian_fitter(object):
         """
 
         if len(params) != npeaks and (len(params) / 3) > npeaks:
-            npeaks = len(params) / 3 
+            self.npeaks = len(params) / 3 
+        else:
+            self.npeaks = npeaks
 
         if isinstance(params,numpy.ndarray): params=params.tolist()
 
         # make sure all various things are the right length; if they're not, fix them using the defaults
         for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars):
-            if len(parlist) != 3*npeaks:
+            if len(parlist) != 3*self.npeaks:
                 # if you leave the defaults, or enter something that can be multiplied by 3 to get to the
                 # right number of gaussians, it will just replicate
                 if len(parlist) == 3: 
-                    parlist *= npeaks 
+                    parlist *= self.npeaks 
                 elif parlist==params:
-                    parlist[:] = [1,0,1] * npeaks
+                    parlist[:] = [1,0,1] * self.npeaks
                 elif parlist==fixed or parlist==limitedmax:
-                    parlist[:] = [False,False,False] * npeaks
+                    parlist[:] = [False,False,False] * self.npeaks
                 elif parlist==limitedmin:
-                    parlist[:] = [False,False,True] * npeaks
+                    parlist[:] = [False,False,True] * self.npeaks
                 elif parlist==minpars or parlist==maxpars:
-                    parlist[:] = [0,0,0] * npeaks
+                    parlist[:] = [0,0,0] * self.npeaks
 
         def mpfitfun(x,y,err):
             if err is None:
@@ -269,13 +278,17 @@ class gaussian_fitter(object):
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
+        self.mp = mp
+        self.mpp = mpp
+        self.mpperr = mpperr
+        self.model = self.n_gaussian(pars=mpp)(xax)
         return mpp,self.n_gaussian(pars=mpp)(xax),mpperr,chi2
 
-    def annotations(self, modelpars,modelerrs,npars,npeaks):
+    def annotations(self):
         label_list = [(
-                "$A$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[0+jj*npars],modelerrs[0+jj*npars]),
-                "$v$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[1+jj*npars],modelerrs[1+jj*npars]),
-                "$\\sigma$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[2+jj*npars],modelerrs[2+jj*npars])
-                          ) for jj in range(npeaks)]
+                "$A$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[0+jj*self.npars],self.mpperr[0+jj*self.npars]),
+                "$v$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
+                "$\\sigma$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[2+jj*self.npars],self.mpperr[2+jj*self.npars])
+                          ) for jj in range(self.npeaks)]
         labels = tuple(mpcb.flatten(label_list))
         return labels
