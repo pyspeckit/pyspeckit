@@ -304,6 +304,9 @@ def onedgaussian(x,H,A,dx,w):
     """
     Returns a 1-dimensional gaussian of form
     H+A*numpy.exp(-(x-dx)**2/(2*w**2))
+    
+    [height,amplitude,center,width]
+    
     """
     return H+A*numpy.exp(-(x-dx)**2/(2*w**2))
 

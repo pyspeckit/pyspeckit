@@ -33,6 +33,7 @@ class Specfit(object):
         self.modelpars = None
         self.modelerrs = None
         self.modelplot = None
+        self.show_components = False
         self.guessplot = []
         self.fitregion = []
         self.ngauss = 0
@@ -257,6 +258,15 @@ class Specfit(object):
                 self.Spectrum.xarr[self.gx1:self.gx2],
                 plotmodel,
                 color=self.fitcolor, linewidth=0.5)
+        
+        if self.show_components:
+            for i in np.arange(len(self.modelpars) / 3):
+                component = gaussfitter.onedgaussian(self.Spectrum.xarr[self.gx1:self.gx2],
+                0.0,self.modelpars[3*i],self.modelpars[3*i+1],self.modelpars[3*i+2])
+                        
+                self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
+                component, color='blue', linewidth=0.5)                
+                
         self.specplotter.plot(**self.specplotter.plotkwargs)
 
     def fullsizemodel(self):
