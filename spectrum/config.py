@@ -56,8 +56,8 @@ class ConfigParser:
 __fn = os.path.expanduser("~/.spectools/config")
 if os.path.exists(__fn): 
     spcfg = ConfigParser(__fn)
-elif not os.path.exists(__fn): 
-    __fn = os.path.expanduser("~/.spectoolsrc/config")
+elif os.path.exists(os.path.expanduser("~/.spectoolsrc")): 
+    __fn = os.path.expanduser("~/.spectoolsrc")
     spcfg = ConfigParser(__fn)
 else:
     spcfg = ConfigParser()
