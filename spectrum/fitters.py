@@ -4,6 +4,8 @@ import matplotlib
 import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
+from config import *
+#import models
 
 interactive_help_message = """
 Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
@@ -51,10 +53,17 @@ class Specfit(object):
         self.setfitspec()
         self.fittype = 'gaussian'
         #self.seterrspec()
+        
+        # config file stuff
+        self.cfg = spcfg.cfg
+        self.fitcolor = self.cfg['fit_color']
+        self.compcolor = self.cfg['comp_color']
+        self.fitlw = self.cfg['fit_lw']
+        self.complw = self.cfg['comp_lw']
 
-    def __call__(self, interactive=False, usemoments=True, fitcolor='r',
+    def __call__(self, interactive=False, usemoments=True, fitcolor=None,
             multifit=False, guesses=None, annotate=True, save=True,
-            fittype='gaussian', **kwargs):
+            fittype='gaussian', compcolor = None, fitlw = None, complw = None, **kwargs):
         """
         Fit gaussians to a spectrum
 
@@ -72,7 +81,11 @@ class Specfit(object):
             Right click or 'd': Disconnect the plot and perform the fit.
         """
   
-        self.fitcolor = fitcolor
+        if fitcolor is not None: self.fitcolor = fitcolor
+        if compcolor is not None: self.compcolor = compcolor
+        if fitlw is not None: self.fitlw = fitlw
+        if complw is not None: self.complw = complw
+
         self.clear()
         self.selectregion(**kwargs)
         if self.fittype != fittype: self.fittype = fittype
@@ -263,7 +276,7 @@ class Specfit(object):
         self.modelplot = self.specplotter.axis.plot(
                 self.Spectrum.xarr[self.gx1:self.gx2],
                 plotmodel,
-                color=self.fitcolor, linewidth=0.5)
+                color=self.fitcolor, linewidth=self.fitlw)
         
         if self.show_components:
             for i in np.arange(len(self.modelpars) / 3):
@@ -271,7 +284,7 @@ class Specfit(object):
                 0.0,self.modelpars[3*i],self.modelpars[3*i+1],self.modelpars[3*i+2])
                         
                 self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
-                component, color='blue', linewidth=0.5)                
+                component, color=self.compcolor, linewidth=self.complw)                
                 
         self.specplotter.plot(**self.specplotter.plotkwargs)
 
