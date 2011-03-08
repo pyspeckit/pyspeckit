@@ -1,3 +1,7 @@
+"""
+Ammonia inversion transition TKIN fitter translated from Erik Rosolowsky's
+http://svn.ok.ubc.ca/svn/signals/nh3fit/
+"""
 import numpy as np
 
 line_names = ['oneone','twotwo','threethree','fourfour']

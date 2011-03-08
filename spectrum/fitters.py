@@ -4,6 +4,7 @@ import matplotlib
 import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
+#import models
 
 interactive_help_message = """
 Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
@@ -21,7 +22,9 @@ singlefitters = {'gaussian': gaussfitter.onedgaussfit,
         'lorentzian': None}
 multifitters = {'gaussian': gaussfitter.multigaussfit,
         'voigt': voigtfitter.multivoigtfit,
-        'lorentzian': None}
+        'lorentzian': None,
+        }
+        #'ammonia': models.multinh3fit}
 
 class Specfit(object):
 
