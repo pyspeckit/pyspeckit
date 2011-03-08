@@ -1,6 +1,7 @@
 import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure
+from config import *
 
 class Plotter(object):
     """
