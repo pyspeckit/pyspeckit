@@ -212,7 +212,6 @@ class Specfit(object):
         self.setfitspec()
         if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp')
         fitter = multifitters[fittype]
-        print self.fitkwargs, self.fitkwargs.has_key('npeaks')
         mpp,model,mpperr,chi2 = fitter(
                 self.Spectrum.xarr[self.gx1:self.gx2], 
                 self.spectofit[self.gx1:self.gx2], 
