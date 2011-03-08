@@ -4,7 +4,6 @@ import matplotlib
 import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
-#import models
 
 interactive_help_message = """
 Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
@@ -24,7 +23,6 @@ multifitters = {'gaussian': gaussfitter.multigaussfit,
         'voigt': voigtfitter.multivoigtfit,
         'lorentzian': None,
         }
-        #'ammonia': models.multinh3fit}
 
 class Specfit(object):
 
@@ -36,7 +34,7 @@ class Specfit(object):
         self.show_components = False
         self.guessplot = []
         self.fitregion = []
-        self.ngauss = 0
+        self.npeaks = 0
         self.nclicks_b1 = 0
         self.nclicks_b2 = 0
         self.gx1 = 0
@@ -84,7 +82,7 @@ class Specfit(object):
             if len(guesses) > 5:
                 multifit = True
 
-        self.ngauss = 0
+        self.npeaks = 0
         self.fitkwargs = kwargs
         if interactive:
             if self.specplotter.axis is None:
@@ -96,14 +94,15 @@ class Specfit(object):
             self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.makeguess)
             self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',self.makeguess)
             self.autoannotate = annotate
-        elif multifit:
+        elif multifit and fittype in multifitters:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
+                return
             else:
                 self.guesses = guesses
                 self.multifit(fittype=fittype)
                 self.autoannotate = annotate
-        else:
+        elif fittype in singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
             if self.Spectrum.baseline.order is None:
                 self.Spectrum.baseline.order=0
@@ -113,6 +112,12 @@ class Specfit(object):
                 self.onedfit(usemoments=usemoments, annotate=annotate,
                         vheight=False, height=0.0, fittype=fittype, **kwargs)
             if self.specplotter.autorefresh: self.specplotter.refresh()
+        else:
+            if multifit:
+                print "Can't fit with given fittype %s: it is not registered as a multifitter." % fittype
+            else:
+                print "Can't fit with given fittype %s: it is not registered as a singlefitter." % fittype
+            return
         if save: self.savefit()
 
     def EQW(self, plot=False, plotcolor='g', annotate=False, alpha=0.5, loc='lower left'):
@@ -186,19 +191,20 @@ class Specfit(object):
         """
         Fit multiple gaussians (or other profiles)
         """
-        self.ngauss = len(self.guesses)/npars[fittype]
+        self.npeaks = len(self.guesses)/npars[fittype]
         self.setfitspec()
         if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp')
         fitter = multifitters[fittype]
+        print self.fitkwargs, self.fitkwargs.has_key('npeaks')
         mpp,model,mpperr,chi2 = fitter(
                 self.Spectrum.xarr[self.gx1:self.gx2], 
                 self.spectofit[self.gx1:self.gx2], 
                 err=self.errspec[self.gx1:self.gx2],
-                ngauss=self.ngauss,
+                npeaks=self.npeaks,
                 params=self.guesses,
                 **self.fitkwargs)
         self.chi2 = chi2
-        self.dof  = self.gx2-self.gx1-self.ngauss*3
+        self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]
         self.model = model
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
@@ -210,7 +216,7 @@ class Specfit(object):
     
     def onedfit(self, usemoments=True, annotate=True, vheight=True, height=0,
             negamp=None, fittype='gaussian', **kwargs):
-        self.ngauss = 1
+        self.npeaks = 1
         self.auto = True
         self.setfitspec()
         if usemoments: # this can be done within gaussfit but I want to save them
@@ -234,7 +240,7 @@ class Specfit(object):
                 params=self.guesses,
                 **self.fitkwargs)
         self.chi2 = chi2
-        self.dof  = self.gx2-self.gx1-self.ngauss*npars[fittype]-vheight
+        self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]-vheight
         if vheight: 
             self.Spectrum.baseline.baselinepars = mpp[:1] # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]
@@ -314,14 +320,14 @@ class Specfit(object):
         label_list = [("c%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[1+jj*npars[self.fittype]],self.modelerrs[1+jj*npars[self.fittype]]),
                       "w%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[2+jj*npars[self.fittype]],self.modelerrs[2+jj*npars[self.fittype]]),
                       "a%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[0+jj*npars[self.fittype]],self.modelerrs[0+jj*npars[self.fittype]]))
-                      for jj in range(self.ngauss)]
+                      for jj in range(self.npeaks)]
         if self.fittype in 'voigt':
             label_list = [
                 L + ("Lw%i=%6.4g $\\pm$ %6.4g" % (jj,self.modelpars[3+jj*npars[self.fittype]],self.modelerrs[3+jj*npars[self.fittype]]),)
                 for jj,L in enumerate(label_list)]
         labels = tuple(mpcb.flatten(label_list))
         self.gaussleg = self.specplotter.axis.legend(
-                tuple([pl]*npars[self.fittype]*self.ngauss),
+                tuple([pl]*npars[self.fittype]*self.npeaks),
                 labels,
                 loc=loc,markerscale=0.01,
                 borderpad=0.1, handlelength=0.1, handletextpad=0.1
@@ -347,6 +353,8 @@ class Specfit(object):
         else:
             raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
 
+        if self.gx1>self.gx2: self.gx1,self.gx2 = self.gx2,self.gx1
+
 
     def selectregion_interactive(self,event):
         if self.nclicks_b1 == 0:
@@ -368,7 +376,7 @@ class Specfit(object):
                             self.Spectrum.xarr[self.gx1:self.gx2],
                             self.spectofit[self.gx1:self.gx2],
                             vheight=0)
-                    self.ngauss = 1
+                    self.npeaks = 1
                     self.auto = True
             else:
                 print "Fitting region is too small (channels %i:%i).  Try again." % (self.gx1,self.gx2)
@@ -384,7 +392,7 @@ class Specfit(object):
                 self.guesses[:2] = [event.ydata,event.xdata]
             else:
                 self.guesses += [event.ydata,event.xdata,1]
-                self.ngauss += 1
+                self.npeaks += 1
             self.nclicks_b2 += 1
             self.guessplot += [self.specplotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
             self.specplotter.plot(**self.specplotter.plotkwargs)
@@ -397,9 +405,9 @@ class Specfit(object):
             self.specplotter.plot(**self.specplotter.plotkwargs)
             if self.auto:
                 self.auto = False
-            if self.nclicks_b2 / 2 > self.ngauss:
-                print "There have been %i middle-clicks but there are only %i gaussians" % (self.nclicks_b2,self.ngauss)
-                self.ngauss += 1
+            if self.nclicks_b2 / 2 > self.npeaks:
+                print "There have been %i middle-clicks but there are only %i gaussians" % (self.nclicks_b2,self.npeaks)
+                self.npeaks += 1
 
     def clear(self,legend=True):
         if self.modelplot is not None:
@@ -420,7 +428,7 @@ class Specfit(object):
         elif button in ('d','D','3',3):
             self.specplotter.figure.canvas.mpl_disconnect(self.click)
             self.specplotter.figure.canvas.mpl_disconnect(self.keyclick)
-            if self.ngauss > 0:
+            if self.npeaks > 0:
                 print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.gx1,self.gx2
                 if len(self.guesses) % 3 == 0:
                     self.multifit()

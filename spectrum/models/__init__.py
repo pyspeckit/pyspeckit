@@ -1,1 +1,1 @@
-from ammonia import multinh3fit
+from ammonia import ammonia_model

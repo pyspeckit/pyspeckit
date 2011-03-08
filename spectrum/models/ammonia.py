@@ -3,6 +3,8 @@ Ammonia inversion transition TKIN fitter translated from Erik Rosolowsky's
 http://svn.ok.ubc.ca/svn/signals/nh3fit/
 """
 import numpy as np
+from mpfit import mpfit
+import spectrum.units as units
 
 line_names = ['oneone','twotwo','threethree','fourfour']
 
@@ -56,190 +58,216 @@ tau_wts_dict = {
         0.006652, 0.011589, 0.005494, 0.003434, 0.008409, 0.012263],
     'fourfour': [0.2431, 0.0162, 0.0162, 0.3008, 0.0163, 0.0163, 0.3911]}
 
-def ammonia(xarr, xtype='frequency', xunits='GHz', tkin=20, tex=20, Ntot=1e10, width=1,
-        xcen=0.0, fortho=0.5):
-    """
-    Generate a model Ammonia spectrum based on input temperatures, column, and
-    gaussian parameters
-    """
+class ammonia_model(object):
 
-    if xunits == 'Hz':
-        xarr /= 1e9
-    if xtype != 'frequency':
-        raise Exception( "Error: convert to frequency first" )
+    def __init__(self):
+        pass
 
-    ckms = 2.99792458e5
-    ccms = ckms*1e5
-    g1 = 1                
-    g2 = 1                
-    h = 6.6260693e-27     
-    kb = 1.3806505e-16     
-    mu0 = 1.476e-18               # Dipole Moment in cgs (1.476 Debeye)
-  
-    # Generate Partition Functions  
-    nlevs = 51
-    jv=np.arange(nlevs)
-    ortho = jv % 3 == 0
-    para = True-ortho
-    Jpara = jv[para]
-    Jortho = jv[ortho]
-    Brot = 298117.06e6
-    Crot = 186726.36e6
-    Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
-        (Crot-Brot)*Jpara**2)/(kb*tkin))
-    Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
-        (Crot-Brot)*Jortho**2)/(kb*tkin))
+    def ammonia(self, xarr, xunits='GHz', tkin=20, tex=20, Ntot=1e10, width=1,
+            xoff_v=0.0, fortho=0.5, line='oneone'):
+        """
+        Generate a model Ammonia spectrum based on input temperatures, column, and
+        gaussian parameters
+        """
 
-    runspec = np.zeros(len(xarr))
-    
-    tau_dict = {}
-    for linename in line_names:
-        orthoparafrac = fortho if ortho_dict[linename] else (1-fortho)
-        tau_dict[linename] = (Ntot * orthoparafrac * Zpara[0]/(Zpara.sum()) / ( 1
-            + np.exp(-h*freq_dict[linename]/(kb*tkin) )) * ccms**2 /
-            (8*np.pi*freq_dict[linename]**2) * aval_dict[linename]*
-            (1-np.exp(-h*freq_dict[linename]/(kb*tex))) /
-            (width/ckms*freq_dict[linename]*np.sqrt(2*np.pi)) )
-  
-        voff_lines = np.array(voff_lines_dict['oneone'])
-        tau_wts = np.array(tau_wts_dict['oneone'])
-  
-        lines = (1-voff_lines/ckms)*freq_dict[linename]/1e9
-        tau_wts = tau_wts / (tau_wts).sum()
-        nuwidth = np.abs(width/ckms*lines)
-        nuoff = xcen/ckms*lines
-  
-        # tau array
-        tauprof = np.zeros(len(xarr))
-        for kk,no in enumerate(nuoff):
-          tauprof += tau_dict[linename]*tau_wts[kk]*\
-                    np.exp(-(xarr-no-lines[kk])**2/(2*nuwidth[kk]**2))
-  
-        T0 = (h*xarr*1e9/kb)
-        runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
-  
-    return runspec
-
-def n_ammonia(pars=None,**kwargs):
-    """
-    Returns a function that sums over N ammonia line profiles, where N is the length of
-    tkin,tex,Ntot,width,xcen,fortho *OR* N = len(pars) / 6
-
-    The background "height" is assumed to be zero (you must "baseline" your
-    spectrum before fitting)
-
-    pars  - a list with len(pars) = 6n, assuming tkin,tex,Ntot,width,xcen,fortho repeated
-    """
-    if len(pars) % 6 == 0:
-        tkin = [pars[ii] for ii in xrange(0,len(pars),6)]
-        tex = [pars[ii] for ii in xrange(1,len(pars),6)]
-        Ntot = [pars[ii] for ii in xrange(2,len(pars),6)]
-        width = [pars[ii] for ii in xrange(3,len(pars),6)]
-        xcen = [pars[ii] for ii in xrange(4,len(pars),6)]
-        fortho = [pars[ii] for ii in xrange(5,len(pars),6)]
-    elif not(len(dx) == len(width) == len(a)):
-        raise ValueError("Wrong array lengths! dx: %i  width %i  a: %i" % (len(dx),len(width),len(a)))
-
-    def L(x):
-        v = numpy.zeros(len(x))
-        for i in range(len(dx)):
-            v += ammonia(x,tkin=tkin[i],tex=tex[i],Ntot=Ntot[i],width=width[i],xcen=xcen[i],fortho=fortho[i],**kwargs)
-        return v
-    return L
-
-def multinh3fit(xax, data, nnh3=1, err=None, params=[20,20,1e10,1.0,0.0,0.5],
-        fixed=[False,False,False,False,False,False],
-        limitedmin=[True,True,True,True,False,True],
-        limitedmax=[False,False,False,False,False,True], minpars=[2.73,0,0,0,0,0],
-        maxpars=[0,0,0,0,0,1], quiet=True, shh=True, veryverbose=False):
-    """
-    Fit multiple nh3 profiles
-
-    Inputs:
-       xax - x axis
-       data - y axis
-       nnh3 - How many nh3 profiles to fit?  Default 1 (this could supersede onedgaussfit)
-       err - error corresponding to data
-
-     These parameters need to have length = 6*nnh3.  If nnh3 > 1 and length = 6, they will
-     be replicated nnh3 times, otherwise they will be reset to defaults:
-       params - Fit parameters: [amplitude, offset, Gfwhm, Lfwhm] * nnh3
-              If len(params) % 6 == 0, nnh3 will be set to len(params) / 6
-       fixed - Is parameter fixed?
-       limitedmin/minpars - set lower limits on each parameter (default: width>0)
-       limitedmax/maxpars - set upper limits on each parameter
-
-       quiet - should MPFIT output each iteration?
-       shh - output final parameters?
-
-    Returns:
-       Fit parameters
-       Model
-       Fit errors
-       chi2
-    """
-
-    npars = 6
-
-    if len(params) != nnh3 and (len(params) / npars) > nnh3:
-        nnh3 = len(params) / npars 
-
-    if isinstance(params,numpy.ndarray): params=params.tolist()
-
-    # make sure all various things are the right length; if they're not, fix them using the defaults
-    for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars):
-        if len(parlist) != npars*nnh3:
-            # if you leave the defaults, or enter something that can be multiplied by 3 to get to the
-            # right number of gaussians, it will just replicate
-            if len(parlist) == npars: 
-                parlist *= nnh3 
-            elif parlist==params:
-                parlist[:] = [20,20,1e10,1.0,0.0,0.5] * nnh3
-            elif parlist==fixed:
-                parlist[:] = [False,False,False,False,False,False] * nnh3
-            elif parlist==limitedmax:
-                parlist[:] = [False,False,False,False,False,True] * nnh3
-            elif parlist==limitedmin:
-                parlist[:] = [True,True,True,True,False,True] * nnh3
-            elif parlist==minpars:
-                parlist[:] = [2.73,0,0,0,0,0] * nnh3
-            elif parlist==maxpars:
-                parlist[:] = [0,0,0,0,0,1] * nnh3
-
-    def mpfitfun(x,y,err):
-        if err == None:
-            def f(p,fjac=None): return [0,(y-n_ammonia(pars=p)(x))]
+        # Convert X-units to frequency in GHz
+        if xunits in units.frequency_dict:
+            xarr = np.copy(xarr) * units.frequency_dict[xunits] / units.frequency_dict['GHz']
+        elif xunits in units.velocity_dict:
+            if line in freq_dict:
+                xarr = (freq_dict[line] + (np.copy(xarr) * 
+                        (units.velocity_dict[xunits] / units.velocity_dict['m/s'] / units.speedoflight) *
+                        freq_dict[line]) ) / units.frequency_dict['GHz']
+            else:
+                raise Exception("Xunits is velocity-type (%s) but line %s is not in the list.") % (xunits,line)
         else:
-            def f(p,fjac=None): return [0,(y-n_ammonia(pars=p)(x))/err]
-        return f
+            raise Exception("xunits not recognized: %s" % (xunits))
 
-    parnames = {0:"TKIN",1:"TEX",2:"NTOT",3:"WIDTH",4:"XCEN",5:"FORTHO"}
+        ckms = 2.99792458e5
+        ccms = ckms*1e5
+        g1 = 1                
+        g2 = 1                
+        h = 6.6260693e-27     
+        kb = 1.3806505e-16     
+        mu0 = 1.476e-18               # Dipole Moment in cgs (1.476 Debeye)
+      
+        # Generate Partition Functions  
+        nlevs = 51
+        jv=np.arange(nlevs)
+        ortho = jv % 3 == 0
+        para = True-ortho
+        Jpara = jv[para]
+        Jortho = jv[ortho]
+        Brot = 298117.06e6
+        Crot = 186726.36e6
+        Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
+            (Crot-Brot)*Jpara**2)/(kb*tkin))
+        Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
+            (Crot-Brot)*Jortho**2)/(kb*tkin))
 
-    parinfo = [ {'n':ii, 'value':params[ii],
-        'limits':[minpars[ii],maxpars[ii]],
-        'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-        'parname':parnames[ii%npars]+str(ii%npars), 'error':ii} 
-        for ii in xrange(len(params)) ]
+        runspec = np.zeros(len(xarr))
+        
+        tau_dict = {}
+        for linename in line_names:
+            orthoparafrac = fortho if ortho_dict[linename] else (1-fortho)
+            tau_dict[linename] = (Ntot * orthoparafrac * Zpara[0]/(Zpara.sum()) / ( 1
+                + np.exp(-h*freq_dict[linename]/(kb*tkin) )) * ccms**2 /
+                (8*np.pi*freq_dict[linename]**2) * aval_dict[linename]*
+                (1-np.exp(-h*freq_dict[linename]/(kb*tex))) /
+                (width/ckms*freq_dict[linename]*np.sqrt(2*np.pi)) )
+      
+            voff_lines = np.array(voff_lines_dict['oneone'])
+            tau_wts = np.array(tau_wts_dict['oneone'])
+      
+            lines = (1-voff_lines/ckms)*freq_dict[linename]/1e9
+            tau_wts = tau_wts / (tau_wts).sum()
+            nuwidth = np.abs(width/ckms*lines)
+            nuoff = xoff_v/ckms*lines
+      
+            # tau array
+            tauprof = np.zeros(len(xarr))
+            for kk,no in enumerate(nuoff):
+              tauprof += tau_dict[linename]*tau_wts[kk]*\
+                        np.exp(-(xarr-no-lines[kk])**2/(2*nuwidth[kk]**2))
+      
+            T0 = (h*xarr*1e9/kb)
+            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
+      
+        return runspec
 
-    if veryverbose:
-        print "GUESSES: "
-        print "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
+    def n_ammonia(self, pars=None,**kwargs):
+        """
+        Returns a function that sums over N ammonia line profiles, where N is the length of
+        tkin,tex,Ntot,width,xoff_v,fortho *OR* N = len(pars) / 6
 
-    mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet)
-    mpp = mp.params
-    if mp.perror is not None: mpperr = mp.perror
-    else: mpperr = mpp*0
-    chi2 = mp.fnorm
+        The background "height" is assumed to be zero (you must "baseline" your
+        spectrum before fitting)
 
-    if mp.status == 0:
-        raise Exception(mp.errmsg)
+        pars  - a list with len(pars) = 6n, assuming tkin,tex,Ntot,width,xoff_v,fortho repeated
+        """
+        if len(pars) % 6 == 0:
+            tkin = [pars[ii] for ii in xrange(0,len(pars),6)]
+            tex = [pars[ii] for ii in xrange(1,len(pars),6)]
+            Ntot = [pars[ii] for ii in xrange(2,len(pars),6)]
+            width = [pars[ii] for ii in xrange(3,len(pars),6)]
+            xoff_v = [pars[ii] for ii in xrange(4,len(pars),6)]
+            fortho = [pars[ii] for ii in xrange(5,len(pars),6)]
+        elif not(len(tkin) == len(tex) == len(Ntot) == len(xoff_v) == len(width) == len(fortho)):
+            raise ValueError("Wrong array lengths!")
 
-    if not shh:
-        print "Final fit values: "
-        for i,p in enumerate(mpp):
-            parinfo[i]['value'] = p
-            print parinfo[i]['parname'],p," +/- ",mpperr[i]
-        print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
+        def L(x):
+            v = np.zeros(len(x))
+            for i in range(len(tkin)):
+                v += self.ammonia(x,tkin=tkin[i],tex=tex[i],Ntot=Ntot[i],width=width[i],xoff_v=xoff_v[i],fortho=fortho[i],**kwargs)
+            return v
+        return L
 
-    return mpp,n_ammonia(pars=mpp)(xax),mpperr,chi2
+    def multinh3fit(self, xax, data, npeaks=1, err=None, params=[20,20,1e10,1.0,0.0,0.5],
+            fixed=[False,False,False,False,False,False],
+            limitedmin=[True,True,True,True,False,True],
+            limitedmax=[False,False,False,False,False,True], minpars=[2.73,0,0,0,0,0],
+            maxpars=[0,0,0,0,0,1], quiet=True, shh=True, veryverbose=False, **kwargs):
+        """
+        Fit multiple nh3 profiles
 
+        Inputs:
+           xax - x axis
+           data - y axis
+           npeaks - How many nh3 profiles to fit?  Default 1 (this could supersede onedgaussfit)
+           err - error corresponding to data
+
+         These parameters need to have length = 6*npeaks.  If npeaks > 1 and length = 6, they will
+         be replicated npeaks times, otherwise they will be reset to defaults:
+           params - Fit parameters: [amplitude, offset, Gfwhm, Lfwhm] * npeaks
+                  If len(params) % 6 == 0, npeaks will be set to len(params) / 6
+           fixed - Is parameter fixed?
+           limitedmin/minpars - set lower limits on each parameter (default: width>0)
+           limitedmax/maxpars - set upper limits on each parameter
+
+           quiet - should MPFIT output each iteration?
+           shh - output final parameters?
+
+        Returns:
+           Fit parameters
+           Model
+           Fit errors
+           chi2
+        """
+
+        npars = 6
+
+        if len(params) != npeaks and (len(params) / npars) > npeaks:
+            npeaks = len(params) / npars 
+
+        if isinstance(params,np.ndarray): params=params.tolist()
+
+        # make sure all various things are the right length; if they're not, fix them using the defaults
+        for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars):
+            if len(parlist) != npars*npeaks:
+                # if you leave the defaults, or enter something that can be multiplied by 3 to get to the
+                # right number of gaussians, it will just replicate
+                if len(parlist) == npars: 
+                    parlist *= npeaks 
+                elif parlist==params:
+                    parlist[:] = [20,20,1e10,1.0,0.0,0.5] * npeaks
+                elif parlist==fixed:
+                    parlist[:] = [False,False,False,False,False,False] * npeaks
+                elif parlist==limitedmax:
+                    parlist[:] = [False,False,False,False,False,True] * npeaks
+                elif parlist==limitedmin:
+                    parlist[:] = [True,True,True,True,False,True] * npeaks
+                elif parlist==minpars:
+                    parlist[:] = [2.73,0,0,0,0,0] * npeaks
+                elif parlist==maxpars:
+                    parlist[:] = [0,0,0,0,0,1] * npeaks
+
+        def mpfitfun(x,y,err):
+            if err == None:
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, **kwargs)(x))]
+            else:
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, **kwargs)(x))/err]
+            return f
+
+        parnames = {0:"TKIN",1:"TEX",2:"NTOT",3:"WIDTH",4:"XOFF_V",5:"FORTHO"}
+
+        parinfo = [ {'n':ii, 'value':params[ii],
+            'limits':[minpars[ii],maxpars[ii]],
+            'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
+            'parname':parnames[ii%npars]+str(ii/npars), 'error':ii} 
+            for ii in xrange(len(params)) ]
+
+        if veryverbose:
+            print "GUESSES: "
+            print "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
+
+        mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet)
+        mpp = mp.params
+        if mp.perror is not None: mpperr = mp.perror
+        else: mpperr = mpp*0
+        chi2 = mp.fnorm
+
+        if mp.status == 0:
+            raise Exception(mp.errmsg)
+
+        if not shh:
+            print "Final fit values: "
+            for i,p in enumerate(mpp):
+                parinfo[i]['value'] = p
+                print parinfo[i]['parname'],p," +/- ",mpperr[i]
+            print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
+
+        return mpp,self.n_ammonia(pars=mpp,**kwargs)(xax),mpperr,chi2
+
+    __call__ = multinh3fit
+
+    def annotations(self,modelpars,modelerrs,npars,npeaks):
+        label_list = [ (
+                "$T_K$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[0+jj*npars],modelerrs[0+jj*npars]),
+                "$T_{ex}$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[1+jj*npars],modelerrs[1+jj*npars]),
+                "$N$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[2+jj*npars],modelerrs[2+jj*npars]),
+                "$w$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[3+jj*npars],modelerrs[3+jj*npars]),
+                "$v$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[4+jj*npars],modelerrs[4+jj*npars]),
+                "$F_o$(%i)=%6.4g $\\pm$ %6.4g" % (jj,modelpars[5+jj*npars],modelerrs[5+jj*npars])
+                          ) for jj in range(npeaks)]
+        labels = tuple(mpcb.flatten(label_list))
+        return labels
