@@ -12,17 +12,21 @@ to perform the fit and disconnect the mouse and keyboard.  '?' will print this
 help message again.
 """
 
-npars = {'gaussian': 3,
-        'lorentzian': 3,
-        'voigt': 4}
+npars = {}
+multifitters = {}
+singlefitters = {}
 
-singlefitters = {'gaussian': gaussfitter.onedgaussfit,
-        'voigt': voigtfitter.onedvoigtfit,
-        'lorentzian': None}
-multifitters = {'gaussian': gaussfitter.multigaussfit,
-        'voigt': voigtfitter.multivoigtfit,
-        'lorentzian': None,
-        }
+#npars = {'gaussian': 3,
+#        'lorentzian': 3,
+#        'voigt': 4}
+#
+#singlefitters = {'gaussian': gaussfitter.onedgaussfit,
+#        'voigt': voigtfitter.onedvoigtfit,
+#        'lorentzian': None}
+#multifitters = {'gaussian': gaussfitter.multigaussfit,
+#        'voigt': voigtfitter.multivoigtfit,
+#        'lorentzian': None,
+#        }
 
 class Specfit(object):
 
@@ -221,7 +225,7 @@ class Specfit(object):
         self.setfitspec()
         if usemoments: # this can be done within gaussfit but I want to save them
             # use this INDEPENDENT of fittype for now (voigt and gauss get same guesses)
-            self.guesses = gaussfitter.onedmoments(
+            self.guesses = singlefitters['gaussian'].onedmoments(
                     self.Spectrum.xarr[self.gx1:self.gx2],
                     self.spectofit[self.gx1:self.gx2],
                     vheight=vheight,negamp=negamp,**kwargs)

@@ -8,6 +8,19 @@ from numpy import pi
 from mpfit import mpfit
 
 class gaussian_fitter(object):
+
+    def __init__(self,multisingle='multi'):
+        if multisingle in ('multi','single'):
+            self.multisingle = multisingle
+        else:
+            raise Exception("multisingle must be multi or single")
+
+    def __call__(self,*args,**kwargs):
+        if self.multisingle == 'single':
+            return self.onedgaussfit(*args,**kwargs)
+        elif self.multisingle == 'multi':
+            return self.multigaussfit(*args,**kwargs)
+
     def onedmoments(self, Xax, data, vheight=True, estimator=median, negamp=None,
             veryverbose=False,  **kwargs):
         """Returns (height, amplitude, x, width_x)
@@ -99,9 +112,9 @@ class gaussian_fitter(object):
 
         def mpfitfun(x,y,err):
             if err is None:
-                def f(p,fjac=None): return [0,(y-onedgaussian(x,*p))]
+                def f(p,fjac=None): return [0,(y-self.onedgaussian(x,*p))]
             else:
-                def f(p,fjac=None): return [0,(y-onedgaussian(x,*p))/err]
+                def f(p,fjac=None): return [0,(y-self.onedgaussian(x,*p))/err]
             return f
 
         if xax is None:
@@ -136,7 +149,7 @@ class gaussian_fitter(object):
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
-        return mpp,onedgaussian(xax,*mpp),mpperr,chi2
+        return mpp,self.onedgaussian(xax,*mpp),mpperr,chi2
 
 
     def n_gaussian(self, pars=None,a=None,dx=None,sigma=None):
@@ -220,9 +233,9 @@ class gaussian_fitter(object):
 
         def mpfitfun(x,y,err):
             if err is None:
-                def f(p,fjac=None): return [0,(y-n_gaussian(pars=p)(x))]
+                def f(p,fjac=None): return [0,(y-self.n_gaussian(pars=p)(x))]
             else:
-                def f(p,fjac=None): return [0,(y-n_gaussian(pars=p)(x))/err]
+                def f(p,fjac=None): return [0,(y-self.n_gaussian(pars=p)(x))/err]
             return f
 
         if xax is None:
@@ -256,7 +269,7 @@ class gaussian_fitter(object):
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
-        return mpp,n_gaussian(pars=mpp)(xax),mpperr,chi2
+        return mpp,self.n_gaussian(pars=mpp)(xax),mpperr,chi2
 
     def annotations(self, modelpars,modelerrs,npars,npeaks):
         label_list = [(

@@ -47,3 +47,7 @@ def register_fitter(name, function, npars, multisingle='single',
 
 import models
 register_fitter('ammonia',models.ammonia_model(),6,multisingle='multi')
+register_fitter('gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi')
+register_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
+register_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi')
+register_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
