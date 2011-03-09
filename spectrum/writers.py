@@ -3,7 +3,7 @@ writers.py
 
 Author: Jordan Mirocha
 Affiliation: University of Colorado at Boulder
-Created on 2011-08-09.
+Created on 2011-03-09.
 
 Description: Write out fitting results to ascii or hdf5.     
 """
@@ -14,6 +14,8 @@ from config import *
 h5fail = False
 try: import h5py
 except ImportError: h5fail = True
+
+#if 'hdf5' in writer_dict: writer = HDF5Writer else: print "ERROR: no hdf5 writer installed"
 
 class Writer(object):
     def __init__(self, Spectrum):
@@ -54,5 +56,47 @@ class Writer(object):
             f.create_dataset('model_component{0}'.format(i), data = self.Spectrum.specfit.modelcomponents[i])
             
         f.close()
+        
+    def write_ascii(self, clobber = True):
+        """
+        Write all fit information to an ASCII file.
+        """
+        
+        fn = "{0}_fit.dat".format(self.Spectrum.fileprefix)
+        if not clobber:
+            i = 1
+            while os.path.exists(fn):
+                fn = "{0}_fit({1}).dat".format(self.Spectrum.fileprefix, i)
+                i += 1
+                
+        f = open(fn, 'w')
+        
+        # Print header
+        print >> f, "# Column 1: {0}".format("x-values")
+        print >> f, "# Column 2: {0}".format("model spectrum")
+        for i, element in enumerate(self.Spectrum.specfit.modelcomponents):
+            print >> f, "# Column {0}: model spectrum component {1}".format(i + 3, i + 1)        
+        print >> f, "# Column {0}: residuals".format(i + 4)
+        print >> f, ""    
+                
+        components = zip(*self.Spectrum.specfit.modelcomponents)        
+        for i, element in enumerate(self.Spectrum.specfit.model):
+            line = "{0:10}{1:10}".format(self.Spectrum.xarr[self.Spectrum.specfit.gx1:self.Spectrum.specfit.gx2][i], 
+                round(self.Spectrum.specfit.model[i], 5))
+            for j, component in enumerate(components[i]): line += "{0:10}".format(round(component, 5))    
+            line += "{0:10}".format(round(self.Spectrum.specfit.residuals[i], 5))       
+                
+            print >> f, line
+            
+        print >> f, ""
+            
+        f.close()
+        
+        
+        
+        
+        
+        
+        
         
         
