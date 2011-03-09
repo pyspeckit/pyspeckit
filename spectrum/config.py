@@ -42,7 +42,7 @@ class ConfigParser:
         """
         if fn is not None:
             f = open(fn)
-            return_dict = {}
+            return_dict = cfgDefaults
             for line in f:
                 if not line.strip(): continue
                 thisline = line.split()
