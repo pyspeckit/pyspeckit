@@ -28,7 +28,7 @@ class Spectrum(object):
         how to automatically determine which subclass to use yet.
         """
 
-        import readers,fitters,plotters,writers,baseline
+        import readers,fitters,plotters,writers,baseline,units
 
         if ".fit" in filename: # allow .fit or .fits
             try: 
@@ -69,22 +69,10 @@ class Spectrum(object):
         This should be moved to the FITSSpectrum subclass when that is available
         """
 
-        self.xunits = hdr.get('CUNIT1'+wcstype)
-
         if hdr.get('BUNIT'):
             self.units = hdr.get('BUNIT').strip()
         else:
             self.units = 'undefined'
-
-        if hdr.get('REFFREQ'+wcstype):
-            self.reffreq = hdr.get('REFFREQ'+wcstype)
-        else:
-            self.reffreq = None
-
-        if hdr.get('CTYPE1'+wcstype):
-            self.xtype = hdr.get('CTYPE1'+wcstype)
-        else:
-            self.xtype = 'VLSR'
 
         if specname is not None:
             self.specname = specname

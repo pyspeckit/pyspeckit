@@ -18,7 +18,7 @@ def open_1d_txt(filename):
     return xarr,data,error,T
 
 
-def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None):
+def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
     """
     Grabs all the relevant pieces of a simple FITS-compliant 1d spectrum
 
@@ -64,5 +64,29 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None):
         xconv = lambda v: ((v-p3+1)*dv+v0)
         xarr = xconv(np.arange(len(spec)))
 
-    return spec,errspec,xarr,hdr
+    XAxis = make_axis(xarr,hdr,**kwargs)
 
+    return spec,errspec,XAxis,hdr
+
+def make_axis(xarr,hdr,specname=None, wcstype=''):
+    """
+    Parse parameters from a .fits header into required SpectroscopicAxis
+    parameters
+    """
+    import units
+
+    xunits = hdr.get('CUNIT1'+wcstype)
+
+    if hdr.get('REFFREQ'+wcstype):
+        reffreq = hdr.get('REFFREQ'+wcstype)
+    else:
+        reffreq = None
+
+    if hdr.get('CTYPE1'+wcstype):
+        xtype = hdr.get('CTYPE1'+wcstype)
+    else:
+        xtype = 'VLSR'
+
+    XAxis = units.SpectroscopicAxis(xarr,xunits,xtype=xtype,reffreq=reffreq)
+
+    return XAxis

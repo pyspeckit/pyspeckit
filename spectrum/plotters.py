@@ -95,10 +95,10 @@ class Plotter(object):
 
         if xlabel is not None:
             self.xlabel = xlabel
-        elif isinstance(self.Spectrum.xtype,str):
-            self.xlabel = self.Spectrum.xtype
-            if isinstance(self.Spectrum.xunits,str):
-                self.xlabel += " "+self.Spectrum.xunits
+        elif isinstance(self.Spectrum.xarr.xtype,str):
+            self.xlabel = self.Spectrum.xarr.xtype
+            if isinstance(self.Spectrum.xarr.units,str):
+                self.xlabel += " "+self.Spectrum.xarr.units
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
 
