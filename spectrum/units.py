@@ -51,6 +51,7 @@ unit_type_dict = {
     'micrometers':'length','micron':'length','microns':'length','um':'length',
     'kilometers':'length','km':'length',
     'angstroms':'length','A':'length',
+    None: None,
     }
 
 xtype_dict = {
@@ -85,9 +86,9 @@ frame_dict = {
 
 speedoflight_ms = 2.99792458e8 # m/s
 
-import numpy
+import numpy as np
 
-class SpectroscopicAxis(object):
+class SpectroscopicAxis(np.ndarray):
     """
     A Spectroscopic Axis object to store the current units of the spectrum and
     allow conversion to other units and frames.  Typically, units are velocity,
@@ -95,45 +96,22 @@ class SpectroscopicAxis(object):
     possible.
     """
 
-    def __init__(self, xarr, unit, frame='rest', xtype=None, reffreq=None,
+    def __new__(self, xarr, unit, frame='rest', xtype=None, reffreq=None,
             redshift=None):
-        self.xarr = xarr
-        self.units = unit
-        self.frame = frame
+        subarr = np.array(xarr)
+        subarr = subarr.view(self)
+        subarr.xarr = xarr
+        subarr.units = unit
+        subarr.frame = frame
         if xtype in xtype_dict:
-            self.xtype = xtype_dict[xtype]
-            self.frame = frame_dict[xtype]
+            subarr.xtype = xtype_dict[xtype]
+            subarr.frame = frame_dict[xtype]
         else:
-            self.xtype = unit_type_dict[self.units]
-        self.reffreq = reffreq
-        self.redshift = redshift
+            subarr.xtype = unit_type_dict[subarr.units]
+        subarr.reffreq = reffreq
+        subarr.redshift = redshift
 
-        self.min = self.xarr.min
-        # this is an ugly hack, there has to be a better way to overload the ndarray...
-        array_attributes = ['min','max','dtype','mean','shape','any','all','argmin','argmax','copy','flat','flatten','ravel','sum','view']
-        for A in array_attributes:
-            exec("self.%s = self.xarr.%s" % (A,A))
-
-    def __str__(self):
-        """ Print out the units if the Class is printed. """
-        return str(self.units)
-
-    def __contains__(self):
-        return self.xarr
-    def __array__(self):
-        """ Return the X-array when plotting and doing other things? """
-        return self.xarr
-
-    def __add__(self,other):
-        return add(self.xarr,other)
-    def __mul__(self,other):
-        return mul(self.xarr,other)
-    def __sub__(self,other):
-        return sub(self.xarr,other)
-    def __div__(self,other):
-        return div(self.xarr,other)
-    def __getitem__(self,obj):
-        return self.xarr.__getitem__(obj)
+        return subarr
 
     def convert_to(self,unit,frame='rest',**kwargs):
         if unit == self.units and frame == self.frame:
