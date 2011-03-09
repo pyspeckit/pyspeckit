@@ -4,3 +4,4 @@ tests/ipython*
 syntax:glob
 *.png
 tests/*png
+*.py.orig

@@ -16,18 +16,6 @@ npars = {}
 multifitters = {}
 singlefitters = {}
 
-#npars = {'gaussian': 3,
-#        'lorentzian': 3,
-#        'voigt': 4}
-#
-#singlefitters = {'gaussian': gaussfitter.onedgaussfit,
-#        'voigt': voigtfitter.onedvoigtfit,
-#        'lorentzian': None}
-#multifitters = {'gaussian': gaussfitter.multigaussfit,
-#        'voigt': voigtfitter.multivoigtfit,
-#        'lorentzian': None,
-#        }
-
 class Specfit(object):
 
     def __init__(self,Spectrum):
@@ -121,10 +109,10 @@ class Specfit(object):
             #print "Non-interactive, 1D fit with automatic guessing"
             if self.Spectrum.baseline.order is None:
                 self.Spectrum.baseline.order=0
-                self.onedfit(usemoments=usemoments, annotate=annotate,
+                self.peakbgfit(usemoments=usemoments, annotate=annotate,
                         fittype=fittype, **kwargs)
             else:
-                self.onedfit(usemoments=usemoments, annotate=annotate,
+                self.peakbgfit(usemoments=usemoments, annotate=annotate,
                         vheight=False, height=0.0, fittype=fittype, **kwargs)
             if self.specplotter.autorefresh: self.specplotter.refresh()
         else:
@@ -228,14 +216,14 @@ class Specfit(object):
         if self.autoannotate:
             self.annotate()
     
-    def onedfit(self, usemoments=True, annotate=True, vheight=True, height=0,
+    def peakbgfit(self, usemoments=True, annotate=True, vheight=True, height=0,
             negamp=None, fittype='gaussian', **kwargs):
         self.npeaks = 1
         self.auto = True
         self.setfitspec()
         if usemoments: # this can be done within gaussfit but I want to save them
             # use this INDEPENDENT of fittype for now (voigt and gauss get same guesses)
-            self.guesses = singlefitters['gaussian'].onedmoments(
+            self.guesses = singlefitters[fittype].moments(
                     self.Spectrum.xarr[self.gx1:self.gx2],
                     self.spectofit[self.gx1:self.gx2],
                     vheight=vheight,negamp=negamp,**kwargs)
@@ -281,7 +269,7 @@ class Specfit(object):
         
         if self.show_components:
             for i in np.arange(len(self.modelpars) / 3):
-                component = singlefitters['gaussian'].onedgaussian(self.Spectrum.xarr[self.gx1:self.gx2],
+                component = singlefitters['gaussian'].onepeakgaussian(self.Spectrum.xarr[self.gx1:self.gx2],
                 0.0,self.modelpars[3*i],self.modelpars[3*i+1],self.modelpars[3*i+2])
                         
                 self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
@@ -381,7 +369,7 @@ class Specfit(object):
                         color='c')
                 self.specplotter.plot(**self.specplotter.plotkwargs)
                 if self.guesses == []:
-                    self.guesses = singlefitters['gaussian'].onedmoments(
+                    self.guesses = singlefitters['gaussian'].moments(
                             self.Spectrum.xarr[self.gx1:self.gx2],
                             self.spectofit[self.gx1:self.gx2],
                             vheight=0)

@@ -20,11 +20,11 @@ class gaussian_fitter(object):
 
     def __call__(self,*args,**kwargs):
         if self.multisingle == 'single':
-            return self.onedgaussfit(*args,**kwargs)
+            return self.onepeakgaussfit(*args,**kwargs)
         elif self.multisingle == 'multi':
             return self.multigaussfit(*args,**kwargs)
 
-    def onedmoments(self, Xax, data, vheight=True, estimator=median, negamp=None,
+    def moments(self, Xax, data, vheight=True, estimator=median, negamp=None,
             veryverbose=False,  **kwargs):
         """Returns (height, amplitude, x, width_x)
         the gaussian parameters of a 1D distribution by calculating its
@@ -74,7 +74,7 @@ class gaussian_fitter(object):
             mylist = [height] + mylist
         return mylist
 
-    def onedgaussian(self, x,H,A,dx,w):
+    def onepeakgaussian(self, x,H,A,dx,w):
         """
         Returns a 1-dimensional gaussian of form
         H+A*numpy.exp(-(x-dx)**2/(2*w**2))
@@ -84,7 +84,7 @@ class gaussian_fitter(object):
         """
         return H+A*numpy.exp(-(x-dx)**2/(2*w**2))
 
-    def onedgaussfit(self, xax, data, err=None,
+    def onepeakgaussfit(self, xax, data, err=None,
             params=[0,1,0,1],fixed=[False,False,False,False],
             limitedmin=[False,False,False,True],
             limitedmax=[False,False,False,False], minpars=[0,0,0,0],
@@ -115,9 +115,9 @@ class gaussian_fitter(object):
 
         def mpfitfun(x,y,err):
             if err is None:
-                def f(p,fjac=None): return [0,(y-self.onedgaussian(x,*p))]
+                def f(p,fjac=None): return [0,(y-self.onepeakgaussian(x,*p))]
             else:
-                def f(p,fjac=None): return [0,(y-self.onedgaussian(x,*p))/err]
+                def f(p,fjac=None): return [0,(y-self.onepeakgaussian(x,*p))/err]
             return f
 
         if xax is None:
@@ -127,7 +127,7 @@ class gaussian_fitter(object):
             height = params[0]
             fixed[0] = True
         if usemoments:
-            params = onedmoments(xax,data,vheight=vheight,negamp=negamp, veryverbose=veryverbose)
+            params = moments(xax,data,vheight=vheight,negamp=negamp, veryverbose=veryverbose)
             if vheight is False: params = [height]+params
             if veryverbose: print "OneD moments: h: %g  a: %g  c: %g  w: %g" % tuple(params)
 
@@ -155,8 +155,8 @@ class gaussian_fitter(object):
         self.mp = mp
         self.mpp = mpp[1:]
         self.mpperr = mpperr
-        self.model = self.onedgaussian(xax,*mpp)
-        return mpp,self.onedgaussian(xax,*mpp),mpperr,chi2
+        self.model = self.onepeakgaussian(xax,*mpp)
+        return mpp,self.onepeakgaussian(xax,*mpp),mpperr,chi2
 
 
     def n_gaussian(self, pars=None,a=None,dx=None,sigma=None):
@@ -191,12 +191,12 @@ class gaussian_fitter(object):
             limitedmax=[False,False,False], minpars=[0,0,0], maxpars=[0,0,0],
             quiet=True, shh=True, veryverbose=False):
         """
-        An improvement on onedgaussfit.  Lets you fit multiple gaussians.
+        An improvement on onepeakgaussfit.  Lets you fit multiple gaussians.
 
         Inputs:
            xax - x axis
            data - y axis
-           npeaks - How many gaussians to fit?  Default 1 (this could supersede onedgaussfit)
+           npeaks - How many gaussians to fit?  Default 1 (this could supersede onepeakgaussfit)
            err - error corresponding to data
 
          These parameters need to have length = 3*npeaks.  If npeaks > 1 and length = 3, they will
