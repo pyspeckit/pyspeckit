@@ -10,8 +10,20 @@ gaussian and voigt profile fitting, baseline/continuum fitting, and equivalent
 width measurements.  However, the design is meant to be extensible.  We want
 additional features to be trivial to implement.
 
+Requirements:
+matplotlib
+numpy
+mpfit (http://code.google.com/p/astrolibpy/source/browse/trunk/mpfit)
+scipy (required by mpfit)
+
+At least one of:
+pyfits (http://www.stsci.edu/resources/software_hardware/pyfits/Download)
+atpy (http://atpy.github.com/)
+asciitable (http://cxc.harvard.edu/contrib/asciitable/)
+
 A good model for our code is:
 http://atpy.github.com/developers.html
+from which we derived inspiration for the "register functions" capability.
 
 Authors:
 Adam Ginsburg (adam.g.ginsburg@gmail.com)
