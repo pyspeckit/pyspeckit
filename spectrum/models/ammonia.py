@@ -268,6 +268,14 @@ class ammonia_model(object):
 
     __call__ = multinh3fit
 
+    def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
+        """
+        Returns a very simple and likely incorrect guess
+        """
+
+        # TKIN, TEX, NTOT, width, center, ortho fraction
+        return [20,10, 1e15, 1.0, 0.0, 1.0]
+
     def annotations(self):
         label_list = [ (
                 "$T_K(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[0+jj*self.npars],self.mpperr[0+jj*self.npars]),
