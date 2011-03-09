@@ -14,6 +14,7 @@ help message again.
 npars = {}
 multifitters = {}
 singlefitters = {}
+writers = {}
 
 class Specfit(object):
 
@@ -276,6 +277,7 @@ class Specfit(object):
             self.modelcomponents[i] = singlefitters['gaussian'].onepeakgaussian(self.Spectrum.xarr[self.gx1:self.gx2],
             0.0,self.modelpars[3*i],self.modelpars[3*i+1],self.modelpars[3*i+2])
         
+        # Plot components
         if self.show_components:
             for i in np.arange(len(self.modelpars) / 3):
                 self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
