@@ -49,6 +49,7 @@ class Writer(object):
         f.create_dataset('model_spectrum', data = self.Spectrum.specfit.model)
         f.create_dataset('model_params', data = self.Spectrum.specfit.modelpars)
         f.create_dataset('model_errs', data = self.Spectrum.specfit.modelerrs)
+        f.create_dataset('residuals', data = self.Spectrum.specfit.residuals)
         for i, element in enumerate(self.Spectrum.specfit.modelcomponents):
             f.create_dataset('model_component{0}'.format(i), data = self.Spectrum.specfit.modelcomponents[i])
             
