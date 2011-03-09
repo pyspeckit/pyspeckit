@@ -79,7 +79,7 @@ class ammonia_model(object):
         elif xunits in units.velocity_dict:
             if line in freq_dict:
                 xarr = (freq_dict[line] + (np.copy(xarr) * 
-                        (units.velocity_dict[xunits] / units.velocity_dict['m/s'] / units.speedoflight) *
+                        (units.velocity_dict[xunits] / units.velocity_dict['m/s'] / units.speedoflight_ms) *
                         freq_dict[line]) ) / units.frequency_dict['GHz']
             else:
                 raise Exception("Xunits is velocity-type (%s) but line %s is not in the list.") % (xunits,line)

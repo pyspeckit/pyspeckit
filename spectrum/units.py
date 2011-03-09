@@ -1,5 +1,12 @@
 """
-Unit parsing and conversion tool
+units.py
+
+Author: Adam Ginsburg
+Affiliation: University of Colorado at Boulder
+Created on March 9th, 2011
+
+Unit parsing and conversion tool.  
+The SpectroscopicAxis class is meant to deal with unit conversion internally
 """
 
 
@@ -44,14 +51,44 @@ unit_type_dict = {
     'micrometers':'length','micron':'length','microns':'length','um':'length',
     'kilometers':'length','km':'length',
     'angstroms':'length','A':'length',
+    None: None,
     }
 
+xtype_dict = {
+        'VLSR':'velocity','VRAD':'velocity','VELO':'velocity',
+        'VOPT':'velocity',
+        'VHEL':'velocity',
+        'VGEO':'velocity',
+        'VREST':'velocity',
+        'velocity':'velocity',
+        'Z':'redshift',
+        'FREQ':'frequency',
+        'frequency':'frequency',
+        'WAV':'length',
+        'WAVE':'length',
+        'wavelength':'length',
+        }
 
+frame_dict = {
+        'VLSR':'LSR','VRAD':'LSR','VELO':'LSR',
+        'VOPT':'LSR',
+        'VHEL':'heliocentric',
+        'VGEO':'geocentric',
+        'velocity':'LSR',
+        'VREST':'rest',
+        'Z':'rest',
+        'FREQ':'rest',
+        'frequency':'rest',
+        'WAV':'rest',
+        'WAVE':'rest',
+        'wavelength':'rest',
+        }
 
 speedoflight_ms = 2.99792458e8 # m/s
 
-# NOTE: this is NOT USED as of 3/9/2011, but will be used once ready...
-class SpectroscopicAxis(object):
+import numpy as np
+
+class SpectroscopicAxis(np.ndarray):
     """
     A Spectroscopic Axis object to store the current units of the spectrum and
     allow conversion to other units and frames.  Typically, units are velocity,
@@ -59,34 +96,28 @@ class SpectroscopicAxis(object):
     possible.
     """
 
-    def __init__(self,xarr,unit,frame='rest'):
-        self.xarr = xarr
-        self.unit = unit
-        self.frame = frame
-        self.xtype = unit_type_dict[self.unit]
+    def __new__(self, xarr, unit, frame='rest', xtype=None, reffreq=None,
+            redshift=None):
+        subarr = np.array(xarr)
+        subarr = subarr.view(self)
+        subarr.xarr = xarr
+        subarr.units = unit
+        subarr.frame = frame
+        if xtype in xtype_dict:
+            subarr.xtype = xtype_dict[xtype]
+            subarr.frame = frame_dict[xtype]
+        else:
+            subarr.xtype = unit_type_dict[subarr.units]
+        subarr.reffreq = reffreq
+        subarr.redshift = redshift
 
-    def __str__(self):
-        return str(self.unit)
-
-    def __contains__(self):
-        return self.xarr
-
-    def __add__(self,other):
-        return add(self.xarr,other)
-    def __mul__(self,other):
-        return mul(self.xarr,other)
-    def __sub__(self,other):
-        return sub(self.xarr,other)
-    def __div__(self,other):
-        return div(self.xarr,other)
-    def __getitem__(self,obj):
-        return self.xarr.__getitem__(obj)
+        return subarr
 
     def convert_to(self,unit,frame='rest',**kwargs):
-        if unit == self.unit and frame == self.frame:
+        if unit == self.units and frame == self.frame:
             print "Already in desired units and frame"
         elif frame == self.frame:
-            conversion_factor = conversion_dict[self.xtype][unit] / conversion_dict[self.xtype][self.unit] 
+            conversion_factor = conversion_dict[self.xtype][unit] / conversion_dict[self.xtype][self.units] 
             self.xarr *= conversion_factor
         else:
             print "Converting frames from %s to %s" % (self.frame,frame)
@@ -105,7 +136,7 @@ class SpectroscopicAxis(object):
         if frequency_units not in frequency_dict:
             raise ValueError("Bad frequency units: %s" % (frequency_units))
 
-        velocity_ms = self.xarr * velocity_dict['m/s'] / velocity_dict[self.unit]
+        velocity_ms = self.xarr * velocity_dict['m/s'] / velocity_dict[self.units]
         if convention == 'radio':
             freq = central_frequency * (1.0 - velocity_ms / speedoflight_ms)
         elif convention == 'optical':
@@ -133,7 +164,7 @@ class SpectroscopicAxis(object):
         if velocity_units not in velocity_dict:
             raise ValueError("Bad velocity units: %s" % (velocity_units))
 
-        frequency_hz = self.xarr * frequency_dict['Hz'] / frequency_dict[self.unit]
+        frequency_hz = self.xarr * frequency_dict['Hz'] / frequency_dict[self.units]
         center_frequency_hz = center_frequency * frequency_dict['Hz'] / frequency_dict[center_frequency_units]
 
         if convention == 'radio':

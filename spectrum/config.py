@@ -32,7 +32,8 @@ cfgDefaults = dict(
     fit_lw = 0.75,
     comp_lw = 0.75,
     show_components = 0,
-    data_format = 'hdf5'
+    data_format = 'hdf5',
+    annotate = True,
     )
 
 class ConfigParser:
