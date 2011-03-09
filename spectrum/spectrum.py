@@ -28,7 +28,7 @@ class Spectrum(object):
         how to automatically determine which subclass to use yet.
         """
 
-        import readers,fitters,plotters,baseline
+        import readers,fitters,plotters,writers,baseline
 
         if ".fit" in filename: # allow .fit or .fits
             try: 
@@ -46,9 +46,11 @@ class Spectrum(object):
                 print inst
                 raise Exception("Reading text failed.")
 
+        self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
         self.plotter = plotters.Plotter(self)
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
+        self.writer = writers.Writer(self)
 
     def parse_text_header(self,Table):
         """

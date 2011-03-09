@@ -3,7 +3,6 @@ import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
 from config import *
-#import models
 
 interactive_help_message = """
 Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
@@ -23,7 +22,7 @@ class Specfit(object):
         self.modelpars = None
         self.modelerrs = None
         self.modelplot = None
-        self.show_components = False
+        self.modelcomponents = None
         self.guessplot = []
         self.fitregion = []
         self.npeaks = 0
@@ -31,11 +30,11 @@ class Specfit(object):
         self.nclicks_b2 = 0
         self.gx1 = 0
         self.gx2 = Spectrum.data.shape[0]
+        self.fitxarr = None
         self.guesses = []
         self.click = 0
         self.fitkwargs = {}
         self.auto = False
-        self.autoannotate = True
         self.Spectrum = Spectrum
         self.specplotter = self.Spectrum.plotter
         self.fitleg=None
@@ -50,10 +49,13 @@ class Specfit(object):
         self.compcolor = self.cfg['comp_color']
         self.fitlw = self.cfg['fit_lw']
         self.complw = self.cfg['comp_lw']
+        self.autoannotate = bool(self.cfg['annotate'])
+        self.show_components = bool(self.cfg['show_components'])
 
     def __call__(self, interactive=False, usemoments=True, fitcolor=None,
-            multifit=False, guesses=None, annotate=True, save=True,
-            fittype='gaussian', compcolor = None, fitlw = None, complw = None, **kwargs):
+            multifit=False, guesses=None, annotate=None, save=True,
+            fittype='gaussian', compcolor = None, fitlw = None, complw = None, 
+            **kwargs):
         """
         Fit gaussians to a spectrum
 
@@ -75,6 +77,7 @@ class Specfit(object):
         if compcolor is not None: self.compcolor = compcolor
         if fitlw is not None: self.fitlw = fitlw
         if complw is not None: self.complw = complw
+        if annotate is not None: self.autoannotate = annotate
 
         self.clear()
         self.selectregion(**kwargs)
@@ -267,13 +270,16 @@ class Specfit(object):
                 plotmodel,
                 color=self.fitcolor, linewidth=self.fitlw)
         
+        # Compute individual Gaussian components
+        self.modelcomponents = np.empty(len(self.modelpars) / 3, np.ndarray)
+        for i in np.arange(len(self.modelpars) / 3):
+            self.modelcomponents[i] = singlefitters['gaussian'].onedgaussian(self.Spectrum.xarr[self.gx1:self.gx2],
+            0.0,self.modelpars[3*i],self.modelpars[3*i+1],self.modelpars[3*i+2])
+        
         if self.show_components:
             for i in np.arange(len(self.modelpars) / 3):
-                component = singlefitters['gaussian'].onepeakgaussian(self.Spectrum.xarr[self.gx1:self.gx2],
-                0.0,self.modelpars[3*i],self.modelpars[3*i+1],self.modelpars[3*i+2])
-                        
                 self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
-                component, color=self.compcolor, linewidth=self.complw)                
+                self.modelcomponents[i], color=self.compcolor, linewidth=self.complw)                
                 
         self.specplotter.plot(**self.specplotter.plotkwargs)
 

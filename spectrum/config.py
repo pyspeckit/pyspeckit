@@ -28,9 +28,11 @@ cfgDefaults = dict(
     plot_color = 'k',
     fit_color = 'r',
     comp_color = 'blue',
-    plot_lw = '0.5',
-    fit_lw = '0.75',
-    comp_lw = '0.75',
+    plot_lw = 0.5,
+    fit_lw = 0.75,
+    comp_lw = 0.75,
+    show_components = 0,
+    data_format = 'hdf5'
     )
 
 class ConfigParser:

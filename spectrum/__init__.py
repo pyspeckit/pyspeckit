@@ -1,6 +1,5 @@
 import readers,fitters,plotters,baseline
 from spectrum import Spectrum
-import gaussfitter
 import units
 
 def register_fitter(name, function, npars, multisingle='single',

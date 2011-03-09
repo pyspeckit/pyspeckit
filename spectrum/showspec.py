@@ -35,7 +35,7 @@ import pyfits
 import gaussfitter
 
 from numpy import isnan
-from mad import MAD,nanmedian
+#from mad import MAD,nanmedian
 
 def steppify(arr,isX=False,interval=0,sign=+1.0):
     """
