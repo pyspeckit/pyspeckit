@@ -270,12 +270,12 @@ class ammonia_model(object):
 
     def annotations(self):
         label_list = [ (
-                "$T_K$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[0+jj*self.npars],self.mpperr[0+jj*self.npars]),
-                "$T_{ex}$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
+                "$T_K(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[0+jj*self.npars],self.mpperr[0+jj*self.npars]),
+                "$T_{ex}(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
                 "$N$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[2+jj*self.npars],self.mpperr[2+jj*self.npars]),
-                "$w$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[3+jj*self.npars],self.mpperr[3+jj*self.npars]),
-                "$v$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[4+jj*self.npars],self.mpperr[4+jj*self.npars]),
-                "$F_o$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[5+jj*self.npars],self.mpperr[5+jj*self.npars])
+                "$\\sigma(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[3+jj*self.npars],self.mpperr[3+jj*self.npars]),
+                "$v(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[4+jj*self.npars],self.mpperr[4+jj*self.npars]),
+                "$F_o(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[5+jj*self.npars],self.mpperr[5+jj*self.npars])
                           ) for jj in range(self.npeaks)]
         labels = tuple(mpcb.flatten(label_list))
         return labels
