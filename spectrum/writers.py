@@ -33,10 +33,6 @@ class Writer(object):
     def __call__(self):
         self.write_data()    
 
-    def write_ascii(self):
-        """ Placeholder function """
-        pass
-        
     def write_hdf5(self, clobber = True):
         """
         Write all fit information to hdf5 file.
