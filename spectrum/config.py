@@ -32,7 +32,8 @@ cfgDefaults = dict(
     fit_lw = 0.75,
     comp_lw = 0.75,
     show_components = 0,
-    data_format = 'hdf5',
+    # FITS should be the default; it is the standard for most spectrographs
+    data_format = 'fits', 
     annotate = True,
     )
 

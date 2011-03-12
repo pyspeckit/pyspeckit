@@ -2,6 +2,7 @@ import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure
 from config import *
+import numpy as np
 
 class Plotter(object):
     """
@@ -9,7 +10,8 @@ class Plotter(object):
     """
 
 
-    def __init__(self,Spectrum,autorefresh=True):
+    def __init__(self, Spectrum, autorefresh=True, title="", ylabel="",
+            xlabel=""):
         self.figure = None
         self.axis = None
         self.Spectrum = Spectrum
@@ -17,9 +19,9 @@ class Plotter(object):
         # plot parameters
         self.offset = 0.0 # vertical offset
         self.autorefresh = autorefresh
-        self.xlabel = ""
-        self.ylabel = ""
-        self.title  = ""
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.title  = title
         self.errorplot = None
         self.plotkwargs = {}
         self.xmax = None
@@ -60,33 +62,50 @@ class Plotter(object):
         self.plot(**kwargs)
 
     def plot(self, offset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
-            xmin=None, xmax=None, ymin=None, ymax=None, **kwargs):
+            xmin=None, xmax=None, ymin=None, ymax=None, reset_xlimits=False,
+            reset_ylimits=False, **kwargs):
 
         if self.axis is None:
             raise Exception("You must call the Plotter class to initiate the canvas before plotting.")
 
         self.offset += offset
 
+        self.label(**kwargs)
+        if kwargs.has_key('title'): kwargs.pop('title')
+        if kwargs.has_key('xlabel'): kwargs.pop('xlabel')
+        if kwargs.has_key('ylabel'): kwargs.pop('ylabel')
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr,
                 self.Spectrum.data+self.offset, color=color,
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
 
+        if (self.Spectrum.xarr.max() < self.xmin or self.Spectrum.xarr.min() > self.xmax 
+                or reset_xlimits):
+            print "Resetting X-axis min/max because the plot is out of bounds."
+            self.xmin = None
+            self.xmax = None
         if xmin is not None: self.xmin = xmin
         elif self.xmin is None: self.xmin=self.Spectrum.xarr.min()
         if xmax is not None: self.xmax = xmax
         elif self.xmax is None: self.xmax=self.Spectrum.xarr.max()
         self.axis.set_xlim(self.xmin,self.xmax)
+
+        xpixmin = np.argmin(np.abs(self.Spectrum.xarr-self.xmin))
+        xpixmax = np.argmin(np.abs(self.Spectrum.xarr-self.xmax))
         
+        if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
+                or reset_ylimits):
+            print "Resetting X-axis min/max because the plot is out of bounds."
+            self.ymin = None
+            self.ymax = None
         if ymin is not None: self.ymin = ymin
-        elif self.ymin is None: self.ymin=self.Spectrum.data.min()
+        elif self.ymin is None: self.ymin=self.Spectrum.data[xpixmin:xpixmax].min()
         if ymax is not None: self.ymax = ymax
-        elif self.ymax is None: self.ymax=self.Spectrum.data.max()
+        elif self.ymax is None: self.ymax=self.Spectrum.data[xpixmin:xpixmax].max()
         self.axis.set_ylim(self.ymin,self.ymax)
         
-        self.label()
         if self.autorefresh: self.refresh()
 
-    def label(self, title=None, xlabel=None):
+    def label(self, title=None, xlabel=None, ylabel=None):
    
         if title is not None:
             self.title = title
@@ -102,14 +121,23 @@ class Plotter(object):
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
 
-        if self.Spectrum.units in ['Ta*','Tastar','K']:
-          self.axis.set_ylabel("$T_A^*$ (K)")
+        if ylabel is not None:
+            self.ylabel=ylabel
+            self.axis.set_ylabel(self.ylabel)
+        elif self.Spectrum.units in ['Ta*','Tastar','K']:
+            self.axis.set_ylabel("$T_A^*$ (K)")
         elif self.Spectrum.units == 'mJy':
-          self.axis.set_ylabel("$S_\\nu$ (mJy)")
+            self.axis.set_ylabel("$S_\\nu$ (mJy)")
         elif self.Spectrum.units == 'Jy':
-          self.axis.set_ylabel("$S_\\nu$ (Jy)")
+            self.axis.set_ylabel("$S_\\nu$ (Jy)")
         else:
-          self.axis.set_ylabel(self.Spectrum.units)
+            self.axis.set_ylabel(self.Spectrum.units)
 
     def refresh(self):
         self.axis.figure.canvas.draw()
+
+    def savefig(self,fname,bbox_inches='tight',**kwargs):
+        """
+        simple wrapper of maplotlib's savefig.  
+        """
+        self.axis.figure.savefig(fname,bbox_inches=bbox_inches,**kwargs)

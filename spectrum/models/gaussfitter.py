@@ -154,7 +154,7 @@ class gaussian_fitter(object):
 
         self.mp = mp
         self.mpp = mpp[1:]
-        self.mpperr = mpperr
+        self.mpperr = mpperr[1:]
         self.model = self.onepeakgaussian(xax,*mpp)
         return mpp,self.onepeakgaussian(xax,*mpp),mpperr,chi2
 

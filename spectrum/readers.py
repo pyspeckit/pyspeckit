@@ -34,7 +34,7 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
     import pyfits
     f = pyfits.open(filename)
     hdr = f[0].header
-    spec = ma.array(f[0].data)
+    spec = ma.array(f[0].data).squeeze()
     errspec  = None
     if hdr.get('NAXIS') == 2:
         if errspecnum is not None:
@@ -49,18 +49,28 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
             raise TypeError("Specnum is of wrong type (not a list of integers or an integer).  Type: %s" %
                     str(type(specnum)))
     elif hdr.get('NAXIS') > 2:
-        raise ValueError("Too many axes for open_1d - use open_3d instead")
-    if hdr.get('CD1_1'+wcstype):
+        for ii in xrange(2,hdr.get('NAXIS')):
+            # only fail if extra axes have more than one row
+            if hdr.get('NAXIS%i' % ii) > 1:
+                raise ValueError("Too many axes for open_1d_fits instead")
+    if hdr.get('ORIGIN') == 'CLASS-Grenoble':
+        # Use the CLASS FITS definition (which is non-standard)
+        # http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node84.html
+        # F(n) = RESTFREQ + CRVALi + ( n - CRPIXi ) * CDELTi
+        print "Loading a CLASS .fits spectrum"
+        dv = -1*hdr.get('CDELT1')
+        v0 = hdr.get('RESTFREQ') + hdr.get('CRVAL1')
+        p3 = hdr.get('CRPIX1')
+    elif hdr.get('CD1_1'+wcstype):
         dv,v0,p3 = hdr['CD1_1'+wcstype],hdr['CRVAL1'+wcstype],hdr['CRPIX1'+wcstype]
     else:
         dv,v0,p3 = hdr['CDELT1'+wcstype],hdr['CRVAL1'+wcstype],hdr['CRPIX1'+wcstype]
 
     # Deal with logarithmic wavelength binning if necessary
-    try: 
-        if hdr['WFITTYPE'] == 'LOG-LINEAR':
-            xconv = lambda v: 10**((v-p3+1)*dv+v0)
-            xarr = xconv(np.arange(len(spec)))
-    except KeyError:
+    if hdr.get('WFITTYPE') == 'LOG-LINEAR':
+        xconv = lambda v: 10**((v-p3+1)*dv+v0)
+        xarr = xconv(np.arange(len(spec)))
+    else:
         xconv = lambda v: ((v-p3+1)*dv+v0)
         xarr = xconv(np.arange(len(spec)))
 
@@ -76,9 +86,14 @@ def make_axis(xarr,hdr,specname=None, wcstype=''):
     import units
 
     xunits = hdr.get('CUNIT1'+wcstype)
+    if hdr.get('ORIGIN') == 'CLASS-Grenoble' and xunits is None:
+        # CLASS default
+        xunits = 'Hz'
 
     if hdr.get('REFFREQ'+wcstype):
         reffreq = hdr.get('REFFREQ'+wcstype)
+    elif hdr.get('RESTFREQ'+wcstype):
+        reffreq = hdr.get('RESTFREQ'+wcstype)
     else:
         reffreq = None
 

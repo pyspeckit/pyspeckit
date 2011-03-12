@@ -78,7 +78,7 @@ class Specfit(object):
         if compcolor is not None: self.compcolor = compcolor
         if fitlw is not None: self.fitlw = fitlw
         if complw is not None: self.complw = complw
-        if annotate is not None: self.autoannotate = annotate
+        if annotate is None: annotate = self.autoannotate
 
         self.clear()
         self.selectregion(**kwargs)
@@ -100,7 +100,6 @@ class Specfit(object):
             self.guesses = []
             self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.makeguess)
             self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',self.makeguess)
-            self.autoannotate = annotate
         elif multifit and fittype in multifitters:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
@@ -108,7 +107,6 @@ class Specfit(object):
             else:
                 self.guesses = guesses
                 self.multifit(fittype=fittype)
-                self.autoannotate = annotate
         elif fittype in singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
             if self.Spectrum.baseline.order is None:
@@ -222,6 +220,9 @@ class Specfit(object):
     
     def peakbgfit(self, usemoments=True, annotate=True, vheight=True, height=0,
             negamp=None, fittype='gaussian', **kwargs):
+        """
+        Fit a single peak
+        """
         self.npeaks = 1
         self.auto = True
         self.setfitspec()
@@ -358,7 +359,13 @@ class Specfit(object):
         else:
             raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
 
-        if self.gx1>self.gx2: self.gx1,self.gx2 = self.gx2,self.gx1
+        if self.gx1 == self.gx2:
+            # Reset if there is no fitting region
+            self.gx1 = 0
+            self.gx2 = self.Spectrum.data.shape[0]
+        elif self.gx1>self.gx2: 
+            # Swap endpoints if the axis has a negative delta-X
+            self.gx1,self.gx2 = self.gx2,self.gx1
 
 
     def selectregion_interactive(self,event):

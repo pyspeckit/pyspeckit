@@ -33,9 +33,9 @@ velocity_dict = {'meters/second':1.0,'m/s':1.0,
         }
 
 conversion_dict = {
-        'velocity':velocity_dict, 'velo': velocity_dict, 'VELO': velocity_dict,
-        'length':length_dict, 
-        'frequency':frequency_dict, 'freq': frequency_dict, 'FREQ': frequency_dict,
+        'VELOCITY':velocity_dict,  'Velocity':velocity_dict,  'velocity':velocity_dict,  'velo': velocity_dict, 'VELO': velocity_dict,
+        'LENGTH':length_dict,      'Length':length_dict,      'length':length_dict, 
+        'FREQUENCY':frequency_dict,'Frequency':frequency_dict,'frequency':frequency_dict, 'freq': frequency_dict, 'FREQ': frequency_dict,
         }
 
 unit_type_dict = {
@@ -100,7 +100,6 @@ class SpectroscopicAxis(np.ndarray):
             redshift=None):
         subarr = np.array(xarr)
         subarr = subarr.view(self)
-        subarr.xarr = xarr
         subarr.units = unit
         subarr.frame = frame
         if xtype in xtype_dict:
@@ -117,8 +116,8 @@ class SpectroscopicAxis(np.ndarray):
         if unit == self.units and frame == self.frame:
             print "Already in desired units and frame"
         elif frame == self.frame:
-            conversion_factor = conversion_dict[self.xtype][unit] / conversion_dict[self.xtype][self.units] 
-            self.xarr *= conversion_factor
+            conversion_factor = conversion_dict[self.xtype][self.units] / conversion_dict[self.xtype][unit] 
+            self *= conversion_factor
         else:
             print "Converting frames from %s to %s" % (self.frame,frame)
 
@@ -136,7 +135,7 @@ class SpectroscopicAxis(np.ndarray):
         if frequency_units not in frequency_dict:
             raise ValueError("Bad frequency units: %s" % (frequency_units))
 
-        velocity_ms = self.xarr * velocity_dict['m/s'] / velocity_dict[self.units]
+        velocity_ms = self * velocity_dict['m/s'] / velocity_dict[self.units]
         if convention == 'radio':
             freq = central_frequency * (1.0 - velocity_ms / speedoflight_ms)
         elif convention == 'optical':
@@ -145,8 +144,9 @@ class SpectroscopicAxis(np.ndarray):
             freq = central_frequency * (1.0 - (velocity_ms / speedoflight_ms)**2)**0.5 / (1.0 + velocity_ms/speedoflight_ms)
         else:
             raise ValueError('Convention "%s" is not allowed.' % (convention))
-        self.xarr = freq
+        self[:] = freq
         self.units = frequency_units
+        self.xtype = 'Frequency'
 
     def frequency_to_velocity(self,center_frequency=None,center_frequency_units='Hz',velocity_units='m/s',convention='radio'):
         """
@@ -159,12 +159,12 @@ class SpectroscopicAxis(np.ndarray):
         """
         if center_frequency is None:
             raise ValueError("Cannot convert frequency to velocity without specifying a central frequency.")
-        if frequency_units not in frequency_dict:
+        if center_frequency_units not in frequency_dict:
             raise ValueError("Bad frequency units: %s" % (frequency_units))
         if velocity_units not in velocity_dict:
             raise ValueError("Bad velocity units: %s" % (velocity_units))
 
-        frequency_hz = self.xarr * frequency_dict['Hz'] / frequency_dict[self.units]
+        frequency_hz = self * frequency_dict['Hz'] / frequency_dict[self.units]
         center_frequency_hz = center_frequency * frequency_dict['Hz'] / frequency_dict[center_frequency_units]
 
         if convention == 'radio':
@@ -175,5 +175,6 @@ class SpectroscopicAxis(np.ndarray):
             velocity = speedoflight_ms * ( center_frequency_hz**2 - frequency_hz**2 ) / ( center_frequency_hz**2 + frequency_hz )**2
         else:
             raise ValueError('Convention "%s" is not allowed.' % (convention))
-        self.xarr = velocity * velocity_dict[velocity_units] / velocity_dict['m/s']
+        self[:] = velocity * velocity_dict['m/s'] / velocity_dict[velocity_units]
         self.units = velocity_units
+        self.xtype = 'Velocity'

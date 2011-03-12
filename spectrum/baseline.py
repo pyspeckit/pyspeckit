@@ -20,7 +20,8 @@ class Baseline:
         self.subtracted = False
 
     def __call__(self, order=1, annotate=False, excludefit=False, save=True,
-            exclude=None, exclusionlevel=0.01, interactive=False, **kwargs):
+            exclude=None, exclusionlevel=0.01, interactive=False, 
+            LoudDebug=False, fit_original=False, **kwargs):
         """
         Fit and remove a polynomial from the spectrum.  
         It will be saved in the variable "self.basespec"
@@ -37,13 +38,17 @@ class Baseline:
         that it has a zero-height) using an exclusion level of (exclusionlevel)
         * the smallest gaussian peak that was fit
 
-        "basespec" is added back to the spectrum before fitting so you can run this
-        procedure multiple times without losing information
+        if fit_original is set, "basespec" is added back to the spectrum before
+        fitting so you can run this procedure multiple times without losing
+        information
         """
+        if LoudDebug:
+            print "Range: %i:%i" % (self.bx1,self.bx2)
+            print "Excluded: %i" % (self.excludemask.sum())
         specfit = self.Spectrum.specfit
         self.order = order
         fitp = np.zeros(self.order+1)
-        if self.subtracted:
+        if self.subtracted and fit_original: # add back in the old baseline
             self.spectofit = self.Spectrum.data+self.basespec
         else:
             self.spectofit = np.copy(self.Spectrum.data)
@@ -63,11 +68,14 @@ class Baseline:
                 self.excludemask = abs(specfit.model) > exclusionlevel*abs(min(specfit.modelpars[0::3]))
             else:
                 self.excludemask[:] = False
-            self.dofit(exclude=exclude,annotate=annotate,**kwargs)
+            self.dofit(exclude=exclude,annotate=annotate,fit_original=fit_original,**kwargs)
         if save: self.savefit()
+        if LoudDebug:
+            print "Range: %i:%i" % (self.bx1,self.bx2)
+            print "Excluded: %i" % (self.excludemask.sum())
 
     def dofit(self, exclude=None, excludeunits='velo', annotate=False,
-            subtract=True, **kwargs):
+            subtract=True, fit_original=False, **kwargs):
         """
         Do the baseline fitting and save and plot the results.
 
@@ -99,7 +107,11 @@ class Baseline:
         # create the full baseline spectrum...
         self.basespec = np.poly1d(self.baselinepars)(self.Spectrum.xarr)
         if subtract:
-            self.Spectrum.data -= self.basespec
+            if self.subtracted and fit_original: 
+                # use the spectrum with the old baseline added in (that's what we fit to)
+                self.Spectrum.data = self.spectofit - self.basespec
+            else:
+                self.Spectrum.data -= self.basespec
             self.subtracted = True
         else:
             self.subtracted = False
@@ -218,17 +230,17 @@ class Baseline:
         (ignored by setting error to infinite in fitting procedure)
         """
         if xmin == 'default':
-            if order <= 1: xmin = np.floor( spectrum.shape[-1]*0.1 )
+            if order <= 1 and exclude is None: xmin = np.floor( spectrum.shape[-1]*0.1 )
             else:          xmin = 0
         elif xmin is None:
             xmin = 0
         if xmax == 'default':
-            if order <= 1: xmax = np.ceil( spectrum.shape[-1]*0.9 )
+            if order <= 1 and exclude is None: xmax = np.ceil( spectrum.shape[-1]*0.9 )
             else:          xmax = spectrum.shape[-1]
         elif xmax is None:
             xmax = spectrum.shape[-1]
         
-        pguess = [1]*(order+1)
+        pguess = [0]*(order+1)
 
         if xarr is None:
             xarr = np.indices(spectrum.shape).squeeze()
@@ -244,7 +256,8 @@ class Baseline:
         if mask is not None:
             if mask.dtype.name != 'bool': mask = mask.astype('bool')
             err[mask] = 1e10
-            spectrum[mask] = 0
+            if hasattr(spectrum,'mask'):
+                spectrum.mask=mask
         if (spectrum!=spectrum).sum() > 0:
             print "There is an error in baseline: some values are NaN"
             import pdb; pdb.set_trace()

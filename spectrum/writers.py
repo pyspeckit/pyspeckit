@@ -23,6 +23,7 @@ class Writer(object):
         self.cfg = spcfg.cfg
         
         if spcfg.cfg['data_format'] in ['hdf5', 'h5'] and h5fail: 
+            # this is probably too verbose
             print 'Failed to import h5py, will write out in ascii format instead.'
             self.write_data = self.write_ascii
         elif spcfg.cfg['data_format'] in ['hdf5', 'h5']: 
