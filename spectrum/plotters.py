@@ -63,7 +63,27 @@ class Plotter(object):
 
     def plot(self, offset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
             xmin=None, xmax=None, ymin=None, ymax=None, reset_xlimits=False,
-            reset_ylimits=False, **kwargs):
+            reset_ylimits=False, ypeakscale=1.2, **kwargs):
+        """
+        Plot the spectrum!
+
+        Tries to automatically find a reasonable plotting range if one is not set.  
+
+        offset - vertical offset to add to the spectrum before plotting.  Useful if you
+        want to overlay multiple spectra on a single plot
+
+        color - default to plotting spectrum in black
+
+        linestyle - histogram-style plotting
+        linewidth - narrow lines are helpful when histo-plotting
+        xmin/xmax/ymin/ymax - override defaults for plot range.  Once set, these parameters
+        are sticky (i.e., replotting will use the same ranges)
+
+        reset_[xy]limits - Reset the limits to "sensible defaults" 
+
+        ypeakscale - Scale up the Y maximum value.  Useful to keep the
+        annotations away from the data.
+        """
 
         if self.axis is None:
             raise Exception("You must call the Plotter class to initiate the canvas before plotting.")
@@ -94,13 +114,13 @@ class Plotter(object):
         
         if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
                 or reset_ylimits):
-            print "Resetting X-axis min/max because the plot is out of bounds."
+            print "Resetting Y-axis min/max because the plot is out of bounds."
             self.ymin = None
             self.ymax = None
         if ymin is not None: self.ymin = ymin
         elif self.ymin is None: self.ymin=self.Spectrum.data[xpixmin:xpixmax].min()
         if ymax is not None: self.ymax = ymax
-        elif self.ymax is None: self.ymax=self.Spectrum.data[xpixmin:xpixmax].max()
+        elif self.ymax is None: self.ymax=self.Spectrum.data[xpixmin:xpixmax].max() * ypeakscale
         self.axis.set_ylim(self.ymin,self.ymax)
         
         if self.autorefresh: self.refresh()
