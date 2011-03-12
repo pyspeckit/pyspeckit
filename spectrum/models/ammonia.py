@@ -67,10 +67,13 @@ class ammonia_model(object):
         pass
 
     def ammonia(self, xarr, xunits='GHz', tkin=20, tex=20, Ntot=1e10, width=1,
-            xoff_v=0.0, fortho=0.5):
+            xoff_v=0.0, fortho=0.5, tau11=None):
         """
         Generate a model Ammonia spectrum based on input temperatures, column, and
         gaussian parameters
+
+
+        (not implemented) if tau11 is specified, Ntot is ignored
         """
 
         # Convert X-units to frequency in GHz
@@ -135,6 +138,8 @@ class ammonia_model(object):
       
             T0 = (h*xarr*1e9/kb)
             runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
+            if runspec.min() < 0:
+                raise ValueError("Model dropped below zero.  That is not possible normally.")
       
         return runspec
 
