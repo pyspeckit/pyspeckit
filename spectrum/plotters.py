@@ -111,6 +111,7 @@ class Plotter(object):
 
         xpixmin = np.argmin(np.abs(self.Spectrum.xarr-self.xmin))
         xpixmax = np.argmin(np.abs(self.Spectrum.xarr-self.xmax))
+        if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
         
         if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
                 or reset_ylimits):
@@ -137,7 +138,7 @@ class Plotter(object):
         elif isinstance(self.Spectrum.xarr.xtype,str):
             self.xlabel = self.Spectrum.xarr.xtype
             if isinstance(self.Spectrum.xarr.units,str):
-                self.xlabel += " "+self.Spectrum.xarr.units
+                self.xlabel += " ("+self.Spectrum.xarr.units+")"
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
 

@@ -38,13 +38,8 @@ class Spectrum(object):
                 print "Failed to read fits file."
                 print inst
         elif ".txt" in filename:
-            try:
-                self.xarr,self.data,self.error,self.Table = readers.open_1d_txt(filename, **kwargs)
-                self.parse_text_header(self.Table)
-            except Exception as inst:
-                print "Reading txt failed.",inst.args
-                print inst
-                raise Exception("Reading text failed.")
+            self.xarr,self.data,self.error,self.Table = readers.open_1d_txt(filename, **kwargs)
+            self.parse_text_header(self.Table)
 
         self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
         self.plotter = plotters.Plotter(self)

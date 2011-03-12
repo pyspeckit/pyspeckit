@@ -1,3 +1,4 @@
+import units
 import numpy as np
 import numpy.ma as ma
 
@@ -15,7 +16,14 @@ def open_1d_txt(filename):
         # assume uniform, nonzero error
         error = data*0 + 1.0
 
-    return xarr,data,error,T
+    if 'xunits' in T.keywords:
+        xunits = T.keywords['xunits']
+    else:
+        xunits = 'unknown'
+
+    XAxis = units.SpectroscopicAxis(xarr,xunits)
+
+    return XAxis,data,error,T
 
 
 def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
@@ -83,7 +91,6 @@ def make_axis(xarr,hdr,specname=None, wcstype=''):
     Parse parameters from a .fits header into required SpectroscopicAxis
     parameters
     """
-    import units
 
     xunits = hdr.get('CUNIT1'+wcstype)
     if hdr.get('ORIGIN') == 'CLASS-Grenoble' and xunits is None:

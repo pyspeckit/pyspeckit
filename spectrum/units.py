@@ -105,8 +105,10 @@ class SpectroscopicAxis(np.ndarray):
         if xtype in xtype_dict:
             subarr.xtype = xtype_dict[xtype]
             subarr.frame = frame_dict[xtype]
-        else:
+        elif subarr.units in unit_type_dict:
             subarr.xtype = unit_type_dict[subarr.units]
+        else:
+            subarr.xtype = 'unknown'
         subarr.reffreq = reffreq
         subarr.redshift = redshift
 
