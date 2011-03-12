@@ -43,7 +43,7 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
     f = pyfits.open(filename)
     hdr = f[0].header
     spec = ma.array(f[0].data).squeeze()
-    errspec  = None
+    if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data
     if hdr.get('NAXIS') == 2:
         if errspecnum is not None:
             errspec = spec[errspecnum,:]
@@ -84,6 +84,7 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
 
     XAxis = make_axis(xarr,hdr,**kwargs)
 
+
     return spec,errspec,XAxis,hdr
 
 def make_axis(xarr,hdr,specname=None, wcstype=''):
@@ -101,6 +102,8 @@ def make_axis(xarr,hdr,specname=None, wcstype=''):
         reffreq = hdr.get('REFFREQ'+wcstype)
     elif hdr.get('RESTFREQ'+wcstype):
         reffreq = hdr.get('RESTFREQ'+wcstype)
+    elif hdr.get('RESTFRQ'+wcstype):
+        reffreq = hdr.get('RESTFRQ'+wcstype)
     else:
         reffreq = None
 

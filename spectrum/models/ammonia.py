@@ -67,7 +67,7 @@ class ammonia_model(object):
         pass
 
     def ammonia(self, xarr, xunits='GHz', tkin=20, tex=20, Ntot=1e10, width=1,
-            xoff_v=0.0, fortho=0.5, line='oneone'):
+            xoff_v=0.0, fortho=0.5):
         """
         Generate a model Ammonia spectrum based on input temperatures, column, and
         gaussian parameters
@@ -119,8 +119,8 @@ class ammonia_model(object):
                 (1-np.exp(-h*freq_dict[linename]/(kb*tex))) /
                 (width/ckms*freq_dict[linename]*np.sqrt(2*np.pi)) )
       
-            voff_lines = np.array(voff_lines_dict['oneone'])
-            tau_wts = np.array(tau_wts_dict['oneone'])
+            voff_lines = np.array(voff_lines_dict[linename])
+            tau_wts = np.array(tau_wts_dict[linename])
       
             lines = (1-voff_lines/ckms)*freq_dict[linename]/1e9
             tau_wts = tau_wts / (tau_wts).sum()
@@ -131,7 +131,7 @@ class ammonia_model(object):
             tauprof = np.zeros(len(xarr))
             for kk,no in enumerate(nuoff):
               tauprof += tau_dict[linename]*tau_wts[kk]*\
-                        np.exp(-(xarr-no-lines[kk])**2/(2*nuwidth[kk]**2))
+                        np.exp(-(xarr+no-lines[kk])**2/(2*nuwidth[kk]**2))
       
             T0 = (h*xarr*1e9/kb)
             runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec

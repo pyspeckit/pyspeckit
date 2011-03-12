@@ -168,7 +168,11 @@ class Specfit(object):
         depending on whether the residuals exist.
         """
         if self.Spectrum.error is not None and not usestd:
-            self.errspec = self.Spectrum.error
+            if (self.Spectrum.error == 0).all():
+                # force errspec to be a non-masked array of ones
+                self.errspec = self.Spectrum.error.data + 1
+            else:
+                self.errspec = self.Spectrum.error
         elif self.residuals is not None and useresiduals: 
             self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
         else: self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()

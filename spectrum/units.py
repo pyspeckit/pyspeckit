@@ -19,6 +19,8 @@ length_dict = {'meters':1.0,'m':1.0,
         'angstroms':1e-10,'A':1e-10,
         }
 
+wavelength_dict = length_dict # synonym
+
 frequency_dict = {
         'Hz':1.0,
         'kHz':1e3,
@@ -114,7 +116,42 @@ class SpectroscopicAxis(np.ndarray):
 
         return subarr
 
-    def convert_to(self,unit,frame='rest',**kwargs):
+    def __array_finalize__(self,obj):
+        """
+        Array finalize allows you to take subsets of the array but keep units
+        around, e.g.:
+        xarr = self[1:20]
+        """
+        self.units = getattr(obj, 'units', None)
+        self.frame = getattr(obj, 'frame', None)
+        self.xtype = getattr(obj, 'xtype', None)
+        self.reffreq = getattr(obj, 'reffreq', None)
+        self.redshift = getattr(obj, 'redshift', None)
+
+    def change_xtype(self,new_xtype,**kwargs):
+        if new_xtype not in conversion_dict:
+            raise ValueError("There is no X-axis type %s" % new_xtype)
+        if conversion_dict[self.xtype] is velocity_dict:
+            if conversion_dict[new_xtype] is frequency_dict:
+                self.velocity_to_frequency(**kwargs)
+            elif conversion_dict[new_xtype] is wavelength_dict:
+                self.velocity_to_frequency()
+                self.frequency_to_wavelength(**kwargs)
+        elif conversion_dict[self.xtype] is frequency_dict:
+            if conversion_dict[new_xtype] is velocity_dict:
+                self.frequency_to_velocity(**kwargs)
+            elif conversion_dict[new_xtype] is wavelength_dict:
+                self.frequency_to_wavelength(**kwargs)
+        elif conversion_dict[self.xtype] is wavelength_dict:
+            if conversion_dict[new_xtype] is velocity_dict:
+                self.wavelength_to_frequency()
+                self.frequency_to_velocity(**kwargs)
+            elif conversion_dict[new_xtype] is wavelength_dict:
+                self.wavelength_to_frequency(**kwargs)
+        else:
+            raise ValueError("Conversion to xtype %s was not recognized." % xtype)
+
+    def convert_to_unit(self,unit,frame='rest',**kwargs):
         if unit == self.units and frame == self.frame:
             print "Already in desired units and frame"
         elif frame == self.frame:
@@ -132,21 +169,23 @@ class SpectroscopicAxis(np.ndarray):
         * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
         * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
         """
-        if center_frequency is None:
+        if center_frequency is None and self.reffreq is None:
             raise ValueError("Cannot convert velocity to frequency without specifying a central frequency.")
+        elif self.reffreq is not None:
+            center_frequency = self.reffreq
         if frequency_units not in frequency_dict:
             raise ValueError("Bad frequency units: %s" % (frequency_units))
 
-        velocity_ms = self * velocity_dict['m/s'] / velocity_dict[self.units]
+        velocity_ms = self / velocity_dict['m/s'] * velocity_dict[self.units]
         if convention == 'radio':
-            freq = central_frequency * (1.0 - velocity_ms / speedoflight_ms)
+            freq = center_frequency * (1.0 - velocity_ms / speedoflight_ms)
         elif convention == 'optical':
-            freq = central_frequency * (1.0 + velocity_ms / speedoflight_ms) - 1.0
+            freq = center_frequency * (1.0 + velocity_ms / speedoflight_ms) - 1.0
         elif convention == 'relativistic':
-            freq = central_frequency * (1.0 - (velocity_ms / speedoflight_ms)**2)**0.5 / (1.0 + velocity_ms/speedoflight_ms)
+            freq = center_frequency * (1.0 - (velocity_ms / speedoflight_ms)**2)**0.5 / (1.0 + velocity_ms/speedoflight_ms)
         else:
             raise ValueError('Convention "%s" is not allowed.' % (convention))
-        self[:] = freq
+        self[:] = freq / frequency_dict[frequency_units]
         self.units = frequency_units
         self.xtype = 'Frequency'
 
@@ -180,3 +219,74 @@ class SpectroscopicAxis(np.ndarray):
         self[:] = velocity * velocity_dict['m/s'] / velocity_dict[velocity_units]
         self.units = velocity_units
         self.xtype = 'Velocity'
+
+    def frequency_to_wavelength(self,wavelength_units='um'):
+        """
+        Simple conversion from frequency to wavelength:
+        lambda = c / nu
+        """
+        if wavelength_units not in length_dict:
+            raise ValueError("Wavelength units %s not valid" % wavelength_units)
+
+        if self.xtype not in frequency_dict:
+            raise AttributeError("Cannot convert from frequency unless units are already frequency.  Current xtype is %s." % self.xtype)
+
+        self[:] = speedoflight_ms / ( self * frequency_dict[self.units] ) / length_dict[wavelength_units]
+        self.xtype = 'Wavelength'
+        self.units = wavelength_units
+
+    def wavelength_to_frequency(self,frequency_units='GHz'):
+        """
+        Simple conversion from frequency to wavelength:
+        nu = c / lambda
+        """
+        if frequency_units not in frequency_dict:
+            raise ValueError("Frequency units %s not valid" % wavelength_units)
+
+        if self.xtype not in length_dict:
+            raise AttributeError("Cannot convert from wavelength unless units are already wavelength.  Current xtype is %s." % self.xtype)
+
+        self[:] = speedoflight_ms / ( self * length_dict[self.units] ) / frequency_dict[frequency_units]
+        self.xtype = 'Frequency'
+        self.units = frequency_units
+
+class SpectroscopicAxes(SpectroscopicAxis):
+    """
+    Counterpart to Spectra: takes a list of SpectroscopicAxis's and
+    concatenates them while checking for consistency and maintaining
+    header parameters
+    """
+
+    def __new__(self, axislist, frame='rest', xtype=None, reffreq=None,
+            redshift=None):
+
+        if type(axislist) is not list:
+            raise TypeError("SpectroscopicAxes must be initiated with a list of SpectroscopicAxis objects")
+
+        units = axislist[0].units
+        xtype = axislist[0].xtype
+        frame = axislist[0].frame
+        redshift = axislist[0].redshift
+        for ax in axislist:
+            if ax.xtype != xtype:
+                try: 
+                    ax.change_xtype(xtype)
+                except:
+                    ValueError("Axis had wrong xtype and could not be converted.")
+            if ax.units != units or ax.frame != frame:
+                try:
+                    ax.convert_to_unit(units,frame=frame)
+                except:
+                    ValueError("Axis had wrong units and could not be converted.")
+
+        subarr = np.concatenate([ax for ax in axislist])
+        subarr = subarr.view(self)
+        subarr.units = units
+        subarr.xtype = xtype
+        subarr.frame = frame
+        subarr.redshift = redshift
+
+        subarr.reffreq = [ax.reffreq for ax in axislist]
+
+        return subarr
+
