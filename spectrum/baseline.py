@@ -276,3 +276,8 @@ class Baseline:
         self.basespec = self.basespec[x1pix:x2pix]
         self.excludemask = self.excludemask[x1pix:x2pix]
         self.OKmask = self.OKmask[x1pix:x2pix]
+
+    def downsample(self,factor):
+        self.basespec = self.basespec[::factor]
+        self.excludemask = self.excludemask[::factor]
+        self.OKmask = self.OKmask[::factor]

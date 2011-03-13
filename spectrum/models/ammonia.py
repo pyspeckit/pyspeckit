@@ -67,7 +67,7 @@ class ammonia_model(object):
         pass
 
     def ammonia(self, xarr, xunits='GHz', tkin=20, tex=20, Ntot=1e10, width=1,
-            xoff_v=0.0, fortho=0.5, tau11=None):
+            xoff_v=0.0, fortho=0.5, tau11=None, line='oneone'):
         """
         Generate a model Ammonia spectrum based on input temperatures, column, and
         gaussian parameters
@@ -81,11 +81,11 @@ class ammonia_model(object):
             xarr = np.copy(xarr) * units.frequency_dict[xunits] / units.frequency_dict['GHz']
         elif xunits in units.velocity_dict:
             if line in freq_dict:
-                xarr = (freq_dict[line] + (np.copy(xarr) * 
+                xarr = (freq_dict[line] - (np.copy(xarr) * 
                         (units.velocity_dict[xunits] / units.velocity_dict['m/s'] / units.speedoflight_ms) *
                         freq_dict[line]) ) / units.frequency_dict['GHz']
             else:
-                raise Exception("Xunits is velocity-type (%s) but line %s is not in the list.") % (xunits,line)
+                raise Exception("Xunits is velocity-type (%s) but line %s is not in the list." % (xunits,line))
         else:
             raise Exception("xunits not recognized: %s" % (xunits))
 

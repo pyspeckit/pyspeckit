@@ -1,4 +1,6 @@
 import numpy as np
+import smooth as sm
+import readers,fitters,plotters,writers,baseline,units
 
 
 class Spectrum(object):
@@ -29,7 +31,6 @@ class Spectrum(object):
         how to automatically determine which subclass to use yet.
         """
 
-        import readers,fitters,plotters,writers,baseline,units
 
         if ".fit" in filename: # allow .fit or .fits
             try: 
@@ -92,6 +93,18 @@ class Spectrum(object):
         # elegant way to do this...
         self.baseline.crop(x1pix,x2pix)
 
+    def smooth(self,smooth,**kwargs):
+        """
+        Smooth the spectrum.  Options are defined in sm.smooth
+        """
+        smooth = round(smooth)
+        self.data = sm.smooth(self.data,smooth,**kwargs)
+        self.xarr = self.xarr[::smooth]
+        if len(self.xarr) != len(self.data):
+            raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
+        self.error = sm.smooth(self.error,smooth,**kwargs)
+        self.baseline.downsample(smooth)
+
 
 class Spectra(Spectrum):
     """
@@ -110,8 +123,6 @@ class Spectra(Spectrum):
                 spec.xarr.change_xtype(xtype,**kwargs)
 
         self.speclist = speclist
-
-        import readers,fitters,plotters,writers,baseline,units
 
         print "Concatenating data"
         self.xarr = units.SpectroscopicAxes([sp.xarr for sp in speclist])

@@ -169,8 +169,11 @@ class Specfit(object):
         """
         if self.Spectrum.error is not None and not usestd:
             if (self.Spectrum.error == 0).all():
-                # force errspec to be a non-masked array of ones
-                self.errspec = self.Spectrum.error.data + 1
+                if type(self.Spectrum.error) is np.ma.masked_array:
+                    # force errspec to be a non-masked array of ones
+                    self.errspec = self.Spectrum.error.data + 1
+                else:
+                    self.errspec = self.Spectrum.error + 1
             else:
                 self.errspec = self.Spectrum.error
         elif self.residuals is not None and useresiduals: 

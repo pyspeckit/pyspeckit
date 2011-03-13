@@ -62,6 +62,16 @@ sp.plotter(xmin=2.3717e10,xmax=2.3722e10,clear=False)
 sp.plotter.figure.savefig('nh3_ammonia_multifit_22_zoom.png')
 sp.plotter(xmin=2.387013e10-5.4e6,xmax=2.387013e10,clear=False)
 sp.plotter.figure.savefig('nh3_ammonia_multifit_33_zoom.png')
+sp.xarr.convert_to_unit('GHz',frame='LSR')
+sp.plotter(axis=subplot(131),xmin=2.3689e1,xmax=2.3694e1)
+sp.specfit.plot_fit()
+sp.plotter(axis=subplot(132),xmin=2.3717e1,xmax=2.3722e1)
+sp.specfit.plot_fit()
+sp.plotter.axis.yaxis.label.set_visible(False)
+sp.plotter(axis=subplot(133),xmin=2.387013e1-5.4e-3,xmax=2.387013e1)
+sp.specfit.plot_fit()
+sp.plotter.axis.yaxis.label.set_visible(False)
+sp.plotter.figure.savefig('nh3_ammonia_multifit_multipanel_zoom.png')
 """
 raw_input('Press enter to multifit')
 sp.specfit(fittype='ammonia',multifit=True,
@@ -76,7 +86,6 @@ sp.specfit.plotresiduals()
 sp.plotter.figure.savefig('nh3_ammonia_multifit_zoom.png')
 """
 
-"""
 sp3.plotter()
 sp3.baseline()
 sp3.specfit(fittype='ammonia', multifit=True, guesses=[145.0, 135.0, 5.55e14, 1.752,
@@ -125,3 +134,4 @@ sp.plotter.figure.savefig('nh3_ammonia_multifit_multipanel_zoom_basedon33.png')
 
 
 raw_input('Press enter to end code')
+"""

@@ -1,6 +1,6 @@
-import readers,fitters,plotters,baseline
+import readers,fitters,plotters,baseline,units
 from spectrum import Spectrum,Spectra
-import units
+import smooth
 
 def register_fitter(name, function, npars, multisingle='single',
         override=False):
