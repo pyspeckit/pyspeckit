@@ -54,6 +54,9 @@ class Plotter(object):
                 self.figure = matplotlib.pyplot.figure()
         if len(self.figure.axes) > 0 and self.axis is None:
             self.axis = self.figure.axes[0] # default to first axis
+        elif axis is not None:
+            self.axis = axis
+            self.figure = axis.figure
         else:
             self.axis = self.figure.gca()
 
@@ -155,7 +158,8 @@ class Plotter(object):
             self.axis.set_ylabel(self.Spectrum.units)
 
     def refresh(self):
-        self.axis.figure.canvas.draw()
+        if self.axis is not None:
+            self.axis.figure.canvas.draw()
 
     def savefig(self,fname,bbox_inches='tight',**kwargs):
         """

@@ -157,8 +157,9 @@ class SpectroscopicAxis(np.ndarray):
         elif frame == self.frame:
             conversion_factor = conversion_dict[self.xtype][self.units] / conversion_dict[self.xtype][unit] 
             self *= conversion_factor
+            print "Converting units from %s to %s" % (self.units,unit)
         else:
-            print "Converting frames from %s to %s" % (self.frame,frame)
+            print "(not actually) Converting frames from %s to %s" % (self.frame,frame)
 
     def velocity_to_frequency(self,center_frequency=None,frequency_units='Hz',convention='radio'):
         """
@@ -198,8 +199,10 @@ class SpectroscopicAxis(np.ndarray):
         * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
         * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
         """
-        if center_frequency is None:
+        if center_frequency is None and self.reffreq is None:
             raise ValueError("Cannot convert frequency to velocity without specifying a central frequency.")
+        elif self.reffreq is not None:
+            center_frequency = self.reffreq
         if center_frequency_units not in frequency_dict:
             raise ValueError("Bad frequency units: %s" % (frequency_units))
         if velocity_units not in velocity_dict:

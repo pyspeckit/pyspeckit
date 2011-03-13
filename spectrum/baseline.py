@@ -268,3 +268,11 @@ class Baseline:
         bestfit = np.poly1d(fitp)(xarr).squeeze()
 
         return bestfit,fitp
+
+    def crop(self,x1pix,x2pix):
+        """
+        When spectrum.crop is called, this must be too
+        """
+        self.basespec = self.basespec[x1pix:x2pix]
+        self.excludemask = self.excludemask[x1pix:x2pix]
+        self.OKmask = self.OKmask[x1pix:x2pix]

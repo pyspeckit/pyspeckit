@@ -89,6 +89,9 @@ class ammonia_model(object):
         else:
             raise Exception("xunits not recognized: %s" % (xunits))
 
+        if tex > tkin: # cannot have Tex > Tkin
+            tex = tkin 
+
         ckms = 2.99792458e5
         ccms = ckms*1e5
         g1 = 1                
@@ -114,9 +117,10 @@ class ammonia_model(object):
         runspec = np.zeros(len(xarr))
         
         tau_dict = {}
-        for linename in line_names:
+        for ii,linename in enumerate(line_names):
             orthoparafrac = fortho if ortho_dict[linename] else (1-fortho)
-            tau_dict[linename] = (Ntot * orthoparafrac * Zpara[0]/(Zpara.sum()) / ( 1
+            Z = Zortho if ortho_dict[linename] else Zpara
+            tau_dict[linename] = (Ntot * orthoparafrac * Z[ii]/(Z.sum()) / ( 1
                 + np.exp(-h*freq_dict[linename]/(kb*tkin) )) * ccms**2 /
                 (8*np.pi*freq_dict[linename]**2) * aval_dict[linename]*
                 (1-np.exp(-h*freq_dict[linename]/(kb*tex))) /
@@ -173,7 +177,7 @@ class ammonia_model(object):
     def multinh3fit(self, xax, data, npeaks=1, err=None, params=[20,20,1e10,1.0,0.0,0.5],
             fixed=[False,False,False,False,False,False],
             limitedmin=[True,True,True,True,False,True],
-            limitedmax=[False,False,False,False,False,True], minpars=[2.73,0,0,0,0,0],
+            limitedmax=[False,False,False,False,False,True], minpars=[2.73,2.73,0,0,0,0],
             maxpars=[0,0,0,0,0,1], quiet=True, shh=True, veryverbose=False, **kwargs):
         """
         Fit multiple nh3 profiles
@@ -189,7 +193,7 @@ class ammonia_model(object):
            params - Fit parameters: [amplitude, offset, Gfwhm, Lfwhm] * npeaks
                   If len(params) % 6 == 0, npeaks will be set to len(params) / 6
            fixed - Is parameter fixed?
-           limitedmin/minpars - set lower limits on each parameter (default: width>0)
+           limitedmin/minpars - set lower limits on each parameter (default: width>0, Tex and Tkin > Tcmb)
            limitedmax/maxpars - set upper limits on each parameter
 
            quiet - should MPFIT output each iteration?
@@ -242,8 +246,11 @@ class ammonia_model(object):
         parinfo = [ {'n':ii, 'value':params[ii],
             'limits':[minpars[ii],maxpars[ii]],
             'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-            'parname':parnames[ii%self.npars]+str(ii/self.npars), 'error':ii} 
+            'parname':parnames[ii%self.npars]+str(ii/self.npars), 
+            'mpmaxstep':0,'error':ii} 
             for ii in xrange(len(params)) ]
+        parinfo[0]['mpmaxstep'] = 1.0
+        parinfo[1]['mpmaxstep'] = 1.0
 
         if veryverbose:
             print "GUESSES: "
@@ -265,6 +272,7 @@ class ammonia_model(object):
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
+        if mpp[1] > mpp[0]: mpp[1] = mpp[0]  # force Tex>Tkin to Tex=Tkin (already done in n_ammonia)
         self.mp = mp
         self.mpp = mpp
         self.mpperr = mpperr

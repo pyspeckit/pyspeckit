@@ -1,12 +1,27 @@
 import spectrum
 
 sp1 = spectrum.Spectrum('G032.751-00.071_nh3_11_Tastar.fits')
-sp1.crop(0,70)
+sp1.crop(0,80)
+sp1.plotter()
+sp1.baseline(exclude=[15,62])
+sp1.plotter()
+sp1.plotter.savefig('nh3_11_baselined.png')
 sp2 = spectrum.Spectrum('G032.751-00.071_nh3_22_Tastar.fits')
-sp2.crop(0,70)
-#sp4 = spectrum.Spectrum('G032.751-00.071_nh3_44_Tastar.fits')
-#sp4.crop(3460,3500)
-spectra = spectrum.Spectra([sp1,sp2])
+sp2.crop(0,80)
+sp2.plotter()
+sp2.specfit()
+sp2.baseline(exclude=[34,42])
+sp2.plotter()
+sp2.plotter.savefig('nh3_22_baselined.png')
+sp3 = spectrum.Spectrum('G032.751-00.071_nh3_33_Tastar.fits')
+sp3.crop(0,80)
+sp3.plotter()
+sp3.specfit()
+sp3.baseline(exclude=[30,42])
+sp3.plotter()
+sp3.plotter.savefig('nh3_33_baselined.png')
+#sp4.crop(2.3868e10,2.3871e10)
+spectra = spectrum.Spectra([sp1,sp2,sp3])
 sp = spectra
 
 sp.plotter()
@@ -14,7 +29,8 @@ sp.plotter()
 #sp.plotter(xmin=-100,xmax=300)
 #raw_input("Plotter")
 from pylab import *
-show()
+draw()
+#raw_input('wait for plotter')
 
 
 # set the baseline to zero to prevent variable-height fitting
@@ -30,19 +46,23 @@ print "Best fit: ", sp.specfit.modelpars
 #print "Plotter min/max: ",sp.plotter.xmin,sp.plotter.xmax," Fitter min/max: ",sp.specfit.gx1,sp.specfit.gx2," Fitregion= ",sp.baseline.excludevelo,sp.baseline.excludepix
 #raw_input('Baseline')
 #sp.specfit(fittype='ammonia',multifit=True,guesses=[20,20,1e16,1.0,-55.0,0.5],quiet=False,xunits='Hz')
-sp.specfit(fittype='ammonia', multifit=True, guesses=[21, 0.3, 5.3e13, 1.14,
-    35, 0.5], fixed=[False,False,False,False,False,True],
-    minpars=[2.73,0,1e10,0.1,0,0],
+sp.specfit(fittype='ammonia', multifit=True, guesses=[21.57, 5.0, 2.95e14, 1.11,
+    37.8, 0.5], fixed=[False,False,False,False,False,True],
+    minpars=[2.73,2.73,1e10,0.1,0,0],
     limitedmin=[True,True,True,True,False,True], quiet=False,
     xunits=sp.xarr.units)
 sp.specfit.plotresiduals()
-raw_input('Press enter to print guesses and zoom in.')
-sp.plotter.figure.savefig('nh3_ammonia_fit.png')
+sp.plotter.figure.savefig('nh3_ammonia_multifit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
-sp.plotter(xmin=70,xmax=125)
 sp.specfit.plot_fit()
-sp.plotter.figure.savefig('nh3_ammonia_fit_zoom.png')
+sp.plotter(xmin=2.3689e10,xmax=2.3694e10,clear=False)
+sp.plotter.figure.savefig('nh3_ammonia_multifit_11_zoom.png')
+sp.plotter(xmin=2.3717e10,xmax=2.3722e10,clear=False)
+sp.plotter.figure.savefig('nh3_ammonia_multifit_22_zoom.png')
+sp.plotter(xmin=2.387013e10-5.4e6,xmax=2.387013e10,clear=False)
+sp.plotter.figure.savefig('nh3_ammonia_multifit_33_zoom.png')
+"""
 raw_input('Press enter to multifit')
 sp.specfit(fittype='ammonia',multifit=True,
         guesses=[25,0.5,5e14,0.68,37,0.5]+[25,0.2,7e14,0.52,37,0.5],
@@ -54,6 +74,53 @@ sp.specfit(fittype='ammonia',multifit=True,
         quiet=False,xunits=sp.xarr.units)
 sp.specfit.plotresiduals()
 sp.plotter.figure.savefig('nh3_ammonia_multifit_zoom.png')
+"""
+
+"""
+sp3.plotter()
+sp3.baseline()
+sp3.specfit(fittype='ammonia', multifit=True, guesses=[145.0, 135.0, 5.55e14, 1.752,
+    36.04, 0.5], fixed=[False,False,False,False,False,True],
+    minpars=[2.73,2.73,1e10,0.1,0,0],
+    limitedmin=[True,True,True,True,False,True], quiet=False,
+    xunits=sp.xarr.units)
+sp3.plotter.savefig('nh3_33_test1.png')
+sp3.baseline(excludefit=True)
+sp3.plotter()
+sp3.specfit.modelpars[1] -= 5
+sp3.specfit(fittype='ammonia', multifit=True, guesses=sp3.specfit.modelpars,
+    fixed=[False,False,False,False,False,True],
+    minpars=[2.73,2.73,1e10,0.1,0,0],
+    limitedmin=[True,True,True,True,False,True], quiet=False,
+    xunits=sp.xarr.units)
+sp3.plotter.savefig('nh3_33_test2_rebased.png')
+sp3.specfit.modelpars[1] -= 5
+sp3.specfit(fittype='ammonia', multifit=True, guesses=sp3.specfit.modelpars,
+    fixed=[False,False,False,False,False,False],
+    minpars=[2.73,2.73,1e10,0.1,0,0],
+    limitedmin=[True,True,True,True,False,True], quiet=False,
+    xunits=sp.xarr.units)
+sp3.plotter.savefig('nh3_33_test3_freeorthopara.png')
+sp3.specfit.plotresiduals()
+sp3.specfit.residualaxis.figure.savefig('nh3_33_test3_freeorthopara_residuals.png')
+"""
+
+
+sp.plotter(reset_xlimits=True,reset_ylimits=True)
+sp.specfit(fittype='ammonia', multifit=True, guesses=[110,68,3.2e14,1.766,36.08,0.41],
+    fixed=[False,False,False,False,False,False],
+    minpars=[62.73,62.73,1e10,0.1,0,0],
+    limitedmin=[True,True,True,True,False,True], quiet=False,
+    xunits=sp.xarr.units)
+figure(1); clf();
+sp.xarr.convert_to_unit('GHz',frame='LSR')
+sp.plotter(axis=subplot(131),xmin=2.3689e1,xmax=2.3694e1)
+sp.specfit.plot_fit()
+sp.plotter(axis=subplot(132),xmin=2.3717e1,xmax=2.3722e1)
+sp.specfit.plot_fit()
+sp.plotter(axis=subplot(133),xmin=2.387013e1-5.4e-3,xmax=2.387013e1)
+sp.specfit.plot_fit()
+sp.plotter.figure.savefig('nh3_ammonia_multifit_multipanel_zoom_basedon33.png')
 
 
 

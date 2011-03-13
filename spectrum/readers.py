@@ -82,7 +82,7 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
         xconv = lambda v: ((v-p3+1)*dv+v0)
         xarr = xconv(np.arange(len(spec)))
 
-    XAxis = make_axis(xarr,hdr,**kwargs)
+    XAxis = make_axis(xarr,hdr,wcstype=wcstype,**kwargs)
 
 
     return spec,errspec,XAxis,hdr

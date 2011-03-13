@@ -87,6 +87,10 @@ class Spectrum(object):
         self.xarr = self.xarr[x1pix:x2pix]
         self.data = self.data[x1pix:x2pix]
         self.error = self.error[x1pix:x2pix]
+        # a baseline spectrum is always defined, even if it is all zeros
+        # this is needed to prevent size mismatches.  There may be a more
+        # elegant way to do this...
+        self.baseline.crop(x1pix,x2pix)
 
 
 class Spectra(Spectrum):
