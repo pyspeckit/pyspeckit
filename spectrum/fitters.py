@@ -167,7 +167,9 @@ class Specfit(object):
         input spectrum or determine the error using the RMS of the residuals,
         depending on whether the residuals exist.
         """
-        if self.Spectrum.error is not None and not usestd:
+        if self.residuals is not None and useresiduals: 
+            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
+        elif self.Spectrum.error is not None and not usestd:
             if (self.Spectrum.error == 0).all():
                 if type(self.Spectrum.error) is np.ma.masked_array:
                     # force errspec to be a non-masked array of ones
@@ -176,8 +178,6 @@ class Specfit(object):
                     self.errspec = self.Spectrum.error + 1
             else:
                 self.errspec = self.Spectrum.error
-        elif self.residuals is not None and useresiduals: 
-            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
         else: self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
 
     def setfitspec(self):
