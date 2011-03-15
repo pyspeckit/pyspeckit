@@ -94,6 +94,16 @@ class Writer(object):
         f.close()
         
         
+    try:
+        import pyfits
+        def write_fits(self, fname, clobber=True):
+            """ FITS writer.  Not complete """
+
+            newfile = pyfits.PrimaryHDU(data=self.Spectrum.data,header=self.Spectrum.hdr)
+            newfile.writeto(fname, clobber=clobber)
+
+    except ImportError:
+        pass
         
         
         
