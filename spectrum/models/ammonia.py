@@ -126,6 +126,13 @@ class ammonia_model(object):
                 (1-np.exp(-h*freq_dict[linename]/(kb*tex))) /
                 (width/ckms*freq_dict[linename]*np.sqrt(2*np.pi)) )
       
+        # allow tau11 to be specified instead of Ntot
+        if tau11 is not None:
+            tau11_temp = tau_dict['oneone']
+            for linename,tau in tau_dict.iteritems():
+                tau_dict[linename] = tau * tau11/tau11_temp
+
+        for linename in line_names:
             voff_lines = np.array(voff_lines_dict[linename])
             tau_wts = np.array(tau_wts_dict[linename])
       
@@ -137,7 +144,7 @@ class ammonia_model(object):
             # tau array
             tauprof = np.zeros(len(xarr))
             for kk,no in enumerate(nuoff):
-              tauprof += tau_dict[linename]*tau_wts[kk]*\
+                tauprof += tau_dict[linename]*tau_wts[kk]*\
                         np.exp(-(xarr+no-lines[kk])**2/(2*nuwidth[kk]**2))
       
             T0 = (h*xarr*1e9/kb)
@@ -147,7 +154,7 @@ class ammonia_model(object):
       
         return runspec
 
-    def n_ammonia(self, pars=None,**kwargs):
+    def n_ammonia(self, pars=None, fittau=False, **kwargs):
         """
         Returns a function that sums over N ammonia line profiles, where N is the length of
         tkin,tex,Ntot,width,xoff_v,fortho *OR* N = len(pars) / 6
@@ -167,10 +174,18 @@ class ammonia_model(object):
         elif not(len(tkin) == len(tex) == len(Ntot) == len(xoff_v) == len(width) == len(fortho)):
             raise ValueError("Wrong array lengths!")
 
+        modelkwargs = kwargs.copy()
         def L(x):
             v = np.zeros(len(x))
             for i in range(len(tkin)):
-                v += self.ammonia(x,tkin=tkin[i],tex=tex[i],Ntot=Ntot[i],width=width[i],xoff_v=xoff_v[i],fortho=fortho[i],**kwargs)
+                modelkwargs.update({'tkin':tkin[i], 'tex':tex[i],
+                        'width':width[i], 'xoff_v':xoff_v[i],
+                        'fortho':fortho[i]})
+                if fittau:
+                    modelkwargs.update({'tau11':Ntot[i]})
+                else:
+                    modelkwargs.update({'Ntot':Ntot[i]})
+                v += self.ammonia(x,**modelkwargs)
             return v
         return L
 

@@ -184,7 +184,9 @@ class Baseline:
             self.bx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))
             self.bx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))
         else:
-            raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
+            self.bx1 = 0
+            self.bx2 = self.Spectrum.data.shape[0]
+            #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
         if self.bx1>self.bx2: self.bx1,self.bx2 = self.bx2,self.bx1
         if highlight:
             self.fitregion += self.specplotter.axis.plot(

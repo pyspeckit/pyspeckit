@@ -156,3 +156,6 @@ class Spectra(Spectrum):
         self.xarr = units.SpectroscopicAxes([self.xarr,spec.xarr])
         self.data = np.concatenate([self.data,spec.data])
         self.error = np.concatenate([self.error,spec.error])
+
+    def __getitem__(self,index):
+        return self.speclist[index]

@@ -214,16 +214,18 @@ class Specfit(object):
                 npeaks=self.npeaks,
                 params=self.guesses,
                 **self.fitkwargs)
+        if model is None:
+            raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
         self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]
         self.model = model
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
+        self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.specplotter.axis is not None:
             self.plot_fit()
-        self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
-        if self.autoannotate:
-            self.annotate()
+            if self.autoannotate:
+                self.annotate()
     
     def peakbgfit(self, usemoments=True, annotate=True, vheight=True, height=0,
             negamp=None, fittype='gaussian', **kwargs):
@@ -253,6 +255,8 @@ class Specfit(object):
                 vheight=vheight,
                 params=self.guesses,
                 **self.fitkwargs)
+        if model is None:
+            raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
         self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]-vheight
         if vheight: 
@@ -265,9 +269,9 @@ class Specfit(object):
         self.modelerrs = mpperr[1:].tolist()
         if self.specplotter.axis is not None:
             self.plot_fit()
-        if annotate:
-            self.annotate()
-            if vheight: self.Spectrum.baseline.annotate()
+            if annotate:
+                self.annotate()
+                if vheight: self.Spectrum.baseline.annotate()
 
     def plot_fit(self):
         if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
@@ -364,7 +368,9 @@ class Specfit(object):
             self.gx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))
             self.gx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))
         else:
-            raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
+            self.gx1 = 0
+            self.gx2 = self.Spectrum.data.shape[0]
+            #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
 
         if self.gx1 == self.gx2:
             # Reset if there is no fitting region
