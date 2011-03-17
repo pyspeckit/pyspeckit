@@ -349,8 +349,8 @@ class Specfit(object):
                 loc=loc,markerscale=0.01,
                 borderpad=0.1, handlelength=0.1, handletextpad=0.1
                 )
-        self.fitleg.draggable(True)
         self.specplotter.axis.add_artist(self.fitleg)
+        self.fitleg.draggable(True)
         if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def selectregion(self,xmin=None,xmax=None,xtype='wcs',**kwargs):
@@ -478,3 +478,9 @@ class Specfit(object):
                 if ii % 3 == 0: self.Spectrum.header.update('AMP%1i' % (ii/3),p,comment="Gaussian best fit amplitude #%i" % (ii/3))
                 if ii % 3 == 1: self.Spectrum.header.update('CEN%1i' % (ii/3),p,comment="Gaussian best fit center #%i" % (ii/3))
                 if ii % 3 == 2: self.Spectrum.header.update('WID%1i' % (ii/3),p,comment="Gaussian best fit width #%i" % (ii/3))
+
+    def downsample(self,factor):
+        self.model = self.model[::factor]
+        self.spectofit = self.spectofit[::factor]
+        self.errspec = self.errspec[::factor]
+        self.residuals = self.residuals[::factor]

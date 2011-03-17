@@ -67,7 +67,7 @@ class ammonia_model(object):
         pass
 
     def ammonia(self, xarr, xunits='GHz', tkin=20, tex=20, Ntot=1e10, width=1,
-            xoff_v=0.0, fortho=0.5, tau11=None, line='oneone'):
+            xoff_v=0.0, fortho=1.0, tau11=None, line='oneone'):
         """
         Generate a model Ammonia spectrum based on input temperatures, column, and
         gaussian parameters
@@ -118,7 +118,7 @@ class ammonia_model(object):
         
         tau_dict = {}
         for ii,linename in enumerate(line_names):
-            orthoparafrac = fortho if ortho_dict[linename] else (1-fortho)
+            orthoparafrac = fortho if ortho_dict[linename] else (1.0/fortho)
             Z = Zortho if ortho_dict[linename] else Zpara
             tau_dict[linename] = (Ntot * orthoparafrac * Z[ii]/(Z.sum()) / ( 1
                 + np.exp(-h*freq_dict[linename]/(kb*tkin) )) * ccms**2 /
