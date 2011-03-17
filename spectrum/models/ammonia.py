@@ -27,6 +27,8 @@ ortho_dict = {
     'threethree': True,
     'fourfour':   False,
     }
+n_ortho = np.arange(0,28,3) # 0..3..27
+n_para = np.array([x for x in range(28) if x % 3 != 0])
 
 voff_lines_dict = {
     'oneone': [19.8513, 19.3159, 7.88669, 7.46967, 7.35132, 0.460409, 0.322042,
@@ -117,15 +119,25 @@ class ammonia_model(object):
         runspec = np.zeros(len(xarr))
         
         tau_dict = {}
-        for ii,linename in enumerate(line_names):
-            orthoparafrac = fortho if ortho_dict[linename] else (1.0/fortho)
-            Z = Zortho if ortho_dict[linename] else Zpara
-            tau_dict[linename] = (Ntot * orthoparafrac * Z[ii]/(Z.sum()) / ( 1
+        para_count = 0
+        ortho_count = 1 # ignore 0-0
+        for linename in line_names:
+            if ortho_dict[linename]:
+                orthoparafrac = fortho
+                Z = Zortho 
+                count = ortho_count
+                ortho_count += 1
+            else:
+                orthoparafrac = 1.0/fortho
+                Z = Zpara
+                count = para_count # need to treat partition function separately
+                para_count += 1
+            tau_dict[linename] = (Ntot * orthoparafrac * Z[count]/(Z.sum()) / ( 1
                 + np.exp(-h*freq_dict[linename]/(kb*tkin) )) * ccms**2 /
                 (8*np.pi*freq_dict[linename]**2) * aval_dict[linename]*
                 (1-np.exp(-h*freq_dict[linename]/(kb*tex))) /
                 (width/ckms*freq_dict[linename]*np.sqrt(2*np.pi)) )
-      
+
         # allow tau11 to be specified instead of Ntot
         if tau11 is not None:
             tau11_temp = tau_dict['oneone']

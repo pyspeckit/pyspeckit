@@ -85,6 +85,8 @@ class Spectrum(object):
         x2pix = np.argmin(np.abs(x2-self.xarr))
         if x1pix > x2pix: x1pix,x2pix = x2pix,x1pix
 
+        self.plotter.xmin = self.xarr[x1pix]
+        self.plotter.xmax = self.xarr[x2pix]
         self.xarr = self.xarr[x1pix:x2pix]
         self.data = self.data[x1pix:x2pix]
         self.error = self.error[x1pix:x2pix]
@@ -92,8 +94,6 @@ class Spectrum(object):
         # this is needed to prevent size mismatches.  There may be a more
         # elegant way to do this...
         self.baseline.crop(x1pix,x2pix)
-        self.plotter.xmin = self.xarr[x1pix]
-        self.plotter.xmax = self.xarr[x2pix]
 
     def smooth(self,smooth,**kwargs):
         """

@@ -480,7 +480,8 @@ class Specfit(object):
                 if ii % 3 == 2: self.Spectrum.header.update('WID%1i' % (ii/3),p,comment="Gaussian best fit width #%i" % (ii/3))
 
     def downsample(self,factor):
-        self.model = self.model[::factor]
+        if self.model is not None:
+            self.model = self.model[::factor]
+            self.residuals = self.residuals[::factor]
         self.spectofit = self.spectofit[::factor]
         self.errspec = self.errspec[::factor]
-        self.residuals = self.residuals[::factor]
