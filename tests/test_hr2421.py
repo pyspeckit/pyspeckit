@@ -39,8 +39,8 @@ print "Best fit: ", sp.specfit.modelpars
 print "EQW: ",sp.specfit.EQW()
 print "Chi2: ",sp.specfit.chi2
 sp.plotter.axis.plot(sp.xarr[sp.specfit.gx1:sp.specfit.gx2],gauss_model,color='b',linewidth=0.5)
+sp.plotter(clear=False)
 sp.plotter.figure.savefig('hr2421_voigtfit.png')
-sp.plotter.plot()
 voigt_model = sp.specfit.model+sp.baseline.basespec[sp.specfit.gx1:sp.specfit.gx2]
 raw_input("Wait here a moment")
 
