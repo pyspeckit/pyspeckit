@@ -1,0 +1,219 @@
+
+/* ---- Ginsburg's Stylesheet ---- */
+/* Wow, I'm awesome */
+
+/* Default Style */
+body {
+	background-color: black;
+	color: white;
+	font-style: normal;
+	font-family: "Times New Roman";
+	font-size:15px;
+}
+
+table {
+    background-color: #222222;
+    border-style: inset outset outset inset;
+    border-width: 5;
+    border-color: #222222;
+    color: white;
+    font-style: normal;
+   	font-family: "Times New Roman";
+	font-size:15px;
+}
+
+
+td {
+    background-color: #090909;
+    border-style: none;
+    border-width: 0;
+    color: white;
+    font-style: normal;
+   	font-family: "Times New Roman";
+	font-size:15px;
+}
+
+p {
+    /* background-color: #090909; */
+    color: white;
+    font-style: normal;
+	font-family: "Times New Roman";
+	font-size:15px;
+}
+
+p.navbar {
+    /* background-color: #090909; */
+    color: white;
+    font-style: normal;
+    font-family: "Georgia";
+    font-size:   15px;
+}
+
+a.navbar:link	 { color:white ;}
+a.navbar:visited { color:white ;}
+a.navbar:hover	 { color:grey; } /* font-weight: bold;} */
+a.navbar:active	 { color:grey; } /* font-weight: bold;} */
+
+div {
+    background-color: black;
+    color: white;
+	font-family: "Times New Roman";
+	font-style: normal;
+	font-size:15px;
+}
+
+h2 {
+		font-size:25px;
+		text-align:center;
+}
+
+/* tt { color:yellow } */
+tt {color:#55ECA9}
+
+
+/* Link Style */
+a:link		{ color:#0044AA }
+a:visited	{ color:#5544AA} }
+a:active	{ color:#0022DD }
+a:hover		{ color:#0033EE }
+a {text-decoration: none; }
+
+/* ASTR3520_site Link Style */
+a.astro:link		{ color:#66FF77 }
+a.astro:visited	{ color:#44DDBB }
+/* a:visited	{ color:blue }*/
+a.astro:active	{ color:#3344DD }
+a.astro:hover		{ color:#3344FF }
+a.astro {text-decoration: none; }
+
+code {color:#66DD88}
+
+a.big:link		{ color:cyan ;
+				font-weight:bold ;
+				font-size:30px ;}
+a.big:visited	{ color:cyan ;
+				font-weight:bold ;
+				font-size:30px ;}
+a.big:hover		{ color:#FF3300; 
+				font-weight:bold ;
+				font-size:30px ;}
+a.big:active	{ color:#FF3300; 
+				font-weight:bold ;
+				font-size:30px ;}
+a.big {text-decoration: underline;}				
+
+a.special:link {color:#FF6611;}
+a.special:visited {color:#FF6611}
+a.special:hover {color:#FF3322}
+a.special:active {color:#FF3322}
+
+a.norm:link		{ color:cyan ;}
+a.norm:visited	{ color:cyan ;}
+a.norm:hover		{ color:#FF3300;}
+a.norm:active	{ color:#FF3300; }
+/*a.norm {text-decoration: underline;}		*/
+
+/* Custom classes */
+.sidebar {
+    font-size: 15px;
+}
+
+.sectionHeader {
+    color: white;
+    font-size: 25px;
+    font-weight: bold;
+    text-indent: 125px;
+}
+
+.divider {
+    background-color: black;
+    width: 1px;
+}
+
+.divider2 {
+    background-color: black;
+}
+
+.white {
+    color: white;
+    font-style: italic;
+}
+
+.white2 {
+    color: white;
+}
+
+/* custom link styles */
+/* I don't think it should be possible to view my stylesheet from the 'net, but if you can, these are fun */
+a.hidden:link		{ color:white }
+a.hidden:visited	{ color:white }
+a.hidden:hover		{ color:white }
+a.hidden:active		{ color:white }
+
+a.emph:tt {color:yellow}
+
+a.big:link		{ color:cyan ;
+				font-weight:bold ;
+				font-size:30px ;}
+a.big:visited	{ color:cyan ;
+				font-weight:bold ;
+				font-size:30px ;}
+a.big:hover		{ color:#FF3300; 
+				font-weight:bold ;
+				font-size:30px ;}
+a.big:active	{ color:#FF3300; 
+				font-weight:bold ;
+				font-size:30px ;}
+a.big {text-decoration: underline;}				
+
+a.norm:link		{ color:cyan ;}
+a.norm:visited	{ color:cyan ;}
+a.norm:hover		{ color:#FF3300;}
+a.norm:active	{ color:#FF3300; }
+/*a.norm {text-decoration: underline;}		*/
+
+/* Custom classes */
+.sidebar { font-size: 15px; }
+.sectionHeader {
+    color: white;
+    font-size: 25px;
+    font-weight: bold;
+    text-indent: 125px;
+}
+.divider {
+    background-color: black;
+    width: 1px;
+}
+.divider2 {    background-color: black;}
+.white {
+    color: white;
+    font-style: italic;
+}
+.white2 { color: white;}
+.hl-default { color: white;}
+.hl-code { color: white;}
+.hl-brackets { color: white;}
+.hl-comment { color: CornflowerBlue;}
+.hl-quotes { color: Darkred;}
+.hl-string { color: Red;}
+.hl-identifier { color: Cyan;}
+.hl-builtin { color: Teal;}
+.hl-idlbuiltin { color: Green;}
+.hl-reserved { color: SaddleBrown;
+/* color: #aa4444;*/}
+.hl-inlinedoc { color: Blue;}
+.hl-var { color: Darkblue;}
+.hl-url { color: Blue;}
+.hl-special { color: Navy;}
+.hl-number { color: LightBlue;}
+.hl-inlinetags { color: Blue;}
+.hl-main { background-color: Black;}
+.hl-gutter {
+    background-color: #999999;
+    color: White
+}
+.hl-table {
+    font-family: courier;
+    font-size: 12px;
+    border: solid 1px Lightgrey;
+}
