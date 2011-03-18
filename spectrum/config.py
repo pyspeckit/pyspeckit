@@ -35,6 +35,7 @@ cfgDefaults = dict(
     # FITS should be the default; it is the standard for most spectrographs
     data_format = 'fits', 
     annotate = True,
+    logfile='SpectrumLogger.log',
     )
 
 class ConfigParser:

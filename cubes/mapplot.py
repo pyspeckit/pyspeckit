@@ -1,3 +1,7 @@
+"""
+Author: Adam Ginsburg
+Created: 03/17/2011
+"""
 import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure

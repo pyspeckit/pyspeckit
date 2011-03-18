@@ -1,3 +1,7 @@
+"""
+Author: Adam Ginsburg
+Created: 3/17/2011
+"""
 import numpy as np
 import numpy.ma as ma
 import spectrum
