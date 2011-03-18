@@ -92,6 +92,8 @@ class Spectrum(object):
         # this is needed to prevent size mismatches.  There may be a more
         # elegant way to do this...
         self.baseline.crop(x1pix,x2pix)
+        self.plotter.xmin = self.xarr[x1pix]
+        self.plotter.xmax = self.xarr[x2pix]
 
     def smooth(self,smooth,**kwargs):
         """
@@ -104,6 +106,7 @@ class Spectrum(object):
             raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
         self.error = sm.smooth(self.error,smooth,**kwargs)
         self.baseline.downsample(smooth)
+        self.specfit.downsample(smooth)
 
 
 class Spectra(Spectrum):
@@ -157,3 +160,5 @@ class Spectra(Spectrum):
         self.data = np.concatenate([self.data,spec.data])
         self.error = np.concatenate([self.error,spec.error])
 
+    def __getitem__(self,index):
+        return self.speclist[index]

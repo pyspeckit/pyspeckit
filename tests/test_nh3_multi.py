@@ -112,14 +112,14 @@ sp3.specfit(fittype='ammonia', multifit=True, guesses=sp3.specfit.modelpars,
 sp3.plotter.savefig('nh3_33_test3_freeorthopara.png')
 sp3.specfit.plotresiduals()
 sp3.specfit.residualaxis.figure.savefig('nh3_33_test3_freeorthopara_residuals.png')
-"""
 
 
 sp.plotter(reset_xlimits=True,reset_ylimits=True)
-sp.specfit(fittype='ammonia', multifit=True, guesses=[110,68,3.2e14,1.766,36.08,0.41],
-    fixed=[False,False,False,False,False,False],
-    minpars=[62.73,62.73,1e10,0.1,0,0],
-    limitedmin=[True,True,True,True,False,True], quiet=False,
+sp.specfit(fittype='ammonia', multifit=True, 
+    guesses=[18.2, 4.5, 1.2e15, 1.01, 37.95, 0.5, 130, 125, 2.9e14, 1.76, 36.08, 0.5],
+    fixed=[False,False,False,False,False,True]*2,
+    minpars=[2.73,2.73,1e10,0.1,0,0]+[62.73,62.73,1e10,0.1,0,0],
+    limitedmin=[True,True,True,True,False,True]*2, quiet=False,
     xunits=sp.xarr.units)
 figure(1); clf();
 sp.xarr.convert_to_unit('GHz',frame='LSR')
@@ -134,4 +134,3 @@ sp.plotter.figure.savefig('nh3_ammonia_multifit_multipanel_zoom_basedon33.png')
 
 
 raw_input('Press enter to end code')
-"""

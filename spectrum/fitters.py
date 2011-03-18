@@ -167,7 +167,9 @@ class Specfit(object):
         input spectrum or determine the error using the RMS of the residuals,
         depending on whether the residuals exist.
         """
-        if self.Spectrum.error is not None and not usestd:
+        if self.residuals is not None and useresiduals: 
+            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
+        elif self.Spectrum.error is not None and not usestd:
             if (self.Spectrum.error == 0).all():
                 if type(self.Spectrum.error) is np.ma.masked_array:
                     # force errspec to be a non-masked array of ones
@@ -176,8 +178,6 @@ class Specfit(object):
                     self.errspec = self.Spectrum.error + 1
             else:
                 self.errspec = self.Spectrum.error
-        elif self.residuals is not None and useresiduals: 
-            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
         else: self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
 
     def setfitspec(self):
@@ -214,16 +214,18 @@ class Specfit(object):
                 npeaks=self.npeaks,
                 params=self.guesses,
                 **self.fitkwargs)
+        if model is None:
+            raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
         self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]
         self.model = model
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
+        self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.specplotter.axis is not None:
             self.plot_fit()
-        self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
-        if self.autoannotate:
-            self.annotate()
+            if self.autoannotate:
+                self.annotate()
     
     def peakbgfit(self, usemoments=True, annotate=True, vheight=True, height=0,
             negamp=None, fittype='gaussian', **kwargs):
@@ -253,6 +255,8 @@ class Specfit(object):
                 vheight=vheight,
                 params=self.guesses,
                 **self.fitkwargs)
+        if model is None:
+            raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
         self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]-vheight
         if vheight: 
@@ -265,9 +269,9 @@ class Specfit(object):
         self.modelerrs = mpperr[1:].tolist()
         if self.specplotter.axis is not None:
             self.plot_fit()
-        if annotate:
-            self.annotate()
-            if vheight: self.Spectrum.baseline.annotate()
+            if annotate:
+                self.annotate()
+                if vheight: self.Spectrum.baseline.annotate()
 
     def plot_fit(self):
         if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
@@ -345,8 +349,8 @@ class Specfit(object):
                 loc=loc,markerscale=0.01,
                 borderpad=0.1, handlelength=0.1, handletextpad=0.1
                 )
-        self.fitleg.draggable(True)
         self.specplotter.axis.add_artist(self.fitleg)
+        self.fitleg.draggable(True)
         if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def selectregion(self,xmin=None,xmax=None,xtype='wcs',**kwargs):
@@ -364,7 +368,9 @@ class Specfit(object):
             self.gx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))
             self.gx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))
         else:
-            raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
+            self.gx1 = 0
+            self.gx2 = self.Spectrum.data.shape[0]
+            #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
 
         if self.gx1 == self.gx2:
             # Reset if there is no fitting region
@@ -472,3 +478,9 @@ class Specfit(object):
                 if ii % 3 == 0: self.Spectrum.header.update('AMP%1i' % (ii/3),p,comment="Gaussian best fit amplitude #%i" % (ii/3))
                 if ii % 3 == 1: self.Spectrum.header.update('CEN%1i' % (ii/3),p,comment="Gaussian best fit center #%i" % (ii/3))
                 if ii % 3 == 2: self.Spectrum.header.update('WID%1i' % (ii/3),p,comment="Gaussian best fit width #%i" % (ii/3))
+
+    def downsample(self,factor):
+        self.model = self.model[::factor]
+        self.spectofit = self.spectofit[::factor]
+        self.errspec = self.errspec[::factor]
+        self.residuals = self.residuals[::factor]

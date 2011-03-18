@@ -156,8 +156,9 @@ class SpectroscopicAxis(np.ndarray):
             print "Already in desired units and frame"
         elif frame == self.frame:
             conversion_factor = conversion_dict[self.xtype][self.units] / conversion_dict[self.xtype][unit] 
-            self *= conversion_factor
             print "Converting units from %s to %s" % (self.units,unit)
+            self.units = unit
+            self *= conversion_factor
         else:
             print "(not actually) Converting frames from %s to %s" % (self.frame,frame)
 

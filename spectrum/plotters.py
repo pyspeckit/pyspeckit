@@ -52,15 +52,16 @@ class Plotter(object):
         
         # figure out where to put the plot
         if self.figure is None:
-            if isinstance(figure,matplotlib.figure.Figure):
-                self.figure = figure
-            elif isinstance(axis,matplotlib.axes.Axes):
-                self.axis = axis
-                self.figure = axis.figure
-            elif type(figure) is int:
-                self.figure = matplotlib.pyplot.figure(figure)
+            if axis is not None:
+                if isinstance(axis,matplotlib.axes.Axes):
+                    self.axis = axis
+                    self.figure = axis.figure
             else:
                 self.figure = matplotlib.pyplot.figure()
+        elif isinstance(figure,matplotlib.figure.Figure):
+            self.figure = figure
+        elif type(figure) is int:
+            self.figure = matplotlib.pyplot.figure(figure)
 
         if self.keyclick is None:
             self.keyclick = self.figure.canvas.mpl_connect('key_press_event',self.parse_keys)
