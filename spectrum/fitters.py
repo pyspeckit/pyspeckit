@@ -15,6 +15,7 @@ npars = {}
 multifitters = {}
 singlefitters = {}
 writers = {}
+fitkeys = {}
 
 class Specfit(object):
 
@@ -463,6 +464,13 @@ class Specfit(object):
                     print "error, wrong # of pars"
         elif button in ('?'):
             print interactive_help_message
+        elif button in fitkeys:
+            fittername = fitskeys[button]
+            print "Selected fitter %s" % fittername
+            if fittername in multifitters:
+                self.fitter = multifitters[fittername]
+            elif fittername in singlefitters:
+                self.fitter = singlefitters[fittername]
         if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def clearlegend(self):
