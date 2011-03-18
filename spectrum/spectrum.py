@@ -95,6 +95,8 @@ class Spectrum(object):
         # elegant way to do this...
         self.baseline.crop(x1pix,x2pix)
 
+        self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
+
     def smooth(self,smooth,**kwargs):
         """
         Smooth the spectrum.  Options are defined in sm.smooth
@@ -107,6 +109,9 @@ class Spectrum(object):
         self.error = sm.smooth(self.error,smooth,**kwargs)
         self.baseline.downsample(smooth)
         self.specfit.downsample(smooth)
+
+        self.header.update('CDELT1',self.header.get('CDELT1') * float(smooth))
+        self.header.update('CRPIX1',self.header.get('CRPIX1') / float(smooth))
 
 
 class Spectra(Spectrum):

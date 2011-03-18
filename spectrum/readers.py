@@ -71,6 +71,7 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
         p3 = hdr.get('CRPIX1')
     elif hdr.get('CD1_1'+wcstype):
         dv,v0,p3 = hdr['CD1_1'+wcstype],hdr['CRVAL1'+wcstype],hdr['CRPIX1'+wcstype]
+        hdr.update('CDELT1',dv)
     else:
         dv,v0,p3 = hdr['CDELT1'+wcstype],hdr['CRVAL1'+wcstype],hdr['CRPIX1'+wcstype]
 
