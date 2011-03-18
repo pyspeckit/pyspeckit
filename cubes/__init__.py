@@ -1,0 +1,1 @@
+from SpectralCube import Cube
