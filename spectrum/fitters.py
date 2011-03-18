@@ -465,7 +465,7 @@ class Specfit(object):
         elif button in ('?'):
             print interactive_help_message
         elif button in fitkeys:
-            fittername = fitskeys[button]
+            fittername = fitkeys[button]
             print "Selected fitter %s" % fittername
             if fittername in multifitters:
                 self.fitter = multifitters[fittername]
