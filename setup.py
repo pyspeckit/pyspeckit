@@ -8,5 +8,5 @@ setup(name='spectrum',
       author=['Adam Ginsburg','Jordan Mirocha'],
       author_email=['adam.g.ginsburg@gmail.com','mirochaj@gmail.com'],
       url='https://bitbucket.org/keflavich/spectroscopic-toolkit-astronomy/',
-      packages=['spectrum','spectrum.models'],
+      packages=['spectrum','spectrum.models','cubes'],
      )

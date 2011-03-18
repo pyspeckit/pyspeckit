@@ -4,6 +4,14 @@ import matplotlib.figure
 from config import *
 import numpy as np
 
+interactive_help_message = """
+Interactive key commands for plotter.  An additional help message may appear if
+you have initiated the fitter.
+'?' - bring up this message
+'f' - initiate the fitter 
+'b' - initiate the baseliner 
+"""
+
 class Plotter(object):
     """
     Class to plot a spectrum
@@ -28,6 +36,7 @@ class Plotter(object):
         self.xmin = None
         self.ymax = None
         self.ymin = None
+        self.keyclick = None
 
     def __call__(self, figure=None, axis=None, clear=True, **kwargs):
         """
@@ -52,13 +61,20 @@ class Plotter(object):
                 self.figure = matplotlib.pyplot.figure(figure)
             else:
                 self.figure = matplotlib.pyplot.figure()
+
+        if self.keyclick is None:
+            self.keyclick = self.figure.canvas.mpl_connect('key_press_event',self.parse_keys)
+
         if len(self.figure.axes) > 0 and self.axis is None:
             self.axis = self.figure.axes[0] # default to first axis
         elif axis is not None:
+            self.figure.canvas.disconnect(self.keyclick)
             self.axis = axis
             self.figure = axis.figure
+            self.keyclick = self.figure.canvas.mpl_connect('key_press_event',self.parse_keys)
         else:
             self.axis = self.figure.gca()
+
 
         if clear: self.axis.clear()
 
@@ -166,3 +182,15 @@ class Plotter(object):
         simple wrapper of maplotlib's savefig.  
         """
         self.axis.figure.savefig(fname,bbox_inches=bbox_inches,**kwargs)
+
+    def parse_keys(self,event):
+        """
+        Parse key commands entered from the keyboard
+        """
+        if hasattr(event,'key'):
+            if event.key == '?':
+                print interactive_help_message
+            elif event.key == 'f':
+                self.Spectrum.specfit(interactive=True)
+            elif event.key == 'b':
+                self.Spectrum.baseline(interactive=True)

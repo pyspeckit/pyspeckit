@@ -1,12 +1,12 @@
 import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure
-from config import *
 import numpy as np
 import pyfits
 import cubes
 try:
     import aplpy
+    icanhasaplpy = True
 except ImportError:
     icanhasaplpy = False
 
@@ -20,15 +20,13 @@ class MapPlotter(object):
         Create a map figure for future plotting
         """
         # figure out where to put the plot
-        if self.figure is None:
-            if isinstance(figure,matplotlib.figure.Figure):
-                self.figure = figure
-            elif type(figure) is int:
-                self.figure = matplotlib.pyplot.figure(figure)
-            else:
-                self.figure = matplotlib.pyplot.figure()
-
-        self.axis = self.figure.add_subplot(111)
+        if isinstance(figure,matplotlib.figure.Figure):
+            self.figure = figure
+        elif type(figure) is int:
+            self.figure = matplotlib.pyplot.figure(figure)
+        else:
+            self.figure = matplotlib.pyplot.figure()
+        self.axis = None
 
         self.Cube = Cube
 
@@ -52,19 +50,20 @@ class MapPlotter(object):
             elif estimator[-5:] == ".fits":
                 plane = pyfits.getdata(estimator)
 
-#    def mapplot(plane,cube,vconv=lambda x: x,xtora=lambda x: x,ytodec=lambda x: x, gaiafignum=0, specfignum=1):
-        
         if icanhasaplpy:
+            self.figure.clf()
             self.fitsfile = pyfits.PrimaryHDU(data=plane,header=cubes.flatten_header(self.Cube.header))
             self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure)
             self.FITSFigure.show_colorscale()
             self.axis = self.FITSFigure._ax1
         else:
+            if self.axis is None:
+                self.axis = self.figure.add_subplot(111)
             self.axis.imshow(plane)
 
         self.canvas = self.axis.figure.canvas
 
-        sp.clickid = self.canvas.mpl_connect('button_press_event',self.plot_spectrum)
+        self.clickid = self.canvas.mpl_connect('button_press_event',self.plot_spectrum)
 
     def plot_spectrum(self, event):
         """
@@ -80,10 +79,10 @@ class MapPlotter(object):
               return
           elif event.button==1:
               print "Plotting spectrum from point %i,%i" % (clickX,clickY)
-              self.Cube.plot_spectrum(clickY,clickX,button=event.button,clear=True)
+              self.Cube.plot_spectrum(clickY,clickX,clear=True)
           elif event.button==2:
               print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
-              self.Cube.plot_spectrum(clickY,clickX,button=event.button,clear=False)
+              self.Cube.plot_spectrum(clickY,clickX,clear=False)
           elif event.button==3:
               print "Disconnecting GAIA-like tool"
               self.canvas.mpl_disconnect(self.clickid)
