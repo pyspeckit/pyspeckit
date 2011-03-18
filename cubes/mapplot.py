@@ -19,7 +19,7 @@ class MapPlotter(object):
     Class to plot a spectrum
     """
 
-    def __init__(self, Cube=None, figure=None, **kwargs):
+    def __init__(self, Cube=None, figure=None, doplot=False, **kwargs):
         """
         Create a map figure for future plotting
         """
@@ -34,7 +34,7 @@ class MapPlotter(object):
 
         self.Cube = Cube
 
-        self.mapplot(**kwargs)
+        if doplot: self.mapplot(**kwargs)
 
     def mapplot(self, estimator=np.mean, **kwargs):
         """
