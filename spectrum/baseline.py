@@ -1,6 +1,11 @@
 import numpy as np
 import matplotlib
 
+interactive_help_message = """
+Left-click twice to select or add to the baseline fitting range.  Middle or
+right click to disconnect and perform the fit.
+"""
+
 class Baseline:
     def __init__(self,Spectrum):
         self.baselinepars  = None
@@ -54,6 +59,7 @@ class Baseline:
             self.spectofit = np.copy(self.Spectrum.data)
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:
+            print interactive_help_message
             self.excludemask[:] = True
             self.excludevelo = []
             self.excludepix  = []
@@ -140,34 +146,38 @@ class Baseline:
         """
         select regions for baseline fitting
         """
-        if event.button == 1:
-            if self.nclicks_b1 == 0:
-                self.bx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
-                self.excludevelo += [self.Spectrum.xarr]
-                self.excludepix  += [self.bx1]
-                self.nclicks_b1 += 1
-            elif self.nclicks_b1 == 1:
-                self.bx2 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
-                self.nclicks_b1 -= 1
-                if self.bx1 > self.bx2: self.bx1,self.bx2 = self.bx2,self.bx1
-                self.fitregion += self.specplotter.axis.plot(
-                        self.Spectrum.xarr[self.bx1:self.bx2],
-                        self.Spectrum.data[self.bx1:self.bx2]+self.specplotter.offset,
-                        drawstyle='steps-mid',
-                        color='g',alpha=0.5)
-                self.specplotter.plot(**self.specplotter.plotkwargs)
+        if hasattr(event,'button'):
+            if event.button == 1:
+                if self.nclicks_b1 == 0:
+                    self.bx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
+                    self.excludevelo += [self.Spectrum.xarr]
+                    self.excludepix  += [self.bx1]
+                    self.nclicks_b1 += 1
+                elif self.nclicks_b1 == 1:
+                    self.bx2 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
+                    self.nclicks_b1 -= 1
+                    if self.bx1 > self.bx2: self.bx1,self.bx2 = self.bx2,self.bx1
+                    self.fitregion += self.specplotter.axis.plot(
+                            self.Spectrum.xarr[self.bx1:self.bx2],
+                            self.Spectrum.data[self.bx1:self.bx2]+self.specplotter.offset,
+                            drawstyle='steps-mid',
+                            color='g',alpha=0.5)
+                    self.specplotter.plot(**self.specplotter.plotkwargs)
+                    self.specplotter.refresh()
+                    self.excludemask[self.bx1:self.bx2] = False
+                    self.excludevelo += [self.Spectrum.xarr]
+                    self.excludepix  += [self.bx2]
+            if event.button in [2,3]:
+                self.specplotter.figure.canvas.mpl_disconnect(self.click)
+                self.dofit(exclude=None,annotate=annotate)
+                for p in self.fitregion:
+                    p.set_visible(False)
+                    self.specplotter.axis.lines.remove(p)
+                self.fitregion=[] # I should be able to just remove from the list... but it breaks the loop...
                 self.specplotter.refresh()
-                self.excludemask[self.bx1:self.bx2] = False
-                self.excludevelo += [self.Spectrum.xarr]
-                self.excludepix  += [self.bx2]
-        if event.button in [2,3]:
-            disconnect(self.click)
-            self.dofit(exclude=None,annotate=annotate)
-            for p in self.fitregion:
-                p.set_visible(False)
-                self.specplotter.axis.lines.remove(p)
-            self.fitregion=[] # I should be able to just remove from the list... but it breaks the loop...
-            self.specplotter.refresh()
+        elif hasattr(event,'key'):
+            if event.key == '?':
+                print interactive_help_message
 
     def selectregion(self,xmin=None,xmax=None,xtype='wcs', highlight=False, **kwargs):
         """

@@ -1,6 +1,9 @@
 import readers,fitters,plotters,baseline,units
 from spectrum import Spectrum,Spectra
 import smooth
+import logger
+import config
+Logger = logger.Logger(config.spcfg.cfg['logfile'])
 
 def register_fitter(name, function, npars, multisingle='single',
         override=False):

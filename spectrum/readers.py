@@ -60,7 +60,7 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
         for ii in xrange(2,hdr.get('NAXIS')):
             # only fail if extra axes have more than one row
             if hdr.get('NAXIS%i' % ii) > 1:
-                raise ValueError("Too many axes for open_1d_fits instead")
+                raise ValueError("Too many axes for open_1d_fits")
     if hdr.get('ORIGIN') == 'CLASS-Grenoble':
         # Use the CLASS FITS definition (which is non-standard)
         # http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node84.html
@@ -83,7 +83,6 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
         xarr = xconv(np.arange(len(spec)))
 
     XAxis = make_axis(xarr,hdr,wcstype=wcstype,**kwargs)
-
 
     return spec,errspec,XAxis,hdr
 
@@ -115,3 +114,4 @@ def make_axis(xarr,hdr,specname=None, wcstype=''):
     XAxis = units.SpectroscopicAxis(xarr,xunits,xtype=xtype,reffreq=reffreq)
 
     return XAxis
+
