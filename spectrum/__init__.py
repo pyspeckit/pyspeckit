@@ -1,9 +1,8 @@
-import readers,fitters,plotters,baseline,units
+import fitters,plotters,baseline,units
 from spectrum import Spectrum,Spectra
 import smooth
 import logger
 import config
-#Logger = logger.Logger(config.spcfg.cfg['logfile'])
 
 def register_fitter(name, function, npars, multisingle='single',
         override=False, key=None):
@@ -44,7 +43,7 @@ def register_fitter(name, function, npars, multisingle='single',
     elif multisingle == 'multi':
         if not name in fitters.multifitters or override:
             fitters.multifitters[name] = function
-    else:
+    elif name in fitters.singlefitters or name in fitters.multifitters:
         raise Exception("Fitting function %s is already defined" % name)
 
     if key is not None:
@@ -59,3 +58,40 @@ register_fitter('gaussian',models.gaussian_fitter(multisingle='multi'),3,multisi
 register_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
 register_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
 register_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
+
+def register_reader(filetype, function, suffix, default=False):
+    ''' 
+    Register a reader function.
+
+    Required Arguments:
+
+        *filetype*: [ string ]
+            The file type name
+
+        *function*: [ function ]
+            The reader function.  Should take a filename as input
+            and return an X-axis object (see units.py), a spectrum,
+            an error spectrum (initialize it to 0's if empty), and a
+            pyfits header instance
+
+        *suffix*: [ int ]
+            What suffix should the file have?
+
+    Optional Keyword Arguments:
+
+    '''
+
+    readers.readers[filetype] = function
+    if suffix in readers.suffix_types:
+        if default:
+            readers.suffix_types[suffix].insert(0,filetype)
+        else:
+            readers.suffix_types[suffix].append(filetype)
+    else: # if it's the first, it defaults to default!
+        readers.suffix_types[suffix] = [filetype]
+
+import readers
+register_reader('fits',readers.open_1d_fits,'fits',default=True)
+register_reader('fits',readers.open_1d_fits,'fit')
+register_reader('txt',readers.open_1d_txt,'txt')
+register_reader('tspec',readers.open_1d_fits,'fits')

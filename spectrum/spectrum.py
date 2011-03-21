@@ -20,7 +20,7 @@ class Spectrum(object):
         -perform fourier transforms and operations in fourier space on a spectrum
     """
 
-    def __init__(self,filename, **kwargs):
+    def __init__(self,filename, filetype=None, **kwargs):
         """
         Initialize the Spectrum.  Accepts files in the following formats:
             - .fits
@@ -31,16 +31,26 @@ class Spectrum(object):
         how to automatically determine which subclass to use yet.
         """
 
+        if filetype is None:
+            suffix = filename.rsplit('.',1)[1]
+            if readers.suffix_types.has_key(suffix):
+                # use the default reader for that suffix
+                filetype = readers.suffix_types[suffix][0]
+                reader = readers.readers[filetype]
+            else:
+                raise TypeError("File with suffix %s is not recognized." % suffix)
+        else:
+            if filetype in readers.readers:
+                reader = readers.readers[filetype]
+            else:
+                raise TypeError("Filetype %s not recognized" % filetype)
 
-        if ".fit" in filename: # allow .fit or .fits
-            try: 
-                self.data,self.error,self.xarr,self.header = readers.open_1d_fits(filename, **kwargs)
-                self.parse_header(self.header)
-            except TypeError as inst:
-                print "Failed to read fits file."
-                print inst
-        elif ".txt" in filename:
-            self.xarr,self.data,self.error,self.Table = readers.open_1d_txt(filename, **kwargs)
+        self.data,self.error,self.xarr,self.header = reader(filename)
+
+        # these should probably be replaced with registerable functions...
+        if filetype is 'fits':
+            self.parse_header(self.header)
+        elif filetype is 'txt':
             self.parse_text_header(self.Table)
 
         self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
