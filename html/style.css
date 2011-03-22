@@ -217,3 +217,10 @@ a.norm:active	{ color:#FF3300; }
     font-size: 12px;
     border: solid 1px Lightgrey;
 }
+ul.NoBullet {
+  list-style-type: none}
+ul.NoBulletNoIndent {
+  list-style-type: none;
+  margin-left: 0px;
+  padding-left: 0px
+}
