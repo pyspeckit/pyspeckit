@@ -4,11 +4,11 @@ sp = spectrum.Spectrum('G031.947+00.076_nh3_11_Tastar.fits')#,wcstype='F')
 
 #sp.plotter(xmin=2.36875e10,xmax=2.36924e10) 
 sp.plotter(xmin=-100,xmax=300)
-import pylab; pylab.show()
+import pylab; pylab.ioff(); pylab.draw()
 raw_input("Plotter")
 sp.smooth(2)
 sp.plotter(xmin=-100,xmax=300)
-import pylab; pylab.show()
+import pylab; pylab.ioff(); pylab.draw()
 raw_input("Plotter (smooth)")
 
 sp.specfit(negamp=False)

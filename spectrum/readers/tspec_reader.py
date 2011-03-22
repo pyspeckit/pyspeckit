@@ -1,6 +1,6 @@
 import pyfits
-import units
-import readers
+import spectrum.units as units
+import numpy as np
 
 def tspec_reader(filename):
     """ 

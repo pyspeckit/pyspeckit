@@ -59,6 +59,7 @@ register_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multis
 register_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
 register_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
 
+import readers
 def register_reader(filetype, function, suffix, default=False):
     ''' 
     Register a reader function.
@@ -90,7 +91,6 @@ def register_reader(filetype, function, suffix, default=False):
     else: # if it's the first, it defaults to default!
         readers.suffix_types[suffix] = [filetype]
 
-import readers
 register_reader('fits',readers.open_1d_fits,'fits',default=True)
 register_reader('fits',readers.open_1d_fits,'fit')
 register_reader('txt',readers.open_1d_txt,'txt')

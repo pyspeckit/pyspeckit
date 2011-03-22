@@ -1,8 +1,4 @@
-from fits_reader import open_1d_fits
-from tspec_reader import tspec_reader
-from txt_reader import open_1d_txt
-
-import units
+import spectrum.units as units
 import numpy as np
 import numpy.ma as ma
 
@@ -38,3 +34,6 @@ def make_axis(xarr,hdr,specname=None, wcstype=''):
 
     return XAxis
 
+from fits_reader import open_1d_fits
+from tspec_reader import tspec_reader
+from txt_reader import open_1d_txt

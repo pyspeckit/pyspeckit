@@ -1,6 +1,5 @@
 import atpy
-import units
-import readers
+import spectrum.units as units
 
 def open_1d_txt(filename):
     T = atpy.Table(filename, type='ascii',
