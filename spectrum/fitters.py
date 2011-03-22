@@ -238,8 +238,11 @@ class Specfit(object):
         self.chi2 = chi2
         self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]
         self.model = model * scalefactor
-        self.modelpars = (scalefactor*mpp).tolist()
-        self.modelerrs = (scalefactor*mpperr).tolist()
+        for ii in xrange(self.npeaks): # assume first parameter is amplitude
+            self.modelpars[self.fitter.npars*ii] /= scalefactor
+            self.modelerrs[self.fitter.npars*ii] /= scalefactor
+        self.modelpars = mpp.tolist()
+        self.modelerrs = mpperr.tolist()
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.specplotter.axis is not None:
             self.plot_fit()
@@ -300,6 +303,10 @@ class Specfit(object):
             self.model = model*scalefactor - mpp[0]*scalefactor
         else: self.model = model*scalefactor
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model*scalefactor
+        self.modelpars[0] /= scalefactor
+        self.modelerrs[0] /= scalefactor
+        self.modelpars[1] /= scalefactor
+        self.modelerrs[1] /= scalefactor
         self.modelpars = (scalefactor*mpp[1:]).tolist()
         self.modelerrs = (scalefactor*mpperr[1:]).tolist()
         if self.specplotter.axis is not None:
