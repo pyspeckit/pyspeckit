@@ -1,6 +1,7 @@
 import pyfits
 import spectrum.units as units
 import numpy as np
+import numpy.ma as ma
 
 def tspec_reader(filename):
     """ 
@@ -10,29 +11,31 @@ def tspec_reader(filename):
 
     AFAIK, Spextool will use the INSTR keyword, IRAF will use INSTRUME
     """
-    fitsfile = pysits.open(filename)
+    fitsfile = pyfits.open(filename)
     header = fitsfile[0].header
     data = fitsfile[0].data
 
     if header.get('INSTR') == 'APO Triplespec':
         # read in SPEXTOOL spectrum
         xarr = data[0,:]
-        spec = data[1,:]
-        errspec = data[2,:]
+        spec = ma.array(data[1,:])
+        spec.mask = spec!=spec
+        errspec = ma.array(data[2,:])
+        errspec.mask = (spec!=spec)+(errspec!=errspec)
         xunits = header.get('XUNITS')
-        units = header.get('YUNITS')
-        header.update('BUNIT',units)
+        unit = header.get('YUNITS')
+        header.update('BUNIT',unit)
         xtype = 'wavelength'
     elif header.get('INSTRUME') == 'tspec':
-        dv,v0,p3 = hdr['CD1_1'],hdr['CRVAL1'],hdr['CRPIX1']
-        hdr.update('CDELT1',dv)
+        dv,v0,p3 = header['CD1_1'],header['CRVAL1'],header['CRPIX1']
+        header.update('CDELT1',dv)
         xconv = lambda v: ((v-p3+1)*dv+v0)
         xarr = xconv(np.arange(len(spec)))
         wat = dict([s.split("=") for s in header.get('WAT1_001').split()])
         xunits = wat['units']
         xtype = wat['label']
-        units = header.get('BUNIT')
+        #unit = header.get('BUNIT')
         
-    XAxis = units.SpectroscopicAxis(xarr,xunits,xtype=xtype,reffreq=reffreq)
+    XAxis = units.SpectroscopicAxis(xarr,xunits,xtype=xtype)
 
-    return spec,errspec,XAxis,hdr
+    return spec,errspec,XAxis,header

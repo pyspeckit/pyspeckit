@@ -94,4 +94,4 @@ def register_reader(filetype, function, suffix, default=False):
 register_reader('fits',readers.open_1d_fits,'fits',default=True)
 register_reader('fits',readers.open_1d_fits,'fit')
 register_reader('txt',readers.open_1d_txt,'txt')
-register_reader('tspec',readers.open_1d_fits,'fits')
+register_reader('tspec',readers.tspec_reader,'fits')

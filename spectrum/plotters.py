@@ -171,7 +171,8 @@ class Plotter(object):
         elif self.Spectrum.units == 'Jy':
             self.axis.set_ylabel("$S_\\nu$ (Jy)")
         else:
-            self.axis.set_ylabel(self.Spectrum.units)
+            label_units = parse_units(self.Spectrum.units)
+            self.axis.set_ylabel(label_units)
 
     def refresh(self):
         if self.axis is not None:
@@ -194,3 +195,12 @@ class Plotter(object):
                 self.Spectrum.specfit(interactive=True)
             elif event.key == 'b':
                 self.Spectrum.baseline(interactive=True)
+
+def parse_units(labelstring):
+    import re
+    labelstring = re.sub("um","$\mu$m",labelstring)
+    labelstring = re.sub("-1","$^{-1}$",labelstring)
+    labelstring = re.sub("-2","$^{-2}$",labelstring)
+    labelstring = re.sub("-3","$^{-3}$",labelstring)
+    labelstring = re.sub("ergss","ergs s",labelstring)
+    return labelstring

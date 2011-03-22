@@ -48,7 +48,7 @@ class Spectrum(object):
         self.data,self.error,self.xarr,self.header = reader(filename)
 
         # these should probably be replaced with registerable functions...
-        if filetype is 'fits':
+        if filetype in ('fits','tspec'):
             self.parse_header(self.header)
         elif filetype is 'txt':
             self.parse_text_header(self.Table)
