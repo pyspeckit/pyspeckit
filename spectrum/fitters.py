@@ -239,8 +239,8 @@ class Specfit(object):
         self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]
         self.model = model * scalefactor
         for ii in xrange(self.npeaks): # assume first parameter is amplitude
-            self.modelpars[self.fitter.npars*ii] /= scalefactor
-            self.modelerrs[self.fitter.npars*ii] /= scalefactor
+            mpp[self.fitter.npars*ii]    *= scalefactor
+            mpperr[self.fitter.npars*ii] *= scalefactor
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
@@ -303,12 +303,12 @@ class Specfit(object):
             self.model = model*scalefactor - mpp[0]*scalefactor
         else: self.model = model*scalefactor
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model*scalefactor
-        self.modelpars[0] /= scalefactor
-        self.modelerrs[0] /= scalefactor
-        self.modelpars[1] /= scalefactor
-        self.modelerrs[1] /= scalefactor
-        self.modelpars = (scalefactor*mpp[1:]).tolist()
-        self.modelerrs = (scalefactor*mpperr[1:]).tolist()
+        self.modelpars = mpp[1:].tolist()
+        self.modelerrs = mpperr[1:].tolist()
+        self.modelpars[0] *= scalefactor
+        self.modelerrs[0] *= scalefactor
+        self.modelpars[1] *= scalefactor
+        self.modelerrs[1] *= scalefactor
         if self.specplotter.axis is not None:
             self.plot_fit()
             if annotate:
