@@ -34,6 +34,26 @@ def make_axis(xarr,hdr,specname=None, wcstype=''):
 
     return XAxis
 
-from fits_reader import open_1d_fits
-from tspec_reader import tspec_reader
-from txt_reader import open_1d_txt
+class ReaderError(Exception):
+    pass
+
+def check_reader(func):
+    def reader(*args,**kwargs):
+        returns = func(*args,**kwargs)
+        if len(returns) != 4:
+            raise ReaderError("Error: reader returns %i parameters instead of 4." % len(returns))
+        else:
+            data,error,xarr,header = returns
+            if data.shape != error.shape:
+                raise ValueError("Data and error spectra shapes do not match.")
+            if data.shape != xarr.shape:
+                raise ValueError("Data and X-axis shapes do not match.")
+        return returns
+    return reader
+
+import fits_reader
+open_1d_fits = check_reader(fits_reader.open_1d_fits)
+import tspec_reader
+tspec_reader = check_reader(tspec_reader.tspec_reader)
+import txt_reader
+open_1d_txt = check_reader(txt_reader.open_1d_txt)

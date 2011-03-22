@@ -19,25 +19,31 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
     """
     f = pyfits.open(filename)
     hdr = f[0].header
-    spec = ma.array(f[0].data).squeeze()
-    if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data
+
     if hdr.get('NAXIS') == 2:
-        if errspecnum is not None:
-            errspec = spec[errspecnum,:]
         if isinstance(specnum,list):
             # allow averaging of multiple spectra (this should be modified
             # - each spectrum should be a Spectrum instance)
-            spec = spec[specnum,:].mean(axis=0)
+            spec = ma.array(f[0].data[specnum,:]).mean(axis=0)
         elif isinstance(specnum,int):
-            spec = spec[specnum,:]
+            spec = ma.array(f[0].data[specnum,:]).squeeze()
         else:
             raise TypeError("Specnum is of wrong type (not a list of integers or an integer).  Type: %s" %
                     str(type(specnum)))
+        if errspecnum is not None:
+            errspec = ma.array(f[0].data[errspecnum,:]).squeeze()
+        else:
+            errspec = spec*0 # set error spectrum to zero if it's not in the data
+
     elif hdr.get('NAXIS') > 2:
         for ii in xrange(2,hdr.get('NAXIS')):
             # only fail if extra axes have more than one row
             if hdr.get('NAXIS%i' % ii) > 1:
                 raise ValueError("Too many axes for open_1d_fits")
+    else:
+        spec = ma.array(f[0].data).squeeze()
+        if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data
+
     if hdr.get('ORIGIN') == 'CLASS-Grenoble':
         # Use the CLASS FITS definition (which is non-standard)
         # http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node84.html

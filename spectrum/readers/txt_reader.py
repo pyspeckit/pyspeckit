@@ -21,5 +21,5 @@ def open_1d_txt(filename):
 
     XAxis = units.SpectroscopicAxis(xarr,xunits)
 
-    return XAxis,data,error,T
+    return data,error,XAxis,T
 

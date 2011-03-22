@@ -1,5 +1,6 @@
 import numpy as np
 import smooth as sm
+import pyfits
 import readers,fitters,plotters,writers,baseline,units,speclines
 
 
@@ -51,7 +52,7 @@ class Spectrum(object):
         if filetype in ('fits','tspec'):
             self.parse_header(self.header)
         elif filetype is 'txt':
-            self.parse_text_header(self.Table)
+            self.parse_text_header(self.header)
 
         self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
         self.plotter = plotters.Plotter(self)
@@ -63,10 +64,16 @@ class Spectrum(object):
         """
         Grab relevant parameters from a table header (xaxis type, etc)
         """
-        self.xtype = Table.data.dtype.names[0]
-        self.xunits = Table.columns[self.xtype].unit
+        self.Table = Table
+        self.xarr.xtype = Table.data.dtype.names[0]
+        self.xarr.xunits = Table.columns[self.xarr.xtype].unit
         self.ytype = Table.data.dtype.names[1]
         self.units = Table.columns[self.ytype].unit
+        self.header = pyfits.Header()
+        self.header.update('CUNIT1',self.xarr.xunits)
+        self.header.update('CTYPE1',self.xarr.xtype)
+        self.header.update('BUNIT',self.units)
+        self.header.update('BTYPE',self.ytype)
 
     def parse_header(self,hdr,specname=None, wcstype=''):
         """
