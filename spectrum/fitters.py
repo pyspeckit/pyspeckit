@@ -110,6 +110,7 @@ class Specfit(object):
             else:
                 self.guesses = guesses
                 self.multifit(fittype=fittype)
+        # SINGLEFITTERS SHOULD BE PHASED OUT
         elif fittype in singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
             if self.Spectrum.baseline.order is None:
