@@ -132,8 +132,10 @@ class Baseline:
                 self.specplotter.axis.lines.remove(p)
         if self.specplotter.errorplot is not None: 
             for p in self.specplotter.errorplot:
-                if isinstance(p,matplotlib.collections.PolyCollection): self.specplotter.axis.collections.remove(p)
-                if isinstance(p,matplotlib.lines.Line2D): self.specplotter.axis.lines.remove(p) 
+                if isinstance(p,matplotlib.collections.PolyCollection):
+                    if p in self.specplotter.axis.collections: self.specplotter.axis.collections.remove(p)
+                if isinstance(p,matplotlib.lines.Line2D):
+                    if p in self.specplotter.axis.lines: self.specplotter.axis.lines.remove(p)
 
         if self.subtracted is False:
             self.specplotter.axis.plot(self.Spectrum.xarr,self.basespec,color=plotcolor)

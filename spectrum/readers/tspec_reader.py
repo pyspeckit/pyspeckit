@@ -17,10 +17,10 @@ def tspec_reader(filename):
 
     if header.get('INSTR') == 'APO Triplespec':
         # read in SPEXTOOL spectrum
-        xarr = data[0,:]
-        spec = ma.array(data[1,:])
+        xarr = np.array(data[0,:],dtype='float64')
+        spec = ma.array(data[1,:],dtype='float64')
         spec.mask = spec!=spec
-        errspec = ma.array(data[2,:])
+        errspec = ma.array(data[2,:],dtype='float64')
         errspec.mask = (spec!=spec)+(errspec!=errspec)
         xunits = header.get('XUNITS')
         unit = header.get('YUNITS')
