@@ -262,7 +262,7 @@ class ammonia_model(object):
                     parlist[:] = [0,0,0,0,0,1] * npeaks
 
         def mpfitfun(x,y,err):
-            if err == None:
+            if err is None:
                 def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, **kwargs)(x))]
             else:
                 def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, **kwargs)(x))/err]

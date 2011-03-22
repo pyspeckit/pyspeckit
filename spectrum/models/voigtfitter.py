@@ -151,7 +151,7 @@ class voigt_fitter(object):
         """
 
         def mpfitfun(x,y,err):
-            if err == None:
+            if err is None:
                 def f(p,fjac=None): return [0,(y-self.n_voigt(pars=p[1:])(x)+p[0])]
             else:
                 def f(p,fjac=None): return [0,(y-self.n_voigt(pars=p[1:])(x)+p[0])/err]
@@ -199,7 +199,7 @@ class voigt_fitter(object):
         return mpp,self.n_voigt(pars=mpp[1:])(xax),mpperr,chi2
 
 
-    def multivoigtfit(self,xax, data, nvoigt=1, err=None, params=[1,0,1,1],
+    def multivoigtfit(self,xax, data, npeaks=1, err=None, params=[1,0,1,1],
             fixed=[False,False,False,False],
             limitedmin=[False,False,True,True],
             limitedmax=[False,False,False,False], minpars=[0,0,0,0],
@@ -210,13 +210,13 @@ class voigt_fitter(object):
         Inputs:
            xax - x axis
            data - y axis
-           nvoigt - How many voigt profiles to fit?  Default 1 (this could supersede onedgaussfit)
+           npeaks - How many voigt profiles to fit?  Default 1 (this could supersede onedgaussfit)
            err - error corresponding to data
 
-         These parameters need to have length = 3*nvoigt.  If nvoigt > 1 and length = 3, they will
-         be replicated nvoigt times, otherwise they will be reset to defaults:
-           params - Fit parameters: [amplitude, offset, Gfwhm, Lfwhm] * nvoigt
-                  If len(params) % 4 == 0, nvoigt will be set to len(params) / 3
+         These parameters need to have length = 3*npeaks.  If npeaks > 1 and length = 3, they will
+         be replicated npeaks times, otherwise they will be reset to defaults:
+           params - Fit parameters: [amplitude, offset, Gfwhm, Lfwhm] * npeaks
+                  If len(params) % 4 == 0, npeaks will be set to len(params) / 3
            fixed - Is parameter fixed?
            limitedmin/minpars - set lower limits on each parameter (default: width>0)
            limitedmax/maxpars - set upper limits on each parameter
@@ -231,30 +231,30 @@ class voigt_fitter(object):
            chi2
         """
 
-        if len(params) != nvoigt and (len(params) / 4) > nvoigt:
-            nvoigt = len(params) / 4 
-        self.npeaks = nvoigt
+        if len(params) != npeaks and (len(params) / 4) > npeaks:
+            npeaks = len(params) / 4 
+        self.npeaks = npeaks
 
         if isinstance(params,numpy.ndarray): params=params.tolist()
 
         # make sure all various things are the right length; if they're not, fix them using the defaults
         for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars):
-            if len(parlist) != 4*nvoigt:
+            if len(parlist) != 4*npeaks:
                 # if you leave the defaults, or enter something that can be multiplied by 3 to get to the
                 # right number of gaussians, it will just replicate
                 if len(parlist) == 4: 
-                    parlist *= nvoigt 
+                    parlist *= npeaks 
                 elif parlist==params:
-                    parlist[:] = [1,0,1,1] * nvoigt
+                    parlist[:] = [1,0,1,1] * npeaks
                 elif parlist==fixed or parlist==limitedmax:
-                    parlist[:] = [False,False,False,False] * nvoigt
+                    parlist[:] = [False,False,False,False] * npeaks
                 elif parlist==limitedmin:
-                    parlist[:] = [False,False,True,True] * nvoigt
+                    parlist[:] = [False,False,True,True] * npeaks
                 elif parlist==minpars or parlist==maxpars:
-                    parlist[:] = [0,0,0,0] * nvoigt
+                    parlist[:] = [0,0,0,0] * npeaks
 
         def mpfitfun(x,y,err):
-            if err == None:
+            if err is None:
                 def f(p,fjac=None): return [0,(y-self.n_voigt(pars=p)(x))]
             else:
                 def f(p,fjac=None): return [0,(y-self.n_voigt(pars=p)(x))/err]
