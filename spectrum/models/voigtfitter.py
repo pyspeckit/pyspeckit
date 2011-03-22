@@ -185,6 +185,7 @@ class voigt_fitter(object):
             raise Exception(mp.errmsg)
 
         if (not shh) or veryverbose:
+            print "Fit message ",mp.errmsg
             print "Fit status: ",mp.status
             for i,p in enumerate(mpp):
                 parinfo[i]['value'] = p
@@ -267,7 +268,7 @@ class voigt_fitter(object):
         parinfo = [ {'n':ii, 'value':params[ii],
             'limits':[minpars[ii],maxpars[ii]],
             'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-            'parname':parnames[ii%4]+str(ii%4), 'error':ii} 
+            'parname':parnames[ii%4]+str(ii/4), 'error':ii} 
             for ii in xrange(len(params)) ]
 
         if veryverbose:
@@ -284,6 +285,7 @@ class voigt_fitter(object):
             raise Exception(mp.errmsg)
 
         if not shh:
+            print "Fit message ",mp.errmsg
             print "Final fit values: "
             for i,p in enumerate(mpp):
                 parinfo[i]['value'] = p

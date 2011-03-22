@@ -82,7 +82,8 @@ class Plotter(object):
 
     def plot(self, offset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
             xmin=None, xmax=None, ymin=None, ymax=None, reset_xlimits=False,
-            reset_ylimits=False, ypeakscale=1.2, **kwargs):
+            reset_ylimits=False, ypeakscale=1.2, errstyle=None, erralpha=0.2,
+            **kwargs):
         """
         Plot the spectrum!
 
@@ -116,6 +117,16 @@ class Plotter(object):
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr,
                 self.Spectrum.data+self.offset, color=color,
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
+        if errstyle is not None:
+            if errstyle == 'fill':
+                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr,isX=True),
+                        steppify(self.Spectrum.data+self.offset-self.Spectrum.error),
+                        steppify(self.Spectrum.data+self.offset+self.Spectrum.error),
+                        facecolor=color, alpha=erralpha, **kwargs)]
+            elif errstyle == 'bars':
+                self.errorplot = axis.errorbar(self.Spectrum.xarr, self.Spectrum.data+self.offset,
+                        yerr=self.Spectrum.error, ecolor=color, fmt=None,
+                        **kwargs)
 
         if (self.Spectrum.xarr.max() < self.xmin or self.Spectrum.xarr.min() > self.xmax 
                 or reset_xlimits):
@@ -204,3 +215,16 @@ def parse_units(labelstring):
     labelstring = re.sub("-3","$^{-3}$",labelstring)
     labelstring = re.sub("ergss","ergs s",labelstring)
     return labelstring
+
+def steppify(arr,isX=False):
+    """
+    *support function*
+    Converts an array to double-length for step plotting
+    """
+    if isX:
+        interval = abs(arr[1:]-arr[:-1]) / 2.0
+        newarr = np.array(zip(arr[:-1]-interval,arr[:-1]+interval)).ravel()
+        newarr = np.concatenate([newarr,2*[newarr[-1]+interval[-1]]])
+    else:
+        newarr = np.array(zip(arr,arr)).ravel()
+    return newarr

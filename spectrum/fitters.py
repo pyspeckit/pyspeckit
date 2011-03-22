@@ -215,7 +215,7 @@ class Specfit(object):
         if renormalize in ('auto',True):
             datarange = self.spectofit[self.gx1:self.gx2].max() - self.spectofit[self.gx1:self.gx2].min()
             if abs(datarange) < 1e-9:
-                scalefactor = np.median(self.spectofit)
+                scalefactor = np.median(np.abs(self.spectofit))
                 print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor
@@ -275,7 +275,7 @@ class Specfit(object):
         if renormalize in ('auto',True):
             datarange = self.spectofit[self.gx1:self.gx2].max() - self.spectofit[self.gx1:self.gx2].min()
             if abs(datarange) < 1e-9:
-                scalefactor = np.median(self.spectofit)
+                scalefactor = np.median(np.abs(self.spectofit))
                 print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor

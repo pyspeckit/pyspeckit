@@ -7,6 +7,7 @@ from numpy.ma import median
 from numpy import pi
 from mpfit import mpfit
 import matplotlib.cbook as mpcb
+from . import mpfit_messages
 
 class gaussian_fitter(object):
 
@@ -91,7 +92,7 @@ class gaussian_fitter(object):
             maxpars=[0,0,0,0], quiet=True, shh=True,
             veryverbose=False,
             vheight=True, negamp=False,
-            usemoments=False):
+            usemoments=False,**kwargs):
         """
         Inputs:
            xax - x axis
@@ -105,6 +106,8 @@ class gaussian_fitter(object):
            quiet - should MPFIT output each iteration?
            shh - output final parameters?
            usemoments - replace default parameters with moments
+
+           kwargs are passed to mpfit
 
         Returns:
            Fit parameters
@@ -136,7 +139,7 @@ class gaussian_fitter(object):
                     {'n':2,'value':params[2],'limits':[minpars[2],maxpars[2]],'limited':[limitedmin[2],limitedmax[2]],'fixed':fixed[2],'parname':"SHIFT",'error':0},
                     {'n':3,'value':params[3],'limits':[minpars[3],maxpars[3]],'limited':[limitedmin[3],limitedmax[3]],'fixed':fixed[3],'parname':"WIDTH",'error':0}]
 
-        mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet)
+        mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
         mpp = mp.params
         if mp.perror is not None: mpperr = mp.perror
         else: mpperr = mpp*0
@@ -147,6 +150,8 @@ class gaussian_fitter(object):
 
         if (not shh) or veryverbose:
             print "Fit status: ",mp.status
+            print "Fit error message: ",mp.errmsg
+            print "Fit message: ",mpfit_messages[mp.status]
             for i,p in enumerate(mpp):
                 parinfo[i]['value'] = p
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
@@ -189,7 +194,7 @@ class gaussian_fitter(object):
     def multigaussfit(self, xax, data, npeaks=1, err=None, params=[1,0,1],
             fixed=[False,False,False], limitedmin=[False,False,True],
             limitedmax=[False,False,False], minpars=[0,0,0], maxpars=[0,0,0],
-            quiet=True, shh=True, veryverbose=False):
+            quiet=True, shh=True, veryverbose=False, **kwargs):
         """
         An improvement on onepeakgaussfit.  Lets you fit multiple gaussians.
 
@@ -209,6 +214,8 @@ class gaussian_fitter(object):
 
            quiet - should MPFIT output each iteration?
            shh - output final parameters?
+
+           kwargs are passed to mpfit
 
         Returns:
            Fit parameters
@@ -255,14 +262,14 @@ class gaussian_fitter(object):
         parinfo = [ {'n':ii, 'value':params[ii],
             'limits':[minpars[ii],maxpars[ii]],
             'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-            'parname':parnames[ii%3]+str(ii%3), 'error':ii} 
+            'parname':parnames[ii%3]+str(ii/3), 'error':ii} 
             for ii in xrange(len(params)) ]
 
         if veryverbose:
             print "GUESSES: "
             print "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
 
-        mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet)
+        mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
         mpp = mp.params
         if mp.perror is not None: mpperr = mp.perror
         else: mpperr = mpp*0
@@ -272,6 +279,9 @@ class gaussian_fitter(object):
             raise Exception(mp.errmsg)
 
         if not shh:
+            print "Fit status: ",mp.status
+            print "Fit error message: ",mp.errmsg
+            print "Fit message: ",mpfit_messages[mp.status]
             print "Final fit values: "
             for i,p in enumerate(mpp):
                 parinfo[i]['value'] = p

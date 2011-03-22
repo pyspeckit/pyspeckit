@@ -293,6 +293,7 @@ class ammonia_model(object):
             raise Exception(mp.errmsg)
 
         if not shh:
+            print "Fit message: ",mp.errmsg
             print "Final fit values: "
             for i,p in enumerate(mpp):
                 parinfo[i]['value'] = p

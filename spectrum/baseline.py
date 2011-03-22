@@ -238,7 +238,7 @@ class Baseline:
                 self.Spectrum.header.update('BLCOEF%0.2i' % (ii),p,comment="Baseline power-law best-fit coefficient x^%i" % (self.order-ii-1))
 
     def _baseline(self,spectrum,xarr=None,xmin='default',xmax='default',order=1,quiet=True,exclude=None,
-            mask=None,**kwargs):
+            mask=None, powerlaw=False, **kwargs):
         """
         Subtract a baseline from a spectrum
         If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum

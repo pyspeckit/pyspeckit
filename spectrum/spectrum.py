@@ -1,6 +1,6 @@
 import numpy as np
 import smooth as sm
-import readers,fitters,plotters,writers,baseline,units
+import readers,fitters,plotters,writers,baseline,units,speclines
 
 
 class Spectrum(object):
@@ -105,7 +105,8 @@ class Spectrum(object):
         # elegant way to do this...
         self.baseline.crop(x1pix,x2pix)
 
-        self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
+        if self.header.get('CRPIX1'):
+            self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
 
     def smooth(self,smooth,**kwargs):
         """

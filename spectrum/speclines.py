@@ -30,5 +30,5 @@ optical_lines = {'line': opt_lines, 'wavelength': opt_waves, 'units': 'Angstrom'
 R = 1.097373 # m^-1 from wikipedia Hydrogen_Spectral_Series
 R = 911.267051 # angstroms
 hydrogen_lines = dict([(n_low,
-    [R*(1./n_low**2-1./n_hi**2) for n_hi in xrange(n_low+1,10)])
+    [R*1./(1./n_low**2-1./n_hi**2) for n_hi in xrange(n_low+1,n_low+10)])
     for n_low in xrange(1,10)])
