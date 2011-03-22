@@ -103,7 +103,7 @@ class Specfit(object):
             self.guesses = []
             self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.makeguess)
             self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',self.makeguess)
-        elif multifit and fittype in multifitters:
+        elif multifit and fittype in multifitters or guesses is not None:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
                 return
@@ -373,6 +373,9 @@ class Specfit(object):
                 linewidth=0.5, color='k', **kwargs)
         if self.specplotter.xmin is not None and self.specplotter.xmax is not None:
             self.residualaxis.set_xlim(self.specplotter.xmin,self.specplotter.xmax)
+        self.residualaxis.set_xlabel(self.specplotter.xlabel)
+        self.residualaxis.set_ylabel(self.specplotter.ylabel)
+        self.residualaxis.set_title("Residuals")
         self.residualaxis.figure.canvas.draw()
 
     def annotate(self,loc='upper right'):
@@ -536,3 +539,9 @@ class Specfit(object):
             self.residuals = self.residuals[::factor]
         self.spectofit = self.spectofit[::factor]
         self.errspec = self.errspec[::factor]
+
+    def crop(self,x1pix,x2pix):
+        """
+        When spectrum.crop is called, this must be too
+        """
+        self.model = self.model[x1pix:x2pix]

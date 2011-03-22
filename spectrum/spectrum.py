@@ -111,6 +111,7 @@ class Spectrum(object):
         # this is needed to prevent size mismatches.  There may be a more
         # elegant way to do this...
         self.baseline.crop(x1pix,x2pix)
+        self.specfit.crop(x1pix,x2pix)
 
         if self.header.get('CRPIX1'):
             self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
