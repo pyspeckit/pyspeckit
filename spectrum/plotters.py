@@ -140,7 +140,7 @@ class Plotter(object):
         if ymin is not None: self.ymin = ymin
         elif self.ymin is None: self.ymin=self.Spectrum.data[xpixmin:xpixmax].min()
         if ymax is not None: self.ymax = ymax
-        elif self.ymax is None: self.ymax=self.Spectrum.data[xpixmin:xpixmax].max() * ypeakscale
+        elif self.ymax is None: self.ymax=(self.Spectrum.data[xpixmin:xpixmax].max()-self.ymin) * ypeakscale + self.ymin
         self.axis.set_ylim(self.ymin,self.ymax)
         
         if self.autorefresh: self.refresh()

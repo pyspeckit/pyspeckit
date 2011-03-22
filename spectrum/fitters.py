@@ -95,6 +95,8 @@ class Specfit(object):
         if interactive:
             if self.specplotter.axis is None:
                 raise Exception("Interactive fitting requires a plotter.")
+            else:
+                self.specplotter.axis.set_autoscale_on(False)
             print interactive_help_message
             self.nclicks_b1 = 0
             self.nclicks_b2 = 0
@@ -396,7 +398,7 @@ class Specfit(object):
                         self.Spectrum.data[self.gx1:self.gx2]+self.specplotter.offset,
                         drawstyle='steps-mid',
                         color='c')
-                self.specplotter.plot(**self.specplotter.plotkwargs)
+                #self.specplotter.plot(**self.specplotter.plotkwargs)
                 if self.guesses == []:
                     self.guesses = singlefitters['gaussian'].moments(
                             self.Spectrum.xarr[self.gx1:self.gx2],
@@ -421,14 +423,14 @@ class Specfit(object):
                 self.npeaks += 1
             self.nclicks_b2 += 1
             self.guessplot += [self.specplotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
-            self.specplotter.plot(**self.specplotter.plotkwargs)
+            #self.specplotter.refresh() #plot(**self.specplotter.plotkwargs)
         elif self.nclicks_b2 % 2 == 1:
             self.guesses[-1] = abs(event.xdata-self.guesses[-2]) / np.sqrt(2*np.log(2))
             self.nclicks_b2 += 1
             self.guessplot += self.specplotter.axis.plot([event.xdata,
                 2*self.guesses[-2]-event.xdata],[event.ydata]*2,
                 color='r')
-            self.specplotter.plot(**self.specplotter.plotkwargs)
+            #self.specplotter.refresh() #plot(**self.specplotter.plotkwargs)
             if self.auto:
                 self.auto = False
             if self.nclicks_b2 / 2 > self.npeaks:
@@ -442,36 +444,38 @@ class Specfit(object):
         if legend: self.clearlegend()
 
     def makeguess(self,event):
-        if hasattr(event,'button'):
-            button = event.button
-        elif hasattr(event,'key'):
-            button = event.key
+        toolbar = self.specplotter.figure.canvas.manager.toolbar
+        if toolbar.mode == '':
+            if hasattr(event,'button'):
+                button = event.button
+            elif hasattr(event,'key'):
+                button = event.key
 
-        if button in ('p','P','1',1):
-            self.selectregion_interactive(event)
-        elif button in ('m','M','2',2):
-            self.guesspeakwidth(event)
-        elif button in ('d','D','3',3):
-            self.specplotter.figure.canvas.mpl_disconnect(self.click)
-            self.specplotter.figure.canvas.mpl_disconnect(self.keyclick)
-            if self.npeaks > 0:
-                print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.gx1,self.gx2
-                if len(self.guesses) % 3 == 0:
-                    self.multifit()
-                    for p in self.guessplot + self.fitregion:
-                        p.set_visible(False)
-                else: 
-                    print "error, wrong # of pars"
-        elif button in ('?'):
-            print interactive_help_message
-        elif button in fitkeys:
-            fittername = fitkeys[button]
-            print "Selected fitter %s" % fittername
-            if fittername in multifitters:
-                self.fitter = multifitters[fittername]
-            elif fittername in singlefitters:
-                self.fitter = singlefitters[fittername]
-        if self.specplotter.autorefresh: self.specplotter.refresh()
+            if button in ('p','P','1',1):
+                self.selectregion_interactive(event)
+            elif button in ('m','M','2',2):
+                self.guesspeakwidth(event)
+            elif button in ('d','D','3',3):
+                self.specplotter.figure.canvas.mpl_disconnect(self.click)
+                self.specplotter.figure.canvas.mpl_disconnect(self.keyclick)
+                if self.npeaks > 0:
+                    print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.gx1,self.gx2
+                    if len(self.guesses) % 3 == 0:
+                        self.multifit()
+                        for p in self.guessplot + self.fitregion:
+                            p.set_visible(False)
+                    else: 
+                        print "error, wrong # of pars"
+            elif button in ('?'):
+                print interactive_help_message
+            elif button in fitkeys:
+                fittername = fitkeys[button]
+                print "Selected fitter %s" % fittername
+                if fittername in multifitters:
+                    self.fitter = multifitters[fittername]
+                elif fittername in singlefitters:
+                    self.fitter = singlefitters[fittername]
+            if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def clearlegend(self):
         if self.fitleg is not None: 

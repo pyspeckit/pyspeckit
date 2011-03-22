@@ -128,15 +128,19 @@ class Baseline:
     def plot_baseline(self, annotate=True, plotcolor='orange'):
 
         if self.specplotter.axis is not None: 
-            [self.specplotter.axis.lines.remove(p) for p in self.specplotter.axis.lines]
+            for p in self.specplotter.axis.lines:
+                self.specplotter.axis.lines.remove(p)
         if self.specplotter.errorplot is not None: 
-            [self.specplotter.axis.collections.remove(p) for p in self.specplotter.errorplot if isinstance(p,matplotlib.collections.PolyCollection)]
-            [self.specplotter.axis.lines.remove(p) for p in self.specplotter.errorplot if isinstance(p,matplotlib.lines.Line2D)]
+            for p in self.specplotter.errorplot:
+                if isinstance(p,matplotlib.collections.PolyCollection): self.specplotter.axis.collections.remove(p)
+                if isinstance(p,matplotlib.lines.Line2D): self.specplotter.axis.lines.remove(p) 
 
         if self.subtracted is False:
             self.specplotter.axis.plot(self.Spectrum.xarr,self.basespec,color=plotcolor)
-        self.specplotter.ymin = abs(self.Spectrum.data[self.OKmask].min())*1.1*np.sign(self.Spectrum.data[self.OKmask].min())
-        self.specplotter.ymax = abs(self.Spectrum.data[self.OKmask].max())*1.1*np.sign(self.Spectrum.data[self.OKmask].max())
+        plotmask = self.OKmask*False
+        plotmask[self.bx1:self.bx2] = self.OKmask[self.bx1+self.bx2]
+        self.specplotter.ymin = abs(self.Spectrum.data[plotmask].min())*1.1*np.sign(self.Spectrum.data[plotmask].min())
+        self.specplotter.ymax = abs(self.Spectrum.data[plotmask].max())*1.1*np.sign(self.Spectrum.data[plotmask].max())
         self.specplotter.plot(**self.specplotter.plotkwargs)
 
         if annotate: self.annotate() # refreshes automatically
@@ -146,38 +150,40 @@ class Baseline:
         """
         select regions for baseline fitting
         """
-        if hasattr(event,'button'):
-            if event.button == 1:
-                if self.nclicks_b1 == 0:
-                    self.bx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
-                    self.excludevelo += [self.Spectrum.xarr]
-                    self.excludepix  += [self.bx1]
-                    self.nclicks_b1 += 1
-                elif self.nclicks_b1 == 1:
-                    self.bx2 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
-                    self.nclicks_b1 -= 1
-                    if self.bx1 > self.bx2: self.bx1,self.bx2 = self.bx2,self.bx1
-                    self.fitregion += self.specplotter.axis.plot(
-                            self.Spectrum.xarr[self.bx1:self.bx2],
-                            self.Spectrum.data[self.bx1:self.bx2]+self.specplotter.offset,
-                            drawstyle='steps-mid',
-                            color='g',alpha=0.5)
-                    self.specplotter.plot(**self.specplotter.plotkwargs)
+        toolbar = self.specplotter.figure.canvas.manager.toolbar
+        if toolbar.mode == '':
+            if hasattr(event,'button'):
+                if event.button == 1:
+                    if self.nclicks_b1 == 0:
+                        self.bx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
+                        self.excludevelo += [self.Spectrum.xarr]
+                        self.excludepix  += [self.bx1]
+                        self.nclicks_b1 += 1
+                    elif self.nclicks_b1 == 1:
+                        self.bx2 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
+                        self.nclicks_b1 -= 1
+                        if self.bx1 > self.bx2: self.bx1,self.bx2 = self.bx2,self.bx1
+                        self.fitregion += self.specplotter.axis.plot(
+                                self.Spectrum.xarr[self.bx1:self.bx2],
+                                self.Spectrum.data[self.bx1:self.bx2]+self.specplotter.offset,
+                                drawstyle='steps-mid',
+                                color='g',alpha=0.5)
+                        self.specplotter.plot(**self.specplotter.plotkwargs)
+                        self.specplotter.refresh()
+                        self.excludemask[self.bx1:self.bx2] = False
+                        self.excludevelo += [self.Spectrum.xarr]
+                        self.excludepix  += [self.bx2]
+                if event.button in [2,3]:
+                    self.specplotter.figure.canvas.mpl_disconnect(self.click)
+                    self.dofit(exclude=None,annotate=annotate)
+                    for p in self.fitregion:
+                        p.set_visible(False)
+                        self.specplotter.axis.lines.remove(p)
+                    self.fitregion=[] # I should be able to just remove from the list... but it breaks the loop...
                     self.specplotter.refresh()
-                    self.excludemask[self.bx1:self.bx2] = False
-                    self.excludevelo += [self.Spectrum.xarr]
-                    self.excludepix  += [self.bx2]
-            if event.button in [2,3]:
-                self.specplotter.figure.canvas.mpl_disconnect(self.click)
-                self.dofit(exclude=None,annotate=annotate)
-                for p in self.fitregion:
-                    p.set_visible(False)
-                    self.specplotter.axis.lines.remove(p)
-                self.fitregion=[] # I should be able to just remove from the list... but it breaks the loop...
-                self.specplotter.refresh()
-        elif hasattr(event,'key'):
-            if event.key == '?':
-                print interactive_help_message
+            elif hasattr(event,'key'):
+                if event.key == '?':
+                    print interactive_help_message
 
     def selectregion(self,xmin=None,xmax=None,xtype='wcs', highlight=False, **kwargs):
         """
