@@ -202,7 +202,7 @@ class Specfit(object):
         self.seterrspec()
         self.errspec[(True-OKmask)] = 1e10
 
-    def multifit(self, fittype='gaussian'):
+    def multifit(self, fittype='gaussian', renormalize='auto'):
         """
         Fit multiple gaussians (or other profiles)
         """
@@ -210,6 +210,18 @@ class Specfit(object):
         self.setfitspec()
         if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp')
         self.fitter = multifitters[fittype]
+        
+        scalefactor = 1.0
+        if renormalize in ('auto',True):
+            datarange = self.spectofit[self.gx1:self.gx2].max() - self.spectofit[self.gx1:self.gx2].min()
+            if abs(datarange) < 1e-9:
+                scalefactor = np.median(self.spectofit)
+                print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
+                self.spectofit /= scalefactor
+                self.errspec   /= scalefactor
+                for ii in xrange(self.npeaks): # assume first parameter is amplitude
+                    self.guesses[self.fitter.npars*ii] /= scalefactor
+
         mpp,model,mpperr,chi2 = self.fitter(
                 self.Spectrum.xarr[self.gx1:self.gx2], 
                 self.spectofit[self.gx1:self.gx2], 
@@ -217,13 +229,17 @@ class Specfit(object):
                 npeaks=self.npeaks,
                 params=self.guesses,
                 **self.fitkwargs)
+
+        self.spectofit *= scalefactor
+        self.errspec   *= scalefactor
+
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
         self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]
-        self.model = model
-        self.modelpars = mpp.tolist()
-        self.modelerrs = mpperr.tolist()
+        self.model = model * scalefactor
+        self.modelpars = (scalefactor*mpp).tolist()
+        self.modelerrs = (scalefactor*mpperr).tolist()
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.specplotter.axis is not None:
             self.plot_fit()
@@ -231,7 +247,7 @@ class Specfit(object):
                 self.annotate()
     
     def peakbgfit(self, usemoments=True, annotate=True, vheight=True, height=0,
-            negamp=None, fittype='gaussian', **kwargs):
+            negamp=None, fittype='gaussian', renormalize='auto', **kwargs):
         """
         Fit a single peak
         """
@@ -251,6 +267,18 @@ class Specfit(object):
         if fittype == 'voigt':
             self.guesses += [0.0]
         self.fitter = singlefitters[fittype]
+
+        scalefactor = 1.0
+        if renormalize in ('auto',True):
+            datarange = self.spectofit[self.gx1:self.gx2].max() - self.spectofit[self.gx1:self.gx2].min()
+            if abs(datarange) < 1e-9:
+                scalefactor = np.median(self.spectofit)
+                print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
+                self.spectofit /= scalefactor
+                self.errspec   /= scalefactor
+                self.guesses[0] /= scalefactor
+                self.guesses[1] /= scalefactor
+
         mpp,model,mpperr,chi2 = self.fitter(
                 self.Spectrum.xarr[self.gx1:self.gx2],
                 self.spectofit[self.gx1:self.gx2],
@@ -258,18 +286,22 @@ class Specfit(object):
                 vheight=vheight,
                 params=self.guesses,
                 **self.fitkwargs)
+
+        self.spectofit *= scalefactor
+        self.errspec   *= scalefactor
+
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
         self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]-vheight
         if vheight: 
-            self.Spectrum.baseline.baselinepars = mpp[:1] # first item in list form
-            self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]
-            self.model = model - mpp[0]
-        else: self.model = model
-        self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
-        self.modelpars = mpp[1:].tolist()
-        self.modelerrs = mpperr[1:].tolist()
+            self.Spectrum.baseline.baselinepars = mpp[:1]*scalefactor # first item in list form
+            self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]*scalefactor
+            self.model = model*scalefactor - mpp[0]*scalefactor
+        else: self.model = model*scalefactor
+        self.residuals = self.spectofit[self.gx1:self.gx2] - self.model*scalefactor
+        self.modelpars = (scalefactor*mpp[1:]).tolist()
+        self.modelerrs = (scalefactor*mpperr[1:]).tolist()
         if self.specplotter.axis is not None:
             self.plot_fit()
             if annotate:
