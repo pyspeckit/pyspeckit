@@ -1,0 +1,41 @@
+
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <link href="prettify.css" type="text/css" rel="stylesheet">
+        <script type="text/javascript" src="prettify.js"></script>
+        <title> PySpecKit - Examples </title>
+        <h2> Examples </h2>
+    </head>
+    <br>
+    <br>
+<body onload="prettyPrint()"> 
+    <center>
+    <table width=800>
+      <tr><td><center><img align=center width=800 src="images/simple_fit_example_HCOp.png"></center></tr></td>
+        <tr><td>
+            <code class="prettyprint">
+              <!--<? readfile("../tests/simple_fit_example.py"); ?>-->
+import spectrum
+
+# load a FITS-compliant spectrum
+spec = spectrum.Spectrum('10074-190_HCOp.fits')
+# The units are originally frequency (check this by printing spec.xarr.units).
+# I want to know the velocity.  Convert!
+# Note that this only works because the reference frequency is set in the header
+spec.xarr.frequency_to_velocity()
+# Default conversion is to m/s, but we traditionally work in km/s
+spec.xarr.convert_to_unit('km/s')
+# plot it up!
+spec.plotter()
+# Subtract a baseline (the data is only 'mostly' reduced)
+spec.baseline()
+# Fit a gaussian.  We know it will be an emission line, so we force a positive guess
+spec.specfit(negamp=False)
+# Save the figure to put on the web....
+spec.plotter.figure.savefig("simple_fit_example_HCOp.png")
+            </code>
+    </table>
+    </center>
+  </body>
+</html>

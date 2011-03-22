@@ -40,6 +40,8 @@ def open_1d_fits(filename,specnum=0,wcstype='',errspecnum=None,**kwargs):
             # only fail if extra axes have more than one row
             if hdr.get('NAXIS%i' % ii) > 1:
                 raise ValueError("Too many axes for open_1d_fits")
+        spec = ma.array(f[0].data).squeeze()
+        if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data
     else:
         spec = ma.array(f[0].data).squeeze()
         if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data

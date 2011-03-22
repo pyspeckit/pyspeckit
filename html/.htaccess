@@ -1,0 +1,5 @@
+RemoveHandler .html .htm
+AddType text/html .html .htm
+AddType application/x-httpd-php .php .htm .html
+AddHandler application/x-httpd-php .php .htm .html
+AddHandler server-parsed .htm .html
