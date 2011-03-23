@@ -63,7 +63,6 @@ class Specfit(object):
 
         guesses = [height,amplitude,center,width]
 
-
         If you pass interactive=True, you can fit n gaussians using the mouse
         and/or keyboard:
             Left click or 'p': Set fitting region.  Two clicks sets the region,

@@ -194,7 +194,7 @@ class gaussian_fitter(object):
     def multigaussfit(self, xax, data, npeaks=1, err=None, params=[1,0,1],
             fixed=[False,False,False], limitedmin=[False,False,True],
             limitedmax=[False,False,False], minpars=[0,0,0], maxpars=[0,0,0],
-            quiet=True, shh=True, veryverbose=False, **kwargs):
+            quiet=True, shh=True, veryverbose=False, tied = ['', '', ''], **kwargs):
         """
         An improvement on onepeakgaussfit.  Lets you fit multiple gaussians.
 
@@ -262,7 +262,7 @@ class gaussian_fitter(object):
         parinfo = [ {'n':ii, 'value':params[ii],
             'limits':[minpars[ii],maxpars[ii]],
             'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-            'parname':parnames[ii%3]+str(ii/3), 'error':ii} 
+            'parname':parnames[ii%3]+str(ii/3), 'error':ii, 'tied':tied[ii]} 
             for ii in xrange(len(params)) ]
 
         if veryverbose:
