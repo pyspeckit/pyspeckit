@@ -232,12 +232,13 @@ class gaussian_fitter(object):
         if isinstance(params,numpy.ndarray): params=params.tolist()
 
         # make sure all various things are the right length; if they're not, fix them using the defaults
-        for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars):
+        for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars,tied):
             if len(parlist) != 3*self.npeaks:
                 # if you leave the defaults, or enter something that can be multiplied by 3 to get to the
                 # right number of gaussians, it will just replicate
                 if len(parlist) == 3: 
                     parlist *= self.npeaks 
+                # is any of this stuff valid?  I don't think so...
                 elif parlist==params:
                     parlist[:] = [1,0,1] * self.npeaks
                 elif parlist==fixed or parlist==limitedmax:
@@ -246,6 +247,8 @@ class gaussian_fitter(object):
                     parlist[:] = [False,False,True] * self.npeaks
                 elif parlist==minpars or parlist==maxpars:
                     parlist[:] = [0,0,0] * self.npeaks
+                elif parlist==tied:
+                    parlist[:] = ['','',''] * self.npeaks
 
         def mpfitfun(x,y,err):
             if err is None:

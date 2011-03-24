@@ -9,6 +9,8 @@ Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
 'm' twice to select a peak and width.  When you're done, right-click or hit 'd'
 to perform the fit and disconnect the mouse and keyboard.  '?' will print this
 help message again.
+You can select different fitters to use with the interactive fitting routine.
+The default is gaussian ('g')
 """
 
 npars = {}
