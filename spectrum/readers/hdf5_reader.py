@@ -1,10 +1,17 @@
-import h5py
 import numpy as np
 import spectrum.units as units
 
-h5check = True
-try: import h5py
-except ImportError: h5check = False
+try: 
+    import h5py
+    h5check = True
+except ImportError: 
+    h5check = False
+
+try: 
+    import pyfits
+    pyfitscheck=True
+except ImportError: 
+    pyfitscheck = False
 
 def open_hdf5(filename):
     """
@@ -32,7 +39,12 @@ def open_hdf5(filename):
         except KeyError: xunits = 'unknown'    
             
         XAxis = units.SpectroscopicAxis(xarr,xunits)    
+
+        if pyfitscheck:
+            header = pyfits.Header()
+            header.update('CUNIT1',xunits)
+        else:
+            header = {}
         
-        # Header?
-        return data,error,XAxis,{}
+        return data,error,XAxis,header
     
