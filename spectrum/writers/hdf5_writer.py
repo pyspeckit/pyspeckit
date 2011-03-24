@@ -8,17 +8,19 @@ class write_hdf5(object):
     def __init__(self, Spectrum):
         self.Spectrum = Spectrum
         
-    def write_data(self, filename = None, extras = None, clobber = True):
+    def write_data(self, filename = None, newsuffix = 'out', extras = None, clobber = True):
         """
         Write information to hdf5 file.
         
         extras = [(dataset name, data), (dataset name, data)] 
+        
+        To do: leave option of writing to groups (for model components especially?)
         """
         
         if not h5check: print "Cannot write to hdf5 - h5py import failed."
         
         else: 
-            if filename is None: fn = "{0}_out.hdf5".format(self.Spectrum.fileprefix)
+            if filename is None: fn = "{0}_{1}.hdf5".format(self.Spectrum.fileprefix, newsuffix)
             else: fn = filename
             
             if clobber: f = h5py.File(fn, 'w')
@@ -39,6 +41,7 @@ class write_hdf5(object):
             
             if extras is not None:
                 for extra in extras:
-                    f.create_dataset(extras[0], data = extras[1])
+                    f.create_dataset(extra[0], data = extra[1])
                 
             f.close()
+            
