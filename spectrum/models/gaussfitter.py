@@ -238,6 +238,7 @@ class gaussian_fitter(object):
                 # right number of gaussians, it will just replicate
                 if len(parlist) == 3: 
                     parlist *= self.npeaks 
+                # is any of this stuff valid?  I don't think so...
                 elif parlist==params:
                     parlist[:] = [1,0,1] * self.npeaks
                 elif parlist==fixed or parlist==limitedmax:
