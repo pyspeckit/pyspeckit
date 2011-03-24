@@ -46,7 +46,7 @@ class Spectrum(object):
             else:
                 raise TypeError("Filetype %s not recognized" % filetype)
 
-        self.data,self.error,self.xarr,self.header = reader(filename)
+        self.data,self.error,self.xarr,self.header = reader(filename)    
 
         # these should probably be replaced with registerable functions...
         if filetype in ('fits','tspec'):
@@ -58,7 +58,10 @@ class Spectrum(object):
         self.plotter = plotters.Plotter(self)
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
-        self.writer = writers.Writer(self)
+        
+        # Initialize writers
+        self.writer = {}
+        for writer in writers.writers: self.writer[writer] = writers.writers[writer](self)
 
     def parse_text_header(self,Table):
         """

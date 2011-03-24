@@ -7,7 +7,7 @@ Created on 2011-03-08.
 
 Description: Modeled after config.py from yt.  Returns dictionary spcfg.cfg.
 
-Notes: Will look in ~/.spectools and ~/.spectoolsrc for file named config.
+Notes: Will look in ~/.pyspeckit for file named config.
 
 Sample ~/.spectools/config file:
 
@@ -58,11 +58,8 @@ class ConfigParser:
     	    self.cfg = return_dict
     	else: self.cfg = cfgDefaults
     	
-__fn = os.path.expanduser("~/.spectools/config")
+__fn = os.path.expanduser("~/.pyspeckit/config")
 if os.path.exists(__fn): 
-    spcfg = ConfigParser(__fn)
-elif os.path.exists(os.path.expanduser("~/.spectoolsrc")): 
-    __fn = os.path.expanduser("~/.spectoolsrc")
     spcfg = ConfigParser(__fn)
 else:
     spcfg = ConfigParser()
