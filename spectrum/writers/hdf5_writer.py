@@ -27,22 +27,12 @@ class write_hdf5(object):
                     i += 1
                             
             # By default, write out x-array, spectrum, errors
-            data = f.create_group('data')
-            data.create_dataset('xarr', data = self.Spectrum.xarr)
-            data.create_dataset('data', data = self.Spectrum.data)
-            data.create_dataset('err', data = self.Spectrum.error)
+            f.create_dataset('xarr', data = self.Spectrum.xarr)
+            f.create_dataset('data', data = self.Spectrum.data)
+            f.create_dataset('err', data = self.Spectrum.error)
             
-            #if extras is not None:
-            #    xtra = f.create_group('extras')
-            #    
-            #    for extra in extras:
-            #        grp.create_dataset('xarr', data = self.Spectrum.xarr[self.Spectrum.specfit.gx1:self.Spectrum.specfit.gx2])
-            #    
-            #    grp.create_dataset('model_spectrum', data = self.Spectrum.specfit.model)
-            #    grp.create_dataset('model_params', data = self.Spectrum.specfit.modelpars)
-            #    f.create_dataset('model_errs', data = self.Spectrum.specfit.modelerrs)
-            #    f.create_dataset('residuals', data = self.Spectrum.specfit.residuals)
-            #    for i, element in enumerate(self.Spectrum.specfit.modelcomponents):
-            #        f.create_dataset('model_component{0}'.format(i), data = self.Spectrum.specfit.modelcomponents[i])
+            if extras is not None:
+                for extra in extras:
+                    f.create_dataset(extras[0], data = extras[1])
                 
             f.close()
