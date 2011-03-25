@@ -2,6 +2,7 @@ import numpy as np
 import smooth as sm
 import pyfits
 import readers,fitters,plotters,writers,baseline,units,speclines
+import history
 
 
 class Spectrum(object):
@@ -10,15 +11,15 @@ class Spectrum(object):
     arrays along with wavelength / frequency / velocity information in various
     formats.
 
-    Will contain functions / classes to:
+    Contains functions / classes to:
         -read and write FITS-compliant spectroscopic data sets
-            -read fits binaries?
+            -read fits binaries? (not implemented)
         -plot a spectrum
         -fit a spectrum both interactively and non-interactively
             -with gaussian, voigt, lorentzian, and multiple (gvl) profiles
         -fit a continuum "baseline" to a selected region with an n-order
           polynomial
-        -perform fourier transforms and operations in fourier space on a spectrum
+        -perform fourier transforms and operations in fourier space on a spectrum (not implemented)
     """
 
     def __init__(self,filename, filetype=None, **kwargs):
@@ -66,6 +67,9 @@ class Spectrum(object):
     def parse_text_header(self,Table):
         """
         Grab relevant parameters from a table header (xaxis type, etc)
+
+        This function should only exist for Spectrum objects created from
+        .txt or other atpy table type objects
         """
         self.Table = Table
         self.xarr.xtype = Table.data.dtype.names[0]
@@ -100,6 +104,9 @@ class Spectrum(object):
         """
         Replace the current spectrum with a subset from x1 to x2 in current
         units
+
+        Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum
+
         """
         x1pix = np.argmin(np.abs(x1-self.xarr))
         x2pix = np.argmin(np.abs(x2-self.xarr))
@@ -119,9 +126,12 @@ class Spectrum(object):
         if self.header.get('CRPIX1'):
             self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
 
+        history.write_history(self.header,"CROP: Cropped from %g to %g (pixel %i to %i)" % (x1,x2,x1pix,x2pix))
+        history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1'))
+
     def smooth(self,smooth,**kwargs):
         """
-        Smooth the spectrum.  Options are defined in sm.smooth
+        Smooth the spectrum by factor "smooth".  Options are defined in sm.smooth
         """
         smooth = round(smooth)
         self.data = sm.smooth(self.data,smooth,**kwargs)
@@ -134,6 +144,10 @@ class Spectrum(object):
 
         self.header.update('CDELT1',self.header.get('CDELT1') * float(smooth))
         self.header.update('CRPIX1',self.header.get('CRPIX1') / float(smooth))
+
+        history.write_history(self.header,"SMOOTH: Smoothed and downsampled spectrum by factor %i" % (smooth)
+        history.write_history(self.header,"SMOOTH: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')*float(smooth),self.header.get('CRPIX1'))
+        history.write_history(self.header,"SMOOTH: Changed CDELT1 from %f to %f" % (self.header.get('CRPIX1')/float(smooth),self.header.get('CRPIX1'))
 
 
 class Spectra(Spectrum):
@@ -188,4 +202,7 @@ class Spectra(Spectrum):
         self.error = np.concatenate([self.error,spec.error])
 
     def __getitem__(self,index):
+        """
+        Can index Spectra to get the component Spectrum objects
+        """
         return self.speclist[index]

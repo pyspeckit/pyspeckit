@@ -61,7 +61,7 @@ class Specfit(object):
             fittype='gaussian', compcolor = None, fitlw = None, complw = None, 
             **kwargs):
         """
-        Fit gaussians to a spectrum
+        Fit gaussians (or other model functions) to a spectrum
 
         guesses = [height,amplitude,center,width]
 
@@ -207,6 +207,11 @@ class Specfit(object):
     def multifit(self, fittype='gaussian', renormalize='auto'):
         """
         Fit multiple gaussians (or other profiles)
+
+        fittype - What function will be fit?  fittype must have been registered in the
+            singlefitters dict
+        renormalize - if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
+            closer to 1 (scales by the median) so that the fit converges better
         """
         self.npeaks = len(self.guesses)/npars[fittype]
         self.setfitspec()
@@ -254,7 +259,19 @@ class Specfit(object):
     def peakbgfit(self, usemoments=True, annotate=True, vheight=True, height=0,
             negamp=None, fittype='gaussian', renormalize='auto', **kwargs):
         """
-        Fit a single peak
+        Fit a single peak (plus a background)
+
+        usemoments - The initial guess will be set by the fitter's 'moments' function
+            (this overrides 'guesses')
+        annotate - Make a legend?
+        vheight - Fit a (constant) background as well as a peak?
+        height - initial guess for background
+        negamp - If True, assumes amplitude is negative.  If False, assumes positive.  If 
+            None, can be either.
+        fittype - What function will be fit?  fittype must have been registered in the
+            singlefitters dict
+        renormalize - if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
+            closer to 1 (scales by the median) so that the fit converges better
         """
         self.npeaks = 1
         self.auto = True
@@ -318,6 +335,12 @@ class Specfit(object):
                 if vheight: self.Spectrum.baseline.annotate()
 
     def plot_fit(self):
+        """
+        Plot the fit.  Must have fitted something before calling this!  
+        
+        It will be automatically called whenever a spectrum is fit (assuming an
+        axis for plotting exists)
+        """
         if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
             plotmodel = self.model+self.specplotter.offset+self.Spectrum.baseline.basespec[self.gx1:self.gx2]
         else:
@@ -381,9 +404,11 @@ class Specfit(object):
         self.residualaxis.figure.canvas.draw()
 
     def annotate(self,loc='upper right'):
-        #text(xloc,yloc     ,"c=%g" % self.modelpars[1],transform = self.specplotter.axis.transAxes)
-        #text(xloc,yloc-0.05,"w=%g" % self.modelpars[2],transform = self.specplotter.axis.transAxes)
-        #text(xloc,yloc-0.10,"a=%g" % self.modelpars[0],transform = self.specplotter.axis.transAxes)
+        """
+        Add a legend to the plot showing the fitted parameters
+
+        clearlegend() will remove the legend
+        """
         self.clearlegend()
         pl = matplotlib.collections.CircleCollection([0],edgecolors=['k'])
         if hasattr(self.fitter,'annotations'):
@@ -429,6 +454,12 @@ class Specfit(object):
 
 
     def selectregion_interactive(self,event):
+        """
+        ***For window-interactive use only!***
+        (i.e., you probably shouldn't call this from the command line or a script)
+
+        Defines the fitting region of the spectrum
+        """
         if self.nclicks_b1 == 0:
             self.gx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
             self.nclicks_b1 += 1
@@ -482,12 +513,23 @@ class Specfit(object):
                 self.npeaks += 1
 
     def clear(self,legend=True):
+        """
+        Remove the fitted model from the plot
+
+        Also removes the legend by default
+        """
         if self.modelplot is not None:
             for p in self.modelplot:
                 p.set_visible(False)
         if legend: self.clearlegend()
 
     def makeguess(self,event):
+        """
+        ***For window-interactive use only!***
+        (i.e., you probably shouldn't call this from the command line or a script)
+
+        Given a set of clicks or button presses, sets the fit guesses
+        """
         toolbar = self.specplotter.figure.canvas.manager.toolbar
         if toolbar.mode == '':
             if hasattr(event,'button'):
@@ -522,6 +564,9 @@ class Specfit(object):
             if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def clearlegend(self):
+        """
+        Remove the legend from the plot window
+        """
         if self.fitleg is not None: 
             self.fitleg.set_visible(False)
             if self.fitleg in self.specplotter.axis.artists:
@@ -529,6 +574,10 @@ class Specfit(object):
         if self.specplotter.autorefresh: self.specplotter.refresh()
     
     def savefit(self):
+        """
+        Save the fit parameters from a Gaussian fit to the FITS header
+        ***THESE SHOULD BE WRITTEN FOR EACH TYPE OF MODEL TO BE FIT***
+        """
         if self.modelpars is not None and hasattr(self.Spectrum,'header'):
             for ii,p in enumerate(self.modelpars):
                 if ii % 3 == 0: self.Spectrum.header.update('AMP%1i' % (ii/3),p,comment="Gaussian best fit amplitude #%i" % (ii/3))
@@ -536,6 +585,10 @@ class Specfit(object):
                 if ii % 3 == 2: self.Spectrum.header.update('WID%1i' % (ii/3),p,comment="Gaussian best fit width #%i" % (ii/3))
 
     def downsample(self,factor):
+        """
+        Downsample the model spectrum (and the spectofit spectra)
+        This should only be done when Spectrum.smooth is called
+        """
         if self.model is not None:
             self.model = self.model[::factor]
             self.residuals = self.residuals[::factor]

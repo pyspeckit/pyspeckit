@@ -2,6 +2,7 @@
 History logger for the spectroscopic toolkit packge
 
 Goal: Save history...
+(should this be implemented as a Header class method?)
 
 Author: Adam Ginsburg
 Created: 03/18/2011
