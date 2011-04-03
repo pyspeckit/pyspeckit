@@ -145,9 +145,9 @@ class Spectrum(object):
         self.header.update('CDELT1',self.header.get('CDELT1') * float(smooth))
         self.header.update('CRPIX1',self.header.get('CRPIX1') / float(smooth))
 
-        history.write_history(self.header,"SMOOTH: Smoothed and downsampled spectrum by factor %i" % (smooth)
-        history.write_history(self.header,"SMOOTH: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')*float(smooth),self.header.get('CRPIX1'))
-        history.write_history(self.header,"SMOOTH: Changed CDELT1 from %f to %f" % (self.header.get('CRPIX1')/float(smooth),self.header.get('CRPIX1'))
+        history.write_history(self.header,"SMOOTH: Smoothed and downsampled spectrum by factor %i" % (smooth))
+        history.write_history(self.header,"SMOOTH: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')*float(smooth),self.header.get('CRPIX1')))
+        history.write_history(self.header,"SMOOTH: Changed CDELT1 from %f to %f" % (self.header.get('CRPIX1')/float(smooth),self.header.get('CRPIX1')))
 
 
 class Spectra(Spectrum):
