@@ -127,7 +127,7 @@ class Spectrum(object):
             self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
 
         history.write_history(self.header,"CROP: Cropped from %g to %g (pixel %i to %i)" % (x1,x2,x1pix,x2pix))
-        history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1'))
+        history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
     def smooth(self,smooth,**kwargs):
         """
