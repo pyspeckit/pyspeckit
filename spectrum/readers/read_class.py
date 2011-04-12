@@ -2,6 +2,19 @@ import pyfits
 import numpy
 import struct
 from numpy import pi
+
+import time
+
+def print_timing(func):
+    def wrapper(*arg,**kwargs):
+        t1 = time.time()
+        res = func(*arg,**kwargs)
+        t2 = time.time()
+        print '%s took %0.5g s' % (func.func_name, (t2-t1))
+        return res
+    return wrapper
+
+
 """
 A note from the CLASS developers: 
 
@@ -178,7 +191,7 @@ def read_index(f, DEBUG=False):
                 "XDRED":_read_byte(f),
                 "XOFF1":_read_float32(f),# 		 first offset (real, radians) 
                 "XOFF2":_read_float32(f),# 		 second offset (real, radians) 
-                "XTYPE":numpy.fromfile(f,count=1,dtype='S2')[0],# 		 coordinate system ('EQ'', 'GA', 'HO') 
+                "XTYPE":read_word(f,2),# 		 coordinate system ('EQ'', 'GA', 'HO') 
                 "XKIND":_read_byte(f),# 		 Kind of observation (0: spectral, 1: continuum, ) 
                 "XQUAL":_read_byte(f),# 		 Quality (0-9)  
                 "XSCAN":_read_byte(f),# 		 Scan number 
@@ -225,6 +238,7 @@ def read_obshead(f,verbose=False):
     return obsnum,hdr
 
 
+@print_timing
 def read_class(filename, DEBUG=False):
     f = open(filename,'rb')
     filelen = len(f.read())
@@ -360,6 +374,7 @@ def make_axis(header):
 
     return XAxis
     
+@print_timing
 def class_to_obsblocks(filename,telescope,line):
     """
     Load an entire CLASS observing session into a list of ObsBlocks based on
@@ -367,7 +382,6 @@ def class_to_obsblocks(filename,telescope,line):
     """
     spectra,header,indexes = read_class(filename)
 
-    H = pyfits.Header()
 
     obslist = []
     lastscannum = -1
@@ -375,6 +389,7 @@ def class_to_obsblocks(filename,telescope,line):
     for sp,hdr,ind in zip(spectra,header,indexes):
         hdr.update(ind)
         # this is slow but necessary...
+        H = pyfits.Header()
         for k,v in hdr.iteritems():
             if hasattr(v,"__len__") and not isinstance(v,str):
                 if len(v) > 1:
@@ -389,6 +404,8 @@ def class_to_obsblocks(filename,telescope,line):
             continue
         if hdr['LINE'].strip() not in line:
             continue
+
+        #print "Did not skip %s,%s.  Scannum, last: %i,%i" % (hdr['XTEL'],hdr['LINE'],scannum,lastscannum)
 
         if scannum != lastscannum:
             lastscannum = scannum
@@ -407,6 +424,7 @@ def class_to_obsblocks(filename,telescope,line):
 
     return obslist
 
+@print_timing
 def class_to_spectra(filename):
     """
     Load each individual spectrum within a CLASS file into a list of Spectrum
@@ -430,7 +448,7 @@ if __name__ == "__main__":
     #fn1 = '/Users/adam/work/bolocam/hht/class_001.smt' 
     #fn1 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-20824-073.cls' 
     #fn2 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-79472+203.cls'
-    #F1 = read_class(fn1)#,DEBUG=True)
+    F1 = read_class(fn1)#,DEBUG=True)
     #F2 = read_class(fn2)
     n2hp = class_to_obsblocks(fn1,telescope=['SMT-F1M-HU','SMT-F1M-VU'],line='N2HP(3-2)')
     hcop = class_to_obsblocks(fn1,telescope=['SMT-F1M-HL','SMT-F1M-VL'],line='HCOP(3-2)')

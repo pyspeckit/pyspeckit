@@ -183,7 +183,7 @@ class Baseline:
                 for p in self.specplotter.axis.lines:
                     self.specplotter.axis.lines.remove(p)
             plotmask = self.OKmask*False
-            plotmask[self.bx1:self.bx2] = self.OKmask[self.bx1+self.bx2]
+            plotmask[self.bx1:self.bx2] = self.OKmask[self.bx1:self.bx2]
             self.specplotter.ymin = abs(self.Spectrum.data[plotmask].min())*1.1*np.sign(self.Spectrum.data[plotmask].min())
             self.specplotter.ymax = abs(self.Spectrum.data[plotmask].max())*1.1*np.sign(self.Spectrum.data[plotmask].max())
             self.specplotter.plot()
