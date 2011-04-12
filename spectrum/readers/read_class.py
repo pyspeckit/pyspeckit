@@ -53,16 +53,16 @@ filetype_dict = {'1A  ':'Multiple_IEEE','1   ':'Multiple_Vax','1B  ':'Multiple_E
     '9A  ':'Single_IEEE','9   ':'Single_Vax','9B  ':'Single_EEEI'}
 
 keys_lengths = { -2: [
-     ( 'NUM'     ,1,'int32'), # Observation number
-     ( 'VER'     ,1,'int32'), # Version number
-     ( 'TELES'   ,3,'|S12') , # Telescope name
-     ( 'DOBS'    ,1,'int32'), # Date of observation
-     ( 'DRED'    ,1,'int32'), # Date of reduction
-     ( 'TYPEC'   ,1,'int32'), # Type of coordinates
-     ( 'KIND'    ,1,'int32'), # Type of data
-     ( 'QUAL'    ,1,'int32'), # Quality of data
-     ( 'SCAN'    ,1,'int32'), # Scan number
-     ( 'SUBSCAN' ,1,'int32'), # Subscan number
+     #( 'NUM'     ,1,'int32'), # Observation number
+     #( 'VER'     ,1,'int32'), # Version number
+     #( 'TELES'   ,3,'|S12') , # Telescope name
+     #( 'DOBS'    ,1,'int32'), # Date of observation
+     #( 'DRED'    ,1,'int32'), # Date of reduction
+     #( 'TYPEC'   ,1,'int32'), # Type of coordinates
+     #( 'KIND'    ,1,'int32'), # Type of data
+     #( 'QUAL'    ,1,'int32'), # Quality of data
+     #( 'SCAN'    ,1,'int32'), # Scan number
+     #( 'SUBSCAN' ,1,'int32'), # Subscan number
      ( 'UT'      ,2,'float64'), #  rad UT of observation
      ( 'ST'      ,2,'float64'), #  rad LST of observation
      ( 'AZ'      ,1,'float32'), #  rad Azimuth
@@ -116,7 +116,7 @@ keys_lengths = { -2: [
      ('CMODE',1,'int32'),   # [ code] Calibration mode
      ('ATFAC',1,'float32'),   # [ ] Applied calibration factor
      ('ALTI',1,'float32'),   # [ m] Site elevation
-     ('COUNT(3)',3,'3float32'),   # [count] Power of Atm., Chopp., Cold
+     ('COUNT',3,'3float32'),   # [count] Power of Atm., Chopp., Cold
      ('LCALOF',1,'float32'),   # [ rad] Longitude offset for sky measurement
      ('BCALOF',1,'float32'),   # [ rad] Latitude offset for sky measurement
      #('GEOLONG',2,'float64'),   # [ rad] Geographic longitude of observatory
@@ -165,7 +165,8 @@ def read_word(f,length):
 def read_int(f):
     return struct.unpack('i',f.read(4))
 
-def read_index(f):
+def read_index(f, DEBUG=False):
+    x0 = f.tell()
     index = {
                 "XBLOC":_read_byte(f),
                 "XNUM":_read_byte(f),
@@ -177,18 +178,22 @@ def read_index(f):
                 "XDRED":_read_byte(f),
                 "XOFF1":_read_float32(f),# 		 first offset (real, radians) 
                 "XOFF2":_read_float32(f),# 		 second offset (real, radians) 
-                "XTYPE":read_word(f,2),# 		 coordinate system ('EQ'', 'GA', 'HO') 
+                "XTYPE":numpy.fromfile(f,count=1,dtype='S2')[0],# 		 coordinate system ('EQ'', 'GA', 'HO') 
                 "XKIND":_read_byte(f),# 		 Kind of observation (0: spectral, 1: continuum, ) 
                 "XQUAL":_read_byte(f),# 		 Quality (0-9)  
                 "XSCAN":_read_byte(f),# 		 Scan number 
                 "XPOSA":_read_byte(f),# 		 Position Angle 
-                "XFRONT":read_word(f,8),# 		 (8 char) Front-end  ID (PROPOSED) 
-                "XBACK" :read_word(f,8),# 		 (8 char) Back-end   ID (PROPOSED) 
-                "XPROC" :read_word(f,8),# 		 (8 char) Procedure  ID (PROPOSED) 
-                "XPROJ" :read_word(f,8),# 		 (8 char) Project    ID (PROPOSED) 
-                "UNUSED":read_word(f,6),
-                "BLANK" :read_word(f,4)
+                "XFRONT":numpy.fromfile(f,count=1,dtype='S8')[0],# 		 (8 char) Front-end  ID (PROPOSED) 
+                "XBACK" :numpy.fromfile(f,count=1,dtype='S8')[0],# 		 (8 char) Back-end   ID (PROPOSED) 
+                "XPROC" :numpy.fromfile(f,count=1,dtype='S8')[0],# 		 (8 char) Procedure  ID (PROPOSED) 
+                "XPROJ" :numpy.fromfile(f,count=1,dtype='S8')[0],# 		 (8 char) Project    ID (PROPOSED) 
+                "UNUSED":numpy.fromfile(f,count=1,dtype='S6')[0],
+                "BLANK" :numpy.fromfile(f,count=1,dtype='S4')[0]
             }
+    if f.tell() - x0 != 128:
+        X = f.read(128-(f.tell()-x0))
+        if DEBUG: print "read_index missed %i bits: %s" % (128-(f.tell()-x0),X)
+        #raise IndexError("read_index did not successfully read 128 bytes at %i.  Read %i bytes." % (x0,f.tell()-x0))
     return index
 
 def read_header(f,type=0):
@@ -211,10 +216,10 @@ def read_obshead(f,verbose=False):
     seclen = numpy.fromfile(f,count=nsec,dtype='int32')
     if verbose: print "Section codes, addresses, lengths: ",seccodes,secaddr,seclen
 
-    hdr = {'NBLOCKS':nblocks, 'NBYTEOB':nbyteob, 'DATA_ADDRESS':data_address,
-            'DATA_LENGTH':data_length, 'NHEADERS':nheaders, 'OBINDEX':obindex,
-            'NSEC':nsec, 'OBSNUM':obsnum, 'SECCODES':seccodes,
-            'SECADDR':secaddr, 'SECLEN':seclen}
+    hdr = {'NBLOCKS':nblocks, 'NBYTEOB':nbyteob, 'DATAADDR':data_address,
+            'DATALEN':data_length, 'NHEADERS':nheaders, 'OBINDEX':obindex,
+            'NSEC':nsec, 'OBSNUM':obsnum, 'SECCODES':str(seccodes),
+            'SECADDR':str(secaddr), 'SECLEN':str(seclen)}
 
     #return obsnum,seccodes
     return obsnum,hdr
@@ -227,24 +232,25 @@ def read_class(filename, DEBUG=False):
 
     filetype = f.read(4)
     if filetype in filetype_dict:
-        print "File is type %s" % filetype_dict[filetype]
+        print "File %s is type %s" % (filename,filetype_dict[filetype])
     else:
         raise TypeError("File type error: %s." % filetype)
     
     nextblock,nindex,nex,nrecords = numpy.fromfile(f,count=4,dtype='int32')
     if DEBUG: print "nextblock,nindex,nex,nrecords",nextblock,nindex,nex,nrecords
     firstblock=numpy.fromfile(f,count=nex,dtype='int32') #[_read_byte(f) for ii in xrange(nex)]
+    f.seek(512)
 
     if DEBUG: print "firstblock",firstblock
     if DEBUG: print "Done with header stuff at position %i" % f.tell()
 
     indexes = []
-    for ii in xrange(nindex):
-        f.seek(128*(ii)+(firstblock[0]-1)*512)
-        index = read_index(f)
-        # OLD DEBUG if index['XLINE'] not in ('HCOP(3-2)   ','N2HP(3-2)   '):
-        # OLD DEBUG     raise Exception("Stopped at %i" % ii)
-        indexes.append(index)
+    #for ii in xrange(nindex):
+    #    f.seek(128*(ii)+(firstblock[0]-1)*512)
+    #    index = read_index(f)
+    #    # OLD DEBUG if index['XLINE'] not in ('HCOP(3-2)   ','N2HP(3-2)   '):
+    #    # OLD DEBUG     raise Exception("Stopped at %i" % ii)
+    #    indexes.append(index)
 
     #if f.tell() % 128 != 0:
     #    f.seek((f.tell()/128 + 1)*128)
@@ -257,7 +263,19 @@ def read_class(filename, DEBUG=False):
         jj += 1
         startpos = f.tell()
         IDcode = f.read(4)
-        if IDcode.strip() != '2':
+        if IDcode == '\x00\x00\x00\x00':
+            """ Skip over all blanks """
+            f.seek(startpos)
+            x = numpy.fromfile(f,count=128,dtype='int32')
+            skipcount = 0
+            while (x==0).all():
+                skipcount += 1
+                pos = f.tell()
+                x = numpy.fromfile(f,count=128,dtype='int32')
+            f.seek(pos)
+            if DEBUG: print "Skipped %i entries starting at %i" % (skipcount, startpos)
+            continue
+        elif IDcode.strip() != '2':
             f.seek(startpos)
             index = read_index(f)
             if 'HCO' in index['XLINE'] or 'N2H' in index['XLINE']:
@@ -280,6 +298,7 @@ def read_class(filename, DEBUG=False):
             #print numpy.fromfile(f,count=168/4+10,dtype='float32') 
             #f.seek(startpos)
             #print numpy.fromfile(f,count=168+40,dtype='int8') 
+        f.seek(pos+84+12*4)
         Header2 = read_header(f,type=-2)
         if f.tell() != pos + 168:
             #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
@@ -288,8 +307,9 @@ def read_class(filename, DEBUG=False):
         Header4 = read_header(f,type='SPECTRO')
         if DEBUG: print "Line %i (byte %i) - OBSERVATION %i (%i): %s, %s" % (f.tell(),(f.tell()-startpos)/4,obsnum,spcount,Header3['SOURC'],Header4['LINE']),
         Header14 = read_header(f,type='CALIBRATION')
-        hdr = Header2
-        hdr.update(Header3)
+
+        hdr = Header3
+        hdr.update(Header2)
         hdr.update(Header4)
         hdr.update(Header14)
         #hdr.update(unclear)
@@ -300,17 +320,24 @@ def read_class(filename, DEBUG=False):
         hdr.update({'OBJECT':hdr['SOURC'].strip()})
         hdr.update({'BUNIT':'Tastar'})
         hdr.update({'EXPOSURE':hdr['TIME']})
+        #for key in hdr:
+        #    if pyfits.Card._comment_FSC_RE.match(str(hdr[key])) is None:
+        #        print "Setting hdr[%s] to ''" % (key)
+        #        hdr[key] = ''
         spcount += 1
 
         nchan = hdr['NCHAN']
-        if nchan != hdr['DATA_LENGTH']:
+        if nchan != hdr['DATALEN']:
             raise ValueError("data_length != nchan")
         if DEBUG: print "Spectrum has %i channels at %i" % (nchan,f.tell())
         spectrum = numpy.fromfile(f,count=nchan,dtype='float32')
         if DEBUG > 2: print "First digits of spectrum: ",spectrum[:10]
         spectra.append( spectrum )
         header.append( hdr )
-        f.seek((f.tell()/nchan + 1)*nchan)
+        if f.tell() % 128 != 0:
+            discard = f.read(128-f.tell()%128)
+            #raise ValueError("Bad position : %i "%f.tell())
+        #f.seek((f.tell()/nchan + 1)*nchan)
 
     f.close()
     return spectra,header,indexes
@@ -349,11 +376,14 @@ def class_to_obsblocks(filename,telescope,line):
         hdr.update(ind)
         # this is slow but necessary...
         for k,v in hdr.iteritems():
-            try:
+            if hasattr(v,"__len__") and not isinstance(v,str):
+                if len(v) > 1:
+                    for ii,vv in enumerate(v):
+                        H.update(k[:7]+str(ii),vv)
+                else:
+                    H.update(k,v[0])
+            elif pyfits.Card._comment_FSC_RE.match(str(v)) is not None:
                 H.update(k,v)
-            except ValueError:
-                pass
-                #H.update(k,str(v))
         scannum = hdr['XSCAN']
         if hdr['XTEL'].strip() not in telescope:
             continue
@@ -396,10 +426,11 @@ def class_to_spectra(filename):
     return spectrumlist
 
 if __name__ == "__main__":
-    fn1 = '/Users/adam/work/bolocam/hht/class_001.smt' 
+    fn1 = '/Users/adam/work/bolocam/hht/class.smt' 
+    #fn1 = '/Users/adam/work/bolocam/hht/class_001.smt' 
     #fn1 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-20824-073.cls' 
     #fn2 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-79472+203.cls'
-    F1 = read_class(fn1)#,DEBUG=True)
+    #F1 = read_class(fn1)#,DEBUG=True)
     #F2 = read_class(fn2)
     n2hp = class_to_obsblocks(fn1,telescope=['SMT-F1M-HU','SMT-F1M-VU'],line='N2HP(3-2)')
     hcop = class_to_obsblocks(fn1,telescope=['SMT-F1M-HL','SMT-F1M-VL'],line='HCOP(3-2)')
