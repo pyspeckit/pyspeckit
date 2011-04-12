@@ -1,6 +1,7 @@
 import spectrum.units as units
 import numpy as np
 import numpy.ma as ma
+import read_class
 
 readers = {}
 suffix_types = {}

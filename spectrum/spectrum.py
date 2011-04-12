@@ -22,40 +22,53 @@ class Spectrum(object):
         -perform fourier transforms and operations in fourier space on a spectrum (not implemented)
     """
 
-    def __init__(self,filename, filetype=None, **kwargs):
+    def __init__(self,filename=None, filetype=None, xarr=None, data=None,
+            error=None, header=None, **kwargs):
         """
         Initialize the Spectrum.  Accepts files in the following formats:
             - .fits
-            - .txt (not functional yet)
+            - .txt
+            - hdf5
 
-        Ideally, we'd like to do something where each independent type of data
-        file has its own subclass for file reading, but we haven't figured out
-        how to automatically determine which subclass to use yet.
+        Must either pass in a filename or ALL of xarr, data, and header, plus
+        optionally error.
+
         """
 
-        if filetype is None:
-            suffix = filename.rsplit('.',1)[1]
-            if readers.suffix_types.has_key(suffix):
-                # use the default reader for that suffix
-                filetype = readers.suffix_types[suffix][0]
-                reader = readers.readers[filetype]
+        if filename:
+            if filetype is None:
+                suffix = filename.rsplit('.',1)[1]
+                if readers.suffix_types.has_key(suffix):
+                    # use the default reader for that suffix
+                    filetype = readers.suffix_types[suffix][0]
+                    reader = readers.readers[filetype]
+                else:
+                    raise TypeError("File with suffix %s is not recognized." % suffix)
             else:
-                raise TypeError("File with suffix %s is not recognized." % suffix)
-        else:
-            if filetype in readers.readers:
-                reader = readers.readers[filetype]
+                if filetype in readers.readers:
+                    reader = readers.readers[filetype]
+                else:
+                    raise TypeError("Filetype %s not recognized" % filetype)
+
+            self.data,self.error,self.xarr,self.header = reader(filename)    
+            
+            # these should probably be replaced with registerable function s...
+            if filetype in ('fits','tspec'):
+                self.parse_header(self.header)
+            elif filetype is 'txt':
+                self.parse_text_header(self.header)
+
+            self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
+        elif xarr is not None and data is not None:
+            self.xarr = xarr
+            self.data = data
+            if error is not None:
+                self.error = error
             else:
-                raise TypeError("Filetype %s not recognized" % filetype)
+                self.error = data * 0
+            self.header = header
+            self.parse_header(header)
 
-        self.data,self.error,self.xarr,self.header = reader(filename)    
-        
-        # these should probably be replaced with registerable function s...
-        if filetype in ('fits','tspec'):
-            self.parse_header(self.header)
-        elif filetype is 'txt':
-            self.parse_text_header(self.header)
-
-        self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
         self.plotter = plotters.Plotter(self)
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
@@ -99,6 +112,8 @@ class Spectrum(object):
             self.specname = specname
         elif hdr.get('OBJECT'):
             self.specname = hdr.get('OBJECT')
+        else:
+            self.specname = ''
 
     def crop(self,x1,x2):
         """
@@ -149,12 +164,20 @@ class Spectrum(object):
         history.write_history(self.header,"SMOOTH: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')*float(smooth),self.header.get('CRPIX1')))
         history.write_history(self.header,"SMOOTH: Changed CDELT1 from %f to %f" % (self.header.get('CRPIX1')/float(smooth),self.header.get('CRPIX1')))
 
+    def shape(self):
+        """
+        Return the data shape
+        """
+        return self.data.shape
+
 
 class Spectra(Spectrum):
     """
-    A list of individual Spectrum objects.  Can be operated on just like any
-    Spectrum object, incuding fitting.  Useful for fitting multiple lines on
-    non-continguous axes simultaneously.  Be wary of plotting these though...
+    A list of individual Spectrum objects.  Intended to be used for
+    concatenating different wavelength observations of the SAME OBJECT.  Can be
+    operated on just like any Spectrum object, incuding fitting.  Useful for
+    fitting multiple lines on non-continguous axes simultaneously.  Be wary of
+    plotting these though...
     """
 
     def __init__(self,speclist,xtype='frequency',**kwargs):
@@ -176,7 +199,10 @@ class Spectra(Spectrum):
         self.plotter = plotters.Plotter(self)
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
-        self.writer = writers.Writer(self)
+        
+        # Initialize writers
+        self.writer = {}
+        for writer in writers.writers: self.writer[writer] = writers.writers[writer](self)
 
         self.units = speclist[0].units
         for spec in speclist: 
@@ -200,6 +226,88 @@ class Spectra(Spectrum):
         self.xarr = units.SpectroscopicAxes([self.xarr,spec.xarr])
         self.data = np.concatenate([self.data,spec.data])
         self.error = np.concatenate([self.error,spec.error])
+
+    def __getitem__(self,index):
+        """
+        Can index Spectra to get the component Spectrum objects
+        """
+        return self.speclist[index]
+
+    def __len__(self): return len(self.speclist)
+
+class ObsBlock(Spectrum):
+    """
+    An Observation Block
+
+    Consists of multiple spectra with a shared X-axis.  Intended to hold groups
+    of observations of the same object in the same setup for later averaging.
+    """
+
+    def __init__(self,speclist,xtype='frequency',xarr=None,**kwargs):
+
+        if xarr is None:
+            self.xarr = speclist[0].xarr
+        else:
+            self.xarr = xarr
+
+        self.units = speclist[0].units
+        self.header = speclist[0].header
+        self.parse_header(self.header)
+
+        for spec in speclist:
+            if type(spec) is not Spectrum:
+                raise TypeError("Must create an ObsBlock with a list of spectra.")
+            if not (spec.xarr == self.xarr).all():
+                raise ValueError("Mismatch between X axes in ObsBlock")
+            if spec.units != self.units: 
+                raise ValueError("Mismatched units")
+
+        self.speclist = speclist
+
+        # Create a 2-dimensional array of the data
+        self.data = np.array([sp.data for sp in speclist]).swapaxes(0,1)
+        self.error = np.array([sp.error for sp in speclist]).swapaxes(0,1)
+
+        self.plotter = plotters.Plotter(self)
+        self.specfit = fitters.Specfit(self)
+        self.baseline = baseline.Baseline(self)
+        
+        # Initialize writers
+        self.writer = {}
+        for writer in writers.writers: self.writer[writer] = writers.writers[writer](self)
+
+    def average(self, weight=None, error='erravgrtn'):
+        """
+        Average all scans in an ObsBlock.  Returns a single Spectrum object
+
+        weight - a header keyword to weight by
+        error - estimate the error spectrum.  Can be:
+            'scanrms'   - the standard deviation of each pixel across all scans
+            'erravg'    - the average of all input error spectra
+            'erravgrtn' - the average of all input error spectra divided by sqrt(n_obs)
+        """
+
+        if weight is not None:
+            wtarr = np.array([sp.header.get(weight) for sp in self.speclist])
+        else:
+            wtarr = np.ones(self.data.shape[1])
+
+        if self.header.get('EXPOSURE'):
+            self.header['EXPOSURE'] = np.sum([sp.header['EXPOSURE'] for sp in self.speclist])
+
+        avgdata = (self.data * wtarr).sum(axis=1) / wtarr.sum()
+        if error is 'scanrms':
+            errspec = np.sqrt( (((self.data-avgdata) * wtarr)**2 / wtarr**2).sum(axis=1) )
+        elif error is 'erravg':
+            errspec = self.error.mean(axis=1)
+        elif error is 'erravgrtn':
+            errspec = self.error.mean(axis=1) / np.sqrt(self.error.shape[1])
+
+        spec = Spectrum(data=avgdata,error=errspec,xarr=self.xarr.copy(),header=self.header)
+
+        return spec
+
+    def __len__(self): return len(self.speclist)
 
     def __getitem__(self,index):
         """

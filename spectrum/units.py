@@ -99,7 +99,7 @@ class SpectroscopicAxis(np.ndarray):
     """
 
     def __new__(self, xarr, unit, frame='rest', xtype=None, reffreq=None,
-            redshift=None):
+            redshift=None, reffreq_units=None):
         subarr = np.array(xarr)
         subarr = subarr.view(self)
         subarr.units = unit
@@ -112,6 +112,10 @@ class SpectroscopicAxis(np.ndarray):
         else:
             subarr.xtype = 'unknown'
         subarr.reffreq = reffreq
+        if reffreq_units is None:
+            subarr.reffreq_units = subarr.units
+        else:
+            subarr.reffreq_units = reffreq_units
         subarr.redshift = redshift
 
         return subarr
@@ -126,6 +130,7 @@ class SpectroscopicAxis(np.ndarray):
         self.frame = getattr(obj, 'frame', None)
         self.xtype = getattr(obj, 'xtype', None)
         self.reffreq = getattr(obj, 'reffreq', None)
+        self.reffreq_units = getattr(obj, 'reffreq_units', None)
         self.redshift = getattr(obj, 'redshift', None)
 
     def change_xtype(self,new_xtype,**kwargs):
@@ -162,7 +167,9 @@ class SpectroscopicAxis(np.ndarray):
         else:
             print "(not actually) Converting frames from %s to %s" % (self.frame,frame)
 
-    def velocity_to_frequency(self,center_frequency=None,frequency_units='Hz',convention='radio'):
+    def velocity_to_frequency(self,center_frequency=None,
+            center_frequency_units=None, frequency_units='Hz',
+            convention='radio'):
         """
         Conventions defined here:
         http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
@@ -175,6 +182,8 @@ class SpectroscopicAxis(np.ndarray):
             raise ValueError("Cannot convert velocity to frequency without specifying a central frequency.")
         elif self.reffreq is not None:
             center_frequency = self.reffreq
+        if center_frequency_units is None:
+            center_frequency_units = self.reffreq_units
         if frequency_units not in frequency_dict:
             raise ValueError("Bad frequency units: %s" % (frequency_units))
 
@@ -187,11 +196,13 @@ class SpectroscopicAxis(np.ndarray):
             freq = center_frequency * (1.0 - (velocity_ms / speedoflight_ms)**2)**0.5 / (1.0 + velocity_ms/speedoflight_ms)
         else:
             raise ValueError('Convention "%s" is not allowed.' % (convention))
-        self[:] = freq / frequency_dict[frequency_units]
+        self[:] = freq / frequency_dict[frequency_units] * frequency_dict[center_frequency_units]
         self.units = frequency_units
         self.xtype = 'Frequency'
 
-    def frequency_to_velocity(self,center_frequency=None,center_frequency_units='Hz',velocity_units='m/s',convention='radio'):
+    def frequency_to_velocity(self, center_frequency=None,
+            center_frequency_units=None, velocity_units='m/s',
+            convention='radio'):
         """
         Conventions defined here:
         http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
@@ -204,6 +215,8 @@ class SpectroscopicAxis(np.ndarray):
             raise ValueError("Cannot convert frequency to velocity without specifying a central frequency.")
         elif self.reffreq is not None:
             center_frequency = self.reffreq
+        if center_frequency_units is None:
+            center_frequency_units = self.reffreq_units
         if center_frequency_units not in frequency_dict:
             raise ValueError("Bad frequency units: %s" % (frequency_units))
         if velocity_units not in velocity_dict:
@@ -213,7 +226,7 @@ class SpectroscopicAxis(np.ndarray):
         center_frequency_hz = center_frequency * frequency_dict['Hz'] / frequency_dict[center_frequency_units]
 
         if convention == 'radio':
-            velocity = speedoflight_ms * ( frequency_hz - center_frequency_hz ) / center_frequency_hz
+            velocity = speedoflight_ms * ( center_frequency_hz - frequency_hz ) / center_frequency_hz
         elif convention == 'optical':
             velocity = speedoflight_ms * ( frequency_hz - center_frequency_hz ) / frequency_hz
         elif convention == 'relativistic':

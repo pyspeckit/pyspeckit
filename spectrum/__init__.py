@@ -1,5 +1,5 @@
 import fitters,plotters,baseline,units
-from spectrum import Spectrum,Spectra
+from spectrum import Spectrum,Spectra,ObsBlock
 import smooth
 import logger
 import config

@@ -160,6 +160,8 @@ class Plotter(object):
    
         if title is not None:
             self.title = title
+        elif hasattr(self.Spectrum,'specname'):
+            self.title = self.Spectrum.specname
         if self.title is not "":
             self.axis.set_title(self.title)
 
