@@ -280,14 +280,16 @@ def read_class(filename, DEBUG=False):
         if IDcode == '\x00\x00\x00\x00':
             """ Skip over all blanks """
             f.seek(startpos)
-            x = numpy.fromfile(f,count=128,dtype='int32')
+            x = numpy.fromfile(f,count=128/4,dtype='int32')
             skipcount = 0
             while (x==0).all():
                 skipcount += 1
                 pos = f.tell()
-                x = numpy.fromfile(f,count=128,dtype='int32')
+                x = numpy.fromfile(f,count=128/4,dtype='int32')
             f.seek(pos)
-            if DEBUG: print "Skipped %i entries starting at %i" % (skipcount, startpos)
+            if DEBUG: print "Loop %i: Skipped %i entries starting at %i" % (jj, skipcount, startpos)
+            if jj >= filelen/128:
+                raise Exception("Infinite Loop")
             continue
         elif IDcode.strip() != '2':
             f.seek(startpos)
@@ -375,12 +377,12 @@ def make_axis(header):
     return XAxis
     
 @print_timing
-def class_to_obsblocks(filename,telescope,line):
+def class_to_obsblocks(filename,telescope,line,DEBUG=False):
     """
     Load an entire CLASS observing session into a list of ObsBlocks based on
     matches to the 'telescope' and 'line' names
     """
-    spectra,header,indexes = read_class(filename)
+    spectra,header,indexes = read_class(filename,DEBUG=DEBUG)
 
 
     obslist = []
@@ -444,11 +446,11 @@ def class_to_spectra(filename):
     return spectrumlist
 
 if __name__ == "__main__":
-    fn1 = '/Users/adam/work/bolocam/hht/class.smt' 
+    fn1 = '/Users/adam/work/bolocam/hht/class_003.smt' 
     #fn1 = '/Users/adam/work/bolocam/hht/class_001.smt' 
     #fn1 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-20824-073.cls' 
     #fn2 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-79472+203.cls'
     F1 = read_class(fn1)#,DEBUG=True)
     #F2 = read_class(fn2)
-    n2hp = class_to_obsblocks(fn1,telescope=['SMT-F1M-HU','SMT-F1M-VU'],line='N2HP(3-2)')
-    hcop = class_to_obsblocks(fn1,telescope=['SMT-F1M-HL','SMT-F1M-VL'],line='HCOP(3-2)')
+    n2hp = class_to_obsblocks(fn1,telescope=['SMT-F1M-HU','SMT-F1M-VU'],line=['N2HP(3-2)','N2H+(3-2)'])
+    hcop = class_to_obsblocks(fn1,telescope=['SMT-F1M-HL','SMT-F1M-VL'],line=['HCOP(3-2)','HCO+(3-2)'])
