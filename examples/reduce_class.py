@@ -79,10 +79,10 @@ if __name__ == "__main__":
         print >>fout_hcop,"".join(["%20s" % s for s in ("Source_Name","amplitude","center","width","amp_err","cen_err","wid_err")])
         print >>fout_n2hp,"".join(["%20s" % s for s in ("Source_Name","amplitude","center","width","amp_err","cen_err","wid_err")])
         for filename in glob.glob("class*smt"):
-            #n2hp = print_timing(class_to_obsblocks)(filename,telescope=['SMT-F1M-HU','SMT-F1M-VU'],line=['N2HP(3-2)','N2H+(3-2)'])
+            n2hp = print_timing(class_to_obsblocks)(filename,telescope=['SMT-F1M-HU','SMT-F1M-VU'],line=['N2HP(3-2)','N2H+(3-2)'])
             hcop = print_timing(class_to_obsblocks)(filename,telescope=['SMT-F1M-HL','SMT-F1M-VL'],line=['HCOP(3-2)','HCO+(3-2)'])
-            print "Found %i spectra in hcop" % (len(hcop))
-            for sp in hcop: #+n2hp:
+            #print "Found %i spectra in hcop" % (len(hcop))
+            for sp in hcop+n2hp:
                 spn = fit_source(sp.average(),refit=True)
                 if 'N2HP' in spn.header.get('LINE'):
                     print >>fout_n2hp,"".join(["%20s" % s 

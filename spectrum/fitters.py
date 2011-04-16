@@ -84,6 +84,8 @@ class Specfit(object):
 
         self.clear()
         self.selectregion(**kwargs)
+        for arg in ['xmin','xmax','xtype','reset']: if arg in kwargs: kwargs.pop(arg)
+
         if self.fittype != fittype: self.fittype = fittype
 
         # multifit = True if the right number of guesses are passed
@@ -425,7 +427,8 @@ class Specfit(object):
         self.fitleg.draggable(True)
         if self.specplotter.autorefresh: self.specplotter.refresh()
 
-    def selectregion(self,xmin=None,xmax=None,xtype='wcs',**kwargs):
+    def selectregion(self,xmin=None,xmax=None,xtype='wcs', reset=False,
+            debug=False, **kwargs):
         """
         Pick a fitting region in either WCS units or pixel units
         """
@@ -439,18 +442,22 @@ class Specfit(object):
         elif self.specplotter.xmin is not None and self.specplotter.xmax is not None:
             self.gx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))
             self.gx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))
-        else:
+        elif reset:
             self.gx1 = 0
             self.gx2 = self.Spectrum.data.shape[0]
             #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
+        else:
+            print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.gx1,self.gx2)
 
         if self.gx1 == self.gx2:
             # Reset if there is no fitting region
             self.gx1 = 0
             self.gx2 = self.Spectrum.data.shape[0]
+            if debug: print "Reset to full range because the endpoints were equal"
         elif self.gx1>self.gx2: 
             # Swap endpoints if the axis has a negative delta-X
             self.gx1,self.gx2 = self.gx2,self.gx1
+            if debug: print "Swapped endpoints because the left end was greater than the right"
 
 
     def selectregion_interactive(self,event):
