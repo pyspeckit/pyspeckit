@@ -211,6 +211,7 @@ class gaussian_fitter(object):
            fixed - Is parameter fixed?
            limitedmin/minpars - set lower limits on each parameter (default: width>0)
            limitedmax/maxpars - set upper limits on each parameter
+           tied - link parameters together
 
            quiet - should MPFIT output each iteration?
            shh - output final parameters?
@@ -257,16 +258,16 @@ class gaussian_fitter(object):
                 def f(p,fjac=None): return [0,(y-self.n_gaussian(pars=p)(x))/err]
             return f
 
+        parnames = {0:"AMPLITUDE",1:"SHIFT",2:"WIDTH"} 
         if xax is None:
             xax = numpy.arange(len(data))
-
-        parnames = {0:"AMPLITUDE",1:"SHIFT",2:"WIDTH"}
-
-        parinfo = [ {'n':ii, 'value':params[ii],
-            'limits':[minpars[ii],maxpars[ii]],
-            'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-            'parname':parnames[ii%3]+str(ii/3), 'error':ii, 'tied':tied[ii]} 
-            for ii in xrange(len(params)) ]
+                   
+        else:
+            parinfo = [ {'n':ii, 'value':params[ii],
+                'limits':[minpars[ii],maxpars[ii]],
+                'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
+                'parname':parnames[ii%3]+str(ii/3), 'error':ii, 'tied':tied[ii]} 
+                for ii in xrange(len(params)) ]
 
         if veryverbose:
             print "GUESSES: "

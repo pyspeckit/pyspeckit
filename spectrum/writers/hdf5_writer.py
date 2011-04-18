@@ -41,7 +41,7 @@ class write_hdf5(object):
             
             if extras is not None:
                 for extra in extras:
-                    f.create_dataset(extra[0], data = extra[1])
+                    f.create_dataset(extra[0], data = extra[1]) # add try-except
                 
             f.close()
             
