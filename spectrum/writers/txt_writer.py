@@ -1,4 +1,8 @@
-import atpy
+try:
+    import atpy
+    atpyOK = True
+except ImportError:
+    atpyOK = False
 
 # rewrite this garbage
 
@@ -40,3 +44,4 @@ class write_txt(object):
         print >> f, ""
             
         f.close()
+

@@ -84,7 +84,8 @@ class Specfit(object):
 
         self.clear()
         self.selectregion(**kwargs)
-        for arg in ['xmin','xmax','xtype','reset']: if arg in kwargs: kwargs.pop(arg)
+        for arg in ['xmin','xmax','xtype','reset']: 
+            if arg in kwargs: kwargs.pop(arg)
 
         if self.fittype != fittype: self.fittype = fittype
 
