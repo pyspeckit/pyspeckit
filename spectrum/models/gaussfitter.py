@@ -242,14 +242,23 @@ class gaussian_fitter(object):
                 # is any of this stuff valid?  I don't think so...
                 elif parlist==params:
                     parlist[:] = [1,0,1] * self.npeaks
-                elif parlist==fixed or parlist==limitedmax:
+                elif parlist==fixed:
                     parlist[:] = [False,False,False] * self.npeaks
+                elif parlist==limitedmax:
+                    if kwargs['negamp'] is None: parlist[:] = [False,False,False] * self.npeaks
+                    elif kwargs['negamp'] is False: parlist[:] = [False,False,False] * self.npeaks
+                    else: parlist[:] = [True,False,False] * self.npeaks
                 elif parlist==limitedmin:
-                    parlist[:] = [False,False,True] * self.npeaks
+                    if kwargs['negamp'] is None: parlist[:] = [False,False,True] * self.npeaks  # Lines can't have negative width!
+                    elif kwargs['negamp'] is False: parlist[:] = [True,False,True] * self.npeaks
+                    else: parlist[:] = [False,False,True] * self.npeaks                   
                 elif parlist==minpars or parlist==maxpars:
                     parlist[:] = [0,0,0] * self.npeaks
                 elif parlist==tied:
                     parlist[:] = ['','',''] * self.npeaks
+                    
+        # mpfit doesn't recognize negamp, so get rid of it now that we're done setting limitedmin/max and min/maxpars
+        if kwargs.has_key('negamp'): kwargs.pop('negamp')
 
         def mpfitfun(x,y,err):
             if err is None:

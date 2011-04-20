@@ -218,7 +218,7 @@ class Specfit(object):
         """
         self.npeaks = len(self.guesses)/npars[fittype]
         self.setfitspec()
-        if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp')
+        #if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp') # We now do this in gaussfitter.py
         self.fitter = multifitters[fittype]
         
         scalefactor = 1.0
