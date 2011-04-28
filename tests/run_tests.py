@@ -1,6 +1,8 @@
-execfile('test_fits.py')
-execfile('test_hr2421.py')
-execfile('test_nh3.py')
-execfile('test_sdss.py')
-execfile('test_txt.py')
+interactive=False
+execfile('test_fits.py',{'interactive':interactive})
+execfile('test_hr2421.py',{'interactive':interactive})
+execfile('test_nh3.py',{'interactive':interactive})
+execfile('test_sdss.py',{'interactive':interactive})
+execfile('test_txt.py',{'interactive':interactive})
 
+print "Success!  Or at least, no exceptions..."

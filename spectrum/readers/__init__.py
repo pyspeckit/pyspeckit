@@ -54,6 +54,7 @@ def check_reader(func):
 
 import fits_reader
 open_1d_fits = check_reader(fits_reader.open_1d_fits)
+open_1d_pyfits = check_reader(fits_reader.open_1d_pyfits)
 import tspec_reader
 tspec_reader = check_reader(tspec_reader.tspec_reader)
 import txt_reader

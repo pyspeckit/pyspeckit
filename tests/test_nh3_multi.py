@@ -1,5 +1,9 @@
 import spectrum
 
+if not interactive in globals():
+    interactive=False
+
+
 sp1 = spectrum.Spectrum('G032.751-00.071_nh3_11_Tastar.fits')
 sp1.crop(0,80)
 sp1.plotter()
@@ -27,10 +31,10 @@ sp = spectra
 sp.plotter()
 #sp.plotter(xmin=2.36875e10,xmax=2.36924e10) 
 #sp.plotter(xmin=-100,xmax=300)
-#raw_input("Plotter")
+#if interactive: raw_input("Plotter")
 from pylab import *
 draw()
-#raw_input('wait for plotter')
+#if interactive: raw_input('wait for plotter')
 
 
 # set the baseline to zero to prevent variable-height fitting
@@ -44,7 +48,7 @@ print "Best fit: ", sp.specfit.modelpars
 
 #sp.baseline(exclude=[0,200],order=0)
 #print "Plotter min/max: ",sp.plotter.xmin,sp.plotter.xmax," Fitter min/max: ",sp.specfit.gx1,sp.specfit.gx2," Fitregion= ",sp.baseline.excludevelo,sp.baseline.excludepix
-#raw_input('Baseline')
+#if interactive: raw_input('Baseline')
 #sp.specfit(fittype='ammonia',multifit=True,guesses=[20,20,1e16,1.0,-55.0,0.5],quiet=False,xunits='Hz')
 sp.specfit(fittype='ammonia', multifit=True, guesses=[21.57, 5.0, 2.95e14, 1.11,
     37.8, 0.5], fixed=[False,False,False,False,False,True],
@@ -73,7 +77,7 @@ sp.specfit.plot_fit()
 sp.plotter.axis.yaxis.label.set_visible(False)
 sp.plotter.figure.savefig('nh3_ammonia_multifit_multipanel_zoom.png')
 """
-raw_input('Press enter to multifit')
+if interactive: raw_input('Press enter to multifit')
 sp.specfit(fittype='ammonia',multifit=True,
         guesses=[25,0.5,5e14,0.68,37,0.5]+[25,0.2,7e14,0.52,37,0.5],
         fixed=[False,False,False,False,False,True]*2,
@@ -133,4 +137,4 @@ sp.plotter.figure.savefig('nh3_ammonia_multifit_multipanel_zoom_basedon33.png')
 
 
 
-raw_input('Press enter to end code')
+if interactive: raw_input('Press enter to end code')

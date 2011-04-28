@@ -1,5 +1,8 @@
 import spectrum
 
+if not interactive in globals():
+    interactive=False
+
 sp = spectrum.Spectrum('sample_13CO.fits')
 
 print "Does it have an axis? ",sp.plotter.axis
@@ -23,7 +26,7 @@ print "Best fit: ", sp.specfit.modelpars
 # print "EQW: ",sp.specfit.EQW()
 
 sp.specfit(interactive=True)
-raw_input('Press enter to print guesses and best fit and end code')
+if interactive: raw_input('Press enter to print guesses and best fit and end code')
 sp.plotter.figure.savefig('fits_interactive_fit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars

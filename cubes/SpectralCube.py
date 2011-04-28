@@ -34,7 +34,9 @@ class Cube(spectrum.Spectrum):
         self.plotter = spectrum.plotters.Plotter(self)
         self.specfit = spectrum.fitters.Specfit(self)
         self.baseline = spectrum.baseline.Baseline(self)
-        self.writer = spectrum.writers.Writer(self)
+        # Initialize writers
+        self.writer = {}
+        for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
         self.mapplot = mapplot.MapPlotter(self)
 
     def plot_spectrum(self, x, y, **kwargs):

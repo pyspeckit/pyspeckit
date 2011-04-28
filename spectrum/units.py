@@ -113,7 +113,10 @@ class SpectroscopicAxis(np.ndarray):
             subarr.xtype = 'unknown'
         subarr.reffreq = reffreq
         if reffreq_units is None:
-            subarr.reffreq_units = subarr.units
+            if subarr.units in frequency_dict:
+                subarr.reffreq_units = subarr.units
+            else:
+                subarr.reffreq_units = 'Hz'
         else:
             subarr.reffreq_units = reffreq_units
         subarr.redshift = redshift

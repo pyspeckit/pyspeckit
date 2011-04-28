@@ -53,12 +53,13 @@ class Spectrum(object):
             self.data,self.error,self.xarr,self.header = reader(filename)    
             
             # these should probably be replaced with registerable function s...
-            if filetype in ('fits','tspec'):
+            if filetype in ('fits','tspec','pyfits'):
                 self.parse_header(self.header)
             elif filetype is 'txt':
                 self.parse_text_header(self.header)
 
-            self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
+            if isinstance(filename,str):
+                self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
         elif xarr is not None and data is not None:
             self.xarr = xarr
             self.data = data
@@ -195,6 +196,7 @@ class Spectra(Spectrum):
         self.xarr = units.SpectroscopicAxes([sp.xarr for sp in speclist])
         self.data = np.concatenate([sp.data for sp in speclist])
         self.error = np.concatenate([sp.error for sp in speclist])
+        self._sort()
 
         self.plotter = plotters.Plotter(self)
         self.specfit = fitters.Specfit(self)
@@ -226,6 +228,7 @@ class Spectra(Spectrum):
         self.xarr = units.SpectroscopicAxes([self.xarr,spec.xarr])
         self.data = np.concatenate([self.data,spec.data])
         self.error = np.concatenate([self.error,spec.error])
+        self._sort()
 
     def __getitem__(self,index):
         """
@@ -234,6 +237,16 @@ class Spectra(Spectrum):
         return self.speclist[index]
 
     def __len__(self): return len(self.speclist)
+
+    def _sort(self):
+        """ Sort the data in order of increasing X (could be decreasing, but
+        must be monotonic for plotting reasons) """
+
+        indices = self.xarr.argsort()
+        self.xarr = self.xarr[indices]
+        self.data = self.data[indices]
+        self.error = self.error[indices]
+
 
 class ObsBlock(Spectrum):
     """

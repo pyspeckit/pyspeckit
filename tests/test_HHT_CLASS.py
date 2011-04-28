@@ -1,24 +1,28 @@
 import spectrum
 from pylab import *
+
+if not interactive in globals():
+    interactive=False
+
 sp = spectrum.Spectrum('10074-190_HCOp.fits')
 sp.plotter(title=sp.header.get('OBJECT'))
 sp.baseline(order=2)
 sp.xarr.frequency_to_velocity(center_frequency=sp.header.get('RESTFREQ'),velocity_units='km/s')
 sp.plotter()
-raw_input('Wait - just plot it')
+if interactive: raw_input('Wait - just plot it')
 sp.plotter(xmin=-100,xmax=150)
 sp.specfit(negamp=False,limitedmin=[True,True,False,True])
 #print sp.specfit.guesses,sp.specfit.modelpars,sp.specfit.modelerrs,sp.specfit.errspec.mean(),sp.specfit.errspec.std()
-raw_input('Wait - show baseline before subtracting')
+if interactive: raw_input('Wait - show baseline before subtracting')
 if sp.specfit.modelpars[0] > sp.specfit.modelerrs[0]:
     sp.baseline(excludefit=True,subtract=False,order=2,quiet=False)
     sp.specfit(negamp=False,limitedmin=[True,True,False,True])
     #print sp.specfit.guesses,sp.specfit.modelpars,sp.specfit.modelerrs,sp.specfit.errspec.mean(),sp.specfit.errspec.std()
     #print sp.specfit.fitter.annotations()
-raw_input('Wait - show baseline before subtracting')
+if interactive: raw_input('Wait - show baseline before subtracting')
 sp.plotter()
 sp.baseline(excludefit=True,subtract=True,order=2)
 sp.specfit(negamp=False,limitedmin=[True,True,False,True])
-raw_input("Wait - we're done now")
+if interactive: raw_input("Wait - we're done now")
 #sp.baseline(excludefit=True,subtract=False,quiet=False,LoudDebug=True)
 #raw_input('Wait')

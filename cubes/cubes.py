@@ -368,6 +368,7 @@ def getspec(lon,lat,rad,cube,header,r_fits=True,inherit=True,wunit='arcsec'):
     return a .fits file or a spectrum.
     
     lon,lat - longitude and latitude center of a circular aperture in WCS coordinates
+                must be in coordinate system of the file
     rad     - radius (default degrees) of aperture
     """
 
