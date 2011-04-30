@@ -38,6 +38,7 @@ sp.write('test.fits')
 
 sptest = spectrum.Spectrum('test.fits')
 sptest.plotter()
+sptest.plotter(figure=1,clear=False,color='b',offset=0.1)
 if interactive: raw_input('Test fits done.')
 
 print "Attempting to write to test.hdf5: "
