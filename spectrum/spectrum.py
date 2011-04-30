@@ -74,9 +74,25 @@ class Spectrum(object):
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
         
-        # Initialize writers
-        self.writer = {}
-        for writer in writers.writers: self.writer[writer] = writers.writers[writer](self)
+    def write(self,filename,type=None,**kwargs):
+        """
+        Write the spectrum to a file.  The available file types are listed
+        in spectrum.writers.writers
+
+        type - what type of file to write to?  If not specified, will attempt
+        to determine type from suffix
+        """
+        if type:
+            self.writer = writers.writers[type](self)
+        else:
+            suffix = filename.rsplit('.',1)[1]
+            if writers.suffix_types.has_key(suffix):
+                # use the default reader for that suffix
+                filetype = writers.suffix_types[suffix][0]
+                self.writer = writers.writers[filetype](self)
+            else:
+                raise TypeError("File with suffix %s is not recognized." % suffix)
+        self.writer(filename=filename,**kwargs)
 
     def parse_text_header(self,Table):
         """
@@ -202,10 +218,6 @@ class Spectra(Spectrum):
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
         
-        # Initialize writers
-        self.writer = {}
-        for writer in writers.writers: self.writer[writer] = writers.writers[writer](self)
-
         self.units = speclist[0].units
         for spec in speclist: 
             if spec.units != self.units: 
@@ -285,10 +297,6 @@ class ObsBlock(Spectrum):
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
         
-        # Initialize writers
-        self.writer = {}
-        for writer in writers.writers: self.writer[writer] = writers.writers[writer](self)
-
     def average(self, weight=None, error='erravgrtn'):
         """
         Average all scans in an ObsBlock.  Returns a single Spectrum object

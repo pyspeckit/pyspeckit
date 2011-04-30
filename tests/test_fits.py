@@ -1,6 +1,6 @@
 import spectrum
 
-if not interactive in globals():
+if not 'interactive' in globals():
     interactive=False
 
 sp = spectrum.Spectrum('sample_13CO.fits')
@@ -33,6 +33,15 @@ print "Best fit: ", sp.specfit.modelpars
 
 # don't try this for a zero-baseline spectrum print "EQW: ",sp.specfit.EQW()
 
+print "Attempting to write to test.fits: "
+sp.write('test.fits')
+
+sptest = spectrum.Spectrum('test.fits')
+sptest.plotter()
+if interactive: raw_input('Test fits done.')
+
+print "Attempting to write to test.hdf5: "
+sp.write('test.hdf5')
 
 #from matplotlib import pyplot
 

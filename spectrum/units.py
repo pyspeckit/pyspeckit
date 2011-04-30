@@ -72,11 +72,12 @@ xtype_dict = {
         }
 
 frame_dict = {
-        'VLSR':'LSR','VRAD':'LSR','VELO':'LSR',
-        'VOPT':'LSR',
+        'VLSR':'LSRK','VRAD':'LSRK','VELO':'LSRK',
+        'VOPT':'LSRK',
+        'LSRD':'LSRD',
         'VHEL':'heliocentric',
         'VGEO':'geocentric',
-        'velocity':'LSR',
+        'velocity':'LSRK',
         'VREST':'rest',
         'Z':'rest',
         'FREQ':'rest',
@@ -85,6 +86,11 @@ frame_dict = {
         'WAVE':'rest',
         'wavelength':'rest',
         }
+
+fits_frame = {'rest':'REST','LSRK':'-LSR','heliocentric':'-HEL','geocentric':'-GEO'}
+fits_specsys = {'rest':'REST','LSRK':'LSRK','LSRD':'LSRD','heliocentric':'HEL','geocentric':'GEO'}
+fits_type = {'velocity':'VELO','frequency':'FREQ','length':'WAVE','redshift':'REDS'}
+convention_suffix = {'radio':'RAD','optical':'OPT','relativistic':'REL','redshift':'RED'}
 
 speedoflight_ms = 2.99792458e8 # m/s
 
@@ -120,6 +126,16 @@ class SpectroscopicAxis(np.ndarray):
         else:
             subarr.reffreq_units = reffreq_units
         subarr.redshift = redshift
+        subarr.wcshead = {}
+        if 'RAD' in xtype:
+            subarr.velocity_convention = 'radio'
+        elif 'OPT' in xtype:
+            subarr.velocity_convention = 'optical'
+        elif 'REL' in xtype:
+            subarr.velocity_convention = 'relativistic'
+        else:
+            subarr.velocity_convention = None
+
 
         return subarr
 
@@ -208,6 +224,7 @@ class SpectroscopicAxis(np.ndarray):
             freq = center_frequency * (1.0 - (velocity_ms / speedoflight_ms)**2)**0.5 / (1.0 + velocity_ms/speedoflight_ms)
         else:
             raise ValueError('Convention "%s" is not allowed.' % (convention))
+        self.velocity_convention = convention
         self[:] = freq / frequency_dict[frequency_units] * frequency_dict[center_frequency_units]
         self.units = frequency_units
         self.xtype = 'Frequency'
@@ -245,6 +262,7 @@ class SpectroscopicAxis(np.ndarray):
             velocity = speedoflight_ms * ( center_frequency_hz**2 - frequency_hz**2 ) / ( center_frequency_hz**2 + frequency_hz )**2
         else:
             raise ValueError('Convention "%s" is not allowed.' % (convention))
+        self.velocity_convention = convention
         self[:] = velocity * velocity_dict['m/s'] / velocity_dict[velocity_units]
         self.units = velocity_units
         self.xtype = 'Velocity'
@@ -278,6 +296,32 @@ class SpectroscopicAxis(np.ndarray):
         self[:] = speedoflight_ms / ( self * length_dict[self.units] ) / frequency_dict[frequency_units]
         self.xtype = 'Frequency'
         self.units = frequency_units
+
+    def _make_header(self, tolerance=1e-8):
+        """
+        Generate a set of WCS parameters for the X-array
+        """
+        dx = np.abs(self[:-1]-self[1:])
+
+        self.wcshead['CUNIT1'] = self.units
+        if fits_type[self.xtype] == 'VELO' and self.velocity_convention is not None:
+            ctype = 'V'+convention_suffix[self.velocity_convention]
+        else:
+            ctype = fits_type[self.xtype]
+        self.wcshead['CTYPE1'] = ctype+fits_frame[self.frame]
+        self.wcshead['SPECSYS'] = fits_specsys[self.frame]
+
+        # check to make sure the X-axis is linear
+        if abs(dx.max()-dx.min())/abs(dx.min()) > tolerance:
+            self.wcshead['CDELT1'] = None
+            self.wcshead['CRPIX1'] = None
+            self.wcshead['CRVAL1'] = None
+            return False
+        else:
+            self.wcshead['CDELT1'] = dx.mean()
+            self.wcshead['CRVAL1'] = self[0]
+            self.wcshead['CRPIX1'] = 1.0
+            return True
 
 class SpectroscopicAxes(SpectroscopicAxis):
     """

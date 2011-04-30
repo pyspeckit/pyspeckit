@@ -1,12 +1,11 @@
 import os
+from . import Writer
 
 h5check = True
 try: import h5py
 except ImportError: h5check = False
 
-class write_hdf5(object):
-    def __init__(self, Spectrum):
-        self.Spectrum = Spectrum
+class write_hdf5(Writer):
         
     def write_data(self, filename = None, newsuffix = 'out', extras = None, clobber = True):
         """

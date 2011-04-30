@@ -121,18 +121,17 @@ def register_writer(filetype, function, suffix, default=False):
 
     '''
 
-    # Note: in future, switch suffix_types in readers to suffix_types_r?
-
     writers.writers[filetype] = function
-    if suffix in writers.suffix_types_w:
+    if suffix in writers.suffix_types:
         if default:
-            writers.suffix_types_w[suffix].insert(0,filetype)
+            writers.suffix_types[suffix].insert(0,filetype)
         else:
-            writers.suffix_types_w[suffix].append(filetype)
+            writers.suffix_types[suffix].append(filetype)
     else: # if it's the first, it defaults to default!
-        writers.suffix_types_w[suffix] = [filetype]
+        writers.suffix_types[suffix] = [filetype]
 
-# Currently, names of writers must be unique!
-register_writer('hdf5',writers.write_hdf5,'hdf5',default=True)
+# Currently, names of writers must be unique! (That should probably always be true)
+register_writer('hdf5',writers.write_hdf5,'hdf5',default=False)
+register_writer('fits',writers.write_fits,'fits',default=True)
 #register_writer('txt',writers.write_ascii,'txt')
 #register_writer('txt',writers.write_ascii,'txt')
