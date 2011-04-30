@@ -132,12 +132,15 @@ class SpectroscopicAxis(np.ndarray):
             subarr.reffreq_units = reffreq_units
         subarr.redshift = redshift
         subarr.wcshead = {}
-        if 'RAD' in subarr.xtype:
-            subarr.velocity_convention = 'radio'
-        elif 'OPT' in subarr.xtype:
-            subarr.velocity_convention = 'optical'
-        elif 'REL' in subarr.xtype:
-            subarr.velocity_convention = 'relativistic'
+        if subarr.xtype is not None:
+            if 'RAD' in subarr.xtype:
+                subarr.velocity_convention = 'radio'
+            elif 'OPT' in subarr.xtype:
+                subarr.velocity_convention = 'optical'
+            elif 'REL' in subarr.xtype:
+                subarr.velocity_convention = 'relativistic'
+            elif subarr.xtype is 'unknown':
+                subarr.velocity_convention = None
         else:
             subarr.velocity_convention = None
 
