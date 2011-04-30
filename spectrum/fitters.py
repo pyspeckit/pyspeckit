@@ -607,4 +607,5 @@ class Specfit(object):
         """
         When spectrum.crop is called, this must be too
         """
-        self.model = self.model[x1pix:x2pix]
+        if self.model:
+            self.model = self.model[x1pix:x2pix]

@@ -51,27 +51,29 @@ class Plotter(object):
         """
         
         # figure out where to put the plot
-        if self.figure is None:
-            if isinstance(figure,matplotlib.figure.Figure):
-                self.figure = figure
-            elif isinstance(axis,matplotlib.axes.Axes):
+        if isinstance(figure,matplotlib.figure.Figure):
+            self.figure = figure
+            self.axis = self.figure.gca()
+        elif type(figure) is int:
+            self.figure = matplotlib.pyplot.figure(figure)
+            self.axis = self.figure.gca()
+        elif self.figure is None:
+            if isinstance(axis,matplotlib.axes.Axes):
                 self.axis = axis
                 self.figure = axis.figure
-            elif type(figure) is int:
-                self.figure = matplotlib.pyplot.figure(figure)
             else:
                 self.figure = matplotlib.pyplot.figure()
 
         if self.keyclick is None:
             self.keyclick = self.figure.canvas.mpl_connect('key_press_event',self.parse_keys)
 
-        if len(self.figure.axes) > 0 and self.axis is None:
-            self.axis = self.figure.axes[0] # default to first axis
-        elif axis is not None:
-            self.figure.canvas.disconnect(self.keyclick)
+        if axis is not None:
+            self.figure.canvas.mpl_disconnect(self.keyclick)
             self.axis = axis
             self.figure = axis.figure
             self.keyclick = self.figure.canvas.mpl_connect('key_press_event',self.parse_keys)
+        elif len(self.figure.axes) > 0 and self.axis is None:
+            self.axis = self.figure.axes[0] # default to first axis
         else:
             self.axis = self.figure.gca()
 

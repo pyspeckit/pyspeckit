@@ -159,7 +159,7 @@ class SpectroscopicAxis(np.ndarray):
         else:
             raise ValueError("Conversion to xtype %s was not recognized." % xtype)
 
-    def convert_to_unit(self,unit,frame='rest',**kwargs):
+    def convert_to_unit(self,unit,frame='rest', **kwargs):
         if unit == self.units and frame == self.frame:
             print "Already in desired units and frame"
         elif frame == self.frame:
@@ -167,8 +167,17 @@ class SpectroscopicAxis(np.ndarray):
             print "Converting units from %s to %s" % (self.units,unit)
             self.units = unit
             self *= conversion_factor
+        elif unit not in conversion_dict[self.xtype]:
+            if unit in velocity_dict and conversion_dict[self.xtype] is frequency_dict:
+                self.frequency_to_velocity(**kwargs)
+        elif frame != self.frame:
+            print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
         else:
-            print "(not actually) Converting frames from %s to %s" % (self.frame,frame)
+            print "ERROR: not implemented?"
+
+        # this should be implemented but requires a callback to spectrum...
+        #if replot:
+        #    self.spectrum.plotter(reset_xlimits=True)
 
     def velocity_to_frequency(self,center_frequency=None,
             center_frequency_units=None, frequency_units='Hz',
