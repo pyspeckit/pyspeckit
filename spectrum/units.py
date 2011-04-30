@@ -190,7 +190,7 @@ class SpectroscopicAxis(np.ndarray):
         if unit not in conversion_dict[self.xtype]:
             change_xtype = True
             change_units = True
-        elif unit != self.unit: 
+        elif unit != self.units: 
             change_xtype = False
             change_units = True
         else: 
