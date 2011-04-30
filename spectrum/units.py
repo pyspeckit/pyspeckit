@@ -87,9 +87,14 @@ frame_dict = {
         'wavelength':'rest',
         }
 
+frame_type_dict = {'LSRK':'velocity','LSRD':'velocity','LSR':'velocity',
+        'heliocentric':'velocity','topocentric':'velocity','geocentric':'velocity',
+        'rest':'frequency',}
+
 fits_frame = {'rest':'REST','LSRK':'-LSR','heliocentric':'-HEL','geocentric':'-GEO'}
 fits_specsys = {'rest':'REST','LSRK':'LSRK','LSRD':'LSRD','heliocentric':'HEL','geocentric':'GEO'}
-fits_type = {'velocity':'VELO','frequency':'FREQ','length':'WAVE','redshift':'REDS'}
+fits_type = {'velocity':'VELO','frequency':'FREQ','length':'WAVE','redshift':'REDS',
+        'Velocity':'VELO','Frequency':'FREQ','Length':'WAVE','Redshift':'REDS'}
 convention_suffix = {'radio':'RAD','optical':'OPT','relativistic':'REL','redshift':'RED'}
 
 speedoflight_ms = 2.99792458e8 # m/s
@@ -176,20 +181,45 @@ class SpectroscopicAxis(np.ndarray):
             raise ValueError("Conversion to xtype %s was not recognized." % xtype)
 
     def convert_to_unit(self,unit,frame='rest', **kwargs):
-        if unit == self.units and frame == self.frame:
-            print "Already in desired units and frame"
-        elif frame == self.frame:
+        """
+        Convert the spectrum to the specified units.  This is a wrapper function
+        to convert between frequency/velocity/wavelength and simply change the 
+        units of the X axis.  Frame conversion is... not necessarily implemented.
+        """
+
+        if unit not in conversion_dict[self.xtype]:
+            change_xtype = True
+            change_units = True
+        elif unit != self.unit: 
+            change_xtype = False
+            change_units = True
+        else: 
+            change_xtype = False
+            change_units = False
+        if frame != self.frame: change_frame = True
+        else: change_frame = False
+
+        if change_xtype:
+            if unit in velocity_dict and conversion_dict[self.xtype] is frequency_dict:
+                self.frequency_to_velocity(**kwargs)
+            elif unit in frequency_dict and conversion_dict[self.xtype] is velocity_dict:
+                self.velocity_to_frequency(**kwargs)
+            else:
+                print "Could not convert from %s to %s" % (self.units,unit)
+
+        # re-check whether units need to be changed; it is possible that change_xtype left you 
+        # with the correct units
+        if unit != self.units and change_units:
             conversion_factor = conversion_dict[self.xtype][self.units] / conversion_dict[self.xtype][unit] 
             print "Converting units from %s to %s" % (self.units,unit)
             self.units = unit
             self *= conversion_factor
-        elif unit not in conversion_dict[self.xtype]:
-            if unit in velocity_dict and conversion_dict[self.xtype] is frequency_dict:
-                self.frequency_to_velocity(**kwargs)
-        elif frame != self.frame:
+
+        if change_frame:
             print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
-        else:
-            print "ERROR: not implemented?"
+
+        if not change_units and not change_xtype and not change_frame:
+            print "Already in desired units, X-type, and frame"
 
         # this should be implemented but requires a callback to spectrum...
         #if replot:

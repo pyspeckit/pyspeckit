@@ -41,6 +41,12 @@ sptest.plotter()
 sptest.plotter(figure=1,clear=False,color='b',offset=0.1)
 if interactive: raw_input('Test fits done.')
 
+sp.xarr.convert_to_unit('GHz',center_frequency=110201.3541,center_frequency_units='MHz')
+sp.write('test_GHz.fits')
+
+sptestGHz = spectrum.Spectrum('test_GHz.fits')
+sptestGHz.plotter()
+
 print "Attempting to write to test.hdf5: "
 sp.write('test.hdf5')
 

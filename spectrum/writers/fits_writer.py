@@ -22,6 +22,8 @@ class write_fits(Writer):
 
         header = self.Spectrum.header
 
+        if header.get('CD1_1'): del header['CD1_1']
+
         # Generate a WCS header from the X-array
         if self.Spectrum.xarr._make_header(tolerance=tolerance):
             for k,v in self.Spectrum.xarr.wcshead.iteritems():
