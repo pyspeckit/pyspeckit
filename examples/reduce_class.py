@@ -54,11 +54,14 @@ def fit_source(sp,debug=False,autorefresh=False,refit=False):
     return sp
 
 if __name__ == "__main__":
+    import re
+    R = re.compile("class_([0-9]*).smt")
     refit = True
     if refit is False:
-        fout_hcop = open('HHT_2011_hcop_bestfits.txt','a')
-        fout_n2hp = open('HHT_2011_n2hp_bestfits.txt','a')
-        for filename in glob.glob("class*smt"):
+        for filename in glob.glob("class_*.smt"):
+            sessionnum = R.search(filename).groups()[0]
+            fout_hcop = open('HHT_2011_hcop_bestfits_%s.txt' % sessionnum,'a')
+            fout_n2hp = open('HHT_2011_n2hp_bestfits_%s.txt' % sessionnum,'a')
             n2hp = print_timing(class_to_obsblocks)(filename,telescope=['SMT-F1M-HU','SMT-F1M-VU'],line=['N2HP(3-2)','N2H+(3-2)'])
             hcop = print_timing(class_to_obsblocks)(filename,telescope=['SMT-F1M-HL','SMT-F1M-VL'],line=['HCOP(3-2)','HCO+(3-2)'])
             for sp in hcop+n2hp:
@@ -66,19 +69,24 @@ if __name__ == "__main__":
                 if sp is not None:
                     if 'N2HP' in sp.header.get('LINE'):
                         print >>fout_n2hp,"".join(["%20s" % s 
-                            for s in [sp.header.get('OBJECT')]+sp.specfit.modelpars+sp.specfit.modelerrs])
+                            for s in [spn.header.get('OBJECT'),spn.header.get('OBSNUM')]+spn.specfit.modelpars+spn.specfit.modelerrs])
                     elif 'HCO' in sp.header.get('LINE'):
                         print >>fout_hcop,"".join(["%20s" % s 
-                            for s in [sp.header.get('OBJECT')]+sp.specfit.modelpars+sp.specfit.modelerrs])
+                            for s in [spn.header.get('OBJECT'),spn.header.get('OBSNUM')]+spn.specfit.modelpars+spn.specfit.modelerrs])
                     else:
                         print "ERROR: line is ",sp.header.get('LINE')
+            fout_hcop.close()
+            fout_n2hp.close()
+            del hcop 
+            del n2hp
 
     else:
-        fout_hcop = open('HHT_2011_hcop_bestfits.txt','w')
-        fout_n2hp = open('HHT_2011_n2hp_bestfits.txt','w')
-        print >>fout_hcop,"".join(["%20s" % s for s in ("Source_Name","amplitude","center","width","amp_err","cen_err","wid_err")])
-        print >>fout_n2hp,"".join(["%20s" % s for s in ("Source_Name","amplitude","center","width","amp_err","cen_err","wid_err")])
-        for filename in glob.glob("class*smt"):
+        for filename in glob.glob("class_*.smt"):
+            sessionnum = R.search(filename).groups()[0]
+            fout_hcop = open('HHT_2011_hcop_bestfits_%s.txt' % sessionnum,'w')
+            fout_n2hp = open('HHT_2011_n2hp_bestfits_%s.txt' % sessionnum,'w')
+            print >>fout_hcop,"".join(["%20s" % s for s in ("Source_Name","scannum","amplitude","center","width","amp_err","cen_err","wid_err")])
+            print >>fout_n2hp,"".join(["%20s" % s for s in ("Source_Name","scannum","amplitude","center","width","amp_err","cen_err","wid_err")])
             n2hp = print_timing(class_to_obsblocks)(filename,telescope=['SMT-F1M-HU','SMT-F1M-VU'],line=['N2HP(3-2)','N2H+(3-2)'])
             hcop = print_timing(class_to_obsblocks)(filename,telescope=['SMT-F1M-HL','SMT-F1M-VL'],line=['HCOP(3-2)','HCO+(3-2)'])
             #print "Found %i spectra in hcop" % (len(hcop))
@@ -86,12 +94,13 @@ if __name__ == "__main__":
                 spn = fit_source(sp.average(),refit=True)
                 if 'N2HP' in spn.header.get('LINE'):
                     print >>fout_n2hp,"".join(["%20s" % s 
-                        for s in [spn.header.get('OBJECT')]+spn.specfit.modelpars+spn.specfit.modelerrs])
+                        for s in [spn.header.get('OBJECT'),spn.header.get('OBSNUM')]+spn.specfit.modelpars+spn.specfit.modelerrs])
                 elif 'HCO' in spn.header.get('LINE'):
                     print >>fout_hcop,"".join(["%20s" % s 
-                        for s in [spn.header.get('OBJECT')]+spn.specfit.modelpars+spn.specfit.modelerrs])
+                        for s in [spn.header.get('OBJECT'),spn.header.get('OBSNUM')]+spn.specfit.modelpars+spn.specfit.modelerrs])
                 else:
                     print "ERROR: line is ",spn.header.get('LINE')
-
-    fout_hcop.close()
-    fout_n2hp.close()
+            fout_hcop.close()
+            fout_n2hp.close()
+            del hcop 
+            del n2hp

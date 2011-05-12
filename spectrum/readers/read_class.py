@@ -239,7 +239,7 @@ def read_obshead(f,verbose=False):
 
 
 @print_timing
-def read_class(filename, DEBUG=False):
+def read_class(filename,  DEBUG=False):
     f = open(filename,'rb')
     filelen = len(f.read())
     f.seek(0)
@@ -294,7 +294,7 @@ def read_class(filename, DEBUG=False):
         elif IDcode.strip() != '2':
             f.seek(startpos)
             index = read_index(f)
-            if 'HCO' in index['XLINE'] or 'N2H' in index['XLINE']:
+            if index['XLINE']: #numpy.any([L in index['XLINE'] for L in line]):
                 if DEBUG: print "Found an index at %i: " % startpos,index
                 indexes.append(index)
                 continue
@@ -427,12 +427,12 @@ def class_to_obsblocks(filename,telescope,line,DEBUG=False):
     return obslist
 
 @print_timing
-def class_to_spectra(filename):
+def class_to_spectra(filename,line):
     """
     Load each individual spectrum within a CLASS file into a list of Spectrum
     objects
     """
-    spectra,header,indexes = read_class(filename)
+    spectra,header,indexes = read_class(filename,line)
 
     spectrumlist = []
     for sp,hdr,ind in zip(spectra,header,indexes):
@@ -450,7 +450,7 @@ if __name__ == "__main__":
     #fn1 = '/Users/adam/work/bolocam/hht/class_001.smt' 
     #fn1 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-20824-073.cls' 
     #fn2 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-79472+203.cls'
-    F1 = read_class(fn1)#,DEBUG=True)
+    #F1 = read_class(fn1)#,DEBUG=True)
     #F2 = read_class(fn2)
     n2hp = class_to_obsblocks(fn1,telescope=['SMT-F1M-HU','SMT-F1M-VU'],line=['N2HP(3-2)','N2H+(3-2)'])
     hcop = class_to_obsblocks(fn1,telescope=['SMT-F1M-HL','SMT-F1M-VL'],line=['HCOP(3-2)','HCO+(3-2)'])

@@ -23,7 +23,7 @@ class Spectrum(object):
     """
 
     def __init__(self,filename=None, filetype=None, xarr=None, data=None,
-            error=None, header=None, **kwargs):
+            error=None, header=None, doplot=False, **kwargs):
         """
         Initialize the Spectrum.  Accepts files in the following formats:
             - .fits
@@ -32,6 +32,8 @@ class Spectrum(object):
 
         Must either pass in a filename or ALL of xarr, data, and header, plus
         optionally error.
+
+        doplot - if specified, will generate a plot when created
 
         """
 
@@ -73,6 +75,8 @@ class Spectrum(object):
         self.plotter = plotters.Plotter(self)
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
+
+        if doplot: self.plotter(**kwargs)
         
     def write(self,filename,type=None,**kwargs):
         """

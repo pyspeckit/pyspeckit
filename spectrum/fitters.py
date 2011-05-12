@@ -365,7 +365,7 @@ class Specfit(object):
                 self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
                 self.modelcomponents[i], color=self.compcolor, linewidth=self.complw)                
                 
-        self.specplotter.plot(**self.specplotter.plotkwargs)
+        self.specplotter.reset_limits(**self.specplotter.plotkwargs)
 
     def fullsizemodel(self):
         """
@@ -607,5 +607,5 @@ class Specfit(object):
         """
         When spectrum.crop is called, this must be too
         """
-        if self.model:
+        if self.model is not None:
             self.model = self.model[x1pix:x2pix]
