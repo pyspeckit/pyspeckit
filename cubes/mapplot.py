@@ -36,34 +36,39 @@ class MapPlotter(object):
 
         if doplot: self.mapplot(**kwargs)
 
-    def mapplot(self, estimator=np.mean, **kwargs):
+    def __call__(self, **kwargs):
+        return self.mapplot(**kwargs)
+
+    def mapplot(self, estimator=np.mean, convention='calabretta', **kwargs):
         """
         Plot up a map based on an input data cube
         """
         # THIS IS A HACK!!!  isinstance(a function, function) must be a thing...
         FUNCTION = type(np.max)
         if type(estimator) is FUNCTION:
-            plane = estimator(self.Cube.cube,axis=0)
+            self.plane = estimator(self.Cube.cube,axis=0)
         elif type(estimator) is str:
             if estimator == 'max':
-                plane = self.Cube.cube.max(axis=0)
+                self.plane = self.Cube.cube.max(axis=0)
             elif estimator == 'int':
                 dx = np.abs(self.cube.xarr[1:] - self.cube.xarr[:-1])
                 dx = np.concatenate(dx,dx[-1])
-                plane = self.Cube.cube.sum(axis=0) * dx
+                self.plane = self.Cube.cube.sum(axis=0) * dx
             elif estimator[-5:] == ".fits":
-                plane = pyfits.getdata(estimator)
+                self.plane = pyfits.getdata(estimator)
 
         if icanhasaplpy:
             self.figure.clf()
-            self.fitsfile = pyfits.PrimaryHDU(data=plane,header=cubes.flatten_header(self.Cube.header))
-            self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure)
-            self.FITSFigure.show_colorscale()
+            self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=cubes.flatten_header(self.Cube.header))
+            vmin = self.plane[self.plane==self.plane].min()
+            vmax = self.plane[self.plane==self.plane].max()
+            self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure,convention=convention)
+            self.FITSFigure.show_colorscale(vmin=vmin,vmax=vmax)
             self.axis = self.FITSFigure._ax1
         else:
             if self.axis is None:
                 self.axis = self.figure.add_subplot(111)
-            self.axis.imshow(plane)
+            self.axis.imshow(self.plane)
 
         self.canvas = self.axis.figure.canvas
 
