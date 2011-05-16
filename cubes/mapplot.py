@@ -7,6 +7,7 @@ import matplotlib.pyplot
 import matplotlib.figure
 import numpy as np
 import pyfits
+import pywcs
 import cubes
 try:
     import aplpy
@@ -36,6 +37,8 @@ class MapPlotter(object):
         self._circles = []
 
         self.Cube = Cube
+        self.header = cubes.flatten_header(self.Cube.header)
+        self.wcs = pywcs.WCS(self.header)
 
         if doplot: self.mapplot(**kwargs)
 
@@ -62,7 +65,7 @@ class MapPlotter(object):
 
         if icanhasaplpy:
             self.figure.clf()
-            self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=cubes.flatten_header(self.Cube.header))
+            self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=self.header)
             vmin = self.plane[self.plane==self.plane].min()
             vmax = self.plane[self.plane==self.plane].max()
             self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure,convention=convention)

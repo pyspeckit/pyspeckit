@@ -113,9 +113,13 @@ class Plotter(object):
         self.offset += offset
 
         self.label(**kwargs)
-        if kwargs.has_key('title'): kwargs.pop('title')
-        if kwargs.has_key('xlabel'): kwargs.pop('xlabel')
-        if kwargs.has_key('ylabel'): kwargs.pop('ylabel')
+        for arg in ['title','xlabel','ylabel']:
+            if kwargs.has_key(arg): kwargs.pop(arg)
+
+        reset_kwargs = {}
+        for arg in ['xmin','xmax','ymin','ymax','reset_xlimits','reset_ylimits','ypeakscale']:
+            if kwargs.has_key(arg): reset_kwargs[arg] = kwargs.pop(arg)
+
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr,
                 self.Spectrum.data+self.offset, color=color,
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
@@ -130,7 +134,7 @@ class Plotter(object):
                         yerr=self.Spectrum.error, ecolor=color, fmt=None,
                         **kwargs)
 
-        self.reset_limits(silent=silent, **kwargs)
+        self.reset_limits(silent=silent, **reset_kwargs)
 
         if self.autorefresh: self.refresh()
     

@@ -80,7 +80,7 @@ def speccen_header(header,lon=None,lat=None):
 
     return newheader
 
-def extract_aperture(cube,ap,r_mask=False,wcs=None,coordsys='galactic',wunit='arcsec'):
+def extract_aperture(cube,ap,r_mask=False,wcs=None,coordsys='galactic',wunit='arcsec',debug=False):
     """
     Extract an aperture from a data cube.  E.g. to acquire a spectrum
     of an outflow that is extended.
@@ -108,7 +108,9 @@ def extract_aperture(cube,ap,r_mask=False,wcs=None,coordsys='galactic',wunit='ar
     """
 
     if wcs is not None and coordsys is not None:
+        if debug: print "Converting aperture ",ap,
         ap = aper_world2pix(ap,wcs,coordsys=coordsys,wunit=wunit)
+        if debug: print " to ",ap
 
     if len(ap) == 3:
         sh = cube.shape
@@ -302,7 +304,7 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
 
 
     """
-    convopt = {'arcsec':3600,'arcmin':60,'degree':1}
+    convopt = {'arcsec':3600.0,'arcmin':60.0,'degree':1.0}
     try:
         conv = convopt[wunit]
     except:

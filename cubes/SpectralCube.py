@@ -49,12 +49,15 @@ class Cube(spectrum.Spectrum):
 
         self.plotter(**kwargs)
 
-    def plot_apspec(self, aperture, coordsys=None, wcs=None, **kwargs):
+    def plot_apspec(self, aperture, coordsys=None, reset_ylimits=True, **kwargs):
         """
         Extract an aperture using cubes.extract_aperture
         (defaults to Cube coordinates)
         """
 
         import cubes
-        self.data = cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=wcs )
-        self.plotter(**kwargs)
+        if coordsys is not None:
+            self.data = cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs )
+        else:
+            self.data = cubes.extract_aperture( self.cube, aperture , coordsys=None)
+        self.plotter(reset_ylimits=reset_ylimits, **kwargs)
