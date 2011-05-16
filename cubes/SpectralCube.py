@@ -25,8 +25,9 @@ class Cube(spectrum.Spectrum):
                 self.error = None
                 self.parse_header(self.header)
             except TypeError as inst:
-                print "Failed to read fits file."
+                print "Failed to read fits file: wrong TYPE."
                 print inst
+                raise inst
         else:
             raise TypeError('Not a .fits cube - what type of file did you give it?')
 
@@ -46,4 +47,14 @@ class Cube(spectrum.Spectrum):
 
         self.data = self.cube[:,y,x]
 
+        self.plotter(**kwargs)
+
+    def plot_apspec(self, aperture, coordsys=None, wcs=None, **kwargs):
+        """
+        Extract an aperture using cubes.extract_aperture
+        (defaults to Cube coordinates)
+        """
+
+        import cubes
+        self.data = cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=wcs )
         self.plotter(**kwargs)
