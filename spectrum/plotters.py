@@ -140,7 +140,7 @@ class Plotter(object):
     
     def reset_limits(self,xmin=None, xmax=None, ymin=None, ymax=None,
             reset_xlimits=False, reset_ylimits=False, ypeakscale=1.2,
-            silent=False ):
+            silent=False, **kwargs):
         """
         Automatically or manually reset the plot limits
         """
