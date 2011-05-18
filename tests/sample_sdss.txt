@@ -1,5 +1,5 @@
 # lambda_subout     fluxsub
-#
+# angstrom  1e-17 erg/s/cm^2/angstrom
 3731           -12.4
 3732          -11.84
 3732          -10.22

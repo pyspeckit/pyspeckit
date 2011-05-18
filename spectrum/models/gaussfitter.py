@@ -233,6 +233,7 @@ class gaussian_fitter(object):
         if isinstance(params,numpy.ndarray): params=params.tolist()
 
         # make sure all various things are the right length; if they're not, fix them using the defaults
+        if kwargs.has_key('negamp') is False: kwargs['negamp'] = None
         for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars,tied):
             if len(parlist) != 3*self.npeaks:
                 # if you leave the defaults, or enter something that can be multiplied by 3 to get to the

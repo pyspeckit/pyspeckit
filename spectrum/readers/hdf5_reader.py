@@ -1,11 +1,11 @@
-import numpy as np
-import spectrum.units as units
-
 try: 
     import h5py
-    h5check = True
+    h5OK = True
 except ImportError: 
-    h5check = False
+    h5OK = False
+    
+import numpy as np
+import spectrum.units as units
 
 try: 
     import pyfits
@@ -18,7 +18,7 @@ def open_hdf5(filename):
     This reader expects three datasets to exist in the hdf5 file 'filename': 'xarr', 'data', and 'error'.
     """
     
-    if not h5check: print "Cannot read hdf5 format - h5py import failed."
+    if not h5OK: print "Cannot read hdf5 format - h5py import failed."
     else:
         f = h5py.File(filename, 'r')
         
