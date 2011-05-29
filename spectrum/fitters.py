@@ -2,7 +2,7 @@ import matplotlib
 import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
-from config import *
+from config import spcfg
 
 interactive_help_message = """
 Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
@@ -21,7 +21,7 @@ fitkeys = {}
 
 class Specfit(object):
 
-    def __init__(self,Spectrum):
+    def __init__(self,Spectrum, autoannotate=bool(spcfg.cfg['annotate'])):
         self.model = None
         self.modelpars = None
         self.modelerrs = None
@@ -53,7 +53,7 @@ class Specfit(object):
         self.compcolor = self.cfg['comp_color']
         self.fitlw = self.cfg['fit_lw']
         self.complw = self.cfg['comp_lw']
-        self.autoannotate = bool(self.cfg['annotate'])
+        self.autoannotate = autoannotate
         self.show_components = bool(self.cfg['show_components'])
 
     def __call__(self, interactive=False, usemoments=True, fitcolor=None,
@@ -76,10 +76,10 @@ class Specfit(object):
             Right click or 'd': Disconnect the plot and perform the fit.
         """
   
-        if fitcolor is not None: self.fitcolor = fitcolor
-        if compcolor is not None: self.compcolor = compcolor
-        if fitlw is not None: self.fitlw = fitlw
-        if complw is not None: self.complw = complw
+        # don't change defaults if fitcolor is not None: self.fitcolor = fitcolor
+        # don't change defaults if compcolor is not None: self.compcolor = compcolor
+        # don't change defaults if fitlw is not None: self.fitlw = fitlw
+        # don't change defaults if complw is not None: self.complw = complw
         if annotate is None: annotate = self.autoannotate
 
         self.clear()
