@@ -12,6 +12,8 @@ def make_axis(xarr,hdr,specname=None, wcstype=''):
     parameters
     """
 
+    #DEBUG if wcstype is not '': print "Loading file with WCSTYPE %s" % wcstype
+
     xunits = hdr.get('CUNIT1'+wcstype)
     if hdr.get('ORIGIN') == 'CLASS-Grenoble' and xunits is None:
         # CLASS default

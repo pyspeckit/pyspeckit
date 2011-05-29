@@ -144,7 +144,7 @@ class SpectroscopicAxis(np.ndarray):
         else:
             subarr.velocity_convention = None
 
-        subarr.dxarr = subarr[:-1]-subarr[1:]
+        subarr.dxarr = subarr[1:]-subarr[:-1]
 
         return subarr
 
@@ -225,7 +225,7 @@ class SpectroscopicAxis(np.ndarray):
             print "Converting units from %s to %s" % (self.units,unit)
             self.units = unit
             self *= conversion_factor
-            self.dxarr = self[:-1]-self[1:]
+            self.dxarr = self[1:]-self[:-1]
 
         if change_frame:
             print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
@@ -270,7 +270,7 @@ class SpectroscopicAxis(np.ndarray):
         self[:] = freq / frequency_dict[frequency_units] * frequency_dict[center_frequency_units]
         self.units = frequency_units
         self.xtype = 'Frequency'
-        self.dxarr = self[:-1]-self[1:]
+        self.dxarr = self[1:]-self[:-1]
 
     def frequency_to_velocity(self, center_frequency=None,
             center_frequency_units=None, velocity_units='m/s',
@@ -309,7 +309,7 @@ class SpectroscopicAxis(np.ndarray):
         self[:] = velocity * velocity_dict['m/s'] / velocity_dict[velocity_units]
         self.units = velocity_units
         self.xtype = 'Velocity'
-        self.dxarr = self[:-1]-self[1:]
+        self.dxarr = self[1:]-self[:-1]
 
     def frequency_to_wavelength(self,wavelength_units='um'):
         """
@@ -325,7 +325,7 @@ class SpectroscopicAxis(np.ndarray):
         self[:] = speedoflight_ms / ( self * frequency_dict[self.units] ) / length_dict[wavelength_units]
         self.xtype = 'Wavelength'
         self.units = wavelength_units
-        self.dxarr = self[:-1]-self[1:]
+        self.dxarr = self[1:]-self[:-1]
 
     def wavelength_to_frequency(self,frequency_units='GHz'):
         """
@@ -341,14 +341,14 @@ class SpectroscopicAxis(np.ndarray):
         self[:] = speedoflight_ms / ( self * length_dict[self.units] ) / frequency_dict[frequency_units]
         self.xtype = 'Frequency'
         self.units = frequency_units
-        self.dxarr = self[:-1]-self[1:]
+        self.dxarr = self[1:]-self[:-1]
 
     def cdelt(self, tolerance=1e-8):
         """
         Return the channel spacing if channels are linear
         """
         if not hasattr(self,'dxarr'): # if cropping happens...
-            self.dxarr = self[:-1]-self[1:]
+            self.dxarr = self[1:]-self[:-1]
         if abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
             return self.dxarr.mean()
 
@@ -356,7 +356,7 @@ class SpectroscopicAxis(np.ndarray):
         """
         Generate a set of WCS parameters for the X-array
         """
-        self.dxarr = self[:-1]-self[1:]
+        self.dxarr = self[1:]-self[:-1]
 
         self.wcshead['CUNIT1'] = self.units
         if fits_type[self.xtype] == 'VELO' and self.velocity_convention is not None:

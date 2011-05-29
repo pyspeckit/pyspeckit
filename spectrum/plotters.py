@@ -166,9 +166,9 @@ class Plotter(object):
             self.ymin = None
             self.ymax = None
         if ymin is not None: self.ymin = ymin
-        elif self.ymin is None: self.ymin=self.Spectrum.data[xpixmin:xpixmax].min()
+        elif self.ymin is None: self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
         if ymax is not None: self.ymax = ymax
-        elif self.ymax is None: self.ymax=(self.Spectrum.data[xpixmin:xpixmax].max()-self.ymin) * ypeakscale + self.ymin
+        elif self.ymax is None: self.ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin) * ypeakscale + self.ymin
         self.axis.set_ylim(self.ymin,self.ymax)
         
 
