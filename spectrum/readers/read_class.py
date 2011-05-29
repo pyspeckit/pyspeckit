@@ -356,7 +356,6 @@ def read_class(filename,  DEBUG=False):
         #f.seek((f.tell()/nchan + 1)*nchan)
 
     f.close()
-    header['RESTFREQ']=header['RESTF']
     return spectra,header,indexes
 
 import spectrum
@@ -407,6 +406,7 @@ def class_to_obsblocks(filename,telescope,line,DEBUG=False):
             continue
         if hdr['LINE'].strip() not in line:
             continue
+        hdr.update('RESTFREQ',hdr.get('RESTF'))
 
         #print "Did not skip %s,%s.  Scannum, last: %i,%i" % (hdr['XTEL'],hdr['LINE'],scannum,lastscannum)
 
