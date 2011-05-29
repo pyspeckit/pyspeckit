@@ -356,7 +356,7 @@ def read_class(filename,  DEBUG=False):
         #f.seek((f.tell()/nchan + 1)*nchan)
 
     f.close()
-    header['RESTFREQ']=header.get('RESTF')
+    header['RESTFREQ']=header['RESTF']
     return spectra,header,indexes
 
 import spectrum
