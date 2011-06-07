@@ -22,7 +22,7 @@ from cosmology import *
 from constants import *
 
 class measurements(object):
-    def __init__(self, Spectrum):
+    def __init__(self, SpecFit):
     
     #fitpars, speclinefile = None, 
         #fluxnorm = 1e-17, z = None, d_L = None, linesep = True):
@@ -42,14 +42,14 @@ class measurements(object):
             d_L = luminosity distance in Mpc
             
         """
-        self.Spectrum = Spectrum
+        self.SpecFit = SpecFit
         self.cosmology = cosmology()
                 
         #self.fitpars = fitpars
         #self.z = z
         #self.d_L = d_L
         #self.linesep = linesep
-        self.Nlines = len(self.Spectrum.specfit.modelpars) / 3
+        self.Nlines = len(self.SpecFit.modelpars) / 3
         self.lines = {}
         self.lum = {}       # erg / s
         self.fwhm = {}      # wavelength units currently

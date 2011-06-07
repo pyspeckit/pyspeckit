@@ -1,4 +1,4 @@
-import matplotlib
+import matplotlib, measurements
 import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
@@ -45,6 +45,7 @@ class Specfit(object):
         self.residuals=None
         self.setfitspec()
         self.fittype = 'gaussian'
+        self.measurements = None
         #self.seterrspec()
         
         # config file stuff
@@ -132,6 +133,8 @@ class Specfit(object):
                 print "Can't fit with given fittype %s: it is not registered as a singlefitter." % fittype
             return
         if save: self.savefit()
+        
+        self.measurements = measurements.measurements(self)
 
     def EQW(self, plot=False, plotcolor='g', annotate=False, alpha=0.5, loc='lower left'):
         """

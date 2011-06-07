@@ -1,7 +1,7 @@
 import numpy as np
 import smooth as sm
 import pyfits
-import readers,fitters,plotters,writers,baseline,units,speclines
+import readers,fitters,plotters,writers,baseline,units,speclines,measurements
 import history
 
 
