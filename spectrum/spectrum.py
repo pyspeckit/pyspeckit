@@ -52,7 +52,7 @@ class Spectrum(object):
                 else:
                     raise TypeError("Filetype %s not recognized" % filetype)
 
-            self.data,self.error,self.xarr,self.header = reader(filename)    
+            self.data,self.error,self.xarr,self.header = reader(filename,**kwargs)
             
             # these should probably be replaced with registerable function s...
             if filetype in ('fits','tspec','pyfits'):
@@ -116,7 +116,7 @@ class Spectrum(object):
         self.header.update('BUNIT',self.units)
         self.header.update('BTYPE',self.ytype)
 
-    def parse_header(self,hdr,specname=None, wcstype=''):
+    def parse_header(self,hdr,specname=None):
         """
         Parse parameters from a .fits header into required spectrum structure
         parameters

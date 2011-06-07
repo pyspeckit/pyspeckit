@@ -48,4 +48,5 @@ class write_fits(Writer):
 
         HDU = pyfits.PrimaryHDU(data=data, header=header)
         
+        HDU.verify('fix')
         HDU.writeto(fn,clobber=clobber)

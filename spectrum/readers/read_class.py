@@ -371,7 +371,7 @@ def make_axis(header):
     refchan = header.get('RCHAN')
     imfreq = header.get('IMAGE')
 
-    xarr = (numpy.arange(nchan) - refchan) * fres + rest_frequency
+    xarr = (numpy.arange(nchan) - refchan + 1.0) * fres + rest_frequency
     XAxis = spectrum.units.SpectroscopicAxis(xarr,'MHz',frame='rest',reffreq=rest_frequency)
 
     return XAxis
@@ -406,6 +406,7 @@ def class_to_obsblocks(filename,telescope,line,DEBUG=False):
             continue
         if hdr['LINE'].strip() not in line:
             continue
+        hdr.update({'RESTFREQ':hdr.get('RESTF')})
 
         #print "Did not skip %s,%s.  Scannum, last: %i,%i" % (hdr['XTEL'],hdr['LINE'],scannum,lastscannum)
 

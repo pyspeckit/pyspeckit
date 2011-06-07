@@ -20,7 +20,7 @@ def open_1d_fits(filename,**kwargs):
 
     f = pyfits.open(filename)
 
-    return open_1d_pyfits(f[0])
+    return open_1d_pyfits(f[0],**kwargs)
 
 
 def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None,**kwargs):
