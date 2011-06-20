@@ -130,7 +130,6 @@ def register_writer(filetype, function, suffix, default=False):
     else: # if it's the first, it defaults to default!
         writers.suffix_types[suffix] = [filetype]
 
-# Currently, names of writers must be unique! (That should probably always be true)
 register_writer('hdf5',writers.write_hdf5,'hdf5',default=False)
 register_writer('fits',writers.write_fits,'fits',default=True)
 #register_writer('txt',writers.write_ascii,'txt')

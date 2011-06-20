@@ -261,6 +261,16 @@ class Specfit(object):
             self.plot_fit()
             if self.autoannotate:
                 self.annotate()
+                
+        # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
+        for ii, element in enumerate(self.fitkwargs['tied']):
+            if not element.strip(): continue
+            
+            i1 = element.index('[') + 1
+            i2 = element.index(']')
+            loc = int(element[i1:i2])
+            self.modelerrs[ii] = self.modelerrs[loc]
+                
     
     def peakbgfit(self, usemoments=True, annotate=True, vheight=True, height=0,
             negamp=None, fittype='gaussian', renormalize='auto', **kwargs):
@@ -356,15 +366,15 @@ class Specfit(object):
                 plotmodel,
                 color=self.fitcolor, linewidth=self.fitlw)
         
-        # Compute individual Gaussian components
-        self.modelcomponents = np.empty(len(self.modelpars) / 3, np.ndarray)
-        for i in np.arange(len(self.modelpars) / 3):
-            self.modelcomponents[i] = singlefitters['gaussian'].onepeakgaussian(self.Spectrum.xarr[self.gx1:self.gx2],
-            0.0,self.modelpars[3*i],self.modelpars[3*i+1],self.modelpars[3*i+2])
-        
+        self.modelcomponents = np.empty(self.npeaks, np.ndarray)
+        for i in range(self.npeaks):
+            if self.fittype == 'gaussian':
+                self.modelcomponents[i] = singlefitters['gaussian'].onepeakgaussian(self.Spectrum.xarr[self.gx1:self.gx2],
+                    0.0,self.modelpars[3*i],self.modelpars[3*i+1],self.modelpars[3*i+2])
+            
         # Plot components
         if self.show_components:
-            for i in np.arange(len(self.modelpars) / 3):
+            for i in range(self.npeaks):
                 self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
                 self.modelcomponents[i], color=self.compcolor, linewidth=self.complw)                
                 

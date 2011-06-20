@@ -1,7 +1,7 @@
 import spectrum
 
-if not interactive in globals():
-    interactive=False
+#if not interactive in globals():
+#    interactive=False
 
 spec = spectrum.Spectrum('sample_sdss.txt',errspecnum=2)
 spec.plotter(xmin = 6450, xmax = 6775, ymin = -20, ymax = 120)

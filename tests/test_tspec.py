@@ -39,3 +39,5 @@ tsp4.specfit(guesses=[-0.95, 1.2826e4, 10, -0.8, 1.2792e4,5],quiet=False,shh=Fal
 import pylab
 pylab.show()
 """
+import pylab as pl
+pl.show()
