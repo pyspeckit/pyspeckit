@@ -14,7 +14,7 @@ class Measurements:
         """
             
         self.specfit = specfit
-        self.modelpars = np.reshape(self.specfit.modelpars, (len(self.specfit.modelpars), self.specfit.npars))
+        self.modelpars = np.reshape(self.specfit.modelpars, (len(self.specfit.modelpars) / 3, 3))
         self.obspos = zip(*self.modelpars)[1]
         
         # Depending on units of xarr, read in set of reference spectral line positions
