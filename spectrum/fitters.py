@@ -134,7 +134,7 @@ class Specfit(object):
             return
         if save: self.savefit()
         
-        self.measurements = measurements.measurements(self)
+        self.measurements = measurements.Measurements(self)
 
     def EQW(self, plot=False, plotcolor='g', annotate=False, alpha=0.5, loc='lower left'):
         """
@@ -263,13 +263,14 @@ class Specfit(object):
                 self.annotate()
                 
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
-        for ii, element in enumerate(self.fitkwargs['tied']):
-            if not element.strip(): continue
-            
-            i1 = element.index('[') + 1
-            i2 = element.index(']')
-            loc = int(element[i1:i2])
-            self.modelerrs[ii] = self.modelerrs[loc]
+        if self.fitkwargs.has_key('tied'):
+            for ii, element in enumerate(self.fitkwargs['tied']):
+                if not element.strip(): continue
+                
+                i1 = element.index('[') + 1
+                i2 = element.index(']')
+                loc = int(element[i1:i2])
+                self.modelerrs[ii] = self.modelerrs[loc]
                 
     
     def peakbgfit(self, usemoments=True, annotate=True, vheight=True, height=0,

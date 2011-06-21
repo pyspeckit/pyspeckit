@@ -1,11 +1,5 @@
 """
-speclines.py
-
-Author: Jordan Mirocha
-Affiliation: University of Colorado at Boulder
-Created on 2011-03-09.
-
-Description: Container for spectral line information.
+Container for spectral line information.  Should be dictionaries.
 """
 
 import numpy as np
