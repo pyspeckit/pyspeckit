@@ -211,6 +211,13 @@ class Struct(object):
             namedict[R.sub('',k)] = v  
         self.__dict__ = namedict
 
+    def add_column(self,name,data):
+        """
+        Add a new column (attribute) to the struct
+        (will overwrite anything with the same name)
+        """
+        self.__dict__[name] = data
+
 def readff(s,format):
     """
     Fixed-format reader
