@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+import speclines
 
 opt_waves = np.array(
              [1033.30, 1215.67, 1239.42, 1305.53, 1335.52, 1399.8, 1545.86, 1640.4, 
@@ -23,14 +24,14 @@ To test:
 import spectrum
 spec = spectrum.Spectrum('sample_sdss.txt')
 spec.plotter(xmin = 6400, xmax = 6800)
-spec.specfit(guesses = [50, 6549.86, 5, 100, 6564.614, 20, 50, 6585.27, 20, 20, 6718.29, 5, 20, 6732.67, 5])
+spec.specfit(guesses = [20, 6718.29, 5, 100, 6564.614, 20, 50, 6585.27, 20, 20, 6732.67, 5, 50, 6549.86, 5])
 spec.specfit.measurements.identify()
 
 
 """
 
 class Measurements(object):
-    def __init__(self, specfit, z = None, d = None):
+    def __init__(self, specfit, z = None, d = None, xunits = None):
         """
         This is called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
         
@@ -40,46 +41,56 @@ class Measurements(object):
             1. make sure we manipulate modelpars correctly, i.e. read in entries corresponding to wavelength/frequency/whatever correctly.
             
         """
+        
+        print optical_lines.name
             
-        self.specfit = specfit
-        self.modelpars = np.reshape(self.specfit.modelpars, (len(self.specfit.modelpars) / 3, 3))   # re-organized by line
-        self.obspos = list(zip(*self.modelpars)[1]) # sort this shortest to longest wavelength
-        self.Nlines = len(self.obspos)
+        # Inherit specfit object    
+        self.specfit = specfit  
+        
+        # This is where we'll keep our results                        
         self.lines = {}
         
-        # Construct difference matrix
-        self.obsdiff = np.zeros([self.Nlines] * 2)
-        for i, element in enumerate(self.obspos): self.obsdiff[i] = element - self.obspos
+        # Read in observed wavelengths
+        tmp = np.reshape(self.specfit.modelpars, (len(self.specfit.modelpars) / 3, 3))
+        self.obspos = np.sort(list(zip(*tmp)[1]))
+        self.Nlines = len(self.obspos)
         
-        # Depending on units of xarr, read in set of reference spectral line positions and construct reference difference matrix
+        # Read in modelpars, re-organize so it is a 2D array sorted by ascending wavelength
+        self.modelpars = np.zeros_like(tmp)
+        for i, element in enumerate(self.obspos):
+            for j, arr in enumerate(tmp):
+                if element == arr[1]: self.modelpars[i] = arr
+                                   
+        # Read in appropriate list of reference wavelengths/frequencies/whatever
         self.refpos = optical_lines['wavelength']
-        self.refdiff = np.zeros([len(self.refpos)] * 2)
-        for i, element in enumerate(self.refpos): self.refdiff[i] = element - self.refpos
         
-        #self.derive()
         
     def identify(self):
         """
         Determine identify of lines in self.fitpars.  Fill entries of self.lines dictionary.
+        
+        probs if two lines have very similar wavelengths in fit - account for this somehow
         """    
         
         self.IDresults= []
         odiff = np.diff(self.obspos)
-        condition = (self.refpos >= 0.9 * min(self.obspos)) & (self.refpos <= 1.1 * max(self.obspos))
+        condition = (self.refpos >= 0.9 * min(self.obspos)) & (self.refpos <= 1.1 * max(self.obspos))   # Speeds things up
         refpos = self.refpos[condition]
         
         combos = itertools.combinations(refpos, self.Nlines)        
-
         for i, combo in enumerate(combos):
             rdiff = np.diff(combo)
             self.IDresults.append((np.sum(np.abs(odiff - rdiff)), combo))
             
         # Pick best solution
-        i = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
-        j = []                                  # Locations of best fit lines in reference dictionary
+        MINloc = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
+        ALLloc = []                                  # Locations of best fit lines in reference dictionary
                 
-        for element in self.IDresults[i][1]: j.append(np.argmin(np.abs(optical_lines['wavelength'] - element)))
-        for element in j: print optical_lines['line'][element]                
+        for element in self.IDresults[MINloc][1]: ALLloc.append(np.argmin(np.abs(optical_lines['wavelength'] - element)))
+        for i, element in enumerate(ALLloc): 
+            line = optical_lines['line'][element]
+            self.lines[line] = {}
+            self.lines[line]['modelpars'] = self.modelpars[i]
     
     def derive(self):
         """
