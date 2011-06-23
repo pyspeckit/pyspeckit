@@ -146,7 +146,7 @@ class Measurements(object):
                                                                                                            
     def compute_luminosity(self, pars):                                                                 
         """                                                                                                
-        Determine luminosity of line (need distance).                                                      
+        Determine luminosity of line (need distance and flux units).                                                      
         """                                                                                                
                                                                                                            
         lum = 0                                                                                            
@@ -156,7 +156,7 @@ class Measurements(object):
     def compute_fwhm(self, pars):
         """
         Determine full-width at half maximum for multi-component fit numerically, or analytically if line
-        has only a single component.  Uses bisection technique for the latter with absolute tolerance of 1e-4.
+        has only a single component.  Uses bisection technique for the former with absolute tolerance of 1e-4.
         """
 
         if len(pars) == 3: return 2. * np.sqrt(2. * np.log(2.)) * pars[2]

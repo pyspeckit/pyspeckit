@@ -73,7 +73,7 @@ for i, element in enumerate(guesses):
         lmax.append(True)
         
 # Plot, and do final fit
-spec.plotter(xmin = NIIa - 250, xmax = SIIb + 50)
+spec.plotter(xmin = NIIa - 150, xmax = SIIb + 50)
 
 spec.specfit(guesses = guesses, tied = tied, fixed = fixed, negamp = False,
     limitedmin = lmin, limitedmax = lmax, minpars = minp, maxpars = maxp)
@@ -87,7 +87,7 @@ lmax.extend([False, False, False])
 minp.extend([0, 0, 0]) 
 maxp.extend([0, 0, 0])      
 
-spec.plotter(xmin = NIIa - 250, xmax = SIIb + 50)
+spec.plotter(xmin = NIIa - 150, xmax = SIIb + 50)
 
 spec.specfit(guesses = guesses, tied = tied, fixed = fixed, negamp = False,
     limitedmin = lmin, limitedmax = lmax, minpars = minp, maxpars = maxp)
@@ -100,19 +100,19 @@ spec.measurements.identify()
 spec.measurements.derive()
 
 # Overplot positions of lines and annotate
-y = spec.plotter.ymax * 0.8
+y = spec.plotter.ymax * 0.9
 for i, line in enumerate(spec.measurements.lines.keys()):
     x = spec.measurements.lines[line]['modelpars'][1]
     spec.plotter.axis.plot([x]*2, [spec.plotter.ymin, spec.plotter.ymax], ls = '--', color = 'k')
     spec.plotter.axis.annotate(spec.speclines.optical.lines[line][-1], 
-        (x, y), rotation = 90)
+        (x, y), rotation = 90, ha = 'right', va = 'center')
 
 spec.plotter.axis.set_xlabel(r'Wavelength $(\AA)$')
 spec.plotter.axis.set_ylabel(r'Flux $(10^{-17} \mathrm{erg/s/cm^2/\AA})$')
 
 print "Spectral Line Information: Line   Flux     FWHM"
 for line in spec.measurements.lines.keys():
-    print line, 'flux', spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm']
+    print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm']
 
 raw_input('Done.')
     
