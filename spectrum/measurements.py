@@ -8,16 +8,13 @@ import spectrum
 spec = spectrum.Spectrum('sample_sdss.txt')
 spec.plotter(xmin = 6400, xmax = 6800)
 spec.specfit(guesses = [20, 6718.29, 5, 100, 6564.614, 20, 50, 6585.27, 20, 20, 6732.67, 5, 50, 6549.86, 5])
-spec.specfit.measurements.identify()
-spec.specfit.measurements.derive()
-spec.specfit.measurements.lines
-
+spec.measure()
 """
 
 cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
-    def __init__(self, Spectrum, z = None, d = None, xunits = None):
+    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None):
         """
         This is called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
         
@@ -33,24 +30,23 @@ class Measurements(object):
         self.specfit = Spectrum.specfit
         self.speclines = Spectrum.speclines
         
-        # If the header had units for flux values, use them!
-        #if not Spectrum.units.strip(): self.fluxunits = 1
-        #else: self.fluxunits = float(Spectrum.units)
+        # Flux units in case we are interested in line luminosities or just having real flux units
+        if fluxnorm is not None: self.fluxnorm=fluxnorm
+        else: self.fluxnorm= 1
                 
         # This is where we'll keep our results                        
         self.lines = {}
         
         # Read in observed wavelengths
         tmp = np.reshape(self.specfit.modelpars, (len(self.specfit.modelpars) / 3, 3))
+        order = np.argsort(zip(*tmp)[1])
         self.obspos = np.sort(list(zip(*tmp)[1]))
         self.Nlines = len(self.obspos)
-        
+                
         # Read in modelpars, re-organize so it is a 2D array sorted by ascending wavelength
         self.modelpars = np.zeros_like(tmp)
-        for i, element in enumerate(self.obspos):
-            for j, arr in enumerate(tmp):
-                if element == arr[1]: self.modelpars[i] = arr
-                                   
+        for i, element in enumerate(order): self.modelpars[i] = tmp[element]
+                                                                      
         # Read in appropriate list of reference wavelengths/frequencies/whatever
         self.reflines = self.speclines.optical.optical_lines
         self.refpos = self.reflines['xarr']
@@ -58,9 +54,13 @@ class Measurements(object):
         
         # If distance or redshift has been provided, we can compute luminosities from fluxes
         if d is not None: self.d = d
+        else: self.d = None
         if z is not None: 
             self.cosmology = cosmology.Cosmology()
             self.d = self.cosmology.LuminosityDistance(z) * cm_per_mpc
+            
+        self.identify()
+        self.derive()
         
     def identify(self):
         """
@@ -83,7 +83,7 @@ class Measurements(object):
             where = 0
             odiff = self.odiff
             multi = False        
-        
+                    
         condition = (self.refpos >= 0.9 * min(self.obspos)) & (self.refpos <= 1.1 * max(self.obspos))   # Speeds things up
         refpos = self.refpos[condition]
                 
@@ -97,18 +97,20 @@ class Measurements(object):
         ALLloc = []                                  # x-values of best fit lines in reference dictionary
         
         # Fill lines dictionary        
-        for element in self.IDresults[MINloc][1]: ALLloc.append(np.argmin(np.abs(self.refpos - element)))
+        for element in self.IDresults[MINloc][1]: ALLloc.append(np.argmin(np.abs(self.refpos - element)))        
         for i, element in enumerate(ALLloc): 
             line = self.refname[element]
             self.lines[line] = {}
             loc = np.argmin(np.abs(self.obspos - self.refpos[element]))                
             self.lines[line]['modelpars'] = list(self.modelpars[loc])
-            
+                    
         # Track down odd lines
         if len(ALLloc) < self.Nlines:
             tmp = list(np.ravel(self.modelpars))
             for key in self.lines.keys():
                 for element in self.lines[key]['modelpars']: tmp.pop(tmp.index(element))
+                            
+            print tmp                
                             
             try:  
                 for i, x in enumerate(zip(*tmp)[1]):    
@@ -119,6 +121,8 @@ class Measurements(object):
                 loc = np.argmin(np.abs(tmp[1] - self.refpos))                       
                 line = self.refname[loc]
                 self.lines[line]['modelpars'].extend(tmp) 
+         
+        self.separate() 
                     
     def derive(self):
         """
@@ -130,10 +134,32 @@ class Measurements(object):
             self.lines[line]['fwhm'] = self.compute_fwhm(self.lines[line]['modelpars'])
             self.lines[line]['flux'] = self.compute_flux(self.lines[line]['modelpars'])
             
-            #if self.fluxunits != 1:
-            #    try: self.lines[line]['lum'] = self.compute_luminosity(self.lines[line]['modelpars'])            
-            #    except AttributeError: print 'Distance unknown.  Cannot compute line luminosities.'
-    
+            if self.d is not None:
+                self.lines[line]['lum'] = self.compute_luminosity(self.lines[line]['modelpars'])            
+        
+    def separate(self):
+        """
+        For multicomponent lines, separate into broad and narrow components (assume only one of components is narrow).
+        """
+        
+        for key in self.lines.keys():
+            pars = self.lines[key]['modelpars']
+            print key, pars
+            if len(pars) > 3:
+                pars2d = np.reshape(pars, (len(pars) / 3, 3))
+                sigma = zip(*pars2d)[2]
+                minsigma = min(sigma)
+                i_narrow = sigma.index(minsigma)
+            else: continue
+                        
+            for i, arr in enumerate(pars2d):
+                if i == i_narrow: 
+                    self.lines["{0}_N".format(key)] = {}
+                    self.lines["{0}_N".format(key)]['modelpars'] = arr
+                else: 
+                    self.lines["{0}_B".format(key)] = {}
+                    self.lines["{0}_B".format(key)]['modelpars'] = arr
+                    
     def compute_flux(self, pars):                                                                       
         """                                                                                                
         Calculate integrated flux of emission line.  Works for multi-component fits too.  Unnormalized.    
@@ -142,7 +168,7 @@ class Measurements(object):
         flux = 0                                                                                           
         for i in xrange(len(pars) / 3): flux += np.sqrt(2. * np.pi) * pars[3 * i] * pars[2 + 3 * i]                                    
                                                                                                            
-        return flux                                                                                
+        return flux * self.fluxnorm
                                                                                                            
     def compute_luminosity(self, pars):                                                                 
         """                                                                                                

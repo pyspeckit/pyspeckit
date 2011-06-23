@@ -73,7 +73,7 @@ for i, element in enumerate(guesses):
         lmax.append(True)
         
 # Plot, and do final fit
-spec.plotter(xmin = NIIa - 150, xmax = SIIb + 50)
+spec.plotter(xmin = NIIa - 100, xmax = SIIb + 30)
 
 spec.specfit(guesses = guesses, tied = tied, fixed = fixed, negamp = False,
     limitedmin = lmin, limitedmax = lmax, minpars = minp, maxpars = maxp)
@@ -87,32 +87,30 @@ lmax.extend([False, False, False])
 minp.extend([0, 0, 0]) 
 maxp.extend([0, 0, 0])      
 
-spec.plotter(xmin = NIIa - 150, xmax = SIIb + 50)
+spec.plotter(xmin = NIIa - 100, xmax = SIIb + 30)
 
 spec.specfit(guesses = guesses, tied = tied, fixed = fixed, negamp = False,
     limitedmin = lmin, limitedmax = lmax, minpars = minp, maxpars = maxp)
     
 spec.plotter.refresh()
 
-spec.units = '1e-17 erg/s/cm^2/Ang'
-spec.measure(z = 0.05)
-spec.measurements.identify()
-spec.measurements.derive()
+spec.measure(z = 0.05, fluxnorm = 1e-17)
 
 # Overplot positions of lines and annotate
-y = spec.plotter.ymax * 0.9
+y = spec.plotter.ymax * 0.85
 for i, line in enumerate(spec.measurements.lines.keys()):
     x = spec.measurements.lines[line]['modelpars'][1]
     spec.plotter.axis.plot([x]*2, [spec.plotter.ymin, spec.plotter.ymax], ls = '--', color = 'k')
-    spec.plotter.axis.annotate(spec.speclines.optical.lines[line][-1], 
+    try: spec.plotter.axis.annotate(spec.speclines.optical.lines[line][-1], 
         (x, y), rotation = 90, ha = 'right', va = 'center')
+    except KeyError: pass
 
 spec.plotter.axis.set_xlabel(r'Wavelength $(\AA)$')
 spec.plotter.axis.set_ylabel(r'Flux $(10^{-17} \mathrm{erg/s/cm^2/\AA})$')
 
-print "Spectral Line Information: Line   Flux     FWHM"
+print "Spectral Line Information: Line   Flux     FWHM   Luminosity"
 for line in spec.measurements.lines.keys():
-    print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm']
+    print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum']
 
 raw_input('Done.')
     

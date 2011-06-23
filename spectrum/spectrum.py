@@ -137,11 +137,11 @@ class Spectrum(object):
         else:
             self.specname = ''
             
-    def measure(self, z = None, d = None):
+    def measure(self, z = None, d = None, fluxnorm = None):
         """
         Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!
         """
-        self.measurements = measurements.Measurements(self, z = z, d = d)                
+        self.measurements = measurements.Measurements(self, z = z, d = d, fluxnorm = fluxnorm)                
 
     def crop(self,x1,x2):
         """
