@@ -1,4 +1,4 @@
-import matplotlib, measurements
+import matplotlib
 import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
@@ -133,9 +133,6 @@ class Specfit(object):
                 print "Can't fit with given fittype %s: it is not registered as a singlefitter." % fittype
             return
         if save: self.savefit()
-        
-        # Initialize measurements class
-        #self.measurements = measurements.Measurements(self.Spectrum)
 
     def EQW(self, plot=False, plotcolor='g', annotate=False, alpha=0.5, loc='lower left'):
         """

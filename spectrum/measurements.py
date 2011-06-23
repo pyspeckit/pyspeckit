@@ -1,21 +1,5 @@
 import numpy as np
-import itertools
-
-#opt_waves = np.array(
-#             [1033.30, 1215.67, 1239.42, 1305.53, 1335.52, 1399.8, 1545.86, 1640.4, 
-#              1665.85, 1857.4, 1908.27, 2326.0, 2439.5, 2800.32, 3346.79, 3426.85,
-#              3728.30, 3798.976, 3836.47, 3889.0, 3934.777, 3969.588, 4072.3, 
-#              4102.89, 4305.61, 4341.68, 4364.436, 4862.68, 4960.295, 5008.240,
-#              5176.7, 5895.6, 6302.046, 6365.536, 6549.86, 6564.61, 6585.27,
-#              6707.89, 6718.29, 6732.67])
-#opt_lines = np.array(
-#             ['OVI', 'Ly_alpha', 'NV', 'OI', 'CII', 'SiIV+OIV', 'CIV', 'HeII', 
-#              'OIII', 'AlIII', 'CIII', 'CII', 'NeIV', 'MgII', 'NeV', 'NeV', 'OII', 
-#              'H_theta', 'H_eta', 'HeI', 'K', 'H', 'SII', 'H_delta', 'G', 'H_gamma',
-#              'OIII', 'H_beta', 'OIII', 'OIII', 'Mg', 'Na', 'OI', 'OI', 'NII', 'H_alpha',
-#              'NII', 'Li', 'SII', 'SII'])
-#              
-#optical_lines = {'line': opt_lines, 'wavelength': opt_waves, 'units': 'Angstrom', 'vac': True}
+import itertools, cosmology
 
 """
 To test:
@@ -30,12 +14,15 @@ spec.specfit.measurements.lines
 
 """
 
+cm_per_mpc = 3.08568e+24
+
 class Measurements(object):
     def __init__(self, Spectrum, z = None, d = None, xunits = None):
         """
         This is called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
         
         Notes: If z (redshift) or d (distance) are present, we can compute ingrated line luminosities rather than just fluxes.
+            Provide distance in cm.
         
         Currently will only work with Gaussians. to generalize:
             1. make sure we manipulate modelpars correctly, i.e. read in entries corresponding to wavelength/frequency/whatever correctly.
@@ -46,6 +33,10 @@ class Measurements(object):
         self.specfit = Spectrum.specfit
         self.speclines = Spectrum.speclines
         
+        # If the header had units for flux values, use them!
+        #if not Spectrum.units.strip(): self.fluxunits = 1
+        #else: self.fluxunits = float(Spectrum.units)
+                
         # This is where we'll keep our results                        
         self.lines = {}
         
@@ -64,6 +55,12 @@ class Measurements(object):
         self.reflines = self.speclines.optical.optical_lines
         self.refpos = self.reflines['xarr']
         self.refname = self.reflines['name']
+        
+        # If distance or redshift has been provided, we can compute luminosities from fluxes
+        if d is not None: self.d = d
+        if z is not None: 
+            self.cosmology = cosmology.Cosmology()
+            self.d = self.cosmology.LuminosityDistance(z) * cm_per_mpc
         
     def identify(self):
         """
@@ -132,7 +129,10 @@ class Measurements(object):
             
             self.lines[line]['fwhm'] = self.compute_fwhm(self.lines[line]['modelpars'])
             self.lines[line]['flux'] = self.compute_flux(self.lines[line]['modelpars'])
-            #self.lines[line]['lum'] = self.compute_luminosity(self.lines[line]['modelpars'])            
+            
+            #if self.fluxunits != 1:
+            #    try: self.lines[line]['lum'] = self.compute_luminosity(self.lines[line]['modelpars'])            
+            #    except AttributeError: print 'Distance unknown.  Cannot compute line luminosities.'
     
     def compute_flux(self, pars):                                                                       
         """                                                                                                
@@ -142,7 +142,7 @@ class Measurements(object):
         flux = 0                                                                                           
         for i in xrange(len(pars) / 3): flux += np.sqrt(2. * np.pi) * pars[3 * i] * pars[2 + 3 * i]                                    
                                                                                                            
-        return flux                                                                                        
+        return flux                                                                                
                                                                                                            
     def compute_luminosity(self, pars):                                                                 
         """                                                                                                
@@ -150,9 +150,7 @@ class Measurements(object):
         """                                                                                                
                                                                                                            
         lum = 0                                                                                            
-        for i in xrange(len(pars) / 3):                                                                    
-            lum += self.fluxnorm * self.integrated_flux(pars) * 4. * np.pi * self.d_L**2                   
-                                                                                                           
+        for i in xrange(len(pars) / 3): lum += self.compute_flux(pars) * 4. * np.pi * self.d**2                   
         return lum                                                                                         
         
     def compute_fwhm(self, pars):
@@ -160,28 +158,32 @@ class Measurements(object):
         Determine full-width at half maximum for multi-component fit numerically, or analytically if line
         has only a single component.  Uses bisection technique for the latter with absolute tolerance of 1e-4.
         """
-        
+
         if len(pars) == 3: return 2. * np.sqrt(2. * np.log(2.)) * pars[2]
         else:
             
             atol = 1e-4
             pars2d = np.reshape(pars, (len(pars) / 3, 3))
+            start = zip(*pars2d)[1][0]                    # start at central wavelength of first component
             
-            # If the centroids are exactly the same for all components, we know where to start
-            #if np.allclose(zip(*pars2d)[1], atol):
-            fmax = np.sum(zip(*pars2d)[0])            # full max
-            hmax = 0.5 * fmax                         # half max
-            start = zip(*pars2d)[1][0]                # start at central wavelength
+            # If the centroids are exactly the same for all components, we know the peak, and peak position
+            if np.allclose(zip(*pars2d)[1], atol): 
+                fmax = np.sum(zip(*pars2d)[0])            
+                
             # Otherwise, we have to figure out where the multicomponent peak is
-            #else:    
-                #f = lambda x
+            else:    
+                f = lambda x: self.specfit.fitter.multipeakgaussianslope(x, pars)
+                xfmax = self.bisection(f, start)
+                fmax = self.specfit.fitter.multipeakgaussian(xfmax, pars)
+            
+            hmax = 0.5 * fmax    
                 
-                
-            # current height relative to half max - we want to minimize this function
+            # current height relative to half max - we want to minimize this function.  Could be asymmetric.
             f = lambda x: self.specfit.fitter.multipeakgaussian(x, pars) - hmax                   
-            xhmax = self.bisection(f, start)
+            xhmax1 = self.bisection(f, start)
+            xhmax2 = self.bisection(f, start + (start - xhmax1))
                                         
-            return 2. * (xhmax - start)
+            return abs(xhmax2 - xhmax1)
             
     def bisection(self, f, x_guess):
         """
@@ -201,7 +203,7 @@ class Measurements(object):
             
             if fmid == 0.0: break
             
-        return x2
+        return x2    
         
     def bracket_root(self, f, x_guess, atol = 1e-4):
         """

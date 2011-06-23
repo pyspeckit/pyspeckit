@@ -95,6 +95,17 @@ class gaussian_fitter(object):
         result = 0
         for fit in pars: result += self.onepeakgaussian(x, 0, fit[0], fit[1], fit[2])
         return result
+        
+    def multipeakgaussianslope(self, x, pars):
+        """
+        Return slope at position x for multicomponent Gaussian fit.  Need this in measurements class for
+        finding the FWHM of multicomponent lines whose centroids are not identical.
+        """    
+        
+        pars = numpy.reshape(pars, (len(pars) / 3, 3))
+        result = 0
+        for fit in pars: result += self.onepeakgaussian(x, 0, fit[0], fit[1], fit[2]) * (-2. * (x - fit[1]) / 2. / fit[2]**2)
+        return result
 
     def onepeakgaussfit(self, xax, data, err=None,
             params=[0,1,0,1],fixed=[False,False,False,False],
