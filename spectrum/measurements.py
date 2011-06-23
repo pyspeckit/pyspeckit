@@ -25,6 +25,8 @@ spec = spectrum.Spectrum('sample_sdss.txt')
 spec.plotter(xmin = 6400, xmax = 6800)
 spec.specfit(guesses = [20, 6718.29, 5, 100, 6564.614, 20, 50, 6585.27, 20, 20, 6732.67, 5, 50, 6549.86, 5])
 spec.specfit.measurements.identify()
+spec.specfit.measurements.derive()
+spec.specfit.measurements.lines
 
 """
 
@@ -67,7 +69,7 @@ class Measurements(object):
         """
         Determine identify of lines in self.fitpars.  Fill entries of self.lines dictionary.
         
-        probs if two lines have very similar wavelengths in fit - account for this somehow
+        Note: This method will be infinitely slow for more than 10 or so lines.
         """    
         
         self.IDresults= []
@@ -87,7 +89,7 @@ class Measurements(object):
         
         condition = (self.refpos >= 0.9 * min(self.obspos)) & (self.refpos <= 1.1 * max(self.obspos))   # Speeds things up
         refpos = self.refpos[condition]
-        
+                
         combos = itertools.combinations(refpos, self.Nlines - where)        
         for i, combo in enumerate(combos):
             rdiff = np.diff(combo)
@@ -95,16 +97,32 @@ class Measurements(object):
             
         # Pick best solution
         MINloc = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
-        ALLloc = []                                  # Locations of best fit lines in reference dictionary
-                
+        ALLloc = []                                  # x-values of best fit lines in reference dictionary
+        
+        # Fill lines dictionary        
         for element in self.IDresults[MINloc][1]: ALLloc.append(np.argmin(np.abs(self.refpos - element)))
         for i, element in enumerate(ALLloc): 
             line = self.refname[element]
             self.lines[line] = {}
-            self.lines[line]['modelpars'] = self.modelpars[i]
+            loc = np.argmin(np.abs(self.obspos - self.refpos[element]))                
+            self.lines[line]['modelpars'] = list(self.modelpars[loc])
             
-        # Track down odd lines    
-    
+        # Track down odd lines
+        if len(ALLloc) < self.Nlines:
+            tmp = list(np.ravel(self.modelpars))
+            for key in self.lines.keys():
+                for element in self.lines[key]['modelpars']: tmp.pop(tmp.index(element))
+                            
+            try:  
+                for i, x in enumerate(zip(*tmp)[1]):    
+                    loc = np.argmin(np.abs(ALLloc - x))
+                    line = self.refname[loc]
+                    self.lines[line]['modelpars'].extend(tmp[i:i+3])
+            except TypeError:
+                loc = np.argmin(np.abs(tmp[1] - self.refpos))                       
+                line = self.refname[loc]
+                self.lines[line]['modelpars'].extend(tmp) 
+                    
     def derive(self):
         """
         Calculate luminosity and FWHM for all spectral lines.
@@ -112,29 +130,21 @@ class Measurements(object):
         
         for line in self.lines.keys():
             
-            # If only single component fit
-            if len(self.lines[line].shape) == 1:
-                self.fwhm[line] = 2. * np.sqrt(2. * np.log(2.)) * self.lines[line][2]
-            
-            # If multi-component fit
-            else:
-                self.fwhm[line] = self.find_fwhm(self.lines[line])
-                
-            try: self.lum[line] = self.find_lum(self.lines[line], self.d_L)
-            except TypeError: pass
+            self.lines[line]['fwhm'] = self.compute_fwhm(self.lines[line]['modelpars'])
+            self.lines[line]['flux'] = self.compute_flux(self.lines[line]['modelpars'])
+            #self.lines[line]['lum'] = self.compute_luminosity(self.lines[line]['modelpars'])            
     
-    def integrated_flux(self, pars):                                                                       
+    def compute_flux(self, pars):                                                                       
         """                                                                                                
         Calculate integrated flux of emission line.  Works for multi-component fits too.  Unnormalized.    
         """                                                                                                
                                                                                                            
         flux = 0                                                                                           
-        for i in xrange(len(pars) / 3):                                                                    
-            flux += np.sqrt(2. * np.pi) * pars[0 + 3*i] * pars[2 + 3*i]                                    
+        for i in xrange(len(pars) / 3): flux += np.sqrt(2. * np.pi) * pars[3 * i] * pars[2 + 3 * i]                                    
                                                                                                            
         return flux                                                                                        
                                                                                                            
-    def integrated_luminosity(self, pars):                                                                 
+    def compute_luminosity(self, pars):                                                                 
         """                                                                                                
         Determine luminosity of line (need distance).                                                      
         """                                                                                                
@@ -145,25 +155,86 @@ class Measurements(object):
                                                                                                            
         return lum                                                                                         
         
-    def integrated_fwhm(self, pars):
+    def compute_fwhm(self, pars):
         """
-        Determine full-width at half maximum for multi-component fit numerically.
+        Determine full-width at half maximum for multi-component fit numerically, or analytically if line
+        has only a single component.  Uses bisection technique for the latter with absolute tolerance of 1e-4.
         """
         
-        fmax = np.sum(zip(*pars)[0])   # full max
-        hmax = 0.5 * fmax              # half max
-                
-        start = np.mean(zip(*pars)[1])
-        maxnow = self.multigauss(start, pars)
-        
-        wave = start + 1
-        while maxnow > hmax:
-            maxnow = self.multigauss(wave, pars)
-            wave += 1
-                        
-        return 2. * (np.interp(hmax, [self.multigauss(wave - 1, pars), self.multigauss(wave - 2, pars)], [wave - 1, wave - 2]) - start)
+        if len(pars) == 3: return 2. * np.sqrt(2. * np.log(2.)) * pars[2]
+        else:
             
+            atol = 1e-4
+            pars2d = np.reshape(pars, (len(pars) / 3, 3))
+            
+            # If the centroids are exactly the same for all components, we know where to start
+            #if np.allclose(zip(*pars2d)[1], atol):
+            fmax = np.sum(zip(*pars2d)[0])            # full max
+            hmax = 0.5 * fmax                         # half max
+            start = zip(*pars2d)[1][0]                # start at central wavelength
+            # Otherwise, we have to figure out where the multicomponent peak is
+            #else:    
+                #f = lambda x
+                
+                
+            # current height relative to half max - we want to minimize this function
+            f = lambda x: self.specfit.fitter.multipeakgaussian(x, pars) - hmax                   
+            xhmax = self.bisection(f, start)
+                                        
+            return 2. * (xhmax - start)
+            
+    def bisection(self, f, x_guess):
+        """
+        Find root of function using bisection method.  Absolute tolerance of 1e-4 is being used.
+        """
+
+        x1, x2 = self.bracket_root(f, x_guess)
         
+        # Narrow bracketed range with bisection until tolerance is met
+        i = 0
+        while abs(x2 - x1) > 1e-4:
+            midpt = np.mean([x1, x2])
+            fmid = f(midpt)
+    
+            if np.sign(fmid) < 0: x1 = midpt
+            else: x2 = midpt
+            
+            if fmid == 0.0: break
+            
+        return x2
+        
+    def bracket_root(self, f, x_guess, atol = 1e-4):
+        """
+        Bracket root by finding points where function goes from positive to negative.
+        """
+        
+        f1 = f(x_guess)
+        f2 = f(x_guess + 1)
+        df = f2 - f1
+                
+        # Determine whether increasing or decreasing x_guess will lead us to zero
+        if (f1 > 0 and df < 0) or (f1 < 0 and df > 0): sign = 1
+        else: sign = -1
+        
+        # Find root bracketing points
+        xpre = x_guess
+        xnow = x_guess + sign 
+        fpre = f1
+        fnow = f(xnow)
+        while (np.sign(fnow) == np.sign(fpre)):
+            xpre = xnow
+            xnow += sign * 0.1
+            fpre = f(xpre)
+            fnow = f(xnow)
+                    
+        x1 = min(xnow, xpre)
+        x2 = max(xnow, xpre)
+        
+        if not np.all([np.sign(fpre), np.sign(fnow)]): 
+            x1 -= 1e-4
+            x2 += 1e-4
+                                
+        return x1, x2    
         
             
         

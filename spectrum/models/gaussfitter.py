@@ -84,6 +84,17 @@ class gaussian_fitter(object):
         
         """
         return H+A*numpy.exp(-(x-dx)**2/(2*w**2))
+        
+    def multipeakgaussian(self, x, pars):
+        """
+        Returns flux at position x due to contributions from multiple Gaussians.
+        """
+        
+        pars = numpy.reshape(pars, (len(pars) / 3, 3))
+        
+        result = 0
+        for fit in pars: result += self.onepeakgaussian(x, 0, fit[0], fit[1], fit[2])
+        return result
 
     def onepeakgaussfit(self, xax, data, err=None,
             params=[0,1,0,1],fixed=[False,False,False,False],
