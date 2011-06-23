@@ -210,9 +210,11 @@ class Spectra(Spectrum):
 
     def __init__(self,speclist,xtype='frequency',**kwargs):
         print "Creating spectra"
-        for spec in speclist:
+        speclist = list(speclist)
+        for ii,spec in enumerate(speclist):
             if type(spec) is str:
                 spec = Spectrum(spec)
+                speclist[ii] = spec
             if spec.xarr.xtype is not xtype:
                 # convert all inputs to same units
                 spec.xarr.change_xtype(xtype,**kwargs)
