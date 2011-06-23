@@ -23,7 +23,7 @@ km_per_mpc = 3.08568 * 10**13 * 10**6
 cm_per_mpc = 3.08568 * 10**13 * 10**5 * 10**6
 sqdeg_per_std = (180.0**2) / (np.pi**2)
 
-class cosmology:
+class Cosmology:
     def __init__(self, OmegaMatterNow = 0.272, OmegaLambdaNow = 0.728, OmegaBaryonNow = 0.044,
         h_70 = 0.702, sigma_8 = 0.807):
         

@@ -4,6 +4,7 @@ Storage for optical spectral line information.
 
 import numpy as np
 
+# Format: name, units, vacuum?, display name
 lines = {
          "H_alpha": [6564.614, 'Angstrom', True, r'$\mathrm{H}\alpha$'], \
          "H_beta":  [4862.721, 'Angstrom', True, r'$\mathrm{H}\beta$'], \
@@ -21,7 +22,6 @@ xarr = np.array(xarr)
 
 indx = np.argsort(xarr)
 xarr = np.sort(xarr)
-
 
 name = []
 for i, key in enumerate(lines.keys()): name.append(lines.keys()[indx[i]])
