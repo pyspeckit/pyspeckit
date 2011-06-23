@@ -78,14 +78,26 @@ spec.plotter(xmin = NIIa - 100, xmax = SIIb + 30)
 spec.specfit(guesses = guesses, tied = tied, fixed = fixed, negamp = False,
     limitedmin = lmin, limitedmax = lmax, minpars = minp, maxpars = maxp)
     
-guesses.extend([0.5 * ampHa, Halpha * opz, broad])
+guesses.extend([50, Halpha * opz, 50])
 tied.extend(['', 'p[4]', ''])
 fixed.extend([0, 0, 0]) 
 
 lmin.extend([True, False, False])
 lmax.extend([False, False, False])
 minp.extend([0, 0, 0]) 
-maxp.extend([0, 0, 0])      
+maxp.extend([0, 0, 0]) 
+
+spec.specfit(guesses = guesses, tied = tied, fixed = fixed, negamp = False,
+    limitedmin = lmin, limitedmax = lmax, minpars = minp, maxpars = maxp)
+
+guesses.extend([10, Halpha * opz, 25])
+tied.extend(['', 'p[4]', ''])
+fixed.extend([0, 0, 0])   
+
+lmin.extend([True, False, False])
+lmax.extend([False, False, False])
+minp.extend([0, 0, 0]) 
+maxp.extend([0, 0, 0])                                 
 
 spec.plotter(xmin = NIIa - 100, xmax = SIIb + 30)
 
@@ -108,7 +120,7 @@ for i, line in enumerate(spec.measurements.lines.keys()):
 spec.plotter.axis.set_xlabel(r'Wavelength $(\AA)$')
 spec.plotter.axis.set_ylabel(r'Flux $(10^{-17} \mathrm{erg/s/cm^2/\AA})$')
 
-print "Spectral Line Information: Line   Flux     FWHM   Luminosity"
+print "Line   Flux (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)"
 for line in spec.measurements.lines.keys():
     print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum']
 

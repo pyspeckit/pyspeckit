@@ -29,7 +29,7 @@ class Measurements(object):
         # Inherit specfit object    
         self.specfit = Spectrum.specfit
         self.speclines = Spectrum.speclines
-        
+                
         # Flux units in case we are interested in line luminosities or just having real flux units
         if fluxnorm is not None: self.fluxnorm=fluxnorm
         else: self.fluxnorm= 1
@@ -76,7 +76,7 @@ class Measurements(object):
         
         # If lines have multiple components...
         if np.any(self.odiff) < self.rdmin:
-            where = np.argwhere(self.odiff < self.rdmin) 
+            where = np.ravel(np.argwhere(self.odiff < self.rdmin))
             odiff = np.delete(self.odiff, where)
             multi = True
         else: 
@@ -87,7 +87,7 @@ class Measurements(object):
         condition = (self.refpos >= 0.9 * min(self.obspos)) & (self.refpos <= 1.1 * max(self.obspos))   # Speeds things up
         refpos = self.refpos[condition]
                 
-        combos = itertools.combinations(refpos, self.Nlines - where)        
+        combos = itertools.combinations(refpos, self.Nlines - len(where))        
         for i, combo in enumerate(combos):
             rdiff = np.diff(combo)
             self.IDresults.append((np.sum(np.abs(odiff - rdiff)), combo))
@@ -109,9 +109,7 @@ class Measurements(object):
             tmp = list(np.ravel(self.modelpars))
             for key in self.lines.keys():
                 for element in self.lines[key]['modelpars']: tmp.pop(tmp.index(element))
-                            
-            print tmp                
-                            
+                                                        
             try:  
                 for i, x in enumerate(zip(*tmp)[1]):    
                     loc = np.argmin(np.abs(ALLloc - x))
@@ -121,7 +119,7 @@ class Measurements(object):
                 loc = np.argmin(np.abs(tmp[1] - self.refpos))                       
                 line = self.refname[loc]
                 self.lines[line]['modelpars'].extend(tmp) 
-         
+                  
         self.separate() 
                     
     def derive(self):
@@ -144,7 +142,6 @@ class Measurements(object):
         
         for key in self.lines.keys():
             pars = self.lines[key]['modelpars']
-            print key, pars
             if len(pars) > 3:
                 pars2d = np.reshape(pars, (len(pars) / 3, 3))
                 sigma = zip(*pars2d)[2]
@@ -264,6 +261,12 @@ class Measurements(object):
                                 
         return x1, x2    
         
+    def to_tex(self):
+        """
+        Write out fit results to tex format.
+        """    
+        
+        pass
             
         
 
