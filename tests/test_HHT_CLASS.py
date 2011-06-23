@@ -1,7 +1,7 @@
 import spectrum
 from pylab import *
 
-if not interactive in globals():
+if not 'interactive' in globals():
     interactive=False
 
 sp = spectrum.Spectrum('10074-190_HCOp.fits')

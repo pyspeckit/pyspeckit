@@ -5,7 +5,7 @@ except ImportError:
     atpyOK = False
 import spectrum.units as units
 
-def open_1d_txt(filename):
+def open_1d_txt(filename,errspecnum=2):
     if not atpyOK: print "atpy not installed; cannot read txt files"
     else:
         T = atpy.Table(filename, type='ascii',
@@ -14,8 +14,8 @@ def open_1d_txt(filename):
         
         xarr = T.data[T.data.dtype.names[0]]
         data = T.data[T.data.dtype.names[1]]
-        if len(T.columns) > 2:
-            error = T.data[T.data.dtype.names[2]]
+        if len(T.columns) > errspecnum:
+            error = T.data[T.data.dtype.names[errspecnum]]
         else:
             # assume uniform, nonzero error
             error = data*0 + 1.0

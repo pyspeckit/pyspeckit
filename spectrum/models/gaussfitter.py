@@ -205,7 +205,8 @@ class gaussian_fitter(object):
     def multigaussfit(self, xax, data, npeaks=1, err=None, params=[1,0,1],
             fixed=[False,False,False], limitedmin=[False,False,True],
             limitedmax=[False,False,False], minpars=[0,0,0], maxpars=[0,0,0],
-            quiet=True, shh=True, veryverbose=False, tied = ['', '', ''], **kwargs):
+            quiet=True, shh=True, veryverbose=False, negamp=None,
+            tied = ['', '', ''], **kwargs):
         """
         An improvement on onepeakgaussfit.  Lets you fit multiple gaussians.
 
@@ -244,7 +245,7 @@ class gaussian_fitter(object):
         if isinstance(params,numpy.ndarray): params=params.tolist()
 
         # make sure all various things are the right length; if they're not, fix them using the defaults
-        if kwargs.has_key('negamp') is False: kwargs['negamp'] = None
+        # multigaussfit should process negamp directly if kwargs.has_key('negamp') is False: kwargs['negamp'] = None 
         for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars,tied):
             if len(parlist) != 3*self.npeaks:
                 # if you leave the defaults, or enter something that can be multiplied by 3 to get to the
@@ -257,12 +258,12 @@ class gaussian_fitter(object):
                 elif parlist==fixed:
                     parlist[:] = [False,False,False] * self.npeaks
                 elif parlist==limitedmax:
-                    if kwargs['negamp'] is None: parlist[:] = [False,False,False] * self.npeaks
-                    elif kwargs['negamp'] is False: parlist[:] = [False,False,False] * self.npeaks
+                    if negamp is None: parlist[:] = [False,False,False] * self.npeaks
+                    elif negamp is False: parlist[:] = [False,False,False] * self.npeaks
                     else: parlist[:] = [True,False,False] * self.npeaks
                 elif parlist==limitedmin:
-                    if kwargs['negamp'] is None: parlist[:] = [False,False,True] * self.npeaks  # Lines can't have negative width!
-                    elif kwargs['negamp'] is False: parlist[:] = [True,False,True] * self.npeaks
+                    if negamp is None: parlist[:] = [False,False,True] * self.npeaks  # Lines can't have negative width!
+                    elif negamp is False: parlist[:] = [True,False,True] * self.npeaks
                     else: parlist[:] = [False,False,True] * self.npeaks                   
                 elif parlist==minpars or parlist==maxpars:
                     parlist[:] = [0,0,0] * self.npeaks
@@ -270,7 +271,7 @@ class gaussian_fitter(object):
                     parlist[:] = ['','',''] * self.npeaks
                     
         # mpfit doesn't recognize negamp, so get rid of it now that we're done setting limitedmin/max and min/maxpars
-        if kwargs.has_key('negamp'): kwargs.pop('negamp')
+        #if kwargs.has_key('negamp'): kwargs.pop('negamp')
 
         def mpfitfun(x,y,err):
             if err is None:

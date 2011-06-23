@@ -159,6 +159,7 @@ class SpectroscopicAxis(np.ndarray):
         self.xtype = getattr(obj, 'xtype', None)
         self.reffreq = getattr(obj, 'reffreq', None)
         self.reffreq_units = getattr(obj, 'reffreq_units', None)
+        self.velocity_convention = getattr(obj, 'velocity_convention', None)
         self.redshift = getattr(obj, 'redshift', None)
         self.wcshead = getattr(obj, 'wcshead', None)
 

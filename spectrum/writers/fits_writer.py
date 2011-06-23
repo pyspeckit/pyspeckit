@@ -27,7 +27,8 @@ class write_fits(Writer):
         # Generate a WCS header from the X-array
         if self.Spectrum.xarr._make_header(tolerance=tolerance):
             for k,v in self.Spectrum.xarr.wcshead.iteritems():
-                header.update(k,v)
+                if v is not None:
+                    header.update(k,v)
             if write_error:
                 data = np.array( [self.Spectrum.data, self.Spectrum.error] )
             else:
