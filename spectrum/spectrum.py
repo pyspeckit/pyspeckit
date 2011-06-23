@@ -1,7 +1,7 @@
 import numpy as np
 import smooth as sm
 import pyfits
-import readers,fitters,plotters,writers,baseline,units,speclines,measurements
+import readers,fitters,plotters,writers,baseline,units,measurements,speclines
 import history
 
 
@@ -75,6 +75,7 @@ class Spectrum(object):
         self.plotter = plotters.Plotter(self)
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
+        self.speclines = speclines
 
         if doplot: self.plotter(**kwargs)
         

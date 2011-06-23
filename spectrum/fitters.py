@@ -135,7 +135,7 @@ class Specfit(object):
         if save: self.savefit()
         
         # Initialize measurements class
-        self.measurements = measurements.Measurements(self)
+        self.measurements = measurements.Measurements(self.Spectrum)
 
     def EQW(self, plot=False, plotcolor='g', annotate=False, alpha=0.5, loc='lower left'):
         """
