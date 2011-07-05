@@ -120,6 +120,8 @@ for i, line in enumerate(spec.measurements.lines.keys()):
 spec.plotter.axis.set_xlabel(r'Wavelength $(\AA)$')
 spec.plotter.axis.set_ylabel(r'Flux $(10^{-17} \mathrm{erg/s/cm^2/\AA})$')
 
+spec.plotter.refresh()
+
 print "Line   Flux (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)"
 for line in spec.measurements.lines.keys():
     print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum']

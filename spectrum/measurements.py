@@ -131,6 +131,7 @@ class Measurements(object):
             
             self.lines[line]['fwhm'] = self.compute_fwhm(self.lines[line]['modelpars'])
             self.lines[line]['flux'] = self.compute_flux(self.lines[line]['modelpars'])
+            self.lines[line]['amp'] = self.compute_amplitude(self.lines[line]['modelpars'])
             
             if self.d is not None:
                 self.lines[line]['lum'] = self.compute_luminosity(self.lines[line]['modelpars'])            
@@ -166,6 +167,16 @@ class Measurements(object):
         for i in xrange(len(pars) / 3): flux += np.sqrt(2. * np.pi) * pars[3 * i] * pars[2 + 3 * i]                                    
                                                                                                            
         return flux * self.fluxnorm
+        
+    def compute_amplitude(self, pars):
+        """
+        Calculate amplitude of emission line.  Should be easy - add multiple components if they exist.
+        Currently assumes multiple components have the same centroid.
+        """
+        
+        amp = 0
+        for i in xrange(len(pars) / 3): amp += pars[3 * i]
+        return amp
                                                                                                            
     def compute_luminosity(self, pars):                                                                 
         """                                                                                                
