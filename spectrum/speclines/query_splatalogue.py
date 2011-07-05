@@ -16,13 +16,17 @@ length_dict = {'meters':1.0,'m':1.0,
         'angstroms':1e-10,'A':1e-10,
         }
 
+# example query of SPLATALOGUE directly:
+# http://www.cv.nrao.edu/php/splat/c.php?sid%5B%5D=64&sid%5B%5D=108&calcIn=&data_version=v2.0&from=&to=&frequency_units=MHz&energy_range_from=&energy_range_to=&lill=on&tran=&submit=Search&no_atmospheric=no_atmospheric&no_potential=no_potential&no_probable=no_probable&include_only_nrao=include_only_nrao&displayLovas=displayLovas&displaySLAIM=displaySLAIM&displayJPL=displayJPL&displayCDMS=displayCDMS&displayToyaMA=displayToyaMA&displayOSU=displayOSU&displayRecomb=displayRecomb&displayLisa=displayLisa&displayRFI=displayRFI&ls1=ls1&ls5=ls5&el1=el1
+
 def query_splatalogue(minwav=0.00260,maxwav=0.00261,
         waveunits='m',root_url='http://find.nrao.edu/splata-slap/slap',
-        chemical_element=None):
+        chemical_element=None, NRAO_Recommended=True,):
     """
     Acquire an atpy table of a splatalogue searched based on wavelength.
 
-    Future work will allow queries based on other parameters.
+    Future work will allow queries based on other parameters.  I'm waiting on
+    development by the SPLATASLAP database folks to implement these.
     """
 
     if waveunits in length_dict:
@@ -33,6 +37,8 @@ def query_splatalogue(minwav=0.00260,maxwav=0.00261,
     # This is probably the more robust/pythonic way to do this sort of query:
     request_dict = {"REQUEST":"queryData","WAVELENGTH":"%f/%f" % (minwav,maxwav)}
     if chemical_element is not None: request_dict['CHEMICAL_ELEMENT'] = chemical_element
+    #if NRAO_Recommended: request_dict['include_only_nrao'] = "yes"
+    if NRAO_Recommended: request_dict['recommended'] = "1"
     #query_url = urllib2.Request(url=root_url,
     #        data=urllib.urlencode(request_dict))
     query_url = "%s?%s" % (root_url,urllib.urlencode(request_dict))

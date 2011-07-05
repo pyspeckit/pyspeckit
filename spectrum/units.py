@@ -249,6 +249,9 @@ class SpectroscopicAxis(np.ndarray):
         * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
         * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
         """
+        if self.units in frequency_dict:
+            print "Already in frequency units"
+            return
         if center_frequency is None and self.reffreq is None:
             raise ValueError("Cannot convert velocity to frequency without specifying a central frequency.")
         elif self.reffreq is not None:
@@ -284,6 +287,9 @@ class SpectroscopicAxis(np.ndarray):
         * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
         * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
         """
+        if self.units in frequency_dict:
+            print "Already in velocity units"
+            return
         if center_frequency is None and self.reffreq is None:
             raise ValueError("Cannot convert frequency to velocity without specifying a central frequency.")
         elif self.reffreq is not None:
@@ -317,6 +323,9 @@ class SpectroscopicAxis(np.ndarray):
         Simple conversion from frequency to wavelength:
         lambda = c / nu
         """
+        if self.units in wavelength_dict:
+            print "Already in wavelength units"
+            return
         if wavelength_units not in length_dict:
             raise ValueError("Wavelength units %s not valid" % wavelength_units)
 
@@ -333,6 +342,9 @@ class SpectroscopicAxis(np.ndarray):
         Simple conversion from frequency to wavelength:
         nu = c / lambda
         """
+        if self.units in frequency_dict:
+            print "Already in frequency units"
+            return
         if frequency_units not in frequency_dict:
             raise ValueError("Frequency units %s not valid" % wavelength_units)
 
