@@ -1,3 +1,14 @@
+"""
+The spectrum module consists of the Spectrum class, with child classes ObsBlock
+and Spectra for multi-spectrum analysis of different types.
+
+The Spectrum class is the main functional code.
+ObsBlocks are containers of multiple spectra of different objects
+The Spectra class is a container of multiple spectra of the *same* object at
+   different wavelengths/frequencies
+
+.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+"""
 import numpy as np
 import smooth as sm
 import pyfits
@@ -20,6 +31,7 @@ class Spectrum(object):
         -fit a continuum "baseline" to a selected region with an n-order
           polynomial
         -perform fourier transforms and operations in fourier space on a spectrum (not implemented)
+
     """
 
     def __init__(self,filename=None, filetype=None, xarr=None, data=None,
