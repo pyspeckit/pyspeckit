@@ -1,0 +1,194 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>cubes &mdash; pyspeckit v0.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pyspeckit v0.1 documentation" href="index.html" />
+    <link rel="prev" title="spectrum" href="spectrum.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="spectrum.html" title="spectrum"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">pyspeckit v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-cubes">
+<span id="cubes"></span><h1>cubes<a class="headerlink" href="#module-cubes" title="Permalink to this headline">¶</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Author:</th><td class="field-body">Adam Ginsburg &lt;<a class="reference external" href="mailto:adam&#46;g&#46;ginsburg&#37;&#52;&#48;gmail&#46;com">adam<span>&#46;</span>g<span>&#46;</span>ginsburg<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="cubes.Cube">
+<em class="property">class </em><tt class="descclassname">cubes.</tt><tt class="descname">Cube</tt><big>(</big><em>filename</em>, <em>x0=0</em>, <em>y0=0</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#cubes.Cube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">spectrum.spectrum.Spectrum</span></tt></p>
+<dl class="method">
+<dt id="cubes.Cube.crop">
+<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em><big>)</big><a class="headerlink" href="#cubes.Cube.crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the current spectrum with a subset from x1 to x2 in current
+units</p>
+<p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cubes.Cube.measure">
+<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em><big>)</big><a class="headerlink" href="#cubes.Cube.measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cubes.Cube.parse_header">
+<tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="headerlink" href="#cubes.Cube.parse_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse parameters from a .fits header into required spectrum structure
+parameters</p>
+<p>This should be moved to the FITSSpectrum subclass when that is available</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cubes.Cube.parse_text_header">
+<tt class="descname">parse_text_header</tt><big>(</big><em>Table</em><big>)</big><a class="headerlink" href="#cubes.Cube.parse_text_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grab relevant parameters from a table header (xaxis type, etc)</p>
+<p>This function should only exist for Spectrum objects created from
+.txt or other atpy table type objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cubes.Cube.plot_apspec">
+<tt class="descname">plot_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em>, <em>reset_ylimits=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#cubes.Cube.plot_apspec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract an aperture using cubes.extract_aperture
+(defaults to Cube coordinates)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cubes.Cube.plot_spectrum">
+<tt class="descname">plot_spectrum</tt><big>(</big><em>x</em>, <em>y</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#cubes.Cube.plot_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill the .data array with a real spectrum and plot it</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cubes.Cube.shape">
+<tt class="descname">shape</tt><big>(</big><big>)</big><a class="headerlink" href="#cubes.Cube.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the data shape</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cubes.Cube.smooth">
+<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#cubes.Cube.smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth the spectrum by factor &#8220;smooth&#8221;.  Options are defined in sm.smooth</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cubes.Cube.write">
+<tt class="descname">write</tt><big>(</big><em>filename</em>, <em>type=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#cubes.Cube.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the spectrum to a file.  The available file types are listed
+in spectrum.writers.writers</p>
+<p>type - what type of file to write to?  If not specified, will attempt
+to determine type from suffix</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-cubes"></span><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Author:</th><td class="field-body">Adam Ginsburg &lt;<a class="reference external" href="mailto:adam&#46;g&#46;ginsburg&#37;&#52;&#48;gmail&#46;com">adam<span>&#46;</span>g<span>&#46;</span>ginsburg<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="spectrum.html"
+                        title="previous chapter">spectrum</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/cubes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="spectrum.html" title="spectrum"
+             >previous</a> |</li>
+        <li><a href="index.html">pyspeckit v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

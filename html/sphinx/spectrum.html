@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>spectrum &mdash; pyspeckit v0.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pyspeckit v0.1 documentation" href="index.html" />
+    <link rel="next" title="cubes" href="cubes.html" />
+    <link rel="prev" title="PySpecKit" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cubes.html" title="cubes"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="PySpecKit"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">pyspeckit v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-spectrum">
+<span id="spectrum"></span><h1>spectrum<a class="headerlink" href="#module-spectrum" title="Permalink to this headline">¶</a></h1>
+<p>The spectrum module consists of the Spectrum class, with child classes ObsBlock
+and Spectra for multi-spectrum analysis of different types.</p>
+<p>The Spectrum class is the main functional code.
+ObsBlocks are containers of multiple spectra of different objects
+The Spectra class is a container of multiple spectra of the <em>same</em> object at</p>
+<blockquote>
+<div>different wavelengths/frequencies</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Author:</th><td class="field-body">Adam Ginsburg &lt;<a class="reference external" href="mailto:adam&#46;g&#46;ginsburg&#37;&#52;&#48;gmail&#46;com">adam<span>&#46;</span>g<span>&#46;</span>ginsburg<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt; and Jordan Mirocha &lt;<a class="reference external" href="mailto:mirochaj&#37;&#52;&#48;gmail&#46;com">mirochaj<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="spectrum.Spectrum">
+<em class="property">class </em><tt class="descclassname">spectrum.</tt><tt class="descname">Spectrum</tt><big>(</big><em>filename=None</em>, <em>filetype=None</em>, <em>xarr=None</em>, <em>data=None</em>, <em>error=None</em>, <em>header=None</em>, <em>doplot=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#spectrum.Spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>The core class for the spectroscopic toolkit.  Contains the data and error
+arrays along with wavelength / frequency / velocity information in various
+formats.</p>
+<dl class="docutils">
+<dt>Contains functions / classes to:</dt>
+<dd><dl class="first docutils">
+<dt>-read and write FITS-compliant spectroscopic data sets</dt>
+<dd>-read fits binaries? (not implemented)</dd>
+</dl>
+<p>-plot a spectrum
+-fit a spectrum both interactively and non-interactively</p>
+<blockquote>
+<div>-with gaussian, voigt, lorentzian, and multiple (gvl) profiles</div></blockquote>
+<dl class="docutils">
+<dt>-fit a continuum &#8220;baseline&#8221; to a selected region with an n-order</dt>
+<dd>polynomial</dd>
+</dl>
+<p class="last">-perform fourier transforms and operations in fourier space on a spectrum (not implemented)</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="spectrum.Spectrum.crop">
+<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em><big>)</big><a class="headerlink" href="#spectrum.Spectrum.crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the current spectrum with a subset from x1 to x2 in current
+units</p>
+<p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectrum.measure">
+<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em><big>)</big><a class="headerlink" href="#spectrum.Spectrum.measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectrum.parse_header">
+<tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="headerlink" href="#spectrum.Spectrum.parse_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse parameters from a .fits header into required spectrum structure
+parameters</p>
+<p>This should be moved to the FITSSpectrum subclass when that is available</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectrum.parse_text_header">
+<tt class="descname">parse_text_header</tt><big>(</big><em>Table</em><big>)</big><a class="headerlink" href="#spectrum.Spectrum.parse_text_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grab relevant parameters from a table header (xaxis type, etc)</p>
+<p>This function should only exist for Spectrum objects created from
+.txt or other atpy table type objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectrum.shape">
+<tt class="descname">shape</tt><big>(</big><big>)</big><a class="headerlink" href="#spectrum.Spectrum.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the data shape</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectrum.smooth">
+<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#spectrum.Spectrum.smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth the spectrum by factor &#8220;smooth&#8221;.  Options are defined in sm.smooth</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectrum.write">
+<tt class="descname">write</tt><big>(</big><em>filename</em>, <em>type=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#spectrum.Spectrum.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the spectrum to a file.  The available file types are listed
+in spectrum.writers.writers</p>
+<p>type - what type of file to write to?  If not specified, will attempt
+to determine type from suffix</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="spectrum.Spectra">
+<em class="property">class </em><tt class="descclassname">spectrum.</tt><tt class="descname">Spectra</tt><big>(</big><em>speclist</em>, <em>xtype='frequency'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#spectrum.Spectra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">spectrum.spectrum.Spectrum</span></tt></p>
+<p>A list of individual Spectrum objects.  Intended to be used for
+concatenating different wavelength observations of the SAME OBJECT.  Can be
+operated on just like any Spectrum object, incuding fitting.  Useful for
+fitting multiple lines on non-continguous axes simultaneously.  Be wary of
+plotting these though...</p>
+<dl class="method">
+<dt id="spectrum.Spectra.crop">
+<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em><big>)</big><a class="headerlink" href="#spectrum.Spectra.crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the current spectrum with a subset from x1 to x2 in current
+units</p>
+<p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectra.measure">
+<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em><big>)</big><a class="headerlink" href="#spectrum.Spectra.measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectra.parse_header">
+<tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="headerlink" href="#spectrum.Spectra.parse_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse parameters from a .fits header into required spectrum structure
+parameters</p>
+<p>This should be moved to the FITSSpectrum subclass when that is available</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectra.parse_text_header">
+<tt class="descname">parse_text_header</tt><big>(</big><em>Table</em><big>)</big><a class="headerlink" href="#spectrum.Spectra.parse_text_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grab relevant parameters from a table header (xaxis type, etc)</p>
+<p>This function should only exist for Spectrum objects created from
+.txt or other atpy table type objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectra.shape">
+<tt class="descname">shape</tt><big>(</big><big>)</big><a class="headerlink" href="#spectrum.Spectra.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the data shape</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectra.smooth">
+<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#spectrum.Spectra.smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth the spectrum by factor &#8220;smooth&#8221;.  Options are defined in sm.smooth</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.Spectra.write">
+<tt class="descname">write</tt><big>(</big><em>filename</em>, <em>type=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#spectrum.Spectra.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the spectrum to a file.  The available file types are listed
+in spectrum.writers.writers</p>
+<p>type - what type of file to write to?  If not specified, will attempt
+to determine type from suffix</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="spectrum.ObsBlock">
+<em class="property">class </em><tt class="descclassname">spectrum.</tt><tt class="descname">ObsBlock</tt><big>(</big><em>speclist</em>, <em>xtype='frequency'</em>, <em>xarr=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#spectrum.ObsBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">spectrum.spectrum.Spectrum</span></tt></p>
+<p>An Observation Block</p>
+<p>Consists of multiple spectra with a shared X-axis.  Intended to hold groups
+of observations of the same object in the same setup for later averaging.</p>
+<dl class="method">
+<dt id="spectrum.ObsBlock.average">
+<tt class="descname">average</tt><big>(</big><em>weight=None</em>, <em>error='erravgrtn'</em><big>)</big><a class="headerlink" href="#spectrum.ObsBlock.average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Average all scans in an ObsBlock.  Returns a single Spectrum object</p>
+<p>weight - a header keyword to weight by
+error - estimate the error spectrum.  Can be:</p>
+<blockquote>
+<div>&#8216;scanrms&#8217;   - the standard deviation of each pixel across all scans
+&#8216;erravg&#8217;    - the average of all input error spectra
+&#8216;erravgrtn&#8217; - the average of all input error spectra divided by sqrt(n_obs)</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.ObsBlock.crop">
+<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em><big>)</big><a class="headerlink" href="#spectrum.ObsBlock.crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the current spectrum with a subset from x1 to x2 in current
+units</p>
+<p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.ObsBlock.measure">
+<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em><big>)</big><a class="headerlink" href="#spectrum.ObsBlock.measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.ObsBlock.parse_header">
+<tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="headerlink" href="#spectrum.ObsBlock.parse_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse parameters from a .fits header into required spectrum structure
+parameters</p>
+<p>This should be moved to the FITSSpectrum subclass when that is available</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.ObsBlock.parse_text_header">
+<tt class="descname">parse_text_header</tt><big>(</big><em>Table</em><big>)</big><a class="headerlink" href="#spectrum.ObsBlock.parse_text_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grab relevant parameters from a table header (xaxis type, etc)</p>
+<p>This function should only exist for Spectrum objects created from
+.txt or other atpy table type objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.ObsBlock.shape">
+<tt class="descname">shape</tt><big>(</big><big>)</big><a class="headerlink" href="#spectrum.ObsBlock.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the data shape</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.ObsBlock.smooth">
+<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#spectrum.ObsBlock.smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth the spectrum by factor &#8220;smooth&#8221;.  Options are defined in sm.smooth</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spectrum.ObsBlock.write">
+<tt class="descname">write</tt><big>(</big><em>filename</em>, <em>type=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#spectrum.ObsBlock.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the spectrum to a file.  The available file types are listed
+in spectrum.writers.writers</p>
+<p>type - what type of file to write to?  If not specified, will attempt
+to determine type from suffix</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-spectrum"></span><p>The spectrum module consists of the Spectrum class, with child classes ObsBlock
+and Spectra for multi-spectrum analysis of different types.</p>
+<p>The Spectrum class is the main functional code.
+ObsBlocks are containers of multiple spectra of different objects
+The Spectra class is a container of multiple spectra of the <em>same</em> object at</p>
+<blockquote>
+<div>different wavelengths/frequencies</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Author:</th><td class="field-body">Adam Ginsburg &lt;<a class="reference external" href="mailto:adam&#46;g&#46;ginsburg&#37;&#52;&#48;gmail&#46;com">adam<span>&#46;</span>g<span>&#46;</span>ginsburg<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt; and Jordan Mirocha &lt;<a class="reference external" href="mailto:mirochaj&#37;&#52;&#48;gmail&#46;com">mirochaj<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="spectrum.register_fitter">
+<tt class="descclassname">spectrum.</tt><tt class="descname">register_fitter</tt><big>(</big><em>name</em>, <em>function</em>, <em>npars</em>, <em>multisingle='single'</em>, <em>override=False</em>, <em>key=None</em><big>)</big><a class="headerlink" href="#spectrum.register_fitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a fitter function.</p>
+<p>Required Arguments:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>name</em>: [ string ]</dt>
+<dd>The fit function name.</dd>
+<dt><em>function</em>: [ function ]</dt>
+<dd>The fitter function.  Single-fitters should take npars + 1 input
+parameters, where the +1 is for a 0th order baseline fit.  They
+should accept an X-axis and data and standard fitting-function
+inputs (see, e.g., gaussfitter).  Multi-fitters should take N *
+npars, but should also operate on X-axis and data arguments.</dd>
+<dt><em>npars</em>: [ int ]</dt>
+<dd>How many parameters does the function being fit accept?</dd>
+</dl>
+</div></blockquote>
+<p>Optional Keyword Arguments:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>multisingle</em>: [ &#8216;multi&#8217; | &#8216;single&#8217; ] </dt>
+<dd>Is the function a single-function fitter (with a background), or
+does it allow N copies of the fitting function?</dd>
+<dt><em>override</em>: [ True | False ]</dt>
+<dd>Whether to override any existing type if already present.</dd>
+<dt><em>key</em>: [ char ]</dt>
+<dd>Key to select the fitter in interactive mode</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="spectrum.register_reader">
+<tt class="descclassname">spectrum.</tt><tt class="descname">register_reader</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="headerlink" href="#spectrum.register_reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a reader function.</p>
+<p>Required Arguments:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>filetype</em>: [ string ]</dt>
+<dd>The file type name</dd>
+<dt><em>function</em>: [ function ]</dt>
+<dd>The reader function.  Should take a filename as input
+and return an X-axis object (see units.py), a spectrum,
+an error spectrum (initialize it to 0&#8217;s if empty), and a
+pyfits header instance</dd>
+<dt><em>suffix</em>: [ int ]</dt>
+<dd>What suffix should the file have?</dd>
+</dl>
+</div></blockquote>
+<p>Optional Keyword Arguments:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spectrum.register_writer">
+<tt class="descclassname">spectrum.</tt><tt class="descname">register_writer</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="headerlink" href="#spectrum.register_writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a writer function.</p>
+<p>Required Arguments:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>filetype</em>: [ string ]</dt>
+<dd>The file type name</dd>
+<dt><em>function</em>: [ function ]</dt>
+<dd>The writer function.  Will be an attribute of Spectrum
+object, and called as spectrum.Spectrum.write_hdf5(), 
+for example.</dd>
+<dt><em>suffix</em>: [ int ]</dt>
+<dd>What suffix should the file have?</dd>
+</dl>
+</div></blockquote>
+<p>Optional Keyword Arguments:</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">PySpecKit</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cubes.html"
+                        title="next chapter">cubes</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/spectrum.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cubes.html" title="cubes"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="PySpecKit"
+             >previous</a> |</li>
+        <li><a href="index.html">pyspeckit v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
