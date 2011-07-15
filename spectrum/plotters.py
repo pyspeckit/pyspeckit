@@ -12,6 +12,26 @@ you have initiated the fitter.
 'b' - initiate the baseliner 
 """
 
+def Property(func):
+    return property(**func())
+
+def add_plot_property(propname,doc=""):
+
+    def fget(self):
+        return self.__dict__["_"+propname]
+
+    def fset(self,new_prop):
+        self.__dict__["_"+propname] = new_prop
+
+    fdel = None
+
+    return_dict = locals()
+    del return_dict['propname']
+
+    #import pdb; pdb.set_trace()
+    #return property(get_prop,set_prop,None,prop_details)
+    return return_dict
+
 class Plotter(object):
     """
     Class to plot a spectrum
@@ -32,10 +52,11 @@ class Plotter(object):
         self.title  = title
         self.errorplot = None
         self.plotkwargs = kwargs
-        self.xmax = None
-        self.xmin = None
-        self.ymax = None
-        self.ymin = None
+        self._xmax = None
+        self._xmin = None
+        self._ymax = None
+        self._ymin = None
+
         self.keyclick = None
 
     def __call__(self, figure=None, axis=None, clear=True, **kwargs):
@@ -83,6 +104,39 @@ class Plotter(object):
         self.plotkwargs = kwargs
 
         self.plot(**kwargs)
+
+    @Property
+    def ymax():
+        return add_plot_property('ymax','Maximum Y value on plot')
+        #self.ymax = add_plot_property(self,'ymax','Maximum Y value on plot')
+        #self.ymin = add_plot_property(self, 
+    @Property
+    def ymin():
+        return add_plot_property('ymin','Minimum Y value on plot')
+        #self.xmax = add_plot_property(self,    
+    @Property
+    def xmax():
+        return add_plot_property('xmax','Maximum X value on plot')
+        #self.xmin = add_plot_property(self,    
+    @Property
+    def xmin():
+        return add_plot_property('xmin','Minimum X value on plot')
+
+    #@property
+    #def get_ymax(self):
+    #    return self._ymax
+
+    #@ymax.setter
+    #def set_ymax(self,new_ymax):
+    #    self._ymax = new_ymax
+
+    #@property
+    #def get_ymax(self):
+    #    return self._ymax
+
+    #@ymax.setter
+    #def set_ymax(self,new_ymax):
+    #    self._ymax = new_ymax
 
     def plot(self, offset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
             errstyle=None, erralpha=0.2, silent=False, **kwargs):
@@ -145,31 +199,31 @@ class Plotter(object):
         Automatically or manually reset the plot limits
         """
 
-        if (self.Spectrum.xarr.max() < self.xmin or self.Spectrum.xarr.min() > self.xmax 
+        if (self.Spectrum.xarr.max() < self._xmin or self.Spectrum.xarr.min() > self._xmax 
                 or reset_xlimits):
             if not silent: print "Resetting X-axis min/max because the plot is out of bounds."
-            self.xmin = None
-            self.xmax = None
-        if xmin is not None: self.xmin = xmin
-        elif self.xmin is None: self.xmin=self.Spectrum.xarr.min()
-        if xmax is not None: self.xmax = xmax
-        elif self.xmax is None: self.xmax=self.Spectrum.xarr.max()
-        self.axis.set_xlim(self.xmin,self.xmax)
+            self._xmin = None
+            self._xmax = None
+        if xmin is not None: self._xmin = xmin
+        elif self._xmin is None: self._xmin=self.Spectrum.xarr.min()
+        if xmax is not None: self._xmax = xmax
+        elif self._xmax is None: self._xmax=self.Spectrum.xarr.max()
+        self.axis.set_xlim(self._xmin,self._xmax)
 
-        xpixmin = np.argmin(np.abs(self.Spectrum.xarr-self.xmin))
-        xpixmax = np.argmin(np.abs(self.Spectrum.xarr-self.xmax))
+        xpixmin = np.argmin(np.abs(self.Spectrum.xarr-self._xmin))
+        xpixmax = np.argmin(np.abs(self.Spectrum.xarr-self._xmax))
         if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
         
-        if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
+        if (self.Spectrum.data.max() < self._ymin or self.Spectrum.data.min() > self._ymax
                 or reset_ylimits):
             if not silent: print "Resetting Y-axis min/max because the plot is out of bounds."
-            self.ymin = None
-            self.ymax = None
-        if ymin is not None: self.ymin = ymin
-        elif self.ymin is None: self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
-        if ymax is not None: self.ymax = ymax
-        elif self.ymax is None: self.ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin) * ypeakscale + self.ymin
-        self.axis.set_ylim(self.ymin,self.ymax)
+            self._ymin = None
+            self._ymax = None
+        if ymin is not None: self._ymin = ymin
+        elif self._ymin is None: self._ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
+        if ymax is not None: self._ymax = ymax
+        elif self._ymax is None: self._ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self._ymin) * ypeakscale + self._ymin
+        self.axis.set_ylim(self._ymin,self._ymax)
         
 
     def label(self, title=None, xlabel=None, ylabel=None, **kwargs):
