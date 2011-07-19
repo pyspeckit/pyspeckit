@@ -18,10 +18,10 @@ HDU = pyfits.PrimaryHDU(data=y,header=header)
 
 HDU.writeto('test_freqswitch.fits',clobber=True)
 
-import spectrum
+import pyspeckit
 import pylab
 
-sp = spectrum.Spectrum('test_freqswitch.fits')
+sp = pyspeckit.Spectrum('test_freqswitch.fits')
 sp.plotter()
 pylab.plot(x,y,'k--',drawstyle='steps-mid')
 

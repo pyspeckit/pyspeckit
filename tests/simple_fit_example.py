@@ -1,7 +1,7 @@
-import spectrum
+import pyspeckit
 
 # load a FITS-compliant spectrum
-spec = spectrum.Spectrum('10074-190_HCOp.fits')
+spec = pyspeckit.Spectrum('10074-190_HCOp.fits')
 # The units are originally frequency (check this by printing spec.xarr.units).
 # I want to know the velocity.  Convert!
 # Note that this only works because the reference frequency is set in the header

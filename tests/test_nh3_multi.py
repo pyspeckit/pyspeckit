@@ -1,23 +1,23 @@
-import spectrum
+import pyspeckit
 
 if not 'interactive' in globals():
     interactive=False
 
 
-sp1 = spectrum.Spectrum('G032.751-00.071_nh3_11_Tastar.fits')
+sp1 = pyspeckit.Spectrum('G032.751-00.071_nh3_11_Tastar.fits')
 sp1.crop(0,80)
 sp1.plotter()
 sp1.baseline(exclude=[15,62])
 sp1.plotter()
 sp1.plotter.savefig('nh3_11_baselined.png')
-sp2 = spectrum.Spectrum('G032.751-00.071_nh3_22_Tastar.fits')
+sp2 = pyspeckit.Spectrum('G032.751-00.071_nh3_22_Tastar.fits')
 sp2.crop(0,80)
 sp2.plotter()
 sp2.specfit()
 sp2.baseline(exclude=[34,42])
 sp2.plotter()
 sp2.plotter.savefig('nh3_22_baselined.png')
-sp3 = spectrum.Spectrum('G032.751-00.071_nh3_33_Tastar.fits')
+sp3 = pyspeckit.Spectrum('G032.751-00.071_nh3_33_Tastar.fits')
 sp3.crop(0,80)
 sp3.plotter()
 sp3.specfit()
@@ -25,7 +25,7 @@ sp3.baseline(exclude=[30,42])
 sp3.plotter()
 sp3.plotter.savefig('nh3_33_baselined.png')
 #sp4.crop(2.3868e10,2.3871e10)
-spectra = spectrum.Spectra([sp1,sp2,sp3])
+spectra = pyspeckit.Spectra([sp1,sp2,sp3])
 sp = spectra
 
 sp.plotter()

@@ -1,4 +1,4 @@
-import spectrum.units as units
+from .. import units
 import numpy as np
 import numpy.ma as ma
 import read_class

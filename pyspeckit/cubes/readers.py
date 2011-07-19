@@ -4,7 +4,8 @@ Created: 3/17/2011
 """
 import numpy as np
 import numpy.ma as ma
-import spectrum
+import pyspeckit 
+from pyspeckit import spectrum
 
 def open_3d_fits(filename,wcstype='',average_extra=False, **kwargs):
     """

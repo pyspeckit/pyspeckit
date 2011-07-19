@@ -1,10 +1,10 @@
-import spectrum
+import pyspeckit
 from pylab import *
 
 if not 'interactive' in globals():
     interactive=False
 
-sp = spectrum.Spectrum('10074-190_HCOp.fits')
+sp = pyspeckit.Spectrum('10074-190_HCOp.fits')
 sp.plotter(title=sp.header.get('OBJECT'))
 sp.baseline(order=2)
 sp.xarr.frequency_to_velocity(center_frequency=sp.header.get('RESTFREQ'),velocity_units='km/s')

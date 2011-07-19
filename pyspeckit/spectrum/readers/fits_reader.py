@@ -1,5 +1,5 @@
 import pyfits
-import spectrum.units as units
+from .. import units
 import numpy.ma as ma
 import numpy as np
 from . import make_axis

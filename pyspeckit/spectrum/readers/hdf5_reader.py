@@ -5,7 +5,7 @@ except ImportError:
     h5OK = False
     
 import numpy as np
-import spectrum.units as units
+from .. import units
 
 try: 
     import pyfits

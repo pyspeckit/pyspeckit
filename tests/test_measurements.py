@@ -1,6 +1,6 @@
 # Test measurements class on an SDSS AGN spectrum
 
-import spectrum
+import pyspeckit
 import numpy as np
 
 # Some lines
@@ -26,7 +26,7 @@ narrow = 5.
 broad = 30.
 
 # Initialize spectrum object
-spec = spectrum.Spectrum('sample_sdss.txt')
+spec = pyspeckit.Spectrum('sample_sdss.txt')
 
 # H-alpha
 spec.specfit.selectregion(xmin = Halpha - 5, xmax = Halpha + 5)

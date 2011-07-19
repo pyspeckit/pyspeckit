@@ -1,10 +1,10 @@
-import spectrum
+import pyspeckit
 
 if not 'interactive' in globals():
     interactive=False
 
 
-sp = spectrum.Spectrum('G031.947+00.076_nh3_11_Tastar.fits')#,wcstype='F')
+sp = pyspeckit.Spectrum('G031.947+00.076_nh3_11_Tastar.fits')#,wcstype='F')
 
 #sp.plotter(xmin=2.36875e10,xmax=2.36924e10) 
 sp.plotter(xmin=-100,xmax=300)

@@ -4,7 +4,7 @@ http://svn.ok.ubc.ca/svn/signals/nh3fit/
 """
 import numpy as np
 from mpfit import mpfit
-import spectrum.units as units
+from .. import units
 import matplotlib.cbook as mpcb
 
 line_names = ['oneone','twotwo','threethree','fourfour']

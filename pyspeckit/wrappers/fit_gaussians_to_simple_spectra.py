@@ -1,4 +1,4 @@
-import spectrum
+import pyspeckit
 
 def fit_gaussians_to_simple_spectra(filename, units='km/s', doplot=True,
         baseline=True, plotresiduals=False, figuresavename=None,
@@ -10,7 +10,7 @@ def fit_gaussians_to_simple_spectra(filename, units='km/s', doplot=True,
     """
 
     # load a FITS-compliant spectrum
-    spec = spectrum.Spectrum(filename)
+    spec = pyspeckit.Spectrum(filename)
     if spec.xarr.units != units:
         spec.xarr.frequency_to_velocity()
         spec.xarr.convert_to_unit(units)

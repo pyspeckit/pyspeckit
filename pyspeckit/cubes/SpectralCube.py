@@ -3,7 +3,8 @@ Author: Adam Ginsburg
 Created: 3/17/2011
 """
 # import parent package
-import spectrum
+import pyspeckit
+from pyspeckit import spectrum
 # import local things
 import mapplot
 import readers

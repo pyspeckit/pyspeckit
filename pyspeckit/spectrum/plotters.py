@@ -38,7 +38,7 @@ class Plotter(object):
         self.ymin = None
         self.keyclick = None
 
-    def __call__(self, figure=None, axis=None, clear=True, **kwargs):
+    def __call__(self, figure=None, axis=None, clear=True, autorefresh=None, **kwargs):
         """
         Plot a spectrum
         
@@ -49,7 +49,7 @@ class Plotter(object):
             it as the plotting canvas
         clear - Clear the axis before plotting?
         """
-        
+
         # figure out where to put the plot
         if isinstance(figure,matplotlib.figure.Figure):
             self.figure = figure
@@ -79,6 +79,9 @@ class Plotter(object):
 
 
         if clear: self.axis.clear()
+
+        if autorefresh is not None:
+            self.autorefresh = autorefresh
 
         self.plotkwargs = kwargs
 
