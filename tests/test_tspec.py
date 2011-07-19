@@ -1,4 +1,4 @@
-import spectrum
+from pyspeckit import spectrum
 tsp = spectrum.Spectrum('BD60596_merged.fits',filetype='tspec')
 tsp.plotter(xmin=1.260,xmax=1.303,errstyle='fill',figure=1)
 tsp.baseline(include=[0.96,0.99,1.1655735969543457, 1.189874529838562, 1.206290602684021, 1.263965368270874, 1.3026881217956543, 1.3405940532684326,1.5,1.78,2.03,2.46],powerlaw=True,subtract=True)

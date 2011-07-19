@@ -10,7 +10,7 @@ The Spectra class is a container of multiple spectra of the *same* object at
 :Author: Adam Ginsburg <adam.g.ginsburg@gmail.com> and Jordan Mirocha <mirochaj@gmail.com>
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
-from spectrum import Spectrum,Spectra,ObsBlock
+from classes import Spectrum,Spectra,ObsBlock
 import fitters,plotters,baseline,units
 import smooth
 import logger

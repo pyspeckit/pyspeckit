@@ -69,6 +69,10 @@ class gaussian_fitter(object):
             print "negamp: %s  amp,width,cen Lower: %g, %g   Upper: %g, %g  Center: %g" %\
                     (negamp,Lamplitude,Lwidth_x,Hamplitude,Hwidth_x,xcen)
         mylist = [amplitude,xcen,width_x]
+        if negamp and amplitude > 0 and veryverbose: 
+            print "WARNING: likely fit failure.  negamp=True, but amplitude > 0"
+        if negamp is False and amplitude < 0 and veryverbose: 
+            print "WARNING: likely fit failure.  negamp=False, but amplitude < 0"
         if numpy.isnan(width_x) or numpy.isnan(height) or numpy.isnan(amplitude):
             raise ValueError("something is nan")
         if vheight:
