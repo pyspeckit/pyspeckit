@@ -69,6 +69,7 @@ xtype_dict = {
         'WAV':'length',
         'WAVE':'length',
         'wavelength':'length',
+        # cm^-1 ? 'wavenumber':'wavenumber',
         }
 
 frame_dict = {
@@ -120,7 +121,12 @@ class SpectroscopicAxis(np.ndarray):
             subarr.frame = frame_dict[xtype]
         elif subarr.units in unit_type_dict:
             subarr.xtype = unit_type_dict[subarr.units]
+        elif type(xtype) is str:
+            print "WARNING: Unknown X-axis type in header: %s" % xtype
+            subarr.xtype = xtype
         else:
+            if xtype is not None:
+                print "WARNING: xtype has been specified but was not recognized as a string."
             subarr.xtype = 'unknown'
         subarr.reffreq = reffreq
         if reffreq_units is None:
@@ -140,6 +146,8 @@ class SpectroscopicAxis(np.ndarray):
             elif 'REL' in subarr.xtype:
                 subarr.velocity_convention = 'relativistic'
             elif subarr.xtype is 'unknown':
+                subarr.velocity_convention = None
+            else:
                 subarr.velocity_convention = None
         else:
             subarr.velocity_convention = None

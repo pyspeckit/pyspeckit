@@ -15,7 +15,7 @@ def fit_gaussians_to_simple_spectra(filename, units='km/s', doplot=True,
         spec.xarr.frequency_to_velocity()
         spec.xarr.convert_to_unit(units)
 
-    if croprange is not None and len(croprange) eq 2:
+    if croprange is not None and len(croprange) == 2:
         spec.crop(*croprange)
 
     if doplot:
