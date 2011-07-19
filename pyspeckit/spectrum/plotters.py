@@ -137,13 +137,13 @@ class Plotter(object):
                         yerr=self.Spectrum.error, ecolor=color, fmt=None,
                         **kwargs)
 
-        self.reset_limits(silent=silent, **reset_kwargs)
+        self.reset_limits(silent=silent, offset=offset, **reset_kwargs)
 
         if self.autorefresh: self.refresh()
     
     def reset_limits(self,xmin=None, xmax=None, ymin=None, ymax=None,
             reset_xlimits=False, reset_ylimits=False, ypeakscale=1.2,
-            silent=False, **kwargs):
+            silent=False, offset=0.0, **kwargs):
         """
         Automatically or manually reset the plot limits
         """
@@ -172,7 +172,7 @@ class Plotter(object):
         elif self.ymin is None: self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
         if ymax is not None: self.ymax = ymax
         elif self.ymax is None: self.ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin) * ypeakscale + self.ymin
-        self.axis.set_ylim(self.ymin,self.ymax)
+        self.axis.set_ylim(self.ymin+offset,self.ymax+offset)
         
 
     def label(self, title=None, xlabel=None, ylabel=None, **kwargs):

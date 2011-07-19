@@ -344,12 +344,9 @@ class Specfit(object):
         self.modelpars[1] *= scalefactor
         self.modelerrs[1] *= scalefactor
         if self.specplotter.axis is not None:
-            self.plot_fit()
-            if annotate:
-                self.annotate()
-                if vheight: self.Spectrum.baseline.annotate()
+            self.plot_fit(annotate=annotate, vheight=vheight)
 
-    def plot_fit(self):
+    def plot_fit(self, annotate=True, vheight=True):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
@@ -378,6 +375,10 @@ class Specfit(object):
                 self.modelcomponents[i], color=self.compcolor, linewidth=self.complw)                
                 
         self.specplotter.reset_limits(**self.specplotter.plotkwargs)
+
+        if annotate:
+            self.annotate()
+            if vheight: self.Spectrum.baseline.annotate()
 
     def fullsizemodel(self):
         """
