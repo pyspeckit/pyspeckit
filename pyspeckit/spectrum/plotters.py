@@ -74,7 +74,7 @@ class Plotter(object):
             self.keyclick = self.figure.canvas.mpl_connect('key_press_event',self.parse_keys)
         elif len(self.figure.axes) > 0 and self.axis is None:
             self.axis = self.figure.axes[0] # default to first axis
-        else:
+        elif self.axis is None:
             self.axis = self.figure.gca()
 
 
