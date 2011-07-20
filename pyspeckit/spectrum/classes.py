@@ -12,7 +12,7 @@ The Spectra class is a container of multiple spectra of the *same* object at
 import numpy as np
 import smooth as sm
 import pyfits
-import readers,fitters,plotters,writers,baseline,units,measurements,speclines
+import readers,fitters,plotters,writers,baseline,units,measurements,speclines,arithmetic
 import history
 
 
@@ -196,7 +196,10 @@ class Spectrum(object):
         self.error = sm.smooth(self.error,smooth,**kwargs)
         self.baseline.downsample(smooth)
         self.specfit.downsample(smooth)
+    
+        self._smooth_header(smooth)
 
+    def _smooth_header(self,smooth):
         self.header.update('CDELT1',self.header.get('CDELT1') * float(smooth))
         self.header.update('CRPIX1',self.header.get('CRPIX1') / float(smooth))
 
@@ -293,7 +296,7 @@ class ObsBlock(Spectrum):
     of observations of the same object in the same setup for later averaging.
     """
 
-    def __init__(self,speclist,xtype='frequency',xarr=None,**kwargs):
+    def __init__(self, speclist, xtype='frequency', xarr=None, force=False, **kwargs):
 
         if xarr is None:
             self.xarr = speclist[0].xarr
@@ -308,11 +311,15 @@ class ObsBlock(Spectrum):
             if type(spec) is not Spectrum:
                 raise TypeError("Must create an ObsBlock with a list of spectra.")
             if not (spec.xarr == self.xarr).all():
-                raise ValueError("Mismatch between X axes in ObsBlock")
+                if force:
+                    spec = arithmetic.interp(spec,self)
+                else:
+                    raise ValueError("Mismatch between X axes in ObsBlock")
             if spec.units != self.units: 
                 raise ValueError("Mismatched units")
 
         self.speclist = speclist
+        self.nobs = len(speclist)
 
         # Create a 2-dimensional array of the data
         self.data = np.array([sp.data for sp in speclist]).swapaxes(0,1)
@@ -322,7 +329,7 @@ class ObsBlock(Spectrum):
         self.specfit = fitters.Specfit(self)
         self.baseline = baseline.Baseline(self)
         
-    def average(self, weight=None, error='erravgrtn'):
+    def average(self, weight=None, inverse_weight=False, error='erravgrtn'):
         """
         Average all scans in an ObsBlock.  Returns a single Spectrum object
 
@@ -334,7 +341,10 @@ class ObsBlock(Spectrum):
         """
 
         if weight is not None:
-            wtarr = np.array([sp.header.get(weight) for sp in self.speclist])
+            if inverse_weight:
+                wtarr = np.array([1.0/sp.header.get(weight) for sp in self.speclist])
+            else:
+                wtarr = np.array([sp.header.get(weight) for sp in self.speclist])
         else:
             wtarr = np.ones(self.data.shape[1])
 
@@ -360,3 +370,18 @@ class ObsBlock(Spectrum):
         Can index Spectra to get the component Spectrum objects
         """
         return self.speclist[index]
+
+    def smooth(self,smooth,**kwargs):
+        """
+        Smooth the spectrum by factor "smooth".  Options are defined in sm.smooth
+        """
+        smooth = round(smooth)
+        self.data = sm.smooth_multispec(self.data,smooth,**kwargs)
+        self.xarr = self.xarr[::smooth]
+        if len(self.xarr) != len(self.data):
+            raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
+        self.error = sm.smooth_multispec(self.error,smooth,**kwargs)
+        self.baseline.downsample(smooth)
+        self.specfit.downsample(smooth)
+    
+        self._smooth_header(smooth)

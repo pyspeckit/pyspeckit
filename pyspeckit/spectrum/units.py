@@ -295,7 +295,7 @@ class SpectroscopicAxis(np.ndarray):
         * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
         * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
         """
-        if self.units in frequency_dict:
+        if self.units in velocity_dict:
             print "Already in velocity units"
             return
         if center_frequency is None and self.reffreq is None:
@@ -305,7 +305,7 @@ class SpectroscopicAxis(np.ndarray):
         if center_frequency_units is None:
             center_frequency_units = self.reffreq_units
         if center_frequency_units not in frequency_dict:
-            raise ValueError("Bad frequency units: %s" % (frequency_units))
+            raise ValueError("Bad frequency units: %s" % (center_frequency_units))
         if velocity_units not in velocity_dict:
             raise ValueError("Bad velocity units: %s" % (velocity_units))
 
@@ -437,7 +437,15 @@ class SpectroscopicAxes(SpectroscopicAxis):
         subarr.frame = frame
         subarr.redshift = redshift
 
-        subarr.reffreq = [ax.reffreq for ax in axislist]
+        # if all the spectra have the same reference frequency, there is one common reffreq
+        # else, reffreq is undefined and velocity transformations should not be done
+        reffreqs_diff = np.sum([axislist[0].reffreq != ax.reffreq for ax in axislist])
+        if reffreqs_diff > 0:
+            subarr.reffreq = None
+            subarr.reffreq_units = None
+        else:
+            subarr.reffreq = axislist[0].reffreq
+            subarr.reffreq_units = axislist[0].reffreq_units
 
         return subarr
 

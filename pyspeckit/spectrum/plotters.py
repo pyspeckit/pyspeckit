@@ -137,7 +137,7 @@ class Plotter(object):
                         yerr=self.Spectrum.error, ecolor=color, fmt=None,
                         **kwargs)
 
-        self.reset_limits(silent=silent, offset=offset, **reset_kwargs)
+        self.reset_limits(silent=silent, offset=self.offset, **reset_kwargs)
 
         if self.autorefresh: self.refresh()
     
