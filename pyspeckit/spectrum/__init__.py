@@ -66,6 +66,7 @@ def register_fitter(name, function, npars, multisingle='single',
 
 import models
 register_fitter('ammonia',models.ammonia_model(),6,multisingle='multi',key='a')
+register_fitter('formaldehyde',models.formaldehyde_model(),3,multisingle='multi',key='f')
 register_fitter('gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
 register_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
 register_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')

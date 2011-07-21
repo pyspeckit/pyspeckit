@@ -200,7 +200,7 @@ class SpectroscopicAxis(np.ndarray):
         else:
             raise ValueError("Conversion to xtype %s was not recognized." % xtype)
 
-    def convert_to_unit(self,unit,frame='rest', **kwargs):
+    def convert_to_unit(self,unit,frame='rest', quiet=False, **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
         to convert between frequency/velocity/wavelength and simply change the 
@@ -236,10 +236,10 @@ class SpectroscopicAxis(np.ndarray):
             self *= conversion_factor
             self.dxarr = self[1:]-self[:-1]
 
-        if change_frame:
+        if change_frame and not quiet:
             print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
 
-        if not change_units and not change_xtype and not change_frame:
+        if not change_units and not change_xtype and not change_frame and not quiet:
             print "Already in desired units, X-type, and frame"
 
         # this should be implemented but requires a callback to spectrum...

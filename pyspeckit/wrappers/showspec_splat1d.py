@@ -13,7 +13,7 @@ def splat_1d(filename=None,vmin=None,vmax=None,button=None,dobaseline=False,
         smoothto=None, xunits=None, units=None, conversion_factor=None,
         smoothtype='gaussian',convmode='same',maskspecnum=None,
         fignum=1, axis=None, autorefresh=False, title=None, color=None,
-        clear=False, **kwargs):
+        clear=False, negamp=None, **kwargs):
 
     sp = pyspeckit.Spectrum(filename, specnum=specnum, errspecnum=errspecnum, wcstype=wcstype, **kwargs)
     sp.plotter.xmin = vmin

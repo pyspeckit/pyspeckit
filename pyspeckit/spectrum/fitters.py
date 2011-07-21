@@ -46,6 +46,7 @@ class Specfit(object):
         self.setfitspec()
         self.fittype = 'gaussian'
         self.measurements = None
+        self.vheight=None
         #self.seterrspec()
         
         # config file stuff
@@ -221,6 +222,7 @@ class Specfit(object):
         self.setfitspec()
         #if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp') # We now do this in gaussfitter.py
         self.fitter = multifitters[fittype]
+        self.vheight = False
         
         scalefactor = 1.0
         if renormalize in ('auto',True):
@@ -332,6 +334,7 @@ class Specfit(object):
         self.chi2 = chi2
         self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]-vheight
         if vheight: 
+            self.vheight=True
             self.Spectrum.baseline.baselinepars = mpp[:1]*scalefactor # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]*scalefactor
             self.model = model*scalefactor - mpp[0]*scalefactor
@@ -344,9 +347,9 @@ class Specfit(object):
         self.modelpars[1] *= scalefactor
         self.modelerrs[1] *= scalefactor
         if self.specplotter.axis is not None:
-            self.plot_fit(annotate=annotate, vheight=vheight)
+            self.plot_fit(annotate=annotate)
 
-    def plot_fit(self, annotate=True, vheight=True):
+    def plot_fit(self, annotate=True, show_components=None):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
@@ -362,23 +365,20 @@ class Specfit(object):
                 plotmodel,
                 color=self.fitcolor, linewidth=self.fitlw)
         
-        self.modelcomponents = np.empty(self.npeaks, np.ndarray)
-        for i in range(self.npeaks):
-            if self.fittype == 'gaussian':
-                self.modelcomponents[i] = singlefitters['gaussian'].onepeakgaussian(self.Spectrum.xarr[self.gx1:self.gx2],
-                    0.0,self.modelpars[3*i],self.modelpars[3*i+1],self.modelpars[3*i+2])
-            
+        if show_components is not None:
+            self.show_components = show_components
         # Plot components
         if self.show_components:
-            for i in range(self.npeaks):
+            self.modelcomponents = self.fitter.components(self.Spectrum.xarr[self.gx1:self.gx2],self.modelpars)
+            for data in self.modelcomponents:
                 self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
-                self.modelcomponents[i], color=self.compcolor, linewidth=self.complw)                
+                    data, color=self.compcolor, linewidth=self.complw)                
                 
         self.specplotter.reset_limits(**self.specplotter.plotkwargs)
 
         if annotate:
             self.annotate()
-            if vheight: self.Spectrum.baseline.annotate()
+            if self.vheight: self.Spectrum.baseline.annotate()
 
     def fullsizemodel(self):
         """

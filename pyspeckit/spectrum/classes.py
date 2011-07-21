@@ -35,7 +35,7 @@ class Spectrum(object):
     """
 
     def __init__(self,filename=None, filetype=None, xarr=None, data=None,
-            error=None, header=None, doplot=False, **kwargs):
+            error=None, header=None, doplot=False, plotkwargs={}, **kwargs):
         """
         Initialize the Spectrum.  Accepts files in the following formats:
             - .fits
@@ -47,6 +47,7 @@ class Spectrum(object):
 
         doplot - if specified, will generate a plot when created
 
+        kwargs are passed to the reader, not the plotter
         """
 
         if filename:
@@ -89,7 +90,7 @@ class Spectrum(object):
         self.baseline = baseline.Baseline(self)
         self.speclines = speclines
 
-        if doplot: self.plotter(**kwargs)
+        if doplot: self.plotter(**plotkwargs)
         
     def write(self,filename,type=None,**kwargs):
         """
