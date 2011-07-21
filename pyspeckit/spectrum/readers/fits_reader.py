@@ -81,6 +81,7 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None,**kwargs):
         xarr = xconv(np.arange(len(spec)))
     
     restfreq = hdr.get('RESTFREQ')
+    if restfreq is None: restfrq= hdr.get('RESTFRQ')
 
     XAxis = make_axis(xarr,hdr,wcstype=wcstype,**kwargs)
 

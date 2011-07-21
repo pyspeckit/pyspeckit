@@ -4,24 +4,32 @@ import matplotlib.pyplot as pyplot
 import numpy as np
 from config import spcfg
 
-interactive_help_message = """
-Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
-'m' twice to select a peak and width.  When you're done, right-click or hit 'd'
-to perform the fit and disconnect the mouse and keyboard.  '?' will print this
-help message again.
-You can select different fitters to use with the interactive fitting routine.
-The default is gaussian ('g')
-"""
+class Registry(object):
+    """
+    This class is a simple wrapper to prevent fitter properties from being globals
+    """
 
-npars = {}
-multifitters = {}
-singlefitters = {}
-writers = {}
-fitkeys = {}
+    def __init__(self):
+        self.npars = {}
+        self.multifitters = {}
+        self.singlefitters = {}
+        self.writers = {}
+        self.fitkeys = {}
+
+        self.interactive_help_message = """
+        Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
+        'm' twice to select a peak and width.  When you're done, right-click or hit 'd'
+        to perform the fit and disconnect the mouse and keyboard.  '?' will print this
+        help message again.
+        You can select different fitters to use with the interactive fitting routine.
+        The default is gaussian ('g')
+        """
+
 
 class Specfit(object):
 
-    def __init__(self,Spectrum, autoannotate=bool(spcfg.cfg['annotate'])):
+    def __init__(self, Spectrum, autoannotate=bool(spcfg.cfg['annotate']),
+            Registry=None):
         self.model = None
         self.modelpars = None
         self.modelerrs = None
@@ -47,6 +55,7 @@ class Specfit(object):
         self.fittype = 'gaussian'
         self.measurements = None
         self.vheight=None
+        self.Registry = Registry
         #self.seterrspec()
         
         # config file stuff
@@ -109,7 +118,7 @@ class Specfit(object):
             self.guesses = []
             self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.makeguess)
             self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',self.makeguess)
-        elif multifit and fittype in multifitters or guesses is not None:
+        elif multifit and fittype in self.Registry.multifitters or guesses is not None:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
                 return
@@ -117,7 +126,7 @@ class Specfit(object):
                 self.guesses = guesses
                 self.multifit(fittype=fittype)
         # SINGLEFITTERS SHOULD BE PHASED OUT
-        elif fittype in singlefitters:
+        elif fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
             if self.Spectrum.baseline.order is None:
                 self.Spectrum.baseline.order=0
@@ -129,9 +138,9 @@ class Specfit(object):
             if self.specplotter.autorefresh: self.specplotter.refresh()
         else:
             if multifit:
-                print "Can't fit with given fittype %s: it is not registered as a multifitter." % fittype
+                print "Can't fit with given fittype %s: it is not Registryed as a multifitter." % fittype
             else:
-                print "Can't fit with given fittype %s: it is not registered as a singlefitter." % fittype
+                print "Can't fit with given fittype %s: it is not Registryed as a singlefitter." % fittype
             return
         if save: self.savefit()
 
@@ -213,15 +222,15 @@ class Specfit(object):
         """
         Fit multiple gaussians (or other profiles)
 
-        fittype - What function will be fit?  fittype must have been registered in the
+        fittype - What function will be fit?  fittype must have been Registryed in the
             singlefitters dict
         renormalize - if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
             closer to 1 (scales by the median) so that the fit converges better
         """
-        self.npeaks = len(self.guesses)/npars[fittype]
+        self.npeaks = len(self.guesses)/self.Registry.npars[fittype]
         self.setfitspec()
         #if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp') # We now do this in gaussfitter.py
-        self.fitter = multifitters[fittype]
+        self.fitter = self.Registry.multifitters[fittype]
         self.vheight = False
         
         scalefactor = 1.0
@@ -249,7 +258,7 @@ class Specfit(object):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]
+        self.dof  = self.gx2-self.gx1-self.npeaks*self.Registry.npars[fittype]
         self.model = model * scalefactor
         for ii in xrange(self.npeaks): # assume first parameter is amplitude
             mpp[self.fitter.npars*ii]    *= scalefactor
@@ -285,7 +294,7 @@ class Specfit(object):
         height - initial guess for background
         negamp - If True, assumes amplitude is negative.  If False, assumes positive.  If 
             None, can be either.
-        fittype - What function will be fit?  fittype must have been registered in the
+        fittype - What function will be fit?  fittype must have been Registryed in the
             singlefitters dict
         renormalize - if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
             closer to 1 (scales by the median) so that the fit converges better
@@ -295,7 +304,7 @@ class Specfit(object):
         self.setfitspec()
         if usemoments: # this can be done within gaussfit but I want to save them
             # use this INDEPENDENT of fittype for now (voigt and gauss get same guesses)
-            self.guesses = singlefitters[fittype].moments(
+            self.guesses = self.Registry.singlefitters[fittype].moments(
                     self.Spectrum.xarr[self.gx1:self.gx2],
                     self.spectofit[self.gx1:self.gx2],
                     vheight=vheight,negamp=negamp,**kwargs)
@@ -305,7 +314,7 @@ class Specfit(object):
             else:  self.guesses = [height,1,0,1]
         if fittype == 'voigt':
             self.guesses += [0.0]
-        self.fitter = singlefitters[fittype]
+        self.fitter = self.Registry.singlefitters[fittype]
 
         scalefactor = 1.0
         if renormalize in ('auto',True):
@@ -332,7 +341,7 @@ class Specfit(object):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.gx2-self.gx1-self.npeaks*npars[fittype]-vheight
+        self.dof  = self.gx2-self.gx1-self.npeaks*self.Registry.npars[fittype]-vheight
         if vheight: 
             self.vheight=True
             self.Spectrum.baseline.baselinepars = mpp[:1]*scalefactor # first item in list form
@@ -432,7 +441,7 @@ class Specfit(object):
         else:
             raise Exception("Fitter %s has no annotations." % self.fitter)
         self.fitleg = self.specplotter.axis.legend(
-                tuple([pl]*npars[self.fittype]*self.npeaks),
+                tuple([pl]*self.Registry.npars[self.fittype]*self.npeaks),
                 labels,
                 loc=loc,markerscale=0.01,
                 borderpad=0.1, handlelength=0.1, handletextpad=0.1
@@ -496,7 +505,7 @@ class Specfit(object):
                         color='c')
                 #self.specplotter.plot(**self.specplotter.plotkwargs)
                 if self.guesses == []:
-                    self.guesses = singlefitters['gaussian'].moments(
+                    self.guesses = self.Registry.singlefitters['gaussian'].moments(
                             self.Spectrum.xarr[self.gx1:self.gx2],
                             self.spectofit[self.gx1:self.gx2],
                             vheight=0)
@@ -575,13 +584,13 @@ class Specfit(object):
                         print "error, wrong # of pars"
             elif button in ('?'):
                 print interactive_help_message
-            elif button in fitkeys:
-                fittername = fitkeys[button]
+            elif button in self.Registry.fitkeys:
+                fittername = self.Registry.fitkeys[button]
                 print "Selected fitter %s" % fittername
-                if fittername in multifitters:
-                    self.fitter = multifitters[fittername]
-                elif fittername in singlefitters:
-                    self.fitter = singlefitters[fittername]
+                if fittername in self.Registry.multifitters:
+                    self.fitter = self.Registry.multifitters[fittername]
+                elif fittername in self.Registry.singlefitters:
+                    self.fitter = self.Registry.singlefitters[fittername]
             if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def clearlegend(self):

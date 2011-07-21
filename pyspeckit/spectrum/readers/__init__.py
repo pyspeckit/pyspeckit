@@ -6,7 +6,7 @@ import read_class
 readers = {}
 suffix_types = {}
 
-def make_axis(xarr,hdr,specname=None, wcstype=''):
+def make_axis(xarr,hdr,specname=None, wcstype='', verbose=True):
     """
     Parse parameters from a .fits header into required SpectroscopicAxis
     parameters
@@ -26,6 +26,7 @@ def make_axis(xarr,hdr,specname=None, wcstype=''):
     elif hdr.get('RESTFRQ'+wcstype):
         reffreq = hdr.get('RESTFRQ'+wcstype)
     else:
+        if verbose: print "No reference frequency found.  Velocity transformations will not be possible"
         reffreq = None
 
     if hdr.get('CTYPE1'+wcstype):

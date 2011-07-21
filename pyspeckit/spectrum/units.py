@@ -309,8 +309,8 @@ class SpectroscopicAxis(np.ndarray):
         if velocity_units not in velocity_dict:
             raise ValueError("Bad velocity units: %s" % (velocity_units))
 
-        frequency_hz = self * frequency_dict['Hz'] / frequency_dict[self.units]
-        center_frequency_hz = center_frequency * frequency_dict['Hz'] / frequency_dict[center_frequency_units]
+        frequency_hz = self / frequency_dict['Hz'] * frequency_dict[self.units]
+        center_frequency_hz = center_frequency / frequency_dict['Hz'] * frequency_dict[center_frequency_units]
 
         if convention == 'radio':
             velocity = speedoflight_ms * ( center_frequency_hz - frequency_hz ) / center_frequency_hz

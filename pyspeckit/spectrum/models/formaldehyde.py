@@ -115,13 +115,29 @@ voff_lines_dict={ # opposite signs of freq offset
 
 class formaldehyde_model(fitter.SimpleFitter):
 
-    def __init__(self):
-        self.npeaks = 1
+    def __init__(self,multisingle='multi'):
         self.npars = 3
-        pass
+        self.npeaks = 1
 
-    def formaldehyde(self, xarr, xunits='GHz', amp=1.0, width=1.0,
-            xoff_v=0.0, return_components=False):
+        self.onepeakformaldehydeian = fitter.vheightmodel(self.formaldehyde)
+        self.onepeakformaldehydefit = self._fourparfitter(self.onepeakformaldehydeian)
+
+        if multisingle in ('multi','single'):
+            self.multisingle = multisingle
+        else:
+            raise Exception("multisingle must be multi or single")
+
+        print "Initialized a formaldehyde model of type %s" % multisingle
+        print self
+
+    def __call__(self,*args,**kwargs):
+        if self.multisingle == 'single':
+            return self.onepeakformaldehydefit(*args,**kwargs)
+        elif self.multisingle == 'multi':
+            return self.multiformaldehydefit(*args,**kwargs)
+
+    def formaldehyde(self, xarr, amp=1.0, xoff_v=0.0, width=1.0, xunits='GHz',
+            return_components=False ):
         """
         Generate a model Formaldehyde spectrum based on simple gaussian parameters
 
@@ -321,4 +337,3 @@ class formaldehyde_model(fitter.SimpleFitter):
         labels = tuple(mpcb.flatten(label_list))
         return labels
 
-    __call__ = multiformaldehydefit
