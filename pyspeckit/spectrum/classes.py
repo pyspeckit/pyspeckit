@@ -16,6 +16,7 @@ import readers,plotters,writers,baseline,units,measurements,speclines,arithmetic
 import fitters
 import models
 import history
+import copy
 
 def register_fitter(Registry, name, function, npars, multisingle='single',
         override=False, key=None):
@@ -280,6 +281,21 @@ class Spectrum(object):
         Return the data shape
         """
         return self.data.shape
+
+    def copy(self):
+        """
+        Create a copy of the spectrum with its own plotter, fitter, etc.
+        Useful for, e.g., comparing smoothed to unsmoothed data
+        """
+
+        newspec = copy.copy(self)
+        newspec.plotter = plotters.Plotter(newspec)
+        newspec._register_fitters()
+        newspec.specfit = fitters.Specfit(newspec,Registry=newspec.Registry)
+        newspec.baseline = baseline.Baseline(newspec)
+
+        return newspec
+
 
 
 class Spectra(Spectrum):

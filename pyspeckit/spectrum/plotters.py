@@ -108,6 +108,9 @@ class Plotter(object):
 
         ypeakscale - Scale up the Y maximum value.  Useful to keep the
         annotations away from the data.
+
+        errstyle - can be "fill", which draws partially transparent boxes around the data to show
+            the error region, or "bars" which draws standard errorbars
         """
 
         if self.axis is None:
@@ -133,17 +136,17 @@ class Plotter(object):
                         steppify(self.Spectrum.data+self.offset+self.Spectrum.error),
                         facecolor=color, alpha=erralpha, **kwargs)]
             elif errstyle == 'bars':
-                self.errorplot = axis.errorbar(self.Spectrum.xarr, self.Spectrum.data+self.offset,
+                self.errorplot = self.axis.errorbar(self.Spectrum.xarr, self.Spectrum.data+self.offset,
                         yerr=self.Spectrum.error, ecolor=color, fmt=None,
                         **kwargs)
 
-        self.reset_limits(silent=silent, offset=self.offset, **reset_kwargs)
+        self.reset_limits(silent=silent, **reset_kwargs)
 
         if self.autorefresh: self.refresh()
     
     def reset_limits(self,xmin=None, xmax=None, ymin=None, ymax=None,
             reset_xlimits=False, reset_ylimits=False, ypeakscale=1.2,
-            silent=False, offset=0.0, **kwargs):
+            silent=False, **kwargs):
         """
         Automatically or manually reset the plot limits
         """
@@ -172,7 +175,7 @@ class Plotter(object):
         elif self.ymin is None: self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
         if ymax is not None: self.ymax = ymax
         elif self.ymax is None: self.ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin) * ypeakscale + self.ymin
-        self.axis.set_ylim(self.ymin+offset,self.ymax+offset)
+        self.axis.set_ylim(self.ymin+self.offset,self.ymax+self.offset)
         
 
     def label(self, title=None, xlabel=None, ylabel=None, **kwargs):
