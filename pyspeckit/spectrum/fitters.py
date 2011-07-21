@@ -381,7 +381,8 @@ class Specfit(object):
             self.modelcomponents = self.fitter.components(self.Spectrum.xarr[self.gx1:self.gx2],self.modelpars)
             for data in self.modelcomponents:
                 self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
-                    data, color=self.compcolor, linewidth=self.complw)                
+                    data+self.specplotter.offset+self.Spectrum.baseline.basespec[self.gx1:self.gx2],
+                    color=self.compcolor, linewidth=self.complw)                
                 
         self.specplotter.reset_limits(**self.specplotter.plotkwargs)
 

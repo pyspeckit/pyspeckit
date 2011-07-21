@@ -127,9 +127,6 @@ class formaldehyde_model(fitter.SimpleFitter):
         else:
             raise Exception("multisingle must be multi or single")
 
-        print "Initialized a formaldehyde model of type %s" % multisingle
-        print self
-
     def __call__(self,*args,**kwargs):
         if self.multisingle == 'single':
             return self.onepeakformaldehydefit(*args,**kwargs)
