@@ -665,7 +665,7 @@ class Specfit(object):
             raise AttributeError("The fitter %s does not have an integral implemented" % self.fittype)
 
         if direct:
-            dx = self.Spectrum.xarr.cdelt()
+            dx = np.abs(self.Spectrum.xarr.cdelt())
             if len(integration_limits) == 2:
                 x1 = np.argmin(np.abs(integration_limits[0]-self.Spectrum.xarr))
                 x2 = np.argmin(np.abs(integration_limits[1]-self.Spectrum.xarr))
