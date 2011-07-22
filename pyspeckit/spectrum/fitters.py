@@ -645,7 +645,8 @@ class Specfit(object):
         if self.model is not None:
             self.model = self.model[x1pix:x2pix]
 
-    def integral(self, direct=False, threshold='auto', integration_limits=[], **kwargs):
+    def integral(self, direct=False, threshold='auto', integration_limits=[],
+            return_error=False, **kwargs):
         """
         Return the integral of the fitted spectrum
 
@@ -654,6 +655,10 @@ class Specfit(object):
 
         note that integration_limits will operate directly on the DATA, which means that
         if you've baselined without subtract=True, the baseline will be included in the integral
+
+        if return_error is set, the error computed by
+        sigma = sqrt(sum(sigma_i^2)) * dx
+        will be returned as well
         """
 
         if not hasattr(self.fitter,'integral'):
@@ -661,19 +666,29 @@ class Specfit(object):
 
         if direct:
             dx = self.Spectrum.xarr.cdelt()
-            if integration_limits is not []:
+            if len(integration_limits) == 2:
                 x1 = np.argmin(np.abs(integration_limits[0]-self.Spectrum.xarr))
                 x2 = np.argmin(np.abs(integration_limits[1]-self.Spectrum.xarr))
                 if x1>x2: x1,x2 = x2,x1
                 integ = self.Spectrum.data[x1:x2] * dx
+                if return_error:
+                    error = np.sqrt((self.Spectrum.error[x1:x2]**2).sum()) * dx
+                    return integ,error
+                else:
+                    return integ
             elif threshold=='auto':
                 threshold = 0.01 * np.abs( self.model ).max()
 
             OK = np.abs( self.model ) > threshold
             integ = self.spectofit[OK].sum() * dx
+            error = np.sqrt((self.errspec[OK]**2).sum()) * dx
         else:
-            integ = self.fitter.integral(self.modelpars)
-
-        return integ
+            integ = self.fitter.integral(self.modelpars, **kwargs)
+            if return_error:
+                raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
+        if return_error:
+            return integ,error
+        else:
+            return integ
 
 
