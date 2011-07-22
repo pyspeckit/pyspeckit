@@ -296,6 +296,21 @@ class Spectrum(object):
 
         return newspec
 
+    def stats(self):
+        """
+        Return some statistical measures
+        """
+
+        stats = {
+            "npts": self.data.shape[0],
+            "std": self.data.std(),
+            "mean": self.data.mean(),
+            "median": np.median(self.data),
+            "min": self.data.min(),
+            "max": self.data.max(),}
+        return stats
+
+
 
 
 class Spectra(Spectrum):

@@ -112,7 +112,7 @@ class Specfit(object):
                 raise Exception("Interactive fitting requires a plotter.")
             else:
                 self.specplotter.axis.set_autoscale_on(False)
-            print interactive_help_message
+            print self.Registry.interactive_help_message
             self.nclicks_b1 = 0
             self.nclicks_b2 = 0
             self.guesses = []
@@ -584,7 +584,7 @@ class Specfit(object):
                     else: 
                         print "error, wrong # of pars"
             elif button in ('?'):
-                print interactive_help_message
+                print self.Registry.interactive_help_message
             elif button in self.Registry.fitkeys:
                 fittername = self.Registry.fitkeys[button]
                 print "Selected fitter %s" % fittername
