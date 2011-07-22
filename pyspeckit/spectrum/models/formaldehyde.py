@@ -334,3 +334,27 @@ class formaldehyde_model(fitter.SimpleFitter):
         labels = tuple(mpcb.flatten(label_list))
         return labels
 
+    def integral(self, modelpars, linename='oneone'):
+        """
+        Return the integral of the individual components (ignoring height)
+        """
+        # produced by directly computing the integral of gaussians and formaldehydeians as a function of 
+        # line width and then fitting that with a broken logarithmic power law
+        # The errors are <0.5% for all widths
+        formaldehyde_to_gaussian_ratio_coefs = {
+                'lt0.1_oneone': np.array([ -5.784020,-40.058798,-111.172706,-154.256411,-106.593122,-28.933119]),
+                'gt0.1_oneone': np.array([  0.038548, -0.071162, -0.045710,  0.183828, -0.145429,  0.040039]),
+                'lt0.1_twotwo': np.array([  1.156561,  6.638570, 11.782065, -0.429536,-24.860297,-27.902274, -9.510288]),
+                'gt0.1_twotwo': np.array([ -0.090646,  0.078204,  0.123181, -0.175590,  0.089506, -0.034687,  0.008676]),
+                }
+
+
+        integ = 0
+        if len(modelpars) % 3 == 0:
+            for amp,cen,width in np.reshape(modelpars,[len(modelpars)/3,3]):
+                gaussint = amp*width*np.sqrt(2.0*np.pi)
+                cftype = "gt0.1_"+linename if width > 0.1 else "lt0.1_"+linename
+                correction_factor = 10**np.polyval(formaldehyde_to_gaussian_ratio_coefs[cftype],width)
+                integ += gaussint*correction_factor
+
+        return integ

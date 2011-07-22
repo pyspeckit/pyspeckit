@@ -42,7 +42,6 @@ class Specfit(object):
         self.nclicks_b2 = 0
         self.gx1 = 0
         self.gx2 = Spectrum.data.shape[0]
-        self.fitxarr = None
         self.guesses = []
         self.click = 0
         self.fitkwargs = {}
@@ -70,7 +69,7 @@ class Specfit(object):
     def __call__(self, interactive=False, usemoments=True, fitcolor=None,
             multifit=False, guesses=None, annotate=None, save=True,
             fittype='gaussian', compcolor = None, fitlw = None, complw = None, 
-            **kwargs):
+            debug=False, **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
 
@@ -116,8 +115,9 @@ class Specfit(object):
             self.nclicks_b1 = 0
             self.nclicks_b2 = 0
             self.guesses = []
-            self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.makeguess)
-            self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',self.makeguess)
+            makeguess = self.makeguess_debug if debug else self.makeguess
+            self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',makeguess)
+            self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',makeguess)
         elif multifit and fittype in self.Registry.multifitters or guesses is not None:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
@@ -455,6 +455,8 @@ class Specfit(object):
             debug=False, **kwargs):
         """
         Pick a fitting region in either WCS units or pixel units
+
+        reset - if true, overrides input xmin,xmax and selects the full range
         """
         if xmin is not None and xmax is not None:
             if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
@@ -484,7 +486,7 @@ class Specfit(object):
             if debug: print "Swapped endpoints because the left end was greater than the right"
 
 
-    def selectregion_interactive(self,event):
+    def selectregion_interactive(self,event,debug=False):
         """
         ***For window-interactive use only!***
         (i.e., you probably shouldn't call this from the command line or a script)
@@ -494,9 +496,11 @@ class Specfit(object):
         if self.nclicks_b1 == 0:
             self.gx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
             self.nclicks_b1 += 1
+            if debug: print "Left at %g.  Click #%i" % (self.gx1,self.nclicks_b1)
         elif self.nclicks_b1 == 1:
             self.gx2 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
             self.nclicks_b1 -= 1
+            if debug: print "Right at %g.  Click #%i" % (self.gx2,self.nclicks_b2)
             if self.gx1 > self.gx2: self.gx1,self.gx2 = self.gx2,self.gx1
             if abs(self.gx1-self.gx2) > 3: # can't fit w/ fewer data than pars
                 self.fitregion = self.specplotter.axis.plot(
@@ -515,7 +519,7 @@ class Specfit(object):
             else:
                 print "Fitting region is too small (channels %i:%i).  Try again." % (self.gx1,self.gx2)
 
-    def guesspeakwidth(self,event):
+    def guesspeakwidth(self,event,debug=False):
         """
         Interactively guess the peak height and width from user input
 
@@ -528,11 +532,13 @@ class Specfit(object):
                 self.guesses += [event.ydata,event.xdata,1]
                 self.npeaks += 1
             self.nclicks_b2 += 1
+            if debug: print "Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)
             self.guessplot += [self.specplotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
             #self.specplotter.refresh() #plot(**self.specplotter.plotkwargs)
         elif self.nclicks_b2 % 2 == 1:
             self.guesses[-1] = abs(event.xdata-self.guesses[-2]) / np.sqrt(2*np.log(2))
             self.nclicks_b2 += 1
+            if debug: print "Width %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)
             self.guessplot += self.specplotter.axis.plot([event.xdata,
                 2*self.guesses[-2]-event.xdata],[event.ydata]*2,
                 color='r')
@@ -554,7 +560,10 @@ class Specfit(object):
                 p.set_visible(False)
         if legend: self.clearlegend()
 
-    def makeguess(self,event):
+    def makeguess_debug(self,event):
+        return self.makeguess(event,debug=True)
+
+    def makeguess(self,event,debug=False):
         """
         ***For window-interactive use only!***
         (i.e., you probably shouldn't call this from the command line or a script)
@@ -568,10 +577,13 @@ class Specfit(object):
             elif hasattr(event,'key'):
                 button = event.key
 
+            if debug:
+                print "button: ",button
+
             if button in ('p','P','1',1):
-                self.selectregion_interactive(event)
+                self.selectregion_interactive(event,debug=debug)
             elif button in ('m','M','2',2):
-                self.guesspeakwidth(event)
+                self.guesspeakwidth(event,debug=debug)
             elif button in ('d','D','3',3):
                 self.specplotter.figure.canvas.mpl_disconnect(self.click)
                 self.specplotter.figure.canvas.mpl_disconnect(self.keyclick)
@@ -632,3 +644,36 @@ class Specfit(object):
         """
         if self.model is not None:
             self.model = self.model[x1pix:x2pix]
+
+    def integral(self, direct=False, threshold='auto', integration_limits=[], **kwargs):
+        """
+        Return the integral of the fitted spectrum
+
+        if direct=True, return the integral of the spectrum over a range
+        defined by the threshold or integration limits if defined
+
+        note that integration_limits will operate directly on the DATA, which means that
+        if you've baselined without subtract=True, the baseline will be included in the integral
+        """
+
+        if not hasattr(self.fitter,'integral'):
+            raise AttributeError("The fitter %s does not have an integral implemented" % self.fittype)
+
+        if direct:
+            dx = self.Spectrum.xarr.cdelt()
+            if integration_limits is not []:
+                x1 = np.argmin(np.abs(integration_limits[0]-self.Spectrum.xarr))
+                x2 = np.argmin(np.abs(integration_limits[1]-self.Spectrum.xarr))
+                if x1>x2: x1,x2 = x2,x1
+                integ = self.Spectrum.data[x1:x2] * dx
+            elif threshold=='auto':
+                threshold = 0.01 * np.abs( self.model ).max()
+
+            OK = np.abs( self.model ) > threshold
+            integ = self.spectofit[OK].sum() * dx
+        else:
+            integ = self.fitter.integral(self.modelpars)
+
+        return integ
+
+

@@ -219,3 +219,15 @@ class gaussian_fitter(fitter.SimpleFitter):
             0.0,modelpars[3*i],modelpars[3*i+1],modelpars[3*i+2]) for i in range(self.npeaks)]
 
         return modelcomponents
+
+    def integral(self, modelpars):
+        """
+        Return the integral of the individual components (ignoring height)
+        """
+        integ = 0
+        if len(modelpars) % 3 == 0:
+            for amp,cen,width in numpy.reshape(modelpars,[len(modelpars)/3,3]):
+                integ += amp*width*numpy.sqrt(2.0*numpy.pi)
+
+        return integ
+
