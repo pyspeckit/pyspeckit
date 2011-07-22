@@ -23,13 +23,16 @@ def open_1d_fits(filename,**kwargs):
     return open_1d_pyfits(f[0],**kwargs)
 
 
-def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None,**kwargs):
+def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None, autofix=True, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
     """
 
     hdr = pyfits_hdu._header
+    if autofix: 
+        for card in hdr.ascardlist():
+            card.verify('silentfix')
     data = pyfits_hdu.data
 
     if hdr.get('NAXIS') == 2:

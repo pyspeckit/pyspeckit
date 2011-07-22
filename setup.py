@@ -10,6 +10,6 @@ setup(name='pyspeckit',
       url='https://bitbucket.org/keflavich/spectroscopic-toolkit-astronomy/',
       packages=['pyspeckit','pyspeckit.spectrum','pyspeckit.spectrum.models','pyspeckit.spectrum.readers','pyspeckit.spectrum.writers','pyspeckit.spectrum.speclines',
           'pyspeckit.cubes', 'pyspeckit.wrappers'],
-      package_dir={'spectrum.speclines':'spectrum/speclines'},
-      package_data={'spectrum.speclines':['splatalogue.csv']},
+      package_dir={'pyspeckit.spectrum.speclines':'pyspeckit/spectrum/speclines'},
+      package_data={'pyspeckit.spectrum.speclines':['splatalogue.csv']},
      )

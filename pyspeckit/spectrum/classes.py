@@ -428,18 +428,18 @@ class ObsBlock(Spectrum):
 
         if weight is not None:
             if inverse_weight:
-                wtarr = np.array([1.0/sp.header.get(weight) for sp in self.speclist])
+                wtarr = np.reshape( np.array([1.0/sp.header.get(weight) for sp in self.speclist]) , [self.nobs,1] )
             else:
-                wtarr = np.array([sp.header.get(weight) for sp in self.speclist])
+                wtarr = np.reshape( np.array([sp.header.get(weight) for sp in self.speclist]) , [self.nobs,1] )
         else:
             wtarr = np.ones(self.data.shape[1])
 
         if self.header.get('EXPOSURE'):
             self.header['EXPOSURE'] = np.sum([sp.header['EXPOSURE'] for sp in self.speclist])
 
-        avgdata = (self.data * wtarr).sum(axis=1) / wtarr.sum()
+        avgdata = (self.data * wtarr.swapaxes(0,1)).sum(axis=1) / wtarr.sum()
         if error is 'scanrms':
-            errspec = np.sqrt( (((self.data-avgdata) * wtarr)**2 / wtarr**2).sum(axis=1) )
+            errspec = np.sqrt( (((self.data.swapaxes(0,1)-avgdata) * wtarr)**2 / wtarr**2).swapaxes(0,1).sum(axis=1) )
         elif error is 'erravg':
             errspec = self.error.mean(axis=1)
         elif error is 'erravgrtn':
