@@ -354,7 +354,8 @@ class formaldehyde_model(fitter.SimpleFitter):
             for amp,cen,width in np.reshape(modelpars,[len(modelpars)/3,3]):
                 gaussint = amp*width*np.sqrt(2.0*np.pi)
                 cftype = "gt0.1_"+linename if width > 0.1 else "lt0.1_"+linename
-                correction_factor = 10**np.polyval(formaldehyde_to_gaussian_ratio_coefs[cftype],width)
+                correction_factor = 10**np.polyval(formaldehyde_to_gaussian_ratio_coefs[cftype], np.log10(width) )
+                # debug statement print "Two components of the integral: amp %g, width %g, gaussint %g, correction_factor %g " % (amp,width,gaussint,correction_factor)
                 integ += gaussint*correction_factor
 
         return integ
