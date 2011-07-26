@@ -37,6 +37,7 @@ class Specfit(object):
         self.modelcomponents = None
         self.guessplot = []
         self.fitregion = []
+        self._plotted_components = []
         self.npeaks = 0
         self.nclicks_b1 = 0
         self.nclicks_b2 = 0
@@ -392,7 +393,7 @@ class Specfit(object):
         if self.show_components:
             self.modelcomponents = self.fitter.components(self.Spectrum.xarr[self.gx1:self.gx2],self.modelpars)
             for data in self.modelcomponents:
-                self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
+                self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
                     data+self.specplotter.offset+self.Spectrum.baseline.basespec[self.gx1:self.gx2],
                     color=self.compcolor, linewidth=self.complw)                
                 
@@ -452,7 +453,7 @@ class Specfit(object):
 
         clearlegend() will remove the legend
         """
-        self.clearlegend()
+        self._clearlegend()
         pl = matplotlib.collections.CircleCollection([0],edgecolors=['k'])
         if hasattr(self.fitter,'annotations'):
             labels = self.fitter.annotations()
@@ -510,7 +511,9 @@ class Specfit(object):
 
         Defines the fitting region of the spectrum
         """
-        if self.nclicks_b1 == 0:
+        if event.xdata is None:
+            if debug: print "Click outside of plot region"
+        elif self.nclicks_b1 == 0:
             self.gx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
             if debug: print "Left at %g.  Click #%i" % (self.gx1,self.nclicks_b1)
             self.nclicks_b1 += 1
@@ -566,7 +569,7 @@ class Specfit(object):
                 print "There have been %i middle-clicks but there are only %i gaussians" % (self.nclicks_b2,self.npeaks)
                 self.npeaks += 1
 
-    def clear(self,legend=True):
+    def clear(self, legend=True, components=True):
         """
         Remove the fitted model from the plot
 
@@ -575,7 +578,27 @@ class Specfit(object):
         if self.modelplot is not None:
             for p in self.modelplot:
                 p.set_visible(False)
-        if legend: self.clearlegend()
+        if legend: self._clearlegend()
+        if components: self._clearcomponents()
+        if self.specplotter.autorefresh: self.specplotter.refresh()
+
+    def _clearcomponents(self):
+        for pc in self._plotted_components:
+            pc.set_visible(False)
+            if pc in self.specplotter.axis.lines:
+                self.specplotter.axis.lines.remove(pc)
+        if self.specplotter.autorefresh: self.specplotter.refresh()
+
+    def _clearlegend(self):
+        """
+        Remove the legend from the plot window
+        """
+        if self.fitleg is not None: 
+            self.fitleg.set_visible(False)
+            if self.fitleg in self.specplotter.axis.artists:
+                self.specplotter.axis.artists.remove(self.fitleg)
+        if self.specplotter.autorefresh: self.specplotter.refresh()
+    
 
     def makeguess_debug(self,event):
         return self.makeguess(event,debug=True)
@@ -628,16 +651,6 @@ class Specfit(object):
                     print "ERROR: Did not find fitter %s" % fittername
             if self.specplotter.autorefresh: self.specplotter.refresh()
 
-    def clearlegend(self):
-        """
-        Remove the legend from the plot window
-        """
-        if self.fitleg is not None: 
-            self.fitleg.set_visible(False)
-            if self.fitleg in self.specplotter.axis.artists:
-                self.specplotter.axis.artists.remove(self.fitleg)
-        if self.specplotter.autorefresh: self.specplotter.refresh()
-    
     def savefit(self):
         """
         Save the fit parameters from a Gaussian fit to the FITS header
