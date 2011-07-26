@@ -15,7 +15,8 @@ SIIb = 6732.68
 # Use [SII] lines to model narrow lines, then force [NII] lines and narrow H-alpha to have same width as [SII].  
 # Fit 2 additional broad components to H-alpha.
 spec.specfit(guesses = [50, NIIa, 5, 100, Halpha, 5, 50, Halpha, 50, 50, NIIb, 5, 20, SIIa, 5, 20, SIIb, 5, 20, Halpha, 5], 
-    tied = ['', '', 'p[17]', '', '', 'p[17]', '', 'p[4]', '', '3 * p[0]', '', 'p[17]', '', '', 'p[17]', '','','', '', '', ''])
+    tied = ['', '', 'p[17]', '', '', 'p[17]', '', 'p[4]', '', '3 * p[0]', '', 'p[17]', '', '', 'p[17]', '','','', '', '', ''],
+    annotate=False)
 #if interactive: raw_input("Wait here a moment")
 #spec.specfit.plotresiduals()
 #if interactive: raw_input("Wait here a moment")

@@ -90,7 +90,7 @@ class Specfit(object):
         # don't change defaults if compcolor is not None: self.compcolor = compcolor
         # don't change defaults if fitlw is not None: self.fitlw = fitlw
         # don't change defaults if complw is not None: self.complw = complw
-        if annotate is None: annotate = self.autoannotate
+        if annotate is not None: self.autoannotate = annotate
 
         self.clear()
         self.selectregion(**kwargs)
@@ -142,10 +142,9 @@ class Specfit(object):
             #print "Non-interactive, 1D fit with automatic guessing"
             if self.Spectrum.baseline.order is None:
                 self.Spectrum.baseline.order=0
-                self.peakbgfit(usemoments=usemoments, annotate=annotate,
-                        **kwargs)
+                self.peakbgfit(usemoments=usemoments, **kwargs)
             else:
-                self.peakbgfit(usemoments=usemoments, annotate=annotate,
+                self.peakbgfit(usemoments=usemoments, 
                         vheight=False, height=0.0, **kwargs)
             if self.specplotter.autorefresh: self.specplotter.refresh()
         else:
@@ -230,7 +229,7 @@ class Specfit(object):
         self.seterrspec()
         self.errspec[(True-OKmask)] = 1e10
 
-    def multifit(self, fittype=None, renormalize='auto'):
+    def multifit(self, fittype=None, renormalize='auto', annotate=None):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -280,9 +279,7 @@ class Specfit(object):
         self.modelerrs = mpperr.tolist()
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.specplotter.axis is not None:
-            self.plot_fit()
-            if self.autoannotate:
-                self.annotate()
+            self.plot_fit(annotate=annotate)
                 
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
         if self.fitkwargs.has_key('tied'):
@@ -295,7 +292,7 @@ class Specfit(object):
                 self.modelerrs[ii] = self.modelerrs[loc]
                 
     
-    def peakbgfit(self, usemoments=True, annotate=True, vheight=True, height=0,
+    def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
             negamp=None, fittype=None, renormalize='auto', **kwargs):
         """
         Fit a single peak (plus a background)
@@ -372,7 +369,7 @@ class Specfit(object):
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate)
 
-    def plot_fit(self, annotate=True, show_components=None):
+    def plot_fit(self, annotate=None, show_components=None):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
@@ -399,8 +396,13 @@ class Specfit(object):
                     color=self.compcolor, linewidth=self.complw)                
                 
         self.specplotter.reset_limits(**self.specplotter.plotkwargs)
+        if self.specplotter.autorefresh:
+            self.specplotter.refresh()
 
-        if annotate:
+        if annotate is not None:
+            self.autoannotate = annotate
+
+        if self.autoannotate:
             self.annotate()
             if self.vheight: self.Spectrum.baseline.annotate()
 
