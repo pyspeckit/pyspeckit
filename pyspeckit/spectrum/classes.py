@@ -151,8 +151,8 @@ class Spectrum(object):
         """
         Registry = fitters.Registry()
         register_fitter(Registry,'ammonia',models.ammonia_model(),6,multisingle='multi',key='a')
-        register_fitter(Registry,'formaldehyde',models.formaldehyde_model(multisingle='multi'),3,multisingle='multi',key='f')
-        register_fitter(Registry,'formaldehyde',models.formaldehyde_model(multisingle='single'),3,multisingle='single',key='F')
+        register_fitter(Registry,'formaldehyde',models.formaldehyde_model(multisingle='multi'),3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
+        register_fitter(Registry,'formaldehyde',models.formaldehyde_model(multisingle='single'),3,multisingle='single')
         register_fitter(Registry,'gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
         register_fitter(Registry,'gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
         register_fitter(Registry,'voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
