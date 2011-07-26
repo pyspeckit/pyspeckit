@@ -90,8 +90,13 @@ class Specfit(object):
         # don't change defaults if compcolor is not None: self.compcolor = compcolor
         # don't change defaults if fitlw is not None: self.fitlw = fitlw
         # don't change defaults if complw is not None: self.complw = complw
+<<<<<<< local
+        if annotate is None: annotate = self.autoannotate
+        
+=======
         if annotate is not None: self.autoannotate = annotate
 
+>>>>>>> other
         self.clear()
         self.selectregion(**kwargs)
         for arg in ['xmin','xmax','xtype','reset']: 
@@ -292,6 +297,7 @@ class Specfit(object):
                 self.modelerrs[ii] = self.modelerrs[loc]
                 
     
+
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
             negamp=None, fittype=None, renormalize='auto', **kwargs):
         """
@@ -369,7 +375,11 @@ class Specfit(object):
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate)
 
+<<<<<<< local
+    def plot_fit(self, annotate=False, show_components=None):
+=======
     def plot_fit(self, annotate=None, show_components=None):
+>>>>>>> other
         """
         Plot the fit.  Must have fitted something before calling this!  
         

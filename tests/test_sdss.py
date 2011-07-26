@@ -1,23 +1,49 @@
-from pyspeckit import spectrum
+import pyspeckit
 
-if not 'interactive' in globals():
-    interactive=False
-
-spec = spectrum.Spectrum('sample_sdss.txt',errspecnum=2)
-spec.plotter(xmin = 6450, xmax = 6775, ymin = -20, ymax = 120)
-print "Plotter min/max: ",spec.plotter.xmin,spec.plotter.xmax," Fitter min/max: ",spec.specfit.gx1,spec.specfit.gx2," Fitregion= ",spec.baseline.fitregion
-if interactive: raw_input("Wait here a moment") 
+# Rest wavelengths of the lines we are fitting
 NIIa = 6549.86
 NIIb = 6585.27
 Halpha = 6564.614
 SIIa = 6718.29
 SIIb = 6732.68
+
+# Initialize spectrum object and plot region surrounding Halpha-[NII] complex
+spec = pyspeckit.Spectrum('sample_sdss.txt', errspecnum=2)
+spec.plotter(xmin = 6450, xmax = 6775, ymin = -20, ymax = 120)
+
 # Use [SII] lines to model narrow lines, then force [NII] lines and narrow H-alpha to have same width as [SII].  
-# Fit 2 additional broad components to H-alpha.
-spec.specfit(guesses = [50, NIIa, 5, 100, Halpha, 5, 50, Halpha, 50, 50, NIIb, 5, 20, SIIa, 5, 20, SIIb, 5, 20, Halpha, 5], 
-    tied = ['', '', 'p[17]', '', '', 'p[17]', '', 'p[4]', '', '3 * p[0]', '', 'p[17]', '', '', 'p[17]', '','','', '', '', ''],
-    annotate=False)
-#if interactive: raw_input("Wait here a moment")
-#spec.specfit.plotresiduals()
-#if interactive: raw_input("Wait here a moment")
+# Will fit 2 additional broad components to H-alpha (standard for AGN spectra)
+guesses = [50, NIIa, 5, 100, Halpha, 5, 50, Halpha, 50, 50, NIIb, 5, 20, SIIa, 5, 20, SIIb, 5, 20, Halpha, 5]
+tied = ['', '', 'p[17]', '', '', 'p[17]', '', 'p[4]', '', '3 * p[0]', '', 'p[17]', '', '', 'p[17]', '','','', '', '', '']
+
+# Actually do the fit.
+spec.specfit(guesses = guesses, tied = tied, annotate = False)
+spec.plotter.refresh()
+
+# Let's use the measurements class to derive information about the emission lines.
+spec.measure(z = 0.05, fluxnorm = 1e-17)
+
+# Now overplot positions of lines and annotate
+y = spec.plotter.ymax * 0.85
+for i, line in enumerate(spec.measurements.lines.keys()):
+    x = spec.measurements.lines[line]['modelpars'][1]
+    spec.plotter.axis.plot([x]*2, [spec.plotter.ymin, spec.plotter.ymax], ls = '--', color = 'k')
+    try: spec.plotter.axis.annotate(spec.speclines.optical.lines[line][-1], 
+        (x, y), rotation = 90, ha = 'right', va = 'center')
+    except KeyError: pass
+
+# Make some nice axis labels
+spec.plotter.axis.set_xlabel(r'Wavelength $(\AA)$')
+spec.plotter.axis.set_ylabel(r'Flux $(10^{-17} \mathrm{erg/s/cm^2/\AA})$')
+spec.plotter.refresh()
+
+# Print out spectral line information
+print "Line   Flux (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)   Amplitude (erg/s/cm^2)"
+for line in spec.measurements.lines.keys():
+    print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum'], \
+        spec.measurements.lines[line]['amp']
+
+# Notice that because we supplied the objects redshift and flux normalization, the measurements class
+# automatically calculated line luminosities.  Also, it separates the broad and narrow H-alpha components. How nice!
+
 raw_input('Done.')

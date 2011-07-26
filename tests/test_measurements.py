@@ -102,7 +102,7 @@ maxp.extend([0, 0, 0])
 spec.plotter(xmin = NIIa - 100, xmax = SIIb + 30)
 
 spec.specfit(guesses = guesses, tied = tied, fixed = fixed, negamp = False,
-    limitedmin = lmin, limitedmax = lmax, minpars = minp, maxpars = maxp)
+    limitedmin = lmin, limitedmax = lmax, minpars = minp, maxpars = maxp, annotate = False)
     
 spec.plotter.refresh()
 
@@ -122,9 +122,10 @@ spec.plotter.axis.set_ylabel(r'Flux $(10^{-17} \mathrm{erg/s/cm^2/\AA})$')
 
 spec.plotter.refresh()
 
-print "Line   Flux (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)"
+print "Line   Flux (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)   Amplitude"
 for line in spec.measurements.lines.keys():
-    print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum']
+    print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum'], \
+        spec.measurements.lines[line]['amp']
 
 raw_input('Done.')
     

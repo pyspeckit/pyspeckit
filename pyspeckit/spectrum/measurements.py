@@ -16,7 +16,8 @@ cm_per_mpc = 3.08568e+24
 class Measurements(object):
     def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None):
         """
-        This is called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
+        This can be called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
+        Just do: spec.measure(z, xunits, fluxnorm)
         
         Notes: If z (redshift) or d (distance) are present, we can compute ingrated line luminosities rather than just fluxes.
             Provide distance in cm.
@@ -102,13 +103,15 @@ class Measurements(object):
             line = self.refname[element]
             self.lines[line] = {}
             loc = np.argmin(np.abs(self.obspos - self.refpos[element]))                
-            self.lines[line]['modelpars'] = list(self.modelpars[loc])
+            self.lines[line]['modelpars'] = list(self.modelpars[loc])            
                     
         # Track down odd lines
         if len(ALLloc) < self.Nlines:
             tmp = list(np.ravel(self.modelpars))
             for key in self.lines.keys():
-                for element in self.lines[key]['modelpars']: tmp.pop(tmp.index(element))
+                for element in self.lines[key]['modelpars']: 
+                    loc = np.argmin(np.abs(element - tmp))
+                    tmp = np.delete(tmp, loc)
                                                         
             try:  
                 for i, x in enumerate(zip(*tmp)[1]):    
@@ -132,6 +135,7 @@ class Measurements(object):
             self.lines[line]['fwhm'] = self.compute_fwhm(self.lines[line]['modelpars'])
             self.lines[line]['flux'] = self.compute_flux(self.lines[line]['modelpars'])
             self.lines[line]['amp'] = self.compute_amplitude(self.lines[line]['modelpars'])
+            self.lines[line]['pos'] = self.lines[line]['modelpars'][1]
             
             if self.d is not None:
                 self.lines[line]['lum'] = self.compute_luminosity(self.lines[line]['modelpars'])            
@@ -176,7 +180,7 @@ class Measurements(object):
         
         amp = 0
         for i in xrange(len(pars) / 3): amp += pars[3 * i]
-        return amp
+        return amp * self.fluxnorm
                                                                                                            
     def compute_luminosity(self, pars):                                                                 
         """                                                                                                
