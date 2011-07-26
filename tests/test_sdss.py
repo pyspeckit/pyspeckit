@@ -1,4 +1,4 @@
-import spectrum
+from pyspeckit import spectrum
 
 if not 'interactive' in globals():
     interactive=False

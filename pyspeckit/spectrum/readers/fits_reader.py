@@ -1,5 +1,5 @@
 import pyfits
-import spectrum.units as units
+from .. import units
 import numpy.ma as ma
 import numpy as np
 from . import make_axis
@@ -23,13 +23,19 @@ def open_1d_fits(filename,**kwargs):
     return open_1d_pyfits(f[0],**kwargs)
 
 
-def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None,**kwargs):
+def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None, autofix=True, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
     """
 
     hdr = pyfits_hdu._header
+    if autofix: 
+        for card in hdr.ascardlist():
+            try:
+                card.verify('silentfix')
+            except pyfits.VerifyError:
+                hdr.__delitem__(card.key)
     data = pyfits_hdu.data
 
     if hdr.get('NAXIS') == 2:
@@ -81,6 +87,7 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None,**kwargs):
         xarr = xconv(np.arange(len(spec)))
     
     restfreq = hdr.get('RESTFREQ')
+    if restfreq is None: restfrq= hdr.get('RESTFRQ')
 
     XAxis = make_axis(xarr,hdr,wcstype=wcstype,**kwargs)
 

@@ -1,9 +1,9 @@
-import spectrum
+import pyspeckit
 
 if not 'interactive' in globals():
     interactive=False
 
-sp = spectrum.Spectrum('sample_13CO.fits')
+sp = pyspeckit.Spectrum('sample_13CO.fits')
 
 print "Does it have an axis? ",sp.plotter.axis
 sp.plotter()
@@ -36,7 +36,7 @@ print "Best fit: ", sp.specfit.modelpars
 print "Attempting to write to test.fits: "
 sp.write('test.fits')
 
-sptest = spectrum.Spectrum('test.fits')
+sptest = pyspeckit.Spectrum('test.fits')
 sptest.plotter()
 sptest.plotter(figure=1,clear=False,color='b',offset=0.1)
 if interactive: raw_input('Test fits done.')
@@ -44,7 +44,7 @@ if interactive: raw_input('Test fits done.')
 sp.xarr.convert_to_unit('GHz',center_frequency=110201.3541,center_frequency_units='MHz')
 sp.write('test_GHz.fits')
 
-sptestGHz = spectrum.Spectrum('test_GHz.fits')
+sptestGHz = pyspeckit.Spectrum('test_GHz.fits')
 sptestGHz.plotter()
 
 print "Attempting to write to test.hdf5: "

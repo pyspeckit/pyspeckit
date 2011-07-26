@@ -39,3 +39,14 @@ def smooth(data,smooth,smoothtype='gaussian',downsample=True,downsample_factor=N
     smdata = np.convolve(data,kernel,convmode)[::downsample_factor]
 
     return smdata
+
+def smooth_multispec(data,smoothfactor,**kwargs):
+    """
+    Smooth multiple spectra as from an ObsBlock (shape should be [speclen, nspec])
+    """
+
+    nobs = data.shape[1]
+
+    newdata = np.array( [smooth(D,smoothfactor,**kwargs) for D in data.swapaxes(0,1)]).swapaxes(0,1)
+
+    return newdata

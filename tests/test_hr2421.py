@@ -1,10 +1,10 @@
-import spectrum
+import pyspeckit
 
 if not 'interactive' in globals():
     interactive=False
 
 
-sp = spectrum.Spectrum('hr2421.fit')
+sp = pyspeckit.Spectrum('hr2421.fit')
 
 print "Does it have an axis? ",sp.plotter.axis
 sp.plotter()

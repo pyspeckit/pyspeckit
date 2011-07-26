@@ -358,7 +358,7 @@ def read_class(filename,  DEBUG=False):
     f.close()
     return spectra,header,indexes
 
-import spectrum
+from .. import units
 def make_axis(header):
 
     rest_frequency = header.get('RESTF')
@@ -372,10 +372,11 @@ def make_axis(header):
     imfreq = header.get('IMAGE')
 
     xarr = (numpy.arange(nchan) - refchan + 1.0) * fres + rest_frequency
-    XAxis = spectrum.units.SpectroscopicAxis(xarr,'MHz',frame='rest',reffreq=rest_frequency)
+    XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',reffreq=rest_frequency)
 
     return XAxis
     
+import pyspeckit
 @print_timing
 def class_to_obsblocks(filename,telescope,line,DEBUG=False):
     """
@@ -413,15 +414,15 @@ def class_to_obsblocks(filename,telescope,line,DEBUG=False):
         if scannum != lastscannum:
             lastscannum = scannum
             if spectrumlist is not None:
-                obslist.append(spectrum.ObsBlock(spectrumlist))
+                obslist.append(pyspeckit.ObsBlock(spectrumlist))
             xarr = make_axis(hdr)
             spectrumlist = [(
-                spectrum.Spectrum(xarr=xarr,
+                pyspeckit.Spectrum(xarr=xarr,
                     header=H,
                     data=sp))]
         else:
             spectrumlist.append(
-                spectrum.Spectrum(xarr=xarr,
+                pyspeckit.Spectrum(xarr=xarr,
                     header=H,
                     data=sp))
 
@@ -440,7 +441,7 @@ def class_to_spectra(filename,line):
         hdr.update(ind)
         xarr = make_axis(hdr)
         spectrumlist.append(
-            spectrum.Spectrum(xarr=xarr,
+            pyspeckit.Spectrum(xarr=xarr,
                 header=hdr,
                 data=sp))
 

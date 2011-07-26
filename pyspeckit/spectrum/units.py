@@ -69,6 +69,7 @@ xtype_dict = {
         'WAV':'length',
         'WAVE':'length',
         'wavelength':'length',
+        # cm^-1 ? 'wavenumber':'wavenumber',
         }
 
 frame_dict = {
@@ -120,7 +121,12 @@ class SpectroscopicAxis(np.ndarray):
             subarr.frame = frame_dict[xtype]
         elif subarr.units in unit_type_dict:
             subarr.xtype = unit_type_dict[subarr.units]
+        elif type(xtype) is str:
+            print "WARNING: Unknown X-axis type in header: %s" % xtype
+            subarr.xtype = xtype
         else:
+            if xtype is not None:
+                print "WARNING: xtype has been specified but was not recognized as a string."
             subarr.xtype = 'unknown'
         subarr.reffreq = reffreq
         if reffreq_units is None:
@@ -140,6 +146,8 @@ class SpectroscopicAxis(np.ndarray):
             elif 'REL' in subarr.xtype:
                 subarr.velocity_convention = 'relativistic'
             elif subarr.xtype is 'unknown':
+                subarr.velocity_convention = None
+            else:
                 subarr.velocity_convention = None
         else:
             subarr.velocity_convention = None
@@ -192,7 +200,7 @@ class SpectroscopicAxis(np.ndarray):
         else:
             raise ValueError("Conversion to xtype %s was not recognized." % xtype)
 
-    def convert_to_unit(self,unit,frame='rest', **kwargs):
+    def convert_to_unit(self,unit,frame='rest', quiet=False, **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
         to convert between frequency/velocity/wavelength and simply change the 
@@ -228,10 +236,10 @@ class SpectroscopicAxis(np.ndarray):
             self *= conversion_factor
             self.dxarr = self[1:]-self[:-1]
 
-        if change_frame:
+        if change_frame and not quiet:
             print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
 
-        if not change_units and not change_xtype and not change_frame:
+        if not change_units and not change_xtype and not change_frame and not quiet:
             print "Already in desired units, X-type, and frame"
 
         # this should be implemented but requires a callback to spectrum...
@@ -287,7 +295,7 @@ class SpectroscopicAxis(np.ndarray):
         * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
         * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
         """
-        if self.units in frequency_dict:
+        if self.units in velocity_dict:
             print "Already in velocity units"
             return
         if center_frequency is None and self.reffreq is None:
@@ -297,12 +305,12 @@ class SpectroscopicAxis(np.ndarray):
         if center_frequency_units is None:
             center_frequency_units = self.reffreq_units
         if center_frequency_units not in frequency_dict:
-            raise ValueError("Bad frequency units: %s" % (frequency_units))
+            raise ValueError("Bad frequency units: %s" % (center_frequency_units))
         if velocity_units not in velocity_dict:
             raise ValueError("Bad velocity units: %s" % (velocity_units))
 
-        frequency_hz = self * frequency_dict['Hz'] / frequency_dict[self.units]
-        center_frequency_hz = center_frequency * frequency_dict['Hz'] / frequency_dict[center_frequency_units]
+        frequency_hz = self / frequency_dict['Hz'] * frequency_dict[self.units]
+        center_frequency_hz = center_frequency / frequency_dict['Hz'] * frequency_dict[center_frequency_units]
 
         if convention == 'radio':
             velocity = speedoflight_ms * ( center_frequency_hz - frequency_hz ) / center_frequency_hz
@@ -429,7 +437,15 @@ class SpectroscopicAxes(SpectroscopicAxis):
         subarr.frame = frame
         subarr.redshift = redshift
 
-        subarr.reffreq = [ax.reffreq for ax in axislist]
+        # if all the spectra have the same reference frequency, there is one common reffreq
+        # else, reffreq is undefined and velocity transformations should not be done
+        reffreqs_diff = np.sum([axislist[0].reffreq != ax.reffreq for ax in axislist])
+        if reffreqs_diff > 0:
+            subarr.reffreq = None
+            subarr.reffreq_units = None
+        else:
+            subarr.reffreq = axislist[0].reffreq
+            subarr.reffreq_units = axislist[0].reffreq_units
 
         return subarr
 

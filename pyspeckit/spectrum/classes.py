@@ -12,8 +12,59 @@ The Spectra class is a container of multiple spectra of the *same* object at
 import numpy as np
 import smooth as sm
 import pyfits
-import readers,fitters,plotters,writers,baseline,units,measurements,speclines
+import readers,plotters,writers,baseline,units,measurements,speclines,arithmetic
+import fitters
+import models
 import history
+import copy
+
+def register_fitter(Registry, name, function, npars, multisingle='single',
+        override=False, key=None):
+    ''' 
+    Register a fitter function.
+
+    Required Arguments:
+
+        *name*: [ string ]
+            The fit function name. 
+
+        *function*: [ function ]
+            The fitter function.  Single-fitters should take npars + 1 input
+            parameters, where the +1 is for a 0th order baseline fit.  They
+            should accept an X-axis and data and standard fitting-function
+            inputs (see, e.g., gaussfitter).  Multi-fitters should take N *
+            npars, but should also operate on X-axis and data arguments.
+
+        *npars*: [ int ]
+            How many parameters does the function being fit accept?
+
+    Optional Keyword Arguments:
+
+        *multisingle*: [ 'multi' | 'single' ] 
+            Is the function a single-function fitter (with a background), or
+            does it allow N copies of the fitting function?
+
+        *override*: [ True | False ]
+            Whether to override any existing type if already present.
+
+        *key*: [ char ]
+            Key to select the fitter in interactive mode
+    '''
+
+    if multisingle == 'single':
+        if not name in Registry.singlefitters or override:
+            Registry.singlefitters[name] = function
+    elif multisingle == 'multi':
+        if not name in Registry.multifitters or override:
+            Registry.multifitters[name] = function
+    elif name in Registry.singlefitters or name in Registry.multifitters:
+        raise Exception("Fitting function %s is already defined" % name)
+
+    if key is not None:
+        Registry.fitkeys[key] = name
+        Registry.interactive_help_message += "\n'%s' - select fitter %s" % (key,name)
+    Registry.npars[name] = npars
+
 
 
 class Spectrum(object):
@@ -35,7 +86,7 @@ class Spectrum(object):
     """
 
     def __init__(self,filename=None, filetype=None, xarr=None, data=None,
-            error=None, header=None, doplot=False, **kwargs):
+            error=None, header=None, doplot=False, plotkwargs={}, **kwargs):
         """
         Initialize the Spectrum.  Accepts files in the following formats:
             - .fits
@@ -47,6 +98,7 @@ class Spectrum(object):
 
         doplot - if specified, will generate a plot when created
 
+        kwargs are passed to the reader, not the plotter
         """
 
         if filename:
@@ -84,12 +136,29 @@ class Spectrum(object):
             self.header = header
             self.parse_header(header)
 
+
         self.plotter = plotters.Plotter(self)
-        self.specfit = fitters.Specfit(self)
+        self._register_fitters()
+        self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         self.speclines = speclines
 
-        if doplot: self.plotter(**kwargs)
+        if doplot: self.plotter(**plotkwargs)
+
+    def _register_fitters(self):
+        """
+        Register fitters independently for each spectrum instance
+        """
+        Registry = fitters.Registry()
+        register_fitter(Registry,'ammonia',models.ammonia_model(),6,multisingle='multi',key='a')
+        register_fitter(Registry,'formaldehyde',models.formaldehyde_model(multisingle='multi'),3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
+        register_fitter(Registry,'formaldehyde',models.formaldehyde_model(multisingle='single'),3,multisingle='single')
+        register_fitter(Registry,'gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
+        register_fitter(Registry,'gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
+        register_fitter(Registry,'voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
+        register_fitter(Registry,'voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
+        self.Registry = Registry
+
         
     def write(self,filename,type=None,**kwargs):
         """
@@ -196,7 +265,10 @@ class Spectrum(object):
         self.error = sm.smooth(self.error,smooth,**kwargs)
         self.baseline.downsample(smooth)
         self.specfit.downsample(smooth)
+    
+        self._smooth_header(smooth)
 
+    def _smooth_header(self,smooth):
         self.header.update('CDELT1',self.header.get('CDELT1') * float(smooth))
         self.header.update('CRPIX1',self.header.get('CRPIX1') / float(smooth))
 
@@ -209,6 +281,36 @@ class Spectrum(object):
         Return the data shape
         """
         return self.data.shape
+
+    def copy(self):
+        """
+        Create a copy of the spectrum with its own plotter, fitter, etc.
+        Useful for, e.g., comparing smoothed to unsmoothed data
+        """
+
+        newspec = copy.copy(self)
+        newspec.plotter = plotters.Plotter(newspec)
+        newspec._register_fitters()
+        newspec.specfit = fitters.Specfit(newspec,Registry=newspec.Registry)
+        newspec.baseline = baseline.Baseline(newspec)
+
+        return newspec
+
+    def stats(self):
+        """
+        Return some statistical measures
+        """
+
+        stats = {
+            "npts": self.data.shape[0],
+            "std": self.data.std(),
+            "mean": self.data.mean(),
+            "median": np.median(self.data),
+            "min": self.data.min(),
+            "max": self.data.max(),}
+        return stats
+
+
 
 
 class Spectra(Spectrum):
@@ -240,7 +342,8 @@ class Spectra(Spectrum):
         self._sort()
 
         self.plotter = plotters.Plotter(self)
-        self.specfit = fitters.Specfit(self)
+        self._register_fitters()
+        self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         
         self.units = speclist[0].units
@@ -293,7 +396,7 @@ class ObsBlock(Spectrum):
     of observations of the same object in the same setup for later averaging.
     """
 
-    def __init__(self,speclist,xtype='frequency',xarr=None,**kwargs):
+    def __init__(self, speclist, xtype='frequency', xarr=None, force=False, **kwargs):
 
         if xarr is None:
             self.xarr = speclist[0].xarr
@@ -308,21 +411,26 @@ class ObsBlock(Spectrum):
             if type(spec) is not Spectrum:
                 raise TypeError("Must create an ObsBlock with a list of spectra.")
             if not (spec.xarr == self.xarr).all():
-                raise ValueError("Mismatch between X axes in ObsBlock")
+                if force:
+                    spec = arithmetic.interp(spec,self)
+                else:
+                    raise ValueError("Mismatch between X axes in ObsBlock")
             if spec.units != self.units: 
                 raise ValueError("Mismatched units")
 
         self.speclist = speclist
+        self.nobs = len(speclist)
 
         # Create a 2-dimensional array of the data
         self.data = np.array([sp.data for sp in speclist]).swapaxes(0,1)
         self.error = np.array([sp.error for sp in speclist]).swapaxes(0,1)
 
         self.plotter = plotters.Plotter(self)
-        self.specfit = fitters.Specfit(self)
+        self._register_fitters()
+        self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         
-    def average(self, weight=None, error='erravgrtn'):
+    def average(self, weight=None, inverse_weight=False, error='erravgrtn'):
         """
         Average all scans in an ObsBlock.  Returns a single Spectrum object
 
@@ -334,16 +442,19 @@ class ObsBlock(Spectrum):
         """
 
         if weight is not None:
-            wtarr = np.array([sp.header.get(weight) for sp in self.speclist])
+            if inverse_weight:
+                wtarr = np.reshape( np.array([1.0/sp.header.get(weight) for sp in self.speclist]) , [self.nobs,1] )
+            else:
+                wtarr = np.reshape( np.array([sp.header.get(weight) for sp in self.speclist]) , [self.nobs,1] )
         else:
             wtarr = np.ones(self.data.shape[1])
 
         if self.header.get('EXPOSURE'):
             self.header['EXPOSURE'] = np.sum([sp.header['EXPOSURE'] for sp in self.speclist])
 
-        avgdata = (self.data * wtarr).sum(axis=1) / wtarr.sum()
+        avgdata = (self.data * wtarr.swapaxes(0,1)).sum(axis=1) / wtarr.sum()
         if error is 'scanrms':
-            errspec = np.sqrt( (((self.data-avgdata) * wtarr)**2 / wtarr**2).sum(axis=1) )
+            errspec = np.sqrt( (((self.data.swapaxes(0,1)-avgdata) * wtarr)**2 / wtarr**2).swapaxes(0,1).sum(axis=1) )
         elif error is 'erravg':
             errspec = self.error.mean(axis=1)
         elif error is 'erravgrtn':
@@ -360,3 +471,18 @@ class ObsBlock(Spectrum):
         Can index Spectra to get the component Spectrum objects
         """
         return self.speclist[index]
+
+    def smooth(self,smooth,**kwargs):
+        """
+        Smooth the spectrum by factor "smooth".  Options are defined in sm.smooth
+        """
+        smooth = round(smooth)
+        self.data = sm.smooth_multispec(self.data,smooth,**kwargs)
+        self.xarr = self.xarr[::smooth]
+        if len(self.xarr) != len(self.data):
+            raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
+        self.error = sm.smooth_multispec(self.error,smooth,**kwargs)
+        self.baseline.downsample(smooth)
+        self.specfit.downsample(smooth)
+    
+        self._smooth_header(smooth)

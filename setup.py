@@ -2,13 +2,14 @@
 
 from distutils.core import setup
 
-setup(name='spectrum',
+setup(name='pyspeckit',
       version='0.1',
       description='Spectroscopic Toolkit for fitting and manipulating spectroscopic data in python',
       author=['Adam Ginsburg','Jordan Mirocha'],
       author_email=['adam.g.ginsburg@gmail.com','mirochaj@gmail.com'],
       url='https://bitbucket.org/keflavich/spectroscopic-toolkit-astronomy/',
-      packages=['spectrum','spectrum.models','spectrum.readers','spectrum.writers','spectrum.speclines', 'cubes'],
-      package_dir={'spectrum.speclines':'spectrum/speclines'},
-      package_data={'spectrum.speclines':['splatalogue.csv']},
+      packages=['pyspeckit','pyspeckit.spectrum','pyspeckit.spectrum.models','pyspeckit.spectrum.readers','pyspeckit.spectrum.writers','pyspeckit.spectrum.speclines',
+          'pyspeckit.cubes', 'pyspeckit.wrappers'],
+      package_dir={'pyspeckit.spectrum.speclines':'pyspeckit/spectrum/speclines'},
+      package_data={'pyspeckit.spectrum.speclines':['splatalogue.csv']},
      )

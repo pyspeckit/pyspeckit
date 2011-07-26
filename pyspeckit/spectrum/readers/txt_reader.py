@@ -3,7 +3,7 @@ try:
     atpyOK = True
 except ImportError:
     atpyOK = False
-import spectrum.units as units
+from .. import units
 
 def open_1d_txt(filename,errspecnum=2):
     if not atpyOK: print "atpy not installed; cannot read txt files"
