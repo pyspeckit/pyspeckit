@@ -370,11 +370,7 @@ class Specfit(object):
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate)
 
-<<<<<<< local
-    def plot_fit(self, annotate=False, show_components=None):
-=======
     def plot_fit(self, annotate=None, show_components=None):
->>>>>>> other
         """
         Plot the fit.  Must have fitted something before calling this!  
         
