@@ -90,13 +90,8 @@ class Specfit(object):
         # don't change defaults if compcolor is not None: self.compcolor = compcolor
         # don't change defaults if fitlw is not None: self.fitlw = fitlw
         # don't change defaults if complw is not None: self.complw = complw
-<<<<<<< local
-        if annotate is None: annotate = self.autoannotate
-        
-=======
         if annotate is not None: self.autoannotate = annotate
 
->>>>>>> other
         self.clear()
         self.selectregion(**kwargs)
         for arg in ['xmin','xmax','xtype','reset']: 
