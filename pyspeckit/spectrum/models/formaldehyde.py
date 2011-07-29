@@ -242,28 +242,30 @@ class formaldehyde_model(fitter.SimpleFitter):
 
         # make sure all various things are the right length; if they're not, fix them using the defaults
         # multiformaldehydefit should process negamp directly if kwargs.has_key('negamp') is False: kwargs['negamp'] = None 
-        for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars,tied):
+        pardict = {"params":params,"fixed":fixed,"limitedmin":limitedmin,"limitedmax":limitedmax,"minpars":minpars,"maxpars":maxpars,"tied":tied}
+        for parlistname in pardict:
+            parlist = pardict[parlistname]
             if len(parlist) != 3*self.npeaks:
                 # if you leave the defaults, or enter something that can be multiplied by 3 to get to the
                 # right number of formaldehydeians, it will just replicate
+                if veryverbose: print "Correcting length of parameter %s" % parlistname
                 if len(parlist) == 3: 
                     parlist *= self.npeaks 
-                # is any of this stuff valid?  I don't think so...
-                elif parlist==params:
+                elif parlistname=="params":
                     parlist[:] = [1,0,1] * self.npeaks
-                elif parlist==fixed:
+                elif parlistname=="fixed":
                     parlist[:] = [False,False,False] * self.npeaks
-                elif parlist==limitedmax:
+                elif parlistname=="limitedmax":
                     if negamp is None: parlist[:] = [False,False,False] * self.npeaks
                     elif negamp is False: parlist[:] = [False,False,False] * self.npeaks
                     else: parlist[:] = [True,False,False] * self.npeaks
-                elif parlist==limitedmin:
+                elif parlistname=="limitedmin":
                     if negamp is None: parlist[:] = [False,False,True] * self.npeaks  # Lines can't have negative width!
                     elif negamp is False: parlist[:] = [True,False,True] * self.npeaks
                     else: parlist[:] = [False,False,True] * self.npeaks                   
-                elif parlist==minpars or parlist==maxpars:
+                elif parlistname=="minpars" or parlistname=="maxpars":
                     parlist[:] = [0,0,0] * self.npeaks
-                elif parlist==tied:
+                elif parlistname=="tied":
                     parlist[:] = ['','',''] * self.npeaks
                     
         # mpfit doesn't recognize negamp, so get rid of it now that we're done setting limitedmin/max and min/maxpars

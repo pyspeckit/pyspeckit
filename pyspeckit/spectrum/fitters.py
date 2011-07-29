@@ -28,12 +28,12 @@ class Registry(object):
 
 class Specfit(object):
 
-    def __init__(self, Spectrum, autoannotate=bool(spcfg.cfg['annotate']),
+    def __init__(self, Spectrum, autoannotate=bool(spcfg.cfg['annotate']), show_components=bool(spcfg.cfg['show_components']),
             Registry=None):
         self.model = None
         self.modelpars = None
         self.modelerrs = None
-        self.modelplot = None
+        self.modelplot = []
         self.modelcomponents = None
         self.guessplot = []
         self.fitregion = []
@@ -65,7 +65,7 @@ class Specfit(object):
         self.fitlw = self.cfg['fit_lw']
         self.complw = self.cfg['comp_lw']
         self.autoannotate = autoannotate
-        self.show_components = bool(self.cfg['show_components'])
+        self.show_components = show_components
 
     def __call__(self, interactive=False, usemoments=True, fitcolor=None,
             multifit=False, guesses=None, annotate=None, save=True,
@@ -379,12 +379,12 @@ class Specfit(object):
         axis for plotting exists)
         """
         if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
-            plotmodel = self.model+self.specplotter.offset+self.Spectrum.baseline.basespec[self.gx1:self.gx2]
+            plot_offset = self.specplotter.offset+self.Spectrum.baseline.basespec[self.gx1:self.gx2]
         else:
-            plotmodel = self.model+self.specplotter.offset
-        self.modelplot = self.specplotter.axis.plot(
+            plot_offset = self.specplotter.offset
+        self.modelplot += self.specplotter.axis.plot(
                 self.Spectrum.xarr[self.gx1:self.gx2],
-                plotmodel,
+                self.model + plot_offset,
                 color=self.fitcolor, linewidth=self.fitlw)
         
         if show_components is not None:
@@ -394,7 +394,7 @@ class Specfit(object):
             self.modelcomponents = self.fitter.components(self.Spectrum.xarr[self.gx1:self.gx2],self.modelpars)
             for data in self.modelcomponents:
                 self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
-                    data+self.specplotter.offset+self.Spectrum.baseline.basespec[self.gx1:self.gx2],
+                    data + plot_offset,
                     color=self.compcolor, linewidth=self.complw)                
                 
         self.specplotter.reset_limits(**self.specplotter.plotkwargs)
@@ -575,9 +575,8 @@ class Specfit(object):
 
         Also removes the legend by default
         """
-        if self.modelplot is not None:
-            for p in self.modelplot:
-                p.set_visible(False)
+        for p in self.modelplot:
+            p.set_visible(False)
         if legend: self._clearlegend()
         if components: self._clearcomponents()
         if self.specplotter.autorefresh: self.specplotter.refresh()
