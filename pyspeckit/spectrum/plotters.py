@@ -19,7 +19,7 @@ class Plotter(object):
 
 
     def __init__(self, Spectrum, autorefresh=True, title="", ylabel="",
-            xlabel="", **kwargs):
+            xlabel="", silent=False, **kwargs):
         self.figure = None
         self.axis = None
         self.Spectrum = Spectrum
@@ -37,6 +37,7 @@ class Plotter(object):
         self.ymax = None
         self.ymin = None
         self.keyclick = None
+        self.silent = silent
 
     def __call__(self, figure=None, axis=None, clear=True, autorefresh=None, **kwargs):
         """
@@ -88,7 +89,7 @@ class Plotter(object):
         self.plot(**kwargs)
 
     def plot(self, offset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
-            errstyle=None, erralpha=0.2, silent=False, **kwargs):
+            errstyle=None, erralpha=0.2, silent=None, **kwargs):
         """
         Plot the spectrum!
 
@@ -140,20 +141,26 @@ class Plotter(object):
                         yerr=self.Spectrum.error, ecolor=color, fmt=None,
                         **kwargs)
 
-        self.reset_limits(silent=silent, **reset_kwargs)
+        if silent is not None:
+            self.silent = silent
+
+        self.reset_limits(**reset_kwargs)
 
         if self.autorefresh: self.refresh()
     
     def reset_limits(self,xmin=None, xmax=None, ymin=None, ymax=None,
             reset_xlimits=False, reset_ylimits=False, ypeakscale=1.2,
-            silent=False, **kwargs):
+            silent=None, **kwargs):
         """
         Automatically or manually reset the plot limits
         """
 
+        if silent is not None:
+            self.silent = silent
+
         if (self.Spectrum.xarr.max() < self.xmin or self.Spectrum.xarr.min() > self.xmax 
                 or reset_xlimits):
-            if not silent: print "Resetting X-axis min/max because the plot is out of bounds."
+            if not self.silent: print "Resetting X-axis min/max because the plot is out of bounds."
             self.xmin = None
             self.xmax = None
         if xmin is not None: self.xmin = xmin
@@ -168,7 +175,7 @@ class Plotter(object):
         
         if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
                 or reset_ylimits):
-            if not silent: print "Resetting Y-axis min/max because the plot is out of bounds."
+            if not self.silent: print "Resetting Y-axis min/max because the plot is out of bounds."
             self.ymin = None
             self.ymax = None
         if ymin is not None: self.ymin = ymin
