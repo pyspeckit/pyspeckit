@@ -31,7 +31,7 @@ class Baseline:
 
     def __call__(self, order=1, annotate=False, excludefit=False, save=True,
             exclude=None, exclusionlevel=0.01, interactive=False, 
-            LoudDebug=False, fit_original=False, **kwargs):
+            LoudDebug=False, fit_original=True, **kwargs):
         """
         Fit and remove a polynomial from the spectrum.  
         It will be saved in the variable "self.basespec"
