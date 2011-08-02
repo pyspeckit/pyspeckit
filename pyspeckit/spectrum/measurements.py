@@ -14,7 +14,7 @@ spec.measure()
 cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
-    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None, miscline = None, misctol = 10):
+    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None, miscline = None, misctol = 10, ignore = None):
         """
         This can be called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
         Just do: spec.measure(z, xunits, fluxnorm)
@@ -45,6 +45,11 @@ class Measurements(object):
         # Read in observed wavelengths
         tmp1 = np.reshape(self.specfit.modelpars, (len(self.specfit.modelpars) / 3, 3))
         tmp2 = np.reshape(self.specfit.modelerrs, (len(self.specfit.modelerrs) / 3, 3))
+        
+        if ignore is not None:
+            tmp1 = np.delete(tmp1, ignore, 0)
+            tmp2 = np.delete(tmp2, ignore, 0)
+                
         order = np.argsort(zip(*tmp1)[1])
         self.obspos = np.sort(list(zip(*tmp1)[1]))
         self.Nlines = len(self.obspos)
@@ -78,7 +83,7 @@ class Measurements(object):
         Note: This method will be infinitely slow for more than 10 or so lines.
         """    
         
-        self.IDresults= []
+        self.IDresults = []
         self.odiff = np.abs(np.diff(self.obspos))
         self.rdiff = np.abs(np.diff(self.refpos))
         self.rdmin = 0.5 * min(self.rdiff)
@@ -100,7 +105,7 @@ class Measurements(object):
         for i, combo in enumerate(combos):
             rdiff = np.diff(combo)
             self.IDresults.append((np.sum(np.abs(odiff - rdiff)), combo))
-            
+                        
         # Pick best solution
         MINloc = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
         ALLloc = []                                  # x-values of best fit lines in reference dictionary

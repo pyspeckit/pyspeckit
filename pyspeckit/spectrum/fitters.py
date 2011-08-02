@@ -62,8 +62,8 @@ class Specfit(object):
     @cfgdec
     def __call__(self, interactive=False, usemoments=True, clear_all_connections=False, debug=False,
             multifit=False, guesses=None, annotate=None, save=True, fittype='gaussian', 
-            color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None, 
-            component_lw = None, show_components = None, 
+            color = 'k', composite_fit_color = 'red', component_fit_color = 'red', lw = 1.0, composite_lw = 1.0, 
+            component_lw = 1.0, show_components = None, 
             **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
@@ -125,21 +125,19 @@ class Specfit(object):
                 return
             else:
                 self.guesses = guesses
-                self.multifit(color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
-                              component_lw = None, show_components = None)
+                self.multifit(color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
+                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components)
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
             if self.Spectrum.baseline.order is None:
                 self.Spectrum.baseline.order=0
-                self.peakbgfit(usemoments=usemoments, color = None, composite_fit_color = None, component_fit_color = None, lw = None, 
-                composite_lw = None, component_lw = None, show_components = None, 
-                **kwargs)
+                self.peakbgfit(usemoments=usemoments, color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
+                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components, **kwargs)
             else:
                 self.peakbgfit(usemoments=usemoments, 
-                        vheight=False, height=0.0, color = None, composite_fit_color = None, component_fit_color = None, lw = None, 
-                        composite_lw = None, component_lw = None, show_components = None, 
-                        **kwargs)
+                    vheight=False, height=0.0, color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
+                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components, **kwargs)
             if self.specplotter.autorefresh: self.specplotter.refresh()
         else:
             if multifit:
@@ -224,8 +222,8 @@ class Specfit(object):
         self.errspec[(True-OKmask)] = 1e10
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None, 
-        color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
-        component_lw = None, show_components = None):
+        color = 'k', composite_fit_color = 'red', component_fit_color = 'red', lw = 1.0, composite_lw = 1.0, 
+            component_lw = 1.0, show_components = None):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -276,8 +274,8 @@ class Specfit(object):
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate, 
-                color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
-                component_lw = None, show_components = None)
+                color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
+                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components)
                 
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
         if self.fitkwargs.has_key('tied'):
@@ -289,12 +287,10 @@ class Specfit(object):
                 loc = int(element[i1:i2])
                 self.modelerrs[ii] = self.modelerrs[loc]
                 
-    
-
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
             negamp=None, fittype=None, renormalize='auto', 
-            color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
-            component_lw = None, show_components = None, 
+            color = 'k', composite_fit_color = 'red', component_fit_color = 'red', lw = 1.0, composite_lw = 1.0, 
+            component_lw = 1.0, show_components = None, 
             **kwargs):
         """
         Fit a single peak (plus a background)
@@ -370,13 +366,12 @@ class Specfit(object):
         self.modelerrs[1] *= scalefactor
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate,
-                color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
-                component_lw = None, show_components = None)
+                color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
+                lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components)
                 
-    @cfgdec            
     def plot_fit(self, annotate=None, show_components=None, 
-        color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
-        component_lw = None):
+        color = 'k', composite_fit_color = 'red', component_fit_color = 'red', lw = 1.0, composite_lw = 1.0, 
+        component_lw = 1.0):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
