@@ -3,7 +3,7 @@ import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
 from config import mycfg
-import inspect
+from config import ConfigDescriptor as cfgdec
 
 class Registry(object):
     """
@@ -56,13 +56,15 @@ class Specfit(object):
         self.measurements = None
         self.vheight=None
         self.Registry = Registry
+        self.autoannotate = mycfg['annotate']
         #self.seterrspec()
         
-
-    def __call__(self, interactive=False, usemoments=True, fitcolor=None,
-            multifit=False, guesses=None, annotate=None, save=True,
-            fittype='gaussian', compcolor = None, fitlw = None, complw = None, 
-            debug=False, clear_all_connections=False, **kwargs):
+    @cfgdec
+    def __call__(self, interactive=False, usemoments=True, clear_all_connections=False, debug=False,
+            multifit=False, guesses=None, annotate=None, save=True, fittype='gaussian', 
+            color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None, 
+            component_lw = None, show_components = None, 
+            **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
 
@@ -78,19 +80,6 @@ class Specfit(object):
                 line that represents the full-width-half-max
             Right click or 'd': Disconnect the plot and perform the fit.
         """
-  
-        # Config file stuff
-        all_args, all_vars, all_keys, all_defs = inspect.getargspec(Specfit)
-        all_defs.reverse()
-        for i, arg in enumerate(all_args.reverse()):
-            try: exec("if {0} == {1}: {0} = {2}".format(arg, all_defs[i], self.cfg[arg]))
-            except KeyError: pass            
-  
-        # don't change defaults if fitcolor is not None: self.fitcolor = fitcolor
-        # don't change defaults if compcolor is not None: self.compcolor = compcolor
-        # don't change defaults if fitlw is not None: self.fitlw = fitlw
-        # don't change defaults if complw is not None: self.complw = complw
-        #if annotate is not None: self.autoannotate = annotate
 
         self.clear()
         self.selectregion(**kwargs)
@@ -136,16 +125,21 @@ class Specfit(object):
                 return
             else:
                 self.guesses = guesses
-                self.multifit()
+                self.multifit(color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
+                              component_lw = None, show_components = None)
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
             if self.Spectrum.baseline.order is None:
                 self.Spectrum.baseline.order=0
-                self.peakbgfit(usemoments=usemoments, **kwargs)
+                self.peakbgfit(usemoments=usemoments, color = None, composite_fit_color = None, component_fit_color = None, lw = None, 
+                composite_lw = None, component_lw = None, show_components = None, 
+                **kwargs)
             else:
                 self.peakbgfit(usemoments=usemoments, 
-                        vheight=False, height=0.0, **kwargs)
+                        vheight=False, height=0.0, color = None, composite_fit_color = None, component_fit_color = None, lw = None, 
+                        composite_lw = None, component_lw = None, show_components = None, 
+                        **kwargs)
             if self.specplotter.autorefresh: self.specplotter.refresh()
         else:
             if multifit:
@@ -229,7 +223,9 @@ class Specfit(object):
         self.seterrspec()
         self.errspec[(True-OKmask)] = 1e10
 
-    def multifit(self, fittype=None, renormalize='auto', annotate=None):
+    def multifit(self, fittype=None, renormalize='auto', annotate=None, 
+        color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
+        component_lw = None, show_components = None):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -279,7 +275,9 @@ class Specfit(object):
         self.modelerrs = mpperr.tolist()
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.specplotter.axis is not None:
-            self.plot_fit(annotate=annotate)
+            self.plot_fit(annotate=annotate, 
+                color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
+                component_lw = None, show_components = None)
                 
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
         if self.fitkwargs.has_key('tied'):
@@ -294,7 +292,10 @@ class Specfit(object):
     
 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
-            negamp=None, fittype=None, renormalize='auto', **kwargs):
+            negamp=None, fittype=None, renormalize='auto', 
+            color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
+            component_lw = None, show_components = None, 
+            **kwargs):
         """
         Fit a single peak (plus a background)
 
@@ -368,9 +369,14 @@ class Specfit(object):
         self.modelpars[1] *= scalefactor
         self.modelerrs[1] *= scalefactor
         if self.specplotter.axis is not None:
-            self.plot_fit(annotate=annotate)
-
-    def plot_fit(self, annotate=None, show_components=None):
+            self.plot_fit(annotate=annotate,
+                color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
+                component_lw = None, show_components = None)
+                
+    @cfgdec            
+    def plot_fit(self, annotate=None, show_components=None, 
+        color = None, composite_fit_color = None, component_fit_color = None, lw = None, composite_lw = None,
+        component_lw = None):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
@@ -384,17 +390,15 @@ class Specfit(object):
         self.modelplot += self.specplotter.axis.plot(
                 self.Spectrum.xarr[self.gx1:self.gx2],
                 self.model + plot_offset,
-                color=self.fitcolor, linewidth=self.fitlw)
+                color=composite_fit_color, linewidth=lw)
         
-        if show_components is not None:
-            self.show_components = show_components
         # Plot components
-        if self.show_components:
+        if show_components:
             self.modelcomponents = self.fitter.components(self.Spectrum.xarr[self.gx1:self.gx2],self.modelpars)
             for data in self.modelcomponents:
                 self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
                     data + plot_offset,
-                    color=self.compcolor, linewidth=self.complw)                
+                    color=component_fit_color, linewidth=component_lw)                
                 
         self.specplotter.reset_limits(**self.specplotter.plotkwargs)
         if self.specplotter.autorefresh:
