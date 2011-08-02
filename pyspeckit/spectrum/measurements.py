@@ -14,7 +14,7 @@ spec.measure()
 cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
-    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None):
+    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None, miscline = None, misctol = 10):
         """
         This can be called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
         Just do: spec.measure(z, xunits, fluxnorm)
@@ -30,6 +30,10 @@ class Measurements(object):
         # Inherit specfit object    
         self.specfit = Spectrum.specfit
         self.speclines = Spectrum.speclines
+                
+        # Bit of a hack - help identifying unmatched lines
+        self.miscline = miscline        
+        self.misctol = misctol
                 
         # Flux units in case we are interested in line luminosities or just having real flux units
         if fluxnorm is not None: self.fluxnorm = fluxnorm
@@ -112,6 +116,8 @@ class Measurements(object):
                     
         # Track down odd lines
         if len(ALLloc) < self.Nlines:
+            
+            # Eliminate all modelpars/errs that belong to lines that were identified
             tmp1 = list(np.ravel(self.modelpars))
             tmp2 = list(np.ravel(self.modelerrs))
             for key in self.lines.keys():
@@ -119,19 +125,38 @@ class Measurements(object):
                     loc = np.argmin(np.abs(element - tmp1))
                     tmp1 = np.delete(tmp1, loc)
                     tmp2 = np.delete(tmp2, loc)
-                                                        
-            try:  
-                for i, x in enumerate(zip(*tmp1)[1]):    
-                    loc = np.argmin(np.abs(ALLloc - x))
+             
+            # Loop over unmatched modelpars/errs, find name of unmatched line, extend corresponding dict entry
+            if self.miscline is None:                                          
+                try:  
+                    for i, x in enumerate(zip(*tmp1)[1]):    
+                        loc = np.argmin(np.abs(ALLloc - x))
+                        line = self.refname[loc]
+                        self.lines[line]['modelpars'].extend(tmp1[i:i+3])
+                        self.lines[line]['modelerrs'].extend(tmp2[i:i+3])
+                except TypeError:
+                    loc = np.argmin(np.abs(tmp1[1] - self.refpos))                       
                     line = self.refname[loc]
-                    self.lines[line]['modelpars'].extend(tmp1[i:i+3])
-                    self.lines[line]['modelerrs'].extend(tmp2[i:i+3])
-            except TypeError:
-                loc = np.argmin(np.abs(tmp1[1] - self.refpos))                       
-                line = self.refname[loc]
-                self.lines[line]['modelpars'].extend(tmp1)
-                self.lines[line]['modelerrs'].extend(tmp2) 
-                  
+                    self.lines[line]['modelpars'].extend(tmp1)
+                    self.lines[line]['modelerrs'].extend(tmp2)
+            
+            # If we've know a-priori which lines the unmatched lines are likely to be, use that information        
+            else:
+                
+                if type(self.miscline) is not list: self.miscline = [self.miscline]
+                
+                for i, miscline in enumerate(self.miscline):
+                    try:  
+                        for j, x in enumerate(zip(*tmp1)[1]):    
+                            if abs(x - self.lines[miscline]['modelpars'][1]) < self.misctol[i]:
+                                self.lines[line]['modelpars'].extend(tmp1[j:j+3])
+                                self.lines[line]['modelerrs'].extend(tmp2[j:j+3])
+                    except TypeError:
+                        if abs(tmp1[1] - self.lines[self.miscline[0]]['modelpars'][1]) < self.misctol:
+                            self.lines[self.miscline[0]]['modelpars'].extend(tmp1)
+                            self.lines[self.miscline[0]]['modelerrs'].extend(tmp2)
+                            break #?
+                                              
         self.separate() 
                     
     def derive(self):
