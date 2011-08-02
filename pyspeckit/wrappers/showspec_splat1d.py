@@ -47,10 +47,13 @@ def splat_1d(filename=None,vmin=None,vmax=None,button=None,dobaseline=False,
         sp.units = units
 
     if dobaseline:
-        sp.baseline(order=order, exclude=exclude, annotate=annotatebaseline)
+        sp.baseline(order=order, exclude=exclude, annotate=annotatebaseline, subtract=False)
 
     if plotspectrum:
-        sp.plotter(figure=fignum, axis=axis, autorefresh=autorefresh, color=color, clear=clear, silent=quiet, reset_ylimits=True, title=title)
+        if color is None:
+            sp.plotter(figure=fignum, axis=axis, autorefresh=autorefresh, clear=clear, silent=quiet, reset_ylimits=True, title=title)
+        else:
+            sp.plotter(figure=fignum, axis=axis, autorefresh=autorefresh, color=color, clear=clear, silent=quiet, reset_ylimits=True, title=title)
 
     if savepre is not None:
         glon,glat = sp.header.get("GLON"),sp.header.get("GLAT")

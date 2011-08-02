@@ -387,8 +387,22 @@ class Spectra(Spectrum):
         self.data = self.data[indices]
         self.error = self.error[indices]
 
+    def smooth(self,smooth,**kwargs):
+        """
+        Smooth the spectrum by factor "smooth".  Options are defined in sm.smooth
 
-class ObsBlock(Spectrum):
+        because 'Spectra' does not have a header attribute, don't do anything to it...
+        """
+        smooth = round(smooth)
+        self.data = sm.smooth(self.data,smooth,**kwargs)
+        self.xarr = self.xarr[::smooth]
+        if len(self.xarr) != len(self.data):
+            raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
+        self.error = sm.smooth(self.error,smooth,**kwargs)
+        self.baseline.downsample(smooth)
+        self.specfit.downsample(smooth)
+
+class ObsBlock(Spectra):
     """
     An Observation Block
 
