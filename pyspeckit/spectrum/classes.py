@@ -91,7 +91,7 @@ class Spectrum(object):
         Initialize the Spectrum.  Accepts files in the following formats:
             - .fits
             - .txt
-            - hdf5
+            - .hdf5
 
         Must either pass in a filename or ALL of xarr, data, and header, plus
         optionally error.

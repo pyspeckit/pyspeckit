@@ -9,33 +9,26 @@ Description: Modeled after config.py from yt.  Returns dictionary spcfg.cfg.
 
 Notes: Will look in ~/.pyspeckit for file named config.
 
-Sample ~/.spectools/config file:
-
-plot_color = k
-fit_color = green
-comp_color = blue
-plot_lw = 0.5
-fit_lw = 1.0
-comp_lw = 1.0
-
-To do: choose reasonable naming convention for these params.
+To do: Replace contents of confit with python dictionary?
   
 """
 
-import os
+import os, inspect
+from functools import wraps
 
 cfgDefaults = dict(
-    plot_color = 'k',
-    fit_color = 'r',
-    comp_color = 'blue',
-    plot_lw = 0.5,
-    fit_lw = 0.75,
-    comp_lw = 0.75,
+    color = 'k',
+    composite_fit_color = 'r',
+    component_fit_color = 'blue',
+    lw = 0.5,
+    composite_lw = 0.75,
+    component_lw = 0.75,
     show_components = 0,
-    # FITS should be the default; it is the standard for most spectrographs
-    data_format = 'fits', 
     annotate = True,
-    logfile='SpectrumLogger.log',
+    interactive = False,
+    autorefresh = False,
+    silent = True,
+    debug = False
     )
 
 class ConfigParser:
@@ -52,14 +45,38 @@ class ConfigParser:
             
                 if thisline[0][0] == '#': continue
                 
-                try: return_dict[thisline[0]] = float(thisline[2])
-                except ValueError: return_dict[thisline[0]] = str(thisline[2])
-    	        
+                if thisline[2] in ['True', 1]: return_dict[thisline[0]] = True
+                elif thisline[2] in ['False', 0]: return_dict[thisline[0]] = False
+                elif thisline[2] == 'None': return_dict[thisline[0]] = None
+                elif thisline[2].isalpha(): return_dict[thisline[0]] = str(thisline[2])
+                else: return_dict[thisline[0]] = float(thisline[2])
+    	            	        
     	    self.cfg = return_dict
     	else: self.cfg = cfgDefaults
-    	
+            	    	
 __fn = os.path.expanduser("~/.pyspeckit/config")
 if os.path.exists(__fn): 
-    spcfg = ConfigParser(__fn)
+    mycfg = ConfigParser(__fn).cfg
 else:
-    spcfg = ConfigParser()
+    mycfg = ConfigParser().cfg
+   
+def ConfigDescriptor(f):    
+                                
+    def decorator(self, *args, **kwargs):    
+        all_args, all_vars, all_keys, all_defs = inspect.getargspec(f)                
+        all_args.pop(0) # pop self
+                                                                                                                       
+        new_kwargs = {}
+        for i, default in enumerate(all_defs):
+            if mycfg.has_key(all_args[i]): new_kwargs[all_args[i]] = mycfg[all_args[i]]
+            else: new_kwargs[all_args[i]] = default
+            
+            # Only update parameter value if it isn't equal to its default...not sure this is absolutely correct
+            if kwargs.has_key(all_args[i]): 
+                if kwargs[all_args[i]] != all_defs[i]:
+                    new_kwargs[all_args[i]] = kwargs[all_args[i]]          
+                                                                                                               
+        f(self, *args, **new_kwargs)
+            
+    return decorator      
+

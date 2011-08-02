@@ -2,7 +2,8 @@ import matplotlib
 import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
-from config import spcfg
+from config import mycfg
+import inspect
 
 class Registry(object):
     """
@@ -28,8 +29,7 @@ class Registry(object):
 
 class Specfit(object):
 
-    def __init__(self, Spectrum, autoannotate=bool(spcfg.cfg['annotate']), show_components=bool(spcfg.cfg['show_components']),
-            Registry=None):
+    def __init__(self, Spectrum, Registry=None):
         self.model = None
         self.modelpars = None
         self.modelerrs = None
@@ -58,14 +58,6 @@ class Specfit(object):
         self.Registry = Registry
         #self.seterrspec()
         
-        # config file stuff
-        self.cfg = spcfg.cfg
-        self.fitcolor = self.cfg['fit_color']
-        self.compcolor = self.cfg['comp_color']
-        self.fitlw = self.cfg['fit_lw']
-        self.complw = self.cfg['comp_lw']
-        self.autoannotate = autoannotate
-        self.show_components = show_components
 
     def __call__(self, interactive=False, usemoments=True, fitcolor=None,
             multifit=False, guesses=None, annotate=None, save=True,
@@ -87,11 +79,18 @@ class Specfit(object):
             Right click or 'd': Disconnect the plot and perform the fit.
         """
   
+        # Config file stuff
+        all_args, all_vars, all_keys, all_defs = inspect.getargspec(Specfit)
+        all_defs.reverse()
+        for i, arg in enumerate(all_args.reverse()):
+            try: exec("if {0} == {1}: {0} = {2}".format(arg, all_defs[i], self.cfg[arg]))
+            except KeyError: pass            
+  
         # don't change defaults if fitcolor is not None: self.fitcolor = fitcolor
         # don't change defaults if compcolor is not None: self.compcolor = compcolor
         # don't change defaults if fitlw is not None: self.fitlw = fitlw
         # don't change defaults if complw is not None: self.complw = complw
-        if annotate is not None: self.autoannotate = annotate
+        #if annotate is not None: self.autoannotate = annotate
 
         self.clear()
         self.selectregion(**kwargs)

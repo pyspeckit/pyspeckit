@@ -108,16 +108,26 @@ spec.plotter.axis.set_ylabel(r'Flux $(10^{-17} \mathrm{erg/s/cm^2/\AA})$')
 spec.plotter.refresh()
 
 # Print out spectral line information
-print "Line   Flux (erg/s/cm^2)     Amplitude (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)"
+print "Line Flux (erg/s/cm^2) Amplitude (erg/s/cm^2) FWHM (Ang) Luminosity (erg/s)"
 for line in spec.measurements.lines.keys():
     print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['amp'], spec.measurements.lines[line]['fwhm'], \
         spec.measurements.lines[line]['lum']
         
-# Notice that because we supplied the objects redshift and flux normalization, the measurements class
-# automatically calculated line luminosities.  Also, it separates the broad and narrow H-alpha components. How nice!
+# Notice that because we supplied the objects redshift and flux normalization, the measurements class automatically calculated line luminosities.  Also, it separates the broad and narrow H-alpha components, and identifies which lines are which. How nice!
 
 # Save the figure
 spec.plotter.figure.savefig("sdss_fit_example.png")
+
+# Output:
+Line   Flux (erg/s/cm^2)     Amplitude (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)
+NIIa 1.59280798105e-15 2.48559532236e-16 6.02005958793 9.38307760327e+39
+NIIb 4.77842394315e-15 7.45678596708e-16 6.02005958793 2.81492328098e+40
+SIIb 1.3266718029e-15 2.07028673062e-16 6.02005958793 7.81529514464e+39
+SIIa 1.41963574357e-15 2.21535803791e-16 6.02005958793 8.36293671851e+39
+H_alpha_B 4.4395950683e-14 5.42064119854e-16 76.9414716216 2.61532247129e+41
+H_alpha_N 4.56987114705e-15 7.13133691068e-16 6.02005958793 2.69206684797e+40
+H_alpha 4.896582183e-14 1.25519781092e-15 11.0611083985 5.76905831218e+41
+
 
             </code>
       <tr><td><center><img align=center width=800 src="images/sdss_fit_example.png" title="Sample Seyfert 1 spectrum (SDSS)"></center></tr></td>

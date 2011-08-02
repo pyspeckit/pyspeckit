@@ -32,21 +32,25 @@ class Measurements(object):
         self.speclines = Spectrum.speclines
                 
         # Flux units in case we are interested in line luminosities or just having real flux units
-        if fluxnorm is not None: self.fluxnorm=fluxnorm
+        if fluxnorm is not None: self.fluxnorm = fluxnorm
         else: self.fluxnorm= 1
                 
         # This is where we'll keep our results                        
         self.lines = {}
         
         # Read in observed wavelengths
-        tmp = np.reshape(self.specfit.modelpars, (len(self.specfit.modelpars) / 3, 3))
-        order = np.argsort(zip(*tmp)[1])
-        self.obspos = np.sort(list(zip(*tmp)[1]))
+        tmp1 = np.reshape(self.specfit.modelpars, (len(self.specfit.modelpars) / 3, 3))
+        tmp2 = np.reshape(self.specfit.modelerrs, (len(self.specfit.modelerrs) / 3, 3))
+        order = np.argsort(zip(*tmp1)[1])
+        self.obspos = np.sort(list(zip(*tmp1)[1]))
         self.Nlines = len(self.obspos)
                 
-        # Read in modelpars, re-organize so it is a 2D array sorted by ascending wavelength
-        self.modelpars = np.zeros_like(tmp)
-        for i, element in enumerate(order): self.modelpars[i] = tmp[element]
+        # Read in modelpars and modelerrs, re-organize so they are 2D arrays sorted by ascending wavelength
+        self.modelpars = np.zeros_like(tmp1)
+        self.modelerrs = np.zeros_like(tmp2)
+        for i, element in enumerate(order): 
+            self.modelpars[i] = tmp1[element]
+            self.modelerrs[i] = tmp2[element]
                                                                       
         # Read in appropriate list of reference wavelengths/frequencies/whatever
         self.reflines = self.speclines.optical.optical_lines
@@ -65,7 +69,7 @@ class Measurements(object):
         
     def identify(self):
         """
-        Determine identify of lines in self.fitpars.  Fill entries of self.lines dictionary.
+        Determine identity of lines in self.fitpars.  Fill entries of self.lines dictionary.
         
         Note: This method will be infinitely slow for more than 10 or so lines.
         """    
@@ -83,7 +87,7 @@ class Measurements(object):
         else: 
             where = 0
             odiff = self.odiff
-            multi = False        
+            multi = False
                     
         condition = (self.refpos >= 0.9 * min(self.obspos)) & (self.refpos <= 1.1 * max(self.obspos))   # Speeds things up
         refpos = self.refpos[condition]
@@ -104,24 +108,29 @@ class Measurements(object):
             self.lines[line] = {}
             loc = np.argmin(np.abs(self.obspos - self.refpos[element]))                
             self.lines[line]['modelpars'] = list(self.modelpars[loc])            
+            self.lines[line]['modelerrs'] = list(self.modelerrs[loc])            
                     
         # Track down odd lines
         if len(ALLloc) < self.Nlines:
-            tmp = list(np.ravel(self.modelpars))
+            tmp1 = list(np.ravel(self.modelpars))
+            tmp2 = list(np.ravel(self.modelerrs))
             for key in self.lines.keys():
                 for element in self.lines[key]['modelpars']: 
-                    loc = np.argmin(np.abs(element - tmp))
-                    tmp = np.delete(tmp, loc)
+                    loc = np.argmin(np.abs(element - tmp1))
+                    tmp1 = np.delete(tmp1, loc)
+                    tmp2 = np.delete(tmp2, loc)
                                                         
             try:  
-                for i, x in enumerate(zip(*tmp)[1]):    
+                for i, x in enumerate(zip(*tmp1)[1]):    
                     loc = np.argmin(np.abs(ALLloc - x))
                     line = self.refname[loc]
-                    self.lines[line]['modelpars'].extend(tmp[i:i+3])
+                    self.lines[line]['modelpars'].extend(tmp1[i:i+3])
+                    self.lines[line]['modelerrs'].extend(tmp2[i:i+3])
             except TypeError:
-                loc = np.argmin(np.abs(tmp[1] - self.refpos))                       
+                loc = np.argmin(np.abs(tmp1[1] - self.refpos))                       
                 line = self.refname[loc]
-                self.lines[line]['modelpars'].extend(tmp) 
+                self.lines[line]['modelpars'].extend(tmp1)
+                self.lines[line]['modelerrs'].extend(tmp2) 
                   
         self.separate() 
                     
@@ -146,21 +155,30 @@ class Measurements(object):
         """
         
         for key in self.lines.keys():
-            pars = self.lines[key]['modelpars']
-            if len(pars) > 3:
-                pars2d = np.reshape(pars, (len(pars) / 3, 3))
-                sigma = zip(*pars2d)[2]
+            modpars = self.lines[key]['modelpars']
+            moderrs = self.lines[key]['modelerrs']
+            if len(modpars) > 3:
+                modpars2d = np.reshape(modpars, (len(modpars) / 3, 3))
+                moderrs2d = np.reshape(moderrs, (len(moderrs) / 3, 3))
+                sigma = zip(*modpars2d)[2]
                 minsigma = min(sigma)
                 i_narrow = sigma.index(minsigma)
             else: continue
                         
-            for i, arr in enumerate(pars2d):
+            self.lines["{0}_N".format(key)] = {}         
+            self.lines["{0}_N".format(key)]['modelpars'] = []   
+            self.lines["{0}_N".format(key)]['modelerrs'] = []   
+            self.lines["{0}_B".format(key)] = {}            
+            self.lines["{0}_B".format(key)]['modelpars'] = [] 
+            self.lines["{0}_B".format(key)]['modelerrs'] = [] 
+                        
+            for i, arr in enumerate(modpars2d):
                 if i == i_narrow: 
-                    self.lines["{0}_N".format(key)] = {}
                     self.lines["{0}_N".format(key)]['modelpars'] = arr
+                    self.lines["{0}_N".format(key)]['modelerrs'] = moderrs2d[i]
                 else: 
-                    self.lines["{0}_B".format(key)] = {}
-                    self.lines["{0}_B".format(key)]['modelpars'] = arr
+                    self.lines["{0}_B".format(key)]['modelpars'].extend(arr)
+                    self.lines["{0}_B".format(key)]['modelerrs'].extend(moderrs2d[i])
                     
     def compute_flux(self, pars):                                                                       
         """                                                                                                
@@ -221,7 +239,7 @@ class Measurements(object):
             xhmax1 = self.bisection(f, start)
             xhmax2 = self.bisection(f, start + (start - xhmax1))
                                         
-            return abs(xhmax2 - xhmax1)
+            return abs(xhmax2 - xhmax1)      
             
     def bisection(self, f, x_guess):
         """
