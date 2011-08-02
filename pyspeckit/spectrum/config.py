@@ -7,9 +7,7 @@ Created on 2011-03-08.
 
 Description: Modeled after config.py from yt.  Returns dictionary spcfg.cfg.
 
-Notes: Will look in ~/.pyspeckit for file named config.
-
-To do: Replace contents of confit with python dictionary?
+Notes: Will look in ~/.pyspeckit for file named config.  There is an example config file in the examples directory.
   
 """
 
@@ -23,7 +21,7 @@ cfgDefaults = dict(
     lw = 0.5,
     composite_lw = 0.75,
     component_lw = 0.75,
-    show_components = 0,
+    show_components = True,
     annotate = True,
     interactive = False,
     autorefresh = False,
@@ -62,43 +60,33 @@ else:
    
 def ConfigDescriptor(f):    
                                 
-    def decorator(self, *args, **kwargs):    
+    def decorator(self, *args, **kwargs):  
+        
+        # inspect.getargspec will tell us the names of all arguments and their default values
+        # later we'll have to be more careful - all_defs only makes entries for arguments that actually
+        # have default values  
         all_args, all_vars, all_keys, all_defs = inspect.getargspec(f)                
         all_args.pop(0) # pop self
-                                          
+        
+        # Construct dictionary containing all of f's keyword arguments                                   
         argsdefs = {}
         for i, arg in enumerate(all_args):
             argsdefs[arg] = all_defs[i]
                                                                    
-        # Include all supplied keyword arguments                                                                                                               
+        # Include these in our new_kwargs dictionary                                                                                                     
         new_kwargs = argsdefs
         
-        # Read in config file
+        # Read in config file and replace keyword arguments that have been defined in it
         for arg in new_kwargs:
             if mycfg.has_key(arg): new_kwargs[arg] = mycfg[arg]
                 
-        # Has anything changed?
-        if f.__name__ == '__call__':
-            for arg in kwargs:
-                try: 
-                    if kwargs[arg] != argsdefs[arg]: new_kwargs[arg] = kwargs[arg]
-                except KeyError: 
-                    new_kwargs[arg] = kwargs[arg]
-                
-                       
-                        
-        # Add all those from config file
-       # for i, default in enumerate(all_defs):
-       #     if new_kwargs.has_key(all_args[i]): continue
-       #     
-       #     if mycfg.has_key(all_args[i]): new_kwargs[all_args[i]] = mycfg[all_args[i]]
-       #     else: new_kwargs[all_args[i]] = default
-            
-            # Only update parameter value if it isn't equal to its default...not sure this is absolutely correct
-            #if kwargs.has_key(all_args[i]): 
-            #    if kwargs[all_args[i]] != all_defs[i]:
-            #        new_kwargs[all_args[i]] = kwargs[all_args[i]]          
-                                                                                                               
+        # If we've changed anything on call, reflect this in new_kwargs
+        for arg in kwargs:
+            #try: 
+            #    if kwargs[arg] != argsdefs[arg]: new_kwargs[arg] = kwargs[arg]
+            #except KeyError: 
+            new_kwargs[arg] = kwargs[arg]       
+                                                                                                                                       
         f(self, *args, **new_kwargs)
             
     return decorator      

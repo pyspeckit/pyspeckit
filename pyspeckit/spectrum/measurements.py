@@ -14,7 +14,7 @@ spec.measure()
 cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
-    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None):
+    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None, miscline = None, misctol = 10, ignore = None):
         """
         This can be called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
         Just do: spec.measure(z, xunits, fluxnorm)
@@ -31,6 +31,10 @@ class Measurements(object):
         self.specfit = Spectrum.specfit
         self.speclines = Spectrum.speclines
                 
+        # Bit of a hack - help identifying unmatched lines
+        self.miscline = miscline        
+        self.misctol = misctol
+                
         # Flux units in case we are interested in line luminosities or just having real flux units
         if fluxnorm is not None: self.fluxnorm = fluxnorm
         else: self.fluxnorm= 1
@@ -41,6 +45,11 @@ class Measurements(object):
         # Read in observed wavelengths
         tmp1 = np.reshape(self.specfit.modelpars, (len(self.specfit.modelpars) / 3, 3))
         tmp2 = np.reshape(self.specfit.modelerrs, (len(self.specfit.modelerrs) / 3, 3))
+        
+        if ignore is not None:
+            tmp1 = np.delete(tmp1, ignore, 0)
+            tmp2 = np.delete(tmp2, ignore, 0)
+                
         order = np.argsort(zip(*tmp1)[1])
         self.obspos = np.sort(list(zip(*tmp1)[1]))
         self.Nlines = len(self.obspos)
@@ -74,7 +83,7 @@ class Measurements(object):
         Note: This method will be infinitely slow for more than 10 or so lines.
         """    
         
-        self.IDresults= []
+        self.IDresults = []
         self.odiff = np.abs(np.diff(self.obspos))
         self.rdiff = np.abs(np.diff(self.refpos))
         self.rdmin = 0.5 * min(self.rdiff)
@@ -96,7 +105,7 @@ class Measurements(object):
         for i, combo in enumerate(combos):
             rdiff = np.diff(combo)
             self.IDresults.append((np.sum(np.abs(odiff - rdiff)), combo))
-            
+                        
         # Pick best solution
         MINloc = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
         ALLloc = []                                  # x-values of best fit lines in reference dictionary
@@ -112,6 +121,8 @@ class Measurements(object):
                     
         # Track down odd lines
         if len(ALLloc) < self.Nlines:
+            
+            # Eliminate all modelpars/errs that belong to lines that were identified
             tmp1 = list(np.ravel(self.modelpars))
             tmp2 = list(np.ravel(self.modelerrs))
             for key in self.lines.keys():
@@ -119,19 +130,38 @@ class Measurements(object):
                     loc = np.argmin(np.abs(element - tmp1))
                     tmp1 = np.delete(tmp1, loc)
                     tmp2 = np.delete(tmp2, loc)
-                                                        
-            try:  
-                for i, x in enumerate(zip(*tmp1)[1]):    
-                    loc = np.argmin(np.abs(ALLloc - x))
+             
+            # Loop over unmatched modelpars/errs, find name of unmatched line, extend corresponding dict entry
+            if self.miscline is None:                                          
+                try:  
+                    for i, x in enumerate(zip(*tmp1)[1]):    
+                        loc = np.argmin(np.abs(ALLloc - x))
+                        line = self.refname[loc]
+                        self.lines[line]['modelpars'].extend(tmp1[i:i+3])
+                        self.lines[line]['modelerrs'].extend(tmp2[i:i+3])
+                except TypeError:
+                    loc = np.argmin(np.abs(tmp1[1] - self.refpos))                       
                     line = self.refname[loc]
-                    self.lines[line]['modelpars'].extend(tmp1[i:i+3])
-                    self.lines[line]['modelerrs'].extend(tmp2[i:i+3])
-            except TypeError:
-                loc = np.argmin(np.abs(tmp1[1] - self.refpos))                       
-                line = self.refname[loc]
-                self.lines[line]['modelpars'].extend(tmp1)
-                self.lines[line]['modelerrs'].extend(tmp2) 
-                  
+                    self.lines[line]['modelpars'].extend(tmp1)
+                    self.lines[line]['modelerrs'].extend(tmp2)
+            
+            # If we've know a-priori which lines the unmatched lines are likely to be, use that information        
+            else:
+                
+                if type(self.miscline) is not list: self.miscline = [self.miscline]
+                
+                for i, miscline in enumerate(self.miscline):
+                    try:  
+                        for j, x in enumerate(zip(*tmp1)[1]):    
+                            if abs(x - self.lines[miscline]['modelpars'][1]) < self.misctol[i]:
+                                self.lines[line]['modelpars'].extend(tmp1[j:j+3])
+                                self.lines[line]['modelerrs'].extend(tmp2[j:j+3])
+                    except TypeError:
+                        if abs(tmp1[1] - self.lines[self.miscline[0]]['modelpars'][1]) < self.misctol:
+                            self.lines[self.miscline[0]]['modelpars'].extend(tmp1)
+                            self.lines[self.miscline[0]]['modelerrs'].extend(tmp2)
+                            break #?
+                                              
         self.separate() 
                     
     def derive(self):

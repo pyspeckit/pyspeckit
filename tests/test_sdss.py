@@ -49,5 +49,9 @@ for line in spec.measurements.lines.keys():
 
 raw_input("Done.")
 
+spec.specfit.plot_fit()
+
+raw_input("Done (again).")
+
 # Save the figure
 spec.plotter.figure.savefig("sdss_fit_example.png")
