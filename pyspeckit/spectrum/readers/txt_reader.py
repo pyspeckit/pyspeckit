@@ -5,12 +5,18 @@ except ImportError:
     atpyOK = False
 from .. import units
 
-def open_1d_txt(filename,errspecnum=2):
-    if not atpyOK: print "atpy not installed; cannot read txt files"
-    else:
-        T = atpy.Table(filename, type='ascii',
-                Reader=atpy.asciitables.asciitable.CommentedHeader, masked=True)
+def open_1d_txt(filename,errspecnum=2, **kwargs):
+    """
+    Attempt to read a 1D spectrum from a text file assuming
+    wavelength as the first column, data as the second, and
+    (optionally) error as the third.  
 
+    kwargs are passed to atpy.Table
+    """
+    if not atpyOK:
+        print "atpy not installed; cannot read txt files"
+    else:
+        T = atpy.Table(filename, type='ascii', masked=True, **kwargs)
         
         xarr = T.data[T.data.dtype.names[0]]
         data = T.data[T.data.dtype.names[1]]
