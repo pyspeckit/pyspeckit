@@ -172,6 +172,10 @@ class Plotter(object):
         xpixmin = np.argmin(np.abs(self.Spectrum.xarr-self.xmin))
         xpixmax = np.argmin(np.abs(self.Spectrum.xarr-self.xmax))
         if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
+        elif xpixmin == xpixmax:
+            if not self.silent: print "ERROR: the X axis limits specified were invalid.  Resetting."
+            self.reset_limits(reset_xlimits=True, ymin=ymin, ymax=ymax, reset_ylimits=reset_ylimits, ypeakscale=ypeakscale, **kwargs)
+            return
         
         if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
                 or reset_ylimits):
