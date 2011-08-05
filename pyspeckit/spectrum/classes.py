@@ -17,6 +17,11 @@ import fitters
 import models
 import history
 import copy
+try:
+    import atpy
+    atpyOK = True
+except ImportError:
+    atpyOK = False
 
 def register_fitter(Registry, name, function, npars, multisingle='single',
         override=False, key=None):
@@ -401,6 +406,24 @@ class Spectra(Spectrum):
         self.error = sm.smooth(self.error,smooth,**kwargs)
         self.baseline.downsample(smooth)
         self.specfit.downsample(smooth)
+
+    def fiteach(self,**kwargs):
+        """
+        Fit each spectrum within the Spectra object
+        """
+        for sp in self.speclist:
+            sp.specfit(**kwargs)
+
+        if atpyOK:
+            self.fittable = atpy.Table()
+            self.fittable.add_column('name',[sp.specname for sp in self.speclist])
+            self.fittable.add_column('amplitude',[sp.specfit.modelpars[0] for sp in self.speclist],unit=self.units)
+            self.fittable.add_column('center',[sp.specfit.modelpars[1] for sp in self.speclist],unit=self.xarr.units)
+            self.fittable.add_column('width',[sp.specfit.modelpars[2] for sp in self.speclist],unit=self.xarr.units)
+            self.fittable.add_column('amplitudeerr',[sp.specfit.modelerrs[0] for sp in self.speclist],unit=self.units)
+            self.fittable.add_column('centererr',[sp.specfit.modelerrs[1] for sp in self.speclist],unit=self.xarr.units)
+            self.fittable.add_column('widtherr',[sp.specfit.modelerrs[2] for sp in self.speclist],unit=self.xarr.units)
+
 
 class ObsBlock(Spectra):
     """
