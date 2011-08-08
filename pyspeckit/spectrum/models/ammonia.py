@@ -5,7 +5,9 @@ http://svn.ok.ubc.ca/svn/signals/nh3fit/
 import numpy as np
 from mpfit import mpfit
 from .. import units
+from . import fitter
 import matplotlib.cbook as mpcb
+import copy
 
 line_names = ['oneone','twotwo','threethree','fourfour']
 
@@ -61,35 +63,53 @@ tau_wts_dict = {
         0.006652, 0.011589, 0.005494, 0.003434, 0.008409, 0.012263],
     'fourfour': [0.2431, 0.0162, 0.0162, 0.3008, 0.0163, 0.0163, 0.3911]}
 
-class ammonia_model(object):
+class ammonia_model(fitter.SimpleFitter):
 
-    def __init__(self):
+    def __init__(self,multisingle='multi'):
         self.npeaks = 1
         self.npars = 6
-        pass
 
-    def ammonia(self, xarr, xunits='GHz', tkin=20, tex=20, Ntot=1e10, width=1,
+        self.onepeakammonia = fitter.vheightmodel(self.ammonia)
+        #self.onepeakammoniafit = self._fourparfitter(self.onepeakammonia)
+
+        if multisingle in ('multi','single'):
+            self.multisingle = multisingle
+        else:
+            raise Exception("multisingle must be multi or single")
+
+    def __call__(self,*args,**kwargs):
+        if self.multisingle == 'single':
+            return self.onepeakammoniafit(*args,**kwargs)
+        elif self.multisingle == 'multi':
+            return self.multinh3fit(*args,**kwargs)
+
+    def ammonia(self, xarr, tkin=20, tex=20, Ntot=1e10, width=1,
             xoff_v=0.0, fortho=1.0, tau11=None, line='oneone'):
         """
         Generate a model Ammonia spectrum based on input temperatures, column, and
         gaussian parameters
 
+        If you're getting null results, try specifying xunits!
 
         (not implemented) if tau11 is specified, Ntot is ignored
         """
 
         # Convert X-units to frequency in GHz
-        if xunits in units.frequency_dict:
-            xarr = np.copy(xarr) * units.frequency_dict[xunits] / units.frequency_dict['GHz']
-        elif xunits in units.velocity_dict:
-            if line in freq_dict:
-                xarr = (freq_dict[line] - (np.copy(xarr) * 
-                        (units.velocity_dict[xunits] / units.velocity_dict['m/s'] / units.speedoflight_ms) *
-                        freq_dict[line]) ) / units.frequency_dict['GHz']
-            else:
-                raise Exception("Xunits is velocity-type (%s) but line %s is not in the list." % (xunits,line))
-        else:
-            raise Exception("xunits not recognized: %s" % (xunits))
+        xarr = copy.copy(xarr)
+        xarr.convert_to_unit('GHz', quiet=True)
+
+        # Convert X-units to frequency in GHz
+        # OLD VERSION if xunits in units.frequency_dict:
+        # OLD VERSION     xarr = np.copy(xarr) * units.frequency_dict[xunits] / units.frequency_dict['GHz']
+        # OLD VERSION elif xunits in units.velocity_dict:
+        # OLD VERSION     if line in freq_dict:
+        # OLD VERSION         xarr = (freq_dict[line] - (np.copy(xarr) * 
+        # OLD VERSION                 (units.velocity_dict[xunits] / units.velocity_dict['m/s'] / units.speedoflight_ms) *
+        # OLD VERSION                 freq_dict[line]) ) / units.frequency_dict['GHz']
+        # OLD VERSION     else:
+        # OLD VERSION         raise Exception("Xunits is velocity-type (%s) but line %s is not in the list." % (xunits,line))
+        # OLD VERSION else:
+        # OLD VERSION     raise Exception("xunits not recognized: %s" % (xunits))
 
         if tex > tkin: # cannot have Tex > Tkin
             tex = tkin 
@@ -159,7 +179,7 @@ class ammonia_model(object):
                 tauprof += tau_dict[linename]*tau_wts[kk]*\
                         np.exp(-(xarr+no-lines[kk])**2/(2*nuwidth[kk]**2))
       
-            T0 = (h*xarr*1e9/kb)
+            T0 = (h*xarr*1e9/kb) # "temperature" of wavelength
             runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
             if runspec.min() < 0:
                 raise ValueError("Model dropped below zero.  That is not possible normally.")
@@ -201,7 +221,7 @@ class ammonia_model(object):
             return v
         return L
 
-    def multinh3fit(self, xax, data, npeaks=1, err=None, params=[20,20,1e10,1.0,0.0,0.5],
+    def multinh3fit(self, xax, data, npeaks=1, err=None, params=[20,20,1e14,1.0,0.0,0.5],
             fixed=[False,False,False,False,False,False],
             limitedmin=[True,True,True,True,False,True],
             limitedmax=[False,False,False,False,False,True], minpars=[2.73,2.73,0,0,0,0],
@@ -306,8 +326,6 @@ class ammonia_model(object):
         self.mpperr = mpperr
         self.model = self.n_ammonia(pars=mpp,**kwargs)(xax)
         return mpp,self.n_ammonia(pars=mpp,**kwargs)(xax),mpperr,chi2
-
-    __call__ = multinh3fit
 
     def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
         """

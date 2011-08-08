@@ -231,16 +231,16 @@ class SpectroscopicAxis(np.ndarray):
         # with the correct units
         if unit != self.units and change_units:
             conversion_factor = conversion_dict[self.xtype][self.units] / conversion_dict[self.xtype][unit] 
-            print "Converting units from %s to %s" % (self.units,unit)
+            if not quiet: print "Converting units from %s to %s" % (self.units,unit)
             self.units = unit
             self *= conversion_factor
             self.dxarr = self[1:]-self[:-1]
 
         if change_frame and not quiet:
-            print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
+            if not quiet: print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
 
         if not change_units and not change_xtype and not change_frame and not quiet:
-            print "Already in desired units, X-type, and frame"
+            if not quiet: print "Already in desired units, X-type, and frame"
 
         # this should be implemented but requires a callback to spectrum...
         #if replot:

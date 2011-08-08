@@ -155,7 +155,8 @@ class Spectrum(object):
         Register fitters independently for each spectrum instance
         """
         Registry = fitters.Registry()
-        register_fitter(Registry,'ammonia',models.ammonia_model(),6,multisingle='multi',key='a')
+        register_fitter(Registry,'ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
+        # not implemented register_fitter(Registry,'ammonia',models.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
         register_fitter(Registry,'formaldehyde',models.formaldehyde_model(multisingle='multi'),3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
         register_fitter(Registry,'formaldehyde',models.formaldehyde_model(multisingle='single'),3,multisingle='single')
         register_fitter(Registry,'gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
