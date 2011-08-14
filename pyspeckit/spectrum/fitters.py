@@ -62,8 +62,8 @@ class Specfit(object):
     @cfgdec
     def __call__(self, interactive=False, usemoments=True, clear_all_connections=False, debug=False,
             multifit=False, guesses=None, annotate=None, save=True, fittype='gaussian', 
-            color = 'k', composite_fit_color = 'red', component_fit_color = 'red', lw = 1.0, composite_lw = 1.0, 
-            component_lw = 1.0, show_components = None, 
+            color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 0.5, composite_lw = 0.75, 
+            component_lw = 0.75, show_components = None, 
             **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
@@ -222,8 +222,8 @@ class Specfit(object):
         self.errspec[(True-OKmask)] = 1e10
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None, 
-        color = 'k', composite_fit_color = 'red', component_fit_color = 'red', lw = 1.0, composite_lw = 1.0, 
-            component_lw = 1.0, show_components = None):
+        color = 'k', composite_fit_color = 'red', component_fit_color = 'red', lw = 0.5, composite_lw = 0.75, 
+            component_lw = 0.75, show_components = None):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -289,7 +289,7 @@ class Specfit(object):
                 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
             negamp=None, fittype=None, renormalize='auto', 
-            color = 'k', composite_fit_color = 'red', component_fit_color = 'red', lw = 1.0, composite_lw = 1.0, 
+            color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 1.0, composite_lw = 1.0, 
             component_lw = 1.0, show_components = None, 
             **kwargs):
         """
@@ -370,8 +370,8 @@ class Specfit(object):
                 lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components)
                 
     def plot_fit(self, annotate=None, show_components=None, 
-        color = 'k', composite_fit_color = 'red', component_fit_color = 'red', lw = 1.0, composite_lw = 1.0, 
-        component_lw = 1.0):
+        color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 0.5, composite_lw = 0.75, 
+        component_lw = 0.75):
         """
         Plot the fit.  Must have fitted something before calling this!  
         

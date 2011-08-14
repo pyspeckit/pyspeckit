@@ -147,17 +147,26 @@ class formaldehyde_model(fitter.SimpleFitter):
         ckms = 2.99792458e5
 
         runspec = np.zeros(len(xarr))
+        if np.any(np.isnan((amp,width,xoff_v))):
+            if return_components:
+                return [runspec] * len(line_names)
+            else:
+                return runspec
 
         components =[]
         for linename in line_names:
             voff_lines = np.array(voff_lines_dict[linename])
       
             lines = (1-voff_lines/ckms)*freq_dict[linename]
-            nuwidth = np.abs(width/ckms*lines)
-            nuoff = xoff_v/ckms*lines
-      
-            speccomp = np.array(relative_strength_theory[linename] * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
-            components.append( speccomp )
+            if width == 0:
+                speccomp = xarr*0
+            else:
+                nuwidth = np.abs(width/ckms*lines)
+                nuoff = xoff_v/ckms*lines
+          
+                speccomp = np.array(relative_strength_theory[linename] * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
+                speccomp[speccomp!=speccomp] = 0 # avoid nans
+                components.append( speccomp )
             runspec += speccomp
 
         # add a list of the individual 'component' spectra to the total components...
@@ -230,6 +239,10 @@ class formaldehyde_model(fitter.SimpleFitter):
            Fit errors
            chi2
         """
+
+        for p in params:
+            if np.isnan(p):
+                raise ValueError("ERROR: A parameter guess is NAN")
 
         if len(params) != npeaks and (len(params) / 3) > npeaks:
             self.npeaks = len(params) / 3 
