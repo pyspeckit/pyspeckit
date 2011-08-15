@@ -5,7 +5,7 @@ http://svn.ok.ubc.ca/svn/signals/nh3fit/
 import numpy as np
 from mpfit import mpfit
 from .. import units
-from . import fitter
+from . import fitter,model
 import matplotlib.cbook as mpcb
 import copy
 
@@ -112,6 +112,102 @@ voff_lines_dict={ # opposite signs of freq offset
         }
 
 
+def formaldehyde_vtau(xarr, Tex=1.0, xoff_v=0.0, width=1.0, tau=1.0 , xunits='GHz',
+        return_components=False ):
+    """
+    Generate a model Formaldehyde spectrum based on simple gaussian parameters with
+    ampltiude set by Tex and tau. Fitted parameters will depend on the optical depth
+    of hyperfine components
+
+    """
+
+    # Convert X-units to frequency in GHz
+    xarr = copy.copy(xarr)
+    xarr.convert_to_unit('Hz', quiet=True)
+
+    ckms = 2.99792458e5
+
+    tau_nu_cumul = np.zeros(len(xarr))
+    if np.any(np.isnan((tau,Tex,width,xoff_v))):
+        if return_components:
+            return [tau_nu_cumul] * len(line_names)
+        else:
+            return tau_nu_cumul
+
+    components =[]
+    for linename in line_names:
+        voff_lines = np.array(voff_lines_dict[linename])
+  
+        lines = (1-voff_lines/ckms)*freq_dict[linename]
+        if width == 0:
+            tau_nu = xarr*0
+        else:
+            nuwidth = np.abs(width/ckms*lines)
+            nuoff = xoff_v/ckms*lines
+            tau_line = relative_strength_theory[linename] * tau
+      
+            tau_nu = np.array(tau_line * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
+            tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
+            components.append( tau_nu )
+        tau_nu_cumul += tau_nu
+
+    # add a list of the individual 'component' spectra to the total components...
+
+    if return_components:
+        return (1.0-np.exp(-np.array(components)))*Tex
+
+    spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*Tex
+  
+    return spec
+
+formaldehyde_vtau_fitter = model.SpectralModel(formaldehyde_vtau,4,parnames=['Tex','center','width','tau']
+
+
+def formaldehyde(self, xarr, amp=1.0, xoff_v=0.0, width=1.0, xunits='GHz',
+        return_components=False ):
+    """
+    Generate a model Formaldehyde spectrum based on simple gaussian parameters
+
+    """
+
+    # Convert X-units to frequency in GHz
+    xarr = copy.copy(xarr)
+    xarr.convert_to_unit('Hz', quiet=True)
+
+    ckms = 2.99792458e5
+
+    runspec = np.zeros(len(xarr))
+    if np.any(np.isnan((amp,width,xoff_v))):
+        if return_components:
+            return [runspec] * len(line_names)
+        else:
+            return runspec
+
+    components =[]
+    for linename in line_names:
+        voff_lines = np.array(voff_lines_dict[linename])
+  
+        lines = (1-voff_lines/ckms)*freq_dict[linename]
+        if width == 0:
+            speccomp = xarr*0
+        else:
+            nuwidth = np.abs(width/ckms*lines)
+            nuoff = xoff_v/ckms*lines
+      
+            speccomp = np.array(relative_strength_theory[linename] * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
+            speccomp[speccomp!=speccomp] = 0 # avoid nans
+            components.append( speccomp )
+        runspec += speccomp
+
+    # add a list of the individual 'component' spectra to the total components...
+
+    if return_components:
+        return np.array(components)*amp/runspec.max()  
+
+    runspec *= amp/runspec.max()
+  
+    return runspec
+
 
 class formaldehyde_model(fitter.SimpleFitter):
 
@@ -133,52 +229,8 @@ class formaldehyde_model(fitter.SimpleFitter):
         elif self.multisingle == 'multi':
             return self.multiformaldehydefit(*args,**kwargs)
 
-    def formaldehyde(self, xarr, amp=1.0, xoff_v=0.0, width=1.0, xunits='GHz',
-            return_components=False ):
-        """
-        Generate a model Formaldehyde spectrum based on simple gaussian parameters
 
-        """
-
-        # Convert X-units to frequency in GHz
-        xarr = copy.copy(xarr)
-        xarr.convert_to_unit('Hz', quiet=True)
-
-        ckms = 2.99792458e5
-
-        runspec = np.zeros(len(xarr))
-        if np.any(np.isnan((amp,width,xoff_v))):
-            if return_components:
-                return [runspec] * len(line_names)
-            else:
-                return runspec
-
-        components =[]
-        for linename in line_names:
-            voff_lines = np.array(voff_lines_dict[linename])
-      
-            lines = (1-voff_lines/ckms)*freq_dict[linename]
-            if width == 0:
-                speccomp = xarr*0
-            else:
-                nuwidth = np.abs(width/ckms*lines)
-                nuoff = xoff_v/ckms*lines
-          
-                speccomp = np.array(relative_strength_theory[linename] * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
-                speccomp[speccomp!=speccomp] = 0 # avoid nans
-                components.append( speccomp )
-            runspec += speccomp
-
-        # add a list of the individual 'component' spectra to the total components...
-
-        if return_components:
-            return np.array(components)*amp/runspec.max()  
-
-        runspec *= amp/runspec.max()
-      
-        return runspec
-
-    def n_formaldehyde(self, pars=None, **kwargs):
+    def n_formaldehyde(self, pars=None, modelfunc=formaldehyde, **kwargs):
         """
         Returns a function that sums over N h2co line profiles 
         The background "height" is assumed to be zero (you must "baseline" your
@@ -200,7 +252,7 @@ class formaldehyde_model(fitter.SimpleFitter):
             for i in range(len(a)):
                 modelkwargs.update({'amp':a[i], 'xoff_v':dx[i],
                         'width':sigma[i]})
-                v += self.formaldehyde(x,**modelkwargs)
+                v += modelfunc(x,**modelkwargs)
             return v
         return L
 
