@@ -140,26 +140,6 @@ class SimpleFitter(object):
 
         return fitter
 
-    def model_fitter(modelfunc, paramnames=None, *args, **kwargs):
-        """
-        This needs to be the most general wrapper for a model function.  It should take in any given 
-        spectral line model that accepts any number of parameters and generate parinfo etc. for it, and it
-        should return a function similar to multigaussfit / multiammoniafit / multiformaldehydefit
-        """
-
-        def mpfitfun(x,y,err):
-            if err is None:
-                def f(p,fjac=None): return [0,(y-modelfunc(x,*p))]
-            else:
-                def f(p,fjac=None): return [0,(y-modelfunc(x,*p))/err]
-            return f
-
-        def mf(xax, data, **kwargs):
-            parinfo = [ {} for {} in something]
-            pass
-
-        return mf
-
 def vheightmodel(zeroheightmodel):
     def vhm(xax, *pars,**kwargs):
         """

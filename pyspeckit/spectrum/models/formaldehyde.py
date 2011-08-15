@@ -37,6 +37,24 @@ relative_strength_theory={
         'threethree_f44':1,
         'threethree_f33':1,
         }
+relative_strength_total_degeneracy={
+        'oneone_f10': 36.,
+        'oneone_f01': 36.,
+        'oneone_f22': 36.,
+        'oneone_f21': 36.,
+        'oneone_f12': 36.,
+        'oneone_f11': 36.,
+        'twotwo_f11': 100.01,
+        'twotwo_f12': 100.01,
+        'twotwo_f21': 100.01,
+        'twotwo_f32': 100.01,
+        'twotwo_f33': 100.01,
+        'twotwo_f22': 100.01,
+        'twotwo_f23': 100.01,
+        'threethree_f22':3.0,
+        'threethree_f44':3.0,
+        'threethree_f33':3.0,
+        }
 hf_freq_dict={
         'oneone_f10':4.82965996e9 - 18.53e3,
         'oneone_f01':4.82965996e9 - 1.34e3,
@@ -112,8 +130,8 @@ voff_lines_dict={ # opposite signs of freq offset
         }
 
 
-def formaldehyde_vtau(xarr, Tex=1.0, xoff_v=0.0, width=1.0, tau=1.0 , xunits='GHz',
-        return_components=False ):
+def formaldehyde_vtau(xarr, Tex=1.0, xoff_v=0.0, width=1.0, tau=1.0 , 
+        return_components=False, Tbackground=2.73 ):
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters with
     ampltiude set by Tex and tau. Fitted parameters will depend on the optical depth
@@ -144,7 +162,8 @@ def formaldehyde_vtau(xarr, Tex=1.0, xoff_v=0.0, width=1.0, tau=1.0 , xunits='GH
         else:
             nuwidth = np.abs(width/ckms*lines)
             nuoff = xoff_v/ckms*lines
-            tau_line = relative_strength_theory[linename] * tau
+            # the total optical depth, which is being fitted, should be the sum of the components
+            tau_line = (tau * relative_strength_theory[linename]) / relative_strength_total_degeneracy[linename]
       
             tau_nu = np.array(tau_line * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
             tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
@@ -154,16 +173,26 @@ def formaldehyde_vtau(xarr, Tex=1.0, xoff_v=0.0, width=1.0, tau=1.0 , xunits='GH
     # add a list of the individual 'component' spectra to the total components...
 
     if return_components:
-        return (1.0-np.exp(-np.array(components)))*Tex
+        return (1.0-np.exp(-np.array(components)))*(Tex-Tbackground)
 
-    spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*Tex
+    spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(Tex-Tbackground)
   
     return spec
 
-formaldehyde_vtau_fitter = model.SpectralModel(formaldehyde_vtau,4,parnames=['Tex','center','width','tau']
+formaldehyde_vtau_fitter = model.SpectralModel(formaldehyde_vtau,4,
+        parnames=['Tex','center','width','tau'], 
+        parlimited=[(False,False),(False,False), (True,False), (True,False)], 
+        parlimits=[(0,0), (0,0), (0,0), (0,0)],
+        fitunits='Hz' )
+
+formaldehyde_vtau_vheight_fitter = model.SpectralModel(fitter.vheightmodel(formaldehyde_vtau),5,
+        parnames=['height','Tex','center','width','tau'], 
+        parlimited=[(False,False), (False,False),(False,False), (True,False), (True,False)], 
+        parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
+        fitunits='Hz' )
 
 
-def formaldehyde(self, xarr, amp=1.0, xoff_v=0.0, width=1.0, xunits='GHz',
+def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0, 
         return_components=False ):
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters
@@ -208,6 +237,19 @@ def formaldehyde(self, xarr, amp=1.0, xoff_v=0.0, width=1.0, xunits='GHz',
   
     return runspec
 
+formaldehyde_fitter = model.SpectralModel(formaldehyde, 3,
+        parnames=['amp','center','width'], 
+        parlimited=[(False,False),(False,False), (True,False)], 
+        parlimits=[(0,0), (0,0), (0,0)],
+        fitunits='Hz' )
+
+formaldehyde_vheight_fitter = model.SpectralModel(fitter.vheightmodel(formaldehyde), 4,
+        parnames=['height','amp','center','width'], 
+        parlimited=[(False,False),(False,False),(False,False), (True,False)], 
+        parlimits=[(0,0), (0,0), (0,0), (0,0)],
+        fitunits='Hz' )
+
+
 
 class formaldehyde_model(fitter.SimpleFitter):
 
@@ -215,7 +257,7 @@ class formaldehyde_model(fitter.SimpleFitter):
         self.npars = 3
         self.npeaks = 1
 
-        self.onepeakformaldehydeian = fitter.vheightmodel(self.formaldehyde)
+        self.onepeakformaldehydeian = fitter.vheightmodel(formaldehyde)
         self.onepeakformaldehydefit = self._fourparfitter(self.onepeakformaldehydeian)
 
         if multisingle in ('multi','single'):
@@ -377,13 +419,13 @@ class formaldehyde_model(fitter.SimpleFitter):
         self.mp = mp
         self.mpp = mpp
         self.mpperr = mpperr
-        self.model = self.n_formaldehyde(pars=mpp,xunits=xax.units)(xax)
-        return mpp,self.n_formaldehyde(pars=mpp,xunits=xax.units)(xax),mpperr,chi2
+        self.model = self.n_formaldehyde(pars=mpp)(xax)
+        return mpp,self.n_formaldehyde(pars=mpp)(xax),mpperr,chi2
 
     def components(self, xarr, pars):
 
         modelcomponents = np.concatenate(
-            [self.formaldehyde(xarr,
+            [formaldehyde(xarr,
                 amp = pars[3*i],
                 xoff_v = pars[3*i+1],
                 width = pars[3*i+2],
