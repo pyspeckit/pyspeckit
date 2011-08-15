@@ -6,7 +6,7 @@ import read_class
 readers = {}
 suffix_types = {}
 
-def make_axis(xarr,hdr,specname=None, wcstype='', verbose=True):
+def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True):
     """
     Parse parameters from a .fits header into required SpectroscopicAxis
     parameters
@@ -14,7 +14,7 @@ def make_axis(xarr,hdr,specname=None, wcstype='', verbose=True):
 
     #DEBUG if wcstype is not '': print "Loading file with WCSTYPE %s" % wcstype
 
-    xunits = hdr.get('CUNIT1'+wcstype)
+    xunits = hdr.get('CUNIT%s%s' % (specaxis,wcstype))
     if hdr.get('ORIGIN') == 'CLASS-Grenoble' and xunits is None:
         # CLASS default
         xunits = 'Hz'
@@ -29,8 +29,8 @@ def make_axis(xarr,hdr,specname=None, wcstype='', verbose=True):
         if verbose: print "No reference frequency found.  Velocity transformations will not be possible"
         reffreq = None
 
-    if hdr.get('CTYPE1'+wcstype):
-        xtype = hdr.get('CTYPE1'+wcstype)
+    if hdr.get('CTYPE%s%s' % (specaxis,wcstype)):
+        xtype = hdr.get('CTYPE%s%s' % (specaxis,wcstype))
     else:
         xtype = 'VLSR'
 

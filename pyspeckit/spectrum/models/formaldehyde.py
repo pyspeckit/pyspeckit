@@ -1,16 +1,31 @@
 """
-Ammonia inversion transition TKIN fitter translated from Erik Rosolowsky's
+Ammonia inversion transition TKIN fitter was translated from Erik Rosolowsky's
 http://svn.ok.ubc.ca/svn/signals/nh3fit/
+
+This is a related formaldehyde 1_11-1_10 / 2_12-2_11 fitter
 """
 import numpy as np
 from mpfit import mpfit
 from .. import units
-from . import fitter,model
+from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb
 import copy
+try: # for model grid reading
+    import pyfits
+    pyfitsOK = True
+except:
+    pyfitsOK = False
+try:
+    import scipy.interpolate
+    import scipy.ndimage
+    scipyOK = True
+except ImportError:
+    scipyOK=False
 
 line_names = ['oneone','twotwo','threethree']
 line_names = ['oneone_f10','oneone_f01','oneone_f22','oneone_f21','oneone_f12','oneone_f11','twotwo_f11','twotwo_f12','twotwo_f21','twotwo_f32','twotwo_f33','twotwo_f22','twotwo_f23']
+
+ckms = units.speedoflight_ms / 1e3 #2.99792458e5
 
 # http://adsabs.harvard.edu/abs/1971ApJ...169..429T has the most accurate freqs
 # http://adsabs.harvard.edu/abs/1972ApJ...174..463T [twotwo]
@@ -130,7 +145,104 @@ voff_lines_dict={ # opposite signs of freq offset
         }
 
 
-def formaldehyde_vtau(xarr, Tex=1.0, xoff_v=0.0, width=1.0, tau=1.0 , 
+def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0, 
+        return_components=False, Tbackground=2.73, 
+        path_to_texgrid='',
+        path_to_taugrid='',
+        temperature_gridnumber=3,
+        debug=False,
+        verbose=False):
+    """
+    Use a grid of RADEX-computed models to make a model line spectrum
+
+    The RADEX models have to be available somewhere.
+
+    xarr must be a SpectroscopicAxis instance
+    xoff_v, width are both in km/s
+    """
+
+    if path_to_texgrid == '' or path_to_taugrid=='':
+        raise IOError("Must specify model grids to use.")
+    else:
+        taugrid = pyfits.getdata(path_to_taugrid)
+        texgrid = pyfits.getdata(path_to_texgrid)
+        hdr = pyfits.getheader(path_to_taugrid)
+        yinds,xinds = np.indices(taugrid.shape[1:])
+        densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
+        columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+    
+    # Convert X-units to frequency in GHz
+    xarr = copy.copy(xarr)
+    xarr.convert_to_unit('Hz', quiet=True)
+
+    tau_nu_cumul = np.zeros(len(xarr))
+
+    gridval1 = np.interp(density, densityarr[0,:], xinds[0,:])
+    gridval2 = np.interp(column, columnarr[:,0], yinds[:,0])
+    if np.isnan(gridval1) or np.isnan(gridval2):
+        raise ValueError("Invalid column/density")
+
+    tau = scipy.ndimage.map_coordinates(taugrid[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1)
+    tex = scipy.ndimage.map_coordinates(texgrid[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1)
+    #tau = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,taugrid[temperature_gridnumber,:,:])
+    #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
+
+    if verbose:
+        print "density %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, column, tau, tex)
+
+    if debug:
+        import pdb; pdb.set_trace()
+
+    components =[]
+    for linename in line_names:
+        voff_lines = np.array(voff_lines_dict[linename])
+  
+        lines = (1-voff_lines/ckms)*freq_dict[linename]
+        if width == 0:
+            tau_nu = xarr*0
+        else:
+            nuwidth = np.abs(width/ckms*lines)
+            nuoff = xoff_v/ckms*lines
+            # the total optical depth, which is being fitted, should be the sum of the components
+            tau_line = (tau * relative_strength_theory[linename]) / relative_strength_total_degeneracy[linename]
+      
+            tau_nu = np.array(tau_line * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
+            tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
+            components.append( tau_nu )
+        tau_nu_cumul += tau_nu
+
+    # add a list of the individual 'component' spectra to the total components...
+
+    if return_components:
+        return (1.0-np.exp(-np.array(components)))*(tex-Tbackground)
+
+    spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(tex-Tbackground)
+  
+    return spec
+
+formaldehyde11_radex_fitter = model.SpectralModel(formaldehyde_radex,4,
+        parnames=['density','column','center','width'], 
+        parvalues=[4,12,0,1],
+        parlimited=[(True,True), (True,True), (False,False), (True,False)], 
+        parlimits=[(1,8), (11,16), (0,0), (0,0)],
+        parsteps=[0.01,0.01,0,0],
+        fitunits='Hz',
+        path_to_texgrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex1.fits',
+        path_to_taugrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau1.fits',
+        )
+
+formaldehyde11_radex_vheight_fitter = model.SpectralModel(fitter.vheightmodel(formaldehyde_radex),5,
+        parnames=['height','density','column','center','width'], 
+        parvalues=[0,4,12,0,1],
+        parlimited=[(False,False), (True,True), (True,True), (False,False), (True,False)], 
+        parlimits=[(0,0), (1,8), (11,16), (0,0), (0,0)],
+        parsteps=[0,0.01,0.01,0,0],
+        path_to_texgrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex1.fits',
+        path_to_taugrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau1.fits',
+        fitunits='Hz' )
+
+
+def formaldehyde_vtau(xarr, Tex=1.0, tau=1.0, xoff_v=0.0, width=1.0, 
         return_components=False, Tbackground=2.73 ):
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters with
@@ -142,8 +254,6 @@ def formaldehyde_vtau(xarr, Tex=1.0, xoff_v=0.0, width=1.0, tau=1.0 ,
     # Convert X-units to frequency in GHz
     xarr = copy.copy(xarr)
     xarr.convert_to_unit('Hz', quiet=True)
-
-    ckms = 2.99792458e5
 
     tau_nu_cumul = np.zeros(len(xarr))
     if np.any(np.isnan((tau,Tex,width,xoff_v))):
@@ -180,14 +290,14 @@ def formaldehyde_vtau(xarr, Tex=1.0, xoff_v=0.0, width=1.0, tau=1.0 ,
     return spec
 
 formaldehyde_vtau_fitter = model.SpectralModel(formaldehyde_vtau,4,
-        parnames=['Tex','center','width','tau'], 
-        parlimited=[(False,False),(False,False), (True,False), (True,False)], 
+        parnames=['Tex','tau','center','width'], 
+        parlimited=[(False,False), (True,False), (False,False), (True,False)], 
         parlimits=[(0,0), (0,0), (0,0), (0,0)],
         fitunits='Hz' )
 
 formaldehyde_vtau_vheight_fitter = model.SpectralModel(fitter.vheightmodel(formaldehyde_vtau),5,
-        parnames=['height','Tex','center','width','tau'], 
-        parlimited=[(False,False), (False,False),(False,False), (True,False), (True,False)], 
+        parnames=['height','Tex','tau','center','width'], 
+        parlimited=[(False,False), (False,False), (True,False), (False,False), (True,False)], 
         parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
         fitunits='Hz' )
 
@@ -202,8 +312,6 @@ def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
     # Convert X-units to frequency in GHz
     xarr = copy.copy(xarr)
     xarr.convert_to_unit('Hz', quiet=True)
-
-    ckms = 2.99792458e5
 
     runspec = np.zeros(len(xarr))
     if np.any(np.isnan((amp,width,xoff_v))):

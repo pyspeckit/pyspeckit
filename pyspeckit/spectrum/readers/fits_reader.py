@@ -23,7 +23,7 @@ def open_1d_fits(filename,**kwargs):
     return open_1d_pyfits(f[0],**kwargs)
 
 
-def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None, autofix=True, **kwargs):
+def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None, autofix=True, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
@@ -37,6 +37,15 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None, autofix=True
             except pyfits.VerifyError:
                 hdr.__delitem__(card.key)
     data = pyfits_hdu.data
+
+    # search for the correct axis (may be 1 or 3, unlikely to be 2 or others)
+    # 1 = 1D spectrum
+    # 3 = "3D" spectrum with a single x,y point (e.g., JCMT smurf/makecube)
+    if hdr.get('NAXIS') > 1:
+        for ii in xrange(1,hdr.get('NAXIS')+1):
+            ctype = hdr.get('CTYPE%i'%ii)
+            if ctype in units.xtype_dict:
+                specaxis="%i" % ii
 
     if hdr.get('NAXIS') == 2:
         if isinstance(specnum,list):
@@ -72,11 +81,11 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None, autofix=True
         dv = -1*hdr.get('CDELT1')
         v0 = hdr.get('RESTFREQ') + hdr.get('CRVAL1')
         p3 = hdr.get('CRPIX1')
-    elif hdr.get('CD1_1'+wcstype):
-        dv,v0,p3 = hdr['CD1_1'+wcstype],hdr['CRVAL1'+wcstype],hdr['CRPIX1'+wcstype]
-        hdr.update('CDELT1',dv)
+    elif hdr.get('CD%s_%s%s' % (specaxis,specaxis,wcstype)):
+        dv,v0,p3 = hdr['CD%s_%s%s' % (specaxis,specaxis,wcstype)],hdr['CRVAL%s%s' % (specaxis,wcstype)],hdr['CRPIX%s%s' % (specaxis,wcstype)]
+        hdr.update('CDELT%s' % specaxis,dv)
     else:
-        dv,v0,p3 = hdr['CDELT1'+wcstype],hdr['CRVAL1'+wcstype],hdr['CRPIX1'+wcstype]
+        dv,v0,p3 = hdr['CDELT%s%s' % (specaxis,wcstype)],hdr['CRVAL%s%s' % (specaxis,wcstype)],hdr['CRPIX%s%s' % (specaxis,wcstype)]
 
     # Deal with logarithmic wavelength binning if necessary
     if hdr.get('WFITTYPE') == 'LOG-LINEAR':
@@ -89,7 +98,7 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',errspecnum=None, autofix=True
     restfreq = hdr.get('RESTFREQ')
     if restfreq is None: restfrq= hdr.get('RESTFRQ')
 
-    XAxis = make_axis(xarr,hdr,wcstype=wcstype,**kwargs)
+    XAxis = make_axis(xarr,hdr,wcstype=wcstype,specaxis=specaxis,**kwargs)
 
     return spec,errspec,XAxis,hdr
 

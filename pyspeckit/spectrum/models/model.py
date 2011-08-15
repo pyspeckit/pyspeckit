@@ -4,8 +4,9 @@ import copy
 
 class SpectralModel(object):
 
-    def __init__(self, modelfunc, npars, parnames=None, parvalues=None, parlimits=None,
-            parlimited=None, parfixed=None, parerror=None, partied=None, fitunits=None):
+    def __init__(self, modelfunc, npars, parnames=None, parvalues=None,
+            parlimits=None, parlimited=None, parfixed=None, parerror=None,
+            partied=None, fitunits=None, parsteps=None, **kwargs):
 
         self.modelfunc = modelfunc
         self.npars = npars
@@ -13,13 +14,14 @@ class SpectralModel(object):
         self.fitunits = fitunits
 
         temp_pardict = dict([(varname, np.zeros(self.npars, dtype='bool')) if locals()[varname] is None else (varname, locals()[varname])
-            for varname in str.split("parnames,parvalues,parlimits,parlimited,parfixed,parerror,partied",",")])
+            for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
 
         # generate the parinfo dict
         # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
         # parlimited, parfixed, and parlimits are all two-element items (tuples or lists)
         self.parinfo = [ {'n':ii,
             'value':temp_pardict['parvalues'][ii],
+            'step':temp_pardict['parsteps'][ii],
             'limits':temp_pardict['parlimits'][ii],
             'limited':temp_pardict['parlimited'][ii],
             'fixed':temp_pardict['parfixed'][ii],
@@ -28,11 +30,13 @@ class SpectralModel(object):
             'tied':temp_pardict['partied'][ii] if temp_pardict['partied'][ii] else ""} 
             for ii in xrange(self.npars)]
 
+        self.modelfunc_kwargs = kwargs
+
     def mpfitfun(self,x,y,err):
         if err is None:
-            def f(p,fjac=None): return [0,(y-self.modelfunc(x,*p))]
+            def f(p,fjac=None): return [0,(y-self.modelfunc(x,*p, **self.modelfunc_kwargs))]
         else:
-            def f(p,fjac=None): return [0,(y-self.modelfunc(x,*p))/err]
+            def f(p,fjac=None): return [0,(y-self.modelfunc(x,*p, **self.modelfunc_kwargs))/err]
         return f
 
     def __call__(self, xax, data, err=None, guesses=[], quiet=True, shh=True, veryverbose=False, **kwargs):
@@ -43,6 +47,12 @@ class SpectralModel(object):
         if len(guesses) == self.npars:
             for par,guess in zip(self.parinfo,guesses):
                 par['value'] = guess
+        
+        for varname in str.split("limits,limited,fixed,tied",","):
+            if varname in kwargs:
+                var = kwargs.pop(varname)
+                for pi in self.parinfo:
+                    pi[varname] = var[pi['n']]
 
         if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
             # some models will depend on the input units.  For these, pass in an X-axis in those units
@@ -50,6 +60,12 @@ class SpectralModel(object):
             # H-alpha, etc. should)
             xax = copy.copy(xax)
             xax.convert_to_unit(self.fitunits, quiet=quiet)
+
+        if err is None:
+            err = np.ones(data.shape)
+        if np.any(np.isnan(data)) or np.any(np.isinf(data)):
+            err[np.isnan(data) + np.isinf(data)] = np.inf
+            data[np.isnan(data) + np.isinf(data)] = 0
 
         mp = mpfit(self.mpfitfun(xax,data,err),parinfo=self.parinfo,quiet=quiet,**kwargs)
         mpp = mp.params
@@ -72,7 +88,7 @@ class SpectralModel(object):
         self.mp = mp
         self.mpp = mpp[1:]
         self.mpperr = mpperr[1:]
-        self.model = self.modelfunc(xax,*mpp)
+        self.model = self.modelfunc(xax,*mpp,**self.modelfunc_kwargs)
         return mpp,self.model,mpperr,chi2
 
 
