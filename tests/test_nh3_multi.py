@@ -3,6 +3,9 @@ import pyspeckit
 if not 'interactive' in globals():
     interactive=False
 
+filenames = {'oneone':'G032.751-00.071_nh3_11_Tastar.fits',
+    'twotwo':'G032.751-00.071_nh3_22_Tastar.fits',
+    'threethree':'G032.751-00.071_nh3_33_Tastar.fits',}
 
 sp1 = pyspeckit.Spectrum('G032.751-00.071_nh3_11_Tastar.fits')
 sp1.crop(0,80)
@@ -36,6 +39,8 @@ from pylab import *
 draw()
 #if interactive: raw_input('wait for plotter')
 
+ammonia_model = pyspeckit.models.ammonia_model()
+published_model = ammonia_model.ammonia(sp1.xarr,tkin=21.57,tex=0.24+2.73,width=1.11,xoff_v=37.88,tau11=3.06)
 
 # set the baseline to zero to prevent variable-height fitting
 # (if you don't do this, the best fit to the spectrum is dominated by the
@@ -54,7 +59,7 @@ sp.specfit(fittype='ammonia', multifit=True, guesses=[21.57, 5.0, 2.95e14, 1.11,
     37.8, 0.5], fixed=[False,False,False,False,False,True],
     minpars=[2.73,2.73,1e10,0.1,0,0],
     limitedmin=[True,True,True,True,False,True], quiet=False,
-    xunits=sp.xarr.units)
+    )
 sp.specfit.plotresiduals()
 sp.plotter.figure.savefig('nh3_ammonia_multifit.png')
 print "Guesses: ", sp.specfit.guesses
@@ -85,7 +90,7 @@ sp.specfit(fittype='ammonia',multifit=True,
         limitedmax=[True,False,False,False,False,True]*2,
         minpars=[2.73,0,1e10,0.1,0,0]*2,
         limitedmin=[True,True,True,True,False,True]*2,
-        quiet=False,xunits=sp.xarr.units)
+        quiet=False,)
 sp.specfit.plotresiduals()
 sp.plotter.figure.savefig('nh3_ammonia_multifit_zoom.png')
 """
@@ -96,23 +101,23 @@ sp3.specfit(fittype='ammonia', multifit=True, guesses=[145.0, 135.0, 5.55e14, 1.
     36.04, 0.5], fixed=[False,False,False,False,False,True],
     minpars=[2.73,2.73,1e10,0.1,0,0],
     limitedmin=[True,True,True,True,False,True], quiet=False,
-    xunits=sp.xarr.units)
+    )
 sp3.plotter.savefig('nh3_33_test1.png')
 sp3.baseline(excludefit=True)
 sp3.plotter()
-sp3.specfit.modelpars[1] -= 5
+if sp.specfit.modelpars[1] > 2.73+5 and sp[1].specfit.modelpars[1] < sp.specfit.modelpars[0]: sp3.specfit.modelpars[1] += 5
 sp3.specfit(fittype='ammonia', multifit=True, guesses=sp3.specfit.modelpars,
     fixed=[False,False,False,False,False,True],
     minpars=[2.73,2.73,1e10,0.1,0,0],
     limitedmin=[True,True,True,True,False,True], quiet=False,
-    xunits=sp.xarr.units)
+    )
 sp3.plotter.savefig('nh3_33_test2_rebased.png')
 sp3.specfit.modelpars[1] -= 5
 sp3.specfit(fittype='ammonia', multifit=True, guesses=sp3.specfit.modelpars,
     fixed=[False,False,False,False,False,False],
     minpars=[2.73,2.73,1e10,0.1,0,0],
     limitedmin=[True,True,True,True,False,True], quiet=False,
-    xunits=sp.xarr.units)
+    )
 sp3.plotter.savefig('nh3_33_test3_freeorthopara.png')
 sp3.specfit.plotresiduals()
 sp3.specfit.residualaxis.figure.savefig('nh3_33_test3_freeorthopara_residuals.png')
@@ -124,14 +129,14 @@ sp.specfit(fittype='ammonia', multifit=True,
     fixed=[False,False,False,False,False,True]*2,
     minpars=[2.73,2.73,1e10,0.1,0,0]+[62.73,62.73,1e10,0.1,0,0],
     limitedmin=[True,True,True,True,False,True]*2, quiet=False,
-    xunits=sp.xarr.units)
+    )
 figure(1); clf();
 sp.xarr.convert_to_unit('GHz',frame='LSR')
-sp.plotter(axis=subplot(131),xmin=2.3689e1,xmax=2.3694e1)
+sp.plotter(axis=subplot(211),xmin=2.3689e1,xmax=2.3694e1)
 sp.specfit.plot_fit()
-sp.plotter(axis=subplot(132),xmin=2.3717e1,xmax=2.3722e1)
+sp.plotter(axis=subplot(223),xmin=2.3717e1,xmax=2.3722e1)
 sp.specfit.plot_fit()
-sp.plotter(axis=subplot(133),xmin=2.387013e1-5.4e-3,xmax=2.387013e1)
+sp.plotter(axis=subplot(224),xmin=2.387013e1-5.4e-3,xmax=2.387013e1)
 sp.specfit.plot_fit()
 sp.plotter.figure.savefig('nh3_ammonia_multifit_multipanel_zoom_basedon33.png')
 

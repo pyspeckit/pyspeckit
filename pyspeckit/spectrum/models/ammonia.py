@@ -63,13 +63,165 @@ tau_wts_dict = {
         0.006652, 0.011589, 0.005494, 0.003434, 0.008409, 0.012263],
     'fourfour': [0.2431, 0.0162, 0.0162, 0.3008, 0.0163, 0.0163, 0.3911]}
 
+def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
+        xoff_v=0.0, fortho=1.0, tau11=None, fillingfraction=None, return_tau=False,
+        thin=False, verbose=False ):
+    """
+    Generate a model Ammonia spectrum based on input temperatures, column, and
+    gaussian parameters
+
+    ntot can be specified as a column density (e.g., 10^15) or a log-column-density (e.g., 15)
+    tex can be specified or can be assumed LTE if unspecified, if tex>tkin, or if "thin"
+        is specified
+    "thin" uses a different parametetrization and requires only the optical depth, width, offset,
+        and tkin to be specified
+    If tau11 is specified, ntot is NOT fit but is set to a fixed value
+    fillingfraction is an arbitrary scaling factor to apply to the model
+    fortho is the ortho/(ortho+para) fraction.  The default is to assume all ortho.
+    xoff_v is the velocity offset in km/s 
+
+    (not implemented) if tau11 is specified, ntot is ignored
+    """
+
+    # Convert X-units to frequency in GHz
+    xarr = copy.copy(xarr)
+    xarr.convert_to_unit('GHz', quiet=True)
+
+    # Convert X-units to frequency in GHz
+    # OLD VERSION if xunits in units.frequency_dict:
+    # OLD VERSION     xarr = np.copy(xarr) * units.frequency_dict[xunits] / units.frequency_dict['GHz']
+    # OLD VERSION elif xunits in units.velocity_dict:
+    # OLD VERSION     if line in freq_dict:
+    # OLD VERSION         xarr = (freq_dict[line] - (np.copy(xarr) * 
+    # OLD VERSION                 (units.velocity_dict[xunits] / units.velocity_dict['m/s'] / units.speedoflight_ms) *
+    # OLD VERSION                 freq_dict[line]) ) / units.frequency_dict['GHz']
+    # OLD VERSION     else:
+    # OLD VERSION         raise Exception("Xunits is velocity-type (%s) but line %s is not in the list." % (xunits,line))
+    # OLD VERSION else:
+    # OLD VERSION     raise Exception("xunits not recognized: %s" % (xunits))
+
+    if tex is not None:
+        if tex > tkin: # cannot have Tex > Tkin
+            tex = tkin 
+        elif thin: # tex is not used in this case
+            tex = tkin
+    else:
+        tex = tkin
+
+    if thin:
+        ntot = 1e15
+    elif 5 < ntot < 25: 
+        # allow ntot to be specified as a logarithm.  This is
+        # safe because ntot < 1e10 gives a spectrum of all zeros, and the
+        # plausible range of columns is not outside the specified range
+        ntot = 10**ntot
+
+    # fillingfraction is an arbitrary scaling for the data
+    # The model will be (normal model) * fillingfraction
+    if fillingfraction is None:
+        fillingfraction = 1.0
+
+    ckms = 2.99792458e5
+    ccms = ckms*1e5
+    g1 = 1                
+    g2 = 1                
+    h = 6.6260693e-27     
+    kb = 1.3806505e-16     
+    mu0 = 1.476e-18               # Dipole Moment in cgs (1.476 Debeye)
+  
+    # Generate Partition Functions  
+    nlevs = 51
+    jv=np.arange(nlevs)
+    ortho = jv % 3 == 0
+    para = True-ortho
+    Jpara = jv[para]
+    Jortho = jv[ortho]
+    Brot = 298117.06e6
+    Crot = 186726.36e6
+    Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
+        (Crot-Brot)*Jpara**2)/(kb*tkin))
+    Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
+        (Crot-Brot)*Jortho**2)/(kb*tkin))
+
+    runspec = np.zeros(len(xarr))
+    
+    tau_dict = {}
+    para_count = 0
+    ortho_count = 1 # ignore 0-0
+
+    if tau11 is not None and thin:
+        dT0 = 41.5                    # Energy diff between (2,2) and (1,1) in K
+        trot = tkin/(1+tkin/dT0*np.log(1+0.6*np.exp(-15.7/tkin)))
+        tau_dict['oneone']     = tau11
+        tau_dict['twotwo']     = tau11*(23.722/23.694)**2*4/3.*5/3.*np.exp(-41.5/trot)
+        tau_dict['threethree'] = tau11*(23.8701279/23.694)**2*3/2.*14./3.*np.exp(-101.1/trot)
+        tau_dict['fourfour']   = tau11*(24.1394169/23.694)**2*8/5.*9/3.*np.exp(-177.34/trot)
+    else:
+        for linename in line_names:
+            if ortho_dict[linename]:
+                orthoparafrac = fortho
+                Z = Zortho 
+                count = ortho_count
+                ortho_count += 1
+            else:
+                orthoparafrac = 1.0-fortho
+                Z = Zpara
+                count = para_count # need to treat partition function separately
+                para_count += 1
+            tau_dict[linename] = (ntot * orthoparafrac * Z[count]/(Z.sum()) / ( 1
+                + np.exp(-h*freq_dict[linename]/(kb*tkin) )) * ccms**2 /
+                (8*np.pi*freq_dict[linename]**2) * aval_dict[linename]*
+                (1-np.exp(-h*freq_dict[linename]/(kb*tex))) /
+                (width/ckms*freq_dict[linename]*np.sqrt(2*np.pi)) )
+
+    # allow tau11 to be specified instead of ntot
+    # in the thin case, this is not needed: ntot plays no role
+    if tau11 is not None and not thin:
+        tau11_temp = tau_dict['oneone']
+        # re-scale all optical depths so that tau11 is as specified, but the relative taus
+        # match theory
+        for linename,tau in tau_dict.iteritems():
+            tau_dict[linename] = tau * tau11/tau11_temp
+
+    for linename in line_names:
+        voff_lines = np.array(voff_lines_dict[linename])
+        tau_wts = np.array(tau_wts_dict[linename])
+  
+        lines = (1-voff_lines/ckms)*freq_dict[linename]/1e9
+        tau_wts = tau_wts / (tau_wts).sum()
+        nuwidth = np.abs(width/ckms*lines)
+        nuoff = xoff_v/ckms*lines
+  
+        # tau array
+        tauprof = np.zeros(len(xarr))
+        for kk,no in enumerate(nuoff):
+            tauprof += (tau_dict[linename] * tau_wts[kk] *
+                    np.exp(-(xarr+no-lines[kk])**2 / (2.0*nuwidth[kk]**2)) *
+                    fillingfraction)
+  
+        T0 = (h*xarr*1e9/kb) # "temperature" of wavelength
+        if tau11 is not None and thin:
+            runspec = tauprof+runspec
+        else:
+            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
+        if runspec.min() < 0:
+            raise ValueError("Model dropped below zero.  That is not possible normally.")
+
+    if verbose:
+        print "tkin: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (tkin,tex,ntot,width,xoff_v,fortho,fillingfraction)
+
+    if return_tau:
+        return tau_dict
+  
+    return runspec
+
 class ammonia_model(fitter.SimpleFitter):
 
-    def __init__(self,multisingle='multi'):
-        self.npeaks = 1
-        self.npars = 6
+    def __init__(self,npeaks=1,npars=6,multisingle='multi'):
+        self.npeaks = npeaks
+        self.npars = npars
 
-        self.onepeakammonia = fitter.vheightmodel(self.ammonia)
+        self.onepeakammonia = fitter.vheightmodel(ammonia)
         #self.onepeakammoniafit = self._fourparfitter(self.onepeakammonia)
 
         if multisingle in ('multi','single'):
@@ -83,145 +235,32 @@ class ammonia_model(fitter.SimpleFitter):
         elif self.multisingle == 'multi':
             return self.multinh3fit(*args,**kwargs)
 
-    def ammonia(self, xarr, tkin=20, tex=20, Ntot=1e10, width=1,
-            xoff_v=0.0, fortho=1.0, tau11=None, line='oneone'):
-        """
-        Generate a model Ammonia spectrum based on input temperatures, column, and
-        gaussian parameters
-
-        If you're getting null results, try specifying xunits!
-
-        (not implemented) if tau11 is specified, Ntot is ignored
-        """
-
-        # Convert X-units to frequency in GHz
-        xarr = copy.copy(xarr)
-        xarr.convert_to_unit('GHz', quiet=True)
-
-        # Convert X-units to frequency in GHz
-        # OLD VERSION if xunits in units.frequency_dict:
-        # OLD VERSION     xarr = np.copy(xarr) * units.frequency_dict[xunits] / units.frequency_dict['GHz']
-        # OLD VERSION elif xunits in units.velocity_dict:
-        # OLD VERSION     if line in freq_dict:
-        # OLD VERSION         xarr = (freq_dict[line] - (np.copy(xarr) * 
-        # OLD VERSION                 (units.velocity_dict[xunits] / units.velocity_dict['m/s'] / units.speedoflight_ms) *
-        # OLD VERSION                 freq_dict[line]) ) / units.frequency_dict['GHz']
-        # OLD VERSION     else:
-        # OLD VERSION         raise Exception("Xunits is velocity-type (%s) but line %s is not in the list." % (xunits,line))
-        # OLD VERSION else:
-        # OLD VERSION     raise Exception("xunits not recognized: %s" % (xunits))
-
-        if tex > tkin: # cannot have Tex > Tkin
-            tex = tkin 
-
-        ckms = 2.99792458e5
-        ccms = ckms*1e5
-        g1 = 1                
-        g2 = 1                
-        h = 6.6260693e-27     
-        kb = 1.3806505e-16     
-        mu0 = 1.476e-18               # Dipole Moment in cgs (1.476 Debeye)
-      
-        # Generate Partition Functions  
-        nlevs = 51
-        jv=np.arange(nlevs)
-        ortho = jv % 3 == 0
-        para = True-ortho
-        Jpara = jv[para]
-        Jortho = jv[ortho]
-        Brot = 298117.06e6
-        Crot = 186726.36e6
-        Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
-            (Crot-Brot)*Jpara**2)/(kb*tkin))
-        Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
-            (Crot-Brot)*Jortho**2)/(kb*tkin))
-
-        runspec = np.zeros(len(xarr))
-        
-        tau_dict = {}
-        para_count = 0
-        ortho_count = 1 # ignore 0-0
-        for linename in line_names:
-            if ortho_dict[linename]:
-                orthoparafrac = fortho
-                Z = Zortho 
-                count = ortho_count
-                ortho_count += 1
-            else:
-                orthoparafrac = 1.0/fortho
-                Z = Zpara
-                count = para_count # need to treat partition function separately
-                para_count += 1
-            tau_dict[linename] = (Ntot * orthoparafrac * Z[count]/(Z.sum()) / ( 1
-                + np.exp(-h*freq_dict[linename]/(kb*tkin) )) * ccms**2 /
-                (8*np.pi*freq_dict[linename]**2) * aval_dict[linename]*
-                (1-np.exp(-h*freq_dict[linename]/(kb*tex))) /
-                (width/ckms*freq_dict[linename]*np.sqrt(2*np.pi)) )
-
-        # allow tau11 to be specified instead of Ntot
-        if tau11 is not None:
-            tau11_temp = tau_dict['oneone']
-            for linename,tau in tau_dict.iteritems():
-                tau_dict[linename] = tau * tau11/tau11_temp
-
-        for linename in line_names:
-            voff_lines = np.array(voff_lines_dict[linename])
-            tau_wts = np.array(tau_wts_dict[linename])
-      
-            lines = (1-voff_lines/ckms)*freq_dict[linename]/1e9
-            tau_wts = tau_wts / (tau_wts).sum()
-            nuwidth = np.abs(width/ckms*lines)
-            nuoff = xoff_v/ckms*lines
-      
-            # tau array
-            tauprof = np.zeros(len(xarr))
-            for kk,no in enumerate(nuoff):
-                tauprof += tau_dict[linename]*tau_wts[kk]*\
-                        np.exp(-(xarr+no-lines[kk])**2/(2*nuwidth[kk]**2))
-      
-            T0 = (h*xarr*1e9/kb) # "temperature" of wavelength
-            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
-            if runspec.min() < 0:
-                raise ValueError("Model dropped below zero.  That is not possible normally.")
-      
-        return runspec
-
-    def n_ammonia(self, pars=None, fittau=False, **kwargs):
+    def n_ammonia(self, pars=None, parnames=None, **kwargs):
         """
         Returns a function that sums over N ammonia line profiles, where N is the length of
-        tkin,tex,Ntot,width,xoff_v,fortho *OR* N = len(pars) / 6
+        tkin,tex,ntot,width,xoff_v,fortho *OR* N = len(pars) / 6
 
         The background "height" is assumed to be zero (you must "baseline" your
         spectrum before fitting)
 
-        pars  - a list with len(pars) = 6n, assuming tkin,tex,Ntot,width,xoff_v,fortho repeated
+        pars  - a list with len(pars) = 6n, assuming tkin,tex,ntot,width,xoff_v,fortho repeated
         """
-        if len(pars) % 6 == 0:
-            tkin = [pars[ii] for ii in xrange(0,len(pars),6)]
-            tex = [pars[ii] for ii in xrange(1,len(pars),6)]
-            Ntot = [pars[ii] for ii in xrange(2,len(pars),6)]
-            width = [pars[ii] for ii in xrange(3,len(pars),6)]
-            xoff_v = [pars[ii] for ii in xrange(4,len(pars),6)]
-            fortho = [pars[ii] for ii in xrange(5,len(pars),6)]
-        elif not(len(tkin) == len(tex) == len(Ntot) == len(xoff_v) == len(width) == len(fortho)):
+        if len(pars) != len(parnames):
             raise ValueError("Wrong array lengths!")
 
-        modelkwargs = kwargs.copy()
         def L(x):
             v = np.zeros(len(x))
-            for i in range(len(tkin)):
-                modelkwargs.update({'tkin':tkin[i], 'tex':tex[i],
-                        'width':width[i], 'xoff_v':xoff_v[i],
-                        'fortho':fortho[i]})
-                if fittau:
-                    modelkwargs.update({'tau11':Ntot[i]})
-                else:
-                    modelkwargs.update({'Ntot':Ntot[i]})
-                v += self.ammonia(x,**modelkwargs)
+            for jj in xrange(self.npeaks):
+                modelkwargs = kwargs.copy()
+                for ii in xrange(len(pars)/self.npeaks):
+                    modelkwargs.update({parnames[ii+jj].strip('0123456789'):pars[ii+jj]})
+                v += ammonia(x,**modelkwargs)
             return v
         return L
 
-    def multinh3fit(self, xax, data, npeaks=1, err=None, params=[20,20,1e14,1.0,0.0,0.5],
+    def multinh3fit(self, xax, data, npeaks=1, err=None, 
+            params=[20,20,14,1.0,0.0,0.5],
+            parnames=['tkin','tex','ntot','width','xoff_v','fortho'],
             fixed=[False,False,False,False,False,False],
             limitedmin=[True,True,True,True,False,True],
             limitedmax=[False,False,False,False,False,True], minpars=[2.73,2.73,0,0,0,0],
@@ -237,7 +276,7 @@ class ammonia_model(fitter.SimpleFitter):
 
          These parameters need to have length = 6*npeaks.  If npeaks > 1 and length = 6, they will
          be replicated npeaks times, otherwise they will be reset to defaults:
-           params - Fit parameters: [amplitude, offset, Gfwhm, Lfwhm] * npeaks
+           params - Fit parameters: [tkin, tex, ntot (or tau), width, offset, ortho fraction] * npeaks
                   If len(params) % 6 == 0, npeaks will be set to len(params) / 6
            fixed - Is parameter fixed?
            limitedmin/minpars - set lower limits on each parameter (default: width>0, Tex and Tkin > Tcmb)
@@ -253,7 +292,7 @@ class ammonia_model(fitter.SimpleFitter):
            chi2
         """
 
-        self.npars = 6
+        self.npars = len(params) / npeaks
 
         if len(params) != npeaks and (len(params) / self.npars) > npeaks:
             npeaks = len(params) / self.npars 
@@ -262,42 +301,41 @@ class ammonia_model(fitter.SimpleFitter):
         if isinstance(params,np.ndarray): params=params.tolist()
 
         # make sure all various things are the right length; if they're not, fix them using the defaults
-        for parlist in (params,fixed,limitedmin,limitedmax,minpars,maxpars):
+        for parlist in (params,parnames,fixed,limitedmin,limitedmax,minpars,maxpars):
             if len(parlist) != self.npars*self.npeaks:
-                # if you leave the defaults, or enter something that can be multiplied by 3 to get to the
+                # if you leave the defaults, or enter something that can be multiplied by npars to get to the
                 # right number of gaussians, it will just replicate
                 if len(parlist) == self.npars: 
                     parlist *= npeaks 
-                elif parlist==params:
+                elif parlist==params: # this instance shouldn't really be possible
                     parlist[:] = [20,20,1e10,1.0,0.0,0.5] * npeaks
                 elif parlist==fixed:
-                    parlist[:] = [False,False,False,False,False,False] * npeaks
-                elif parlist==limitedmax:
-                    parlist[:] = [False,False,False,False,False,True] * npeaks
-                elif parlist==limitedmin:
-                    parlist[:] = [True,True,True,True,False,True] * npeaks
-                elif parlist==minpars:
-                    parlist[:] = [2.73,0,0,0,0,0] * npeaks
-                elif parlist==maxpars:
-                    parlist[:] = [0,0,0,0,0,1] * npeaks
-
-        def mpfitfun(x,y,err):
-            if err is None:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, **kwargs)(x))]
-            else:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, **kwargs)(x))/err]
-            return f
-
-        parnames = {0:"TKIN",1:"TEX",2:"NTOT",3:"WIDTH",4:"XOFF_V",5:"FORTHO"}
+                    parlist[:] = [False] * len(params)
+                elif parlist==limitedmax: # only fortho, fillingfraction have upper limits
+                    parlist[:] = (np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')
+                elif parlist==limitedmin: # no physical values can be negative except velocity
+                    parlist[:] = (np.array(parnames) != 'xoff_v')
+                elif parlist==minpars: # all have minima of zero except kinetic temperature, which can't be below CMB.  Excitation temperature technically can be, but not in this model
+                    parlist[:] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * 2.73
+                elif parlist==maxpars: # fractions have upper limits of 1.0
+                    parlist[:] = ((np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')).astype('float')
+                elif parlist==parnames: # assumes the right number of parnames (essential)
+                    parlist[:] = list(parnames) * self.npeaks 
 
         parinfo = [ {'n':ii, 'value':params[ii],
             'limits':[minpars[ii],maxpars[ii]],
             'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-            'parname':parnames[ii%self.npars]+str(ii/self.npars), 
-            'mpmaxstep':0,'error':ii} 
+            'parname':parnames[ii]+str(ii/self.npars),
+            'mpmaxstep':float(parnames[ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
+            'error': 0} 
             for ii in xrange(len(params)) ]
-        parinfo[0]['mpmaxstep'] = 1.0
-        parinfo[1]['mpmaxstep'] = 1.0
+
+        def mpfitfun(x,y,err):
+            if err is None:
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=[pi['parname'] for pi in parinfo], **kwargs)(x))]
+            else:
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=[pi['parname'] for pi in parinfo], **kwargs)(x))/err]
+            return f
 
         if veryverbose:
             print "GUESSES: "
@@ -312,11 +350,14 @@ class ammonia_model(fitter.SimpleFitter):
         if mp.status == 0:
             raise Exception(mp.errmsg)
 
+        for i,p in enumerate(mpp):
+            parinfo[i]['value'] = p
+            parinfo[i]['error'] = mpperr[i]
+
         if not shh:
             print "Fit message: ",mp.errmsg
             print "Final fit values: "
             for i,p in enumerate(mpp):
-                parinfo[i]['value'] = p
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
@@ -324,25 +365,25 @@ class ammonia_model(fitter.SimpleFitter):
         self.mp = mp
         self.mpp = mpp
         self.mpperr = mpperr
-        self.model = self.n_ammonia(pars=mpp,**kwargs)(xax)
-        return mpp,self.n_ammonia(pars=mpp,**kwargs)(xax),mpperr,chi2
+        self.model = self.n_ammonia(pars=mpp, parnames=parnames, **kwargs)(xax)
+        indiv_parinfo = [parinfo[jj*self.npars:(jj+1)*self.npars] for jj in xrange(len(parinfo)/self.npars)]
+        modelkwargs = [
+                dict([(p['parname'].strip("0123456789").lower(),p['value']) for p in pi])
+                for pi in indiv_parinfo]
+        self.tau_list = [ammonia(xax,return_tau=True,**mk) for mk in modelkwargs]
+        self.parinfo = parinfo
+        return mpp,self.model,mpperr,chi2
 
     def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
         """
         Returns a very simple and likely incorrect guess
         """
 
-        # TKIN, TEX, NTOT, width, center, ortho fraction
+        # TKIN, TEX, ntot, width, center, ortho fraction
         return [20,10, 1e15, 1.0, 0.0, 1.0]
 
     def annotations(self):
-        label_list = [ (
-                "$T_K(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[0+jj*self.npars],self.mpperr[0+jj*self.npars]),
-                "$T_{ex}(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
-                "$N$(%i)=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[2+jj*self.npars],self.mpperr[2+jj*self.npars]),
-                "$\\sigma(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[3+jj*self.npars],self.mpperr[3+jj*self.npars]),
-                "$v(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[4+jj*self.npars],self.mpperr[4+jj*self.npars]),
-                "$F_o(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[5+jj*self.npars],self.mpperr[5+jj*self.npars])
-                          ) for jj in range(self.npeaks)]
+        tex_key = {'tkin':'T_K','tex':'T_{ex}','ntot':'N','fortho':'F_o','width':'\\sigma','xoff_v':'v','fillingfraction':'FF','tau11':'\\tau_{1-1}'}
+        label_list = [ "$%s(%i)$=%6.4g $\\pm$ %6.4g" % (tex_key[pinfo['parname'].strip("0123456789")],int(pinfo['parname'][-1]),pinfo['value'],pinfo['error']) for pinfo in self.parinfo]
         labels = tuple(mpcb.flatten(label_list))
         return labels

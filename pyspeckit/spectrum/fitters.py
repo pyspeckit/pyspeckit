@@ -271,6 +271,7 @@ class Specfit(object):
             mpperr[self.fitter.npars*ii] *= scalefactor
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
+        self.parinfo = self.fitter.mp.parinfo
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate, 
@@ -458,7 +459,7 @@ class Specfit(object):
         else:
             raise Exception("Fitter %s has no annotations." % self.fitter)
         self.fitleg = self.specplotter.axis.legend(
-                tuple([pl]*self.Registry.npars[self.fittype]*self.npeaks),
+                tuple([pl]*self.fitter.npars*self.npeaks),
                 labels,
                 loc=loc,markerscale=0.01,
                 borderpad=0.1, handlelength=0.1, handletextpad=0.1
@@ -474,16 +475,19 @@ class Specfit(object):
 
         reset - if true, overrides input xmin,xmax and selects the full range
         """
+        # need to add 1 to the second index to be inclusive b/c array[0:10] has 10 elements, 
+        # but argmin(abs(lastelt-array)) = 9
+        cdelt_is_pos = self.Spectrum.xarr[-1] > self.Spectrum.xarr[0]
         if xmin is not None and xmax is not None:
             if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
-                self.gx1 = np.argmin(abs(xmin-self.Spectrum.xarr))
-                self.gx2 = np.argmin(abs(xmax-self.Spectrum.xarr))
+                self.gx1 = np.argmin(abs(xmin-self.Spectrum.xarr))+1*(not cdelt_is_pos)
+                self.gx2 = np.argmin(abs(xmax-self.Spectrum.xarr))+1*cdelt_is_pos
             else:
                 self.gx1 = xmin
                 self.gx2 = xmax
         elif self.specplotter.xmin is not None and self.specplotter.xmax is not None:
-            self.gx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))
-            self.gx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))
+            self.gx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))+1*(not cdelt_is_pos)
+            self.gx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))+1*cdelt_is_pos
         elif reset:
             self.gx1 = 0
             self.gx2 = self.Spectrum.data.shape[0]
