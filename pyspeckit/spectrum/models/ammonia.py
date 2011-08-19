@@ -65,7 +65,7 @@ tau_wts_dict = {
 
 def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
         xoff_v=0.0, fortho=1.0, tau11=None, fillingfraction=None, return_tau=False,
-        thin=False, verbose=False ):
+        thin=False, verbose=False, return_components=False ):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
     gaussian parameters
@@ -183,6 +183,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
         for linename,tau in tau_dict.iteritems():
             tau_dict[linename] = tau * tau11/tau11_temp
 
+    components =[]
     for linename in line_names:
         voff_lines = np.array(voff_lines_dict[linename])
         tau_wts = np.array(tau_wts_dict[linename])
@@ -198,6 +199,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
             tauprof += (tau_dict[linename] * tau_wts[kk] *
                     np.exp(-(xarr+no-lines[kk])**2 / (2.0*nuwidth[kk]**2)) *
                     fillingfraction)
+            components.append( tauprof )
   
         T0 = (h*xarr*1e9/kb) # "temperature" of wavelength
         if tau11 is not None and thin:
@@ -209,6 +211,9 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
 
     if verbose:
         print "tkin: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (tkin,tex,ntot,width,xoff_v,fortho,fillingfraction)
+
+    if return_components:
+        return (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-1*np.array(components)))
 
     if return_tau:
         return tau_dict
@@ -248,15 +253,36 @@ class ammonia_model(fitter.SimpleFitter):
         if len(pars) != len(parnames):
             raise ValueError("Wrong array lengths!")
 
+        self._components = []
         def L(x):
             v = np.zeros(len(x))
             for jj in xrange(self.npeaks):
                 modelkwargs = kwargs.copy()
                 for ii in xrange(len(pars)/self.npeaks):
-                    modelkwargs.update({parnames[ii+jj].strip('0123456789'):pars[ii+jj]})
+                    modelkwargs.update({parnames[ii+jj*self.npars].strip('0123456789'):pars[ii+jj*self.npars]})
                 v += ammonia(x,**modelkwargs)
             return v
         return L
+
+    def components(self, xarr, pars, hyperfine=False):
+        """
+        Ammonia components don't follow the default, since in Galactic astronomy the hyperfine components should be well-separated.
+        If you want to see the individual components overlaid, you'll need to pass hyperfine to the plot_fit call
+        """
+
+        comps=[]
+        for ii in xrange(self.npeaks):
+            if hyperfine:
+                modelkwargs = dict(zip(self.parnames[ii*self.npars:(ii+1)*self.npars],pars[ii*self.npars:(ii+1)*self.npars]))
+                comps.append( ammonia(xarr,return_components=True,**modelkwargs) )
+            else:
+                modelkwargs = dict(zip(self.parnames[ii*self.npars:(ii+1)*self.npars],pars[ii*self.npars:(ii+1)*self.npars]))
+                comps.append( [ammonia(xarr,return_components=False,**modelkwargs)] )
+
+        modelcomponents = np.concatenate(comps)
+
+        return modelcomponents
+
 
     def multinh3fit(self, xax, data, npeaks=1, err=None, 
             params=[20,20,14,1.0,0.0,0.5],
@@ -322,6 +348,9 @@ class ammonia_model(fitter.SimpleFitter):
                 elif parlist==parnames: # assumes the right number of parnames (essential)
                     parlist[:] = list(parnames) * self.npeaks 
 
+        # used in components.  Is this just a hack?
+        self.parnames = parnames
+
         parinfo = [ {'n':ii, 'value':params[ii],
             'limits':[minpars[ii],maxpars[ii]],
             'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
@@ -383,7 +412,11 @@ class ammonia_model(fitter.SimpleFitter):
         return [20,10, 1e15, 1.0, 0.0, 1.0]
 
     def annotations(self):
+        from decimal import Decimal # for formatting
         tex_key = {'tkin':'T_K','tex':'T_{ex}','ntot':'N','fortho':'F_o','width':'\\sigma','xoff_v':'v','fillingfraction':'FF','tau11':'\\tau_{1-1}'}
-        label_list = [ "$%s(%i)$=%6.4g $\\pm$ %6.4g" % (tex_key[pinfo['parname'].strip("0123456789")],int(pinfo['parname'][-1]),pinfo['value'],pinfo['error']) for pinfo in self.parinfo]
+        label_list = [ "$%s(%i)$=%8s $\\pm$ %8s" % (tex_key[pinfo['parname'].strip("0123456789")],int(pinfo['parname'][-1]),
+            Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % pinfo['error'])),
+            Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error'])),)
+            for pinfo in self.parinfo]
         labels = tuple(mpcb.flatten(label_list))
         return labels

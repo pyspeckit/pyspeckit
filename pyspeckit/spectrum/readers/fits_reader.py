@@ -3,6 +3,7 @@ from .. import units
 import numpy.ma as ma
 import numpy as np
 from . import make_axis
+import operator
 
 def open_1d_fits(filename,**kwargs):
     """
@@ -23,7 +24,8 @@ def open_1d_fits(filename,**kwargs):
     return open_1d_pyfits(f[0],**kwargs)
 
 
-def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None, autofix=True, **kwargs):
+def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None, autofix=True,
+        scale_keyword=None, scale_action=operator.div, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
@@ -72,6 +74,12 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
     else:
         spec = ma.array(data).squeeze()
         if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data
+
+    if hdr.get(scale_keyword):
+        print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
+        scaleval = hdr.get(scale_keyword)
+        spec = scale_action(spec,scaleval)
+        errpsec = scale_action(errspec,scaleval)
 
     if hdr.get('ORIGIN') == 'CLASS-Grenoble':
         # Use the CLASS FITS definition (which is non-standard)

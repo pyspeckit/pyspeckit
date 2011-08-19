@@ -372,12 +372,14 @@ class Specfit(object):
                 
     def plot_fit(self, annotate=None, show_components=None, 
         color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 0.5, composite_lw = 0.75, 
-        component_lw = 0.75):
+        component_lw = 0.75, **component_kwargs):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
         It will be automatically called whenever a spectrum is fit (assuming an
         axis for plotting exists)
+
+        kwargs are passed to the fitter's components attribute
         """
         if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
             plot_offset = self.specplotter.offset+self.Spectrum.baseline.basespec[self.gx1:self.gx2]
@@ -390,7 +392,7 @@ class Specfit(object):
         
         # Plot components
         if show_components:
-            self.modelcomponents = self.fitter.components(self.Spectrum.xarr[self.gx1:self.gx2],self.modelpars)
+            self.modelcomponents = self.fitter.components(self.Spectrum.xarr[self.gx1:self.gx2],self.modelpars, **component_kwargs)
             for data in self.modelcomponents:
                 self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
                     data + plot_offset,
@@ -446,11 +448,14 @@ class Specfit(object):
         self.residualaxis.set_title("Residuals")
         self.residualaxis.figure.canvas.draw()
 
-    def annotate(self,loc='upper right'):
+    def annotate(self,loc='upper right',labelspacing=0.25, markerscale=0.01,
+            borderpad=0.1, handlelength=0.1, handletextpad=0.1, **kwargs):
         """
         Add a legend to the plot showing the fitted parameters
 
         clearlegend() will remove the legend
+        
+        kwargs passed to legend
         """
         self._clearlegend()
         pl = matplotlib.collections.CircleCollection([0],edgecolors=['k'])
@@ -460,10 +465,9 @@ class Specfit(object):
             raise Exception("Fitter %s has no annotations." % self.fitter)
         self.fitleg = self.specplotter.axis.legend(
                 tuple([pl]*self.fitter.npars*self.npeaks),
-                labels,
-                loc=loc,markerscale=0.01,
-                borderpad=0.1, handlelength=0.1, handletextpad=0.1
-                )
+                labels, loc=loc,markerscale=markerscale, borderpad=borderpad,
+                handlelength=handlelength, handletextpad=handletextpad,
+                labelspacing=labelspacing, **kwargs)
         self.specplotter.axis.add_artist(self.fitleg)
         self.fitleg.draggable(True)
         if self.specplotter.autorefresh: self.specplotter.refresh()

@@ -132,10 +132,11 @@ class Plotter(object):
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
         if errstyle is not None:
             if errstyle == 'fill':
-                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr,isX=True),
-                        steppify(self.Spectrum.data+self.offset-self.Spectrum.error),
-                        steppify(self.Spectrum.data+self.offset+self.Spectrum.error),
-                        facecolor=color, alpha=erralpha, **kwargs)]
+                order = -1 if self.Spectrum.xarr.cdelt() < 0 else 1
+                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr[::order],isX=True),
+                    steppify((self.Spectrum.data+self.offset-self.Spectrum.error)[::order]),
+                    steppify((self.Spectrum.data+self.offset+self.Spectrum.error)[::order]),
+                    facecolor=color, alpha=erralpha, **kwargs)]
             elif errstyle == 'bars':
                 self.errorplot = self.axis.errorbar(self.Spectrum.xarr, self.Spectrum.data+self.offset,
                         yerr=self.Spectrum.error, ecolor=color, fmt=None,

@@ -58,7 +58,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
 
     return spdict,spectra
 
-def plot_nh3(spdict,spectra,fignum=1):
+def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, **plotkwargs):
     """
     Plot the results from a multi-nh3 fit
     """ 
@@ -72,11 +72,23 @@ def plot_nh3(spdict,spectra,fignum=1):
     elif len(splist) == 4:
         axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
     for linename,sp in spdict.iteritems():
-        sp.plotter(axis=axdict[linename],title=linename)
+        sp.plotter(axis=axdict[linename],title=linename, **plotkwargs)
         sp.specfit.selectregion(reset=True)
-        sp.specfit.plot_fit(annotate=False)
+        sp.specfit.plot_fit(annotate=False, show_components=show_components)
+    spdict['oneone'].specfit.annotate(labelspacing=0.05,prop={'size':'small','stretch':'extra-condensed'},frameon=False)
 
-    spdict['oneone'].specfit.annotate()
+    if residfignum is not None:
+        pyplot.figure(residfignum)
+        pyplot.clf()
+        if len(splist) == 2:
+            axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
+        elif len(splist) == 3:
+            axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223), 'threethree':pyplot.subplot(224), 'fourfour':pyplot.subplot(224) }
+        elif len(splist) == 4:
+            axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
+        for linename,sp in spdict.iteritems():
+            sp.specfit.plotresiduals(axis=axdict[linename])
+
 
 
 def fitnh3(spectrum, vrange=[-100,100], vrangeunits='km/s', quiet=False,
