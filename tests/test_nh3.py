@@ -25,8 +25,7 @@ print "Best fit: ", sp.specfit.modelpars
 #if interactive: raw_input('Baseline')
 #sp.specfit(fittype='ammonia',multifit=True,guesses=[20,20,1e16,1.0,-55.0,0.5],quiet=False,xunits='Hz')
 sp.specfit(fittype='ammonia',
-        multifit=True,guesses=[5.9,4.45,8.3e14,0.84,96.2,0.43],quiet=False,
-        line='oneone')
+        multifit=True,guesses=[5.9,4.45,14.919,0.84,96.2,0.43],quiet=False)
 sp.specfit.plotresiduals()
 if interactive: raw_input('Press enter to print guesses and zoom in.')
 sp.plotter.figure.savefig('nh3_ammonia_fit.png')
@@ -37,7 +36,7 @@ sp.specfit.plot_fit()
 sp.plotter.figure.savefig('nh3_ammonia_fit_zoom.png')
 if interactive: raw_input('Press enter to multifit')
 sp.specfit(fittype='ammonia',multifit=True,
-        guesses=[4,3.5,5e14,0.68,97.3,0.5]+[15,4.2,7e14,0.52,95.8,0.35],
+        guesses=[4,3.5,14.69,0.68,97.3,0.5]+[15,4.2,14.85,0.52,95.8,0.35],
         quiet=False)
 sp.specfit.plotresiduals()
 sp.plotter.figure.savefig('nh3_ammonia_multifit_zoom.png')

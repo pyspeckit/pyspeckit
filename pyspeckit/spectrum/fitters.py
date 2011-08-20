@@ -412,9 +412,7 @@ class Specfit(object):
     def fullsizemodel(self):
         """
         If the gaussian was fit to a sub-region of the spectrum,
-        expand it (with zeros) to fill the spectrum.  You can 
-        always recover the original by:
-        origmodel = model[gx1:gx2]
+        expand it (with zeros) to fill the spectrum.  
         """
 
         if self.model.shape != self.Spectrum.data.shape:
@@ -422,6 +420,7 @@ class Specfit(object):
             temp[self.gx1:self.gx2] = self.model
             self.model = temp
             self.residuals = self.spectofit - self.model
+            self.selectregion(reset=True)
 
     def plotresiduals(self,fig=2,axis=None,clear=True,**kwargs):
         """
