@@ -328,16 +328,16 @@ class Spectra(Spectrum):
     plotting these though...
     """
 
-    def __init__(self,speclist,xtype='frequency',**kwargs):
+    def __init__(self,speclist,xunits='GHz',**kwargs):
         print "Creating spectra"
         speclist = list(speclist)
         for ii,spec in enumerate(speclist):
             if type(spec) is str:
                 spec = Spectrum(spec)
                 speclist[ii] = spec
-            if spec.xarr.xtype is not xtype:
+            if spec.xarr.units != xunits:
                 # convert all inputs to same units
-                spec.xarr.change_xtype(xtype,**kwargs)
+                spec.xarr.convert_to_unit(xunits, **kwargs)
 
         self.speclist = speclist
 
@@ -368,9 +368,9 @@ class Spectra(Spectrum):
         if other.units != self.units:
             raise ValueError("Mismatched units")
 
-        if other.xarr.xtype is not self.xarr.xtype:
+        if other.xarr.units != self.xarr.units:
             # convert all inputs to same units
-            spec.xarr.change_xtype(self.xarr.xtype,**kwargs)
+            spec.xarr.convert_to_units(self.xarr.units,**kwargs)
         self.xarr = units.SpectroscopicAxes([self.xarr,spec.xarr])
         self.data = np.concatenate([self.data,spec.data])
         self.error = np.concatenate([self.error,spec.error])

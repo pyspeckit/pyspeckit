@@ -1,6 +1,7 @@
 import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure
+import itertools
 from config import *
 import numpy as np
 
@@ -130,6 +131,7 @@ class Plotter(object):
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr,
                 self.Spectrum.data+self.offset, color=color,
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
+
         if errstyle is not None:
             if errstyle == 'fill':
                 order = -1 if self.Spectrum.xarr.cdelt() < 0 else 1

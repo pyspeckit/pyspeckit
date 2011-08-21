@@ -3,7 +3,9 @@ Storage for radio spectral line information.
 """
 
 import numpy as np
+import copy
 import re
+from .. import units
 
 try:
     import atpy
@@ -73,8 +75,34 @@ def LatexName(species,qn):
 #        species,freq,qn in zip(splat.Species,splat.FreqGHz,splat.ResolvedQNs)])
 #
 #    #splat = query_splatalogue(minwav,maxwav)
+
+
+class radio_lines(object):
+    def __init__(self, spectrum, webquery=True, **kwargs):
+        """
+        Initialize the radio lines class
+        Requires a spectrum object 
+        """
+        self.Spectrum = spectrum
+
+        self.xarr = self.Spectrum.xarr.copy()
+        self.xarr.convert_to_unit('GHz')
+
+        self.minfreq_GHz = self.xarr.min()
+        self.maxfreq_GHz = self.xarr.max()
+
+        self.table = get_splat_table(webquery=webquery, 
+                minwav=pyspeckit.units.speedoflight_ms/self.minfreq_GHz*1e9,
+                maxwav=pyspeckit.units.speedoflight_ms/self.maxfreq_GHz*1e9,
+                waveunits='m')
+
+    def show(self, **kwargs):
+        """
+        Display vertical lines (using 'vlines') at the position of each
+        discovered line
+        """
  
-def radio_lines(webquery=False, savename=None, **kwargs):
+def get_splat_table(webquery=False, savename=None, **kwargs):
     if webquery and webOK:
         splat = query_splatalogue.query_splatalogue(**kwargs)
         splat.describe()
