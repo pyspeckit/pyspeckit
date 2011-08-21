@@ -85,22 +85,43 @@ class radio_lines(object):
         """
         self.Spectrum = spectrum
 
-        self.xarr = self.Spectrum.xarr.copy()
-        self.xarr.convert_to_unit('GHz')
-
-        self.minfreq_GHz = self.xarr.min()
-        self.maxfreq_GHz = self.xarr.max()
+        self.minfreq_GHz = self.Spectrum.xarr.umin(units='GHz')
+        self.maxfreq_GHz = self.Spectrum.xarr.umax(units='GHz')
 
         self.table = get_splat_table(webquery=webquery, 
-                minwav=pyspeckit.units.speedoflight_ms/self.minfreq_GHz*1e9,
-                maxwav=pyspeckit.units.speedoflight_ms/self.maxfreq_GHz*1e9,
+                minwav=units.speedoflight_ms/self.maxfreq_GHz/1e9,
+                maxwav=units.speedoflight_ms/self.minfreq_GHz/1e9,
                 waveunits='m')
 
-    def show(self, **kwargs):
+    def show(self, voff=0.0, ymax_scale=0.8, userecommended=True,
+            maxupperstateenergy=None, color=None, **kwargs):
         """
         Display vertical lines (using 'vlines') at the position of each
         discovered line
         """
+        ymin = self.Spectrum.plotter.ymin
+        ymax = self.Spectrum.plotter.ymax
+
+        mask = np.ones(len(self.table),dtype='bool')
+        if userecommended:
+            mask *= self.table.frequencyrecommended
+        if maxupperstateenergy is not None:
+            mask *= (self.table.upperstateenergyK < maxupperstateenergy)
+
+        freqoff = voff * 1e3 / units.speedoflight_ms * self.table.frequency[mask]
+
+        self._lines = self.Spectrum.plotter.axis.vlines( 
+                self.Spectrum.xarr.x_to_coord(self.table.frequency[mask]-freqoff, 'GHz'),
+                ymin, ymax, color=color, **kwargs)
+        self._linenames = [self.Spectrum.plotter.axis.text(
+                self.Spectrum.xarr.x_to_coord(FREQ, 'GHz'),
+                ymax*ymax_scale,
+                NAME,
+                rotation='vertical', color=color)
+            for FREQ,NAME in zip(self.table.frequency[mask]-freqoff,self.table.LatexName[mask])]
+
+        if self.Spectrum.plotter.autorefresh:
+            self.Spectrum.plotter.refresh()
  
 def get_splat_table(webquery=False, savename=None, **kwargs):
     if webquery and webOK:
@@ -140,6 +161,7 @@ def get_splat_table(webquery=False, savename=None, **kwargs):
     if hasattr(splat,'add_column'):
         splat.add_column("LineName",line_names)
         splat.add_column("LatexName",latex_names)
+        splat.add_column('frequency',splat.FreqGHz)
 
     if savename is not None:
         splat.write(savename)
