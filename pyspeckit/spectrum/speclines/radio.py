@@ -93,14 +93,19 @@ class radio_lines(object):
                 maxwav=units.speedoflight_ms/self.minfreq_GHz/1e9,
                 waveunits='m')
 
+        self._lines = []
+        self._linenames = []
+
     def show(self, voff=0.0, ymax_scale=0.8, userecommended=True,
-            maxupperstateenergy=None, color=None, **kwargs):
+            maxupperstateenergy=None, color='r', **kwargs):
         """
         Display vertical lines (using 'vlines') at the position of each
         discovered line
         """
         ymin = self.Spectrum.plotter.ymin
         ymax = self.Spectrum.plotter.ymax
+
+        self.hide()
 
         mask = np.ones(len(self.table),dtype='bool')
         if userecommended:
@@ -119,6 +124,20 @@ class radio_lines(object):
                 NAME,
                 rotation='vertical', color=color)
             for FREQ,NAME in zip(self.table.frequency[mask]-freqoff,self.table.LatexName[mask])]
+
+        if self.Spectrum.plotter.autorefresh:
+            self.Spectrum.plotter.refresh()
+
+    def hide(self):
+        """
+        Remove all annotations and lines
+        """
+        for text in self._linenames:
+            if text in self.Spectrum.plotter.axis.texts:
+                self.Spectrum.plotter.axis.texts.remove(text)
+        for line in self._lines:
+            if line in self.Spectrum.plotter.axis.collections:
+                self.Spectrum.plotter.axis.collections.remove(line)
 
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()

@@ -225,7 +225,7 @@ class SpectroscopicAxis(np.ndarray):
         else: 
             return self.xmin()
 
-    def x_to_coord(self, xval, xunit):
+    def x_to_coord(self, xval, xunit, verbose=False):
         """
         Given a wavelength/frequency/velocity, return the value in the SpectroscopicAxis's units
         e.g.:
@@ -238,7 +238,11 @@ class SpectroscopicAxis(np.ndarray):
             xval = wavelength_to_frequency(xval, xunit, 'Hz')
             xunit = 'Hz'
 
-        if xunit in velocity_dict:
+        if unit_type_dict[self.units] == unit_type_dict[xunit]:
+            if verbose: print "Input units of same type as output units."
+            return xval * conversion_dict[unit_type_dict[xunit]][xunit] / conversion_dict[unit_type_dict[self.units]][self.units]
+        elif xunit in velocity_dict:
+            if verbose: print "Requested units are Velocity"
             if self.units in frequency_dict:
                 return velocity_to_frequency(xval, xunit,
                         center_frequency=self.reffreq,
@@ -254,6 +258,7 @@ class SpectroscopicAxis(np.ndarray):
                 return frequency_to_wavelength(FREQ, 'Hz',
                         wavelength_units=self.units)
         elif xunit in frequency_dict:
+            if verbose: print "Requested units are Frequency"
             if self.units in velocity_dict:
                 return frequency_to_velocity(xval, xunit,
                         center_frequency=self.reffreq,
@@ -263,8 +268,8 @@ class SpectroscopicAxis(np.ndarray):
             elif self.units in wavelength_dict:
                 return frequency_to_wavelength(xval, xunit,
                         wavelength_units=self.units)
-        elif unit_type_dict[self.units] == unit_type_dict[xunit]:
-            return xval * conversion_dict[unit_type_dict[xunit]][xunit] / conversion_dict[unit_type_dict[self.units]][self.units]
+        else:
+            raise ValueError("Units not recognized.")
 
     def coord_to_x(self, xval, xunit):
         """
@@ -313,6 +318,8 @@ class SpectroscopicAxis(np.ndarray):
                 return frequency_to_wavelength(FREQ, 'Hz', wavelength_units=xunit)
             elif self.units in frequency_dict:
                 return frequency_to_wavelength(xval, self.units, wavelength_units=xunit)
+        else:
+            raise ValueError("Units not recognized.")
 
     def convert_to_unit(self,unit,frame='rest', quiet=False,
             center_frequency=None, center_frequency_units=None, **kwargs):

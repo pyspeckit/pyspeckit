@@ -316,6 +316,23 @@ class Spectrum(object):
             "max": self.data.max(),}
         return stats
 
+    def getlines(self, linetype='radio'):
+        """
+        Access a registered database of spectral lines.  Will add an attribute
+        with the name linetype, which then has properties defined by the
+        speclines module (most likely, a table and a "show" function to display
+        the lines)
+        """
+
+        # this is somewhat unreadable, but in short:
+        # self.__dict__ is a dictionary that defines the class attributes
+        # so, for example, if linetype is radio, this reads:
+        # self.radio = speclines.radio.radio_lines(self)
+        # or optical:
+        # self.optical = speclines.optical.optical_lines(self)
+        if not self.__dict__.has_key(linetype): # don't replace it if it already exists
+            self.__dict__[linetype] = speclines.__dict__[linetype].__dict__[linetype+"_lines"](self)
+
 
 
 
