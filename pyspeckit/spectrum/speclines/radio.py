@@ -97,7 +97,7 @@ class radio_lines(object):
         self._linenames = []
 
     def show(self, voff=0.0, ymax_scale=0.8, userecommended=True,
-            maxupperstateenergy=None, color='r', **kwargs):
+            maxupperstateenergy=None, color='r', verbose=False, **kwargs):
         """
         Display vertical lines (using 'vlines') at the position of each
         discovered line
@@ -115,15 +115,19 @@ class radio_lines(object):
 
         freqoff = voff * 1e3 / units.speedoflight_ms * self.table.frequency[mask]
 
-        self._lines = self.Spectrum.plotter.axis.vlines( 
-                self.Spectrum.xarr.x_to_coord(self.table.frequency[mask]-freqoff, 'GHz'),
-                ymin, ymax, color=color, **kwargs)
-        self._linenames = [self.Spectrum.plotter.axis.text(
-                self.Spectrum.xarr.x_to_coord(FREQ, 'GHz'),
-                ymax*ymax_scale,
-                NAME,
-                rotation='vertical', color=color)
-            for FREQ,NAME in zip(self.table.frequency[mask]-freqoff,self.table.LatexName[mask])]
+        if mask.sum() > 0:
+            if verbose: print "Labeled %i lines." % mask.sum()
+            self._lines += [self.Spectrum.plotter.axis.vlines( 
+                    self.Spectrum.xarr.x_to_coord(self.table.frequency[mask]-freqoff, 'GHz'),
+                    ymin, ymax, color=color, **kwargs)]
+            self._linenames += [self.Spectrum.plotter.axis.text(
+                    self.Spectrum.xarr.x_to_coord(FREQ, 'GHz'),
+                    ymax*ymax_scale,
+                    NAME,
+                    rotation='vertical', color=color)
+                for FREQ,NAME in zip(self.table.frequency[mask]-freqoff,self.table.LatexName[mask])]
+        else:
+            if verbose: print "No lines found in range [%g, %g] GHz" % (self.minfreq_GHz, self.maxfreq_GHz)
 
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
@@ -135,9 +139,11 @@ class radio_lines(object):
         for text in self._linenames:
             if text in self.Spectrum.plotter.axis.texts:
                 self.Spectrum.plotter.axis.texts.remove(text)
+            self._linenames.remove(text)
         for line in self._lines:
             if line in self.Spectrum.plotter.axis.collections:
                 self.Spectrum.plotter.axis.collections.remove(line)
+            self._lines.remove(line)
 
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
