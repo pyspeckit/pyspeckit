@@ -191,8 +191,8 @@ class Measurements(object):
                 modpars2d = np.reshape(modpars, (len(modpars) / 3, 3))
                 moderrs2d = np.reshape(moderrs, (len(moderrs) / 3, 3))
                 sigma = zip(*modpars2d)[2]
-                minsigma = min(sigma)
-                i_narrow = sigma.index(minsigma)
+                minsigma = min(np.abs(sigma))
+                i_narrow = list(np.abs(sigma)).index(minsigma)
             else: continue
                         
             self.lines["{0}_N".format(key)] = {}         
@@ -216,7 +216,7 @@ class Measurements(object):
         """                                                                                                
                                                                                                            
         flux = 0                                                                                           
-        for i in xrange(len(pars) / 3): flux += np.sqrt(2. * np.pi) * pars[3 * i] * pars[2 + 3 * i]                                    
+        for i in xrange(len(pars) / 3): flux += np.sqrt(2. * np.pi) * pars[3 * i] * abs(pars[2 + 3 * i])
                                                                                                            
         return flux * self.fluxnorm
         
@@ -245,7 +245,7 @@ class Measurements(object):
         has only a single component.  Uses bisection technique for the former with absolute tolerance of 1e-4.
         """
 
-        if len(pars) == 3: return 2. * np.sqrt(2. * np.log(2.)) * pars[2]
+        if len(pars) == 3: return 2. * np.sqrt(2. * np.log(2.)) * abs(pars[2])
         else:
             
             atol = 1e-4
