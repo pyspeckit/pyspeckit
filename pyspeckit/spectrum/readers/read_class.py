@@ -448,6 +448,9 @@ def class_to_spectra(filename,line):
     return spectrumlist
 
 if __name__ == "__main__":
+    """
+    Tests are specific to the machine on which this code was developed. 
+    """
     fn1 = '/Users/adam/work/bolocam/hht/class_003.smt' 
     #fn1 = '/Users/adam/work/bolocam/hht/class_001.smt' 
     #fn1 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-20824-073.cls' 
