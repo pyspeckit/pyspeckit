@@ -6,13 +6,13 @@ from matplotlib import pyplot
 
 def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guessline='twotwo',
         tex=20,tkin=15,column=15.0,fortho=0.66, tau11=None, thin=False, quiet=False, doplot=True, fignum=1,
-        guessfignum=2, smooth=False,
+        guessfignum=2, smooth=False, scale_keyword=None,
         **kwargs): 
     """
     Given a dictionary of filenames and lines, fit them together
     e.g. {'oneone':'G000.000+00.000_nh3_11.fits'}
     """
-    spdict = dict([ (linename,pyspeckit.Spectrum(value)) if type(value) is str else (linename,value) for linename, value in input_dict.iteritems() ])
+    spdict = dict([ (linename,pyspeckit.Spectrum(value, scale_keyword=scale_keyword)) if type(value) is str else (linename,value) for linename, value in input_dict.iteritems() ])
     splist = spdict.values()
 
     for sp in splist: # required for plotting, cropping

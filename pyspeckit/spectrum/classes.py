@@ -241,6 +241,8 @@ class Spectrum(object):
         x1pix = np.argmin(np.abs(x1-self.xarr))
         x2pix = np.argmin(np.abs(x2-self.xarr))
         if x1pix > x2pix: x1pix,x2pix = x2pix,x1pix
+        if x1pix == x2pix:
+            raise IndexError("ERROR: Trying to crop to zero size.")
 
         self.plotter.xmin = self.xarr[x1pix]
         self.plotter.xmax = self.xarr[x2pix]

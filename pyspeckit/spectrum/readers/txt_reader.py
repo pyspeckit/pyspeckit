@@ -5,7 +5,7 @@ except ImportError:
     atpyOK = False
 from .. import units
 
-def open_1d_txt(filename,errspecnum=2, **kwargs):
+def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2, **kwargs):
     """
     Attempt to read a 1D spectrum from a text file assuming
     wavelength as the first column, data as the second, and
@@ -18,10 +18,10 @@ def open_1d_txt(filename,errspecnum=2, **kwargs):
     else:
         T = atpy.Table(filename, type='ascii', masked=True, **kwargs)
         
-        xarr = T.data[T.data.dtype.names[0]]
-        data = T.data[T.data.dtype.names[1]]
-        if len(T.columns) > errspecnum:
-            error = T.data[T.data.dtype.names[errspecnum]]
+        xarr = T.data[T.data.dtype.names[xaxcol]]
+        data = T.data[T.data.dtype.names[datacol]]
+        if len(T.columns) > errorcol:
+            error = T.data[T.data.dtype.names[errorcol]]
         else:
             # assume uniform, nonzero error
             error = data*0 + 1.0
