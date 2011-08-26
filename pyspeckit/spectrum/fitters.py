@@ -221,9 +221,10 @@ class Specfit(object):
         self.seterrspec()
         self.errspec[(True-OKmask)] = 1e10
 
-    def multifit(self, fittype=None, renormalize='auto', annotate=None, 
-        color = 'k', composite_fit_color = 'red', component_fit_color = 'red', lw = 0.5, composite_lw = 0.75, 
-            component_lw = 0.75, show_components = None):
+    def multifit(self, fittype=None, renormalize='auto', annotate=None,
+            color='k', composite_fit_color='red', component_fit_color='red',
+            lw=0.5, composite_lw=0.75, component_lw=0.75,
+            show_components=None):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -598,7 +599,7 @@ class Specfit(object):
         Remove the legend from the plot window
         """
         if self.fitleg is not None: 
-            self.fitleg.set_visible(False)
+            # don't remove fitleg unless it's in the current axis self.fitleg.set_visible(False)
             if self.fitleg in self.specplotter.axis.artists:
                 self.specplotter.axis.artists.remove(self.fitleg)
         if self.specplotter.autorefresh: self.specplotter.refresh()

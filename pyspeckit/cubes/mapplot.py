@@ -14,6 +14,11 @@ try:
     icanhasaplpy = True
 except ImportError:
     icanhasaplpy = False
+try:
+    import coords
+    icanhascoords = True
+except ImportError:
+    icanhascoords = False
 
 class MapPlotter(object):
     """
@@ -35,6 +40,8 @@ class MapPlotter(object):
         self.FITSFigure = None
         self._click_marks = []
         self._circles = []
+        self._clickX = None
+        self._clickY = None
 
         self.Cube = Cube
         self.header = cubes.flatten_header(self.Cube.header)
@@ -78,8 +85,17 @@ class MapPlotter(object):
 
         self.canvas = self.axis.figure.canvas
 
-        self.clickid = self.canvas.mpl_connect('button_press_event',self.plot_spectrum)
+        self.clickid = self.canvas.mpl_connect('button_press_event',self.click)
+        self.clickupid = self.canvas.mpl_connect('button_release_event',self.plot_spectrum)
         self.keyid = self.canvas.mpl_connect('key_press_event',self.plot_spectrum)
+
+    def click(self,event):
+        """
+        Record location of downclick
+        """
+        if event.inaxes:
+            self._clickX = event.xdata
+            self._clickY = event.ydata
 
     def plot_spectrum(self, event):
         """
@@ -93,15 +109,23 @@ class MapPlotter(object):
           tb = self.canvas.toolbar
           if tb.mode != '':
               return
-          elif event.key is not None: #hasattr(event,'key'):
+          elif event.key is not None:
               if event.key == 'c':
-                  self.center = (clickX,clickY)
+                  self._center = (clickX,clickY)
                   self._remove_circle()
                   self._add_click_mark(clickX,clickY,clear=True)
               elif event.key == 'r':
-                  x,y = self.center
+                  x,y = self._center
                   self._add_circle(x,y,clickX,clickY)
                   self.circle(x,y,clickX,clickY)
+          elif event.button in (1,2) and not (self._clickX == clickX and self._clickY == clickY):
+              if event.button == 1:
+                  self._remove_circle()
+                  clear=True
+              else:
+                  clear=False
+              self._add_circle(self._clickX,self._clickY,clickX,clickY)
+              self.circle(self._clickX,self._clickY,clickX,clickY,clear=clear)
           elif event.button is not None: #hasattr(event,'button'):
               if event.button==1:
                   print "Plotting spectrum from point %i,%i" % (clickX,clickY)
@@ -155,8 +179,11 @@ class MapPlotter(object):
         if self.FITSFigure is not None:
             x,y = self.FITSFigure.pixel2world(x,y)
             x2,y2 = self.FITSFigure.pixel2world(x2,y2)
-            r = (3600.0*np.linalg.norm(np.array([x,y])-np.array([x2,y2])))**2
-            self.FITSFigure.show_markers(x,y,s=r,marker='o',facecolor='none',edgecolor='black',layer='circle')
+            r = (np.linalg.norm(np.array([x,y])-np.array([x2,y2])))
+            #self.FITSFigure.show_markers(x,y,s=r,marker='o',facecolor='none',edgecolor='black',layer='circle')
+            layername = "circle%02i" % len(self._circles)
+            self.FITSFigure.show_circles(x,y,r,edgecolor='black',facecolor='none',layer=layername)
+            self._circles.append(layername)
         else:
             r = np.linalg.norm(np.array([x,y])-np.array([x2,y2]))
             self._circles.append( matplotlib.patches.Circle([x,y],radius=r) )
@@ -167,8 +194,9 @@ class MapPlotter(object):
         """
         """
         if self.FITSFigure is not None:
-            if 'circle' in self.FITSFigure._layers:
-                self.FITSFigure.remove_layer('circle')
+            for layername in self._circles:
+                if layername in self.FITSFigure._layers:
+                    self.FITSFigure.remove_layer(layername)
         else:
             for circle in self._circles:
                 self.axis.patches.remove(circle)
@@ -178,12 +206,12 @@ class MapPlotter(object):
         if self.axis is not None:
             self.axis.figure.canvas.draw()
 
-    def circle(self,x1,y1,x2,y2):
+    def circle(self,x1,y1,x2,y2,**kwargs):
         """
         Plot the spectrum of a circular aperture
         """
 
         r = (np.linalg.norm(np.array([x1,y1])-np.array([x2,y2])))
-        self.Cube.plot_apspec([x1,y1,r])
+        self.Cube.plot_apspec([x1,y1,r],**kwargs)
         #self.Cube.data = cubes.extract_aperture( self.Cube.cube, [x1,y1,r] , coordsys=None )
         #self.Cube.plotter()

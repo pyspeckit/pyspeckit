@@ -3,6 +3,7 @@ Wrapper to fit ammonia spectra.  Generates a reasonable guess at the position an
 """
 import pyspeckit
 from matplotlib import pyplot 
+import copy
 
 def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guessline='twotwo',
         tex=20,tkin=15,column=15.0,fortho=0.66, tau11=None, thin=False, quiet=False, doplot=True, fignum=1,
@@ -48,9 +49,10 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
 
     for sp in splist:
         sp.xarr.convert_to_unit('km/s',quiet=True)
-        sp.specfit.fitter = spectra.specfit.fitter
+        sp.specfit.fitter = copy.copy(spectra.specfit.fitter)
         sp.specfit.modelpars = spectra.specfit.modelpars
         sp.specfit.npeaks = spectra.specfit.npeaks
+        sp.specfit.fitter.npeaks = spectra.specfit.npeaks
         sp.specfit.model = pyspeckit.models.ammonia.ammonia(sp.xarr, *spectra.specfit.modelpars)
 
     if doplot:

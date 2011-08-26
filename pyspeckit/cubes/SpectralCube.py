@@ -34,8 +34,10 @@ class Cube(spectrum.Spectrum):
 
         self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
         self.plotter = spectrum.plotters.Plotter(self)
-        self.specfit = spectrum.fitters.Specfit(self)
+        self._register_fitters()
+        self.specfit = spectrum.fitters.Specfit(self,Registry=self.Registry)
         self.baseline = spectrum.baseline.Baseline(self)
+        self.speclines = spectrum.speclines
         # Initialize writers
         self.writer = {}
         for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
@@ -46,7 +48,7 @@ class Cube(spectrum.Spectrum):
         Fill the .data array with a real spectrum and plot it
         """
 
-        self.data = self.cube[:,y,x]
+        self.data = self.cube[:,x,y]
 
         self.plotter(**kwargs)
 

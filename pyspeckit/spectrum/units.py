@@ -11,6 +11,51 @@ The SpectroscopicAxis class is meant to deal with unit conversion internally
 
 import numpy as np
 
+# declare a case-insensitive dict class to return case-insensitive versions of each dictionary...
+class CaseInsensitiveDict(dict):
+    def __init__(self, inputdict=None):
+        if inputdict:
+            # Doesn't do keyword args
+            if isinstance(inputdict, dict):
+                self.CaseDict = inputdict
+                for k,v in inputdict.items():
+                    dict.__setitem__(self, k.lower(), v)
+            else:
+                for k,v in inputdict:
+                    dict.__setitem__(self, k.lower(), v)
+
+    def __getitem__(self, key):
+        return dict.__getitem__(self, key.lower())
+
+    def __setitem__(self, key, value):
+        dict.__setitem__(self, key.lower(), value)
+
+    def __contains__(self, key):
+        return dict.__contains__(self, key.lower())
+
+    def has_key(self, key):
+        return dict.has_key(self, key.lower())
+
+    def get(self, key, def_val=None):
+        return dict.get(self, key.lower(), def_val)
+
+    def setdefault(self, key, def_val=None):
+        return dict.setdefault(self, key.lower(), def_val)
+
+    def update(self, inputdict):
+        for k,v in inputdict.items():
+            dict.__setitem__(self, k.lower(), v)
+
+    def fromkeys(self, iterable, value=None):
+        d = CaseInsensitiveDict()
+        for k in iterable:
+            dict.__setitem__(d, k.lower(), value)
+        return d
+
+    def pop(self, key, def_val=None):
+        return dict.pop(self, key.lower(), def_val)
+    
+
 length_dict = {'meters':1.0,'m':1.0,
         'centimeters':1e-2,'cm':1e-2,
         'millimeters':1e-3,'mm':1e-3,
@@ -19,6 +64,7 @@ length_dict = {'meters':1.0,'m':1.0,
         'kilometers':1e3,'km':1e3,
         'angstroms':1e-10,'A':1e-10,
         }
+length_dict = CaseInsensitiveDict(length_dict)
 
 wavelength_dict = length_dict # synonym
 
@@ -29,20 +75,25 @@ frequency_dict = {
         'GHz':1e9,
         'THz':1e12,
         }
+frequency_dict = CaseInsensitiveDict(frequency_dict)
 
 velocity_dict = {'meters/second':1.0,'m/s':1.0,
         'kilometers/s':1e3,'km/s':1e3,'kms':1e3,
         'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
         }
+velocity_dict = CaseInsensitiveDict(velocity_dict)
 
 conversion_dict = {
         'VELOCITY':velocity_dict,  'Velocity':velocity_dict,  'velocity':velocity_dict,  'velo': velocity_dict, 'VELO': velocity_dict,
         'LENGTH':length_dict,      'Length':length_dict,      'length':length_dict, 
         'FREQUENCY':frequency_dict,'Frequency':frequency_dict,'frequency':frequency_dict, 'freq': frequency_dict, 'FREQ': frequency_dict,
         }
+conversion_dict = CaseInsensitiveDict(conversion_dict)
 
 unit_type_dict = {
     'Hz' :'frequency', 'kHz':'frequency', 'MHz':'frequency', 'GHz':'frequency',
+    'HZ' :'frequency', 'KHZ':'frequency', 'MHZ':'frequency', 'GHZ':'frequency',
+    'hz' :'frequency', 'khz':'frequency', 'mhz':'frequency', 'ghz':'frequency',
     'THz':'frequency', 
     'meters/second':'velocity', 'm/s':'velocity', 'kilometers/s':'velocity',
     'km/s':'velocity', 'kms':'velocity', 'centimeters/s':'velocity',

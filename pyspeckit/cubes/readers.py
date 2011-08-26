@@ -7,13 +7,14 @@ import numpy.ma as ma
 import pyspeckit 
 from pyspeckit import spectrum
 
-def open_3d_fits(filename,wcstype='',average_extra=False, **kwargs):
+def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3, **kwargs):
     """
     Grabs all the relevant pieces of a simple FITS-compliant 3d data cube
 
     Inputs:
         wcstype - the suffix on the WCS type to get to
             velocity/frequency/whatever
+        specaxis - Which axis containts the spectrum?  Default 3
 
     """
     import pyfits
@@ -46,6 +47,6 @@ def open_3d_fits(filename,wcstype='',average_extra=False, **kwargs):
     xconv = lambda v: ((v-p3+1)*dv+v0)
     xarr = xconv(np.arange(cube.shape[0]))
 
-    XAxis = spectrum.readers.make_axis(xarr,hdr,wcstype=wcstype,**kwargs)
+    XAxis = spectrum.readers.make_axis(xarr,hdr,wcstype=wcstype, specaxis=3, **kwargs)
 
     return cube,XAxis,hdr,f

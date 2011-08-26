@@ -4,8 +4,7 @@ http://svn.ok.ubc.ca/svn/signals/nh3fit/
 """
 import numpy as np
 from mpfit import mpfit
-from .. import units
-from . import fitter
+import fitter
 import matplotlib.cbook as mpcb
 import copy
 
@@ -86,19 +85,6 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
     # Convert X-units to frequency in GHz
     xarr = copy.copy(xarr)
     xarr.convert_to_unit('GHz', quiet=True)
-
-    # Convert X-units to frequency in GHz
-    # OLD VERSION if xunits in units.frequency_dict:
-    # OLD VERSION     xarr = np.copy(xarr) * units.frequency_dict[xunits] / units.frequency_dict['GHz']
-    # OLD VERSION elif xunits in units.velocity_dict:
-    # OLD VERSION     if line in freq_dict:
-    # OLD VERSION         xarr = (freq_dict[line] - (np.copy(xarr) * 
-    # OLD VERSION                 (units.velocity_dict[xunits] / units.velocity_dict['m/s'] / units.speedoflight_ms) *
-    # OLD VERSION                 freq_dict[line]) ) / units.frequency_dict['GHz']
-    # OLD VERSION     else:
-    # OLD VERSION         raise Exception("Xunits is velocity-type (%s) but line %s is not in the list." % (xunits,line))
-    # OLD VERSION else:
-    # OLD VERSION     raise Exception("xunits not recognized: %s" % (xunits))
 
     if tex is not None:
         if tex > tkin: # cannot have Tex > Tkin
@@ -225,6 +211,7 @@ class ammonia_model(fitter.SimpleFitter):
     def __init__(self,npeaks=1,npars=6,multisingle='multi'):
         self.npeaks = npeaks
         self.npars = npars
+        self.parnames = ['tkin','tex','ntot','width','xoff_v','fortho']
 
         self.onepeakammonia = fitter.vheightmodel(ammonia)
         #self.onepeakammoniafit = self._fourparfitter(self.onepeakammonia)
@@ -251,7 +238,7 @@ class ammonia_model(fitter.SimpleFitter):
         pars  - a list with len(pars) = 6n, assuming tkin,tex,ntot,width,xoff_v,fortho repeated
         """
         if len(pars) != len(parnames):
-            raise ValueError("Wrong array lengths!")
+            raise ValueError("Wrong array lengths passed to n_ammonia!")
 
         self._components = []
         def L(x):
@@ -286,7 +273,7 @@ class ammonia_model(fitter.SimpleFitter):
 
     def multinh3fit(self, xax, data, npeaks=1, err=None, 
             params=[20,20,14,1.0,0.0,0.5],
-            parnames=['tkin','tex','ntot','width','xoff_v','fortho'],
+            parnames=None,
             fixed=[False,False,False,False,False,False],
             limitedmin=[True,True,True,True,False,True],
             limitedmax=[False,False,False,False,False,True], minpars=[2.73,2.73,0,0,0,0],
@@ -307,6 +294,7 @@ class ammonia_model(fitter.SimpleFitter):
            fixed - Is parameter fixed?
            limitedmin/minpars - set lower limits on each parameter (default: width>0, Tex and Tkin > Tcmb)
            limitedmax/maxpars - set upper limits on each parameter
+           parnames - default parameter names, important for setting kwargs in model ['tkin','tex','ntot','width','xoff_v','fortho']
 
            quiet - should MPFIT output each iteration?
            shh - output final parameters?
@@ -325,39 +313,53 @@ class ammonia_model(fitter.SimpleFitter):
         self.npeaks = npeaks
 
         if isinstance(params,np.ndarray): params=params.tolist()
+        # this is actually a hack, even though it's decently elegant
+        # somehow, parnames was being changed WITHOUT being passed as a variable
+        # this doesn't make sense - at all - but it happened.
+        if parnames is None: parnames = self.parnames
+
+        partype_dict = dict(zip(['params','parnames','fixed','limitedmin','limitedmax','minpars','maxpars'],
+                [params,parnames,fixed,limitedmin,limitedmax,minpars,maxpars]))
 
         # make sure all various things are the right length; if they're not, fix them using the defaults
-        for parlist in (params,parnames,fixed,limitedmin,limitedmax,minpars,maxpars):
+        for partype,parlist in partype_dict.iteritems():
             if len(parlist) != self.npars*self.npeaks:
                 # if you leave the defaults, or enter something that can be multiplied by npars to get to the
                 # right number of gaussians, it will just replicate
                 if len(parlist) == self.npars: 
-                    parlist *= npeaks 
+                    partype_dict[partype] *= npeaks 
+                elif len(parlist) > self.npars:
+                    # DANGER:  THIS SHOULD NOT HAPPEN!
+                    print "WARNING!  Input parameters were longer than allowed for variable ",parlist
+                    partype_dict[partype] = partype_dict[partype][:self.npars]
                 elif parlist==params: # this instance shouldn't really be possible
-                    parlist[:] = [20,20,1e10,1.0,0.0,0.5] * npeaks
+                    partype_dict[partype] = [20,20,1e10,1.0,0.0,0.5] * npeaks
                 elif parlist==fixed:
-                    parlist[:] = [False] * len(params)
+                    partype_dict[partype] = [False] * len(params)
                 elif parlist==limitedmax: # only fortho, fillingfraction have upper limits
-                    parlist[:] = (np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')
+                    partype_dict[partype] = (np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')
                 elif parlist==limitedmin: # no physical values can be negative except velocity
-                    parlist[:] = (np.array(parnames) != 'xoff_v')
+                    partype_dict[partype] = (np.array(parnames) != 'xoff_v')
                 elif parlist==minpars: # all have minima of zero except kinetic temperature, which can't be below CMB.  Excitation temperature technically can be, but not in this model
-                    parlist[:] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * 2.73
+                    partype_dict[partype] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * 2.73
                 elif parlist==maxpars: # fractions have upper limits of 1.0
-                    parlist[:] = ((np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')).astype('float')
+                    partype_dict[partype] = ((np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')).astype('float')
                 elif parlist==parnames: # assumes the right number of parnames (essential)
-                    parlist[:] = list(parnames) * self.npeaks 
+                    partype_dict[partype] = list(parnames) * self.npeaks 
+
+        if len(parnames) != len(partype_dict['params']):
+            raise ValueError("Wrong array lengths AFTER fixing them")
 
         # used in components.  Is this just a hack?
-        self.parnames = parnames
+        self.parnames = partype_dict['parnames']
 
-        parinfo = [ {'n':ii, 'value':params[ii],
-            'limits':[minpars[ii],maxpars[ii]],
-            'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-            'parname':parnames[ii]+str(ii/self.npars),
-            'mpmaxstep':float(parnames[ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
+        parinfo = [ {'n':ii, 'value':partype_dict['params'][ii],
+            'limits':[partype_dict['minpars'][ii],partype_dict['maxpars'][ii]],
+            'limited':[partype_dict['limitedmin'][ii],partype_dict['limitedmax'][ii]], 'fixed':partype_dict['fixed'][ii],
+            'parname':partype_dict['parnames'][ii]+str(ii/self.npars),
+            'mpmaxstep':float(partype_dict['parnames'][ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
             'error': 0} 
-            for ii in xrange(len(params)) ]
+            for ii in xrange(len(partype_dict['params'])) ]
 
         def mpfitfun(x,y,err):
             if err is None:
@@ -394,7 +396,7 @@ class ammonia_model(fitter.SimpleFitter):
         self.mp = mp
         self.mpp = mpp
         self.mpperr = mpperr
-        self.model = self.n_ammonia(pars=mpp, parnames=parnames, **kwargs)(xax)
+        self.model = self.n_ammonia(pars=mpp, parnames=self.parnames, **kwargs)(xax)
         indiv_parinfo = [parinfo[jj*self.npars:(jj+1)*self.npars] for jj in xrange(len(parinfo)/self.npars)]
         modelkwargs = [
                 dict([(p['parname'].strip("0123456789").lower(),p['value']) for p in pi])
@@ -414,8 +416,9 @@ class ammonia_model(fitter.SimpleFitter):
     def annotations(self):
         from decimal import Decimal # for formatting
         tex_key = {'tkin':'T_K','tex':'T_{ex}','ntot':'N','fortho':'F_o','width':'\\sigma','xoff_v':'v','fillingfraction':'FF','tau11':'\\tau_{1-1}'}
+        # small hack below: don't quantize if error > value.  We want to see the values.
         label_list = [ "$%s(%i)$=%8s $\\pm$ %8s" % (tex_key[pinfo['parname'].strip("0123456789")],int(pinfo['parname'][-1]),
-            Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % pinfo['error'])),
+            Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value'])))),
             Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error'])),)
             for pinfo in self.parinfo]
         labels = tuple(mpcb.flatten(label_list))
