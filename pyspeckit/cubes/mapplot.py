@@ -35,7 +35,7 @@ class MapPlotter(object):
         elif type(figure) is int:
             self.figure = matplotlib.pyplot.figure(figure)
         else:
-            self.figure = matplotlib.pyplot.figure()
+            self.figure = None
         self.axis = None
         self.FITSFigure = None
         self._click_marks = []
@@ -56,6 +56,8 @@ class MapPlotter(object):
         """
         Plot up a map based on an input data cube
         """
+        if self.figure is None:
+            self.figure = matplotlib.pyplot.figure()
         # THIS IS A HACK!!!  isinstance(a function, function) must be a thing...
         FUNCTION = type(np.max)
         if type(estimator) is FUNCTION:
@@ -124,6 +126,7 @@ class MapPlotter(object):
                   clear=True
               else:
                   clear=False
+              print "Plotting circle from point %i,%i to %i,%i" % (self._clickX,self._clickY,clickX,clickY)
               self._add_circle(self._clickX,self._clickY,clickX,clickY)
               self.circle(self._clickX,self._clickY,clickX,clickY,clear=clear)
           elif event.button is not None: #hasattr(event,'button'):

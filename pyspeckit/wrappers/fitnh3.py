@@ -47,14 +47,6 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
 
     spectra.specfit(fittype='ammonia',quiet=quiet,multifit=True,guesses=[tkin,tex,column,widthguess,vguess,fortho], thin=thin, **kwargs)
 
-    for sp in splist:
-        sp.xarr.convert_to_unit('km/s',quiet=True)
-        sp.specfit.fitter = copy.copy(spectra.specfit.fitter)
-        sp.specfit.modelpars = spectra.specfit.modelpars
-        sp.specfit.npeaks = spectra.specfit.npeaks
-        sp.specfit.fitter.npeaks = spectra.specfit.npeaks
-        sp.specfit.model = pyspeckit.models.ammonia.ammonia(sp.xarr, *spectra.specfit.modelpars)
-
     if doplot:
         plot_nh3(spdict,spectra,fignum=fignum)
 
@@ -67,6 +59,15 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, *
     pyplot.figure(fignum)
     pyplot.clf()
     splist = spdict.values()
+
+    for sp in splist:
+        sp.xarr.convert_to_unit('km/s',quiet=True)
+        sp.specfit.fitter = copy.copy(spectra.specfit.fitter)
+        sp.specfit.modelpars = spectra.specfit.modelpars
+        sp.specfit.npeaks = spectra.specfit.npeaks
+        sp.specfit.fitter.npeaks = spectra.specfit.npeaks
+        sp.specfit.model = pyspeckit.models.ammonia.ammonia(sp.xarr, *spectra.specfit.modelpars)
+
     if len(splist) == 2:
         axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
     elif len(splist) == 3:

@@ -58,9 +58,38 @@ class Cube(spectrum.Spectrum):
         (defaults to Cube coordinates)
         """
 
+        self.set_apspec(aperture, coordsys=coordsys)
+        self.plotter(reset_ylimits=reset_ylimits, **kwargs)
+
+    def get_spectrum(self, x, y):
+        """
+        Very simple: get the spectrum at coordinates x,y
+
+        Returns a SpectroscopicAxis instance
+        """
+        return pyspeckit.Spectrum( xarr=self.xarr.copy(), data = self.cube[:,x,y],
+                header=self.header)
+
+    def get_apspec(self, aperture, coordsys=None):
+        """
+        Extract an aperture using cubes.extract_aperture
+        (defaults to Cube coordinates)
+        """
+
+        import cubes
+        if coordsys is not None:
+            return pyspeckit.Spectrum(xarr=self.xarr.copy(), data=cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs ), header=self.header)
+        else:
+            return pyspeckit.Spectrum(xarr=self.xarr.copy(), data=cubes.extract_aperture( self.cube, aperture , coordsys=None), header=self.header)
+
+    def set_apspec(self, aperture, coordsys=None):
+        """
+        Extract an aperture using cubes.extract_aperture
+        (defaults to Cube coordinates)
+        """
+
         import cubes
         if coordsys is not None:
             self.data = cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs )
         else:
             self.data = cubes.extract_aperture( self.cube, aperture , coordsys=None)
-        self.plotter(reset_ylimits=reset_ylimits, **kwargs)

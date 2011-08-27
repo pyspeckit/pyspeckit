@@ -61,7 +61,7 @@ class Baseline:
         if self.subtracted and fit_original: # add back in the old baseline
             self.spectofit = self.Spectrum.data+self.basespec
         else:
-            self.spectofit = np.copy(self.Spectrum.data)
+            self.spectofit = self.Spectrum.data.copy()
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:
             self.specplotter.axis.set_autoscale_on(False)
