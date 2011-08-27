@@ -13,7 +13,11 @@
 <body onload="prettyPrint()"> 
     <center>
     <table width=800>
+        <tr><td><br> <b> <a href="sdss_example.html"> Optical Fitting - SDSS example </a></b></td></tr>
+        <tr><td><br> <b> <a href="nh3_example.html"> Radio Fitting - NH<sub>3</sub> example </a></b></td></tr>
         <tr><td>
+                <br><br>
+                <h3>Simple Radio Fitting: HCO+ example</h3>
             <code class="prettyprint">
               <!--<? readfile("../tests/simple_fit_example.py"); ?>-->
 import pyspeckit
@@ -57,80 +61,7 @@ spec.plotter.figure.savefig("simple_fit_example_HCOp_cropped.png")
       <tr><td><center><img align=center width=800 src="images/simple_fit_example_HCOp.png" title="Sample HCO+ spectrum fitted with a gaussian"></center></tr></td>
       <tr><td><center><img align=center width=800 src="images/simple_fit_example_HCOp_residuals.png" title="Residuals of the gaussian fit from the previous figure"></center></tr></td>
       <tr><td><center><img align=center width=800 src="images/simple_fit_example_HCOp_cropped.png" title="A zoomed-in, cropped version of the spectrum.  With the 'crop' command, the excess data is discarded."></center></tr></td>
-    </table>
-    <?php include 'navbar.php';?>
-    </center>
     
-    <!-- Example with SDSS -->
-    <center>
-    <table width=800>
-        <tr><td>
-            <code class="prettyprint">
-              <!--<? readfile("../tests/test_sdss.py"); ?>-->
-import pyspeckit
-
-# Rest wavelengths of the lines we are fitting - use as initial guesses
-NIIa = 6549.86
-NIIb = 6585.27
-Halpha = 6564.614
-SIIa = 6718.29
-SIIb = 6732.68
-
-# Initialize spectrum object and plot region surrounding Halpha-[NII] complex
-spec = pyspeckit.Spectrum('sample_sdss.txt', errspecnum=2)
-spec.plotter(xmin = 6450, xmax = 6775, ymin = 0, ymax = 150)
-
-# Use [SII] lines to model narrow lines, then force [NII] lines and narrow H-alpha to have same width as [SII].  
-# Will fit 1 additional broad component to H-alpha (standard for AGN spectra)
-# Wavelengths are all tied together
-guesses = [50, NIIa, 5, 100, Halpha, 5, 50, Halpha, 50, 50, NIIb, 5, 20, SIIa, 5, 20, SIIb, 5]
-tied = ['', '', 'p[17]', '', '', 'p[17]', '', 'p[4]', '', '3 * p[0]', '', 'p[17]', '', '', 'p[17]', '', '', '']
-
-# Actually do the fit.
-spec.specfit(guesses = guesses, tied = tied, annotate = False)
-spec.plotter.refresh()
-
-# Let's use the measurements class to derive information about the emission lines.
-spec.measure(z = 0.05, fluxnorm = 1e-17)
-
-# Now overplot positions of lines and annotate
-y = spec.plotter.ymax * 0.85
-for i, line in enumerate(spec.measurements.lines.keys()):
-    x = spec.measurements.lines[line]['modelpars'][1]
-    spec.plotter.axis.plot([x]*2, [spec.plotter.ymin, spec.plotter.ymax], ls = '--', color = 'k')
-    try: spec.plotter.axis.annotate(spec.speclines.optical.lines[line][-1], 
-        (x, y), rotation = 90, ha = 'right', va = 'center')
-    except KeyError: pass
-
-# Make some nice axis labels
-spec.plotter.axis.set_xlabel(r'Wavelength $(\AA)$')
-spec.plotter.axis.set_ylabel(r'Flux $(10^{-17} \mathrm{erg/s/cm^2/\AA})$')
-spec.plotter.refresh()
-
-# Print out spectral line information
-print "Line Flux (erg/s/cm^2) Amplitude (erg/s/cm^2) FWHM (Ang) Luminosity (erg/s)"
-for line in spec.measurements.lines.keys():
-    print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['amp'], spec.measurements.lines[line]['fwhm'], \
-        spec.measurements.lines[line]['lum']
-        
-# Notice that because we supplied the objects redshift and flux normalization, the measurements class automatically calculated line luminosities.  Also, it separates the broad and narrow H-alpha components, and identifies which lines are which. How nice!
-
-# Save the figure
-spec.plotter.figure.savefig("sdss_fit_example.png")
-
-# Output:
-Line   Flux (erg/s/cm^2)     Amplitude (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)
-NIIa 1.59280798105e-15 2.48559532236e-16 6.02005958793 9.38307760327e+39
-NIIb 4.77842394315e-15 7.45678596708e-16 6.02005958793 2.81492328098e+40
-SIIb 1.3266718029e-15 2.07028673062e-16 6.02005958793 7.81529514464e+39
-SIIa 1.41963574357e-15 2.21535803791e-16 6.02005958793 8.36293671851e+39
-H_alpha_B 4.4395950683e-14 5.42064119854e-16 76.9414716216 2.61532247129e+41
-H_alpha_N 4.56987114705e-15 7.13133691068e-16 6.02005958793 2.69206684797e+40
-H_alpha 4.896582183e-14 1.25519781092e-15 11.0611083985 5.76905831218e+41
-
-
-            </code>
-      <tr><td><center><img align=center width=800 src="images/sdss_fit_example.png" title="Sample Seyfert 1 spectrum (SDSS)"></center></tr></td>
     </table>
     <?php include 'navbar.php';?>
     </center>
