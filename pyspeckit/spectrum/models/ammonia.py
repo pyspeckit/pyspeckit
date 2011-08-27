@@ -272,12 +272,12 @@ class ammonia_model(fitter.SimpleFitter):
 
 
     def multinh3fit(self, xax, data, npeaks=1, err=None, 
-            params=[20,20,14,1.0,0.0,0.5],
+            params=(20,20,14,1.0,0.0,0.5),
             parnames=None,
-            fixed=[False,False,False,False,False,False],
-            limitedmin=[True,True,True,True,False,True],
-            limitedmax=[False,False,False,False,False,True], minpars=[2.73,2.73,0,0,0,0],
-            maxpars=[0,0,0,0,0,1], quiet=True, shh=True, veryverbose=False, **kwargs):
+            fixed=(False,False,False,False,False,False),
+            limitedmin=(True,True,True,True,False,True),
+            limitedmax=(False,False,False,False,False,True), minpars=(2.73,2.73,0,0,0,0),
+            maxpars=(0,0,0,0,0,1), quiet=True, shh=True, veryverbose=False, **kwargs):
         """
         Fit multiple nh3 profiles
 
