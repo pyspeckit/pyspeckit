@@ -182,8 +182,8 @@ class Baseline:
             if self.specplotter.axis is not None: 
                 for p in self.specplotter.axis.lines:
                     self.specplotter.axis.lines.remove(p)
-            plotmask = self.OKmask*False
-            plotmask[self.bx1:self.bx2] = self.OKmask[self.bx1:self.bx2]
+            plotmask = self.OKmask*False # include nothing...
+            plotmask[self.bx1:self.bx2] = self.OKmask[self.bx1:self.bx2] # then include everything OK in range
             self.specplotter.ymin = abs(self.Spectrum.data[plotmask].min())*1.1*np.sign(self.Spectrum.data[plotmask].min())
             self.specplotter.ymax = abs(self.Spectrum.data[plotmask].max())*1.1*np.sign(self.Spectrum.data[plotmask].max())
             self.specplotter.plot()
@@ -325,14 +325,18 @@ class Baseline:
                 def f(p,fjac=None): return [0,np.ravel((np.poly1d(p)(subxarr)-data)/err)]
                 return f
 
+        # A good alternate implementation of masking is to only pass mpfit the data
+        # that is unmasked.  That would require some manipulation above...
         err = np.ones(spectrum.shape)
         if exclude is not None:
             err[exclude[0]:exclude[1]] = 1e10
         if mask is not None:
             if mask.dtype.name != 'bool': mask = mask.astype('bool')
             err[mask] = 1e10
-            if hasattr(spectrum,'mask'):
-                spectrum.mask=mask
+            # don't do this: it actually modifies the DATA mask, which is
+            # dangerous!   The high error-per-point should be adequate...
+            #if hasattr(spectrum,'mask'):
+            #    spectrum.mask=mask
         if (spectrum!=spectrum).sum() > 0:
             print "There is an error in baseline: some values are NaN"
             import pdb; pdb.set_trace()

@@ -237,6 +237,8 @@ class ammonia_model(fitter.SimpleFitter):
 
         pars  - a list with len(pars) = 6n, assuming tkin,tex,ntot,width,xoff_v,fortho repeated
         """
+        if parnames is None:
+            parnames = self.parnames
         if len(pars) != len(parnames):
             raise ValueError("Wrong array lengths passed to n_ammonia!")
 
