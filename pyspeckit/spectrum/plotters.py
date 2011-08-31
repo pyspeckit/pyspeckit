@@ -40,6 +40,9 @@ class Plotter(object):
         self.keyclick = None
         self.silent = silent
 
+        self._xclick1 = None
+        self._xclick2 = None
+
     def __call__(self, figure=None, axis=None, clear=True, autorefresh=None, **kwargs):
         """
         Plot a spectrum
@@ -246,6 +249,13 @@ class Plotter(object):
             elif event.key == 'b':
                 print "Baseline initiated from the interactive plotter."
                 self.Spectrum.baseline(interactive=True)
+
+    def get_two_clicks(self,event):
+
+        if self._xclick1 is None:
+            self._xclick1 = event.xdata
+        elif self._xclick2 is None:
+            self._xclick2 = event.xdata
 
 def parse_units(labelstring):
     import re

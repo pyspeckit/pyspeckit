@@ -276,6 +276,13 @@ class SpectroscopicAxis(np.ndarray):
         else: 
             return self.xmin()
 
+    def x_to_pix(self, xval):
+        """
+        Given an X coordinate in SpectroscopicAxis' units, return the corresponding pixel number
+        """
+        nearest_pix = np.argmin(np.abs(self-xval))
+        return nearest_pix
+
     def x_to_coord(self, xval, xunit, verbose=False):
         """
         Given a wavelength/frequency/velocity, return the value in the SpectroscopicAxis's units

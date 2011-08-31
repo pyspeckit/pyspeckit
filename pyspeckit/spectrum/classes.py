@@ -304,18 +304,33 @@ class Spectrum(object):
 
         return newspec
 
-    def stats(self):
+    def stats(self, statrange=(), interactive=False):
         """
-        Return some statistical measures
+        Return some statistical measures in a dictionary (somewhat self-explanatory)
+
+        range - X-range over which to perform measures
+        interactive - specify range interactively in plotter
+
         """
 
+        if len(statrange) == 2:
+            pix1 = self.xarr.x_to_pix(statrange[0])
+            pix2 = self.xarr.x_to_pix(statrange[1])
+            if pix1 > pix2: pix1,pix2 = pix2,pix1
+            elif pix1 == pix2: raise ValueError("Invalid statistics range - includes 0 pixels")
+            data = self.data[pix1:pix2]
+        elif interactive:
+            raise NotImplementedError('Not implemented yet.  Probably need to move the stats command into a different module first')
+        else:
+            data = self.data
+
         stats = {
-            "npts": self.data.shape[0],
-            "std": self.data.std(),
-            "mean": self.data.mean(),
-            "median": np.median(self.data),
-            "min": self.data.min(),
-            "max": self.data.max(),}
+            "npts": data.shape[0],
+            "std": data.std(),
+            "mean": data.mean(),
+            "median": np.median(data),
+            "min": data.min(),
+            "max": data.max(),}
         return stats
 
     def getlines(self, linetype='radio'):
