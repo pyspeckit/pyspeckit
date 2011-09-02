@@ -91,7 +91,8 @@ class Spectrum(object):
     """
 
     def __init__(self,filename=None, filetype=None, xarr=None, data=None,
-            error=None, header=None, doplot=False, plotkwargs={}, **kwargs):
+            error=None, header=None, doplot=False, maskdata=True,
+            plotkwargs={}, **kwargs):
         """
         Initialize the Spectrum.  Accepts files in the following formats:
             - .fits
@@ -141,6 +142,9 @@ class Spectrum(object):
             self.header = header
             self.parse_header(header)
 
+        if maskdata:
+            if hasattr(self.data,'mask'):
+                self.data.mask += np.isnan(self.data) + np.isinf(self.data)
 
         self.plotter = plotters.Plotter(self)
         self._register_fitters()
@@ -255,11 +259,12 @@ class Spectrum(object):
         self.baseline.crop(x1pix,x2pix)
         self.specfit.crop(x1pix,x2pix)
 
-        if self.header.get('CRPIX1'):
-            self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
+        if hasattr(self,'header'):
+            if self.header.get('CRPIX1'):
+                self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
 
-        history.write_history(self.header,"CROP: Cropped from %g to %g (pixel %i to %i)" % (x1,x2,x1pix,x2pix))
-        history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
+            history.write_history(self.header,"CROP: Cropped from %g to %g (pixel %i to %i)" % (x1,x2,x1pix,x2pix))
+            history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
     def smooth(self,smooth,**kwargs):
         """
@@ -482,20 +487,21 @@ class ObsBlock(Spectra):
         for spec in speclist:
             if type(spec) is not Spectrum:
                 raise TypeError("Must create an ObsBlock with a list of spectra.")
-            if not (spec.xarr == self.xarr).all():
-                if force:
-                    spec = arithmetic.interp(spec,self)
-                else:
+            if not np.array_equal(spec.xarr, self.xarr):
+                if not force:
                     raise ValueError("Mismatch between X axes in ObsBlock")
             if spec.units != self.units: 
                 raise ValueError("Mismatched units")
 
-        self.speclist = speclist
-        self.nobs = len(speclist)
+        if force:
+            self.speclist = [arithmetic.interp(spec,self) for spec in speclist]
+        else:
+            self.speclist = speclist
+        self.nobs = len(self.speclist)
 
         # Create a 2-dimensional array of the data
-        self.data = np.array([sp.data for sp in speclist]).swapaxes(0,1)
-        self.error = np.array([sp.error for sp in speclist]).swapaxes(0,1)
+        self.data = np.array([sp.data for sp in self.speclist]).swapaxes(0,1)
+        self.error = np.array([sp.error for sp in self.speclist]).swapaxes(0,1)
 
         self.plotter = plotters.Plotter(self)
         self._register_fitters()

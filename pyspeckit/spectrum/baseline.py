@@ -28,6 +28,7 @@ class Baseline:
         self.include = [self.bx1,self.bx2]
         self.includevelo = [Spectrum.xarr[self.bx1],Spectrum.xarr[self.bx2]]
         self.powerlaw=False
+        self._plots = []
 
     def __call__(self, order=1, annotate=False, excludefit=False, save=True,
             exclude=None, exclusionlevel=0.01, interactive=False, 
@@ -71,7 +72,7 @@ class Baseline:
             self.excludepix  = []
             self.includevelo = []
             self.includepix  = []
-            selectregion_interactive = lambda(x): self.selectregion_interactive(x,**kwargs)
+            selectregion_interactive = lambda(x): self.selectregion_interactive(x, LoudDebug=LoudDebug, **kwargs)
             self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',selectregion_interactive)
         else:
             self.selectregion(**kwargs)
@@ -83,20 +84,22 @@ class Baseline:
                 self.excludemask = abs(specfit.model) > exclusionlevel*abs(min(specfit.modelpars[0::3]))
             else:
                 self.excludemask[:] = False
-            self.dofit(exclude=exclude,annotate=annotate,fit_original=fit_original,**kwargs)
+            self.dofit(exclude=exclude,annotate=annotate,fit_original=fit_original, LoudDebug=LoudDebug, **kwargs)
         if save: self.savefit()
         if LoudDebug:
             print "Range: %i:%i" % (self.bx1,self.bx2)
             print "Excluded: %i" % (self.excludemask.sum())
 
     def dofit(self, exclude=None, excludeunits='velo', annotate=False,
-            include=None, includeunits='velo', 
+            include=None, includeunits='velo', LoudDebug=False,
             subtract=True, fit_original=False, powerlaw=False, **kwargs):
         """
         Do the baseline fitting and save and plot the results.
 
         Can specify a region to exclude using velocity units or pixel units
         """
+        if LoudDebug:
+            print "include: ",include," units: ",includeunits," exclude: ",exclude," units: ",excludeunits
         if include is not None and includeunits in ['velo','km/s','wavelength','frequency']:
             self.excludemask[:] = True
             if len(include) % 2 == 0:
@@ -140,6 +143,9 @@ class Baseline:
             self.excludepix = []
             self.excludevelo = []
 
+        if LoudDebug:
+            print "Excluded: ",self.excludemask.sum()," out of ",self.bx2-self.bx1
+
         self.basespec, self.baselinepars = self._baseline(
                 self.spectofit[self.bx1:self.bx2],
                 xarr=self.Spectrum.xarr[self.bx1:self.bx2],
@@ -173,9 +179,11 @@ class Baseline:
         if self.specplotter.errorplot is not None: 
             for p in self.specplotter.errorplot:
                 if isinstance(p,matplotlib.collections.PolyCollection):
-                    if p in self.specplotter.axis.collections: self.specplotter.axis.collections.remove(p)
+                    if p in self.specplotter.axis.collections: 
+                        self.specplotter.axis.collections.remove(p)
                 if isinstance(p,matplotlib.lines.Line2D):
-                    if p in self.specplotter.axis.lines: self.specplotter.axis.lines.remove(p)
+                    if p in self.specplotter.axis.lines: 
+                        self.specplotter.axis.lines.remove(p)
 
         # if we subtract the baseline, replot the now-subtracted data with rescaled Y axes
         if self.subtracted:
@@ -189,10 +197,21 @@ class Baseline:
             self.specplotter.plot()
         else: # otherwise just overplot the fit
             self.specplotter.axis.set_autoscale_on(False)
-            self.specplotter.axis.plot(self.Spectrum.xarr,self.basespec,color=plotcolor)
+            for p in self._plots:
+                # remove the old baseline plots
+                if p in self.specplotter.axis.lines:
+                    self.specplotter.axis.lines.remove(p)
+            self._plots += self.specplotter.axis.plot(self.Spectrum.xarr,self.basespec,color=plotcolor)
 
         if annotate: self.annotate() # refreshes automatically
         elif self.specplotter.autorefresh: self.specplotter.refresh()
+
+    def unsubtract(self):
+        if self.subtracted:
+            self.Spectrum.data += self.basespec
+            self.subtracted = False
+        else: 
+            print "Baseline wasn't subtracted; not unsubtracting."
 
     def selectregion_interactive(self,event,**kwargs):
         """
@@ -201,28 +220,33 @@ class Baseline:
         toolbar = self.specplotter.figure.canvas.manager.toolbar
         if toolbar.mode == '':
             if hasattr(event,'button'):
+                xpix = self.Spectrum.xarr.x_to_pix(event.xdata)
                 if event.button == 1:
                     if self.nclicks_b1 == 0:
-                        self.bx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
-                        self.includevelo += [self.Spectrum.xarr[self.bx1]]
-                        self.includepix  += [self.bx1]
+                        if xpix < self.bx1:
+                            self.bx1 = xpix
+                        self.includevelo += [self.Spectrum.xarr[xpix]]
+                        self.includepix  += [xpix]
                         self.nclicks_b1 += 1
+                        self._xclick1 = xpix
                     elif self.nclicks_b1 == 1:
-                        self.bx2 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
+                        if xpix > self.bx2:
+                            self.bx2 = xpix
+                        self._xclick2 = xpix
                         self.nclicks_b1 -= 1
-                        if self.bx1 > self.bx2: self.bx1,self.bx2 = self.bx2,self.bx1
+                        if self._xclick1 > self._xclick2: self.bx1,self._xclick2 = self._xclick2,self.bx1
                         self.fitregion += self.specplotter.axis.plot(
-                                self.Spectrum.xarr[self.bx1:self.bx2],
-                                self.Spectrum.data[self.bx1:self.bx2]+self.specplotter.offset,
+                                self.Spectrum.xarr[self._xclick1:self._xclick2],
+                                self.Spectrum.data[self._xclick1:self._xclick2]+self.specplotter.offset,
                                 drawstyle='steps-mid',
                                 color='g',alpha=0.5)
                         self.specplotter.refresh()
-                        self.excludemask[self.bx1:self.bx2] = False
-                        self.includevelo += [self.Spectrum.xarr[self.bx2]]
-                        self.includepix  += [self.bx2]
+                        self.excludemask[self._xclick1:self._xclick2] = False
+                        self.includevelo += [self.Spectrum.xarr[self._xclick2]]
+                        self.includepix  += [self._xclick2]
                 if event.button in [2,3]:
                     self.specplotter.figure.canvas.mpl_disconnect(self.click)
-                    self.dofit(**kwargs)
+                    self.dofit(include=self.includepix, includeunits='pix', **kwargs)
                     for p in self.fitregion:
                         p.set_visible(False)
                         if p in self.specplotter.axis.lines: self.specplotter.axis.lines.remove(p)

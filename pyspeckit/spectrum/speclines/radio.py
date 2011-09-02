@@ -97,17 +97,22 @@ class radio_lines(object):
         self._linenames = []
 
     def show(self, voff=0.0, ymax_scale=0.8, userecommended=True,
-            maxupperstateenergy=None, color='r', verbose=False, **kwargs):
+            maxupperstateenergy=None, color='r', verbose=False, 
+            force=False, **kwargs):
         """
         Display vertical lines (using 'vlines') at the position of each
         discovered line
         """
         ymin = self.Spectrum.plotter.ymin
         ymax = self.Spectrum.plotter.ymax
+        if ymax < 0:
+            ymax_scale = 1.0/ymax_scale
 
         self.hide()
 
         mask = np.ones(len(self.table),dtype='bool')
+        mask *= (self.table.frequency > self.Spectrum.xarr.umin(units='GHz')) * (self.table.frequency < self.Spectrum.xarr.umax(units='GHz'))
+
         if userecommended:
             mask *= self.table.frequencyrecommended
         if maxupperstateenergy is not None:
@@ -116,6 +121,8 @@ class radio_lines(object):
         freqoff = voff * 1e3 / units.speedoflight_ms * self.table.frequency[mask]
 
         if mask.sum() > 0:
+            if mask.sum() > 30 and not force:
+                print "WARNING: show() will plot %i lines!  Use force=True if you want this to happen anyway." % (mask.sum())
             if verbose: print "Labeled %i lines." % mask.sum()
             self._lines += [self.Spectrum.plotter.axis.vlines( 
                     self.Spectrum.xarr.x_to_coord(self.table.frequency[mask]-freqoff, 'GHz'),
@@ -139,10 +146,12 @@ class radio_lines(object):
         for text in self._linenames:
             if text in self.Spectrum.plotter.axis.texts:
                 self.Spectrum.plotter.axis.texts.remove(text)
+        for text in self._linenames:
             self._linenames.remove(text)
         for line in self._lines:
             if line in self.Spectrum.plotter.axis.collections:
                 self.Spectrum.plotter.axis.collections.remove(line)
+        for line in self._lines:
             self._lines.remove(line)
 
         if self.Spectrum.plotter.autorefresh:
