@@ -123,6 +123,7 @@ class radio_lines(object):
         if mask.sum() > 0:
             if mask.sum() > 30 and not force:
                 print "WARNING: show() will plot %i lines!  Use force=True if you want this to happen anyway." % (mask.sum())
+                return
             if verbose: print "Labeled %i lines." % mask.sum()
             self._lines += [self.Spectrum.plotter.axis.vlines( 
                     self.Spectrum.xarr.x_to_coord(self.table.frequency[mask]-freqoff, 'GHz'),

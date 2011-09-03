@@ -36,3 +36,22 @@ def interp(spec1,spec2):
             header=spec2.header)
 
     return newSpec
+
+def interpnans(spec):
+    """
+    Interpolate over NAN values, replacing them with their neighbors...
+    """
+
+    if hasattr(spec.data,'mask'):
+        OK = True - spec.data.mask
+    else:
+        OK = True - (np.isnan(spec.data) + np.isinf(spec.data))
+
+    newdata = _interp(spec.xarr,spec.xarr[OK],spec.data[OK])
+    spec.data.mask[:] = False
+    spec.data = newdata
+
+    if spec.error is not None:
+        newerror = _interp(spec.xarr,spec.xarr[OK],spec.error[OK]) 
+        spec.error = newerror
+
