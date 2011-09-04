@@ -39,11 +39,15 @@ def smooth(data,smooth,smoothtype='gaussian',downsample=True,downsample_factor=N
 
     # deal with NANs or masked values
     if hasattr(data,'mask'):
-        OK = True - data.mask
+        if type(data.mask) is np.ndarray:
+            OK = True - data.mask
+            data = arithmetic._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
+    if np.any(True - np.isfinite(data)):
+        OK = np.isfinite(data)
         data = arithmetic._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
-    elif (True - np.isfinite(data)).sum() > 0:
-        OK = (True - np.isfinite(data))
-        data = arithmetic._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
+
+    if np.any(True - np.isfinite(data)):
+        raise ValueError("NANs in data array after they have been forcibly removed.")
 
     smdata = np.convolve(data,kernel,convmode)[::downsample_factor]
 

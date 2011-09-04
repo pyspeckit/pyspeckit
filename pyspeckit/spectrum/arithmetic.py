@@ -43,8 +43,9 @@ def interpnans(spec):
     """
 
     if hasattr(spec.data,'mask'):
-        OK = True - spec.data.mask
-    else:
+        if type(spec.data.mask) is np.ndarray:
+            OK = True - spec.data.mask
+    if np.any(np.isnan(spec.data) + np.isinf(spec.data)):
         OK = True - (np.isnan(spec.data) + np.isinf(spec.data))
 
     newdata = _interp(spec.xarr,spec.xarr[OK],spec.data[OK])
