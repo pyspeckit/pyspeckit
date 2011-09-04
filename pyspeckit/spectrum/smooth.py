@@ -1,4 +1,5 @@
 import numpy as np
+import arithmetic
 
 def smooth(data,smooth,smoothtype='gaussian',downsample=True,downsample_factor=None,
         convmode='same'):
@@ -35,6 +36,14 @@ def smooth(data,smooth,smoothtype='gaussian',downsample=True,downsample_factor=N
                 kernel = kernel[lengthdiff/2+1:-lengthdiff/2-1]
     elif smoothtype == 'boxcar':
         kernel = np.ones(roundsmooth)/float(roundsmooth)
+
+    # deal with NANs or masked values
+    if hasattr(data,'mask'):
+        OK = True - data.mask
+        data = arithmetic._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
+    elif (True - np.isfinite(data)).sum() > 0:
+        OK = (True - np.isfinite(data))
+        data = arithmetic._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
 
     smdata = np.convolve(data,kernel,convmode)[::downsample_factor]
 
