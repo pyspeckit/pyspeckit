@@ -81,6 +81,7 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
         spec = scale_action(spec,scaleval)
         errpsec = scale_action(errspec,scaleval)
 
+    xarr = None
     if hdr.get('ORIGIN') == 'CLASS-Grenoble':
         # Use the CLASS FITS definition (which is non-standard)
         # http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node84.html
@@ -92,16 +93,26 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
     elif hdr.get('CD%s_%s%s' % (specaxis,specaxis,wcstype)):
         dv,v0,p3 = hdr['CD%s_%s%s' % (specaxis,specaxis,wcstype)],hdr['CRVAL%s%s' % (specaxis,wcstype)],hdr['CRPIX%s%s' % (specaxis,wcstype)]
         hdr.update('CDELT%s' % specaxis,dv)
-    else:
+    elif hdr.get('CDELT%s%s' % (specaxis,wcstype)):
         dv,v0,p3 = hdr['CDELT%s%s' % (specaxis,wcstype)],hdr['CRVAL%s%s' % (specaxis,wcstype)],hdr['CRPIX%s%s' % (specaxis,wcstype)]
+    elif len(data.shape) > 1:
+        # try assuming first axis is X axis
+        if hdr.get('CUNIT%s%s' % (specaxis,wcstype)):
+            xarr = data[0,:]
+            spec = data[1,:]
+            if data.shape[0] > 2:
+                errspec = data[2,:]
+        else:
+            raise TypeError("Don't know what type of FITS file you've input; its header is not FITS compliant and it doesn't look like it was written by pyspeckit.")
 
     # Deal with logarithmic wavelength binning if necessary
-    if hdr.get('WFITTYPE') == 'LOG-LINEAR':
-        xconv = lambda v: 10**((v-p3+1)*dv+v0)
-        xarr = xconv(np.arange(len(spec)))
-    else:
-        xconv = lambda v: ((v-p3+1)*dv+v0)
-        xarr = xconv(np.arange(len(spec)))
+    if xarr is None:
+        if hdr.get('WFITTYPE') == 'LOG-LINEAR':
+            xconv = lambda v: 10**((v-p3+1)*dv+v0)
+            xarr = xconv(np.arange(len(spec)))
+        else:
+            xconv = lambda v: ((v-p3+1)*dv+v0)
+            xarr = xconv(np.arange(len(spec)))
     
     restfreq = hdr.get('RESTFREQ')
     if restfreq is None: restfrq= hdr.get('RESTFRQ')

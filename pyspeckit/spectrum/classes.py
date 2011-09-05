@@ -266,11 +266,12 @@ class Spectrum(object):
         self.specfit.crop(x1pix,x2pix)
 
         if hasattr(self,'header'):
+            history.write_history(self.header,"CROP: Cropped from %g to %g (pixel %i to %i)" % (x1,x2,x1pix,x2pix))
+
             if self.header.get('CRPIX1'):
                 self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
+                history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
-            history.write_history(self.header,"CROP: Cropped from %g to %g (pixel %i to %i)" % (x1,x2,x1pix,x2pix))
-            history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
     def smooth(self,smooth,**kwargs):
         """
@@ -388,9 +389,14 @@ class Spectra(Spectrum):
 
         print "Concatenating data"
         self.xarr = units.SpectroscopicAxes([sp.xarr for sp in speclist])
-        self.data = np.concatenate([sp.data for sp in speclist])
-        self.error = np.concatenate([sp.error for sp in speclist])
+        self.data = np.ma.concatenate([sp.data for sp in speclist])
+        self.error = np.ma.concatenate([sp.error for sp in speclist])
         self._sort()
+
+        self.header = pyfits.Header()
+        for spec in speclist:
+            for key,value in spec.header.items():
+                self.header.update(key,value)
 
         self.plotter = plotters.Plotter(self)
         self._register_fitters()

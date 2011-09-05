@@ -458,6 +458,9 @@ class SpectroscopicAxis(np.ndarray):
         """
         self.dxarr = self[1:]-self[:-1]
 
+        if self.wcshead is None:
+            self.wcshead = {}
+
         self.wcshead['CUNIT1'] = self.units
         if fits_type[self.xtype] == 'VELO' and self.velocity_convention is not None:
             ctype = 'V'+convention_suffix[self.velocity_convention]
