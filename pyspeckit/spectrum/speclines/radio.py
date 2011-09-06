@@ -78,15 +78,15 @@ def LatexName(species,qn):
 
 
 class radio_lines(object):
-    def __init__(self, spectrum, webquery=True, **kwargs):
+    def __init__(self, spectrum, voff=0.0, webquery=True, **kwargs):
         """
         Initialize the radio lines class
         Requires a spectrum object 
         """
         self.Spectrum = spectrum
 
-        self.minfreq_GHz = self.Spectrum.xarr.umin(units='GHz')
-        self.maxfreq_GHz = self.Spectrum.xarr.umax(units='GHz')
+        self.minfreq_GHz = self.Spectrum.xarr.umin(units='GHz')*(1+voff/units.speedoflight_kms)
+        self.maxfreq_GHz = self.Spectrum.xarr.umax(units='GHz')*(1+voff/units.speedoflight_kms)
 
         self.table = get_splat_table(webquery=webquery, 
                 minwav=units.speedoflight_ms/self.maxfreq_GHz/1e9,
@@ -97,8 +97,8 @@ class radio_lines(object):
         self._linenames = []
 
     def show(self, voff=0.0, ymax_scale=0.8, userecommended=True,
-            maxupperstateenergy=None, color='r', verbose=False, 
-            force=False, **kwargs):
+            maxupperstateenergy=None, minupperstateenergy=None, color='r',
+            verbose=False, force=False, regexp=None, **kwargs):
         """
         Display vertical lines (using 'vlines') at the position of each
         discovered line
@@ -111,12 +111,19 @@ class radio_lines(object):
         self.hide()
 
         mask = np.ones(len(self.table),dtype='bool')
-        mask *= (self.table.frequency > self.Spectrum.xarr.umin(units='GHz')) * (self.table.frequency < self.Spectrum.xarr.umax(units='GHz'))
+        mask *= ((self.table.frequency > self.Spectrum.xarr.umin(units='GHz')*(1+voff/units.speedoflight_kms)) * 
+                (self.table.frequency < self.Spectrum.xarr.umax(units='GHz')*(1+voff/units.speedoflight_kms)))
 
         if userecommended:
             mask *= self.table.frequencyrecommended
         if maxupperstateenergy is not None:
             mask *= (self.table.upperstateenergyK < maxupperstateenergy)
+        if minupperstateenergy is not None:
+            mask *= (self.table.upperstateenergyK > minupperstateenergy)
+        if regexp is not None:
+            import re
+            reg = re.compile(regexp)
+            mask *= np.array([reg.search(sn) is not None for sn in self.table.Species])
 
         freqoff = voff * 1e3 / units.speedoflight_ms * self.table.frequency[mask]
 

@@ -151,6 +151,8 @@ fits_type = {'velocity':'VELO','frequency':'FREQ','length':'WAVE','redshift':'RE
 convention_suffix = {'radio':'RAD','optical':'OPT','relativistic':'REL','redshift':'RED'}
 
 speedoflight_ms = 2.99792458e8 # m/s
+speedoflight_kms = 2.99792458e5 # m/s
+speedoflight_cms = 2.99792458e10 # m/s
 
 class SpectroscopicAxis(np.ndarray):
     """

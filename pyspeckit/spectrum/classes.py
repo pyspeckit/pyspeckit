@@ -289,12 +289,13 @@ class Spectrum(object):
         self._smooth_header(smooth)
 
     def _smooth_header(self,smooth):
-        self.header.update('CDELT1',self.header.get('CDELT1') * float(smooth))
-        self.header.update('CRPIX1',self.header.get('CRPIX1') / float(smooth))
+        if self.header.get('CDELT1') is not None and self.header.get('CRPIX1') is not None:
+            self.header.update('CDELT1',self.header.get('CDELT1') * float(smooth))
+            self.header.update('CRPIX1',self.header.get('CRPIX1') / float(smooth))
 
-        history.write_history(self.header,"SMOOTH: Smoothed and downsampled spectrum by factor %i" % (smooth))
-        history.write_history(self.header,"SMOOTH: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')*float(smooth),self.header.get('CRPIX1')))
-        history.write_history(self.header,"SMOOTH: Changed CDELT1 from %f to %f" % (self.header.get('CRPIX1')/float(smooth),self.header.get('CRPIX1')))
+            history.write_history(self.header,"SMOOTH: Smoothed and downsampled spectrum by factor %i" % (smooth))
+            history.write_history(self.header,"SMOOTH: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')*float(smooth),self.header.get('CRPIX1')))
+            history.write_history(self.header,"SMOOTH: Changed CDELT1 from %f to %f" % (self.header.get('CRPIX1')/float(smooth),self.header.get('CRPIX1')))
 
     def shape(self):
         """
@@ -345,7 +346,7 @@ class Spectrum(object):
             "max": data.max(),}
         return stats
 
-    def getlines(self, linetype='radio'):
+    def getlines(self, linetype='radio', **kwargs):
         """
         Access a registered database of spectral lines.  Will add an attribute
         with the name linetype, which then has properties defined by the
@@ -360,7 +361,7 @@ class Spectrum(object):
         # or optical:
         # self.optical = speclines.optical.optical_lines(self)
         if not self.__dict__.has_key(linetype): # don't replace it if it already exists
-            self.__dict__[linetype] = speclines.__dict__[linetype].__dict__[linetype+"_lines"](self)
+            self.__dict__[linetype] = speclines.__dict__[linetype].__dict__[linetype+"_lines"](self,**kwargs)
 
 
 
