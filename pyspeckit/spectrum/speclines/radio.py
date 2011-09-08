@@ -93,10 +93,11 @@ class radio_lines(object):
                 maxwav=units.speedoflight_ms/self.minfreq_GHz/1e9,
                 waveunits='m')
 
+        self.voff = voff
         self._lines = []
         self._linenames = []
 
-    def show(self, voff=0.0, ymax_scale=0.8, userecommended=True,
+    def show(self, voff=None, ymax_scale=0.8, userecommended=True,
             maxupperstateenergy=None, minupperstateenergy=None, color='r',
             verbose=False, force=False, regexp=None, **kwargs):
         """
@@ -109,6 +110,7 @@ class radio_lines(object):
             ymax_scale = 1.0/ymax_scale
 
         self.hide()
+        voff = self.voff if voff is None else voff
 
         mask = np.ones(len(self.table),dtype='bool')
         mask *= ((self.table.frequency > self.Spectrum.xarr.umin(units='GHz')*(1+voff/units.speedoflight_kms)) * 

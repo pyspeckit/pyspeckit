@@ -147,6 +147,8 @@ voff_lines_dict={ # opposite signs of freq offset
 
 def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0, 
         return_components=False, Tbackground=2.73, 
+        texgrid=None,
+        taugrid=None,
         path_to_texgrid='',
         path_to_taugrid='',
         temperature_gridnumber=3,
@@ -156,20 +158,26 @@ def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0,
     Use a grid of RADEX-computed models to make a model line spectrum
 
     The RADEX models have to be available somewhere.
+    OR they can be passed as arrays.  If as arrays, the form should be:
+    texgrid = ((minfreq1,maxfreq1,texgrid1),(minfreq2,maxfreq2,texgrid2))
 
     xarr must be a SpectroscopicAxis instance
     xoff_v, width are both in km/s
     """
 
-    if path_to_texgrid == '' or path_to_taugrid=='':
-        raise IOError("Must specify model grids to use.")
-    else:
-        taugrid = pyfits.getdata(path_to_taugrid)
-        texgrid = pyfits.getdata(path_to_texgrid)
-        hdr = pyfits.getheader(path_to_taugrid)
-        yinds,xinds = np.indices(taugrid.shape[1:])
-        densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
-        columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+    if texgrid is None and taugrid is None:
+        if path_to_texgrid == '' or path_to_taugrid=='':
+            raise IOError("Must specify model grids to use.")
+        else:
+            taugrid = pyfits.getdata(path_to_taugrid)
+            texgrid = pyfits.getdata(path_to_texgrid)
+            hdr = pyfits.getheader(path_to_taugrid)
+            yinds,xinds = np.indices(taugrid.shape[1:])
+            densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
+            columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+    elif len(texgrid) % 3 == 0 and len(taugrid)==len(texgrid):
+        minfreq,maxfreq,texgrid = zip(*texgrid)
+        minfreq,maxfreq,taugrid = zip(*taugrid)
     
     # Convert X-units to frequency in GHz
     xarr = copy.copy(xarr)
@@ -182,8 +190,8 @@ def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0,
     if np.isnan(gridval1) or np.isnan(gridval2):
         raise ValueError("Invalid column/density")
 
-    tau = scipy.ndimage.map_coordinates(taugrid[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1)
-    tex = scipy.ndimage.map_coordinates(texgrid[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1)
+    tau = [scipy.ndimage.map_coordinates(tg[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1) for tg in taugrid]
+    tex = [scipy.ndimage.map_coordinates(tg[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1) for tg in texgrid]
     #tau = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,taugrid[temperature_gridnumber,:,:])
     #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
 
@@ -204,9 +212,11 @@ def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0,
             nuwidth = np.abs(width/ckms*lines)
             nuoff = xoff_v/ckms*lines
             # the total optical depth, which is being fitted, should be the sum of the components
-            tau_line = (tau * relative_strength_theory[linename]) / relative_strength_total_degeneracy[linename]
+            tau_line = [(T * relative_strength_theory[linename]) / relative_strength_total_degeneracy[linename] for T in tau]
       
-            tau_nu = np.array(tau_line * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
+            tau_nu = np.sum([np.array(tau_line[ii] * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
+                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])
+                for ii in xrange(len(tau_line))], axis=0) # THIS MIGHT NOT BE RIGHT FIX IT!
             tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
             components.append( tau_nu )
         tau_nu_cumul += tau_nu
@@ -214,9 +224,14 @@ def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0,
     # add a list of the individual 'component' spectra to the total components...
 
     if return_components:
-        return (1.0-np.exp(-np.array(components)))*(tex-Tbackground)
+        # not clear if the slicing works here...
+        return np.sum([((1.0-np.exp(-np.array(components)))*(tex[ii]-Tbackground)
+                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
+                axis=0)
 
-    spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(tex-Tbackground)
+    spec = np.sum([((1.0-np.exp(-np.array(tau_nu_cumul)))*(tex[ii]-Tbackground)
+                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
+                axis=0)
   
     return spec
 
@@ -229,6 +244,7 @@ formaldehyde11_radex_fitter = model.SpectralModel(formaldehyde_radex,4,
         fitunits='Hz',
         path_to_texgrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex1.fits',
         path_to_taugrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau1.fits',
+        shortvarnames=("n","N","v","\\sigma"),
         )
 
 formaldehyde11_radex_vheight_fitter = model.SpectralModel(fitter.vheightmodel(formaldehyde_radex),5,

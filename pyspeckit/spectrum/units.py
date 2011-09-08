@@ -381,6 +381,14 @@ class SpectroscopicAxis(np.ndarray):
         else:
             raise ValueError("Units not recognized.")
 
+    def as_unit(self, unit, **kwargs):
+        """
+        Return the X-array in the specified units without changing it
+        (similar to convert_to_unit
+        """
+        raise NotImplementedError
+        return
+
     def convert_to_unit(self,unit,frame='rest', quiet=False,
             center_frequency=None, center_frequency_units=None, **kwargs):
         """

@@ -1,17 +1,21 @@
 import numpy as np
 from mpfit import mpfit
 import copy
+import matplotlib.cbook as mpcb
 
 class SpectralModel(object):
 
     def __init__(self, modelfunc, npars, parnames=None, parvalues=None,
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
-            partied=None, fitunits=None, parsteps=None, **kwargs):
+            partied=None, fitunits=None, parsteps=None, npeaks=1,
+            shortvarnames=("A","v","\\sigma"), **kwargs):
 
         self.modelfunc = modelfunc
         self.npars = npars
         self.parnames = parnames
         self.fitunits = fitunits
+        self.npeaks = npeaks
+        self.shortvarnames = shortvarnames
 
         temp_pardict = dict([(varname, np.zeros(self.npars, dtype='bool')) if locals()[varname] is None else (varname, locals()[varname])
             for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
@@ -39,13 +43,17 @@ class SpectralModel(object):
             def f(p,fjac=None): return [0,(y-self.modelfunc(x,*p, **self.modelfunc_kwargs))/err]
         return f
 
-    def __call__(self, xax, data, err=None, guesses=[], quiet=True, shh=True, veryverbose=False, **kwargs):
+    def __call__(self, xax, data, err=None, params=[], quiet=True, shh=True,
+            veryverbose=False, npeaks=None, **kwargs):
         """
         Run the fitter
         """
 
-        if len(guesses) == self.npars:
-            for par,guess in zip(self.parinfo,guesses):
+        if npeaks is not None:
+            self.npeaks = npeaks
+
+        if len(params) == self.npars:
+            for par,guess in zip(self.parinfo,params):
                 par['value'] = guess
         
         for varname in str.split("limits,limited,fixed,tied",","):
@@ -86,9 +94,17 @@ class SpectralModel(object):
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
         self.mp = mp
-        self.mpp = mpp[1:]
-        self.mpperr = mpperr[1:]
+        self.mpp = mpp#[1:]
+        self.mpperr = mpperr#[1:]
         self.model = self.modelfunc(xax,*mpp,**self.modelfunc_kwargs)
         return mpp,self.model,mpperr,chi2
 
+
+    def annotations(self, shortvarnames=None):
+        svn = self.shortvarnames if shortvarnames is None else shortvarnames
+        label_list = [(
+                "$%s(%i)$=%6.4g $\\pm$ %6.4g" % (svn[ii],jj,self.mpp[ii+jj*self.npars],self.mpperr[ii+jj*self.npars]),
+                          ) for ii in range(len(svn)) for jj in range(self.npeaks)]
+        labels = tuple(mpcb.flatten(label_list))
+        return labels
 
