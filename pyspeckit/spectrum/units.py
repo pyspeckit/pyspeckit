@@ -381,15 +381,23 @@ class SpectroscopicAxis(np.ndarray):
         else:
             raise ValueError("Units not recognized.")
 
-    def as_unit(self, unit, **kwargs):
+    def convert_to_unit(self, unit, quiet=False, **kwargs):
         """
         Return the X-array in the specified units without changing it
         (similar to convert_to_unit
         """
-        raise NotImplementedError
-        return
+        if not quiet: print "Converting from unit %s to %s" % (self.units, unit)
+        self[:] = self.as_unit(unit,**kwargs)
+        
+        if unit in velocity_dict:
+            self.xtype = "Velocity"
+        elif unit in frequency_dict:
+            self.xtype = "Frequency"
 
-    def convert_to_unit(self,unit,frame='rest', quiet=False,
+        self.units = unit
+        self.dxarr = self[1:]-self[:-1]
+
+    def as_unit(self,unit,frame='rest', quiet=True,
             center_frequency=None, center_frequency_units=None, **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
@@ -416,32 +424,32 @@ class SpectroscopicAxis(np.ndarray):
 
         if change_xtype:
             if unit in velocity_dict and conversion_dict[self.xtype] is frequency_dict:
-                self[:] = frequency_to_velocity(self,self.units,
+                newxarr = frequency_to_velocity(self,self.units,
                         center_frequency=center_frequency,
                         center_frequency_units=center_frequency_units,
                         velocity_units=unit, convention=self.velocity_convention)
-                self.xtype = "Velocity"
-                self.units = unit
-                self.dxarr = self[1:]-self[:-1]
+                newxtype = "Velocity"
+                newunit = unit
             elif unit in frequency_dict and conversion_dict[self.xtype] is velocity_dict:
-                self[:] = velocity_to_frequency(self,self.units,
+                newxarr = velocity_to_frequency(self,self.units,
                         center_frequency=center_frequency,
                         center_frequency_units=center_frequency_units,
                         frequency_units=unit, convention=self.velocity_convention)
-                self.xtype = "Frequency"
-                self.units = unit
-                self.dxarr = self[1:]-self[:-1]
+                newxtype = "Frequency"
+                newunit = unit
             else:
                 print "Could not convert from %s to %s" % (self.units,unit)
+        else:
+            newxtype = self.xtype
+            newxarr = self
+            newunit = self.units
 
         # re-check whether units need to be changed; it is possible that change_xtype left you 
         # with the correct units
-        if unit != self.units and change_units:
-            conversion_factor = conversion_dict[self.xtype][self.units] / conversion_dict[self.xtype][unit] 
-            if not quiet: print "Converting units from %s to %s" % (self.units,unit)
-            self.units = unit
-            self *= conversion_factor
-            self.dxarr = self[1:]-self[:-1]
+        if unit != newunit and change_units:
+            conversion_factor = conversion_dict[newxtype][newunit] / conversion_dict[newxtype][unit] 
+            if not quiet: print "Converting units from %s to %s" % (newunit,unit)
+            newxarr = newxarr*conversion_factor
 
         if change_frame and not quiet:
             if not quiet: print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
@@ -452,6 +460,8 @@ class SpectroscopicAxis(np.ndarray):
         # this should be implemented but requires a callback to spectrum...
         #if replot:
         #    self.spectrum.plotter(reset_xlimits=True)
+
+        return newxarr
 
     def cdelt(self, tolerance=1e-8):
         """

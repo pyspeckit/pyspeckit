@@ -483,6 +483,7 @@ class Specfit(object):
         # but argmin(abs(lastelt-array)) = 9
         cdelt_is_pos = self.Spectrum.xarr[-1] > self.Spectrum.xarr[0]
         if xmin is not None and xmax is not None:
+            if xmin > xmax: xmin,xmax = xmax,xmin
             if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
                 self.gx1 = np.argmin(abs(xmin-self.Spectrum.xarr))+1*(not cdelt_is_pos)
                 self.gx2 = np.argmin(abs(xmax-self.Spectrum.xarr))+1*cdelt_is_pos
@@ -490,6 +491,7 @@ class Specfit(object):
                 self.gx1 = xmin
                 self.gx2 = xmax
         elif self.specplotter.xmin is not None and self.specplotter.xmax is not None:
+            if self.specplotter.xmin > self.specplotter.xmax: self.specplotter.xmin,self.specplotter.xmax = self.specplotter.xmax,self.specplotter.xmin
             self.gx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))+1*(not cdelt_is_pos)
             self.gx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))+1*cdelt_is_pos
         elif reset:

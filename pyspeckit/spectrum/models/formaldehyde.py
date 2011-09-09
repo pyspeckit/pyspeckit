@@ -149,6 +149,7 @@ def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0,
         return_components=False, Tbackground=2.73, 
         texgrid=None,
         taugrid=None,
+        hdr=None,
         path_to_texgrid='',
         path_to_taugrid='',
         temperature_gridnumber=3,
@@ -169,15 +170,22 @@ def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0,
         if path_to_texgrid == '' or path_to_taugrid=='':
             raise IOError("Must specify model grids to use.")
         else:
-            taugrid = pyfits.getdata(path_to_taugrid)
-            texgrid = pyfits.getdata(path_to_texgrid)
+            taugrid = [pyfits.getdata(path_to_taugrid)]
+            texgrid = [pyfits.getdata(path_to_texgrid)]
             hdr = pyfits.getheader(path_to_taugrid)
-            yinds,xinds = np.indices(taugrid.shape[1:])
+            yinds,xinds = np.indices(taugrid[0].shape[1:])
             densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
             columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
-    elif len(texgrid) % 3 == 0 and len(taugrid)==len(texgrid):
+            minfreq = (4.8,)
+            maxfreq = (5.0,)
+    elif len(taugrid)==len(texgrid) and hdr is not None:
         minfreq,maxfreq,texgrid = zip(*texgrid)
         minfreq,maxfreq,taugrid = zip(*taugrid)
+        yinds,xinds = np.indices(taugrid[0].shape[1:])
+        densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
+        columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+    else:
+        raise Exception
     
     # Convert X-units to frequency in GHz
     xarr = copy.copy(xarr)
@@ -234,6 +242,25 @@ def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0,
                 axis=0)
   
     return spec
+
+texgrid1 = pyfits.getdata('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex1.fits')
+taugrid1 = pyfits.getdata('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau1.fits')
+texgrid2 = pyfits.getdata('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex2.fits')
+taugrid2 = pyfits.getdata('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau2.fits')
+hdr = pyfits.getheader('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau2.fits')
+
+formaldehyde_radex_fitter = model.SpectralModel(formaldehyde_radex,4,
+        parnames=['density','column','center','width'], 
+        parvalues=[4,12,0,1],
+        parlimited=[(True,True), (True,True), (False,False), (True,False)], 
+        parlimits=[(1,8), (11,16), (0,0), (0,0)],
+        parsteps=[0.01,0.01,0,0],
+        fitunits='Hz',
+        texgrid=((4,5,texgrid1),(14,15,texgrid2)),
+        taugrid=((4,5,taugrid1),(14,15,taugrid2)),
+        hdr=hdr,
+        shortvarnames=("n","N","v","\\sigma"),
+        )
 
 formaldehyde11_radex_fitter = model.SpectralModel(formaldehyde_radex,4,
         parnames=['density','column','center','width'], 
