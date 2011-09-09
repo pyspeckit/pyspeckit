@@ -101,10 +101,12 @@ class SpectralModel(object):
 
 
     def annotations(self, shortvarnames=None):
+        from decimal import Decimal # for formatting
         svn = self.shortvarnames if shortvarnames is None else shortvarnames
         label_list = [(
-                "$%s(%i)$=%6.4g $\\pm$ %6.4g" % (svn[ii],jj,self.mpp[ii+jj*self.npars],self.mpperr[ii+jj*self.npars]),
+                "$%s(%i)$=%8s $\\pm$ %8s" % (svn[ii],jj,
+                Decimal("%g" % self.mpp[ii+jj*self.npars]).quantize(Decimal("%0.2g" % (min(self.mpp[ii+jj*self.npars],self.mpperr[ii+jj*self.npars])))),
+                Decimal("%g" % self.mpperr[ii+jj*self.npars]).quantize(Decimal("%0.2g" % (self.mpperr[ii+jj*self.npars]))),)
                           ) for ii in range(len(svn)) for jj in range(self.npeaks)]
         labels = tuple(mpcb.flatten(label_list))
         return labels
-

@@ -137,7 +137,7 @@ class Plotter(object):
 
         if errstyle is not None:
             if errstyle == 'fill':
-                order = -1 if self.Spectrum.xarr.cdelt() < 0 else 1
+                order = -1 if self.Spectrum.xarr[-1] < self.Spectrum.xarr[0] else 1
                 self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr[::order],isX=True),
                     steppify((self.Spectrum.data+self.offset-self.Spectrum.error)[::order]),
                     steppify((self.Spectrum.data+self.offset+self.Spectrum.error)[::order]),
