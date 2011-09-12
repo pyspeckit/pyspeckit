@@ -1,3 +1,26 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <link href="prettify.css" type="text/css" rel="stylesheet">
+        <link rel="icon" type="image/gif" href="images/logo.ico">
+        <script type="text/javascript" src="prettify.js"></script>
+        <title> PySpecKit - Examples </title>
+        <h2> Examples </h2>
+    </head>
+    <br>
+    <br>
+<body onload="prettyPrint()"> 
+    <center>
+    <table width=800>
+        <tr><td>
+                <br><br>
+                <h3>Radio Fitting: H<sub>2</sub>CO RADEX example</h3>
+                Because an LVG model grid is being used as the basis for the fitting in this example, there are fewer free parameters.  
+                If you want to create your own model grid, there is a set of tools for creating RADEX model grids (in parallel) at 
+                <a href="http://code.google.com/p/agpy/source/browse/trunk/radex"> the agpy RADEX page </a>.  The model grids used below
+                are available on the <a href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/downloads">pyspeckit bitbucket download page</a>.
+                <br>
+            <code class="prettyprint">
 import pyspeckit
 import numpy as np
 import pyfits
@@ -55,41 +78,9 @@ formaldehyde_radex_fitter_sphere = models.model.SpectralModel(
 
 
 
-# this is an old version; it only works for one line, so I'm discarding it
-"""
-formaldehyde11_radex_fitter = model.SpectralModel(formaldehyde_radex,4,
-        parnames=['density','column','center','width'], 
-        parvalues=[4,12,0,1],
-        parlimited=[(True,True), (True,True), (False,False), (True,False)], 
-        parlimits=[(1,8), (11,16), (0,0), (0,0)],
-        parsteps=[0.01,0.01,0,0],
-        fitunits='Hz',
-        path_to_texgrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex1.fits',
-        path_to_taugrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau1.fits',
-        shortvarnames=("n","N","v","\\sigma"),
-        )
-
-formaldehyde11_radex_vheight_fitter = model.SpectralModel(fitter.vheightmodel(formaldehyde_radex),5,
-        parnames=['height','density','column','center','width'], 
-        parvalues=[0,4,12,0,1],
-        parlimited=[(False,False), (True,True), (True,True), (False,False), (True,False)], 
-        parlimits=[(0,0), (1,8), (11,16), (0,0), (0,0)],
-        parsteps=[0,0.01,0.01,0,0],
-        path_to_texgrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex1.fits',
-        path_to_taugrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau1.fits',
-        fitunits='Hz' )
-"""
-
-
-
 sp1 = pyspeckit.Spectrum('G203.04+1.76_h2co.fits',wcstype='D',scale_keyword='ETAMB')
 sp2 = pyspeckit.Spectrum('G203.04+1.76_h2co_Tastar.fits',wcstype='V',scale_keyword='ETAMB')
 
-# pyspeckit.classes.register_fitter(sp1.Registry,'formaldehyde_radex',
-#         pyspeckit.models.formaldehyde.formaldehyde11_radex_fitter,4,multisingle='multi')
-# 
-# sp1.plotter()
-# sp1.specfit(fittype='formaldehyde_radex',multifit=True,guesses=[4,12,3.75,0.43],quiet=False)
 
 sp1.crop(-50,50)
 sp1.smooth(3) # match to GBT resolution
@@ -146,3 +137,18 @@ sp1.plotter(xmin=-5,xmax=15,errstyle='fill',figure=6)
 sp1.specfit.plot_fit(show_components=True)
 sp2.plotter(xmin=-5,xmax=15,errstyle='fill',figure=7)
 sp2.specfit.plot_fit(show_components=True)
+
+        </code>
+    </td></tr>
+    <tr><td>
+            <br> The results:
+            <br>
+    <img align=center width=800 src=images/h2co_11_radexlvgfit.png title="Both transitions are fit simultaneously using a RADEX model.  The input (fitted) parameters are therefore density, column density, width, and velocity.">
+    <img align=center width=800 src=images/h2co_22_radexlvgfit.png title="Both transitions are fit simultaneously using a RADEX model.  The input (fitted) parameters are therefore density, column density, width, and velocity.">
+    </td></tr>
+    </table>
+    <?php include 'navbar.php';?>
+    </center>
+    
+  </body>
+</html>

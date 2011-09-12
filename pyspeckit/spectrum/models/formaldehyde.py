@@ -147,6 +147,7 @@ voff_lines_dict={ # opposite signs of freq offset
 
 def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0, 
         return_components=False, Tbackground=2.73, grid_vwidth=1.0,
+        grid_vwidth_scale=False,
         texgrid=None,
         taugrid=None,
         hdr=None,
@@ -168,6 +169,7 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     grid_vwidth is the velocity assumed when computing the grid in km/s
         this is important because tau = modeltau / width (see, e.g., 
         Draine 2011 textbook pgs 219-230)
+    grid_vwidth_scale is True or False: False for LVG, True for Sphere
     """
 
     if texgrid is None and taugrid is None:
@@ -228,9 +230,9 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
       
             tau_nu = np.sum([np.array(tau_line[ii] * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
                 * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])
-                * grid_vwidth / width 
                 for ii in xrange(len(tau_line))], axis=0) 
             tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
+            if grid_vwidth_scale: tau_nu *= grid_vwidth / width
             components.append( tau_nu )
         tau_nu_cumul += tau_nu
 
