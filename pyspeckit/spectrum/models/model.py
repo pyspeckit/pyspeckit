@@ -110,3 +110,23 @@ class SpectralModel(object):
                           ) for ii in range(len(svn)) for jj in range(self.npeaks)]
         labels = tuple(mpcb.flatten(label_list))
         return labels
+
+    def components(self, xarr, pars):
+
+        modelcomponents = np.concatenate(
+            [self.modelfunc(xarr,
+                *pars[i*self.npars:(i+1)*self.npars],
+                return_components=True,
+                **self.modelfunc_kwargs)
+            for i in range(self.npeaks)])
+
+        return modelcomponents
+
+    def integral(self, modelpars, **kwargs):
+        """
+        Extremely simple integrator:
+        IGNORES modelpars
+        just sums self.model
+        """
+
+        return self.model.sum()

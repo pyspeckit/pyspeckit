@@ -145,8 +145,8 @@ voff_lines_dict={ # opposite signs of freq offset
         }
 
 
-def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0, 
-        return_components=False, Tbackground=2.73, 
+def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0, 
+        return_components=False, Tbackground=2.73, grid_vwidth=1.0,
         texgrid=None,
         taugrid=None,
         hdr=None,
@@ -164,6 +164,10 @@ def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0,
 
     xarr must be a SpectroscopicAxis instance
     xoff_v, width are both in km/s
+
+    grid_vwidth is the velocity assumed when computing the grid in km/s
+        this is important because tau = modeltau / width (see, e.g., 
+        Draine 2011 textbook pgs 219-230)
     """
 
     if texgrid is None and taugrid is None:
@@ -224,7 +228,8 @@ def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0,
       
             tau_nu = np.sum([np.array(tau_line[ii] * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
                 * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])
-                for ii in xrange(len(tau_line))], axis=0) # THIS MIGHT NOT BE RIGHT FIX IT!
+                * grid_vwidth / width 
+                for ii in xrange(len(tau_line))], axis=0) 
             tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
             components.append( tau_nu )
         tau_nu_cumul += tau_nu
@@ -242,48 +247,6 @@ def formaldehyde_radex(xarr, density=4, column=12, xoff_v=0.0, width=1.0,
                 axis=0)
   
     return spec
-
-texgrid1 = pyfits.getdata('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex1.fits')
-taugrid1 = pyfits.getdata('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau1.fits')
-texgrid2 = pyfits.getdata('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex2.fits')
-taugrid2 = pyfits.getdata('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau2.fits')
-hdr = pyfits.getheader('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau2.fits')
-
-formaldehyde_radex_fitter = model.SpectralModel(formaldehyde_radex,4,
-        parnames=['density','column','center','width'], 
-        parvalues=[4,12,0,1],
-        parlimited=[(True,True), (True,True), (False,False), (True,False)], 
-        parlimits=[(1,8), (11,16), (0,0), (0,0)],
-        parsteps=[0.01,0.01,0,0],
-        fitunits='Hz',
-        texgrid=((4,5,texgrid1),(14,15,texgrid2)),
-        taugrid=((4,5,taugrid1),(14,15,taugrid2)),
-        hdr=hdr,
-        shortvarnames=("n","N","v","\\sigma"),
-        )
-
-formaldehyde11_radex_fitter = model.SpectralModel(formaldehyde_radex,4,
-        parnames=['density','column','center','width'], 
-        parvalues=[4,12,0,1],
-        parlimited=[(True,True), (True,True), (False,False), (True,False)], 
-        parlimits=[(1,8), (11,16), (0,0), (0,0)],
-        parsteps=[0.01,0.01,0,0],
-        fitunits='Hz',
-        path_to_texgrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex1.fits',
-        path_to_taugrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau1.fits',
-        shortvarnames=("n","N","v","\\sigma"),
-        )
-
-formaldehyde11_radex_vheight_fitter = model.SpectralModel(fitter.vheightmodel(formaldehyde_radex),5,
-        parnames=['height','density','column','center','width'], 
-        parvalues=[0,4,12,0,1],
-        parlimited=[(False,False), (True,True), (True,True), (False,False), (True,False)], 
-        parlimits=[(0,0), (1,8), (11,16), (0,0), (0,0)],
-        parsteps=[0,0.01,0.01,0,0],
-        path_to_texgrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex1.fits',
-        path_to_taugrid='/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tau1.fits',
-        fitunits='Hz' )
-
 
 def formaldehyde_vtau(xarr, Tex=1.0, tau=1.0, xoff_v=0.0, width=1.0, 
         return_components=False, Tbackground=2.73 ):

@@ -753,9 +753,6 @@ class Specfit(object):
         will be returned as well
         """
 
-        if not hasattr(self.fitter,'integral'):
-            raise AttributeError("The fitter %s does not have an integral implemented" % self.fittype)
-
         if direct:
             dx = np.abs(self.Spectrum.xarr.cdelt())
             if len(integration_limits) == 2:
@@ -775,6 +772,9 @@ class Specfit(object):
             integ = self.spectofit[OK].sum() * dx
             error = np.sqrt((self.errspec[OK]**2).sum()) * dx
         else:
+            if not hasattr(self.fitter,'integral'):
+                raise AttributeError("The fitter %s does not have an integral implemented" % self.fittype)
+
             integ = self.fitter.integral(self.modelpars, **kwargs)
             if return_error:
                 raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
