@@ -8,7 +8,7 @@ SIIa = 6718.29
 SIIb = 6732.68
 
 # Initialize spectrum object and plot region surrounding Halpha-[NII] complex
-spec = pyspeckit.Spectrum('sample_sdss.txt', errspecnum=2)
+spec = pyspeckit.Spectrum('sample_sdss.txt', errorcol=2)
 spec.plotter(xmin = 6450, xmax = 6775, ymin = 0, ymax = 150)
 
 # Use [SII] lines to model narrow lines, then force [NII] lines and narrow H-alpha to have same width as [SII].  

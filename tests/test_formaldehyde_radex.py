@@ -25,7 +25,7 @@ sp2.specfit() # determine errors
 sp2.error = np.ones(sp2.data.shape)*sp2.specfit.residuals.std()
 sp = pyspeckit.Spectra([sp1,sp2])
 
-pyspeckit.classes.register_fitter(sp.Registry,'formaldehyde_radex_2',
+sp.Registry.add_fitter('formaldehyde_radex_2',
         pyspeckit.models.formaldehyde.formaldehyde_radex_fitter,4,multisingle='multi')
 
 sp.plotter()

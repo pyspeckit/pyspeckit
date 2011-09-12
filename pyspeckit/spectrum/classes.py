@@ -23,55 +23,6 @@ try:
 except ImportError:
     atpyOK = False
 
-def register_fitter(Registry, name, function, npars, multisingle='single',
-        override=False, key=None):
-    ''' 
-    Register a fitter function.
-
-    Required Arguments:
-
-        *name*: [ string ]
-            The fit function name. 
-
-        *function*: [ function ]
-            The fitter function.  Single-fitters should take npars + 1 input
-            parameters, where the +1 is for a 0th order baseline fit.  They
-            should accept an X-axis and data and standard fitting-function
-            inputs (see, e.g., gaussfitter).  Multi-fitters should take N *
-            npars, but should also operate on X-axis and data arguments.
-
-        *npars*: [ int ]
-            How many parameters does the function being fit accept?
-
-    Optional Keyword Arguments:
-
-        *multisingle*: [ 'multi' | 'single' ] 
-            Is the function a single-function fitter (with a background), or
-            does it allow N copies of the fitting function?
-
-        *override*: [ True | False ]
-            Whether to override any existing type if already present.
-
-        *key*: [ char ]
-            Key to select the fitter in interactive mode
-    '''
-
-    if multisingle == 'single':
-        if not name in Registry.singlefitters or override:
-            Registry.singlefitters[name] = function
-    elif multisingle == 'multi':
-        if not name in Registry.multifitters or override:
-            Registry.multifitters[name] = function
-    elif name in Registry.singlefitters or name in Registry.multifitters:
-        raise Exception("Fitting function %s is already defined" % name)
-
-    if key is not None:
-        Registry.fitkeys[key] = name
-        Registry.interactive_help_message += "\n'%s' - select fitter %s" % (key,name)
-    Registry.npars[name] = npars
-
-
-
 class Spectrum(object):
     """
     The core class for the spectroscopic toolkit.  Contains the data and error
@@ -165,14 +116,14 @@ class Spectrum(object):
         Register fitters independently for each spectrum instance
         """
         Registry = fitters.Registry()
-        register_fitter(Registry,'ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
-        # not implemented register_fitter(Registry,'ammonia',models.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
-        register_fitter(Registry,'formaldehyde',models.formaldehyde_model(multisingle='multi'),3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
-        register_fitter(Registry,'formaldehyde',models.formaldehyde_model(multisingle='single'),3,multisingle='single')
-        register_fitter(Registry,'gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
-        register_fitter(Registry,'gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
-        register_fitter(Registry,'voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
-        register_fitter(Registry,'voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
+        Registry.add_fitter('ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
+        # not implemented Registry.add_fitter(Registry,'ammonia',models.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
+        Registry.add_fitter('formaldehyde',models.formaldehyde_model(multisingle='multi'),3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
+        Registry.add_fitter('formaldehyde',models.formaldehyde_model(multisingle='single'),3,multisingle='single')
+        Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
+        Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
+        Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
+        Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
         self.Registry = Registry
 
         
