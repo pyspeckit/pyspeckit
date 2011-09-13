@@ -428,6 +428,24 @@ class Spectra(Spectrum):
             self.fittable.add_column('centererr',[sp.specfit.modelerrs[1] for sp in self.speclist],unit=self.xarr.units)
             self.fittable.add_column('widtherr',[sp.specfit.modelerrs[2] for sp in self.speclist],unit=self.xarr.units)
 
+    def ploteach(self, xunits=None, inherit_fit=False, plot_fit=True, plotfitkwargs={}, **plotkwargs):
+        """
+        Plot each spectrum in its own window
+        inherit_fit - if specified, will grab the fitter & fitter properties from Spectra
+        """
+        for sp in self.speclist:
+            if xunits is not None:
+                sp.xarr.convert_to_unit(xunits,quiet=True)
+            if inherit_fit:
+                sp.specfit.fitter = self.specfit.fitter
+                sp.specfit.modelpars = self.specfit.modelpars
+                sp.specfit.model = np.interp(sp.xarr.as_unit(self.xarr.units),self.xarr,self.specfit.model)
+
+            sp.plotter(**plotkwargs)
+            
+            if plot_fit and self.specfit.model is not None:
+                sp.specfit.plot_fit(**plotfitkwargs)
+
 
 class ObsBlock(Spectra):
     """

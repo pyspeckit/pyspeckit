@@ -29,18 +29,29 @@ class SpectralModel(object):
             'limits':temp_pardict['parlimits'][ii],
             'limited':temp_pardict['parlimited'][ii],
             'fixed':temp_pardict['parfixed'][ii],
-            'parname':temp_pardict['parnames'][ii],
+            'parname':temp_pardict['parnames'][ii]+"%0i" % jj,
             'error':temp_pardict['parerror'][ii],
             'tied':temp_pardict['partied'][ii] if temp_pardict['partied'][ii] else ""} 
-            for ii in xrange(self.npars)]
+            for ii in xrange(self.npars) for jj in xrange(self.npeaks)]
 
         self.modelfunc_kwargs = kwargs
 
+    def n_modelfunc(self, pars, **kwargs):
+        """
+        Simple wrapper to deal with N peaks
+        """
+        def L(x):
+            v = np.zeros(len(x))
+            for jj in xrange(self.npeaks):
+                v += self.modelfunc(x, *pars[jj*self.npars:(jj+1)*self.npars], **kwargs)
+            return v
+        return L
+
     def mpfitfun(self,x,y,err):
         if err is None:
-            def f(p,fjac=None): return [0,(y-self.modelfunc(x,*p, **self.modelfunc_kwargs))]
+            def f(p,fjac=None): return [0,(y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))]
         else:
-            def f(p,fjac=None): return [0,(y-self.modelfunc(x,*p, **self.modelfunc_kwargs))/err]
+            def f(p,fjac=None): return [0,(y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))/err]
         return f
 
     def __call__(self, xax, data, err=None, params=[], quiet=True, shh=True,
@@ -50,9 +61,18 @@ class SpectralModel(object):
         """
 
         if npeaks is not None:
+            if npeaks > self.npeaks:
+                # duplicate the current parameters npeaks-oldnpeaks times
+                for ii in xrange(npeaks-self.npeaks):
+                    self.parinfo += self.parinfo[:self.npars]
+                    self.shortvarnames += self.shortvarnames
+                    # replace the number for each parameter
+                    for jj in xrange(self.npars): 
+                        self.parinfo[self.npars*(ii+1)+jj]['n'] = self.parinfo[jj]['n'] + self.npars
+                        self.parinfo[self.npars*(ii+1)+jj]['parname'] = self.parinfo[jj]['parname'].replace('0','%0i' % (ii+1))
             self.npeaks = npeaks
 
-        if len(params) == self.npars:
+        if len(params) == self.npars*self.npeaks:
             for par,guess in zip(self.parinfo,params):
                 par['value'] = guess
         
@@ -96,7 +116,7 @@ class SpectralModel(object):
         self.mp = mp
         self.mpp = mpp#[1:]
         self.mpperr = mpperr#[1:]
-        self.model = self.modelfunc(xax,*mpp,**self.modelfunc_kwargs)
+        self.model = self.n_modelfunc(mpp,**self.modelfunc_kwargs)(xax)
         return mpp,self.model,mpperr,chi2
 
 
@@ -104,10 +124,10 @@ class SpectralModel(object):
         from decimal import Decimal # for formatting
         svn = self.shortvarnames if shortvarnames is None else shortvarnames
         label_list = [(
-                "$%s(%i)$=%8s $\\pm$ %8s" % (svn[ii],jj,
+                "$%s(%i)$=%8s $\\pm$ %8s" % (svn[ii+jj*self.npars],jj,
                 Decimal("%g" % self.mpp[ii+jj*self.npars]).quantize(Decimal("%0.2g" % (min(self.mpp[ii+jj*self.npars],self.mpperr[ii+jj*self.npars])))),
                 Decimal("%g" % self.mpperr[ii+jj*self.npars]).quantize(Decimal("%0.2g" % (self.mpperr[ii+jj*self.npars]))),)
-                          ) for ii in range(len(svn)) for jj in range(self.npeaks)]
+                          ) for jj in range(self.npeaks) for ii in range(self.npars)]
         labels = tuple(mpcb.flatten(label_list))
         return labels
 

@@ -233,7 +233,7 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
                 for ii in xrange(len(tau_line))], axis=0) 
             tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
             if grid_vwidth_scale: tau_nu *= grid_vwidth / width
-            components.append( tau_nu )
+        components.append( tau_nu )
         tau_nu_cumul += tau_nu
 
     # add a list of the individual 'component' spectra to the total components...
