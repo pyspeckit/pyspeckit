@@ -33,7 +33,8 @@ def interp(spec1,spec2):
         newerror = None
 
     newSpec = classes.Spectrum(xarr=spec2.xarr,data=newdata, error=newerror,
-            header=spec2.header)
+            header=spec1.header) # inherit the old spectrum's header info
+                                 # but nearly all other properties are changed
 
     return newSpec
 
