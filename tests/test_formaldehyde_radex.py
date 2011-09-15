@@ -59,7 +59,8 @@ if __name__ == "__main__":
     parser=optparse.OptionParser()
     parser.add_option("--scalekeyword",help="Scale the data before fitting?",default='ETAMB')
     parser.add_option("--vmin",help="Mininum velocity to include",default=-50)
-    parser.add_option("--vmax",help="Mininum velocity to include",default=50)
+    parser.add_option("--vmax",help="Maximum velocity to include",default=50)
+    parser.add_option("--vguess",help="Velocity guess",default=3.75)
     parser.add_option("--smooth6cm",help="Smooth the 6cm spectrum",default=3)
 
     options,args = parser.parse_args()
@@ -100,7 +101,7 @@ if __name__ == "__main__":
             formaldehyde_radex_fitter_sphere,4,multisingle='multi')
 
     sp.plotter()
-    sp.specfit(fittype='formaldehyde_radex',multifit=True,guesses=[4,12,3.75,0.43],quiet=False)
+    sp.specfit(fittype='formaldehyde_radex',multifit=True,guesses=[4,12,options.vguess,0.43],quiet=False)
 
     # these are just for pretty plotting:
     sp1.specfit.fitter = sp.specfit.fitter
@@ -114,15 +115,15 @@ if __name__ == "__main__":
     sp1.xarr.convert_to_unit('km/s')
     sp2.xarr.convert_to_unit('km/s')
 
-    sp1.plotter(xmin=-5,xmax=15,errstyle='fill')
+    sp1.plotter(xmin=options.vmin,xmax=options.vmax,errstyle='fill')
     sp1.specfit.plot_fit(show_components=True)
-    sp2.plotter(xmin=-5,xmax=15,errstyle='fill')
+    sp2.plotter(xmin=options.vmin,xmax=options.vmax,errstyle='fill')
     sp2.specfit.plot_fit(show_components=True)
 
 
     sp.plotter(figure=5)
-    sp.specfit(fittype='formaldehyde_radex_sphere',multifit=True,guesses=[4,13,3.75,0.43],quiet=False)
-    sp.ploteach(inherit_fit=True,  xmin=-5, xmax=15, errstyle='fill', plotfitkwargs={'show_components':True})
+    sp.specfit(fittype='formaldehyde_radex_sphere',multifit=True,guesses=[4,13,options.vguess,0.43],quiet=False)
+    sp.ploteach(inherit_fit=True,  xmin=options.vmin, xmax=options.vmax, errstyle='fill', plotfitkwargs={'show_components':True})
 
     # these are just for pretty plotting:
     #sp1.specfit.fitter = sp.specfit.fitter
