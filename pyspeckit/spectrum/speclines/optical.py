@@ -13,7 +13,10 @@ lines = {
          "NIIa":    [6549.860, 'Angstrom', True, r'$[\mathrm{NII}]\lambda 6549\AA$'], \
          "NIIb":    [6585.270, 'Angstrom', True, r'$[\mathrm{NII}]\lambda 6585\AA$'], \
          "SIIa":    [6718.290, 'Angstrom', True, r'$[\mathrm{SII}]\lambda 6718\AA$'], \
-         "SIIb":    [6732.680, 'Angstrom', True, r'$[\mathrm{SII}]\lambda 6732\AA$']
+         "SIIb":    [6732.680, 'Angstrom', True, r'$[\mathrm{SII}]\lambda 6732\AA$'], \
+         "OI":      [6300.304, 'Angstrom', True, r'$[\mathrm{OI}]\lambda 6300\AA$'], \
+         "OII":     [3727.319, 'Angstrom', True, r'$[\mathrm{OII}]\lambda 3727\AA$'], \
+         "NeIII":   [3868.760, 'Angstrom', True, r'$[\mathrm{OII}]\lambda 3869\AA$']
 }
 
 xarr = []

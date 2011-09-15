@@ -15,7 +15,11 @@ Notes:
 """
 
 import numpy as np
-from scipy.integrate import romberg
+try:
+    from scipy.integrate import romberg
+    scipyOK=True
+except:
+    scipyOK=False
 
 c = 29979245800.0
 G = 6.673*10**-8
@@ -68,7 +72,8 @@ class Cosmology:
         """
         Integrand = lambda z: (1.0 / (1.0 + z) / self.EvolutionFunction(z))
         
-        return (romberg(Integrand, z_i, z_f) / self.HubbleParameterNow)    
+        if scipyOK:
+            return (romberg(Integrand, z_i, z_f) / self.HubbleParameterNow)    
         
     def TimeToRedshiftConverter(self, z_i, dt):
         """
