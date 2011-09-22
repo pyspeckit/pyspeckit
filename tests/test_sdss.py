@@ -27,11 +27,13 @@ spec.measure(z = 0.05, fluxnorm = 1e-17)
 # Now overplot positions of lines and annotate
 y = spec.plotter.ymax * 0.85
 for i, line in enumerate(spec.measurements.lines.keys()):
+    
+    if line not in spec.speclines.optical.lines.keys(): continue
+    
     x = spec.measurements.lines[line]['modelpars'][1]
     spec.plotter.axis.plot([x]*2, [spec.plotter.ymin, spec.plotter.ymax], ls = '--', color = 'k')
-    try: spec.plotter.axis.annotate(spec.speclines.optical.lines[line][-1], 
-        (x, y), rotation = 90, ha = 'right', va = 'center')
-    except KeyError: pass
+    
+    spec.plotter.axis.annotate(spec.speclines.optical.lines[line][-1], (x, y), rotation = 90, ha = 'right', va = 'center')
 
 # Make some nice axis labels
 spec.plotter.axis.set_xlabel(r'Wavelength $(\AA)$')
@@ -41,8 +43,8 @@ spec.plotter.refresh()
 # Print out spectral line information
 print "Line   Flux (erg/s/cm^2)     Amplitude (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)"
 for line in spec.measurements.lines.keys():
-    print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['amp'], spec.measurements.lines[line]['fwhm'], \
-        spec.measurements.lines[line]['lum']
+    print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['amp'], \
+        spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum']
         
 # Notice that because we supplied the objects redshift and flux normalization, the measurements class
 # automatically calculated line luminosities.  Also, it separates the broad and narrow H-alpha components, and identifies which lines are which. How nice!
