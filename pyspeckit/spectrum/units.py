@@ -162,8 +162,12 @@ class SpectroscopicAxis(np.ndarray):
     possible.
     """
 
-    def __new__(self, xarr, unit, frame='rest', xtype=None, reffreq=None,
+    def __new__(self, xarr, unit="Hz", frame='rest', xtype=None, reffreq=None,
             redshift=None, reffreq_units=None):
+        """
+        Make a new spectroscopic axis instance
+        Default units Hz
+        """
         subarr = np.array(xarr)
         subarr = subarr.view(self)
         subarr.units = unit
@@ -470,7 +474,7 @@ class SpectroscopicAxis(np.ndarray):
         if not hasattr(self,'dxarr'): # if cropping happens...
             self.dxarr = self[1:]-self[:-1]
         if abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
-            return self.dxarr.mean()
+            return self.dxarr.mean().flat[0]
 
     def _make_header(self, tolerance=1e-8):
         """
