@@ -83,8 +83,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
     """
 
     # Convert X-units to frequency in GHz
-    xarr = copy.copy(xarr)
-    xarr.convert_to_unit('GHz', quiet=True)
+    xarr = xarr.as_unit('GHz')
 
     if tex is not None:
         if tex > tkin: # cannot have Tex > Tkin
