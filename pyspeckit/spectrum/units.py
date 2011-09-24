@@ -237,8 +237,11 @@ class SpectroscopicAxis(np.ndarray):
         Do this when calling ufuncs
         """
         ret = np.ndarray.__array_wrap__(self, out_arr, context)
-        if len(ret) == 1: # I think this is a bad hack; it used to be unnecessary but a recent update to numpy changed that?
-            ret = float(ret) # FORCE scalar
+        try:
+            if len(ret) == 1: # I think this is a bad hack; it used to be unnecessary but a recent update to numpy changed that?
+                ret = float(ret) # FORCE scalar
+        except TypeError: # sometimes ret has no len
+            pass
         return ret
 
     """ OBSOLETE use convert_to_unit

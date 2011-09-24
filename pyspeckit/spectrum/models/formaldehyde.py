@@ -146,8 +146,12 @@ voff_lines_dict={ # opposite signs of freq offset
         }
 
 
+formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict)
+formaldehyde_vtau_fitter = formaldehyde_vtau.fitter
+formaldehyde_vtau_vheight_fitter = formaldehyde_vtau.vheight_fitter
+
 def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0, 
-        return_components=False, Tbackground=2.73, grid_vwidth=1.0,
+        grid_vwidth=1.0,
         grid_vwidth_scale=False,
         texgrid=None,
         taugrid=None,
@@ -156,7 +160,8 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
         path_to_taugrid='',
         temperature_gridnumber=3,
         debug=False,
-        verbose=False):
+        verbose=False,
+        **kwargs):
     """
     Use a grid of RADEX-computed models to make a model line spectrum
 
@@ -216,44 +221,11 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     if debug:
         import pdb; pdb.set_trace()
 
-    components =[]
-    for linename in line_names:
-        voff_lines = np.array(voff_lines_dict[linename])
-  
-        lines = (1-voff_lines/ckms)*freq_dict[linename]
-        if width == 0:
-            tau_nu = xarr*0
-        else:
-            nuwidth = np.abs(width/ckms*lines)
-            nuoff = xoff_v/ckms*lines
-            # the total optical depth, which is being fitted, should be the sum of the components
-            tau_line = [(T * line_strength_dict[linename]) / relative_strength_total_degeneracy[linename] for T in tau]
-      
-            tau_nu = np.sum([np.array(tau_line[ii] * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
-                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])
-                for ii in xrange(len(tau_line))], axis=0) 
-            tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
-            if grid_vwidth_scale: tau_nu *= grid_vwidth / width
-        components.append( tau_nu )
-        tau_nu_cumul += tau_nu
-
-    # add a list of the individual 'component' spectra to the total components...
-
-    if return_components:
-        # not clear if the slicing works here...
-        return np.sum([((1.0-np.exp(-np.array(components)))*(tex[ii]-Tbackground)
-                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
-                axis=0)
-
-    spec = np.sum([((1.0-np.exp(-np.array(tau_nu_cumul)))*(tex[ii]-Tbackground)
+    spec = np.sum([(formaldehyde_vtau(xarr,Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)
                 * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
                 axis=0)
   
     return spec
-
-formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict)
-formaldehyde_vtau_fitter = formaldehyde_vtau.fitter
-formaldehyde_vtau_vheight_fitter = formaldehyde_vtau.vheight_fitter
 
 
 def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0, 
