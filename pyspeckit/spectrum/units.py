@@ -7,11 +7,16 @@ Created on March 9th, 2011
 
 Unit parsing and conversion tool.  
 The SpectroscopicAxis class is meant to deal with unit conversion internally
+
+Open Question: Are there other FITS-valid projection types, unit types, etc. that should be included?
+    What about for other fields (e.g., wavenumber?)
 """
 
 import numpy as np
 
 # declare a case-insensitive dict class to return case-insensitive versions of each dictionary...
+# this is just a shortcut so that units can be specified as, e.g., Hz, hz, HZ, hZ, etc.  3 of those 4 are "legitimate".  
+# the templates for this code were grabbed from a few StackOverflow.com threads
 class CaseInsensitiveDict(dict):
     def __init__(self, inputdict=None):
         if inputdict:
