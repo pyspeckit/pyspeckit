@@ -26,6 +26,6 @@ from ammonia import ammonia_model
 from gaussfitter import gaussian_fitter
 from voigtfitter import voigt_fitter
 import formaldehyde
-from formaldehyde import formaldehyde_model
+from formaldehyde import formaldehyde_fitter,formaldehyde_vheight_fitter
 import n2hp
 from n2hp import n2hp_vtau_fitter,n2hp_vtau

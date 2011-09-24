@@ -10,6 +10,7 @@ from .. import units
 from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb
 import copy
+import hyperfine
 try: # for model grid reading
     import pyfits
     pyfitsOK = True
@@ -34,7 +35,7 @@ freq_dict = {
     'twotwo':     14.48847881e9,
     'threethree': 28.97480e9,
     }
-relative_strength_theory={
+line_strength_dict={
         'oneone_f10':  4.,
         'oneone_f01':  4.,
         'oneone_f22': 15.,
@@ -226,7 +227,7 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
             nuwidth = np.abs(width/ckms*lines)
             nuoff = xoff_v/ckms*lines
             # the total optical depth, which is being fitted, should be the sum of the components
-            tau_line = [(T * relative_strength_theory[linename]) / relative_strength_total_degeneracy[linename] for T in tau]
+            tau_line = [(T * line_strength_dict[linename]) / relative_strength_total_degeneracy[linename] for T in tau]
       
             tau_nu = np.sum([np.array(tau_line[ii] * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
                 * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])
@@ -250,64 +251,9 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
   
     return spec
 
-def formaldehyde_vtau(xarr, Tex=1.0, tau=1.0, xoff_v=0.0, width=1.0, 
-        return_components=False, Tbackground=2.73 ):
-    """
-    Generate a model Formaldehyde spectrum based on simple gaussian parameters with
-    ampltiude set by Tex and tau. Fitted parameters will depend on the optical depth
-    of hyperfine components
-
-    """
-
-    # Convert X-units to frequency in GHz
-    xarr = copy.copy(xarr)
-    xarr.convert_to_unit('Hz', quiet=True)
-
-    tau_nu_cumul = np.zeros(len(xarr))
-    if np.any(np.isnan((tau,Tex,width,xoff_v))):
-        if return_components:
-            return [tau_nu_cumul] * len(line_names)
-        else:
-            return tau_nu_cumul
-
-    components =[]
-    for linename in line_names:
-        voff_lines = np.array(voff_lines_dict[linename])
-  
-        lines = (1-voff_lines/ckms)*freq_dict[linename]
-        if width == 0:
-            tau_nu = xarr*0
-        else:
-            nuwidth = np.abs(width/ckms*lines)
-            nuoff = xoff_v/ckms*lines
-            # the total optical depth, which is being fitted, should be the sum of the components
-            tau_line = (tau * relative_strength_theory[linename]) / relative_strength_total_degeneracy[linename]
-      
-            tau_nu = np.array(tau_line * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
-            tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
-            components.append( tau_nu )
-        tau_nu_cumul += tau_nu
-
-    # add a list of the individual 'component' spectra to the total components...
-
-    if return_components:
-        return (1.0-np.exp(-np.array(components)))*(Tex-Tbackground)
-
-    spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(Tex-Tbackground)
-  
-    return spec
-
-formaldehyde_vtau_fitter = model.SpectralModel(formaldehyde_vtau,4,
-        parnames=['Tex','tau','center','width'], 
-        parlimited=[(False,False), (True,False), (False,False), (True,False)], 
-        parlimits=[(0,0), (0,0), (0,0), (0,0)],
-        fitunits='Hz' )
-
-formaldehyde_vtau_vheight_fitter = model.SpectralModel(fitter.vheightmodel(formaldehyde_vtau),5,
-        parnames=['height','Tex','tau','center','width'], 
-        parlimited=[(False,False), (False,False), (True,False), (False,False), (True,False)], 
-        parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
-        fitunits='Hz' )
+formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict)
+formaldehyde_vtau_fitter = formaldehyde_vtau.fitter
+formaldehyde_vtau_vheight_fitter = formaldehyde_vtau.vheight_fitter
 
 
 def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0, 
@@ -315,58 +261,20 @@ def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters
 
+    the "amplitude" is an essentially arbitrary parameter; we therefore define it to be Tex given tau=0.01 when
+    passing to the fitter
+    The final spectrum is then rescaled to that value
     """
 
-    # Convert X-units to frequency in GHz
-    xarr = copy.copy(xarr)
-    xarr.convert_to_unit('Hz', quiet=True)
-
-    runspec = np.zeros(len(xarr))
-    if np.any(np.isnan((amp,width,xoff_v))):
-        if return_components:
-            return [runspec] * len(line_names)
-        else:
-            return runspec
-
-    components =[]
-    for linename in line_names:
-        voff_lines = np.array(voff_lines_dict[linename])
-  
-        lines = (1-voff_lines/ckms)*freq_dict[linename]
-        if width == 0:
-            speccomp = xarr*0
-        else:
-            nuwidth = np.abs(width/ckms*lines)
-            nuoff = xoff_v/ckms*lines
-      
-            speccomp = np.array(relative_strength_theory[linename] * np.exp(-(xarr+nuoff-freq_dict[linename])**2/(2.0*nuwidth**2)))
-            speccomp[speccomp!=speccomp] = 0 # avoid nans
-            components.append( speccomp )
-        runspec += speccomp
-
-    # add a list of the individual 'component' spectra to the total components...
-
-    if return_components:
-        return np.array(components)*amp/runspec.max()  
-
-    runspec *= amp/runspec.max()
-  
-    return runspec
-
-formaldehyde_fitter = model.SpectralModel(formaldehyde, 3,
-        parnames=['amp','center','width'], 
-        parlimited=[(False,False),(False,False), (True,False)], 
-        parlimits=[(0,0), (0,0), (0,0)],
-        fitunits='Hz' )
-
-formaldehyde_vheight_fitter = model.SpectralModel(fitter.vheightmodel(formaldehyde), 4,
-        parnames=['height','amp','center','width'], 
-        parlimited=[(False,False),(False,False),(False,False), (True,False)], 
-        parlimits=[(0,0), (0,0), (0,0), (0,0)],
-        fitunits='Hz' )
+    mdl = formaldehyde_vtau(xarr, Tex=amp*0.01, tau=0.01, xoff_v=xoff_v, width=width, return_components=return_components)
+    if amp > 0:
+        mdl *= amp/mdl.max() 
+    else:
+        mdl *= amp/mdl.min() 
+    return mdl
 
 
-
+# This should now be superceded by the model, fitter, and hyperfine wrappers
 class formaldehyde_model(fitter.SimpleFitter):
 
     def __init__(self,multisingle='multi'):
@@ -584,3 +492,46 @@ class formaldehyde_model(fitter.SimpleFitter):
                 integ += gaussint*correction_factor
 
         return integ
+
+
+class formaldehyde_model(model.SpectralModel):
+    def formaldehyde_integral(self, modelpars, linename='oneone'):
+        """
+        Return the integral of the individual components (ignoring height)
+        """
+        # produced by directly computing the integral of gaussians and formaldehydeians as a function of 
+        # line width and then fitting that with a broken logarithmic power law
+        # The errors are <0.5% for all widths
+        formaldehyde_to_gaussian_ratio_coefs = {
+                'lt0.1_oneone': np.array([ -5.784020,-40.058798,-111.172706,-154.256411,-106.593122,-28.933119]),
+                'gt0.1_oneone': np.array([  0.038548, -0.071162, -0.045710,  0.183828, -0.145429,  0.040039]),
+                'lt0.1_twotwo': np.array([  1.156561,  6.638570, 11.782065, -0.429536,-24.860297,-27.902274, -9.510288]),
+                'gt0.1_twotwo': np.array([ -0.090646,  0.078204,  0.123181, -0.175590,  0.089506, -0.034687,  0.008676]),
+                }
+
+
+        integ = 0
+        if len(modelpars) % 3 == 0:
+            for amp,cen,width in np.reshape(modelpars,[len(modelpars)/3,3]):
+                gaussint = amp*width*np.sqrt(2.0*np.pi)
+                cftype = "gt0.1_"+linename if width > 0.1 else "lt0.1_"+linename
+                correction_factor = 10**np.polyval(formaldehyde_to_gaussian_ratio_coefs[cftype], np.log10(width) )
+                # debug statement print "Two components of the integral: amp %g, width %g, gaussint %g, correction_factor %g " % (amp,width,gaussint,correction_factor)
+                integ += gaussint*correction_factor
+
+        return integ
+
+formaldehyde_fitter = formaldehyde_model(formaldehyde, 3,
+        parnames=['amp','center','width'], 
+        parlimited=[(False,False),(False,False), (True,False)], 
+        parlimits=[(0,0), (0,0), (0,0)],
+        shortvarnames=("A","v","\\sigma"), # specify the parameter names (TeX is OK)
+        fitunits='Hz' )
+
+formaldehyde_vheight_fitter = formaldehyde_model(fitter.vheightmodel(formaldehyde), 4,
+        parnames=['height','amp','center','width'], 
+        parlimited=[(False,False),(False,False),(False,False), (True,False)], 
+        parlimits=[(0,0), (0,0), (0,0), (0,0)],
+        shortvarnames=("H","A","v","\\sigma"), # specify the parameter names (TeX is OK)
+        fitunits='Hz' )
+
