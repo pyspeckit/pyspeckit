@@ -115,6 +115,7 @@ unit_type_dict = {
 
 xtype_dict = {
         'VLSR':'velocity','VRAD':'velocity','VELO':'velocity',
+        'VELO-LSR':'velocity',
         'VOPT':'velocity',
         'VHEL':'velocity',
         'VGEO':'velocity',
@@ -132,6 +133,7 @@ xtype_dict = {
 frame_dict = {
         'VLSR':'LSRK','VRAD':'LSRK','VELO':'LSRK',
         'VOPT':'LSRK',
+        'VELO-LSR':'LSRK',
         'LSRD':'LSRD',
         'VHEL':'heliocentric',
         'VGEO':'geocentric',
@@ -176,6 +178,8 @@ class SpectroscopicAxis(np.ndarray):
         subarr = np.array(xarr)
         subarr = subarr.view(self)
         subarr.units = unit
+        if subarr.units is None:
+            subarr.units = 'none'
         subarr.frame = frame
         if xtype in xtype_dict:
             subarr.xtype = xtype_dict[xtype]

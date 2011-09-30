@@ -113,7 +113,7 @@ class Specfit(object):
     def __call__(self, interactive=False, usemoments=True, clear_all_connections=False, debug=False,
             multifit=False, guesses=None, annotate=None, save=True, fittype='gaussian', 
             color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 0.5, composite_lw = 0.75, 
-            component_lw = 0.75, show_components = None, 
+            component_lw = 0.75, show_components = None, verbose=True,
             **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
@@ -132,7 +132,7 @@ class Specfit(object):
         """
 
         self.clear()
-        self.selectregion(**kwargs)
+        self.selectregion(verbose=verbose, **kwargs)
         for arg in ['xmin','xmax','xtype','reset']: 
             if arg in kwargs: kwargs.pop(arg)
 
@@ -176,7 +176,7 @@ class Specfit(object):
             else:
                 self.guesses = guesses
                 self.multifit(color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
-                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components)
+                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components, verbose=verbose)
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
@@ -274,7 +274,7 @@ class Specfit(object):
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
             color='k', composite_fit_color='red', component_fit_color='red',
             lw=0.5, composite_lw=0.75, component_lw=0.75,
-            show_components=None):
+            show_components=None, verbose=True):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -295,7 +295,7 @@ class Specfit(object):
             datarange = self.spectofit[self.gx1:self.gx2].max() - self.spectofit[self.gx1:self.gx2].min()
             if abs(datarange) < 1e-9:
                 scalefactor = np.median(np.abs(self.spectofit))
-                print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
+                if verbose: print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor
                 for ii in xrange(self.npeaks): # assume first parameter is amplitude
@@ -523,7 +523,7 @@ class Specfit(object):
         if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def selectregion(self,xmin=None,xmax=None,xtype='wcs', reset=False,
-            debug=False, **kwargs):
+            debug=False, verbose=True, **kwargs):
         """
         Pick a fitting region in either WCS units or pixel units
 
@@ -549,7 +549,7 @@ class Specfit(object):
             self.gx2 = self.Spectrum.data.shape[0]
             #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
         else:
-            print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.gx1,self.gx2)
+            if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.gx1,self.gx2)
 
         if self.gx1 == self.gx2:
             # Reset if there is no fitting region

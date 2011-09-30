@@ -233,7 +233,8 @@ class Spectrum(object):
         self.xarr = self.xarr[::smooth]
         if len(self.xarr) != len(self.data):
             raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
-        self.error = sm.smooth(self.error,smooth,**kwargs)
+        if self.error is not None:
+            self.error = sm.smooth(self.error,smooth,**kwargs)
         self.baseline.downsample(smooth)
         self.specfit.downsample(smooth)
     

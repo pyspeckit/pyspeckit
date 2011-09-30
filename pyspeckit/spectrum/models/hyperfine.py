@@ -42,6 +42,12 @@ class hyperfinemodel(object):
             shortvarnames=("H","T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
             fitunits='Hz' )
 
+        self.ampfitter = model.SpectralModel(self,3,
+            parnames=['amp','center','width'], 
+            parlimited=[(False,False), (False,False), (True,False)], 
+            parlimits=[(0,0), (0,0), (0,0)],
+            shortvarnames=("amp","v","\\sigma"), # specify the parameter names (TeX is OK)
+            fitunits='Hz' )
 
     def __call__(self, *args, **kwargs):
         """
@@ -49,8 +55,8 @@ class hyperfinemodel(object):
         """
         return self.hyperfine(*args,**kwargs)
 
-    def hyperfine(self, xarr, Tex=1.0, tau=1.0, xoff_v=0.0, width=1.0, 
-            return_components=False, Tbackground=2.73 ):
+    def hyperfine(self, xarr, Tex=5.0, tau=1.0, xoff_v=0.0, width=1.0, 
+            return_components=False, Tbackground=2.73, amp=None ):
         """
         Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.
         """
@@ -88,11 +94,18 @@ class hyperfinemodel(object):
         # add a list of the individual 'component' spectra to the total components...
 
         if return_components:
-            return (1.0-np.exp(-np.array(components)))*(Tex-Tbackground)
+            if amp is None:
+                return (1.0-np.exp(-np.array(components)))*(Tex-Tbackground)
+            else:
+                comps = (1.0-np.exp(-np.array(components)))*(Tex-Tbackground)
+                return comps/comps.max() * amp
 
         spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(Tex-Tbackground)
       
-        return spec
+        if amp is None:
+            return spec
+        else:
+            return spec/spec.max() * amp
 
 
 

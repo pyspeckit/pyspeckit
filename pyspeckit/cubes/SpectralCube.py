@@ -8,6 +8,8 @@ from pyspeckit import spectrum
 # import local things
 import mapplot
 import readers
+import time
+import numpy as np
 
 class Cube(spectrum.Spectrum):
 
@@ -93,3 +95,52 @@ class Cube(spectrum.Spectrum):
             self.data = cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs )
         else:
             self.data = cubes.extract_aperture( self.cube, aperture , coordsys=None)
+
+    def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
+            verbose_level=1, quiet=True, signal_cut=3, **fitkwargs):
+        """
+        Fit a spectrum to each valid pixel in the cube
+        """
+
+        if not hasattr(self.mapplot,'plane'):
+            print "Must mapplot before fitting."
+            return
+
+        yy,xx = np.indices(self.mapplot.plane.shape)
+        if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
+            OK = (True-self.mapplot.plane.mask)
+        else:
+            OK = np.isfinite(self.mapplot.plane)
+        valid_pixels = zip(xx[OK],yy[OK])
+
+        self.parcube = np.zeros((len(guesses),)+self.mapplot.plane.shape)
+        self.errcube = np.zeros((len(guesses),)+self.mapplot.plane.shape) 
+
+        t0 = time.time()
+
+        for ii,(x,y) in enumerate(valid_pixels):
+            sp = self.get_spectrum(y,x)
+            if errspec is not None:
+                sp.error = errspec
+            elif errmap is not None:
+                sp.error = np.ones(sp.data.shape) * errmap[y,x]
+            if sp.error is not None and signal_cut > 0:
+                max_sn = (sp.data / sp.error).max()
+                if max_sn < signal_cut:
+                    if verbose_level > 1:
+                        print "Skipped %i,%i" % (x,y)
+                    continue
+            sp.specfit.Registry = self.Registry # copy over fitter registry
+            sp.specfit(guesses=guesses,quiet=True, verbose=False, **fitkwargs)
+            self.parcube[:,y,x] = sp.specfit.modelpars
+            self.errcube[:,y,x] = sp.specfit.modelerrs
+
+            if verbose:
+                if ii % 10**(3-verbose_level) == 0:
+                    print "Finished fit %i.  Elapsed time is %i seconds" % (ii, time.time()-t0)
+
+        if verbose:
+            print "Finished final fit %i.  Elapsed time was %i seconds" % (ii, time.time()-t0)
+
+
+

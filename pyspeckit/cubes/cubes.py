@@ -6,6 +6,13 @@ import os
 import pyfits
 import tempfile
 import posang # agpy code
+import pyspeckit
+try:
+    from agpy.convolve import smooth
+    from agpy.contributed import parallel_map
+    smoothOK = True
+except ImportError:
+    smoothOK = False
 try:
     import coords
 except ImportError:
@@ -467,7 +474,20 @@ def coords_in_image(fitsfile,lon,lat,system='galactic'):
     else:
         return False
 
-def smooth_cube(cube,cubedim=0,parallel=True,numcores=None,**kwargs):
+def spectral_smooth(cube, smooth_factor):
+    """
+    Smooth the cube along the spectral direction
+    """
+
+    newcube = numpy.zeros(cube.shape)
+    yy,xx = numpy.indices(cube.shape[1:])
+
+    for (x,y) in zip(xx.flat,yy.flat):
+        newcube[:,y,x] = pyspeckit.smooth.smooth(cube[:,y,x], smooth_factor)
+
+    return newcube
+
+def plane_smooth(cube,cubedim=0,parallel=True,numcores=None,**kwargs):
     """
     parallel-map the smooth function
 
@@ -475,15 +495,15 @@ def smooth_cube(cube,cubedim=0,parallel=True,numcores=None,**kwargs):
         purposes?)
     numcores - pass to parallel_map (None = use all available)
     """
-    from convolve import smooth
-    from contributed import parallel_map
+    if not smoothOK:
+        return
 
     if cubedim != 0:
         cube = cube.swapaxes(0,cubedim)
 
     cubelist = [cube[ii,:,:] for ii in xrange(cube.shape[0])]
 
-    Psmooth = lambda C: smooth(C,**kwargs)
+    Psmooth = lambda C: smooth.smooth(C,**kwargs)
 
     if parallel:
         smoothcube = array(parallel_map(Psmooth,cubelist,numcores=numcores))

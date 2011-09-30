@@ -29,3 +29,4 @@ import formaldehyde
 from formaldehyde import formaldehyde_fitter,formaldehyde_vheight_fitter
 import n2hp
 from n2hp import n2hp_vtau_fitter,n2hp_vtau
+import hcn

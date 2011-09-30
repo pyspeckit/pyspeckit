@@ -6,8 +6,10 @@ import numpy as np
 import numpy.ma as ma
 import pyspeckit 
 from pyspeckit import spectrum
+import operator
 
-def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3, **kwargs):
+def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3, 
+        scale_keyword=None, scale_action=operator.div, **kwargs):
     """
     Grabs all the relevant pieces of a simple FITS-compliant 3d data cube
 
@@ -43,6 +45,11 @@ def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3, **kwargs):
         dv,v0,p3 = hdr['CD3_3'+wcstype],hdr['CRVAL3'+wcstype],hdr['CRPIX3'+wcstype]
     else:
         dv,v0,p3 = hdr['CDELT3'+wcstype],hdr['CRVAL3'+wcstype],hdr['CRPIX3'+wcstype]
+
+    if hdr.get(scale_keyword):
+        print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
+        scaleval = hdr.get(scale_keyword)
+        cube = scale_action(cube,scaleval)
 
     xconv = lambda v: ((v-p3+1)*dv+v0)
     xarr = xconv(np.arange(cube.shape[0]))

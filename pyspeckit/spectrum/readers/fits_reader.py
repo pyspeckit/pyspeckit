@@ -79,7 +79,7 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
         print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
         scaleval = hdr.get(scale_keyword)
         spec = scale_action(spec,scaleval)
-        errpsec = scale_action(errspec,scaleval)
+        errspec = scale_action(errspec,scaleval)
 
     xarr = None
     if hdr.get('ORIGIN') == 'CLASS-Grenoble':
