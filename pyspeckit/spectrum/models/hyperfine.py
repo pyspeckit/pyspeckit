@@ -42,7 +42,7 @@ class hyperfinemodel(object):
             shortvarnames=("H","T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
             fitunits='Hz' )
 
-        self.ampfitter = model.SpectralModel(self,3,
+        self.ampfitter = model.SpectralModel(self.hyperfine_amp,3,
             parnames=['amp','center','width'], 
             parlimited=[(False,False), (False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
@@ -55,7 +55,17 @@ class hyperfinemodel(object):
         """
         return self.hyperfine(*args,**kwargs)
 
-    def hyperfine(self, xarr, Tex=5.0, tau=1.0, xoff_v=0.0, width=1.0, 
+    def hyperfine_amp(self, xarr, amp=None, xoff_v=0.0, width=1.0, 
+            return_components=False, Tbackground=2.73, Tex=5.0, tau=0.1):
+        """
+        wrapper of self.hyperfine with order of arguments changed
+        """ 
+        return self.hyperfine(xarr, amp=amp, Tex=Tex, tau=tau, xoff_v=xoff_v,
+                width=width, return_components=return_components,
+                Tbackground=Tbackground)
+
+
+    def hyperfine(self, xarr, Tex=5.0, tau=0.1, xoff_v=0.0, width=1.0, 
             return_components=False, Tbackground=2.73, amp=None ):
         """
         Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.

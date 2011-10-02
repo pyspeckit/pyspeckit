@@ -175,8 +175,12 @@ class Specfit(object):
                 return
             else:
                 self.guesses = guesses
-                self.multifit(color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
-                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components, verbose=verbose)
+                self.multifit(color=color,
+                        composite_fit_color=composite_fit_color,
+                        component_fit_color=component_fit_color, lw=lw,
+                        composite_lw=composite_lw, component_lw=component_lw,
+                        show_components=show_components, verbose=verbose,
+                        debug=debug)
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
@@ -274,7 +278,7 @@ class Specfit(object):
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
             color='k', composite_fit_color='red', component_fit_color='red',
             lw=0.5, composite_lw=0.75, component_lw=0.75,
-            show_components=None, verbose=True):
+            show_components=None, verbose=True, **kwargs):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -289,6 +293,9 @@ class Specfit(object):
         self.npeaks = len(self.guesses)/self.Registry.npars[self.fittype]
         self.fitter = self.Registry.multifitters[self.fittype]
         self.vheight = False
+
+        # add kwargs to fitkwargs
+        self.fitkwargs.update(kwargs)
         
         scalefactor = 1.0
         if renormalize in ('auto',True):
