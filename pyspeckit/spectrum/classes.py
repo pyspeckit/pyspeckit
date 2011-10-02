@@ -13,6 +13,7 @@ import numpy as np
 import smooth as sm
 import pyfits
 import readers,plotters,writers,baseline,units,measurements,speclines,arithmetic
+import moments as moments_module
 import fitters
 import models
 import history
@@ -315,6 +316,20 @@ class Spectrum(object):
         if not self.__dict__.has_key(linetype): # don't replace it if it already exists
             self.__dict__[linetype] = speclines.__dict__[linetype].__dict__[linetype+"_lines"](self,**kwargs)
 
+    def moments(self, unit='km/s', **kwargs):
+        """
+        Return the moments of the spectrum.  In order to assure that the 1st
+        and 2nd moments are meaningful, a 'default' unit is set.  If unit is not
+        set, will use current unit.
+
+        """
+
+        if unit is False or unit is None:
+            return moments_module.moments(self.xarr, self.data, **kwargs)
+        else:
+            return moments_module.moments(self.xarr.as_unit(unit), self.data, **kwargs)
+
+    moments.__doc__ += moments_module.moments.__doc__
 
 
 

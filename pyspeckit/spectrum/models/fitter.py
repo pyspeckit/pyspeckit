@@ -1,7 +1,7 @@
 import numpy
 from mpfit import mpfit
 from numpy.ma import median
-from pyspeckit.moments import moments
+from pyspeckit.spectrum.moments import moments
 
 class SimpleFitter(object):
 

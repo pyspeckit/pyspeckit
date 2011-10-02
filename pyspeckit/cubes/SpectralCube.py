@@ -97,7 +97,8 @@ class Cube(spectrum.Spectrum):
             self.data = cubes.extract_aperture( self.cube, aperture , coordsys=None)
 
     def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
-            verbose_level=1, quiet=True, signal_cut=3, **fitkwargs):
+            verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
+            blank_value=0, integral=True, direct=False, **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
         """
@@ -113,8 +114,14 @@ class Cube(spectrum.Spectrum):
             OK = np.isfinite(self.mapplot.plane)
         valid_pixels = zip(xx[OK],yy[OK])
 
-        self.parcube = np.zeros((len(guesses),)+self.mapplot.plane.shape)
-        self.errcube = np.zeros((len(guesses),)+self.mapplot.plane.shape) 
+        if usemomentcube:
+            npars = self.momentcube.shape[0]
+        else:
+            npars = len(guesses)
+
+        self.parcube = np.zeros((npars,)+self.mapplot.plane.shape)
+        self.errcube = np.zeros((npars,)+self.mapplot.plane.shape) 
+        if integral: self.integralmap = np.zeros(self.mapplot.plane.shape)
 
         t0 = time.time()
 
@@ -131,9 +138,18 @@ class Cube(spectrum.Spectrum):
                         print "Skipped %i,%i" % (x,y)
                     continue
             sp.specfit.Registry = self.Registry # copy over fitter registry
+            
+            if usemomentcube:
+                guesses = self.momentcube[:,y,x]
+
             sp.specfit(guesses=guesses,quiet=True, verbose=False, **fitkwargs)
             self.parcube[:,y,x] = sp.specfit.modelpars
             self.errcube[:,y,x] = sp.specfit.modelerrs
+            if integral: self.integralmap[y,x] = sp.specfit.integral(direct=direct)
+        
+            if blank_value != 0:
+                self.errcube[self.parcube == 0] = blank_value
+                self.parcube[self.parcube == 0] = blank_value
 
             if verbose:
                 if ii % 10**(3-verbose_level) == 0:
@@ -143,4 +159,31 @@ class Cube(spectrum.Spectrum):
             print "Finished final fit %i.  Elapsed time was %i seconds" % (ii, time.time()-t0)
 
 
+    def momenteach(self, verbose=True, verbose_level=1, **kwargs):
+        """
+        Return a cube of the moments of each pixel
+        """
+
+        yy,xx = np.indices(self.mapplot.plane.shape)
+        if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
+            OK = (True-self.mapplot.plane.mask)
+        else:
+            OK = np.isfinite(self.mapplot.plane)
+        valid_pixels = zip(xx[OK],yy[OK])
+
+        _temp_moment = self.get_spectrum(yy[OK][0],xx[OK][0]).moments(**kwargs)
+
+        self.momentcube = np.zeros((len(_temp_moment),)+self.mapplot.plane.shape)
+
+        t0 = time.time()
+
+        for ii,(x,y) in enumerate(valid_pixels):
+            sp = self.get_spectrum(y,x)
+            self.momentcube[:,y,x] = sp.moments(**kwargs)
+            if verbose:
+                if ii % 10**(3-verbose_level) == 0:
+                    print "Finished moment %i.  Elapsed time is %i seconds" % (ii, time.time()-t0)
+
+        if verbose:
+            print "Finished final moment %i.  Elapsed time was %i seconds" % (ii, time.time()-t0)
 
