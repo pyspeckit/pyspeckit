@@ -1,0 +1,7 @@
+Installation is the same as any python package, e.g.:
+
+wget --no-check-certificate https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz
+tar -xzf pyspeckit-pyspeckit.bitbucket.org-tip.tar.gz 
+cd pyspeckit-pyspeckit.bitbucket.org-tip
+python setup.py install
+

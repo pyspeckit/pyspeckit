@@ -782,9 +782,13 @@ class Specfit(object):
             if not hasattr(self.fitter,'integral'):
                 raise AttributeError("The fitter %s does not have an integral implemented" % self.fittype)
 
-            integ = self.fitter.integral(self.modelpars, **kwargs)
+            dx = np.abs(self.Spectrum.xarr.cdelt())
+            integ = self.fitter.integral(self.modelpars, **kwargs) * dx
             if return_error:
-                raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
+                print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."
+                OK = np.abs( self.model ) > threshold
+                error = np.sqrt((self.errspec[OK]**2).sum()) * dx
+                #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
         if return_error:
             return integ,error
         else:

@@ -226,6 +226,9 @@ class gaussian_fitter(fitter.SimpleFitter):
         """
         Return the integral of the individual components (ignoring height)
         """
+        return self.model.sum()
+
+        # this is the "proper" way to do it, but the above line was used for compatibility with other models
         integ = 0
         if len(modelpars) % 3 == 0:
             for amp,cen,width in numpy.reshape(modelpars,[len(modelpars)/3,3]):

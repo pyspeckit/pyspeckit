@@ -121,7 +121,7 @@ class Cube(spectrum.Spectrum):
 
         self.parcube = np.zeros((npars,)+self.mapplot.plane.shape)
         self.errcube = np.zeros((npars,)+self.mapplot.plane.shape) 
-        if integral: self.integralmap = np.zeros(self.mapplot.plane.shape)
+        if integral: self.integralmap = np.zeros((2,)+self.mapplot.plane.shape)
 
         t0 = time.time()
 
@@ -145,7 +145,7 @@ class Cube(spectrum.Spectrum):
             sp.specfit(guesses=guesses,quiet=True, verbose=False, **fitkwargs)
             self.parcube[:,y,x] = sp.specfit.modelpars
             self.errcube[:,y,x] = sp.specfit.modelerrs
-            if integral: self.integralmap[y,x] = sp.specfit.integral(direct=direct)
+            if integral: self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,return_error=True)
         
             if blank_value != 0:
                 self.errcube[self.parcube == 0] = blank_value
@@ -153,10 +153,10 @@ class Cube(spectrum.Spectrum):
 
             if verbose:
                 if ii % 10**(3-verbose_level) == 0:
-                    print "Finished fit %i.  Elapsed time is %i seconds" % (ii, time.time()-t0)
+                    print "Finished fit %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
 
         if verbose:
-            print "Finished final fit %i.  Elapsed time was %i seconds" % (ii, time.time()-t0)
+            print "Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
 
 
     def momenteach(self, verbose=True, verbose_level=1, **kwargs):
@@ -182,8 +182,8 @@ class Cube(spectrum.Spectrum):
             self.momentcube[:,y,x] = sp.moments(**kwargs)
             if verbose:
                 if ii % 10**(3-verbose_level) == 0:
-                    print "Finished moment %i.  Elapsed time is %i seconds" % (ii, time.time()-t0)
+                    print "Finished moment %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
 
         if verbose:
-            print "Finished final moment %i.  Elapsed time was %i seconds" % (ii, time.time()-t0)
+            print "Finished final moment %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
 
