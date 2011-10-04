@@ -15,6 +15,7 @@ import fitters,plotters,baseline,units
 import smooth
 import logger
 import config
+import moments
 
 import readers
 def register_reader(filetype, function, suffix, default=False):

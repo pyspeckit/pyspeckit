@@ -47,7 +47,7 @@ class SpectralModel(object):
             return v
         return L
 
-    def mpfitfun(self,x,y,err):
+    def mpfitfun(self,x,y,err=None):
         if err is None:
             def f(p,fjac=None): return [0,(y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))]
         else:
@@ -55,7 +55,7 @@ class SpectralModel(object):
         return f
 
     def __call__(self, xax, data, err=None, params=[], quiet=True, shh=True,
-            veryverbose=False, npeaks=None, **kwargs):
+            veryverbose=False, npeaks=None, debug=False, **kwargs):
         """
         Run the fitter
         """
@@ -89,8 +89,6 @@ class SpectralModel(object):
             xax = copy.copy(xax)
             xax.convert_to_unit(self.fitunits, quiet=quiet)
 
-        if err is None:
-            err = np.ones(data.shape)
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
             err[np.isnan(data) + np.isinf(data)] = np.inf
             data[np.isnan(data) + np.isinf(data)] = 0
@@ -117,6 +115,11 @@ class SpectralModel(object):
         self.mpp = mpp#[1:]
         self.mpperr = mpperr#[1:]
         self.model = self.n_modelfunc(mpp,**self.modelfunc_kwargs)(xax)
+        if np.isnan(chi2):
+            if debug:
+                raise ValueError("Error: chi^2 is nan")
+            else:
+                print "Warning: chi^2 is nan"
         return mpp,self.model,mpperr,chi2
 
 
