@@ -6,8 +6,10 @@ import matplotlib.cbook as mpcb
 
 try:
     import scipy.special
+    scipyOK = True
 except ImportError:
-    print "Voigt profile fitting will fail.  Requires scipy.special"
+    scipyOK = False
+    #print "Voigt profile fitting will fail.  Requires scipy.special"
 
 class voigt_fitter(object):
 
@@ -88,12 +90,15 @@ class voigt_fitter(object):
         http://mail.scipy.org/pipermail/scipy-user/2011-January/028327.html
         """
 
-        tmp = 1.0/scipy.special.wofz(numpy.zeros((len(xarr))) \
-              +1j*numpy.sqrt(numpy.log(2.0))*Lfwhm).real
-        tmp = tmp*amp* \
-              scipy.special.wofz(2*numpy.sqrt(numpy.log(2.0))*(xarr-xcen)/Gfwhm+1j* \
-              numpy.sqrt(numpy.log(2.0))*Lfwhm).real
-        return tmp
+        if scipyOK:
+            tmp = 1.0/scipy.special.wofz(numpy.zeros((len(xarr))) \
+                  +1j*numpy.sqrt(numpy.log(2.0))*Lfwhm).real
+            tmp = tmp*amp* \
+                  scipy.special.wofz(2*numpy.sqrt(numpy.log(2.0))*(xarr-xcen)/Gfwhm+1j* \
+                  numpy.sqrt(numpy.log(2.0))*Lfwhm).real
+            return tmp
+        else:
+            raise ImportError("Couldn't import scipy, therefore cannot do voigt profile stuff")
 
     def n_voigt(self,pars=None):
         """
