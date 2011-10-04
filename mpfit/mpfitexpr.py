@@ -18,7 +18,6 @@
 import mpfit 
 import re
 import numpy
-import scipy
 
 def mpfitexpr(func, x, y, err , start_params, check=True, full_output=False, **kw):
 	"""Fit the used defined expression to the data
@@ -36,7 +35,7 @@ def mpfitexpr(func, x, y, err , start_params, check=True, full_output=False, **k
 	Example:
 	params,yfit=mpfitexpr('p[0]+p[2]*(x-p[1])',x,y,err,[0,10,1])
 	
-	If you need to use numpy and scipy functions in your function, then
+	If you need to use numpy functions in your function, then
 		you must to use the full names of these functions, e.g.:
 		numpy.sin, numpy.cos etc.
 	
