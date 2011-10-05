@@ -8,6 +8,7 @@ PySpecKit
 An extensible spectroscopic analysis toolkit for astronomy.
 
 * :doc:`spectrum` can read a variety of individual spectra types
+
     * :class:`~pyspeckit.spectrum.Spectrum` The Spectrum class, which is the core
       of pyspeckit.  The __init__ procedure opens a spectrum file.
     * :class:`~pyspeckit.spectrum.Spectra` A group of Spectrums.  Generally for use
@@ -20,6 +21,7 @@ An extensible spectroscopic analysis toolkit for astronomy.
 * :doc:`cubes` is used to deal with data cubes and has functionality similar to
   `GAIA <http://astro.dur.ac.uk/~pdraper/gaia/gaia.html>`_ and `ds9
   <http://hea-www.harvard.edu/RD/ds9/>`_.
+
   * :class:`~pyspeckit.cubes.Cube` A Cube of Spectra.  Has features to collapse
     the cube along the spectral axis and fit spectra to each element of the
     cube.  Is meant to replicate `Starlink's GAIA
