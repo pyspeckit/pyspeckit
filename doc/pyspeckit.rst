@@ -8,6 +8,9 @@ PySpecKit
 An extensible spectroscopic analysis toolkit for astronomy.
 
 * :doc:`spectrum` can read a variety of individual spectra types
+* :class:`~pyspeckit.spectrum.Spectrum`
+* :class:`~pyspeckit.spectrum.Spectra`
+* :class:`~pyspeckit.spectrum.ObsBlock`
 * :doc:`cubes` is used to deal with data cubes and has functionality similar to
   `GAIA <http://astro.dur.ac.uk/~pdraper/gaia/gaia.html>`_ and `ds9
   <http://hea-www.harvard.edu/RD/ds9/>`_.

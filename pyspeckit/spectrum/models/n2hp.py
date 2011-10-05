@@ -58,11 +58,11 @@ aval_dict = {
 '101-012':2.016,
 }
 """
-—Line strengths of the 15 hyperﬁne components in J ¼ 1 –  0  transition. The
+Line strengths of the 15 hyperfine components in J=1-0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
-Line strengths are normalized in such a way that summing over all initial J ¼ 1
-levels gives the degeneracy of the ﬁnal J ¼ 0 levels, i.e., ﬁve for JF1F ¼ 012,
-three for JF1F ¼ 011, and one for JF1F ¼ 010. Thus, the sum over all 15
+Line strengths are normalized in such a way that summing over all initial J = 1
+levels gives the degeneracy of the J = 0 levels, i.e.,  for JF1F  012,
+three for JF1F  011, and one for JF1F  010. Thus, the sum over all 15
 transitions gives the total spin degeneracy
 """
 line_strength_dict = { # effectively the degeneracy per rotation state...
