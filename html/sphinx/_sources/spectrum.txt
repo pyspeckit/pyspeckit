@@ -1,8 +1,8 @@
 spectrum
 ==================
 
-.. currentmodule:: spectrum
-.. automodule:: spectrum
+.. currentmodule:: pyspeckit.spectrum
+.. automodule:: pyspeckit.spectrum
 .. autoclass:: Spectrum
     :show-inheritance:
     :members:
@@ -21,5 +21,5 @@ spectrum
     :inherited-members:
     :undoc-members:
 
-.. automodule:: spectrum
+.. automodule:: pyspeckit.spectrum
     :members:
