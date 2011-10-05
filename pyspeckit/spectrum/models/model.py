@@ -4,11 +4,36 @@ import copy
 import matplotlib.cbook as mpcb
 
 class SpectralModel(object):
+    """
+    A wrapper class for a spectra model.  Includes internal functions to
+    generate multi-component models, annotations, integrals, and individual
+    components.  The declaration can be complex, since you should name
+    individual variables, set limits on them, set the units the fit will be
+    performed in, and set the annotations to be used.  Check out some
+    of the hyperfine codes (hcn, n2hp) for examples.
+    """
 
     def __init__(self, modelfunc, npars, parnames=None, parvalues=None,
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
             partied=None, fitunits=None, parsteps=None, npeaks=1,
             shortvarnames=("A","v","\\sigma"), **kwargs):
+        """
+        modelfunc: the model function to be fitted.  Should take an X-axis (spectroscopic axis)
+        as an input, followed by input parameters.
+        npars - number of parameters required by the model
+        parnames - a list or tuple of the parameter names
+        parvalues - the initial guesses for the input parameters (defaults to ZEROS)
+        parlimits - the upper/lower limits for each variable     (defaults to ZEROS)
+        parfixed  - Can declare any variables to be fixed        (defaults to ZEROS)
+        parerror  - technically an output parameter... hmm       (defaults to ZEROS)
+        partied   - not the past tense of party.  Can declare, via text, that
+            some parameters are tied to each other.  Defaults to zeros like the
+            others, but it's not clear if that's a sensible default
+        fitunits - convert X-axis to these units before passing to model
+        parsteps - minimum step size for each paremeter          (defaults to ZEROS)
+        npeaks   - default number of peaks to assume when fitting (can be overridden)
+        shortvarnames - TeX names of the variables to use when annotating
+        """
 
         self.modelfunc = modelfunc
         self.npars = npars
@@ -38,7 +63,7 @@ class SpectralModel(object):
 
     def n_modelfunc(self, pars, **kwargs):
         """
-        Simple wrapper to deal with N peaks
+        Simple wrapper to deal with N independent peaks for a given spectral model
         """
         def L(x):
             v = np.zeros(len(x))

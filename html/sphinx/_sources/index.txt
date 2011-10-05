@@ -9,13 +9,13 @@ An extensible spectroscopic analysis toolkit for astronomy.
 
 * :doc:`spectrum` can read a variety of individual spectra types
 
-    * :class:`~pyspeckit.spectrum.Spectrum` The Spectrum class, which is the core
+  * :class:`~pyspeckit.spectrum.Spectrum` The Spectrum class, which is the core
       of pyspeckit.  The __init__ procedure opens a spectrum file.
-    * :class:`~pyspeckit.spectrum.Spectra` A group of Spectrums.  Generally for use
+  * :class:`~pyspeckit.spectrum.Spectra` A group of Spectrums.  Generally for use
       when you have multiple wavelength observations you want to stitch together
       (e.g., two filterbanks on a heterodyne system, or the red/blue spectra from a
       multi-band spectrometer like the Double Imaging Spectrograph)
-    * :class:`~pyspeckit.spectrum.ObsBlock` An Observation Block - multiple spectra
+  * :class:`~pyspeckit.spectrum.ObsBlock` An Observation Block - multiple spectra
       of different objects or different times covering the same wavelength range
 
 * :doc:`cubes` is used to deal with data cubes and has functionality similar to
@@ -43,4 +43,5 @@ Table of Contents:
 
    spectrum
    cubes
+   models
 
