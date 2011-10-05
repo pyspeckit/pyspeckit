@@ -1,0 +1,174 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Models &mdash; pyspeckit v0.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pyspeckit v0.1 documentation" href="index.html" />
+    <link rel="prev" title="cubes" href="cubes.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cubes.html" title="cubes"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">pyspeckit v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-models">
+<span id="models"></span><h1>Models<a class="headerlink" href="#module-models" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-pyspeckit.spectrum.models"></span><dl class="class">
+<dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel">
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.hyperfine.</tt><tt class="descname">hyperfinemodel</tt><big>(</big><em>line_names</em>, <em>voff_lines_dict</em>, <em>freq_dict</em>, <em>line_strength_dict</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Wrapper for the hyperfine model class.  Specify the offsets and relative strengths when initializing, then 
+you&#8217;ve got yourself a hyperfine modeler.</p>
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine">
+<tt class="descname">hyperfine</tt><big>(</big><em>xarr</em>, <em>Tex=5.0</em>, <em>tau=0.1</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_components=False</em>, <em>Tbackground=2.73</em>, <em>amp=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp">
+<tt class="descname">hyperfine_amp</tt><big>(</big><em>xarr</em>, <em>amp=None</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_components=False</em>, <em>Tbackground=2.73</em>, <em>Tex=5.0</em>, <em>tau=0.1</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp" title="Permalink to this definition">¶</a></dt>
+<dd><p>wrapper of self.hyperfine with order of arguments changed</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel">
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>parnames=None</em>, <em>parvalues=None</em>, <em>parlimits=None</em>, <em>parlimited=None</em>, <em>parfixed=None</em>, <em>parerror=None</em>, <em>partied=None</em>, <em>fitunits=None</em>, <em>parsteps=None</em>, <em>npeaks=1</em>, <em>shortvarnames=('A'</em>, <em>'v'</em>, <em>'\sigma')</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.annotations">
+<tt class="descname">annotations</tt><big>(</big><em>shortvarnames=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.annotations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.components">
+<tt class="descname">components</tt><big>(</big><em>xarr</em>, <em>pars</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.integral">
+<tt class="descname">integral</tt><big>(</big><em>modelpars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extremely simple integrator:
+IGNORES modelpars
+just sums self.model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.mpfitfun">
+<tt class="descname">mpfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.mpfitfun" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc">
+<tt class="descname">n_modelfunc</tt><big>(</big><em>pars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple wrapper to deal with N peaks</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyspeckit.spectrum.models.fitter.SimpleFitter">
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.fitter.</tt><tt class="descname">SimpleFitter</tt><a class="headerlink" href="#pyspeckit.spectrum.models.fitter.SimpleFitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.fitter.SimpleFitter.moments">
+<tt class="descname">moments</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.fitter.SimpleFitter.moments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pyspeckit.spectrum.models"></span></div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cubes.html"
+                        title="previous chapter">cubes</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/models.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cubes.html" title="cubes"
+             >previous</a> |</li>
+        <li><a href="index.html">pyspeckit v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>
