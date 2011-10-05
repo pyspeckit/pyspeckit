@@ -33,11 +33,11 @@ aval_dict = {
 '12-01':2.4075e-5,
 }
 """
-—Line strengths of the 15 hyperﬁne components in J ¼ 1 –  0  transition. The
+Line strengths of the 15 hyperfine components in J = 1 -  0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
-Line strengths are normalized in such a way that summing over all initial J ¼ 1
-levels gives the degeneracy of the ﬁnal J ¼ 0 levels, i.e., ﬁve for JF1F ¼ 012,
-three for JF1F ¼ 011, and one for JF1F ¼ 010. Thus, the sum over all 15
+Line strengths are normalized in such a way that summing over all initial J = 1
+levels gives the degeneracy of the  J = 0 levels, i.e.,  for JF1F = 012,
+three for JF1F = 011, and one for JF1F = 010. Thus, the sum over all 15
 transitions gives the total spin degeneracy
 """
 line_strength_dict = { # effectively the degeneracy per rotation state...
@@ -116,8 +116,11 @@ def hcn_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     if np.isnan(gridval1) or np.isnan(gridval2):
         raise ValueError("Invalid column/density")
 
-    tau = [scipy.ndimage.map_coordinates(tg[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1) for tg in taugrid]
-    tex = [scipy.ndimage.map_coordinates(tg[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1) for tg in texgrid]
+    if scipyOK:
+        tau = [scipy.ndimage.map_coordinates(tg[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1) for tg in taugrid]
+        tex = [scipy.ndimage.map_coordinates(tg[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1) for tg in texgrid]
+    else:
+        raise ImportError("Couldn't import scipy, therefore cannot interpolate")
     #tau = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,taugrid[temperature_gridnumber,:,:])
     #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
 
