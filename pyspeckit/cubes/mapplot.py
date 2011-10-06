@@ -50,9 +50,11 @@ class MapPlotter(object):
         if doplot: self.mapplot(**kwargs)
 
     def __call__(self, **kwargs):
+        """ see mapplot """
         return self.mapplot(**kwargs)
 
-    def mapplot(self, estimator=np.mean, convention='calabretta', **kwargs):
+    def mapplot(self, estimator=np.mean, convention='calabretta',
+            colorbar=True, aplpy=True, **kwargs):
         """
         Plot up a map based on an input data cube
         """
@@ -72,7 +74,7 @@ class MapPlotter(object):
             elif estimator[-5:] == ".fits":
                 self.plane = pyfits.getdata(estimator)
 
-        if icanhasaplpy:
+        if icanhasaplpy and aplpy:
             self.figure.clf()
             self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=self.header)
             vmin = self.plane[self.plane==self.plane].min()
@@ -80,10 +82,12 @@ class MapPlotter(object):
             self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure,convention=convention)
             self.FITSFigure.show_colorscale(vmin=vmin,vmax=vmax)
             self.axis = self.FITSFigure._ax1
+            if colorbar: self.FITSFigure.add_colorbar()
         else:
             if self.axis is None:
                 self.axis = self.figure.add_subplot(111)
             self.axis.imshow(self.plane)
+            if colorbar: self.colorbar = matplotlib.pyplot.colorbar()
 
         self.canvas = self.axis.figure.canvas
 

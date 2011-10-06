@@ -187,3 +187,66 @@ class Cube(spectrum.Spectrum):
         if verbose:
             print "Finished final moment %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
 
+
+class CubeStack(Cube):
+    """
+    The Cube equivalent of Spectra: for stitching multiple cubes with the same
+    spatial grid but different frequencies together
+    """
+
+    def __init__(self, cubelist, xunits='GHz', x0=0, y0=0, **kwargs):
+        """
+        Initialize the Cube.  Accepts files in the following formats:
+            - .fits
+
+        x0,y0 - initial spectrum to use (defaults to lower-left corner)
+        """
+
+        print "Creating Cube Stack"
+        cubelist = list(cubelist)
+        for ii,cube in enumerate(cubelist):
+            if type(cube) is str:
+                cube = Cube(cube)
+                cubelist[ii] = cube
+            if cube.xarr.units != xunits:
+                # convert all inputs to same (non-velocity) units
+                cube.xarr.convert_to_unit(xunits, **kwargs)
+
+        self.cubelist = cubelist
+
+        print "Concatenating data"
+        self.xarr = spectrum.units.SpectroscopicAxes([sp.xarr for sp in cubelist])
+        self.cube = np.ma.concatenate([cube.cube for cube in cubelist])
+        self._sort()
+        self.data = self.cube[:,y0,x0]
+        self.error = None
+
+        self.header = cubelist[0].header
+        for cube in cubelist:
+            for key,value in cube.header.items():
+                self.header.update(key,value)
+
+        
+        self.units = cubelist[0].units
+        for cube in cubelist: 
+            if cube.units != self.units: 
+                raise ValueError("Mismatched units")
+
+        self._register_fitters()
+        self.fileprefix = cubelist[0].fileprefix # first is the best?
+        self.plotter = spectrum.plotters.Plotter(self)
+        self.specfit = spectrum.fitters.Specfit(self,Registry=self.Registry)
+        self.baseline = spectrum.baseline.Baseline(self)
+        self.speclines = spectrum.speclines
+        # Initialize writers TO DO: DO WRITERS WORK FOR CUBES?
+        self.writer = {}
+        for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
+        self.mapplot = mapplot.MapPlotter(self)
+
+    def _sort(self):
+        """ Sort the data in order of increasing X (could be decreasing, but
+        must be monotonic for plotting reasons) """
+
+        indices = self.xarr.argsort()
+        self.xarr = self.xarr[indices]
+        self.cube = self.cube[indices,:,:]

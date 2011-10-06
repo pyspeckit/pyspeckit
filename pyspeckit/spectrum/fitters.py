@@ -290,6 +290,8 @@ class Specfit(object):
         self.setfitspec()
         #if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp') # We now do this in gaussfitter.py
         if fittype is not None: self.fittype = fittype
+        if len(self.guesses) < self.Registry.npars[self.fittype]:
+            raise ValueError("Too few parameters input.  Need at least %i for %s models" % (self.Registry.npars[self.fittype],self.fittype))
         self.npeaks = len(self.guesses)/self.Registry.npars[self.fittype]
         self.fitter = self.Registry.multifitters[self.fittype]
         self.vheight = False
