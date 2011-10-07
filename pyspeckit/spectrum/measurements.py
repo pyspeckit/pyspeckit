@@ -14,7 +14,8 @@ spec.measure()
 cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
-    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None, miscline = None, misctol = 10, ignore = None):
+    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None, miscline = None, misctol = 10, ignore = None,
+        derive = True):
         """
         This can be called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
         Just do: spec.measure(z, xunits, fluxnorm)
@@ -24,6 +25,9 @@ class Measurements(object):
         
         Currently will only work with Gaussians. to generalize:
             1. make sure we manipulate modelpars correctly, i.e. read in entries corresponding to wavelength/frequency/whatever correctly.
+            
+        misclines = dictionary
+            miscline = {{'name': H_alpha', 'wavelength': 6565, 'etc': 0}, {}}
             
         """
                     
@@ -74,7 +78,7 @@ class Measurements(object):
             self.d = self.cosmology.LuminosityDistance(z) * cm_per_mpc
             
         self.identify()
-        self.derive()
+        if derive: self.derive()
         
     def identify(self):
         """
@@ -148,12 +152,10 @@ class Measurements(object):
             # If we've know a-priori which lines the unmatched lines are likely to be, use that information        
             else:
                 
-                if type(self.miscline) is not list: self.miscline = [self.miscline]
-                
                 for i, miscline in enumerate(self.miscline):
                     try:  
                         for j, x in enumerate(zip(*tmp1)[1]):    
-                            if abs(x - self.lines[miscline]['modelpars'][1]) < self.misctol[i]:
+                            if abs(x - self.lines[miscline['name']]['modelpars'][1]) < self.misctol[i]:
                                 self.lines[line]['modelpars'].extend(tmp1[j:j+3])
                                 self.lines[line]['modelerrs'].extend(tmp2[j:j+3])
                     except TypeError:
