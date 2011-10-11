@@ -54,7 +54,7 @@ class MapPlotter(object):
         return self.mapplot(**kwargs)
 
     def mapplot(self, estimator=np.mean, convention='calabretta',
-            colorbar=True, aplpy=True, **kwargs):
+            colorbar=True, useaplpy=True, **kwargs):
         """
         Plot up a map based on an input data cube
         """
@@ -74,7 +74,7 @@ class MapPlotter(object):
             elif estimator[-5:] == ".fits":
                 self.plane = pyfits.getdata(estimator)
 
-        if icanhasaplpy and aplpy:
+        if icanhasaplpy and useaplpy:
             self.figure.clf()
             self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=self.header)
             vmin = self.plane[self.plane==self.plane].min()

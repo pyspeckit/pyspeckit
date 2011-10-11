@@ -35,3 +35,7 @@ from which we derived inspiration for the "register functions" capability.
 Authors:
 Adam Ginsburg (adam.g.ginsburg@gmail.com)
 Jordan Mirocha (mirochaj@gmail.com)
+
+The PySpecKit logo uses the Voyager 1 image of Earth known as the "Pale Blue Dot".
+Original source: http://visibleearth.nasa.gov/view_rec.php?id=601
+Reprocessed image: http://instructors.cwrl.utexas.edu/mcginnis/sites/instructors.cwrl.utexas.edu.mcginnis/files/pale_blue_dot2.jpg
