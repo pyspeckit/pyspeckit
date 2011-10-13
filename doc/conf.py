@@ -207,6 +207,8 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
+# Try to make autoclass include both __init__ and Class docstrings
+autoclass_content = 'both'
 
 # -- Options for manual page output --------------------------------------------
 

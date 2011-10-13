@@ -23,6 +23,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="pyspeckit v0.1 documentation" href="index.html" />
+    <link rel="next" title="Models" href="models.html" />
     <link rel="prev" title="spectrum" href="spectrum.html" /> 
   </head>
   <body>
@@ -35,6 +36,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Models"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="spectrum.html" title="spectrum"
              accesskey="P">previous</a> |</li>
@@ -61,6 +65,14 @@
 <dt id="pyspeckit.cubes.Cube">
 <em class="property">class </em><tt class="descclassname">pyspeckit.cubes.</tt><tt class="descname">Cube</tt><big>(</big><em>filename</em>, <em>x0=0</em>, <em>y0=0</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.classes.Spectrum</span></tt></p>
+<dl class="docutils">
+<dt>Initialize the Cube.  Accepts files in the following formats:</dt>
+<dd><ul class="first last simple">
+<li>.fits</li>
+</ul>
+</dd>
+</dl>
+<p>x0,y0 - initial spectrum to use (defaults to lower-left corner)</p>
 <dl class="method">
 <dt id="pyspeckit.cubes.Cube.copy">
 <tt class="descname">copy</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.copy" title="Permalink to this definition">¶</a></dt>
@@ -70,7 +82,7 @@ Useful for, e.g., comparing smoothed to unsmoothed data</p>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.Cube.crop">
-<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.crop" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace the current spectrum with a subset from x1 to x2 in current
 units</p>
 <p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
@@ -113,7 +125,7 @@ the lines)</p>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.Cube.measure">
-<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=None</em>, <em>ignore=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.measure" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=None</em>, <em>ignore=None</em>, <em>derive=True</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.measure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
 </dd></dl>
 
@@ -188,6 +200,13 @@ parameters</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.cubes.Cube.slice">
+<tt class="descname">slice</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>copy=True</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slice a spectrum.  Defaults to the current units.  Can specify &#8216;pixels&#8217;
+if you want to just slice by index</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.cubes.Cube.smooth">
 <tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.smooth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooth the spectrum by factor &#8220;smooth&#8221;.  Options are defined in sm.smooth</p>
@@ -234,6 +253,9 @@ to determine type from suffix</p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="spectrum.html"
                         title="previous chapter">spectrum</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="models.html"
+                        title="next chapter">Models</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/cubes.txt"
@@ -242,7 +264,7 @@ to determine type from suffix</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" size="18" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -266,6 +288,9 @@ to determine type from suffix</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
+          <a href="models.html" title="Models"
+             >next</a> |</li>
+        <li class="right" >
           <a href="spectrum.html" title="spectrum"
              >previous</a> |</li>
         <li><a href="index.html">pyspeckit v0.1 documentation</a> &raquo;</li> 
@@ -273,7 +298,7 @@ to determine type from suffix</p>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
     </div>
   </body>
 </html>

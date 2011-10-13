@@ -40,6 +40,14 @@ class Spectrum(object):
           polynomial
         -perform fourier transforms and operations in fourier space on a spectrum (not implemented)
 
+    Example usage:
+
+    # automatically load a "compliant" (linear X-axis) FITS file
+    spec = pyspeckit.Spectrum('test.fits')
+
+    # plot the spectrum
+    spec.plotter()
+
     """
 
     from arithmetic import interpnans

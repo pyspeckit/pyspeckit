@@ -92,6 +92,24 @@ formats.</p>
 <p class="last">-perform fourier transforms and operations in fourier space on a spectrum (not implemented)</p>
 </dd>
 </dl>
+<p>Example usage:</p>
+<p># automatically load a &#8220;compliant&#8221; (linear X-axis) FITS file
+spec = pyspeckit.Spectrum(&#8216;test.fits&#8217;)</p>
+<p># plot the spectrum
+spec.plotter()</p>
+<dl class="docutils">
+<dt>Initialize the Spectrum.  Accepts files in the following formats:</dt>
+<dd><ul class="first last simple">
+<li>.fits</li>
+<li>.txt</li>
+<li>.hdf5</li>
+</ul>
+</dd>
+</dl>
+<p>Must either pass in a filename or ALL of xarr, data, and header, plus
+optionally error.</p>
+<p>doplot - if specified, will generate a plot when created</p>
+<p>kwargs are passed to the reader, not the plotter</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.copy">
 <tt class="descname">copy</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.copy" title="Permalink to this definition">¶</a></dt>
@@ -101,7 +119,7 @@ Useful for, e.g., comparing smoothed to unsmoothed data</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.crop">
-<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.crop" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace the current spectrum with a subset from x1 to x2 in current
 units</p>
 <p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
@@ -124,7 +142,7 @@ the lines)</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.measure">
-<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=None</em>, <em>ignore=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.measure" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=None</em>, <em>ignore=None</em>, <em>derive=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.measure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
 </dd></dl>
 
@@ -173,6 +191,13 @@ parameters</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.Spectrum.slice">
+<tt class="descname">slice</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>copy=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slice a spectrum.  Defaults to the current units.  Can specify &#8216;pixels&#8217;
+if you want to just slice by index</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.smooth">
 <tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.smooth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooth the spectrum by factor &#8220;smooth&#8221;.  Options are defined in sm.smooth</p>
@@ -215,7 +240,7 @@ Useful for, e.g., comparing smoothed to unsmoothed data</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectra.crop">
-<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectra.crop" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectra.crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace the current spectrum with a subset from x1 to x2 in current
 units</p>
 <p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
@@ -244,7 +269,7 @@ the lines)</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectra.measure">
-<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=None</em>, <em>ignore=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectra.measure" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=None</em>, <em>ignore=None</em>, <em>derive=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectra.measure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
 </dd></dl>
 
@@ -297,6 +322,13 @@ inherit_fit - if specified, will grab the fitter &amp; fitter properties from Sp
 <dt id="pyspeckit.spectrum.Spectra.shape">
 <tt class="descname">shape</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectra.shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the data shape</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.Spectra.slice">
+<tt class="descname">slice</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>copy=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectra.slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slice a spectrum.  Defaults to the current units.  Can specify &#8216;pixels&#8217;
+if you want to just slice by index</p>
 </dd></dl>
 
 <dl class="method">
@@ -353,7 +385,7 @@ Useful for, e.g., comparing smoothed to unsmoothed data</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.ObsBlock.crop">
-<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.crop" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace the current spectrum with a subset from x1 to x2 in current
 units</p>
 <p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
@@ -382,7 +414,7 @@ the lines)</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.ObsBlock.measure">
-<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=None</em>, <em>ignore=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.measure" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=None</em>, <em>ignore=None</em>, <em>derive=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.measure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
 </dd></dl>
 
@@ -435,6 +467,13 @@ inherit_fit - if specified, will grab the fitter &amp; fitter properties from Sp
 <dt id="pyspeckit.spectrum.ObsBlock.shape">
 <tt class="descname">shape</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the data shape</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.ObsBlock.slice">
+<tt class="descname">slice</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>copy=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slice a spectrum.  Defaults to the current units.  Can specify &#8216;pixels&#8217;
+if you want to just slice by index</p>
 </dd></dl>
 
 <dl class="method">
@@ -543,7 +582,7 @@ for example.</dd>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" size="18" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -577,7 +616,7 @@ for example.</dd>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
     </div>
   </body>
 </html>
