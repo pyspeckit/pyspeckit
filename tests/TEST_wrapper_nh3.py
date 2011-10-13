@@ -6,7 +6,9 @@ filenames = {'oneone':'G032.751-00.071_nh3_11_Tastar.fits',
     'threethree':'G032.751-00.071_nh3_33_Tastar.fits',
     'fourfour':'G032.751-00.071_nh3_44_Tastar.fits'}
 
-spdict1,spectra1 = pyspeckit.wrappers.fitnh3.fitnh3tkin(filenames,crop=[0,80],tkin=18.65,tex=4.49,column=15.5,fortho=0.9,verbose=False,smooth=6, fignum=6)
+spdict1,spectra1 = pyspeckit.wrappers.fitnh3.fitnh3tkin(filenames, crop=[0,80],
+        tkin=18.65, tex=4.49, column=15.5, fortho=0.9, verbose=False, smooth=6,
+        fignum=6, quiet=True)
 print spectra1.specfit.Registry
 print spectra1.specfit.Registry.multifitters['ammonia']
 

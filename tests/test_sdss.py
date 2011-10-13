@@ -49,11 +49,11 @@ for line in spec.measurements.lines.keys():
 # Notice that because we supplied the objects redshift and flux normalization, the measurements class
 # automatically calculated line luminosities.  Also, it separates the broad and narrow H-alpha components, and identifies which lines are which. How nice!
 
-raw_input("Done.")
+#raw_input("Done.")
 
-spec.specfit.plot_fit()
+spec.specfit.plot_fit(show_components=True)
 
-raw_input("Done (again).")
+#raw_input("Done (again).")
 
 # Save the figure
 spec.plotter.figure.savefig("sdss_fit_example.png")

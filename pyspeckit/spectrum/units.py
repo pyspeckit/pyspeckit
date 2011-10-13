@@ -88,10 +88,14 @@ velocity_dict = {'meters/second':1.0,'m/s':1.0,
         }
 velocity_dict = CaseInsensitiveDict(velocity_dict)
 
+pixel_dict = {'pixel':1,'pixels':1}
+pixel_dict = CaseInsensitiveDict(pixel_dict)
+
 conversion_dict = {
         'VELOCITY':velocity_dict,  'Velocity':velocity_dict,  'velocity':velocity_dict,  'velo': velocity_dict, 'VELO': velocity_dict,
         'LENGTH':length_dict,      'Length':length_dict,      'length':length_dict, 
         'FREQUENCY':frequency_dict,'Frequency':frequency_dict,'frequency':frequency_dict, 'freq': frequency_dict, 'FREQ': frequency_dict,
+        'pixels':pixel_dict,'PIXELS':pixel_dict,
         }
 conversion_dict = CaseInsensitiveDict(conversion_dict)
 
@@ -424,7 +428,11 @@ class SpectroscopicAxis(np.ndarray):
         units of the X axis.  Frame conversion is... not necessarily implemented.
         """
 
-        if unit not in conversion_dict[self.xtype]:
+        if unit is None:
+            return self
+        elif unit in pixel_dict:
+            return np.arange(self.shape[0])
+        elif unit not in conversion_dict[self.xtype]:
             change_xtype = True
             change_units = True
         elif unit != self.units: 
