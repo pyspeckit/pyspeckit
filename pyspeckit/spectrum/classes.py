@@ -43,10 +43,13 @@ class Spectrum(object):
     Example usage:
 
     # automatically load a "compliant" (linear X-axis) FITS file
+
     spec = pyspeckit.Spectrum('test.fits')
 
     # plot the spectrum
+
     spec.plotter()
+
 
     """
 
@@ -56,6 +59,7 @@ class Spectrum(object):
             error=None, header=None, doplot=False, maskdata=True,
             plotkwargs={}, **kwargs):
         """
+        __init__
         Initialize the Spectrum.  Accepts files in the following formats:
             - .fits
             - .txt
@@ -259,7 +263,7 @@ class Spectrum(object):
 
     def smooth(self,smooth,**kwargs):
         """
-        Smooth the spectrum by factor "smooth".  Options are defined in sm.smooth
+        Smooth the spectrum by factor "smooth".  
         """
         smooth = round(smooth)
         self.data = sm.smooth(self.data,smooth,**kwargs)
@@ -272,8 +276,12 @@ class Spectrum(object):
         self.specfit.downsample(smooth)
     
         self._smooth_header(smooth)
+    smooth.__doc__ += "sm.smooth doc: \n" + sm.smooth.__doc__
 
     def _smooth_header(self,smooth):
+        """
+        Internal - correct the FITS header parameters when smoothing
+        """
         if self.header.get('CDELT1') is not None and self.header.get('CRPIX1') is not None:
             self.header.update('CDELT1',self.header.get('CDELT1') * float(smooth))
             self.header.update('CRPIX1',self.header.get('CRPIX1') / float(smooth))
@@ -287,6 +295,14 @@ class Spectrum(object):
         Return the data shape
         """
         return self.data.shape
+
+    def __len__(self):
+        return len(self.data)
+
+    def __repr__(self):
+        return r'<Spectrum object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s>' % \
+                (self.xarr.min(), self.xarr.max(), self.xarr.units, self.data.min(), self.data.max(), self.units)
+    
 
     def copy(self):
         """

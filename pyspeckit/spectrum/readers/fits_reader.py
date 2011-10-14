@@ -25,17 +25,23 @@ def open_1d_fits(filename,**kwargs):
 
 
 def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None, autofix=True,
-        scale_keyword=None, scale_action=operator.div, **kwargs):
+        scale_keyword=None, scale_action=operator.div, verbose=False, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
     """
 
+    # force things that will be treated as strings to be strings
+    # this is primarily to avoid problems with variables being passed as unicode
+    wcstype = str(wcstype)
+    specaxis = str(specaxis)
+
     hdr = pyfits_hdu._header
     if autofix: 
         for card in hdr.ascardlist():
             try:
-                card.verify('silentfix')
+                if verbose: card.verify('fix')
+                else: card.verify('silentfix')
             except pyfits.VerifyError:
                 hdr.__delitem__(card.key)
     data = pyfits_hdu.data
@@ -86,16 +92,19 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
         # Use the CLASS FITS definition (which is non-standard)
         # http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node84.html
         # F(n) = RESTFREQ + CRVALi + ( n - CRPIXi ) * CDELTi
-        print "Loading a CLASS .fits spectrum"
+        if verbose: print "Loading a CLASS .fits spectrum"
         dv = -1*hdr.get('CDELT1')
         v0 = hdr.get('RESTFREQ') + hdr.get('CRVAL1')
         p3 = hdr.get('CRPIX1')
-    elif hdr.get('CD%s_%s%s' % (specaxis,specaxis,wcstype)):
+    elif hdr.get(str('CD%s_%s%s' % (specaxis,specaxis,wcstype))):
         dv,v0,p3 = hdr['CD%s_%s%s' % (specaxis,specaxis,wcstype)],hdr['CRVAL%s%s' % (specaxis,wcstype)],hdr['CRPIX%s%s' % (specaxis,wcstype)]
         hdr.update('CDELT%s' % specaxis,dv)
-    elif hdr.get('CDELT%s%s' % (specaxis,wcstype)):
+        if verbose: print "Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
+    elif hdr.get(str('CDELT%s%s' % (specaxis,wcstype))):
         dv,v0,p3 = hdr['CDELT%s%s' % (specaxis,wcstype)],hdr['CRVAL%s%s' % (specaxis,wcstype)],hdr['CRPIX%s%s' % (specaxis,wcstype)]
+        if verbose: print "Using the FITS CDELT value.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
     elif len(data.shape) > 1:
+        if verbose: print "No CDELT or CD in header.  Assuming 2D input with 1st line representing the spectral axis."
         # try assuming first axis is X axis
         if hdr.get('CUNIT%s%s' % (specaxis,wcstype)):
             xarr = data[0,:]

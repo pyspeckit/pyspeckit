@@ -56,7 +56,8 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, *
     """
     Plot the results from a multi-nh3 fit
     """ 
-    pyplot.figure(fignum)
+    spectra.plotter.figure = pyplot.figure(fignum)
+    spectra.plotter.axis = spectra.plotter.figure.gca()
     pyplot.clf()
     splist = spdict.values()
 
@@ -99,7 +100,7 @@ def fitnh3(spectrum, vrange=[-100,100], vrangeunits='km/s', quiet=False,
 
     if vrange:
         spectrum.xarr.convert_to_unit(vrangeunits)
-        spectrum.crop(*vrange)
+        spectrum.crop(*vrange, units=vrangeunits)
 
     spectrum.specfit(fittype='gaussian',negamp=False)
     ampguess,vguess,widthguess = spectrum.specfit.modelpars

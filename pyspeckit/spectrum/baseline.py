@@ -18,7 +18,6 @@ class Baseline:
         self.blleg = None
         self.click = 0
         self.nclicks_b1 = 0
-        self.nclicks_b2 = 0
         self.fitregion=[]
         self.excludevelo = []
         self.excludepix  = []
@@ -213,28 +212,32 @@ class Baseline:
         else: 
             print "Baseline wasn't subtracted; not unsubtracting."
 
-    def selectregion_interactive(self,event,**kwargs):
+    def selectregion_interactive(self,event, debug=False, **kwargs):
         """
         select regions for baseline fitting
         """
         toolbar = self.specplotter.figure.canvas.manager.toolbar
-        if toolbar.mode == '':
+        if event.xdata is None:
+            # do nothing
+            if debug: print "Click outside of plot region"
+        elif toolbar.mode == '':
             if hasattr(event,'button'):
                 xpix = self.Spectrum.xarr.x_to_pix(event.xdata)
                 if event.button == 1:
                     if self.nclicks_b1 == 0:
-                        if xpix < self.bx1:
-                            self.bx1 = xpix
-                        self.includevelo += [self.Spectrum.xarr[xpix]]
-                        self.includepix  += [xpix]
-                        self.nclicks_b1 += 1
+                        self.nclicks_b1 = 1
                         self._xclick1 = xpix
+                        if debug: print "Click 1: clickx=%i bx1=%i, bx2=%i" % (xpix,self.bx1,self.bx2)
                     elif self.nclicks_b1 == 1:
-                        if xpix > self.bx2:
-                            self.bx2 = xpix
                         self._xclick2 = xpix
-                        self.nclicks_b1 -= 1
-                        if self._xclick1 > self._xclick2: self.bx1,self._xclick2 = self._xclick2,self.bx1
+                        self.nclicks_b1 = 0
+                        # force click1 to be left
+                        if self._xclick1 > self._xclick2: self._xclick1,self._xclick2 = self._xclick2,self._xclick1
+
+                        # ensure that the fit/plot range is at least as large as the click range
+                        if self.bx1 < self._xclick2: self.bx1 = self._xclick2
+                        if self.bx2 > self._xclick1: self.bx2 = self._xclick1
+
                         self.fitregion += self.specplotter.axis.plot(
                                 self.Spectrum.xarr[self._xclick1:self._xclick2],
                                 self.Spectrum.data[self._xclick1:self._xclick2]+self.specplotter.offset,
@@ -242,8 +245,9 @@ class Baseline:
                                 color='g',alpha=0.5)
                         self.specplotter.refresh()
                         self.excludemask[self._xclick1:self._xclick2] = False
-                        self.includevelo += [self.Spectrum.xarr[self._xclick2]]
-                        self.includepix  += [self._xclick2]
+                        self.includevelo += [self.xpectrum.xarr[self._xclick1], self.Spectrum.xarr[self._xclick2]]
+                        self.includepix  += [self._xclick1, self._xclick2]
+                        if debug: print "Click 2: clickx=%i bx1=%i, bx2=%i" % (xpix,self.bx1,self.bx2)
                 if event.button in [2,3]:
                     self.specplotter.figure.canvas.mpl_disconnect(self.click)
                     self.dofit(include=self.includepix, includeunits='pix', **kwargs)
@@ -252,6 +256,7 @@ class Baseline:
                         if p in self.specplotter.axis.lines: self.specplotter.axis.lines.remove(p)
                     self.fitregion=[] # I should be able to just remove from the list... but it breaks the loop...
                     self.specplotter.refresh()
+                    if debug: print "Click to fit.  Includepix: %s" % (str(self.includepix))
             elif hasattr(event,'key'):
                 if event.key == '?':
                     print interactive_help_message

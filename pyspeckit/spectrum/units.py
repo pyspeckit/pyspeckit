@@ -404,13 +404,12 @@ class SpectroscopicAxis(np.ndarray):
         else:
             raise ValueError("Units not recognized.")
 
-    def convert_to_unit(self, unit, quiet=False, **kwargs):
+    def convert_to_unit(self, unit, **kwargs):
         """
         Return the X-array in the specified units without changing it
         (similar to convert_to_unit
         """
-        if not quiet: print "Converting from unit %s to %s" % (self.units, unit)
-        self[:] = self.as_unit(unit,**kwargs)
+        self[:] = self.as_unit(unit, **kwargs)
         
         if unit in velocity_dict:
             self.xtype = "Velocity"
@@ -420,7 +419,7 @@ class SpectroscopicAxis(np.ndarray):
         self.units = unit
         self.dxarr = self[1:]-self[:-1]
 
-    def as_unit(self,unit,frame='rest', quiet=True,
+    def as_unit(self,unit,frame=None, quiet=True,
             center_frequency=None, center_frequency_units=None, **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
@@ -441,7 +440,7 @@ class SpectroscopicAxis(np.ndarray):
         else: 
             change_xtype = False
             change_units = False
-        if frame != self.frame: change_frame = True
+        if frame is not None and frame != self.frame: change_frame = True
         else: change_frame = False
 
         if center_frequency is None:
