@@ -1,6 +1,13 @@
 """
+===========================
 Hill5 analytic infall model 
+===========================
+.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+
+Code translated from:
 https://bitbucket.org/devries/analytic_infall/overview
+
+Original source:
 http://adsabs.harvard.edu/abs/2005ApJ...620..800D
 """
 from numpy import exp

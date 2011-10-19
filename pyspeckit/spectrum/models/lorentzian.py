@@ -1,3 +1,8 @@
+"""
+=================
+Lorentzian Fitter
+=================
+"""
 import numpy
 from numpy.ma import median
 from numpy import pi

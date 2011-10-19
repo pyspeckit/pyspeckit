@@ -1,3 +1,9 @@
+"""
+====================
+SimpleFitter wrapper 
+====================
+Adds a variable height (background) component to any model
+"""
 import numpy
 from mpfit import mpfit
 from numpy.ma import median

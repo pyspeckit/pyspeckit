@@ -1,6 +1,16 @@
 """
+========================================
+Ammonia inversion transition TKIN fitter
+========================================
+
 Ammonia inversion transition TKIN fitter translated from Erik Rosolowsky's
 http://svn.ok.ubc.ca/svn/signals/nh3fit/
+
+.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+
+Module API
+^^^^^^^^^^
+
 """
 import numpy as np
 from mpfit import mpfit
@@ -70,10 +80,13 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
     gaussian parameters
 
     ntot can be specified as a column density (e.g., 10^15) or a log-column-density (e.g., 15)
+
     tex can be specified or can be assumed LTE if unspecified, if tex>tkin, or if "thin"
         is specified
+
     "thin" uses a different parametetrization and requires only the optical depth, width, offset,
         and tkin to be specified
+
     If tau11 is specified, ntot is NOT fit but is set to a fixed value
     fillingfraction is an arbitrary scaling factor to apply to the model
     fortho is the ortho/(ortho+para) fraction.  The default is to assume all ortho.

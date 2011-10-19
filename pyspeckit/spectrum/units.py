@@ -1,7 +1,9 @@
 """
-units.py
+===========================
+Units and SpectroscopicAxes
+===========================
 
-Author: Adam Ginsburg
+.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 Affiliation: University of Colorado at Boulder
 Created on March 9th, 2011
 

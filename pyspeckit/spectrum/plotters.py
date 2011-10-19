@@ -1,3 +1,10 @@
+"""
+=======
+Plotter
+=======
+
+.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+"""
 import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure

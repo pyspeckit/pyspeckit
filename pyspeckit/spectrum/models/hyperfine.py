@@ -1,5 +1,8 @@
 """
+======================================
 Generalized hyperfine component fitter
+======================================
+.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
 import numpy as np
 import model,fitter
@@ -8,8 +11,8 @@ ckms = 2.99792458e5
 
 class hyperfinemodel(object):
     """
-    Wrapper for the hyperfine model class.  Specify the offsets and relative strengths when initializing, then 
-    you've got yourself a hyperfine modeler.
+    Wrapper for the hyperfine model class.  Specify the offsets and relative
+    strengths when initializing, then you've got yourself a hyperfine modeler.
     """
 
     def __init__(self, line_names, voff_lines_dict, freq_dict, line_strength_dict):
@@ -17,9 +20,11 @@ class hyperfinemodel(object):
         Initialize the various parameters defining the hyperfine transitions
 
         line_names is a LIST of the line names to be used as indices for the dictionaries
+
         voff_lines_dict is a linename:v_off dictionary of velocity offsets for the hyperfine components.  Technically,
             this is redundant with freq_dict
         freq_dict - frequencies of the indvidual transitions
+
         line_strength_dict - Relative strengths of the hyperfine components, usually determined by their degeneracy and 
             Einstein A coefficients
         """

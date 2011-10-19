@@ -1,4 +1,8 @@
 """
+==========================
+PySpecKit Spectrum classes
+==========================
+
 The spectrum module consists of the Spectrum class, with child classes ObsBlock
 and Spectra for multi-spectrum analysis of different types.
 
@@ -8,6 +12,7 @@ The Spectra class is a container of multiple spectra of the *same* object at
    different wavelengths/frequencies
 
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+.. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
 """
 import numpy as np
 import smooth as sm

@@ -1,4 +1,8 @@
 """
+==================
+NH3 fitter wrapper
+==================
+
 Wrapper to fit ammonia spectra.  Generates a reasonable guess at the position and velocity using a gaussian fit
 """
 import pyspeckit

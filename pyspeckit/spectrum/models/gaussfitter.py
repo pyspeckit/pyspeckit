@@ -1,7 +1,14 @@
-# gaussfitter.py
-# created by Adam Ginsburg (adam.ginsburg@colorado.edu or keflavich@gmail.com) 3/17/08)
-# latest version available at http://code.google.com/p/agpy/source/browse/trunk/agpy/gaussfitter.py
-# (the version below uses a Class instead of independent functions)
+"""
+===============
+Gaussian fitter
+===============
+
+.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+Created 3/17/08
+
+Original version available at http://code.google.com/p/agpy/source/browse/trunk/agpy/gaussfitter.py
+(the version below uses a Class instead of independent functions)
+"""
 import numpy
 from numpy.ma import median
 from numpy import pi

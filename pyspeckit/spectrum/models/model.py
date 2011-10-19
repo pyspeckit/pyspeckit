@@ -1,3 +1,9 @@
+"""
+=============================
+Generic SpectralModel wrapper 
+=============================
+.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+"""
 import numpy as np
 from mpfit import mpfit
 import copy
@@ -21,17 +27,27 @@ class SpectralModel(object):
         modelfunc: the model function to be fitted.  Should take an X-axis (spectroscopic axis)
         as an input, followed by input parameters.
         npars - number of parameters required by the model
+
         parnames - a list or tuple of the parameter names
+
         parvalues - the initial guesses for the input parameters (defaults to ZEROS)
+
         parlimits - the upper/lower limits for each variable     (defaults to ZEROS)
+
         parfixed  - Can declare any variables to be fixed        (defaults to ZEROS)
+
         parerror  - technically an output parameter... hmm       (defaults to ZEROS)
+
         partied   - not the past tense of party.  Can declare, via text, that
             some parameters are tied to each other.  Defaults to zeros like the
             others, but it's not clear if that's a sensible default
+
         fitunits - convert X-axis to these units before passing to model
+
         parsteps - minimum step size for each paremeter          (defaults to ZEROS)
+
         npeaks   - default number of peaks to assume when fitting (can be overridden)
+
         shortvarnames - TeX names of the variables to use when annotating
         """
 
@@ -73,16 +89,29 @@ class SpectralModel(object):
         return L
 
     def mpfitfun(self,x,y,err=None):
+        """
+        Wrapper function to compute the fit residuals in an mpfit-friendly format
+        """
         if err is None:
             def f(p,fjac=None): return [0,(y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))]
         else:
             def f(p,fjac=None): return [0,(y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))/err]
         return f
 
-    def __call__(self, xax, data, err=None, params=[], quiet=True, shh=True,
+    def __call__(self, xax, data, err=None, params=(), quiet=True, 
             veryverbose=False, npeaks=None, debug=False, **kwargs):
         """
-        Run the fitter
+        Run the fitter.  Must pass the x-axis and data.  Can include
+        error, parameter guesses, and a number of verbosity parameters.
+
+        quiet - pass to mpfit.  If False, will print out the parameter values
+            for each iteration of the fitter
+
+        veryverbose - print out a variety of mpfit output parameters
+
+        debug - raise an exception (rather than a warning) if chi^2 is nan
+
+        kwargs are passed to mpfit
         """
 
         if npeaks is not None:
@@ -127,7 +156,7 @@ class SpectralModel(object):
         if mp.status == 0:
             raise Exception(mp.errmsg)
 
-        if (not shh) or veryverbose:
+        if veryverbose:
             print "Fit status: ",mp.status
             print "Fit error message: ",mp.errmsg
             print "Fit message: ",mpfit_messages[mp.status]
@@ -149,6 +178,9 @@ class SpectralModel(object):
 
 
     def annotations(self, shortvarnames=None):
+        """
+        Return a list of TeX-formatted labels
+        """
         from decimal import Decimal # for formatting
         svn = self.shortvarnames if shortvarnames is None else shortvarnames
         label_list = [(
@@ -160,6 +192,9 @@ class SpectralModel(object):
         return labels
 
     def components(self, xarr, pars):
+        """
+        Return a numpy ndarray of the independent components of the fits
+        """
 
         modelcomponents = np.concatenate(
             [self.modelfunc(xarr,
@@ -173,7 +208,7 @@ class SpectralModel(object):
     def integral(self, modelpars, **kwargs):
         """
         Extremely simple integrator:
-        IGNORES modelpars
+        IGNORES modelpars;
         just sums self.model
         """
 

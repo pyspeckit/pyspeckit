@@ -1,8 +1,11 @@
 """
-Ammonia inversion transition TKIN fitter was translated from Erik Rosolowsky's
-http://svn.ok.ubc.ca/svn/signals/nh3fit/
+===========================
+Formaldehyde cm-line fitter
+===========================
 
-This is a related formaldehyde 1_11-1_10 / 2_12-2_11 fitter
+This is a formaldehyde 1_11-1_10 / 2_12-2_11 fitter.  It includes hyperfine
+components of the formaldehyde lines and has both LTE and RADEX LVG based
+models
 """
 import numpy as np
 from mpfit import mpfit

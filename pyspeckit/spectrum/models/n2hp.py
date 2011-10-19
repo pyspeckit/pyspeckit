@@ -1,7 +1,12 @@
 """
-This is a N2H+ fitter...
-ref for line params: 
+===========
+N2H+ fitter
+===========
+Reference for line params: 
 Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 363, 1083
+http://www.strw.leidenuniv.nl/~moldata/N2H+.html
+http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D
+
 """
 import numpy as np
 from mpfit import mpfit
