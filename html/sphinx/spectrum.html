@@ -93,19 +93,19 @@ formats.</p>
 </dd>
 </dl>
 <p>Example usage:</p>
-<p># automatically load a &#8220;compliant&#8221; (linear X-axis) FITS file
-spec = pyspeckit.Spectrum(&#8216;test.fits&#8217;)</p>
-<p># plot the spectrum
-spec.plotter()</p>
-<dl class="docutils">
-<dt>Initialize the Spectrum.  Accepts files in the following formats:</dt>
-<dd><ul class="first last simple">
+<p># automatically load a &#8220;compliant&#8221; (linear X-axis) FITS file</p>
+<p>spec = pyspeckit.Spectrum(&#8216;test.fits&#8217;)</p>
+<p># plot the spectrum</p>
+<p>spec.plotter()</p>
+<p>__init__
+Initialize the Spectrum.  Accepts files in the following formats:</p>
+<blockquote>
+<div><ul class="simple">
 <li>.fits</li>
 <li>.txt</li>
 <li>.hdf5</li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 <p>Must either pass in a filename or ALL of xarr, data, and header, plus
 optionally error.</p>
 <p>doplot - if specified, will generate a plot when created</p>
@@ -200,7 +200,16 @@ if you want to just slice by index</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.smooth">
 <tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.smooth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Smooth the spectrum by factor &#8220;smooth&#8221;.  Options are defined in sm.smooth</p>
+<dd><blockquote>
+<div>Smooth the spectrum by factor &#8220;smooth&#8221;.  
+sm.smooth doc:</div></blockquote>
+<p>Smooth and downsample the data array
+smoothtype - &#8216;gaussian&#8217;,&#8217;hanning&#8217;, or &#8216;boxcar&#8217;
+downsample - Downsample the data?
+downsample_factor - Downsample by the smoothing factor, or something else?
+convmode - see numpy.convolve.  &#8216;same&#8217; returns an array of the same length as</p>
+<blockquote>
+<div>&#8216;data&#8217; (assuming data is larger than the kernel)</div></blockquote>
 </dd></dl>
 
 <dl class="method">
