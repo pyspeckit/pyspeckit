@@ -3,15 +3,13 @@ Models
 
 .. module:: models
 .. currentmodule:: pyspeckit.spectrum.models
-.. automodule:: pyspeckit.spectrum.models
-    :members:
 
 The generic SpectralModel class is a wrapper for model functions.  A model
 should take in an X-axis and some number of parameters.  In order to declare a
 SpectralModel, you give SpectralModel the function name and the number of
 parameters it requires.  The rest of the options are optional, though parnames
 & shortvarnames are strongly recommended.  If you do not specify fitunits,
-your fitting code must deal with units internally.::
+your fitting code must deal with units internally::
 
     hill5_fitter = model.SpectralModel(hill5_model, 5,
             parnames=['tau', 'v_lsr',  'v_infall',  'sigma', 'tpeak'], 
@@ -21,27 +19,8 @@ your fitting code must deal with units internally.::
             fitunits='Hz' )
 
 
-.. autoclass:: pyspeckit.spectrum.models.model.SpectralModel
-    :show-inheritance:
+.. automodule:: pyspeckit.spectrum.models.model
     :members:
-    :inherited-members:
-    :undoc-members:
-
-.. autoclass:: pyspeckit.spectrum.models.hyperfine.hyperfinemodel
-    :show-inheritance:
-    :members:
-    :inherited-members:
-    :undoc-members:
-
-.. autoclass:: pyspeckit.spectrum.models.fitter.SimpleFitter
-    :show-inheritance:
-    :members:
-    :inherited-members:
-    :undoc-members:
-
-.. automodule:: pyspeckit.spectrum.models
-    :members:
-
 .. automodule:: pyspeckit.spectrum.models.ammonia
     :members:
 .. automodule:: pyspeckit.spectrum.models.fitter
