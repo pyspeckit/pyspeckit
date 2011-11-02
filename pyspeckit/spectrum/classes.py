@@ -62,7 +62,7 @@ class Spectrum(object):
 
     def __init__(self,filename=None, filetype=None, xarr=None, data=None,
             error=None, header=None, doplot=False, maskdata=True,
-            plotkwargs={}, **kwargs):
+            plotkwargs={}, xarrkwargs={}, **kwargs):
         """
         __init__
         Initialize the Spectrum.  Accepts files in the following formats:
@@ -104,14 +104,18 @@ class Spectrum(object):
             if isinstance(filename,str):
                 self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
         elif xarr is not None and data is not None:
-            self.xarr = xarr
+            self.xarr = units.SpectroscopicAxis(xarr, **xarrkwargs)
             self.data = data
             if error is not None:
                 self.error = error
             else:
                 self.error = data * 0
-            self.header = header
-            self.parse_header(header)
+            if hasattr(header,'get'):
+                self.header = header
+            else: # set as blank
+                print "WARNING: Blank header."
+                self.header = pyfits.Header()
+            self.parse_header(self.header)
 
         if maskdata:
             if hasattr(self.data,'mask'):
