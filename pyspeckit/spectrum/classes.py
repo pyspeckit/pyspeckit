@@ -406,14 +406,11 @@ class Spectra(Spectrum):
             if type(spec) is str:
                 spec = Spectrum(spec)
                 speclist[ii] = spec
-            if spec.xarr.units != xunits:
-                # convert all inputs to same units
-                spec.xarr.convert_to_unit(xunits, **kwargs)
 
         self.speclist = speclist
 
         print "Concatenating data"
-        self.xarr = units.SpectroscopicAxes([sp.xarr for sp in speclist])
+        self.xarr = units.SpectroscopicAxes([sp.xarr.as_unit(xunits) for sp in speclist])
         self.data = np.ma.concatenate([sp.data for sp in speclist])
         self.error = np.ma.concatenate([sp.error for sp in speclist])
         self._sort()
