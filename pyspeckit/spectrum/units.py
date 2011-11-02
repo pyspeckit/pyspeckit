@@ -175,8 +175,8 @@ class SpectroscopicAxis(np.ndarray):
     possible.
     """
 
-    def __new__(self, xarr, unit="Hz", frame='rest', xtype=None, reffreq=None,
-            redshift=None, reffreq_units=None):
+    def __new__(self, xarr, unit="Hz", frame='rest', xtype=None, refX=None,
+            redshift=None, refX_units=None):
         """
         Make a new spectroscopic axis instance
         Default units Hz
@@ -199,14 +199,14 @@ class SpectroscopicAxis(np.ndarray):
             if xtype is not None:
                 print "WARNING: xtype has been specified but was not recognized as a string."
             subarr.xtype = 'unknown'
-        subarr.reffreq = reffreq
-        if reffreq_units is None:
+        subarr.refX = refX
+        if refX_units is None:
             if subarr.units in frequency_dict:
-                subarr.reffreq_units = subarr.units
+                subarr.refX_units = subarr.units
             else:
-                subarr.reffreq_units = 'Hz'
+                subarr.refX_units = 'Hz'
         else:
-            subarr.reffreq_units = reffreq_units
+            subarr.refX_units = refX_units
         subarr.redshift = redshift
         subarr.wcshead = {}
         if subarr.xtype is not None:
@@ -236,8 +236,8 @@ class SpectroscopicAxis(np.ndarray):
         self.units = getattr(obj, 'units', None)
         self.frame = getattr(obj, 'frame', None)
         self.xtype = getattr(obj, 'xtype', None)
-        self.reffreq = getattr(obj, 'reffreq', None)
-        self.reffreq_units = getattr(obj, 'reffreq_units', None)
+        self.refX = getattr(obj, 'refX', None)
+        self.refX_units = getattr(obj, 'refX_units', None)
         self.velocity_convention = getattr(obj, 'velocity_convention', None)
         self.redshift = getattr(obj, 'redshift', None)
         self.wcshead = getattr(obj, 'wcshead', None)
@@ -253,6 +253,18 @@ class SpectroscopicAxis(np.ndarray):
         except TypeError: # sometimes ret has no len
             pass
         return ret
+
+    def __repr__(self):
+        rep = ("SpectroscopicAxis([%r,...,%r], units=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r)" %
+            (self[0], self[-1], self.units, self.refX, self.refX_units, self.frame, self.redshift, self.xtype))
+        return rep
+
+    def __str__(self):
+        selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
+                self.units,self.umin(),self.umax())
+        if self.refX is not None:
+            selfstr += "Reference is %g %s" % (self.refX, self.refX_units)
+        return selfstr
 
     """ OBSOLETE use convert_to_unit
     def change_xtype(self,new_xtype,**kwargs):
@@ -301,7 +313,7 @@ class SpectroscopicAxis(np.ndarray):
             # could be reversed
             return np.min([self.coord_to_x(self.max(), units),self.coord_to_x(self.min(),units)])
         else: 
-            return self.xmin()
+            return self.min()
 
     def x_to_pix(self, xval):
         """
@@ -315,8 +327,8 @@ class SpectroscopicAxis(np.ndarray):
         Given a wavelength/frequency/velocity, return the value in the SpectroscopicAxis's units
         e.g.:
         xarr.units = 'km/s'
-        xarr.reffreq = 5.0 
-        xarr.reffreq_units = GHz
+        xarr.refX = 5.0 
+        xarr.refX_units = GHz
         xarr.x_to_coord(5.1,'GHz') == 6000 # km/s
         """
         if xunit in wavelength_dict: # shortcut - convert wavelength to freq
@@ -330,14 +342,14 @@ class SpectroscopicAxis(np.ndarray):
             if verbose: print "Requested units are Velocity"
             if self.units in frequency_dict:
                 return velocity_to_frequency(xval, xunit,
-                        center_frequency=self.reffreq,
-                        center_frequency_units=self.reffreq_units,
+                        center_frequency=self.refX,
+                        center_frequency_units=self.refX_units,
                         frequency_units=self.units,
                         convention=self.velocity_convention)
             elif self.units in wavelength_dict:
                 FREQ = velocity_to_frequency(xval, xunit,
-                        center_frequency=self.reffreq,
-                        center_frequency_units=self.reffreq_units,
+                        center_frequency=self.refX,
+                        center_frequency_units=self.refX_units,
                         frequency_units='Hz',
                         convention=self.velocity_convention)
                 return frequency_to_wavelength(FREQ, 'Hz',
@@ -346,8 +358,8 @@ class SpectroscopicAxis(np.ndarray):
             if verbose: print "Requested units are Frequency"
             if self.units in velocity_dict:
                 return frequency_to_velocity(xval, xunit,
-                        center_frequency=self.reffreq,
-                        center_frequency_units=self.reffreq_units,
+                        center_frequency=self.refX,
+                        center_frequency_units=self.refX_units,
                         velocity_units=self.units,
                         convention=self.velocity_convention)
             elif self.units in wavelength_dict:
@@ -362,8 +374,8 @@ class SpectroscopicAxis(np.ndarray):
         value converted to xunit
         e.g.:
         xarr.units = 'km/s'
-        xarr.reffreq = 5.0 
-        xarr.reffreq_units = GHz
+        xarr.refX = 5.0 
+        xarr.refX_units = GHz
         xarr.coord_to_x(6000,'GHz') == 5.1 # GHz
         """
         if unit_type_dict[self.units] == unit_type_dict[xunit]:
@@ -373,22 +385,22 @@ class SpectroscopicAxis(np.ndarray):
         if xunit in velocity_dict:
             if self.units in frequency_dict:
                 return frequency_to_velocity(xval, self.units,
-                        center_frequency=self.reffreq,
-                        center_frequency_units=self.reffreq_units,
+                        center_frequency=self.refX,
+                        center_frequency_units=self.refX_units,
                         velocity_units=xunit,
                         convention=self.velocity_convention)
             elif self.units in wavelength_dict:
                 FREQ = wavelength_to_frequency(xval, self.units, frequency_units='Hz')
                 return frequency_to_velocity(FREQ, 'Hz',
-                        center_frequency=self.reffreq,
-                        center_frequency_units=self.reffreq_units,
+                        center_frequency=self.refX,
+                        center_frequency_units=self.refX_units,
                         velocity_units=xunit,
                         convention=self.velocity_convention)
         elif xunit in frequency_dict:
             if self.units in velocity_dict:
                 return velocity_to_frequency(xval, self.units,
-                        center_frequency=self.reffreq,
-                        center_frequency_units=self.reffreq_units,
+                        center_frequency=self.refX,
+                        center_frequency_units=self.refX_units,
                         frequency_units=xunit,
                         convention=self.velocity_convention)
             elif self.units in wavelength_dict:
@@ -396,8 +408,8 @@ class SpectroscopicAxis(np.ndarray):
         elif xunit in wavelength_dict:
             if self.units in velocity_dict:
                 FREQ = velocity_to_frequency(xval, self.units,
-                        center_frequency=self.reffreq,
-                        center_frequency_units=self.reffreq_units,
+                        center_frequency=self.refX,
+                        center_frequency_units=self.refX_units,
                         frequency_units='Hz',
                         convention=self.velocity_convention)
                 return frequency_to_wavelength(FREQ, 'Hz', wavelength_units=xunit)
@@ -446,9 +458,9 @@ class SpectroscopicAxis(np.ndarray):
         else: change_frame = False
 
         if center_frequency is None:
-            center_frequency = self.reffreq
+            center_frequency = self.refX
         if center_frequency_units is None:
-            center_frequency_units = self.reffreq_units
+            center_frequency_units = self.refX_units
 
         if change_xtype:
             if unit in velocity_dict and conversion_dict[self.xtype] is frequency_dict:
@@ -516,7 +528,7 @@ class SpectroscopicAxis(np.ndarray):
             ctype = fits_type[self.xtype]
         self.wcshead['CTYPE1'] = ctype+fits_frame[self.frame]
         self.wcshead['SPECSYS'] = fits_specsys[self.frame]
-        self.wcshead['REFFREQ'] = self.reffreq
+        self.wcshead['refX'] = self.refX
 
         # check to make sure the X-axis is linear
         cdelt = self.cdelt(tolerance=tolerance)
@@ -538,7 +550,7 @@ class SpectroscopicAxes(SpectroscopicAxis):
     header parameters
     """
 
-    def __new__(self, axislist, frame='rest', xtype=None, reffreq=None,
+    def __new__(self, axislist, frame='rest', xtype=None, refX=None,
             redshift=None):
 
         if type(axislist) is not list:
@@ -569,15 +581,15 @@ class SpectroscopicAxes(SpectroscopicAxis):
         subarr.redshift = redshift
         subarr.velocity_convention = velocity_convention
 
-        # if all the spectra have the same reference frequency, there is one common reffreq
-        # else, reffreq is undefined and velocity transformations should not be done
-        reffreqs_diff = np.sum([axislist[0].reffreq != ax.reffreq for ax in axislist])
-        if reffreqs_diff > 0:
-            subarr.reffreq = None
-            subarr.reffreq_units = None
+        # if all the spectra have the same reference frequency, there is one common refX
+        # else, refX is undefined and velocity transformations should not be done
+        refXs_diff = np.sum([axislist[0].refX != ax.refX for ax in axislist])
+        if refXs_diff > 0:
+            subarr.refX = None
+            subarr.refX_units = None
         else:
-            subarr.reffreq = axislist[0].reffreq
-            subarr.reffreq_units = axislist[0].reffreq_units
+            subarr.refX = axislist[0].refX
+            subarr.refX_units = axislist[0].refX_units
 
         return subarr
 

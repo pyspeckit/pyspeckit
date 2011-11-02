@@ -91,7 +91,8 @@ class Baseline:
 
     def dofit(self, exclude=None, excludeunits='velo', annotate=False,
             include=None, includeunits='velo', LoudDebug=False,
-            subtract=True, fit_original=False, powerlaw=False, **kwargs):
+            subtract=True, fit_original=False, powerlaw=False,
+            xarr_fit_units='pixels', **kwargs):
         """
         Do the baseline fitting and save and plot the results.
 
@@ -151,6 +152,7 @@ class Baseline:
                 order=self.order, exclude=None, 
                 mask=(True-self.OKmask[self.bx1:self.bx2])+self.excludemask[self.bx1:self.bx2],
                 powerlaw=powerlaw,
+                xarr_fit_units=xarr_fit_units,
                 **kwargs)
         # create the full baseline spectrum...
         if powerlaw:
@@ -158,7 +160,7 @@ class Baseline:
             self.basespec = (self.baselinepars[0]*self.Spectrum.xarr**(-self.baselinepars[1])).squeeze()
         else:
             self.powerlaw = False
-            self.basespec = np.poly1d(self.baselinepars)(self.Spectrum.xarr)
+            self.basespec = np.poly1d(self.baselinepars)(self.Spectrum.xarr.as_unit(xarr_fit_units))
         if subtract:
             if self.subtracted and fit_original: 
                 # use the spectrum with the old baseline added in (that's what we fit to)
@@ -173,6 +175,9 @@ class Baseline:
             self.plot_baseline()
 
     def plot_baseline(self, annotate=True, plotcolor='orange'):
+        """
+        Overplot the baseline fit
+        """
 
         # clear out the errorplot.  This should not be relevant...
         if self.specplotter.errorplot is not None: 
@@ -317,7 +322,7 @@ class Baseline:
                 self.Spectrum.header.update('BLCOEF%0.2i' % (ii),p,comment="Baseline power-law best-fit coefficient x^%i" % (self.order-ii-1))
 
     def _baseline(self,spectrum,xarr=None,xmin='default',xmax='default',order=1,quiet=True,exclude=None,
-            mask=None, powerlaw=False, **kwargs):
+            mask=None, powerlaw=False, xarr_fit_units='pixels', **kwargs):
         """
         Subtract a baseline from a spectrum
         If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum
@@ -340,7 +345,7 @@ class Baseline:
         if xarr is None:
             xarr = np.indices(spectrum.shape).squeeze()
 
-        subxarr = xarr[xmin:xmax]
+        subxarr = xarr[xmin:xmax].as_unit(xarr_fit_units)
         if powerlaw:
             pguess = [1,1]
 
