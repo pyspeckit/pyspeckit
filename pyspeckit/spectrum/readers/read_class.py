@@ -372,7 +372,7 @@ def make_axis(header):
     imfreq = header.get('IMAGE')
 
     xarr = (numpy.arange(nchan) - refchan + 1.0) * fres + rest_frequency
-    XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',reffreq=rest_frequency)
+    XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=rest_frequency)
 
     return XAxis
     

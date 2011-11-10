@@ -20,21 +20,21 @@ def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True):
         xunits = 'Hz'
 
     if hdr.get('REFFREQ'+wcstype):
-        reffreq = hdr.get('REFFREQ'+wcstype)
+        refX = hdr.get('REFFREQ'+wcstype)
     elif hdr.get('RESTFREQ'+wcstype):
-        reffreq = hdr.get('RESTFREQ'+wcstype)
+        refX = hdr.get('RESTFREQ'+wcstype)
     elif hdr.get('RESTFRQ'+wcstype):
-        reffreq = hdr.get('RESTFRQ'+wcstype)
+        refX = hdr.get('RESTFRQ'+wcstype)
     else:
         if verbose: print "No reference frequency found.  Velocity transformations will not be possible"
-        reffreq = None
+        refX = None
 
     if hdr.get('CTYPE%s%s' % (specaxis,wcstype)):
         xtype = hdr.get('CTYPE%s%s' % (specaxis,wcstype))
     else:
         xtype = 'VLSR'
 
-    XAxis = units.SpectroscopicAxis(xarr,xunits,xtype=xtype,reffreq=reffreq)
+    XAxis = units.SpectroscopicAxis(xarr,xunits,xtype=xtype,refX=refX)
 
     return XAxis
 
