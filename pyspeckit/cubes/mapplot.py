@@ -7,18 +7,25 @@ import matplotlib.pyplot
 import matplotlib.figure
 import numpy as np
 import pyfits
-import pywcs
+try:
+    import astropy.wcs as pywcs
+except ImportError:
+    try:
+        import pywcs
+    except ImportError:
+        pass # error is printed in cubes.py
 import cubes
 try:
     import aplpy
     icanhasaplpy = True
-except ImportError:
+except: # aplpy fails with generic exceptions instead of ImportError 
     icanhasaplpy = False
 try:
     import coords
     icanhascoords = True
 except ImportError:
     icanhascoords = False
+
 
 class MapPlotter(object):
     """

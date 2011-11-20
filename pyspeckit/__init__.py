@@ -4,7 +4,10 @@
 """
 __all__ = ['spectrum','cubes','wrappers']
 import spectrum
-import cubes
+try:
+    import cubes
+except ImportError:
+    print "pyspeckit.cubes module not imported - cubes requires pywcs"
 import wrappers
 from wrappers import *
 from cubes import *

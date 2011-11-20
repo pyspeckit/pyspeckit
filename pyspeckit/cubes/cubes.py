@@ -22,9 +22,12 @@ try:
 except ImportError:
     print "cubes.py requires pyregion for getspec_reg"
 try:
-    import pywcs
+    import astropy.wcs as pywcs
 except ImportError:
-    print "cubes.py requires pywcs for some subimage_integ,aper_wordl2pix,getspec, and coords_in_image"
+    try:
+        import pywcs
+    except ImportError:
+        print "cubes.py requires astropy.wcs or pywcs for some subimage_integ,aper_wordl2pix,getspec, and coords_in_image"
 
 dtor = pi/180.0
 
