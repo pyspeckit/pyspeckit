@@ -9,11 +9,13 @@ import numpy as np
 import pyfits
 try:
     import astropy.wcs as pywcs
+    pywcsOK = True
 except ImportError:
     try:
         import pywcs
+        pywcsOK = True
     except ImportError:
-        pass # error is printed in cubes.py
+        pywcsOK = False
 import cubes
 try:
     import aplpy
@@ -52,7 +54,8 @@ class MapPlotter(object):
 
         self.Cube = Cube
         self.header = cubes.flatten_header(self.Cube.header)
-        self.wcs = pywcs.WCS(self.header)
+        if pywcsOK:
+            self.wcs = pywcs.WCS(self.header)
 
         if doplot: self.mapplot(**kwargs)
 
