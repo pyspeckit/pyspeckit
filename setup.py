@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os, shutil
 from distutils.core import setup
 
 setup(name='pyspeckit',
@@ -13,3 +14,11 @@ setup(name='pyspeckit',
       package_dir={'pyspeckit.spectrum.speclines':'pyspeckit/spectrum/speclines','mpfit':'mpfit'},
       package_data={'pyspeckit.spectrum.speclines':['splatalogue.csv']},
      )
+
+# Copy default config file to directory $HOME/.pyspeckit
+HOME = os.environ.get('HOME')
+CWD = os.getcwd()
+if not os.path.exists('%s/.pyspeckit' % HOME):
+    os.mkdir('%s/.pyspeckit' % HOME)
+    
+shutil.copyfile('%s/pyspeckit/config_default' % CWD, '%s/.pyspeckit/config' % HOME)
