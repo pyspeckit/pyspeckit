@@ -1,5 +1,4 @@
-#lambda_suboutfluxsub  err   tem
-#
+# lambda flux err tem
 3637.390 0.314 0.000 54.029
 3638.227 0.717 0.000 53.619
 3639.065 1.482 0.000 52.849

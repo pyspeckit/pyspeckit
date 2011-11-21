@@ -12,7 +12,7 @@ Notes: Will look in ~/.pyspeckit for file named config.  There is an example con
 """
 
 import os, inspect
-from functools import wraps
+#from functools import wraps
 
 cfgDefaults = dict(
     color = 'k',
