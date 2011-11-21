@@ -255,8 +255,12 @@ class SpectroscopicAxis(np.ndarray):
         return ret
 
     def __repr__(self):
-        rep = ("SpectroscopicAxis([%r,...,%r], units=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r)" %
-            (self[0], self[-1], self.units, self.refX, self.refX_units, self.frame, self.redshift, self.xtype))
+        if self.shape is ():
+            rep = ("SpectroscopicAxis([%r], units=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r)" %
+                (self.__array__(), self.units, self.refX, self.refX_units, self.frame, self.redshift, self.xtype))
+        else:
+            rep = ("SpectroscopicAxis([%r,...,%r], units=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r)" %
+                (self[0], self[-1], self.units, self.refX, self.refX_units, self.frame, self.redshift, self.xtype))
         return rep
 
     def __str__(self):

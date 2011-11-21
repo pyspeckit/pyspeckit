@@ -25,8 +25,8 @@ if interactive: raw_input("Wait here a moment")
 # background level)
 #sp.baseline.order = 0
 print "FITTING GAUSSIAN"
-sp.specfit()
-sp.specfit() # Do this twice to get a better estimate of the noise
+sp.specfit(debug=True)
+sp.specfit(debug=True) # Do this twice to get a better estimate of the noise
 print "Plotter min/max: ",sp.plotter.xmin,sp.plotter.xmax," Fitter min/max: ",sp.specfit.gx1,sp.specfit.gx2," Fitregion= ",sp.baseline.fitregion
 sp.plotter.figure.savefig('hr2421_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses

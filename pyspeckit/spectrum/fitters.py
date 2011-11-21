@@ -186,12 +186,18 @@ class Specfit(object):
             #print "Non-interactive, 1D fit with automatic guessing"
             if self.Spectrum.baseline.order is None:
                 self.Spectrum.baseline.order=0
-                self.peakbgfit(usemoments=usemoments, color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
-                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components, **kwargs)
+                self.peakbgfit(usemoments=usemoments, color=color,
+                        composite_fit_color=composite_fit_color,
+                        component_fit_color=component_fit_color, lw=lw,
+                        composite_lw=composite_lw, component_lw=component_lw,
+                        show_components=show_components, debug=debug, **kwargs)
             else:
-                self.peakbgfit(usemoments=usemoments, 
-                    vheight=False, height=0.0, color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
-                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components, **kwargs)
+                self.peakbgfit(usemoments=usemoments, vheight=False,
+                        height=0.0, color=color,
+                        composite_fit_color=composite_fit_color,
+                        component_fit_color=component_fit_color, lw=lw,
+                        composite_lw=composite_lw, component_lw=component_lw,
+                        show_components=show_components, debug=debug, **kwargs)
             if self.specplotter.autorefresh: self.specplotter.refresh()
         else:
             if multifit:
@@ -349,10 +355,10 @@ class Specfit(object):
                 self.modelerrs[ii] = self.modelerrs[loc]
                 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
-            negamp=None, fittype=None, renormalize='auto', 
-            color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 1.0, composite_lw = 1.0, 
-            component_lw = 1.0, show_components = None, 
-            **kwargs):
+            negamp=None, fittype=None, renormalize='auto', color='k',
+            composite_fit_color='red', component_fit_color='blue', lw=1.0,
+            composite_lw=1.0, component_lw=1.0, show_components=None,
+            debug=False, **kwargs):
         """
         Fit a single peak (plus a background)
 
@@ -376,8 +382,8 @@ class Specfit(object):
             # use this INDEPENDENT of fittype for now (voigt and gauss get same guesses)
             self.guesses = self.Registry.singlefitters[self.fittype].moments(
                     self.Spectrum.xarr[self.gx1:self.gx2],
-                    self.spectofit[self.gx1:self.gx2],
-                    vheight=vheight,negamp=negamp,**kwargs)
+                    self.spectofit[self.gx1:self.gx2], vheight=vheight,
+                    negamp=negamp, **kwargs)
             if vheight is False: self.guesses = [height]+self.guesses
         else:
             if negamp: self.guesses = [height,-1,0,1]
@@ -397,6 +403,7 @@ class Specfit(object):
                 self.guesses[0] /= scalefactor
                 self.guesses[1] /= scalefactor
 
+        if debug: print "Guesses before fit: ",self.guesses
         mpp,model,mpperr,chi2 = self.fitter(
                 self.Spectrum.xarr[self.gx1:self.gx2],
                 self.spectofit[self.gx1:self.gx2],
