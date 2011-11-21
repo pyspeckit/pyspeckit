@@ -390,6 +390,9 @@ class Baseline:
         # that is unmasked.  That would require some manipulation above...
         if err is None:
             err = np.ones(spectrum.shape)
+        else:
+            # don't overwrite error
+            err = err.copy()
 
 
         err[:xmin] = 1e10

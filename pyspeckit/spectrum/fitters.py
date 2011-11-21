@@ -111,9 +111,9 @@ class Specfit(object):
         
     @cfgdec
     def __call__(self, interactive=False, usemoments=True, clear_all_connections=False, debug=False,
-            multifit=False, guesses=None, annotate=None, save=True, fittype='gaussian', 
+            multifit=False, guesses=None, save=True, fittype='gaussian', annotate=None,
             color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 0.5, composite_lw = 0.75, 
-            component_lw = 0.75, show_components = None, verbose=True,
+            component_lw = 0.75, show_components = None, verbose=True, clear=True, 
             **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
@@ -131,7 +131,7 @@ class Specfit(object):
             Right click or 'd': Disconnect the plot and perform the fit.
         """
 
-        self.clear()
+        if clear: self.clear()
         self.selectregion(verbose=verbose, **kwargs)
         for arg in ['xmin','xmax','xtype','reset']: 
             if arg in kwargs: kwargs.pop(arg)
@@ -176,7 +176,7 @@ class Specfit(object):
             else:
                 self.guesses = guesses
                 self.multifit(color=color,
-                        composite_fit_color=composite_fit_color,
+                        composite_fit_color=composite_fit_color, annotate=annotate,
                         component_fit_color=component_fit_color, lw=lw,
                         composite_lw=composite_lw, component_lw=component_lw,
                         show_components=show_components, verbose=verbose,
@@ -187,13 +187,13 @@ class Specfit(object):
             if self.Spectrum.baseline.order is None:
                 self.Spectrum.baseline.order=0
                 self.peakbgfit(usemoments=usemoments, color=color,
-                        composite_fit_color=composite_fit_color,
+                        composite_fit_color=composite_fit_color, annotate=annotate,
                         component_fit_color=component_fit_color, lw=lw,
                         composite_lw=composite_lw, component_lw=component_lw,
                         show_components=show_components, debug=debug, **kwargs)
             else:
                 self.peakbgfit(usemoments=usemoments, vheight=False,
-                        height=0.0, color=color,
+                        height=0.0, color=color, annotate=annotate,
                         composite_fit_color=composite_fit_color,
                         component_fit_color=component_fit_color, lw=lw,
                         composite_lw=composite_lw, component_lw=component_lw,
@@ -434,12 +434,14 @@ class Specfit(object):
         self.modelerrs[1] *= scalefactor
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate,
-                color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
-                lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components)
+                color=color, composite_fit_color=composite_fit_color,
+                component_fit_color=component_fit_color, lw=lw,
+                composite_lw=composite_lw, component_lw=component_lw,
+                show_components=show_components)
                 
     def plot_fit(self, annotate=None, show_components=None, 
-        color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 0.5, composite_lw = 0.75, 
-        component_lw = 0.75, **component_kwargs):
+        color='k', composite_fit_color='red', component_fit_color='blue',
+        lw=0.5, composite_lw=0.75, component_lw=0.75, **component_kwargs):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
@@ -469,10 +471,7 @@ class Specfit(object):
         if self.specplotter.autorefresh:
             self.specplotter.refresh()
 
-        if annotate is not None:
-            self.autoannotate = annotate
-
-        if self.autoannotate:
+        if self.annotate or ((self.annotate is None) and self.autoannotate):
             self.annotate()
             if self.vheight: self.Spectrum.baseline.annotate()
 
