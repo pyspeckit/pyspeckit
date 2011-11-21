@@ -256,7 +256,7 @@ class voigt_fitter(fitter.SimpleFitter):
     def annotations(self):
         label_list = [(
                 "$A(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[0+jj*self.npars],self.mpperr[0+jj*self.npars]),
-                "$v(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
+                "$x(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
                 "$\\sigma_G(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[2+jj*self.npars],self.mpperr[2+jj*self.npars]),
                 "$\\sigma_L(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[3+jj*self.npars],self.mpperr[3+jj*self.npars]),
                           ) for jj in range(self.npeaks)]

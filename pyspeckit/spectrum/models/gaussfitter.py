@@ -216,7 +216,7 @@ class gaussian_fitter(fitter.SimpleFitter):
     def annotations(self):
         label_list = [(
                 "$A(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[0+jj*self.npars],self.mpperr[0+jj*self.npars]),
-                "$v(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
+                "$x(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
                 "$\\sigma(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[2+jj*self.npars],self.mpperr[2+jj*self.npars])
                           ) for jj in range(self.npeaks)]
         labels = tuple(mpcb.flatten(label_list))

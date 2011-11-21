@@ -4,6 +4,7 @@ import matplotlib.pyplot as pyplot
 import numpy as np
 from config import mycfg
 from config import ConfigDescriptor as cfgdec
+import units
 
 class Registry(object):
     """
@@ -528,6 +529,12 @@ class Specfit(object):
             labels = self.fitter.annotations()
         else:
             raise Exception("Fitter %s has no annotations." % self.fitter)
+
+        #xtypename = units.unit_type_dict[self.Spectrum.xarr.xtype]
+        xcharconv = {'frequency':'\\nu', 'wavelength':'\\lambda', 'velocity':'v', 'pixels':'x'}
+        xchar = xcharconv[self.Spectrum.xarr.xtype]
+        labels = [L.replace('x',xchar) if L[1]=='x' else L for L in labels]
+
         self.fitleg = self.specplotter.axis.legend(
                 tuple([pl]*self.fitter.npars*self.npeaks),
                 labels, loc=loc,markerscale=markerscale, borderpad=borderpad,
