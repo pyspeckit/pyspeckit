@@ -66,7 +66,11 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
             raise TypeError("Specnum is of wrong type (not a list of integers or an integer).  Type: %s" %
                     str(type(specnum)))
         if errspecnum is not None:
-            errspec = ma.array(data[errspecnum,:]).squeeze()
+            # SDSS supplies weights, not errors.    
+            if hdr.get('TELESCOP') == 'SDSS 2.5-M':
+                errspec = 1. / np.sqrt(ma.array(data[errspecnum,:]).squeeze())
+            else:       
+                errspec = ma.array(data[errspecnum,:]).squeeze()
         else:
             errspec = spec*0 # set error spectrum to zero if it's not in the data
 
@@ -76,9 +80,10 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
             if hdr.get('NAXIS%i' % ii) > 1:
                 raise ValueError("Too many axes for open_1d_fits")
         spec = ma.array(data).squeeze()
-        if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data
-    else:
-        spec = ma.array(data).squeeze()
+        if errspecnum is None: 
+            errspec = spec*0 # set error spectrum to zero if it's not in the data
+        else:
+            spec = ma.array(data).squeeze()
         if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data
 
     if hdr.get(scale_keyword):

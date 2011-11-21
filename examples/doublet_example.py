@@ -14,18 +14,18 @@ offset = SIIb - SIIa
 # Let's have a look at the spectrum
 sp.plotter()
 
-raw_input('\nLet\'s do a simple continuum subtraction (continue)')
+raw_input('Let\'s do a simple continuum subtraction (continue)')
 
 # Plot the baseline fit
 sp.baseline(subtract = False)
 
-raw_input('\nLet\'s zoom in on the SII doublet (continue)')
+raw_input('Let\'s zoom in on the SII doublet (continue)')
 
 # Subtract the baseline fit and save
 sp.baseline()
 sp.plotter.savefig('doublet_example_fullspectrum.png')
 
-# I already know the redshift, so lets take that into account
+# Guess for the redshift - otherwise we'll end up with the Halpha-NII complex
 z = 0.02        
 
 # Zoom in on SII doublet
@@ -40,5 +40,9 @@ tied = ['', '', '', '', 'p[1] + %g' % offset, '']
 sp.specfit(guesses = guesses, tied = tied, quiet = False)
 sp.plotter.savefig('doublet_example_SII.png')
               
-raw_input('\nHooray! The doublet has been fit. ')
+raw_input('Hooray! The doublet has been fit. ')
 
+SIIb_obs = sp.specfit.modelpars[-2]
+
+print 'Our guess for the redshift was z = 0.02.'
+print 'The redshift, as derived by the line shift, is z = %g' % ((SIIb_obs / SIIb) - 1)

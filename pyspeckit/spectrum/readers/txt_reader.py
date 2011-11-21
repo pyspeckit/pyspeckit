@@ -39,8 +39,8 @@ def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2, **kwargs):
         if len(T.columns) > errorcol:
             error = T.data[T.data.dtype.names[errorcol]]
         else:
-            # assume uniform, nonzero error
-            error = data*0 + 1.0
+            # assume uniform, zero error
+            error = data*0 
 
         if 'xunits' in T.keywords:
             xunits = T.keywords['xunits']
@@ -96,7 +96,7 @@ def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, **kwargs):
     data = coldata[datacol]
     xarr = coldata[xaxcol]
     if errorcol > N - 1:
-        error = data*0 + 1.0
+        error = data*0
     else:
         error = coldata[errorcol]
 
