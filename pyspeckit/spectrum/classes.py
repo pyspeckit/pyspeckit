@@ -177,9 +177,9 @@ class Spectrum(object):
         .txt or other atpy table type objects
         """
         self.Table = Table
-        self.xarr.xtype = Table.data.dtype.names[0]
+        self.xarr.xtype = Table.data.dtype.names[Table.xaxcol]
         self.xarr.xunits = Table.columns[self.xarr.xtype].unit
-        self.ytype = Table.data.dtype.names[1]
+        self.ytype = Table.data.dtype.names[Table.datacol]
         self.units = Table.columns[self.ytype].unit
         self.header = pyfits.Header()
         self.header.update('CUNIT1',self.xarr.xunits)

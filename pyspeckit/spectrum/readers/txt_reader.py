@@ -48,6 +48,10 @@ def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2, **kwargs):
             xunits = 'unknown'
 
         XAxis = units.SpectroscopicAxis(xarr,xunits)
+    
+    # Need this in Spectrum class to correctly parse header    
+    T.xaxcol = xaxcol
+    T.datacol = datacol 
 
     return data, error, XAxis, T
 
