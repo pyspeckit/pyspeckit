@@ -27,6 +27,7 @@ cfgDefaults = dict(
     color = 'k',
     composite_fit_color = 'r',
     component_fit_color = 'blue',
+    baseline_fit_color = 'orange',
     lw = 0.5,
     composite_lw = 0.75,
     component_lw = 0.75,

@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib
+from config import mycfg
+from config import ConfigDescriptor as cfgdec
 
 interactive_help_message = """
 Left-click twice to select or add to the baseline fitting range.  Middle or
@@ -29,9 +31,11 @@ class Baseline:
         self.powerlaw=False
         self._plots = []
 
+    @cfgdec
     def __call__(self, order=1, annotate=False, excludefit=False, save=True,
             exclude=None, exclusionlevel=0.01, interactive=False, 
-            LoudDebug=False, fit_original=True, **kwargs):
+            LoudDebug=False, fit_original=True, baseline_fit_color = 'orange',
+            **kwargs):
         """
         Fit and remove a polynomial from the spectrum.  
         It will be saved in the variable "self.basespec"
@@ -83,7 +87,8 @@ class Baseline:
                 self.excludemask = abs(specfit.model) > exclusionlevel*abs(min(specfit.modelpars[0::3]))
             else:
                 self.excludemask[:] = False
-            self.dofit(exclude=exclude,annotate=annotate,fit_original=fit_original, LoudDebug=LoudDebug, **kwargs)
+            self.dofit(exclude=exclude,annotate=annotate,fit_original=fit_original, 
+                baseline_fit_color = baseline_fit_color, LoudDebug=LoudDebug, **kwargs)
         if save: self.savefit()
         if LoudDebug:
             print "Range: %i:%i" % (self.bx1,self.bx2)
@@ -92,7 +97,7 @@ class Baseline:
     def dofit(self, exclude=None, excludeunits='velo', annotate=False,
             include=None, includeunits='velo', LoudDebug=False,
             subtract=True, fit_original=False, powerlaw=False,
-            xarr_fit_units='pixels', **kwargs):
+            xarr_fit_units='pixels', baseline_fit_color = 'orange', **kwargs):
         """
         Do the baseline fitting and save and plot the results.
 
@@ -195,9 +200,9 @@ class Baseline:
             self.subtracted = False
 
         if self.specplotter.axis is not None:
-            self.plot_baseline()
+            self.plot_baseline(baseline_fit_color = baseline_fit_color)
 
-    def plot_baseline(self, annotate=True, plotcolor='orange'):
+    def plot_baseline(self, annotate=True, baseline_fit_color='orange'):
         """
         Overplot the baseline fit
         """
@@ -228,7 +233,7 @@ class Baseline:
                 # remove the old baseline plots
                 if p in self.specplotter.axis.lines:
                     self.specplotter.axis.lines.remove(p)
-            self._plots += self.specplotter.axis.plot(self.Spectrum.xarr,self.basespec,color=plotcolor)
+            self._plots += self.specplotter.axis.plot(self.Spectrum.xarr,self.basespec,color=baseline_fit_color)
 
         if annotate: self.annotate() # refreshes automatically
         elif self.specplotter.autorefresh: self.specplotter.refresh()
