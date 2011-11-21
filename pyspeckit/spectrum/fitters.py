@@ -471,7 +471,7 @@ class Specfit(object):
         if self.specplotter.autorefresh:
             self.specplotter.refresh()
 
-        if self.annotate or ((self.annotate is None) and self.autoannotate):
+        if annotate or ((annotate is None) and self.autoannotate):
             self.annotate()
             if self.vheight: self.Spectrum.baseline.annotate()
 
