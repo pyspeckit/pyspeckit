@@ -228,10 +228,15 @@ class Plotter(object):
         elif self.Spectrum.units == 'mJy':
             self.axis.set_ylabel("$S_\\nu$ (mJy)")
         elif self.Spectrum.units == 'Jy':
-            self.axis.set_ylabel("$S_\\nu$ (Jy)")
+            self.axis.set_ylabel("$S_\\nu$ (Jy)")            
         else:
-            label_units = parse_units(self.Spectrum.units)
-            self.axis.set_ylabel(label_units)
+            if len(self.Spectrum.units.split()) > 1: 
+                if self.Spectrum.units.split()[1] in ['erg/cm^2/s/Ang', 'erg/cm/s/Ang']:
+                    norm = parse_norm(self.Spectrum.units.split()[0])
+                    self.axis.set_ylabel("$%s \\mathrm{erg/s/cm^2/\\AA}$" % norm)
+            else:
+                label_units = parse_units(self.Spectrum.units)
+                self.axis.set_ylabel(label_units)
 
     def refresh(self):
         if self.axis is not None:
@@ -272,6 +277,25 @@ def parse_units(labelstring):
     labelstring = re.sub("-3","$^{-3}$",labelstring)
     labelstring = re.sub("ergss","ergs s",labelstring)
     return labelstring
+    
+def parse_norm(norm):
+    """
+    Expected format: norm = 10E15
+    """    
+        
+    try: 
+        base, exp = norm.split('E')
+    except ValueError:
+        base, exp = norm.split('e')
+
+    if float(base) == 1.0:
+        norm = '10'
+    else:
+        norm = base    
+        
+    norm += '^{%s}' % exp    
+    
+    return norm
 
 def steppify(arr,isX=False):
     """

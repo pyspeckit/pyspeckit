@@ -533,7 +533,7 @@ class Specfit(object):
                 tuple([pl]*self.fitter.npars*self.npeaks),
                 labels, loc=loc,markerscale=markerscale, borderpad=borderpad,
                 handlelength=handlelength, handletextpad=handletextpad,
-                labelspacing=labelspacing, **kwargs)
+                labelspacing=labelspacing, frameon = False, **kwargs)
         self.specplotter.axis.add_artist(self.fitleg)
         self.fitleg.draggable(True)
         if self.specplotter.autorefresh: self.specplotter.refresh()

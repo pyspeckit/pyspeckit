@@ -338,7 +338,7 @@ class Baseline:
         self.blleg = self.specplotter.axis.legend(
                 (pl,),
                 (bltext,),loc=loc,markerscale=0.001,
-                borderpad=0.1, handlelength=0.1, handletextpad=0.1
+                borderpad=0.1, handlelength=0.1, handletextpad=0.1, frameon = False
                 )
         self.specplotter.axis.add_artist(self.blleg)
         if self.specplotter.autorefresh: self.specplotter.refresh()
