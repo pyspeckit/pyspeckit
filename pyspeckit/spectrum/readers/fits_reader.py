@@ -82,8 +82,8 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
         spec = ma.array(data).squeeze()
         if errspecnum is None: 
             errspec = spec*0 # set error spectrum to zero if it's not in the data
-        else:
-            spec = ma.array(data).squeeze()
+    else:
+        spec = ma.array(data).squeeze()
         if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data
 
     if hdr.get(scale_keyword):
