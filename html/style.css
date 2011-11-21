@@ -72,10 +72,10 @@ tt {color:#55ECA9}
 
 
 /* Link Style */
-a:link		{ color:#2244FF }
-a:visited	{ color:#4433DD }
+a:link		{ color:#4488FF }
+a:visited	{ color:#8866DD }
 a:active	{ color:#0022DD }
-a:hover		{ color:#1033FF }
+a:hover		{ color:#2043FF }
 a {text-decoration: none; }
 
 /* ASTR3520_site Link Style */
