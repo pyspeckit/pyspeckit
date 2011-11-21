@@ -106,7 +106,7 @@ class Specfit(object):
         self.measurements = None
         self.vheight=None
         self.Registry = Registry
-        self.autoannotate = mycfg['annotate']
+        self.autoannotate = mycfg['autoannotate']
         #self.seterrspec()
         
     @cfgdec

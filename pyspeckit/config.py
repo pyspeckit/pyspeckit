@@ -1,18 +1,27 @@
 """
-config.py
+==========================
+PySpecKit config system
+==========================
 
-Author: Jordan Mirocha
-Affiliation: University of Colorado at Boulder
-Created on 2011-03-08.
+Create decorator used to modify inputs to various __call__ methods
+to reflect preferences we set in ~/.pyspeckit/config.
 
-Description: Modeled after config.py from yt.  Returns dictionary spcfg.cfg.
+To see what values exist in config file, do:
+    from config import mycfg
+    mycfg.keys()
+    
+To decorate a new __call__ method, do:
+    from config import ConfigDescriptor as cfgdec
+    
+    @cfgdec
+    def __call__(self, **kwargs):
+        pass    # do something!
 
-Notes: Will look in ~/.pyspeckit for file named config.  There is an example config file in the examples directory.
-  
+.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+.. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
 """
 
 import os, inspect
-#from functools import wraps
 
 cfgDefaults = dict(
     color = 'k',
@@ -22,7 +31,7 @@ cfgDefaults = dict(
     composite_lw = 0.75,
     component_lw = 0.75,
     show_components = False,
-    annotate = True,
+    autoannotate = True,
     interactive = False,
     autorefresh = True,
     silent = True,
@@ -50,7 +59,8 @@ class ConfigParser:
                 else: return_dict[thisline[0]] = float(thisline[2])
     	            	        
     	    self.cfg = return_dict
-    	else: self.cfg = cfgDefaults
+    	else: 
+    	    self.cfg = cfgDefaults
             	    	
 __fn = os.path.expanduser("~/.pyspeckit/config")
 if os.path.exists(__fn): 
@@ -60,11 +70,17 @@ else:
    
 def ConfigDescriptor(f):    
                                 
-    def decorator(self, *args, **kwargs):  
-        
-        # inspect.getargspec will tell us the names of all arguments and their default values
-        # later we'll have to be more careful - all_defs only makes entries for arguments that actually
-        # have default values  
+    def decorator(self, *args, **kwargs):
+        """
+        This is our decorator function, used to modify the inputs of __call__
+        methods to reflect preferences we set in config file.
+                
+        Notes:
+        inspect.getargspec will tell us the names of all arguments and their default values.
+        Later we'll have to be more careful - all_defs only makes entries for arguments that actually
+        have default values          
+        """  
+
         all_args, all_vars, all_keys, all_defs = inspect.getargspec(f)                
         all_args.pop(0) # pop self
         
@@ -82,9 +98,6 @@ def ConfigDescriptor(f):
                 
         # If we've changed anything on call, reflect this in new_kwargs
         for arg in kwargs:
-            #try: 
-            #    if kwargs[arg] != argsdefs[arg]: new_kwargs[arg] = kwargs[arg]
-            #except KeyError: 
             new_kwargs[arg] = kwargs[arg]       
                                                                                                                                        
         f(self, *args, **new_kwargs)

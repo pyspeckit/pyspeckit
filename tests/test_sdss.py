@@ -53,7 +53,7 @@ for line in spec.measurements.lines.keys():
 
 spec.specfit.plot_fit(show_components=True)
 
-raw_input("Done (again).")
+#raw_input("Done (again).")
 
 # Save the figure
 spec.plotter.figure.savefig("sdss_fit_example.png")
