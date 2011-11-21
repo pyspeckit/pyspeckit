@@ -122,6 +122,13 @@ class Baseline:
         else:
             self.includepix = []
             self.includevelo = []
+
+        if self.includepix:
+            if self.bx1 < min(self.includepix):
+                self.bx1 = min(self.includepix)
+            if self.bx2 > max(self.includepix):
+                self.bx2 = max(self.includepix)
+
         if exclude is not None and excludeunits in ['velo','km/s','wavelength','frequency','xarr']:
             if len(exclude) % 2 == 0:
                 self.excludevelo = exclude
@@ -146,19 +153,23 @@ class Baseline:
         # instead of cropping the data with data[self.bx1:self.bx2], we need to
         # mask out the undesired data because otherwise the "pixel" indexing
         # leads to incorrect fits
-        exclude_edges = self.OKmask.copy()
-        exclude_edges[:self.bx1] = False
-        exclude_edges[self.bx2:] = False
+        OK_edges = self.OKmask*False + True
+        OK_edges[:self.bx1] = False
+        OK_edges[self.bx2:] = False
 
         if LoudDebug:
-            print "Excluded: ",self.excludemask.sum()," out of ",self.bx2-self.bx1
-            print "Edges exclude %i out of %i OK points" % ((True-exclude_edges).sum(),self.OKmask.sum())
+            print "Excluded: ",self.excludemask.sum()," out of ",self.bx2-self.bx1," range %i-%i " % (self.bx1,self.bx2)
+            print "Edges exclude %i out of %i OK points" % ((True-OK_edges).sum(),self.OKmask.sum())
+
+        if self.subtracted:
+            self.unsubtract()
 
         self.basespec, self.baselinepars = self._baseline(
                 self.spectofit,
                 xarr=self.Spectrum.xarr,
+                err=self.Spectrum.error,
                 order=self.order, exclude=None, 
-                mask=((True-self.OKmask)+self.excludemask)+(True-exclude_edges),
+                mask=((True-self.OKmask)+self.excludemask)+(True-OK_edges),
                 powerlaw=powerlaw,
                 xarr_fit_units=xarr_fit_units,
                 LoudDebug=LoudDebug,
@@ -166,7 +177,8 @@ class Baseline:
         # create the full baseline spectrum...
         if powerlaw:
             self.powerlaw = True
-            self.basespec = (self.baselinepars[0]*self.Spectrum.xarr**(-self.baselinepars[1])).squeeze()
+            #self.basespec = (self.baselinepars[0]*(self.Spectrum.xarr.as_unit(xarr_fit_units)-self.baselinepars[2])**(-self.baselinepars[1])).squeeze()
+            self.basespec = (self.baselinepars[0]*(self.Spectrum.xarr.as_unit(xarr_fit_units)/self.baselinepars[2])**(-self.baselinepars[1])).squeeze()
         else:
             self.powerlaw = False
             self.basespec = np.poly1d(self.baselinepars)(self.Spectrum.xarr.as_unit(xarr_fit_units))
@@ -178,6 +190,8 @@ class Baseline:
                 self.Spectrum.data -= self.basespec
             self.subtracted = True
         else:
+            if self.subtracted:
+                self.unsubtract()
             self.subtracted = False
 
         if self.specplotter.axis is not None:
@@ -275,6 +289,16 @@ class Baseline:
                 if event.key == '?':
                     print interactive_help_message
 
+    def show_fitregion(self):
+        bad = self.Spectrum.data*0
+        bad[self.excludemask] = np.nan
+        self.fitregion += self.specplotter.axis.plot(
+                self.Spectrum.xarr,
+                self.Spectrum.data+self.specplotter.offset+bad,
+                drawstyle='steps-mid',
+                color='g',alpha=0.5)
+        self.specplotter.refresh()
+
     def selectregion(self,xmin=None,xmax=None,xtype='wcs', highlight=False, **kwargs):
         """
         Pick a fitting region in either WCS units or pixel units
@@ -303,7 +327,8 @@ class Baseline:
 
     def annotate(self,loc='upper left'):
         if self.powerlaw:
-            bltext = "bl: $y=%6.3gx^{-%6.3g}$" % (self.baselinepars[0],self.baselinepars[1])
+            #bltext = "bl: $y=%6.3g\\times(x-%6.3g)^{-%6.3g}$" % (self.baselinepars[0],self.baselinepars[2],self.baselinepars[1])
+            bltext = "bl: $y=%6.3g\\times(x/%6.3g)^{-%6.3g}$" % (self.baselinepars[0],self.baselinepars[2],self.baselinepars[1])
         else:
             bltext = "bl: $y=$"+"".join(["$%+6.3gx^{%i}$" % (f,self.order-i)
                 for i,f in enumerate(self.baselinepars)])
@@ -345,13 +370,14 @@ class Baseline:
         EDIT Nov 21, 2011: DO NOT exclude ends by chopping them!  This results
         in bad fits when indexing by pixels
         """
+
         if xmin == 'default':
-            if order <= 1 and exclude is None: xmin = np.floor( spectrum.shape[-1]*0.1 )
+            if order <= 1 and exclude is None and mask is None: xmin = np.floor( spectrum.shape[-1]*0.1 )
             else: xmin = 0
         elif xmin is None:
             xmin = 0
         if xmax == 'default':
-            if order <= 1 and exclude is None: xmax = np.ceil( spectrum.shape[-1]*0.9 )
+            if order <= 1 and exclude is None and mask is None: xmax = np.ceil( spectrum.shape[-1]*0.9 )
             else: xmax = spectrum.shape[-1]
         elif xmax is None:
             xmax = spectrum.shape[-1]
@@ -359,34 +385,12 @@ class Baseline:
         if xarr is None:
             xarr = np.indices(spectrum.shape).squeeze()
 
-        #subxarr = xarr[xmin:xmax].as_unit(xarr_fit_units)
-        subxarr = xarr.as_unit(xarr_fit_units)
-        if powerlaw:
-            pguess = [1,1]
-
-            def mpfitfun(data,err):
-                def f(p,fjac=None): return [0,np.ravel(((p[0] * subxarr**(-p[1]))-data)/err)]
-                return f
-        else:
-            pguess = [0]*(order+1)
-
-            def mpfitfun(data,err):
-                def f(p,fjac=None): return [0,np.ravel((np.poly1d(p)(subxarr)-data)/err)]
-                return f
 
         # A good alternate implementation of masking is to only pass mpfit the data
         # that is unmasked.  That would require some manipulation above...
         if err is None:
             err = np.ones(spectrum.shape)
 
-        #scalefactor = 1.0
-        #if renormalize in ('auto',True):
-        #    datarange = spectrum.max() - spectrum.min()
-        #    if abs(datarange) < 1e-9 or abs(datarange) > 1e9:
-        #        scalefactor = np.median(np.abs(self.spectrum))
-        #        print "BASELINE: Renormalizing data by factor %e to improve fitting procedure" % scalefactor
-        #        spectrum /= scalefactor
-        #        err /= scalefactor
 
         err[:xmin] = 1e10
         err[xmax:] = 1e10
@@ -400,16 +404,52 @@ class Baseline:
             print "There is an error in baseline: some values are NaN"
             import pdb; pdb.set_trace()
 
+        #xarrconv = xarr[xmin:xmax].as_unit(xarr_fit_units)
+        OK = True-mask
+        OK[:xmin] = False
+        OK[xmax:] = False
+        xarrconv = xarr.as_unit(xarr_fit_units)
+        if powerlaw:
+            pguess = [np.median(spectrum[OK]),2,xarrconv[OK][0]-1]
+            if LoudDebug: print "_baseline powerlaw Guesses: ",pguess
+
+            def mpfitfun(data,err):
+                #def f(p,fjac=None): return [0,np.ravel(((p[0] * (xarrconv[OK]-p[2])**(-p[1]))-data)/err)]
+                # Logarithmic fitting:
+                def f(p,fjac=None):
+                    return [0,
+                            np.ravel( (np.log10(data) - np.log10(p[0]) + p[1]*np.log10(xarrconv[OK]/p[2])) / (err/data) )
+                            ]
+                return f
+        else:
+            pguess = [0]*(order+1)
+            if LoudDebug: print "_baseline Guesses: ",pguess
+
+            def mpfitfun(data,err):
+                def f(p,fjac=None): return [0,np.ravel((np.poly1d(p)(xarrconv[OK])-data)/err)]
+                return f
+        #scalefactor = 1.0
+        #if renormalize in ('auto',True):
+        #    datarange = spectrum.max() - spectrum.min()
+        #    if abs(datarange) < 1e-9 or abs(datarange) > 1e9:
+        #        scalefactor = np.median(np.abs(self.spectrum))
+        #        print "BASELINE: Renormalizing data by factor %e to improve fitting procedure" % scalefactor
+        #        spectrum /= scalefactor
+        #        err /= scalefactor
+
         if LoudDebug:
             print "In _baseline, xmin: %i, xmax: %i, len(spectrum)=%i, len(err)=%i" % (xmin,xmax,len(spectrum),len(err))
 
         import mpfit
-        mp = mpfit.mpfit(mpfitfun(spectrum,err),xall=pguess,quiet=quiet,**kwargs)
+        mp = mpfit.mpfit(mpfitfun(spectrum[OK],err[OK]),xall=pguess,quiet=quiet,**kwargs)
+        if np.isnan(mp.fnorm):
+            raise ValueError("chi^2 is NAN in baseline fitting")
         fitp = mp.params
         if powerlaw:
-            bestfit = (fitp[0]*xarr**(-fitp[1])).squeeze()
+            #bestfit = (fitp[0]*(xarrconv-fitp[2])**(-fitp[1])).squeeze()
+            bestfit = (fitp[0]*(xarrconv/fitp[2])**(-fitp[1])).squeeze()
         else:
-            bestfit = np.poly1d(fitp)(xarr).squeeze()
+            bestfit = np.poly1d(fitp)(xarrconv).squeeze()
 
         return bestfit,fitp
 
