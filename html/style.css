@@ -4,7 +4,7 @@
 
 /* Default Style */
 body {
-	background-color: black;
+	background-color: #333333;
 	color: white;
 	font-style: normal;
 	font-family: "Times New Roman";
@@ -12,7 +12,7 @@ body {
 }
 
 table {
-    background-color: #222222;
+    background-color: #393939;
     border-style: inset outset outset inset;
     border-width: 5;
     border-color: #222222;
@@ -24,7 +24,7 @@ table {
 
 
 td {
-    background-color: #090909;
+    background-color: #393939;
     border-style: none;
     border-width: 0;
     color: white;

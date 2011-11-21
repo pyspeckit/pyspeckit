@@ -187,6 +187,9 @@ class Spectrum(object):
         self.ytype = Table.data.dtype.names[Table.datacol]
         self.units = Table.columns[self.ytype].unit
         self.header = pyfits.Header()
+        self._update_header()
+
+    def _update_header(self):
         self.header.update('CUNIT1',self.xarr.xunits)
         self.header.update('CTYPE1',self.xarr.xtype)
         self.header.update('BUNIT',self.units)
@@ -234,7 +237,7 @@ class Spectrum(object):
         else:
             self.specname = ''
             
-    def measure(self, z = None, d = None, fluxnorm = None, miscline = None, misctol = None, ignore = None, derive = True):
+    def measure(self, z=None, d=None, fluxnorm=None, miscline=None, misctol=None, ignore=None, derive=True):
         """
         Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!
         """
