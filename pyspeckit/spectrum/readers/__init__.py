@@ -18,6 +18,10 @@ def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True):
     if hdr.get('ORIGIN') == 'CLASS-Grenoble' and xunits is None:
         # CLASS default
         xunits = 'Hz'
+        
+    # SDSS doesn't use FITS standard! Argh.    
+    if hdr.get('TELESCOP') == 'SDSS 2.5-M':   
+        xunits = 'angstroms' 
 
     if hdr.get('REFFREQ'+wcstype):
         refX = hdr.get('REFFREQ'+wcstype)
