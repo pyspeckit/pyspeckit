@@ -158,6 +158,7 @@ frame_dict = {
         'WAV':'rest',
         'WAVE':'rest',
         'wavelength':'rest',
+        'lambda':'rest',
         }
 
 frame_type_dict = {'LSRK':'velocity','LSRD':'velocity','LSR':'velocity',
