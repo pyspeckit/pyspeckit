@@ -7,7 +7,8 @@ except ImportError: h5check = False
 
 class write_hdf5(Writer):
         
-    def write_data(self, filename = None, newsuffix = 'out', extras = None, clobber = True):
+    def write_data(self, filename = None, newsuffix = 'out', 
+        extras = None, clobber = True):
         """
         Write information to hdf5 file.
         
@@ -35,8 +36,10 @@ class write_hdf5(Writer):
             error = f.create_dataset('error', data = self.Spectrum.error)
             
             # Add metadata to each dataset?
-            xarr.attrs.create('xunits', self.Spectrum.xarr.units)
-            xarr.attrs.create('xtype', self.Spectrum.xarr.xtype)
+            xarr.attrs.create('units', self.Spectrum.xarr.units)
+            xarr.attrs.create('type', self.Spectrum.xarr.xtype)
+            data.attrs.create('units', self.Spectrum.units)
+            data.attrs.create('type', self.Spectrum.ytype)
             
             if extras is not None:
                 for extra in extras:

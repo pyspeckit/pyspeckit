@@ -32,7 +32,7 @@ def open_hdf5(filename, xaxkey = 'xarr', datakey = 'data', errkey = 'error'):
     """
     
     if not h5OK: 
-        print "Cannot read hdf5 format - h5py import failed."
+        print "WARNING: h5py not installed; cannot read hdf5 files."
     else:
         f = h5py.File(filename, 'r')
         
@@ -44,21 +44,40 @@ def open_hdf5(filename, xaxkey = 'xarr', datakey = 'data', errkey = 'error'):
     
         try: error = f[errkey].value
         except KeyError: 
-            print 'Dataset \'%s\' not found.' % errkey
+            print 'Dataset \'%s\' not found.  Assuming uniform errors.' % errkey
             error = np.ones_like(data)
             
         try: 
-            xunits = f[xaxkey].attrs['xunits']
-            if xunits == '': xunits = 'unknown'
-        except KeyError: xunits = 'unknown'    
-            
-        XAxis = units.SpectroscopicAxis(xarr,xunits)    
-
-        if pyfitscheck:
-            header = pyfits.Header()
-            header.update('CUNIT1',xunits)
-        else:
-            header = {}
+            xunits = f[xaxkey].attrs['units']
+            if xunits == '': 
+                xunits = 'unknown'
+        except KeyError: 
+            xunits = 'unknown'    
         
-        return data,error,XAxis,header
+        try: 
+            yunits = f[datakey].attrs['units']
+            if yunits == '': 
+                yunits = 'unknown'
+        except KeyError: 
+            yunits = 'unknown'    
+            
+        try: 
+            xtype = f[xaxkey].attrs['type']
+            if xtype == '': 
+                xtype = xaxkey
+        except KeyError: 
+            xtype = xaxkey
+        
+        try: 
+            ytype = f[datakey].attrs['type']
+            if ytype == '': 
+                ytype = datakey
+        except KeyError: 
+            ytype = datakey            
+            
+        XAxis = units.SpectroscopicAxis(xarr, xunits)    
+
+        header = {'xunits': xunits, 'xtype': xtype, 'yunits': yunits, 'ytype': ytype}
+        
+        return data, error, XAxis, header
     

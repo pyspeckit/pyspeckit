@@ -24,7 +24,7 @@ cfgDefaults = dict(
     show_components = False,
     annotate = True,
     interactive = False,
-    autorefresh = False,
+    autorefresh = True,
     silent = True,
     debug = False
     )

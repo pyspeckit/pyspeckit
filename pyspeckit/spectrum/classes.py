@@ -100,6 +100,8 @@ class Spectrum(object):
                 self.parse_header(self.header)
             elif filetype is 'txt':
                 self.parse_text_header(self.header)
+            elif filetype in ('hdf5', 'h5'):
+                self.parse_hdf5_header(self.header)
 
             if isinstance(filename,str):
                 self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
@@ -189,6 +191,23 @@ class Spectrum(object):
         self.header.update('CTYPE1',self.xarr.xtype)
         self.header.update('BUNIT',self.units)
         self.header.update('BTYPE',self.ytype)
+        
+    def parse_hdf5_header(self, hdr):
+        """
+        HDF5 reader will create a hdr dictionary from HDF5 dataset
+        attributes if they exist.  This routine will convert that dict
+        to a pyfits header instance.
+        """    
+        
+        self.xarr.xtype = hdr['xtype']
+        self.xarr.xunits = hdr['xunits']
+        self.ytype = hdr['ytype']
+        self.units = hdr['yunits']
+        self.header = pyfits.Header()
+        self.header.update('CUNIT1', self.xarr.xunits)
+        self.header.update('CTYPE1', self.xarr.xtype)
+        self.header.update('BUNIT', self.ytype)
+        self.header.update('BTYPE', self.units)
 
     def parse_header(self,hdr,specname=None):
         """
@@ -202,6 +221,11 @@ class Spectrum(object):
             self.units = hdr.get('BUNIT').strip()
         else:
             self.units = 'undefined'
+            
+        if hdr.get('BTYPE'):
+            self.ytype = hdr.get('BTYPE').strip()
+        else:
+            self.ytype = 'data'
 
         if specname is not None:
             self.specname = specname
