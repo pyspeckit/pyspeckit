@@ -2,6 +2,7 @@
 color                       = k
 composite_fit_color         = red
 component_fit_color         = blue
+baseline_fit_color          = orange
 lw                          = 0.5
 composite_lw                = 1.0
 component_lw                = 1.0
