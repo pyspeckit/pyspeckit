@@ -139,6 +139,7 @@ xtype_dict = {
         'WAV':'wavelength',
         'WAVE':'wavelength',
         'wavelength':'wavelength',
+        'lambda':'wavelength',
         # cm^-1 ? 'wavenumber':'wavenumber',
         }
 

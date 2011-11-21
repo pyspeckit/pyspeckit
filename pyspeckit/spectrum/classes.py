@@ -182,8 +182,14 @@ class Spectrum(object):
         .txt or other atpy table type objects
         """
         self.Table = Table
-        self.xarr.xtype = Table.data.dtype.names[Table.xaxcol]
-        self.xarr.xunits = Table.columns[self.xarr.xtype].unit
+        xtype = Table.data.dtype.names[Table.xaxcol]
+        if xtype in units.xtype_dict.values():
+            self.xarr.xtype = xtype
+        elif xtype in units.xtype_dict:
+            self.xarr.xtype = units.xtype_dict[xtype]
+        else:
+            raise ValueError("Invalid xtype in text header")
+        self.xarr.xunits = Table.columns[xtype].unit
         self.ytype = Table.data.dtype.names[Table.datacol]
         self.units = Table.columns[self.ytype].unit
         self.header = pyfits.Header()
