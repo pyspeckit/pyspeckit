@@ -173,6 +173,14 @@ or it will be &#8220;autodetected&#8221; (negamp=None)</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.Spectrum.parse_hdf5_header">
+<tt class="descname">parse_hdf5_header</tt><big>(</big><em>hdr</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.parse_hdf5_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>HDF5 reader will create a hdr dictionary from HDF5 dataset
+attributes if they exist.  This routine will convert that dict
+to a pyfits header instance.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.parse_header">
 <tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.parse_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse parameters from a .fits header into required spectrum structure
@@ -306,6 +314,14 @@ a subset of the above.
 &#8216;estimator&#8217; is used to measure the background level (height)</p>
 <p>negamp can be used to force the peak negative (True), positive (False),
 or it will be &#8220;autodetected&#8221; (negamp=None)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.Spectra.parse_hdf5_header">
+<tt class="descname">parse_hdf5_header</tt><big>(</big><em>hdr</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectra.parse_hdf5_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>HDF5 reader will create a hdr dictionary from HDF5 dataset
+attributes if they exist.  This routine will convert that dict
+to a pyfits header instance.</p>
 </dd></dl>
 
 <dl class="method">
@@ -451,6 +467,14 @@ a subset of the above.
 &#8216;estimator&#8217; is used to measure the background level (height)</p>
 <p>negamp can be used to force the peak negative (True), positive (False),
 or it will be &#8220;autodetected&#8221; (negamp=None)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.ObsBlock.parse_hdf5_header">
+<tt class="descname">parse_hdf5_header</tt><big>(</big><em>hdr</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.parse_hdf5_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>HDF5 reader will create a hdr dictionary from HDF5 dataset
+attributes if they exist.  This routine will convert that dict
+to a pyfits header instance.</p>
 </dd></dl>
 
 <dl class="method">
