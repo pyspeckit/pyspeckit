@@ -104,7 +104,10 @@ class Spectrum(object):
             if isinstance(filename,str):
                 self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
         elif xarr is not None and data is not None:
-            self.xarr = units.SpectroscopicAxis(xarr, **xarrkwargs)
+            if type(xarr) is units.SpectroscopicAxis:
+                self.xarr = xarr
+            else:
+                self.xarr = units.SpectroscopicAxis(xarr, **xarrkwargs)
             self.data = data
             if error is not None:
                 self.error = error

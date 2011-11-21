@@ -214,7 +214,7 @@ class Plotter(object):
         if xlabel is not None:
             self.xlabel = xlabel
         elif isinstance(self.Spectrum.xarr.xtype,str):
-            self.xlabel = self.Spectrum.xarr.xtype
+            self.xlabel = self.Spectrum.xarr.xtype.title()
             if isinstance(self.Spectrum.xarr.units,str):
                 self.xlabel += " ("+self.Spectrum.xarr.units+")"
         if self.xlabel is not None:

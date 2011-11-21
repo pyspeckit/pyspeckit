@@ -26,10 +26,12 @@ class CaseInsensitiveDict(dict):
             if isinstance(inputdict, dict):
                 self.CaseDict = inputdict
                 for k,v in inputdict.items():
-                    dict.__setitem__(self, k.lower(), v)
+                    if hasattr(k,'lower'):
+                        dict.__setitem__(self, k.lower(), v)
             else:
                 for k,v in inputdict:
-                    dict.__setitem__(self, k.lower(), v)
+                    if hasattr(k,'lower'):
+                        dict.__setitem__(self, k.lower(), v)
 
     def __getitem__(self, key):
         return dict.__getitem__(self, key.lower())
@@ -96,6 +98,7 @@ pixel_dict = CaseInsensitiveDict(pixel_dict)
 conversion_dict = {
         'VELOCITY':velocity_dict,  'Velocity':velocity_dict,  'velocity':velocity_dict,  'velo': velocity_dict, 'VELO': velocity_dict,
         'LENGTH':length_dict,      'Length':length_dict,      'length':length_dict, 
+        'WAVELENGTH':length_dict,      'WAVELength':length_dict,      'WAVElength':length_dict, 
         'FREQUENCY':frequency_dict,'Frequency':frequency_dict,'frequency':frequency_dict, 'freq': frequency_dict, 'FREQ': frequency_dict,
         'pixels':pixel_dict,'PIXELS':pixel_dict,
         }
@@ -109,15 +112,18 @@ unit_type_dict = {
     'meters/second':'velocity', 'm/s':'velocity', 'kilometers/s':'velocity',
     'km/s':'velocity', 'kms':'velocity', 'centimeters/s':'velocity',
     'cm/s':'velocity', 'cms':'velocity', 
-    'meters':'length','m':'length',
-    'centimeters':'length','cm':'length',
-    'millimeters':'length','mm':'length',
-    'nanometers':'length','nm':'length',
-    'micrometers':'length','micron':'length','microns':'length','um':'length',
-    'kilometers':'length','km':'length',
-    'angstroms':'length','A':'length',
-    None: None,
+    'meters':'wavelength','m':'wavelength',
+    'centimeters':'wavelength','cm':'wavelength',
+    'millimeters':'wavelength','mm':'wavelength',
+    'nanometers':'wavelength','nm':'wavelength',
+    'micrometers':'wavelength','micron':'wavelength','microns':'wavelength','um':'wavelength',
+    'kilometers':'wavelength','km':'wavelength',
+    'angstroms':'wavelength','A':'wavelength',
+    'unknown':'pixels',
+    None: 'pixels',
     }
+
+unit_type_dict = CaseInsensitiveDict(unit_type_dict)
 
 xtype_dict = {
         'VLSR':'velocity','VRAD':'velocity','VELO':'velocity',
@@ -130,9 +136,9 @@ xtype_dict = {
         'Z':'redshift',
         'FREQ':'frequency',
         'frequency':'frequency',
-        'WAV':'length',
-        'WAVE':'length',
-        'wavelength':'length',
+        'WAV':'wavelength',
+        'WAVE':'wavelength',
+        'wavelength':'wavelength',
         # cm^-1 ? 'wavenumber':'wavenumber',
         }
 
@@ -159,8 +165,8 @@ frame_type_dict = {'LSRK':'velocity','LSRD':'velocity','LSR':'velocity',
 
 fits_frame = {'rest':'REST','LSRK':'-LSR','heliocentric':'-HEL','geocentric':'-GEO'}
 fits_specsys = {'rest':'REST','LSRK':'LSRK','LSRD':'LSRD','heliocentric':'HEL','geocentric':'GEO'}
-fits_type = {'velocity':'VELO','frequency':'FREQ','length':'WAVE','redshift':'REDS',
-        'Velocity':'VELO','Frequency':'FREQ','Length':'WAVE','Redshift':'REDS'}
+fits_type = {'velocity':'VELO','frequency':'FREQ','wavelength':'WAVE','length':'WAVE','redshift':'REDS',
+        'Velocity':'VELO','Frequency':'FREQ','Wavelength':'WAVE','Length':'WAVE','Redshift':'REDS'}
 convention_suffix = {'radio':'RAD','optical':'OPT','relativistic':'REL','redshift':'RED'}
 
 speedoflight_ms = 2.99792458e8 # m/s
@@ -183,7 +189,10 @@ class SpectroscopicAxis(np.ndarray):
         """
         subarr = np.array(xarr)
         subarr = subarr.view(self)
-        subarr.units = unit
+        if unit in unit_type_dict:
+            subarr.units = unit
+        else:
+            raise ValueError('Unit %s not recognized.' % unit)
         if subarr.units is None:
             subarr.units = 'none'
         subarr.frame = frame

@@ -21,4 +21,5 @@ CWD = os.getcwd()
 if not os.path.exists('%s/.pyspeckit' % HOME):
     os.mkdir('%s/.pyspeckit' % HOME)
     
-shutil.copyfile('%s/pyspeckit/config_default' % CWD, '%s/.pyspeckit/config' % HOME)
+if not os.path.exists('%s/.pyspeckit/config' % HOME):
+    shutil.copyfile('%s/pyspeckit/config_default' % CWD, '%s/.pyspeckit/config' % HOME)

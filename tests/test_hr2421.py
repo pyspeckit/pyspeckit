@@ -15,7 +15,7 @@ print "Plotter min/max: ",sp.plotter.xmin,sp.plotter.xmax," Fitter min/max: ",sp
 
 
 if interactive: raw_input("Wait here a moment")
-sp.baseline(subtract=False,exclude=[4830,4890])
+sp.baseline(subtract=False,exclude=[4830,4890],order=2)
 print "Plotter min/max: ",sp.plotter.xmin,sp.plotter.xmax," Fitter min/max: ",sp.specfit.gx1,sp.specfit.gx2," Fitregion= ",sp.baseline.fitregion
 print "Baseline exclude: ",sp.baseline.excludevelo,sp.baseline.excludepix
 if interactive: raw_input("Wait here a moment")

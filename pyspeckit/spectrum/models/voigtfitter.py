@@ -312,3 +312,11 @@ class voigt_fitter(object):
                           ) for jj in range(self.npeaks)]
         labels = tuple(mpcb.flatten(label_list))
         return labels
+
+    def components(self,xarr,modelpars):
+
+        modelcomponents = [ self.voigt(xarr,
+            modelpars[4*i],modelpars[4*i+1],modelpars[4*i+2],modelpars[4*i+3])
+            for i in range(self.npeaks)]
+
+        return modelcomponents
