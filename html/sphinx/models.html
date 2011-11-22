@@ -24,22 +24,31 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit v0.1 documentation" href="index.html" />
-    <link rel="prev" title="cubes" href="cubes.html" /> 
+    <link rel="prev" title="cubes" href="cubes.html" />
+     
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setDomainName', 'pyspeckit.bitbucket.org']);
+      _gaq.push(['_setAllowHash', false]);
+      _gaq.push(['_trackPageview']);
+
+
+    </script>
   </head>
   <body>
     <div class="header-wrapper">
       <div class="header">
-          <p class="logo"><a href="index.html">
+          <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
         <h1><a href="index.html">pyspeckit v0.1 documentation</a></h1>
         <div class="rel">
-          <a href="cubes.html" title="cubes"
-             accesskey="P">previous</a> |
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a>
+          <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
+          <a href=index.html>Docs Home </a>  |
+          <a href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/overview">Bitbucket Home </a>  |
+          <a href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/wiki/Home">Wiki</a>  |
+          <a href=search.html>Search </a>
         </div>
        </div>
     </div>
@@ -283,29 +292,6 @@ strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.
 </dd></dl>
 
 </div>
-<span class="target" id="module-pyspeckit.spectrum.models.lorentzian"></span><div class="section" id="lorentzian-fitter">
-<h2>Lorentzian Fitter<a class="headerlink" href="#lorentzian-fitter" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="pyspeckit.spectrum.models.lorentzian.n_lorentzian">
-<tt class="descclassname">pyspeckit.spectrum.models.lorentzian.</tt><tt class="descname">n_lorentzian</tt><big>(</big><em>pars=None</em>, <em>a=None</em>, <em>dx=None</em>, <em>width=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.lorentzian.n_lorentzian" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a function that sums over N lorentzians, where N is the length of
-a,dx,sigma <em>OR</em> N = len(pars) / 3</p>
-<p>The background &#8220;height&#8221; is assumed to be zero (you must &#8220;baseline&#8221; your
-spectrum before fitting)</p>
-<p>pars  - a list with len(pars) = 3n, assuming a,dx,sigma repeated
-dx    - offset (velocity center) values
-width - line widths (Lorentzian FWHM)
-a     - amplitudes</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyspeckit.spectrum.models.lorentzian.onedlorentzian">
-<tt class="descclassname">pyspeckit.spectrum.models.lorentzian.</tt><tt class="descname">onedlorentzian</tt><big>(</big><em>x</em>, <em>H</em>, <em>A</em>, <em>dx</em>, <em>w</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.lorentzian.onedlorentzian" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a 1-dimensional gaussian of form
-H+A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
-</dd></dl>
-
-</div>
 <span class="target" id="module-pyspeckit.spectrum.models.modelgrid"></span><div class="section" id="model-grid">
 <h2>Model Grid<a class="headerlink" href="#model-grid" title="Permalink to this headline">¶</a></h2>
 <p>Fit a line based on parameters output from a grid of models</p>
@@ -317,7 +303,7 @@ H+A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x1055a0398&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x106266410&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -387,7 +373,6 @@ Draine 2011 textbook pgs 219-230)</dd>
 <li class="toctree-l2"><a class="reference internal" href="#gaussian-fitter">Gaussian fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hill5-analytic-infall-model">Hill5 analytic infall model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generalized-hyperfine-component-fitter">Generalized hyperfine component fitter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#lorentzian-fitter">Lorentzian Fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#model-grid">Model Grid</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#n2h-fitter">N2H+ fitter</a></li>
 </ul>
@@ -409,30 +394,9 @@ Draine 2011 textbook pgs 219-230)</dd>
       </div>
     </div>
 
-    <div class="footer-wrapper">
-      <div class="footer">
-        <div class="left">
-          <a href="cubes.html" title="cubes"
-             >previous</a> |
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |
-          <a href="genindex.html" title="General Index"
-             >index</a>
-            <br/>
-            <a href="_sources/models.txt"
-               rel="nofollow">Show Source</a>
-        </div>
-
-        <div class="right">
-          
     <div class="footer">
-        &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
+      &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
     </div>
-        </div>
-        <div class="clearer"></div>
-      </div>
-    </div>
-
   </body>
 </html>

@@ -99,6 +99,18 @@ html_theme = 'agogo'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #html_theme_options = {}
+html_theme_options = dict(
+    pagewidth = '960px',
+    documentwidth = '760px',
+    sidebarwidth = '200px',
+
+    headerbg="#666666",
+    headercolor1="#000000",
+    headercolor2="#000000",
+    headerlinkcolor="#FF9522",
+    linkcolor="#4a8f43",
+)
+
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []

@@ -25,20 +25,20 @@ body {
 /* Page layout */
 
 div.header, div.content, div.footer {
-  width: 70em;
+  width: 960px;
   margin-left: auto;
   margin-right: auto;
 }
 
 div.header-wrapper {
-  background: url(bgtop.png) top left repeat-x;
+  background: #666666;
   border-bottom: 3px solid #2e3436;
 }
 
 
 /* Default body styles */
 a {
-  color: #ce5c00;
+  color: #4a8f43;
 }
 
 div.bodywrapper a, div.footer a {
@@ -72,17 +72,17 @@ div.bodywrapper a, div.footer a {
 h1, h2, h3, h4 {
   font-family: "Georgia", "Times New Roman", serif;
   font-weight: normal;
-  color: #3465a4;
+  color: #000000;
   margin-bottom: .8em;
 }
 
 h1 {
-  color: #204a87;
+  color: #000000;
 }
 
 h2 {
   padding-bottom: .5em;
-  border-bottom: 1px solid #3465a4;
+  border-bottom: 1px solid #000000;
 }
 
 a.headerlink {
@@ -144,7 +144,7 @@ div.header div.rel {
 }
 
 div.header div.rel a {
-  color: #fcaf3e;
+  color: #FF9522;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
@@ -166,7 +166,7 @@ div.content-wrapper {
 }
 
 div.document {
-  width: 50em;
+  width: 760px;
   float: left;
 }
 
@@ -244,7 +244,7 @@ div.document ol {
 /* Sidebar */
 
 div.sidebar {
-  width: 20em;
+  width: 200px;
   float: right;
   font-size: .9em;
 }
@@ -297,7 +297,7 @@ div.sidebar li.toctree-l2:last-child a {
 }
 
 div.sidebar li.toctree-l1.current a {
-  border-right: 5px solid #fcaf3e;
+  border-right: 5px solid #FF9522;
 }
 
 div.sidebar li.toctree-l1.current li.toctree-l2 a {
