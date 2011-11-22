@@ -8,8 +8,9 @@ import numpy as np
 from mpfit import mpfit
 import copy
 import matplotlib.cbook as mpcb
+import fitter
 
-class SpectralModel(object):
+class SpectralModel(fitter.SimpleFitter):
     """
     A wrapper class for a spectra model.  Includes internal functions to
     generate multi-component models, annotations, integrals, and individual
