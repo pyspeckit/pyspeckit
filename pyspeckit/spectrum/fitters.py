@@ -2,8 +2,8 @@ import matplotlib
 import matplotlib.cbook as mpcb
 import matplotlib.pyplot as pyplot
 import numpy as np
-from config import mycfg
-from config import ConfigDescriptor as cfgdec
+from ..config import mycfg
+from ..config import ConfigDescriptor as cfgdec
 import units
 
 class Registry(object):
@@ -216,7 +216,7 @@ class Specfit(object):
         if np.median(self.Spectrum.baseline.basespec) == 0:
             raise ValueError("Baseline / continuum is zero: equivalent width is undefined.")
         elif np.median(self.Spectrum.baseline.basespec) < 0:
-            print "WARNING: Baseline / continuum is negative: equivalent width is poorly defined."
+            if mycfg.WARN: print "WARNING: Baseline / continuum is negative: equivalent width is poorly defined."
         diffspec = (self.Spectrum.baseline.basespec - self.Spectrum.data)
         dx = np.abs((self.Spectrum.xarr[self.gx2-1]-self.Spectrum.xarr[self.gx1]) / (self.gx2-self.gx1))
         sumofspec = diffspec[self.gx1:self.gx2].sum() * dx
@@ -800,7 +800,7 @@ class Specfit(object):
             dx = np.abs(self.Spectrum.xarr.cdelt())
             integ = self.fitter.integral(self.modelpars, **kwargs) * dx
             if return_error:
-                print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."
+                if mycfg.WARN: print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."
                 OK = np.abs( self.model ) > threshold
                 error = np.sqrt((self.errspec[OK]**2).sum()) * dx
                 #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")

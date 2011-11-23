@@ -98,7 +98,8 @@ class Cube(spectrum.Spectrum):
 
     def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
             verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
-            blank_value=0, integral=True, direct=False, **fitkwargs):
+            blank_value=0, integral=True, direct=False, absorption=False,
+            **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
         """
@@ -132,7 +133,10 @@ class Cube(spectrum.Spectrum):
             elif errmap is not None:
                 sp.error = np.ones(sp.data.shape) * errmap[y,x]
             if sp.error is not None and signal_cut > 0:
-                max_sn = (sp.data / sp.error).max()
+                if absorption:
+                    max_sn = (-1*sp.data / sp.error).max()
+                else:
+                    max_sn = (sp.data / sp.error).max()
                 if max_sn < signal_cut:
                     if verbose_level > 1:
                         print "Skipped %i,%i" % (x,y)

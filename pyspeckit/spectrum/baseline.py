@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib
-from config import mycfg
-from config import ConfigDescriptor as cfgdec
+from ..config import mycfg
+from ..config import ConfigDescriptor as cfgdec
 
 interactive_help_message = """
 Left-click twice to select or add to the baseline fitting range.  Middle or

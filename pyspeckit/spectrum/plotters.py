@@ -9,7 +9,7 @@ import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure
 import itertools
-from config import *
+from ..config import *
 import numpy as np
 
 interactive_help_message = """

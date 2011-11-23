@@ -14,8 +14,9 @@ from classes import Spectrum,Spectra,ObsBlock
 import fitters,plotters,baseline,units
 import smooth
 import logger
-import config
+from .. import config
 import moments
+import units
 
 import readers
 def register_reader(filetype, function, suffix, default=False):
