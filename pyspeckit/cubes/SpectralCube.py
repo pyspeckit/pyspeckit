@@ -139,8 +139,10 @@ class Cube(spectrum.Spectrum):
                     max_sn = (sp.data / sp.error).max()
                 if max_sn < signal_cut:
                     if verbose_level > 1:
-                        print "Skipped %i,%i" % (x,y)
+                        print "Skipped %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
                     continue
+                if verbose_level > 2:
+                    print "Fitting %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
             sp.specfit.Registry = self.Registry # copy over fitter registry
             
             if usemomentcube:

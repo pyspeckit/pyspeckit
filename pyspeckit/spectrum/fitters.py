@@ -531,7 +531,7 @@ class Specfit(object):
             raise Exception("Fitter %s has no annotations." % self.fitter)
 
         #xtypename = units.unit_type_dict[self.Spectrum.xarr.xtype]
-        xcharconv = {'frequency':'\\nu', 'wavelength':'\\lambda', 'velocity':'v', 'pixels':'x'}
+        xcharconv = units.CaseInsensitiveDict({'frequency':'\\nu', 'wavelength':'\\lambda', 'velocity':'v', 'pixels':'x'})
         xchar = xcharconv[self.Spectrum.xarr.xtype]
         labels = [L.replace('x',xchar) if L[1]=='x' else L for L in labels]
 
