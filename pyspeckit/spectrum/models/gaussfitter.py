@@ -42,12 +42,14 @@ class gaussian_fitter(fitter.SimpleFitter):
         [height,amplitude,center,width]
         
         """
+        x = numpy.array(x) # make sure xarr is no longer a spectroscopic axis
         return H+A*numpy.exp(-(x-dx)**2/(2*w**2))
         
     def multipeakgaussian(self, x, pars):
         """
         Returns flux at position x due to contributions from multiple Gaussians.
         """
+        x = numpy.array(x) # make sure xarr is no longer a spectroscopic axis
         
         pars = numpy.reshape(pars, (len(pars) / 3, 3))
         
