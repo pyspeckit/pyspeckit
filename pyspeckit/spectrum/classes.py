@@ -151,6 +151,12 @@ class Spectrum(object):
         Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
         Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
         Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
+        Registry.add_fitter('hill5',models.hill5infall.hill5_fitter(multisingle='multi'),5,multisingle='multi')
+        Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter(multisingle='multi'),4,multisingle='multi')
+
+hcn_vtau_fitter = hcn_vtau.fitter
+hcn_vtau_vheight_fitter = hcn_vtau.vheight_fitter
+
         self.Registry = Registry
 
         
