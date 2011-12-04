@@ -144,6 +144,7 @@ class Spectrum(object):
         """
         Registry = fitters.Registry()
         Registry.add_fitter('ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
+        Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(multisingle='multi'),6,multisingle='multi')
         # not implemented Registry.add_fitter(Registry,'ammonia',models.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
         Registry.add_fitter('formaldehyde',models.formaldehyde_fitter,3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
         Registry.add_fitter('formaldehyde',models.formaldehyde_vheight_fitter,3,multisingle='single')
@@ -151,8 +152,8 @@ class Spectrum(object):
         Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
         Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
         Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
-        Registry.add_fitter('hill5',models.hill5infall.hill5_fitter(multisingle='multi'),5,multisingle='multi')
-        Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter(multisingle='multi'),4,multisingle='multi')
+        Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5,multisingle='multi')
+        Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
         self.Registry = Registry
 
         

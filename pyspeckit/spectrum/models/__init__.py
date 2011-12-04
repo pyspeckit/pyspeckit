@@ -22,7 +22,7 @@ for ii in xrange(-15,0):
        terminate the fitting process.  Values from -15 to -1 are reserved
        for the user functions and will not clash with MPFIT."""
 
-from ammonia import ammonia_model
+from ammonia import ammonia_model,ammonia_model_vtau
 from gaussfitter import gaussian_fitter
 from voigtfitter import voigt_fitter
 import formaldehyde

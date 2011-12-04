@@ -73,7 +73,7 @@ tau_wts_dict = {
     'fourfour': [0.2431, 0.0162, 0.0162, 0.3008, 0.0163, 0.0163, 0.3911]}
 
 def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
-        xoff_v=0.0, fortho=1.0, tau11=None, fillingfraction=None, return_tau=False,
+        xoff_v=0.0, fortho=1.0, tau=None, fillingfraction=None, return_tau=False,
         thin=False, verbose=False, return_components=False, debug=False ):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
@@ -85,14 +85,18 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
         is specified
 
     "thin" uses a different parametetrization and requires only the optical depth, width, offset,
-        and tkin to be specified
+        and tkin to be specified.  In the 'thin' approximation, tex is not used in computation of
+        the partition function - LTE is implicitly assumed
 
-    If tau11 is specified, ntot is NOT fit but is set to a fixed value
+    If tau is specified, ntot is NOT fit but is set to a fixed value
     fillingfraction is an arbitrary scaling factor to apply to the model
     fortho is the ortho/(ortho+para) fraction.  The default is to assume all ortho.
     xoff_v is the velocity offset in km/s 
 
-    (not implemented) if tau11 is specified, ntot is ignored
+    tau refers to the optical depth of the 1-1 line.  The optical depths of the
+    other lines are fixed relative to tau_oneone
+
+    (not implemented) if tau is specified, ntot is ignored
     """
 
     # Convert X-units to frequency in GHz
@@ -136,10 +140,6 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
     Jortho = jv[ortho]
     Brot = 298117.06e6
     Crot = 186726.36e6
-    Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
-        (Crot-Brot)*Jpara**2)/(kb*tkin))
-    Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
-        (Crot-Brot)*Jortho**2)/(kb*tkin))
 
     runspec = np.zeros(len(xarr))
     
@@ -147,14 +147,31 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
     para_count = 0
     ortho_count = 1 # ignore 0-0
 
-    if tau11 is not None and thin:
+    if tau is not None and thin:
+        """
+        Use optical depth in the 1-1 line as a free parameter
+        The optical depths of the other lines are then set by the kinetic temperature
+        Tex is still a free parameter in the final spectrum calculation at the bottom
+        (technically, I think this process assumes LTE; Tex should come into play in
+        these equations, not just the final one)
+        """
         dT0 = 41.5                    # Energy diff between (2,2) and (1,1) in K
         trot = tkin/(1+tkin/dT0*np.log(1+0.6*np.exp(-15.7/tkin)))
-        tau_dict['oneone']     = tau11
-        tau_dict['twotwo']     = tau11*(23.722/23.694)**2*4/3.*5/3.*np.exp(-41.5/trot)
-        tau_dict['threethree'] = tau11*(23.8701279/23.694)**2*3/2.*14./3.*np.exp(-101.1/trot)
-        tau_dict['fourfour']   = tau11*(24.1394169/23.694)**2*8/5.*9/3.*np.exp(-177.34/trot)
+        tau_dict['oneone']     = tau
+        tau_dict['twotwo']     = tau*(23.722/23.694)**2*4/3.*5/3.*np.exp(-41.5/trot)
+        tau_dict['threethree'] = tau*(23.8701279/23.694)**2*3/2.*14./3.*np.exp(-101.1/trot)
+        tau_dict['fourfour']   = tau*(24.1394169/23.694)**2*8/5.*9/3.*np.exp(-177.34/trot)
     else:
+        """
+        Column density is the free parameter.  It is used in conjunction with
+        the full partition function to compute the optical depth in each band
+        Given the complexity of these equations, it would be worth my while to
+        comment each step carefully.  
+        """
+        Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
+            (Crot-Brot)*Jpara**2)/(kb*tkin))
+        Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
+            (Crot-Brot)*Jortho**2)/(kb*tkin))
         for linename in line_names:
             if ortho_dict[linename]:
                 orthoparafrac = fortho
@@ -172,14 +189,16 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
                 (1-np.exp(-h*freq_dict[linename]/(kb*tex))) /
                 (width/ckms*freq_dict[linename]*np.sqrt(2*np.pi)) )
 
-    # allow tau11 to be specified instead of ntot
+    # allow tau(11) to be specified instead of ntot
     # in the thin case, this is not needed: ntot plays no role
-    if tau11 is not None and not thin:
+    # this process allows you to specify tau without using the approximate equations specified
+    # above.  It should remove ntot from the calculations anyway...
+    if tau is not None and not thin:
         tau11_temp = tau_dict['oneone']
-        # re-scale all optical depths so that tau11 is as specified, but the relative taus
-        # match theory
-        for linename,tau in tau_dict.iteritems():
-            tau_dict[linename] = tau * tau11/tau11_temp
+        # re-scale all optical depths so that tau is as specified, but the relative taus
+        # are sest by the kinetic temperature and partition functions
+        for linename,t in tau_dict.iteritems():
+            tau_dict[linename] = t * tau/tau11_temp
 
     components =[]
     for linename in line_names:
@@ -200,8 +219,10 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
             components.append( tauprof )
   
         T0 = (h*xarr*1e9/kb) # "temperature" of wavelength
-        if tau11 is not None and thin:
-            runspec = tauprof+runspec
+        if tau is not None and thin:
+            #runspec = tauprof+runspec
+            # is there ever a case where you want to ignore the optical depth function? I think no
+            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
         else:
             runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
         if runspec.min() < 0:
@@ -429,7 +450,7 @@ class ammonia_model(fitter.SimpleFitter):
 
     def annotations(self):
         from decimal import Decimal # for formatting
-        tex_key = {'tkin':'T_K','tex':'T_{ex}','ntot':'N','fortho':'F_o','width':'\\sigma','xoff_v':'v','fillingfraction':'FF','tau11':'\\tau_{1-1}'}
+        tex_key = {'tkin':'T_K','tex':'T_{ex}','ntot':'N','fortho':'F_o','width':'\\sigma','xoff_v':'v','fillingfraction':'FF','tau':'\\tau_{1-1}'}
         # small hack below: don't quantize if error > value.  We want to see the values.
         label_list = [ "$%s(%i)$=%8s $\\pm$ %8s" % (tex_key[pinfo['parname'].strip("0123456789")],int(pinfo['parname'][-1]),
             Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value'])))),
@@ -437,3 +458,23 @@ class ammonia_model(fitter.SimpleFitter):
             for pinfo in self.parinfo]
         labels = tuple(mpcb.flatten(label_list))
         return labels
+
+class ammonia_model_vtau(ammonia_model):
+    def __init__(self,**kwargs):
+        super(ammonia_model_vtau,self).__init__()
+        self.parnames = ['tkin','tex','tau','width','xoff_v','fortho']
+
+    def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
+        """
+        Returns a very simple and likely incorrect guess
+        """
+
+        # TKIN, TEX, ntot, width, center, ortho fraction
+        return [20,10, 1, 1.0, 0.0, 1.0]
+
+    def __call__(self,*args,**kwargs):
+        if self.multisingle == 'single':
+            return self.onepeakammoniafit(*args,thin=False,**kwargs)
+        elif self.multisingle == 'multi':
+            return self.multinh3fit(*args,thin=False,**kwargs)
+
