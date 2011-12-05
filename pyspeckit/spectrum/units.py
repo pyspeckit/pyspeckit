@@ -281,6 +281,15 @@ class SpectroscopicAxis(np.ndarray):
             selfstr += "Reference is %g %s" % (self.refX, self.refX_units)
         return selfstr
 
+    def _check_consistent_type(self):
+        """
+        Make sure self.xtype is unit_type_dict[units]
+        if this is NOT true, can cause significant errors
+        """
+        OK = self.xtype == unit_type_dict[self.units]
+        if not OK:
+            raise InconsistentTypeError("Units: %s Type[units]: %s in %r" % (self.units,unit_type_dict[self.units],self) )
+
     """ OBSOLETE use convert_to_unit
     def change_xtype(self,new_xtype,**kwargs):
         if new_xtype not in conversion_dict:
@@ -710,3 +719,6 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
     frequencies = speedoflight_ms / ( wavelengths * length_dict[input_units] ) / frequency_dict[frequency_units]
 
     return frequencies
+
+class InconsistentTypeError(Exception):
+    pass

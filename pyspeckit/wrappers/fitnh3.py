@@ -8,28 +8,30 @@ Wrapper to fit ammonia spectra.  Generates a reasonable guess at the position an
 import pyspeckit
 from matplotlib import pyplot 
 import copy
+import random
 
 def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guessline='twotwo',
-        tex=20,tkin=15,column=15.0,fortho=0.66, tau11=None, thin=False, quiet=False, doplot=True, fignum=1,
-        guessfignum=2, smooth=False, scale_keyword=None,
+        tex=20,tkin=15,column=15.0,fortho=0.66, tau=None, thin=False, quiet=False, doplot=True, fignum=1,
+        guessfignum=2, smooth=False, scale_keyword=None, rebase=False, npeaks=1, guesses=None,
         **kwargs): 
     """
     Given a dictionary of filenames and lines, fit them together
     e.g. {'oneone':'G000.000+00.000_nh3_11.fits'}
     """
-    spdict = dict([ (linename,pyspeckit.Spectrum(value, scale_keyword=scale_keyword)) if type(value) is str else (linename,value) for linename, value in input_dict.iteritems() ])
+    spdict = dict([ (linename,pyspeckit.Spectrum(value, scale_keyword=scale_keyword)) 
+        if type(value) is str else (linename,value) for linename, value in input_dict.iteritems() ])
     splist = spdict.values()
 
     for sp in splist: # required for plotting, cropping
         sp.xarr.convert_to_unit('km/s')
 
-    if dobaseline:
-        for sp in splist:
-            sp.baseline(**baselinekwargs)
-
     if crop and len(crop) == 2:
         for sp in splist:
             sp.crop(*crop)
+
+    if dobaseline:
+        for sp in splist:
+            sp.baseline(**baselinekwargs)
 
     if smooth and type(smooth) is int:
         for sp in splist:
@@ -37,9 +39,16 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
 
     spdict[guessline].specfit(fittype='gaussian',negamp=False)
     ampguess,vguess,widthguess = spdict[guessline].specfit.modelpars
-    print "RMS guess: ",spdict[guessline].specfit.errspec.mean()
-    print "RMS guess: ",spdict[guessline].specfit.residuals.std()
-    errguess = spdict[guessline].specfit.errspec.mean()
+    print "RMS guess (errspec): ",spdict[guessline].specfit.errspec.mean()
+    print "RMS guess (residuals): ",spdict[guessline].specfit.residuals.std()
+    errguess = spdict[guessline].specfit.residuals.std()
+
+    if rebase:
+        # redo baseline subtraction excluding the centroid +/- about 20 km/s 
+        vlow = spdict[guessline].specfit.modelpars[1]-(19.8+spdict[guessline].specfit.modelpars[2]*2.35)
+        vhigh = spdict[guessline].specfit.modelpars[1]+(19.8+spdict[guessline].specfit.modelpars[2]*2.35)
+        for sp in splist:
+            sp.baseline(exclude=[vlow,vhigh], **baselinekwargs)
     
     for sp in splist:
         sp.error[:] = errguess
@@ -48,8 +57,16 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
     spdict[guessline].specfit.plot_fit()
 
     spectra = pyspeckit.Spectra(splist)
+    spectra.specfit.npeaks = npeaks
 
-    spectra.specfit(fittype='ammonia',quiet=quiet,multifit=True,guesses=[tkin,tex,column,widthguess,vguess,fortho], thin=thin, **kwargs)
+    if tau is not None:
+        if guesses is None:
+            guesses = [a for i in xrange(npeaks) for a in (tkin+random.random()*i,tex,tau+random.random()*i,widthguess+random.random()*i,vguess+random.random()*i,fortho)]
+        spectra.specfit(fittype='ammonia_tau',quiet=quiet,multifit=True,guesses=guesses, thin=thin, **kwargs)
+    else:
+        if guesses is None:
+            guesses = [a for i in xrange(npeaks) for a in (tkin+random.random()*i,tex,column+random.random()*i,widthguess+random.random()*i,vguess+random.random()*i,fortho)]
+        spectra.specfit(fittype='ammonia',quiet=quiet,multifit=True,guesses=guesses, thin=thin, **kwargs)
 
     if doplot:
         plot_nh3(spdict,spectra,fignum=fignum)
@@ -71,7 +88,7 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, *
         sp.specfit.modelpars = spectra.specfit.modelpars
         sp.specfit.npeaks = spectra.specfit.npeaks
         sp.specfit.fitter.npeaks = spectra.specfit.npeaks
-        sp.specfit.model = pyspeckit.models.ammonia.ammonia(sp.xarr, *spectra.specfit.modelpars)
+        sp.specfit.model = sp.specfit.fitter.n_ammonia(pars=spectra.specfit.modelpars, parnames=spectra.specfit.fitter.parnames)(sp.xarr)
 
     if len(splist) == 2:
         axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
@@ -100,7 +117,7 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, *
 
 
 def fitnh3(spectrum, vrange=[-100,100], vrangeunits='km/s', quiet=False,
-        Tex=20,Tkin=15,column=1e15,fortho=1.0): 
+        Tex=20,Tkin=15,column=1e15,fortho=1.0, tau=None): 
 
     if vrange:
         spectrum.xarr.convert_to_unit(vrangeunits)
@@ -109,6 +126,9 @@ def fitnh3(spectrum, vrange=[-100,100], vrangeunits='km/s', quiet=False,
     spectrum.specfit(fittype='gaussian',negamp=False)
     ampguess,vguess,widthguess = spectrum.specfit.modelpars
 
-    spectrum.specfit(fittype='ammonia',quiet=quiet,multifit=True,guesses=[Tex,Tkin,column,widthguess,vguess,fortho])
+    if tau is None:
+        spectrum.specfit(fittype='ammonia',quiet=quiet,multifit=True,guesses=[Tex,Tkin,column,widthguess,vguess,fortho])
+    else:
+        spectrum.specfit(fittype='ammonia_tau',quiet=quiet,multifit=True,guesses=[Tex,Tkin,tau,widthguess,vguess,fortho])
 
     return spectrum

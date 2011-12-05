@@ -43,7 +43,7 @@ draw()
 #if interactive: raw_input('wait for plotter')
 
 ammonia_model = pyspeckit.models.ammonia_model()
-published_model = pyspeckit.models.ammonia.ammonia(sp1.xarr,tkin=21.57,tex=0.24+2.73,width=1.11,xoff_v=37.88,tau11=3.06)
+published_model = pyspeckit.models.ammonia.ammonia(sp1.xarr,tkin=21.57,tex=0.24+2.73,width=1.11,xoff_v=37.88,tau=3.06)
 
 # set the baseline to zero to prevent variable-height fitting
 # (if you don't do this, the best fit to the spectrum is dominated by the

@@ -73,7 +73,7 @@ tau_wts_dict = {
     'fourfour': [0.2431, 0.0162, 0.0162, 0.3008, 0.0163, 0.0163, 0.3911]}
 
 def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
-        xoff_v=0.0, fortho=1.0, tau=None, fillingfraction=None, return_tau=False,
+        xoff_v=0.0, fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
         thin=False, verbose=False, return_components=False, debug=False ):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
@@ -396,6 +396,11 @@ class ammonia_model(fitter.SimpleFitter):
             'error': 0} 
             for ii in xrange(len(partype_dict['params'])) ]
 
+        # hack: remove 'fixed' pars
+        parinfo = [p for p in parinfo if not p['fixed']]
+        self.parnames = [p['parname'] for p in parinfo]
+        self.npars = len(parinfo)/self.npeaks
+
         def mpfitfun(x,y,err):
             if err is None:
                 def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=[pi['parname'] for pi in parinfo], **kwargs)(x))]
@@ -421,6 +426,7 @@ class ammonia_model(fitter.SimpleFitter):
             parinfo[i]['error'] = mpperr[i]
 
         if not shh:
+            print "Fit status: ",mp.status
             print "Fit message: ",mp.errmsg
             print "Final fit values: "
             for i,p in enumerate(mpp):
@@ -474,7 +480,7 @@ class ammonia_model_vtau(ammonia_model):
 
     def __call__(self,*args,**kwargs):
         if self.multisingle == 'single':
-            return self.onepeakammoniafit(*args,thin=False,**kwargs)
+            return self.onepeakammoniafit(*args,**kwargs)
         elif self.multisingle == 'multi':
-            return self.multinh3fit(*args,thin=False,**kwargs)
+            return self.multinh3fit(*args,**kwargs)
 

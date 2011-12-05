@@ -515,7 +515,7 @@ class Specfit(object):
         self.residualaxis.figure.canvas.draw()
 
     def annotate(self,loc='upper right',labelspacing=0.25, markerscale=0.01,
-            borderpad=0.1, handlelength=0.1, handletextpad=0.1, **kwargs):
+            borderpad=0.1, handlelength=0.1, handletextpad=0.1, frameon=False, **kwargs):
         """
         Add a legend to the plot showing the fitted parameters
 
@@ -539,7 +539,7 @@ class Specfit(object):
                 tuple([pl]*self.fitter.npars*self.npeaks),
                 labels, loc=loc,markerscale=markerscale, borderpad=borderpad,
                 handlelength=handlelength, handletextpad=handletextpad,
-                labelspacing=labelspacing, frameon = False, **kwargs)
+                labelspacing=labelspacing, frameon=frameon, **kwargs)
         self.specplotter.axis.add_artist(self.fitleg)
         self.fitleg.draggable(True)
         if self.specplotter.autorefresh: self.specplotter.refresh()

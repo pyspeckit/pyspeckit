@@ -363,7 +363,7 @@ class Baseline:
     def _baseline(self, spectrum, xarr=None, err=None, xmin='default', xmax='default',
             order=1, quiet=True, exclude=None, mask=None, powerlaw=False,
             xarr_fit_units='pixels', LoudDebug=False, renormalize='auto',
-            **kwargs):
+            zeroerr_is_OK=True, **kwargs):
         """
         Subtract a baseline from a spectrum
         If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum
@@ -398,6 +398,11 @@ class Baseline:
         else:
             # don't overwrite error
             err = err.copy()
+            # assume anything with 0 error is GOOD
+            if zeroerr_is_OK:
+                err[err == 0] = 1.
+            else: # flag it out!
+                err[err == 0] = 1e10
 
 
         err[:xmin] = 1e10
