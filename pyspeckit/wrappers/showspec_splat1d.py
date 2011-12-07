@@ -68,4 +68,8 @@ def splat_1d(filename=None,vmin=None,vmax=None,button=None,dobaseline=False,
     sp.spectrum = sp.data
     sp.axis = sp.plotter.axis
     sp.dv = sp.xarr.cdelt()
+    sp.vind = sp.xarr
+    sp.cube = sp.data
+    sp.save = sp.write
+
     return sp
