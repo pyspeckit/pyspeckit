@@ -11,7 +11,7 @@ import copy
 import random
 
 def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guessline='twotwo',
-        tex=20,tkin=15,column=15.0,fortho=0.66, tau=None, thin=False, quiet=False, doplot=True, fignum=1,
+        tex=15,tkin=20,column=15.0,fortho=0.66, tau=None, thin=False, quiet=False, doplot=True, fignum=1,
         guessfignum=2, smooth=False, scale_keyword=None, rebase=False, npeaks=1, guesses=None,
         **kwargs): 
     """

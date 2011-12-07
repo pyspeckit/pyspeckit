@@ -27,7 +27,7 @@ class Plotter(object):
 
 
     def __init__(self, Spectrum, autorefresh=True, title="", ylabel="",
-            xlabel="", silent=False, **kwargs):
+            xlabel="", silent=False, plotscale=1.0, **kwargs):
         self.figure = None
         self.axis = None
         self.Spectrum = Spectrum
@@ -46,11 +46,12 @@ class Plotter(object):
         self.ymin = None
         self.keyclick = None
         self.silent = silent
+        self.plotscale = plotscale
 
         self._xclick1 = None
         self._xclick2 = None
 
-    def __call__(self, figure=None, axis=None, clear=True, autorefresh=None, **kwargs):
+    def __call__(self, figure=None, axis=None, clear=True, autorefresh=None, plotscale=1.0, **kwargs):
         """
         Plot a spectrum
         
@@ -95,11 +96,13 @@ class Plotter(object):
         if autorefresh is not None:
             self.autorefresh = autorefresh
 
+        self.plotscale = plotscale
+
         self.plotkwargs = kwargs
 
         self.plot(**kwargs)
 
-    def plot(self, offset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
+    def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
             errstyle=None, erralpha=0.2, silent=None, **kwargs):
         """
         Plot the spectrum!
@@ -138,20 +141,20 @@ class Plotter(object):
         for arg in ['xmin','xmax','ymin','ymax','reset_xlimits','reset_ylimits','ypeakscale']:
             if kwargs.has_key(arg): reset_kwargs[arg] = kwargs.pop(arg)
 
-        self._spectrumplot = self.axis.plot(self.Spectrum.xarr,
-                self.Spectrum.data+self.offset, color=color,
+        self._spectrumplot = self.axis.plot(self.Spectrum.xarr+xoffset,
+                self.Spectrum.data*self.plotscale+self.offset, color=color,
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
 
         if errstyle is not None:
             if errstyle == 'fill':
                 order = -1 if self.Spectrum.xarr[-1] < self.Spectrum.xarr[0] else 1
-                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr[::order],isX=True),
-                    steppify((self.Spectrum.data+self.offset-self.Spectrum.error)[::order]),
-                    steppify((self.Spectrum.data+self.offset+self.Spectrum.error)[::order]),
+                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr[::order]+xoffset,isX=True),
+                    steppify((self.Spectrum.data*self.plotscale+self.offset-self.Spectrum.error*self.plotscale)[::order]),
+                    steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[::order]),
                     facecolor=color, alpha=erralpha, **kwargs)]
             elif errstyle == 'bars':
-                self.errorplot = self.axis.errorbar(self.Spectrum.xarr, self.Spectrum.data+self.offset,
-                        yerr=self.Spectrum.error, ecolor=color, fmt=None,
+                self.errorplot = self.axis.errorbar(self.Spectrum.xarr+xoffset, self.Spectrum.data*self.plotscale+self.offset,
+                        yerr=self.Spectrum.error*self.plotscale, ecolor=color, fmt=None,
                         **kwargs)
 
         if silent is not None:
