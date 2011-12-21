@@ -139,23 +139,27 @@ class Spectrum(object):
 
         if doplot: self.plotter(**plotkwargs)
 
-    def _register_fitters(self):
+    def _register_fitters(self, registry=None):
         """
         Register fitters independently for each spectrum instance
+
+        This approach allows you to add fitters to a given Spectrum instance
+        without modifying the default registry
         """
-        Registry = fitters.Registry()
-        Registry.add_fitter('ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
-        Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(multisingle='multi'),6,multisingle='multi')
-        # not implemented Registry.add_fitter(Registry,'ammonia',models.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
-        Registry.add_fitter('formaldehyde',models.formaldehyde_fitter,3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
-        Registry.add_fitter('formaldehyde',models.formaldehyde_vheight_fitter,3,multisingle='single')
-        Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
-        Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
-        Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
-        Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
-        Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5,multisingle='multi')
-        Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
-        self.Registry = Registry
+        self.Registry = fitters.Registry()
+        if registry is None:
+            registry = fitters.default_Registry
+        elif not isinstance(registry, fitters.Registry):
+            raise TypeError("registry must be an instance of the fitters.Registry class")
+
+        for modelname, model in registry.multifitters.iteritems():
+            self.Registry.add_fitter(modelname, model,
+                    registry.npars[modelname], multisingle='multi',
+                    key=registry.associated_keys.get(modelname))
+        for modelname, model in registry.singlefitters.iteritems():
+            self.Registry.add_fitter(modelname, model,
+                    registry.npars[modelname], multisingle='single',
+                    key=registry.associated_keys.get(modelname))
 
     def _sort(self):
         """

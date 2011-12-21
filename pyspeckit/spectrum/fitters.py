@@ -5,6 +5,7 @@ import numpy as np
 from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
 import units
+import models
 
 class Registry(object):
     """
@@ -15,8 +16,8 @@ class Registry(object):
         self.npars = {}
         self.multifitters = {}
         self.singlefitters = {}
-        self.writers = {}
         self.fitkeys = {}
+        self.associatedkeys = {}
 
         self.interactive_help_message = """
         Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
@@ -74,8 +75,20 @@ class Registry(object):
             self.fitkeys[key] = name
             self.interactive_help_message += "\n'%s' - select fitter %s" % (key,name)
         self.npars[name] = npars
+        self.associated_keys = dict(zip(self.fitkeys.values(),self.fitkeys.keys()))
 
-
+default_Registry = Registry()
+default_Registry.add_fitter('ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
+default_Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(multisingle='multi'),6,multisingle='multi')
+# not implemented default_Registry.add_fitter(Registry,'ammonia',models.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
+default_Registry.add_fitter('formaldehyde',models.formaldehyde_fitter,3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
+default_Registry.add_fitter('formaldehyde',models.formaldehyde_vheight_fitter,3,multisingle='single')
+default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
+default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
+default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
+default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
+default_Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5,multisingle='multi')
+default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
 
 
 class Specfit(object):
@@ -243,6 +256,13 @@ class Specfit(object):
                 self.specplotter.refresh()
         return eqw
 
+    def register_fitter(self,*args,**kwargs):
+        """
+        Register a model fitter
+        """
+        self.Registry.add_fitter(*args,**kwargs)
+
+    register_fitter.__doc__ += Registry.add_fitter.__doc__
     
     def seterrspec(self,usestd=None,useresiduals=True):
         """

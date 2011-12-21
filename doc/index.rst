@@ -5,7 +5,7 @@
 
 PySpecKit
 =====================================
-An extensible spectroscopic analysis toolkit for astronomy.
+An `extensible <registration.html>`_ spectroscopic analysis toolkit for astronomy.
 
 If you're just getting started, see the `examples page
 <http://pyspeckit.bitbucket.org/html/examples.html>`_.
