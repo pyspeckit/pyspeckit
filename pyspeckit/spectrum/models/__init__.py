@@ -32,3 +32,4 @@ from n2hp import n2hp_vtau_fitter,n2hp_vtau
 import hcn
 import hyperfine,fitter,model,redshiftedgroup
 import hill5infall
+import radex_modelgrid
