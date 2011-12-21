@@ -1,3 +1,8 @@
+"""
+============
+Cube Fitting
+============
+"""
 import pyspeckit
 import pyfits
 import numpy as np
@@ -11,9 +16,47 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
 
     Takes a cube and error map (error will be computed naively if not given)
     and computes moments then fits for each spectrum in the cube.  It then
-    saves the fitted parameters to a reasonably descriptive output file.
+    saves the fitted parameters to a reasonably descriptive output file whose
+    header will look like ::
 
-    **kwargs are passed to pyspeckit.Spectrum.specfit
+        PLANE1  = 'amplitude'
+        PLANE2  = 'velocity'
+        PLANE3  = 'sigma'
+        PLANE4  = 'err_amplitude'
+        PLANE5  = 'err_velocity'
+        PLANE6  = 'err_sigma'
+        PLANE7  = 'integral'
+        PLANE8  = 'integral_error'
+        CDELT3  = 1
+        CTYPE3  = 'FITPAR'
+        CRVAL3  = 0
+        CRPIX3  = 1
+
+    Parameters:
+
+    *errfilename* [ None | string name of .fits file ]
+        A two-dimensional error map to use for computing signal-to-noise cuts
+
+    *scale_keyword* [ None | Char ]
+        Keyword to pass to the data cube loader - multiplies cube by the number
+        indexed by this header kwarg if it exists.  e.g., if your cube is in
+        T_A units and you want T_A*
+
+    *vheight* [ bool ]
+        Is there a background to be fit?  Used in moment computation
+
+    *verbose* [ bool ] 
+    *verbose_level* [ int ]
+        How loud will the fitting procedure be?  Passed to momenteach and fiteach
+    
+    *signal_cut* [ float ] 
+        Signal-to-Noise ratio minimum.  Spectra with a peak below this S/N ratio
+        will not be fit and will be left blank in the output fit parameter cube
+
+    *clobber* [ bool ] 
+        Overwrite parameter .fits cube if it exists?
+
+    `kwargs` are passed to pyspeckit.Spectrum.specfit
     """
 
     # Load the spectrum

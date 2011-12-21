@@ -54,7 +54,10 @@ Table of Contents:
 .. toctree::
    :maxdepth: 2
 
+   wrappers
    spectrum
    cubes
    models
+   registration
+   readers
 
