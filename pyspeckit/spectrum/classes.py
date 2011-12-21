@@ -135,6 +135,7 @@ class Spectrum(object):
         self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         self.speclines = speclines
+        self._sort()
 
         if doplot: self.plotter(**plotkwargs)
 
@@ -156,6 +157,15 @@ class Spectrum(object):
         Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
         self.Registry = Registry
 
+    def _sort(self):
+        """
+        Make sure X axis is monotonic.  
+        """
+        if self.xarr.dxarr.min() < 0:
+            argsort = np.argsort(self.xarr)
+            self.data = self.data[argsort]
+            self.error = self.error[argsort]
+            self.xarr = self.xarr[argsort]
         
     def write(self,filename,type=None,**kwargs):
         """
