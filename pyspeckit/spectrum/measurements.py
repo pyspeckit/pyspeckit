@@ -14,17 +14,20 @@ spec.measure()
 cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
-    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None, miscline = None, misctol = 10, ignore = None,
-        derive = True):
+    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm =
+            None, miscline = None, misctol = 10, ignore = None, derive = True):
         """
-        This can be called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
-        Just do: spec.measure(z, xunits, fluxnorm)
+        This can be called after a fit is run.  It will inherit the specfit
+        object and derive as much as it can from modelpars.  Just do:
+        spec.measure(z, xunits, fluxnorm)
         
-        Notes: If z (redshift) or d (distance) are present, we can compute ingrated line luminosities rather than just fluxes.
-            Provide distance in cm.
+        Notes: If z (redshift) or d (distance) are present, we can compute
+        integrated line luminosities rather than just fluxes.  Provide distance
+        in cm.
         
-        Currently will only work with Gaussians. to generalize:
-            1. make sure we manipulate modelpars correctly, i.e. read in entries corresponding to wavelength/frequency/whatever correctly.
+        Currently will only work with Gaussians.  To generalize:
+            1. make sure we manipulate modelpars correctly, i.e. read in
+            entries corresponding to wavelength/frequency/whatever correctly.
             
         misclines = dictionary
             miscline = {{'name': H_alpha', 'wavelength': 6565, 'etc': 0}, {}}

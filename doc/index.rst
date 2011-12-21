@@ -41,6 +41,18 @@ Classes
     <http://astro.dur.ac.uk/~pdraper/gaia/gaia.html>`_ in some ways, but with
     less emphasis on speed and much greater emphasis on spectral line fitting.
 
+Features
+========
+.. toctree::
+
+* :doc:`baseline` describes baseline & continuum fitting.
+* :doc:`fitting` describes the general process of model fitting.
+* :doc:`measurements` is a toolkit for performing EQW, column, and other measurements...
+* :doc:`units` contains the all-important
+  :class:`~pyspeckit.units.SpectroscopicAxis` class that is used to deal with
+  coordinate transformations
+* :doc:`registration` describes the extensible qualities of pyspeckit
+
 
 Indices and tables
 ==================

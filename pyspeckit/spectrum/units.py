@@ -3,16 +3,17 @@
 Units and SpectroscopicAxes
 ===========================
 
-.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
-Affiliation: University of Colorado at Boulder
-Created on March 9th, 2011
-
 Unit parsing and conversion tool.  
 The SpectroscopicAxis class is meant to deal with unit conversion internally
 
-Open Question: Are there other FITS-valid projection types, unit types, etc. that should be included?
+Open Questions: Are there other FITS-valid projection types, unit types, etc.
+    that should be included?
     What about for other fields (e.g., wavenumber?)
 """
+#.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+#Affiliation: University of Colorado at Boulder
+#Created on March 9th, 2011
+
 
 import numpy as np
 
@@ -445,7 +446,8 @@ class SpectroscopicAxis(np.ndarray):
     def convert_to_unit(self, unit, **kwargs):
         """
         Return the X-array in the specified units without changing it
-        (similar to convert_to_unit
+        Uses as_unit for the conversion, but changes internal values rather
+        than returning them.
         """
         self[:] = self.as_unit(unit, **kwargs)
         
@@ -457,12 +459,28 @@ class SpectroscopicAxis(np.ndarray):
         self.units = unit
         self.dxarr = self[1:]-self[:-1]
 
-    def as_unit(self,unit,frame=None, quiet=True,
-            center_frequency=None, center_frequency_units=None, **kwargs):
+    def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
+            center_frequency_units=None, **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
         to convert between frequency/velocity/wavelength and simply change the 
         units of the X axis.  Frame conversion is... not necessarily implemented.
+
+        *unit* [ string ] 
+            What unit do you want to 'view' the array as?
+
+        *frame* [ None ]
+            NOT IMPLEMENTED.  When it is, it will allow you to convert between
+            LSR, topocentric, heliocentric, rest, redshifted, and whatever other
+            frames we can come up with.  Right now the main holdup is finding a 
+            nice python interface to an LSR velocity calculator... and motivation.
+ 
+        *center_frequency* [ None | float ]
+        *center_frequency_units* [ None | string ]
+            If converting between velocity and any other spectroscopic type,
+            need to specify the central frequency around which that velocity is
+            calculated.
+            I think this can also accept wavelengths....
         """
 
         if unit is None:
