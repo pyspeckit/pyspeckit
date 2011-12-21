@@ -188,18 +188,22 @@ class Spectrum(object):
         xtype = Table.data.dtype.names[Table.xaxcol]
         if xtype in units.xtype_dict.values():
             self.xarr.xtype = xtype
+            self.xarr.units = Table.columns[xtype].unit
         elif xtype in units.xtype_dict:
             self.xarr.xtype = units.xtype_dict[xtype]
+            self.xarr.units = Table.columns[self.xarr.xtype].unit
         else:
-            raise ValueError("Invalid xtype in text header")
-        self.xarr.xunits = Table.columns[xtype].unit
+            print "Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels"
+            self.xarr.xtype = 'pixels'
+            self.xarr.units = 'none'
+            #raise ValueError("Invalid xtype in text header")
         self.ytype = Table.data.dtype.names[Table.datacol]
         self.units = Table.columns[self.ytype].unit
         self.header = pyfits.Header()
         self._update_header()
 
     def _update_header(self):
-        self.header.update('CUNIT1',self.xarr.xunits)
+        self.header.update('CUNIT1',self.xarr.units)
         self.header.update('CTYPE1',self.xarr.xtype)
         self.header.update('BUNIT',self.units)
         self.header.update('BTYPE',self.ytype)

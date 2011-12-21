@@ -148,7 +148,7 @@ just sums self.model</p>
 <h3>Module API<a class="headerlink" href="#module-api" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.ammonia.ammonia">
-<tt class="descclassname">pyspeckit.spectrum.models.ammonia.</tt><tt class="descname">ammonia</tt><big>(</big><em>xarr</em>, <em>tkin=20</em>, <em>tex=None</em>, <em>ntot=100000000000000.0</em>, <em>width=1</em>, <em>xoff_v=0.0</em>, <em>fortho=1.0</em>, <em>tau11=None</em>, <em>fillingfraction=None</em>, <em>return_tau=False</em>, <em>thin=False</em>, <em>verbose=False</em>, <em>return_components=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.ammonia.ammonia" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.ammonia.</tt><tt class="descname">ammonia</tt><big>(</big><em>xarr</em>, <em>tkin=20</em>, <em>tex=None</em>, <em>ntot=100000000000000.0</em>, <em>width=1</em>, <em>xoff_v=0.0</em>, <em>fortho=0.0</em>, <em>tau=None</em>, <em>fillingfraction=None</em>, <em>return_tau=False</em>, <em>thin=False</em>, <em>verbose=False</em>, <em>return_components=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.ammonia.ammonia" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a model Ammonia spectrum based on input temperatures, column, and
 gaussian parameters</p>
 <p>ntot can be specified as a column density (e.g., 10^15) or a log-column-density (e.g., 15)</p>
@@ -156,13 +156,16 @@ gaussian parameters</p>
 <dt>tex can be specified or can be assumed LTE if unspecified, if tex&gt;tkin, or if &#8220;thin&#8221;</dt>
 <dd>is specified</dd>
 <dt>&#8220;thin&#8221; uses a different parametetrization and requires only the optical depth, width, offset,</dt>
-<dd>and tkin to be specified</dd>
+<dd>and tkin to be specified.  In the &#8216;thin&#8217; approximation, tex is not used in computation of
+the partition function - LTE is implicitly assumed</dd>
 </dl>
-<p>If tau11 is specified, ntot is NOT fit but is set to a fixed value
+<p>If tau is specified, ntot is NOT fit but is set to a fixed value
 fillingfraction is an arbitrary scaling factor to apply to the model
 fortho is the ortho/(ortho+para) fraction.  The default is to assume all ortho.
 xoff_v is the velocity offset in km/s</p>
-<p>(not implemented) if tau11 is specified, ntot is ignored</p>
+<p>tau refers to the optical depth of the 1-1 line.  The optical depths of the
+other lines are fixed relative to tau_oneone</p>
+<p>(not implemented) if tau is specified, ntot is ignored</p>
 </dd></dl>
 
 </div>
@@ -303,7 +306,7 @@ strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x106266410&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x1062b5e60&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>

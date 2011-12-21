@@ -7,16 +7,29 @@ PySpecKit
 =====================================
 An extensible spectroscopic analysis toolkit for astronomy.
 
+If you're just getting started, see the `examples page
+<http://pyspeckit.bitbucket.org/html/examples.html>`_.
+
+Supported file types and their formats:
+
+    * :doc:`fitsfiles` 
+    * :doc:`txtfiles` 
+    * :doc:`hdf5files` 
+
+Classes
+=====================================
+
 * :doc:`spectrum` can read a variety of individual spectra types
 
   * :class:`~pyspeckit.spectrum.Spectrum` The Spectrum class, which is the core
-      of pyspeckit.  The __init__ procedure opens a spectrum file.
-  * :class:`~pyspeckit.spectrum.Spectra` A group of Spectrums.  Generally for use
-      when you have multiple wavelength observations you want to stitch together
-      (e.g., two filterbanks on a heterodyne system, or the red/blue spectra from a
-      multi-band spectrometer like the Double Imaging Spectrograph)
-  * :class:`~pyspeckit.spectrum.ObsBlock` An Observation Block - multiple spectra
-      of different objects or different times covering the same wavelength range
+    of pyspeckit.  The __init__ procedure opens a spectrum file.
+  * :class:`~pyspeckit.spectrum.Spectra` A group of Spectrums.  Generally for
+    when you have multiple wavelength observations you want to stitch together
+    (e.g., two filterbanks on a heterodyne system, or the red/blue spectra from
+    a multi-band spectrometer like the Double Imaging Spectrograph)
+  * :class:`~pyspeckit.spectrum.ObsBlock` An Observation Block - multiple
+    spectra of different objects or different times covering the same
+    wavelength range
 
 * :doc:`cubes` is used to deal with data cubes and has functionality similar to
   `GAIA <http://astro.dur.ac.uk/~pdraper/gaia/gaia.html>`_ and `ds9

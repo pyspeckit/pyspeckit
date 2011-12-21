@@ -64,34 +64,33 @@
   <div class="section" id="pyspeckit">
 <h1>PySpecKit<a class="headerlink" href="#pyspeckit" title="Permalink to this headline">¶</a></h1>
 <p>An extensible spectroscopic analysis toolkit for astronomy.</p>
-<ul>
-<li><p class="first"><a class="reference internal" href="spectrum.html"><em>spectrum</em></a> can read a variety of individual spectra types</p>
-<ul>
-<li><dl class="first docutils">
-<dt><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectrum" title="pyspeckit.spectrum.Spectrum"><tt class="xref py py-class docutils literal"><span class="pre">Spectrum</span></tt></a> The Spectrum class, which is the core</dt>
-<dd><p class="first last">of pyspeckit.  The __init__ procedure opens a spectrum file.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectra" title="pyspeckit.spectrum.Spectra"><tt class="xref py py-class docutils literal"><span class="pre">Spectra</span></tt></a> A group of Spectrums.  Generally for use</dt>
-<dd><p class="first last">when you have multiple wavelength observations you want to stitch together
-(e.g., two filterbanks on a heterodyne system, or the red/blue spectra from a
-multi-band spectrometer like the Double Imaging Spectrograph)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.ObsBlock" title="pyspeckit.spectrum.ObsBlock"><tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt></a> An Observation Block - multiple spectra</dt>
-<dd><p class="first last">of different objects or different times covering the same wavelength range</p>
-</dd>
-</dl>
-</li>
+<p>If you&#8217;re just getting started, see the <a class="reference external" href="http://pyspeckit.bitbucket.org/html/examples.html">examples page</a>.</p>
+<p>Supported file types and their formats:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="fitsfiles.html"><em>FITS</em></a></li>
+<li><a class="reference internal" href="txtfiles.html"><em>Plain Text</em></a></li>
+<li><a class="reference internal" href="hdf5files.html"><em>hdf5</em></a></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="classes">
+<h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="spectrum.html"><em>spectrum</em></a> can read a variety of individual spectra types<ul>
+<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectrum" title="pyspeckit.spectrum.Spectrum"><tt class="xref py py-class docutils literal"><span class="pre">Spectrum</span></tt></a> The Spectrum class, which is the core
+of pyspeckit.  The __init__ procedure opens a spectrum file.</li>
+<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectra" title="pyspeckit.spectrum.Spectra"><tt class="xref py py-class docutils literal"><span class="pre">Spectra</span></tt></a> A group of Spectrums.  Generally for
+when you have multiple wavelength observations you want to stitch together
+(e.g., two filterbanks on a heterodyne system, or the red/blue spectra from
+a multi-band spectrometer like the Double Imaging Spectrograph)</li>
+<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.ObsBlock" title="pyspeckit.spectrum.ObsBlock"><tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt></a> An Observation Block - multiple
+spectra of different objects or different times covering the same
+wavelength range</li>
 </ul>
 </li>
-<li><p class="first"><a class="reference internal" href="cubes.html"><em>cubes</em></a> is used to deal with data cubes and has functionality similar to
-<a class="reference external" href="http://astro.dur.ac.uk/~pdraper/gaia/gaia.html">GAIA</a> and <a class="reference external" href="http://hea-www.harvard.edu/RD/ds9/">ds9</a>.</p>
-<ul class="simple">
+<li><a class="reference internal" href="cubes.html"><em>cubes</em></a> is used to deal with data cubes and has functionality similar to
+<a class="reference external" href="http://astro.dur.ac.uk/~pdraper/gaia/gaia.html">GAIA</a> and <a class="reference external" href="http://hea-www.harvard.edu/RD/ds9/">ds9</a>.<ul>
 <li><a class="reference internal" href="cubes.html#pyspeckit.cubes.Cube" title="pyspeckit.cubes.Cube"><tt class="xref py py-class docutils literal"><span class="pre">Cube</span></tt></a> A Cube of Spectra.  Has features to collapse
 the cube along the spectral axis and fit spectra to each element of the
 cube.  Is meant to replicate <a class="reference external" href="http://astro.dur.ac.uk/~pdraper/gaia/gaia.html">Starlink&#8217;s GAIA</a> in some ways, but with
