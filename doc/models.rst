@@ -15,7 +15,8 @@ your fitting code must deal with units internally::
             parnames=['tau', 'v_lsr',  'v_infall',  'sigma', 'tpeak'], 
             parlimited=[(True,False),(False,False),(True,False),(True,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
-            shortvarnames=("\\tau","v_{lsr}","v_{infall}","\\sigma","T_{peak}"), # specify the parameter names (TeX is OK)
+            # specify the parameter names (TeX is OK)
+            shortvarnames=("\\tau","v_{lsr}","v_{infall}","\\sigma","T_{peak}"), 
             fitunits='Hz' )
 
 

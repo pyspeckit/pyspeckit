@@ -1,0 +1,6 @@
+Classes
+=======
+.. toctree::
+
+    spectrum
+    cubes

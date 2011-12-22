@@ -43,7 +43,6 @@ Classes
 
 Features
 ========
-.. toctree::
 
 * :doc:`baseline` describes baseline & continuum fitting.
 * :doc:`fitting` describes the general process of model fitting.
@@ -67,9 +66,10 @@ Table of Contents:
    :maxdepth: 2
 
    wrappers
-   spectrum
-   cubes
+   features
+   classes
    models
    registration
    readers
+
 
