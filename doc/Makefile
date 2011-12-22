@@ -105,6 +105,9 @@ latexpdf:
 	@echo "Running LaTeX files through pdflatex..."
 	make -C $(BUILDDIR)/latex all-pdf
 	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
+	@echo "******** THIS HAS BEEN ADDED BY AG *******"
+	cp -R $(BUILDDIR)/latex/pyspeckit.pdf ../html/sphinx/
+	@echo "Copied $(BUILDDIR)/latex/pyspeckit.pdf to ../html/sphinx/"
 
 text:
 	$(SPHINXBUILD) -b text $(ALLSPHINXOPTS) $(BUILDDIR)/text

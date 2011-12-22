@@ -62,6 +62,7 @@ Features
    :hidden:
 
    Index <self>
+   install
    Models & Fitting <models>
    Base Classes <classes>
    Class Features <features>
