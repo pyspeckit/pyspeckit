@@ -37,7 +37,7 @@ spdict1,spectra1 = pyspeckit.wrappers.fitnh3.fitnh3tkin(filenames,crop=[0,80],tk
     <img align=center width=800 src=images/nh3_multiline_fit.png title="Then all 4 lines are simultaneously fit.  Even upper limits on the 4-4 line can provide helpful contraints on the model">
     </td></tr>
     </table>
-    <center><p class=navbar><nobr>[&nbsp;<a class=navbar href="../index.html">Home</a>&nbsp;]</nobr><nobr>[&nbsp;<a class=navbar href="examples.html">Examples</a>&nbsp;]</nobr>
+    <?php include 'navbar.php';?>
     </center>
     
   </body>

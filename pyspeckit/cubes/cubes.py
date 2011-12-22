@@ -1,18 +1,3 @@
-"""
-=====
-Cubes
-=====
-
-Tools to deal with spectroscopic data cubes.  
-
-
-Many features in Cubes require additional packages:
-    smoothing - requires `agpy <https://agpy.googlecode.com/svn/trunk>`_'s smooth and parallel_map routines
-    `coords <https://www.stsci.edu/svn/ssb/astrolib/trunk/coords>`_
-    `pyregion <git://github.com/leejjoon/pyregion.git>`_
-    `pywcs <git://github.com/astropy/astropy.git>`_
-    
-"""
 from numpy import sqrt,repeat,indices,newaxis,pi,cos,sin,array,mean,sum,nansum
 from math import acos,atan2,tan
 import numpy

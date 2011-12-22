@@ -1,5 +1,6 @@
 Classes
 =======
 
-.. include:: spectrum.rst
-.. include:: cubes.rst
+.. toctree::
+     Spectrum, Spectra, and ObsBlocks <spectrum>
+     SpectroscopicCube and its supporting functions <cubes>

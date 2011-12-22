@@ -14,7 +14,7 @@
     <table width=800>
         <tr><td>
                 <br><br>
-                <h3>Radio Fitting: NH<sub>3</sub> example</h3>
+                <h3>Radio Fitting: N<sub>2</sub>H+ example</h3>
             <code class="prettyprint">
 import pyspeckit
 
@@ -33,14 +33,12 @@ spdict1,spectra1 = pyspeckit.wrappers.fitnh3.fitnh3tkin(filenames,crop=[0,80],tk
         </code>
     </td></tr>
     <tr><td>
-    <img align=center width=800 src=images/nh3_22_velocityguess.png title="The 2-2 transition is used to guess the central velocity and width via gaussian fitting because its hyperfine lines are weaker">
-    <img align=center width=800 src=images/nh3_multiline_fit.png title="Then all 4 lines are simultaneously fit.  Even upper limits on the 4-4 line can provide helpful contraints on the model">
+    <img align=center width=800 src=images/n2hp_ophA_fit.png title="Fit to the 15 hyperfine components of N2H+ simultaneously.  The (0)'s indicate that this is the 0'th velocity component being fit">
     </td></tr>
     </table>
-    <center><p class=navbar><nobr>[&nbsp;<a class=navbar href="../index.html">Home</a>&nbsp;]</nobr><nobr>[&nbsp;<a class=navbar href="examples.html">Examples</a>&nbsp;]</nobr>
+    <?php include 'navbar.php';?>
     </center>
-    
-  </body>
+
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
@@ -54,5 +52,7 @@ spdict1,spectra1 = pyspeckit.wrappers.fitnh3.fitnh3tkin(filenames,crop=[0,80],tk
   })();
 
 </script>
-  
+    
+    
+  </body>
 </html>

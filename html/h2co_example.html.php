@@ -147,7 +147,7 @@ sp2.specfit.plot_fit(show_components=True)
     <img align=center width=800 src=images/h2co_22_radexlvgfit.png title="Both transitions are fit simultaneously using a RADEX model.  The input (fitted) parameters are therefore density, column density, width, and velocity.">
     </td></tr>
     </table>
-    <center><p class=navbar><nobr>[&nbsp;<a class=navbar href="../index.html">Home</a>&nbsp;]</nobr><nobr>[&nbsp;<a class=navbar href="examples.html">Examples</a>&nbsp;]</nobr>
+    <?php include 'navbar.php';?>
     </center>
     
   </body>

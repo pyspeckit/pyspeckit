@@ -75,7 +75,7 @@ print 'The redshift, as derived by the line shift, is z = %g' % ((SIIb_obs / SII
     <img align=center width=800 src=images/doublet_example_SII.png title="">
     </td></tr>
     </table>
-    <center><p class=navbar><nobr>[&nbsp;<a class=navbar href="../index.html">Home</a>&nbsp;]</nobr><nobr>[&nbsp;<a class=navbar href="examples.html">Examples</a>&nbsp;]</nobr>
+    <?php include 'navbar.php';?>
     </center>
     
   </body>

@@ -92,7 +92,7 @@ H_alpha 4.89658218328e-14 1.25519781099e-15 11.0611083985 5.76905831251e+41 <br>
     <img align=center width=800 src=images/sdss_fit_example.png title="Both transitions are fit simultaneously using a RADEX model.  The input (fitted) parameters are therefore density, column density, width, and velocity.">
     </td></tr>
     </table>
-    <center><p class=navbar><nobr>[&nbsp;<a class=navbar href="../index.html">Home</a>&nbsp;]</nobr><nobr>[&nbsp;<a class=navbar href="examples.html">Examples</a>&nbsp;]</nobr>
+    <?php include 'navbar.php';?>
     </center>
     
   </body>
