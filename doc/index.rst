@@ -10,11 +10,15 @@ An `extensible <registration.html>`_ spectroscopic analysis toolkit for astronom
 If you're just getting started, see the `examples page
 <../examples.html>`_.
 
+`Download <../../get/tip.tar.gz>`_ or see :doc:`install`
+
+
 Supported file types and their formats:
 
     * :doc:`fitsfiles` 
     * :doc:`txtfiles` 
     * :doc:`hdf5files` 
+
 
 Classes
 =====================================
