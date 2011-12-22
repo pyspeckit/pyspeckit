@@ -454,6 +454,10 @@ class Spectra(Spectrum):
     operated on just like any Spectrum object, incuding fitting.  Useful for
     fitting multiple lines on non-continguous axes simultaneously.  Be wary of
     plotting these though...
+
+    Can be indexed like python lists.  
+
+    X array is forcibly sorted in increasing order
     """
 
     def __init__(self,speclist,xunits='GHz',**kwargs):
@@ -516,15 +520,6 @@ class Spectra(Spectrum):
 
     def __len__(self): return len(self.speclist)
 
-    def _sort(self):
-        """ Sort the data in order of increasing X (could be decreasing, but
-        must be monotonic for plotting reasons) """
-
-        indices = self.xarr.argsort()
-        self.xarr = self.xarr[indices]
-        self.data = self.data[indices]
-        self.error = self.error[indices]
-
     def smooth(self,smooth,**kwargs):
         """
         Smooth the spectrum by factor "smooth".  Options are defined in sm.smooth
@@ -582,6 +577,8 @@ class ObsBlock(Spectra):
 
     Consists of multiple spectra with a shared X-axis.  Intended to hold groups
     of observations of the same object in the same setup for later averaging.
+
+    ObsBlocks can be indexed like python lists.  
     """
 
     def __init__(self, speclist, xtype='frequency', xarr=None, force=False, **kwargs):

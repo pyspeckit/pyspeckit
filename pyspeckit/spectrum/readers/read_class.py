@@ -1,3 +1,10 @@
+"""
+------------------------
+GILDAS CLASS file reader
+------------------------
+
+Read a CLASS file into an :class:`pyspeckit.spectrum.ObsBlock`
+"""
 import pyfits
 import numpy
 import struct
@@ -12,6 +19,7 @@ def print_timing(func):
         t2 = time.time()
         print '%s took %0.5g s' % (func.func_name, (t2-t1))
         return res
+    wrapper.__doc__ = func.__doc__
     return wrapper
 
 
@@ -240,6 +248,10 @@ def read_obshead(f,verbose=False):
 
 @print_timing
 def read_class(filename,  DEBUG=False):
+    """
+    A hacked-together method to read a binary CLASS file.  It is strongly dependent on the incomplete
+    `GILDAS CLASS file type Specification <http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html>`_
+    """
     f = open(filename,'rb')
     filelen = len(f.read())
     f.seek(0)
@@ -360,6 +372,9 @@ def read_class(filename,  DEBUG=False):
 
 from .. import units
 def make_axis(header):
+    """
+    Create a :class:`pyspeckit.spectrum.units.SpectroscopicAxis` from the CLASS "header"
+    """
 
     rest_frequency = header.get('RESTF')
     xunits = 'MHz'

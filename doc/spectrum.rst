@@ -12,13 +12,11 @@ spectrum
 .. autoclass:: Spectra
     :show-inheritance:
     :members:
-    :inherited-members:
     :undoc-members:
 
 .. autoclass:: ObsBlock
     :show-inheritance:
     :members:
-    :inherited-members:
     :undoc-members:
 
 .. automodule:: pyspeckit.spectrum

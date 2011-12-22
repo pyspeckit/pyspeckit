@@ -7,6 +7,7 @@ Readers
     txtfiles
     fitsfiles
     hdf5files
+    classfiles
 
 ..
     .. include:: txtfiles.rst
