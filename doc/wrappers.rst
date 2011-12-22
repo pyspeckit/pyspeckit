@@ -4,8 +4,7 @@ Wrappers
 These are wrappers to simplify some of the more complicated (and even some of
 the simpler) functions in PySpecKit
 
-.. module:: wrappers
-.. currentmodule:: pyspeckit.wrappers
+.. module:: pyspeckit.wrappers
 
 .. automodule:: pyspeckit.wrappers.cube_fit
     :members:

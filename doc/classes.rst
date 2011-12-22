@@ -1,6 +1,5 @@
 Classes
 =======
-.. toctree::
 
-    spectrum
-    cubes
+.. include:: spectrum.rst
+.. include:: cubes.rst

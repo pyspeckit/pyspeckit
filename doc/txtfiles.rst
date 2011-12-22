@@ -1,5 +1,5 @@
 Plain Text
-=====================================
+-------------------------------------
 
 Text files should be of the form::
 
@@ -20,7 +20,7 @@ in ascending order.
 
 
 API
----
+~~~
 
 .. automodule:: pyspeckit.spectrum.readers.txt_reader
     :members:

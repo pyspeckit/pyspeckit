@@ -53,23 +53,13 @@ Features
 * :doc:`registration` describes the extensible qualities of pyspeckit
 
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-Table of Contents:
-------------------
 .. toctree::
    :maxdepth: 2
+   :hidden:
 
-   wrappers
-   features
-   classes
-   models
-   registration
-   readers
-
-
+   Index <self>
+   Models & Fitting <models>
+   Base Classes <classes>
+   Class Features <features>
+   File Readers <readers>
+   High-Level Wrappers <wrappers>

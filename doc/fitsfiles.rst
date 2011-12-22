@@ -1,5 +1,5 @@
 FITS
-=====================================
+-------------------------------------
 
 A minimal header should look like this::
 
@@ -47,7 +47,7 @@ It can be registered using :doc:`registration`: ::
 
 
 API
----
+~~~
 
 .. automodule:: pyspeckit.spectrum.readers.fits_reader
     :members:

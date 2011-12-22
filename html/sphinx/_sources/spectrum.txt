@@ -1,5 +1,5 @@
 spectrum
-==================
+------------------
 
 .. currentmodule:: pyspeckit.spectrum
 .. automodule:: pyspeckit.spectrum

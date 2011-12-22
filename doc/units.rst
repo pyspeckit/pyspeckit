@@ -1,5 +1,5 @@
 Units 
-=============
+-------------
 .. automodule:: pyspeckit.spectrum.units
 .. autoclass:: SpectroscopicAxis
     :show-inheritance:

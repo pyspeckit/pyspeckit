@@ -1,7 +1,6 @@
-cubes
-==================
+Cubes
+----------------
 
-.. currentmodule:: pyspeckit.cubes
 .. automodule:: pyspeckit.cubes
 .. autoclass:: Cube
     :show-inheritance:

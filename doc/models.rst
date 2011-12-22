@@ -1,8 +1,7 @@
 Models
 ==================
 
-.. module:: models
-.. currentmodule:: pyspeckit.spectrum.models
+.. module:: pyspeckit.spectrum.models
 
 The generic SpectralModel class is a wrapper for model functions.  A model
 should take in an X-axis and some number of parameters.  In order to declare a

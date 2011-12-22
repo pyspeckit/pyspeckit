@@ -41,6 +41,8 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
+html_sidebars = {'*':['globaltoc.html','localtoc.html','relations.html', 'sourcelink.html', 'searchbox.html']}
+
 # General information about the project.
 project = u'pyspeckit'
 copyright = u'2011, Adam Ginsburg and Jordan Mirocha'

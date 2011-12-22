@@ -1,5 +1,5 @@
 Baseline Fitting
-================
+----------------
 
 .. automodule:: pyspeckit.spectrum.baseline
 .. autoclass:: Baseline

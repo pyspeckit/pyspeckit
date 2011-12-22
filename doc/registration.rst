@@ -1,5 +1,5 @@
 Registration
-============
+------------
 
 PySpecKit is made extensible by allowing user-registered modules for reading,
 writing, and fitting data.
@@ -32,7 +32,7 @@ the semi-private method ::
 
 
 API
----
+~~~
 
 .. automodule:: pyspeckit.spectrum.__init__
     :members:
