@@ -12,14 +12,17 @@ def gaussian(x,A,dx,w, return_components=False):
     
     """
     x = numpy.array(x) # make sure xarr is no longer a spectroscopic axis
-    return A*numpy.exp(-(x-dx)**2/(2*w**2))
+    return A*numpy.exp(-(x-dx)**2/(2.0*w**2))
 
 def gaussian_fitter(multisingle='multi'):
 
-    return model.SpectralModel(gaussian, 3,
+    myclass =  model.SpectralModel(gaussian, 3,
             parnames=['amplitude','shift','width'], 
             parlimited=[(False,False),(False,False),(True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma'),
             multisingle=multisingle,
             )
+    myclass.__name__ = "gaussian"
+    
+    return myclass

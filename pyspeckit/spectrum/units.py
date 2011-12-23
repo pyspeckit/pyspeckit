@@ -163,11 +163,12 @@ frame_dict = {
         'WAVE':'rest',
         'wavelength':'rest',
         'lambda':'rest',
+        'redshift':'obs'
         }
 
 frame_type_dict = {'LSRK':'velocity','LSRD':'velocity','LSR':'velocity',
         'heliocentric':'velocity','topocentric':'velocity','geocentric':'velocity',
-        'rest':'frequency',}
+        'rest':'frequency','obs':'frequency','observed':'frequency'}
 
 fits_frame = {'rest':'REST','LSRK':'-LSR','heliocentric':'-HEL','geocentric':'-GEO'}
 fits_specsys = {'rest':'REST','LSRK':'LSRK','LSRD':'LSRD','heliocentric':'HEL','geocentric':'GEO'}
@@ -238,7 +239,7 @@ class SpectroscopicAxis(np.ndarray):
         else:
             subarr.velocity_convention = 'radio' # default
 
-        subarr.dxarr = subarr[1:]-subarr[:-1]
+        subarr.dxarr = np.diff(subarr)
 
         return subarr
 
@@ -460,7 +461,7 @@ class SpectroscopicAxis(np.ndarray):
             self.xtype = "Frequency"
 
         self.units = unit
-        self.dxarr = self[1:]-self[:-1]
+        self.dxarr = np.diff(self)
 
     def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
             center_frequency_units=None, **kwargs):
@@ -548,12 +549,48 @@ class SpectroscopicAxis(np.ndarray):
 
         return newxarr
 
+    def change_frame(self, frame):
+        """
+        Change velocity frame
+        """
+        if self.frame == frame:
+            return
+        
+        if frame in frame_type_dict:
+            self[:] = self.in_frame(frame)
+            self.dxarr = np.diff(self)
+            self.frame = frame
+
+    def in_frame(self, frame):
+        """
+        Return a shifted xaxis
+        """
+        if self.frame in ('obs','observed') and frame in ('rest',):
+            if self.redshift is not None:
+                return self/(1.0+self.redshift)
+            else:
+                print "WARNING: Redshift is not specified, so no shift will be done."
+        elif self.frame in ('rest',) and frame in ('obs','observed'):
+            if self.redshift is not None:
+                return self*(1.0+self.redshift)
+            else:
+                print "WARNING: Redshift is not specified, so no shift will be done."
+        else:
+            print "Frame shift from %s to %s is not defined or implemented." % (self.frame, frame)
+            return self
+
+    def x_in_frame(self, xx, frame):
+        """
+        Return the value 'x' shifted to the target frame
+        """
+        return self.in_frame(frame)[self.x_to_pix(xx)]
+
     def cdelt(self, tolerance=1e-8):
         """
         Return the channel spacing if channels are linear
         """
         if not hasattr(self,'dxarr'): # if cropping happens...
-            self.dxarr = self[1:]-self[:-1]
+            self.dxarr = np.diff(self)
         if abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
             return self.dxarr.mean().flat[0]
 
@@ -561,7 +598,7 @@ class SpectroscopicAxis(np.ndarray):
         """
         Generate a set of WCS parameters for the X-array
         """
-        self.dxarr = self[1:]-self[:-1]
+        self.dxarr = np.diff(self)
 
         if self.wcshead is None:
             self.wcshead = {}

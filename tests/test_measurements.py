@@ -27,6 +27,8 @@ broad = 30.
 
 # Initialize spectrum object
 spec = pyspeckit.Spectrum('sample_sdss.txt')
+spec.units = 'erg s^{-1} cm^{-2} \\AA^{-1}'
+spec.xarr.units='angstroms'
 
 # H-alpha
 spec.specfit.selectregion(xmin = Halpha - 5, xmax = Halpha + 5)
@@ -36,8 +38,9 @@ ampHa = np.max(spec.data[spec.specfit.gx1:spec.specfit.gx2])
 spec.specfit.selectregion(xmin = SIIa - 20, xmax = SIIb + 20)
 smallamp = np.max(spec.data[spec.specfit.gx1:spec.specfit.gx2])    
 
-spec.specfit(guesses = [smallamp, SIIa, narrow, smallamp, SIIb, narrow], 
-    tied = ['', '', 'p[-1]', '', 'p[1] + {0}'.format(SIIb_off), ''], negamp = False, quiet = True, multifit = True)
+spec.specfit(guesses = [smallamp, SIIa, narrow, smallamp, SIIb, narrow],
+        tied=['', '', 'p[-1]', '', 'p[1] + {0}'.format(SIIb_off), ''],
+        negamp=False, quiet=True, multifit=True, show_components=True)
     
 ampSIIa, lamSIIa, sigmaSII, ampSIIb, lamSIIb, sigmaSII = spec.specfit.modelpars
 
@@ -75,8 +78,9 @@ for i, element in enumerate(guesses):
 # Plot, and do final fit
 spec.plotter(xmin = NIIa - 100, xmax = SIIb + 30)
 
-spec.specfit(guesses = guesses, tied = tied, fixed = fixed, negamp = False,
-    limitedmin = lmin, limitedmax = lmax, minpars = minp, maxpars = maxp)
+spec.specfit(guesses=guesses, tied=tied, fixed=fixed, negamp=False,
+        limitedmin=lmin, limitedmax=lmax, minpars=minp, maxpars=maxp,
+        show_components=True)
     
 guesses.extend([50, Halpha * opz, 50])
 tied.extend(['', 'p[4]', ''])
@@ -99,10 +103,11 @@ lmax.extend([False, False, False])
 minp.extend([0, 0, 0]) 
 maxp.extend([0, 0, 0])                                 
 
-spec.plotter(xmin = NIIa - 100, xmax = SIIb + 30)
+spec.plotter(xmin=NIIa - 100, xmax=SIIb + 30)
 
-spec.specfit(guesses = guesses, tied = tied, fixed = fixed, negamp = False,
-    limitedmin = lmin, limitedmax = lmax, minpars = minp, maxpars = maxp, annotate = False)
+spec.specfit(guesses=guesses, tied=tied, fixed=fixed, negamp=False,
+    limitedmin=lmin, limitedmax=lmax, minpars=minp, maxpars=maxp, annotate=False,
+    show_components=True)
     
 spec.plotter.refresh()
 

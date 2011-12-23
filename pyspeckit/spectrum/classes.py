@@ -264,12 +264,13 @@ class Spectrum(object):
         else:
             self.specname = ''
             
-    def measure(self, z=None, d=None, fluxnorm=None, miscline=None, misctol=None, ignore=None, derive=True):
+    def measure(self, z=None, d=None, fluxnorm=None, miscline=None, misctol=None, ignore=None, derive=True, **kwargs):
         """
         Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!
         """
-        self.measurements = measurements.Measurements(self, z = z, d = d, fluxnorm = fluxnorm, miscline = miscline, 
-            misctol = misctol, ignore = ignore, derive = derive)                
+        self.measurements=measurements.Measurements(self, z=z, d=d,
+                fluxnorm=fluxnorm, miscline=miscline, misctol=misctol,
+                ignore=ignore, derive=derive, **kwargs)
 
     def crop(self, x1, x2, units=None, **kwargs):
         """

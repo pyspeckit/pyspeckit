@@ -15,7 +15,7 @@ cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
     def __init__(self, Spectrum, z=None, d=None, xunits=None, fluxnorm=None,
-            miscline=None, misctol=10, ignore=None, derive=True):
+            miscline=None, misctol=10, ignore=None, derive=True, debug=False):
         """
         This can be called after a fit is run.  It will inherit the specfit
         object and derive as much as it can from modelpars.  Just do:
@@ -33,6 +33,7 @@ class Measurements(object):
             miscline = {{'name': H_alpha', 'wavelength': 6565, 'etc': 0}, {}}
             
         """
+        self.debug = debug
                     
         # Inherit specfit object    
         self.specfit = Spectrum.specfit
@@ -109,7 +110,8 @@ class Measurements(object):
             multi = False
 
         # need to account for redshift if self.redshift is set
-        refpos = self.refpos * (1.0+self.redshift)
+        # WRONG! Assume REST frame, do shifting elsewhere...
+        refpos = self.refpos #* (1.0+self.redshift)
                     
         condition = (refpos >= 0.9 * min(self.obspos)) & (refpos <= 1.1 * max(self.obspos))   # Speeds things up
         refpos = refpos[condition]
@@ -181,6 +183,9 @@ class Measurements(object):
         """            
         
         for line in self.lines.keys():
+
+            if self.debug:
+                print "Computing parameters for line %s" % line
             
             self.lines[line]['fwhm'] = self.compute_fwhm(self.lines[line]['modelpars'])
             self.lines[line]['flux'] = self.compute_flux(self.lines[line]['modelpars'])
@@ -276,7 +281,7 @@ class Measurements(object):
             hmax = 0.5 * fmax    
                 
             # current height relative to half max - we want to minimize this function.  Could be asymmetric.
-            f = lambda x: self.specfit.fitter.n_modelfunc(pars)(x) - hmax                   
+            f = lambda x: self.specfit.fitter.n_modelfunc(pars)(np.array([x])) - hmax                   
             xhmax1 = self.bisection(f, start)
             xhmax2 = self.bisection(f, start + (start - xhmax1))
                                         

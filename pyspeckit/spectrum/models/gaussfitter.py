@@ -94,12 +94,9 @@ class gaussian_fitter(model.SpectralModel):
             raise ValueError("Wrong array lengths! dx: %i  sigma: %i  a: %i" % (len(dx),len(sigma),len(a)))
 
         def g(x):
-            if hasattr(x,'__len__'):
-                v = numpy.zeros(len(x))
-            else: # assume scalar
-                v = numpy.zeros(1)
-            for i in range(len(dx)):
-                v += a[i] * numpy.exp( - ( x - dx[i] )**2 / (2.0*sigma[i]**2) )
+            v = numpy.zeros(len(x))
+            for ii in range(len(pars)/3):
+                v += a[ii] * numpy.exp( - ( x - dx[ii] )**2 / (2.0*sigma[ii]**2) )
             return v
         return g
 
@@ -107,7 +104,7 @@ class gaussian_fitter(model.SpectralModel):
             fixed=[False,False,False], limitedmin=[False,False,True],
             limitedmax=[False,False,False], minpars=[0,0,0], maxpars=[0,0,0],
             quiet=True, shh=True, veryverbose=False, negamp=None,
-            tied = ['', '', ''], parinfo=None, **kwargs):
+            tied = ['', '', ''], parinfo=None, debug=False, **kwargs):
         """
         An improvement on onepeakgaussfit.  Lets you fit multiple gaussians.
 
@@ -198,6 +195,9 @@ class gaussian_fitter(model.SpectralModel):
         if veryverbose:
             print "GUESSES: "
             print "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
+
+        if debug: 
+            for p in parinfo: print p
 
         mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
         mpp = mp.params

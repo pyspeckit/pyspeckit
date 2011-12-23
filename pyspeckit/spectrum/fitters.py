@@ -831,4 +831,18 @@ class Specfit(object):
         else:
             return integ
 
+    def shift_pars(self, frame=None):
+        """
+        Shift the velocity / wavelength / frequency of the fitted parameters
+        into a different frame
+
+        Right now this only takes care of redshift and only if redshift is defined.
+        It should be extended to do other things later
+        """
+        for ii,pi in enumerate(self.parinfo):
+            for partype in ('shift','offset','velo'):
+                if partype in str.lower(pi['parname']):
+                    if frame is not None:
+                        self.modelpars[ii] = self.Spectrum.xarr.x_in_frame(self.modelpars[ii], frame)
+
 
