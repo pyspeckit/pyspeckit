@@ -136,5 +136,9 @@ def ConfigDescriptor(f):
                                                                                                                                        
         f(self, *args, **new_kwargs)
             
+    # documentation should be passed on, else sphinx doesn't work and the user can't access the docs
+    decorator.__doc__ = f.__doc__
+    decorator.__defaults__ = f.__defaults__
+    decorator.__repr__ = f.__repr__
     return decorator      
 

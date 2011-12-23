@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Baseline Fitting &mdash; pyspeckit v0.1 documentation</title>
+    <title>Baseline Fitting &mdash; pyspeckit 0.1 documentation</title>
+    
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
@@ -23,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit v0.1 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
     <link rel="up" title="Features" href="features.html" />
     <link rel="next" title="Model Fitting" href="fitting.html" />
     <link rel="prev" title="Features" href="features.html" />
@@ -44,7 +47,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit v0.1 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -63,8 +66,18 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-pyspeckit.spectrum.baseline">
-<span id="baseline-fitting"></span><h1>Baseline Fitting<a class="headerlink" href="#module-pyspeckit.spectrum.baseline" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="baseline-fitting">
+<h1>Baseline Fitting<a class="headerlink" href="#baseline-fitting" title="Permalink to this headline">¶</a></h1>
+<p>There are a number of cool features in baselining that aren&#8217;t well-described
+below, partly due to Sphinx errors as of 12/22/2011.</p>
+<p><tt class="docutils literal"><span class="pre">exclude</span></tt> and <tt class="docutils literal"><span class="pre">include</span></tt> allow you to specify which parts of the spectrum to use
+for baseline fitting.  Enter values as pairs of coordinates.</p>
+<p>Excludefit makes use of an existing fit and excludes all points with signal above
+a (very low) threshold when fitting the baseline.  Going back and forth between
+<tt class="docutils literal"><span class="pre">baseline(excludefit=True)</span></tt> and <tt class="docutils literal"><span class="pre">specfit()</span></tt> is a nice way to iteratively measure
+the baseline &amp; emission/absorption line components.</p>
+<div class="section" id="module-pyspeckit.spectrum.baseline">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-pyspeckit.spectrum.baseline" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pyspeckit.spectrum.baseline.Baseline">
 <em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.baseline.</tt><tt class="descname">Baseline</tt><big>(</big><em>Spectrum</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline" title="Permalink to this definition">¶</a></dt>
@@ -85,6 +98,35 @@ a necessary prerequisite for Equivalent Width measurement.</p>
 <p>As you may observe in the comments on this code, this has been one of the
 buggiest and least adequately tested components of pyspeckit.  Bug reports
 are welcome.</p>
+<dl class="method">
+<dt id="pyspeckit.spectrum.baseline.Baseline.__call__">
+<tt class="descname">__call__</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit and remove a polynomial from the spectrum.  
+It will be saved in the variable &#8220;self.basespec&#8221;
+and the fit parameters will be saved in &#8220;self.order&#8221;</p>
+<p>function baseline(spectrum,xarr=None,xmin=None,xmax=None,order=1,quiet=True,exclude=None):
+Subtract a baseline from a spectrum
+If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum</p>
+<p>exclude is a set of start/end indices to ignore when baseline fitting
+(ignored by setting error to infinite in fitting procedure)</p>
+<p>excludefit creates a mask based on the fitted gaussian model (assuming
+that it has a zero-height) using an exclusion level of (exclusionlevel)
+* the smallest gaussian peak that was fit</p>
+<p>if fit_original is set, &#8220;basespec&#8221; is added back to the spectrum before
+fitting so you can run this procedure multiple times without losing
+information</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.baseline.Baseline.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>Spectrum</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyspeckit.spectrum.baseline.Baseline.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'pyspeckit.spectrum.baseline'</em><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="pyspeckit.spectrum.baseline.Baseline.annotate">
 <tt class="descname">annotate</tt><big>(</big><em>loc='upper left'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.annotate" title="Permalink to this definition">¶</a></dt>
@@ -149,6 +191,7 @@ are welcome.</p>
 </dd></dl>
 
 </div>
+</div>
 
 
           </div>
@@ -192,7 +235,7 @@ are welcome.</p>
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
       Last updated on Dec 22, 2011.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
     <a href="pyspeckit.pdf">PDF version of this document</a>
     <script type="text/javascript">
 

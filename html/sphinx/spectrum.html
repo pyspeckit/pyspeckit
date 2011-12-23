@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>spectrum &mdash; pyspeckit v0.1 documentation</title>
+    <title>spectrum &mdash; pyspeckit 0.1 documentation</title>
+    
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
@@ -23,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit v0.1 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
     <link rel="up" title="Classes" href="classes.html" />
     <link rel="next" title="Cubes" href="cubes.html" />
     <link rel="prev" title="Classes" href="classes.html" />
@@ -44,7 +47,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit v0.1 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -146,12 +149,13 @@ the lines)</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.moments">
 <tt class="descname">moments</tt><big>(</big><em>unit='km/s'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.moments" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Return the moments of the spectrum.  In order to assure that the 1st
-and 2nd moments are meaningful, a &#8216;default&#8217; unit is set.  If unit is not
+<dd><dl class="docutils">
+<dt>Return the moments of the spectrum.  In order to assure that the 1st</dt>
+<dd><p class="first">and 2nd moments are meaningful, a &#8216;default&#8217; unit is set.  If unit is not
 set, will use current unit.</p>
-<p>Returns (height, amplitude, x, width_x)</p>
-</div></blockquote>
+<p class="last">Returns (height, amplitude, x, width_x)</p>
+</dd>
+</dl>
 <p>the gaussian parameters of a 1D distribution by calculating its
 moments.  Depending on the input parameters, will only output 
 a subset of the above.
@@ -205,9 +209,10 @@ if you want to just slice by index</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.smooth">
 <tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.smooth" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>Smooth the spectrum by factor &#8220;smooth&#8221;.  
-sm.smooth doc:</div></blockquote>
+<dd><dl class="docutils">
+<dt>Smooth the spectrum by factor &#8220;smooth&#8221;.  </dt>
+<dd>sm.smooth doc:</dd>
+</dl>
 <p>Smooth and downsample the data array
 smoothtype - &#8216;gaussian&#8217;,&#8217;hanning&#8217;, or &#8216;boxcar&#8217;
 downsample - Downsample the data?
@@ -379,7 +384,7 @@ for example.</dd>
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
       Last updated on Dec 22, 2011.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
     <a href="pyspeckit.pdf">PDF version of this document</a>
     <script type="text/javascript">
 

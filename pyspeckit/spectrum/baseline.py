@@ -56,7 +56,7 @@ class Baseline:
     @cfgdec
     def __call__(self, order=1, annotate=False, excludefit=False, save=True,
             exclude=None, exclusionlevel=0.01, interactive=False, 
-            LoudDebug=False, fit_original=True, baseline_fit_color = 'orange',
+            LoudDebug=False, fit_original=True, baseline_fit_color='orange',
             **kwargs):
         """
         Fit and remove a polynomial from the spectrum.  
