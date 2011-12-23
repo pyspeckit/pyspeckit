@@ -18,7 +18,9 @@ def moments(Xax, data, vheight=True, estimator=numpy.median, negamp=None,
     or it will be "autodetected" (negamp=None)
     """
 
-    dx = numpy.mean(Xax[1:] - Xax[:-1]) # assume a regular grid
+    Xax = np.array(Xax)
+
+    dx = numpy.mean(np.diff(Xax)) # assume a regular grid
     integral = (data*dx).sum()
     height = estimator(data)
     
