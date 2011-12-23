@@ -21,7 +21,8 @@ class SpectralModel(fitter.SimpleFitter):
     of the hyperfine codes (hcn, n2hp) for examples.
     """
 
-    def __init__(self, modelfunc, npars, multisingle='multi', **kwargs):
+    def __init__(self, modelfunc, npars, 
+            shortvarnames=("A","\\Delta x","\\sigma"), multisingle='multi', **kwargs):
         """
         modelfunc: the model function to be fitted.  Should take an X-axis (spectroscopic axis)
         as an input, followed by input parameters.
@@ -54,8 +55,12 @@ class SpectralModel(fitter.SimpleFitter):
         """
 
         self.modelfunc = modelfunc
-        self.npars = npars
+        self.npars = npars 
+        self.default_npars = npars
         self.multisingle = multisingle
+        
+        # this needs to be set once only
+        self.shortvarnames = shortvarnames
         
         self.parinfo, kwargs = self._make_parinfo(**kwargs)
 
@@ -64,12 +69,13 @@ class SpectralModel(fitter.SimpleFitter):
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
             partied=None, fitunits=None, parsteps=None, npeaks=1,
-            shortvarnames=("A","\\Delta x","\\sigma"), parinfo=None,
+            parinfo=None,
             names=None, values=None, limits=None,
             limited=None, fixed=None, error=None, tied=None, steps=None,
             negamp=None,
             limitedmin=None, limitedmax=None,
             minpars=None, maxpars=None,
+            vheight=False,
             **kwargs):
 
         # for backwards compatibility - partied = tied, etc.
@@ -88,8 +94,6 @@ class SpectralModel(fitter.SimpleFitter):
             self.parnames = parnames
         elif parnames is None and self.parnames is not None:
             parnames = self.parnames
-        if shortvarnames is not None:
-            self.shortvarnames = shortvarnames
 
         if limitedmin is not None:
             if limitedmax is not None:
@@ -119,10 +123,18 @@ class SpectralModel(fitter.SimpleFitter):
         temp_pardict['parlimits'] = parlimits if parlimits is not None else [(0,0)] * (self.npars*self.npeaks)
         temp_pardict['parlimited'] = parlimited if parlimited is not None else [(False,False)] * (self.npars*self.npeaks)
 
+        self.vheight = vheight
+        if vheight and len(self.parinfo) == self.default_npars:
+            self.parinfo = [ {'n':0, 'value':parvalues.pop(0), 'limits':(0,0),
+                'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
+                'error': 0, 'tied':"" } ]
+        else:
+            self.parinfo = []
+
         # generate the parinfo dict
         # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
         # parlimited, parfixed, and parlimits are all two-element items (tuples or lists)
-        self.parinfo = [ {'n':ii+self.npars*jj,
+        self.parinfo += [ {'n':ii+self.npars*jj+vheight,
             'value':temp_pardict['parvalues'][ii+self.npars*jj],
             'step':temp_pardict['parsteps'][ii+self.npars*jj],
             'limits':temp_pardict['parlimits'][ii+self.npars*jj],
@@ -154,8 +166,10 @@ class SpectralModel(fitter.SimpleFitter):
         """
         Simple wrapper to deal with N independent peaks for a given spectral model
         """
+        pars = list(pars)
         def L(x):
             v = np.zeros(len(x))
+            if self.vheight: v += pars.pop(0)
             # use len(pars) instead of self.npeaks because we want this to work
             # independent of the current best fit
             for jj in xrange(len(pars)/self.npars):
@@ -175,13 +189,9 @@ class SpectralModel(fitter.SimpleFitter):
 
     def __call__(self, *args, **kwargs):
         if self.multisingle == 'single':
-            # I can only admit to myself that this is too many layers of abstraction....
-            # oh well.
             # Generate a variable-height version of the model
             func = fitter.vheightmodel(self.modelfunc)
-            # Pass that into the four-parameter fitter 
-            # this REALLY needs to be replaced with an "npar+1" model fitter
-            return self._fourparfitter(func)(*args,**kwargs)
+            return self.fitter(*args, **kwargs)
         elif self.multisingle == 'multi':
             return self.fitter(*args,**kwargs)
 

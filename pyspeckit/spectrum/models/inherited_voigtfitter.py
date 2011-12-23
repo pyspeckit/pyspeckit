@@ -11,7 +11,7 @@ try:
 except ImportError:
     scipyOK = False
 
-def voigt(self,xarr,amp,xcen,Gfwhm,Lfwhm):
+def voigt(xarr,amp,xcen,Gfwhm,Lfwhm):
     """
     voigt profile
 
