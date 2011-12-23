@@ -48,7 +48,8 @@ sp.plotter.figure.savefig('hr2421_voigtfit.png')
 voigt_model = sp.specfit.model+sp.baseline.basespec[sp.specfit.gx1:sp.specfit.gx2]
 if interactive: raw_input("Wait here a moment")
 
-sp.specfit(interactive=True)
+
+if interactive: sp.specfit(interactive=True)
 if interactive: raw_input('Press enter to print guesses and best fit and end code')
 sp.plotter.figure.savefig('hr2421_interactive_fit.png')
 print "Guesses: ", sp.specfit.guesses

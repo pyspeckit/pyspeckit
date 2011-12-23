@@ -407,12 +407,16 @@ class Specfit(object):
                     self.Spectrum.xarr[self.gx1:self.gx2],
                     self.spectofit[self.gx1:self.gx2], vheight=vheight,
                     negamp=negamp, **kwargs)
-            if vheight is False: self.guesses = [height]+self.guesses
+            #if vheight is False: self.guesses = [height]+self.guesses
         else:
             if negamp: self.guesses = [height,-1,0,1]
             else:  self.guesses = [height,1,0,1]
-        if self.fittype == 'voigt':
-            self.guesses += [0.0]
+
+        NP = self.Registry.singlefitters[self.fittype].default_npars
+        if NP > 3:
+            for ii in xrange(3,NP):
+                self.guesses += [0.0]
+
         self.fitter = self.Registry.singlefitters[self.fittype]
 
         scalefactor = 1.0
@@ -434,6 +438,7 @@ class Specfit(object):
                 vheight=vheight,
                 params=self.guesses,
                 **self.fitkwargs)
+        if debug: print "Guesses, fits after: ",self.guesses, mpp
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
@@ -845,4 +850,13 @@ class Specfit(object):
                     if frame is not None:
                         self.modelpars[ii] = self.Spectrum.xarr.x_in_frame(self.modelpars[ii], frame)
 
+    def moments(self, **kwargs):
+        """
+        Return the moments 
+
+        see :mod:`moments`
+        """
+        return self.Registry.singlefitters[self.fittype].moments(
+                self.Spectrum.xarr[self.gx1:self.gx2],
+                self.spectofit[self.gx1:self.gx2],  **kwargs)
 
