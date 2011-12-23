@@ -126,6 +126,9 @@ unit_type_dict = {
 
 unit_type_dict = CaseInsensitiveDict(unit_type_dict)
 
+# to-do
+# unit_prettyprint = dict([(a,a.replace('angstroms','\\AA')) for a in unit_type_dict.keys() if a is not None])
+
 xtype_dict = {
         'VLSR':'velocity','VRAD':'velocity','VELO':'velocity',
         'VELO-LSR':'velocity',

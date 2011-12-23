@@ -15,9 +15,13 @@ from numpy import pi
 from mpfit import mpfit
 import matplotlib.cbook as mpcb
 from . import mpfit_messages
-from . import fitter
+from . import model
 
-class gaussian_fitter(fitter.SimpleFitter):
+class gaussian_fitter(model.SpectralModel):
+    """
+    A rather complicated Gaussian fitter class.  Inherits from, but overrides
+    most components of, :mod:`model.SpectralModel`
+    """
 
     def __init__(self,multisingle='multi'):
         self.npars = 3
@@ -57,15 +61,16 @@ class gaussian_fitter(fitter.SimpleFitter):
         for fit in pars: result += self.onepeakgaussian(x, 0, fit[0], fit[1], fit[2])
         return result
         
-    def multipeakgaussianslope(self, x, pars):
+    def slope(self, x):#, pars):
         """
         Return slope at position x for multicomponent Gaussian fit.  Need this in measurements class for
         finding the FWHM of multicomponent lines whose centroids are not identical.
         """    
         
-        pars = numpy.reshape(pars, (len(pars) / 3, 3))
+        pars = numpy.reshape(self.mpp, (len(self.mpp) / 3, 3))
         result = 0
-        for fit in pars: result += self.onepeakgaussian(x, 0, fit[0], fit[1], fit[2]) * (-2. * (x - fit[1]) / 2. / fit[2]**2)
+        for fit in pars:
+            result += self.onepeakgaussian(x, 0, fit[0], fit[1], fit[2]) * (-2. * (x - fit[1]) / 2. / fit[2]**2)
         return result
 
     def n_gaussian(self, pars=None,a=None,dx=None,sigma=None):
@@ -89,7 +94,10 @@ class gaussian_fitter(fitter.SimpleFitter):
             raise ValueError("Wrong array lengths! dx: %i  sigma: %i  a: %i" % (len(dx),len(sigma),len(a)))
 
         def g(x):
-            v = numpy.zeros(len(x))
+            if hasattr(x,'__len__'):
+                v = numpy.zeros(len(x))
+            else: # assume scalar
+                v = numpy.zeros(1)
             for i in range(len(dx)):
                 v += a[i] * numpy.exp( - ( x - dx[i] )**2 / (2.0*sigma[i]**2) )
             return v
@@ -245,4 +253,6 @@ class gaussian_fitter(fitter.SimpleFitter):
                 integ += amp*width*numpy.sqrt(2.0*numpy.pi)
 
         return integ
+
+    n_modelfunc = n_gaussian
 
