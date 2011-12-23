@@ -72,10 +72,6 @@ class Measurements(object):
         self.reflines = self.speclines.optical.optical_lines
         self.refpos = self.reflines['xarr']
         self.refname = self.reflines['name']
-        print "DEBUG: ",self.refpos
-        print "DEBUG: ",Spectrum.xarr
-        print "DEBUG: ",[self.specfit.Spectrum.xarr.x_to_pix(i) for i in self.refpos]
-        print "DEBUG: ",[self.specfit.fitter.slope(i) for i in self.refpos]
         
         # If distance or redshift has been provided, we can compute luminosities from fluxes
         if d is not None: self.d = d
