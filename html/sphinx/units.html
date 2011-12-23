@@ -117,6 +117,12 @@ I think this can also accept wavelengths....</div></blockquote>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.change_frame">
+<tt class="descname">change_frame</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.change_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change velocity frame</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.convert_to_unit">
 <tt class="descname">convert_to_unit</tt><big>(</big><em>unit</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.convert_to_unit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the X-array in the specified units without changing it
@@ -137,6 +143,12 @@ xarr.coord_to_x(6000,&#8217;GHz&#8217;) == 5.1 # GHz</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.in_frame">
+<tt class="descname">in_frame</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.in_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a shifted xaxis</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.umax">
 <tt class="descname">umax</tt><big>(</big><em>units=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.umax" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the maximum value of the SpectroscopicAxis.  If units specified,
@@ -148,6 +160,12 @@ convert to those units first</p>
 <tt class="descname">umin</tt><big>(</big><em>units=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.umin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the minimum value of the SpectroscopicAxis.  If units specified,
 convert to those units first</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.x_in_frame">
+<tt class="descname">x_in_frame</tt><big>(</big><em>xx</em>, <em>frame</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.x_in_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value &#8216;x&#8217; shifted to the target frame</p>
 </dd></dl>
 
 <dl class="method">
@@ -221,7 +239,7 @@ header parameters</p>
 
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Last updated on Dec 22, 2011.
+      Last updated on Dec 23, 2011.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
     <a href="pyspeckit.pdf">PDF version of this document</a>
     <script type="text/javascript">
