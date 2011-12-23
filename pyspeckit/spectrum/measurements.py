@@ -14,8 +14,8 @@ spec.measure()
 cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
-    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm =
-            None, miscline = None, misctol = 10, ignore = None, derive = True):
+    def __init__(self, Spectrum, z=None, d=None, xunits=None, fluxnorm=None,
+            miscline=None, misctol=10, ignore=None, derive=True):
         """
         This can be called after a fit is run.  It will inherit the specfit
         object and derive as much as it can from modelpars.  Just do:
@@ -79,6 +79,9 @@ class Measurements(object):
         if z is not None: 
             self.cosmology = cosmology.Cosmology()
             self.d = self.cosmology.LuminosityDistance(z) * cm_per_mpc
+            self.redshift = z
+        else:
+            self.redshift = 0.0
             
         self.identify()
         if derive: self.derive()
@@ -104,8 +107,11 @@ class Measurements(object):
             where = 0
             odiff = self.odiff
             multi = False
+
+        # need to account for redshift if self.redshift is set
+        refpos = self.refpos * (1.0+self.redshift)
                     
-        condition = (self.refpos >= 0.9 * min(self.obspos)) & (self.refpos <= 1.1 * max(self.obspos))   # Speeds things up
+        condition = (refpos >= 0.9 * min(self.obspos)) & (refpos <= 1.1 * max(self.obspos))   # Speeds things up
         refpos = self.refpos[condition]
                 
         combos = itertools.combinations(refpos, self.Nlines - len(where))        
