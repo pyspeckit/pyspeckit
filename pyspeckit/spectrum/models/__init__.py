@@ -25,7 +25,7 @@ for ii in xrange(-15,0):
 from ammonia import ammonia_model,ammonia_model_vtau
 # old way from gaussfitter import gaussian_fitter
 from inherited_gaussfitter import gaussian_fitter
-from voigtfitter import voigt_fitter
+from inherited_voigtfitter import voigt_fitter
 import formaldehyde
 from formaldehyde import formaldehyde_fitter,formaldehyde_vheight_fitter
 import n2hp

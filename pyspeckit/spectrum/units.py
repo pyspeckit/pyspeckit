@@ -16,6 +16,7 @@ Open Questions: Are there other FITS-valid projection types, unit types, etc.
 
 
 import numpy as np
+import warnings
 
 # declare a case-insensitive dict class to return case-insensitive versions of each dictionary...
 # this is just a shortcut so that units can be specified as, e.g., Hz, hz, HZ, hZ, etc.  3 of those 4 are "legitimate".  
@@ -209,11 +210,11 @@ class SpectroscopicAxis(np.ndarray):
         elif subarr.units in unit_type_dict:
             subarr.xtype = unit_type_dict[subarr.units]
         elif type(xtype) is str:
-            print "WARNING: Unknown X-axis type in header: %s" % xtype
+            warnings.warn("Unknown X-axis type in header: %s" % xtype)
             subarr.xtype = xtype
         else:
             if xtype is not None:
-                print "WARNING: xtype has been specified but was not recognized as a string."
+                warnings.warn("WARNING: xtype has been specified but was not recognized as a string.")
             subarr.xtype = 'unknown'
         subarr.refX = refX
         if refX_units is None:
@@ -524,7 +525,7 @@ class SpectroscopicAxis(np.ndarray):
                 newxtype = "Frequency"
                 newunit = unit
             else:
-                print "Could not convert from %s to %s" % (self.units,unit)
+                warnings.warn("Could not convert from %s to %s" % (self.units,unit))
         else:
             newxtype = self.xtype
             newxarr = self
@@ -569,12 +570,12 @@ class SpectroscopicAxis(np.ndarray):
             if self.redshift is not None:
                 return self/(1.0+self.redshift)
             else:
-                print "WARNING: Redshift is not specified, so no shift will be done."
+                warnings.warn("WARNING: Redshift is not specified, so no shift will be done.")
         elif self.frame in ('rest',) and frame in ('obs','observed'):
             if self.redshift is not None:
                 return self*(1.0+self.redshift)
             else:
-                print "WARNING: Redshift is not specified, so no shift will be done."
+                warnings.warn("WARNING: Redshift is not specified, so no shift will be done.")
         else:
             print "Frame shift from %s to %s is not defined or implemented." % (self.frame, frame)
             return self

@@ -1,4 +1,7 @@
 """
+====================
+HCN Hyperfine Fitter
+====================
 This is an HCN fitter...
 ref for line params: http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn@hfs.dat
 """

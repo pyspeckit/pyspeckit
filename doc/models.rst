@@ -35,12 +35,12 @@ your fitting code must deal with units internally::
     :members:
 .. automodule:: pyspeckit.spectrum.models.hyperfine
     :members:
-.. automodule:: pyspeckit.spectrum.models.lorentzian
+.. automodule:: pyspeckit.spectrum.models.inherited_lorentzian
     :members:
 .. automodule:: pyspeckit.spectrum.models.modelgrid
     :members:
 .. automodule:: pyspeckit.spectrum.models.n2hp
     :members:
-.. automodule:: pyspeckit.spectrum.models.voigtfitter
+.. automodule:: pyspeckit.spectrum.models.inherited_voigtfitter
     :members:
 

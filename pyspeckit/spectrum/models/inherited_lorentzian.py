@@ -1,44 +1,44 @@
 """
-===============
-Gaussian Fitter
-===============
+=================
+Lorentzian Fitter
+=================
 
 The simplest and most useful model.
 
-Until 12/23/2011, gaussian fitting used the complicated and somewhat bloated
+Until 12/23/2011, lorentzian fitting used the complicated and somewhat bloated
 gaussfitter.py code.  Now, this is a great example of how to make your own
-model!  Just make a function like gaussian and plug it into the SpectralModel
-class.
+model!
 
 """
 import model
 import numpy 
 
-def gaussian(x,A,dx,w, return_components=False):
+def lorentzian(x,A,dx,w, return_components=False):
     """
-    Returns a 1-dimensional gaussian of form
-    H+A*numpy.exp(-(x-dx)**2/(2*w**2))
+    Returns a 1-dimensional lorentzian of form
+    A*2*pi*w/((x-dx)**2 + ((w/2)**2))
     
-    [height,amplitude,center,width]
+    [amplitude,center,width]
 
     return_components does nothing but is required by all fitters
     
     """
     x = numpy.array(x) # make sure xarr is no longer a spectroscopic axis
-    return A*numpy.exp(-(x-dx)**2/(2.0*w**2))
+    return A/(2.0*numpy.pi)*w/((x-dx)**2 + (w/2.0)**2)
 
-def gaussian_fitter(multisingle='multi'):
+def lorentzian_fitter(multisingle='multi'):
     """
-    Generator for Gaussian fitter class
+    Generator for lorentzian fitter class
     """
 
-    myclass =  model.SpectralModel(gaussian, 3,
+    myclass =  model.SpectralModel(lorentzian, 3,
             parnames=['amplitude','shift','width'], 
             parlimited=[(False,False),(False,False),(True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma'),
             multisingle=multisingle,
             )
-    myclass.__name__ = "gaussian"
+    myclass.__name__ = "lorentzian"
     
     return myclass
+
