@@ -244,107 +244,21 @@ Draine 2011 textbook pgs 219-230)</dd>
 </dd></dl>
 
 </div>
-<span class="target" id="module-pyspeckit.spectrum.models.gaussfitter"></span><div class="section" id="gaussian-fitter">
-<h2>Gaussian fitter<a class="headerlink" href="#gaussian-fitter" title="Permalink to this headline">¶</a></h2>
-<p>Created 3/17/08</p>
-<p>Original version available at <a class="reference external" href="http://code.google.com/p/agpy/source/browse/trunk/agpy/gaussfitter.py">http://code.google.com/p/agpy/source/browse/trunk/agpy/gaussfitter.py</a>
-(the version below uses a Class instead of independent functions)</p>
-<dl class="class">
-<dt id="pyspeckit.spectrum.models.gaussfitter.gaussian_fitter">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.gaussfitter.</tt><tt class="descname">gaussian_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.gaussfitter.gaussian_fitter" title="Permalink to this definition">¶</a></dt>
-<dd><p>A rather complicated Gaussian fitter class.  Inherits from, but overrides
-most components of, <tt class="xref py py-mod docutils literal"><span class="pre">model.SpectralModel</span></tt></p>
-<dl class="method">
-<dt id="pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.integral">
-<tt class="descname">integral</tt><big>(</big><em>modelpars</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.integral" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the integral of the individual components (ignoring height)</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.multigaussfit">
-<tt class="descname">multigaussfit</tt><big>(</big><em>xax, data, npeaks=1, err=None, params=[1, 0, 1], fixed=[False, False, False], limitedmin=[False, False, True], limitedmax=[False, False, False], minpars=[0, 0, 0], maxpars=[0, 0, 0], quiet=True, shh=True, veryverbose=False, negamp=None, tied=['', '', ''], parinfo=None, debug=False, **kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.multigaussfit" title="Permalink to this definition">¶</a></dt>
-<dd><p>An improvement on onepeakgaussfit.  Lets you fit multiple gaussians.</p>
-<dl class="docutils">
-<dt>Inputs:</dt>
-<dd><blockquote class="first">
-<div>xax - x axis
-data - y axis
-npeaks - How many gaussians to fit?  Default 1 (this could supersede onepeakgaussfit)
-err - error corresponding to data</div></blockquote>
-<p>These parameters need to have length = 3*npeaks.  If npeaks &gt; 1 and length = 3, they will
-be replicated npeaks times, otherwise they will be reset to defaults:</p>
-<blockquote class="last">
-<div><dl class="docutils">
-<dt>params - Fit parameters: [amplitude, offset, width] * npeaks</dt>
-<dd>If len(params) % 3 == 0, npeaks will be set to len(params) / 3</dd>
-</dl>
-<p>fixed - Is parameter fixed?
-limitedmin/minpars - set lower limits on each parameter (default: width&gt;0)
-limitedmax/maxpars - set upper limits on each parameter
-tied - link parameters together</p>
-<p>quiet - should MPFIT output each iteration?
-shh - output final parameters?</p>
-<p>kwargs are passed to mpfit</p>
-</div></blockquote>
-</dd>
-<dt>Returns:</dt>
-<dd>Fit parameters
-Model
-Fit errors
-chi2</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.multipeakgaussian">
-<tt class="descname">multipeakgaussian</tt><big>(</big><em>x</em>, <em>pars</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.multipeakgaussian" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns flux at position x due to contributions from multiple Gaussians.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.n_gaussian">
-<tt class="descname">n_gaussian</tt><big>(</big><em>pars=None</em>, <em>a=None</em>, <em>dx=None</em>, <em>sigma=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.n_gaussian" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a function that sums over N gaussians, where N is the length of
-a,dx,sigma <em>OR</em> N = len(pars) / 3</p>
-<p>The background &#8220;height&#8221; is assumed to be zero (you must &#8220;baseline&#8221; your
-spectrum before fitting)</p>
-<p>pars  - a list with len(pars) = 3n, assuming a,dx,sigma repeated
-dx    - offset (velocity center) values
-sigma - line widths
-a     - amplitudes</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.n_modelfunc">
-<tt class="descname">n_modelfunc</tt><big>(</big><em>pars=None</em>, <em>a=None</em>, <em>dx=None</em>, <em>sigma=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.n_modelfunc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a function that sums over N gaussians, where N is the length of
-a,dx,sigma <em>OR</em> N = len(pars) / 3</p>
-<p>The background &#8220;height&#8221; is assumed to be zero (you must &#8220;baseline&#8221; your
-spectrum before fitting)</p>
-<p>pars  - a list with len(pars) = 3n, assuming a,dx,sigma repeated
-dx    - offset (velocity center) values
-sigma - line widths
-a     - amplitudes</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.onepeakgaussian">
-<tt class="descname">onepeakgaussian</tt><big>(</big><em>x</em>, <em>H</em>, <em>A</em>, <em>dx</em>, <em>w</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.onepeakgaussian" title="Permalink to this definition">¶</a></dt>
+<span class="target" id="module-pyspeckit.spectrum.models.inherited_gaussfitter"></span><dl class="function">
+<dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian">
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian</tt><big>(</big><em>x</em>, <em>A</em>, <em>dx</em>, <em>w</em>, <em>return_components=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a 1-dimensional gaussian of form
 H+A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
 <p>[height,amplitude,center,width]</p>
+<p>return_components does nothing but is required by all fitters</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.slope">
-<tt class="descname">slope</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.gaussfitter.gaussian_fitter.slope" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return slope at position x for multicomponent Gaussian fit.  Need this in measurements class for
-finding the FWHM of multicomponent lines whose centroids are not identical.</p>
+<dl class="function">
+<dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_fitter">
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_fitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator for Gaussian fitter class</p>
 </dd></dl>
 
-</dd></dl>
-
-</div>
 <span class="target" id="module-pyspeckit.spectrum.models.hcn"></span><p>This is an HCN fitter...
 ref for line params: <a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat">http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat</a></p>
 <dl class="data">
@@ -442,7 +356,7 @@ strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x105c35488&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x106196668&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -509,7 +423,6 @@ Draine 2011 textbook pgs 219-230)</dd>
 <li class="toctree-l2"><a class="reference internal" href="#ammonia-inversion-transition-tkin-fitter">Ammonia inversion transition TKIN fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#simplefitter-wrapper">SimpleFitter wrapper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#formaldehyde-cm-line-fitter">Formaldehyde cm-line fitter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#gaussian-fitter">Gaussian fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hill5-analytic-infall-model">Hill5 analytic infall model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generalized-hyperfine-component-fitter">Generalized hyperfine component fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#lorentzian-fitter">Lorentzian Fitter</a></li>

@@ -27,7 +27,7 @@ your fitting code must deal with units internally::
     :members:
 .. automodule:: pyspeckit.spectrum.models.formaldehyde
     :members:
-.. automodule:: pyspeckit.spectrum.models.gaussfitter
+.. automodule:: pyspeckit.spectrum.models.inherited_gaussfitter
     :members:
 .. automodule:: pyspeckit.spectrum.models.hcn
     :members:

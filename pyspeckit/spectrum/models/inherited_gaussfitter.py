@@ -15,6 +15,9 @@ def gaussian(x,A,dx,w, return_components=False):
     return A*numpy.exp(-(x-dx)**2/(2.0*w**2))
 
 def gaussian_fitter(multisingle='multi'):
+    """
+    Generator for Gaussian fitter class
+    """
 
     myclass =  model.SpectralModel(gaussian, 3,
             parnames=['amplitude','shift','width'], 
