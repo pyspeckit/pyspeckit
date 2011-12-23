@@ -86,7 +86,7 @@ your fitting code must deal with units internally:</p>
 <h2>Generic SpectralModel wrapper<a class="headerlink" href="#generic-spectralmodel-wrapper" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>multisingle='multi'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>shortvarnames=('A'</em>, <em>'\Delta x'</em>, <em>'\sigma')</em>, <em>multisingle='multi'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper class for a spectra model.  Includes internal functions to
 generate multi-component models, annotations, integrals, and individual
 components.  The declaration can be complex, since you should name
@@ -386,7 +386,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x10639a398&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x105d76500&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -440,7 +440,7 @@ Draine 2011 textbook pgs 219-230)</dd>
 <h2>Voigt Profile Fitter<a class="headerlink" href="#voigt-profile-fitter" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_voigtfitter.voigt">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt</tt><big>(</big><em>self</em>, <em>xarr</em>, <em>amp</em>, <em>xcen</em>, <em>Gfwhm</em>, <em>Lfwhm</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt</tt><big>(</big><em>xarr</em>, <em>amp</em>, <em>xcen</em>, <em>Gfwhm</em>, <em>Lfwhm</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt" title="Permalink to this definition">¶</a></dt>
 <dd><p>voigt profile</p>
 <p>V(x,sig,gam) = Re(w(z))/(sig*sqrt(2*pi))
 z = (x+i*gam)/(sig*sqrt(2))</p>
