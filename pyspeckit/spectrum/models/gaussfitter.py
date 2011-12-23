@@ -15,9 +15,13 @@ from numpy import pi
 from mpfit import mpfit
 import matplotlib.cbook as mpcb
 from . import mpfit_messages
-from . import fitter
+from . import model
 
-class gaussian_fitter(fitter.SimpleFitter):
+class gaussian_fitter(model.SpectralModel):
+    """
+    A rather complicated Gaussian fitter class.  Inherits from, but overrides
+    most components of, :mod:`model.SpectralModel`
+    """
 
     def __init__(self,multisingle='multi'):
         self.npars = 3

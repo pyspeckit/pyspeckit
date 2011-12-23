@@ -23,7 +23,8 @@ for ii in xrange(-15,0):
        for the user functions and will not clash with MPFIT."""
 
 from ammonia import ammonia_model,ammonia_model_vtau
-from gaussfitter import gaussian_fitter
+#from gaussfitter import gaussian_fitter
+from inherited_gaussfitter import gaussian_fitter
 from voigtfitter import voigt_fitter
 import formaldehyde
 from formaldehyde import formaldehyde_fitter,formaldehyde_vheight_fitter

@@ -23,7 +23,8 @@ class SpectralModel(fitter.SimpleFitter):
     def __init__(self, modelfunc, npars, parnames=None, parvalues=None,
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
             partied=None, fitunits=None, parsteps=None, npeaks=1,
-            shortvarnames=("A","v","\\sigma"), parinfo=None, **kwargs):
+            shortvarnames=("A","v","\\sigma"), parinfo=None,
+            multisingle='multi', **kwargs):
         """
         modelfunc: the model function to be fitted.  Should take an X-axis (spectroscopic axis)
         as an input, followed by input parameters.
@@ -50,6 +51,9 @@ class SpectralModel(fitter.SimpleFitter):
         npeaks   - default number of peaks to assume when fitting (can be overridden)
 
         shortvarnames - TeX names of the variables to use when annotating
+
+        multisingle - Are there multiple peaks (no background will be fit) or
+            just a single peak (a background may/will be fit)
         """
 
         self.modelfunc = modelfunc
@@ -58,13 +62,15 @@ class SpectralModel(fitter.SimpleFitter):
         self.fitunits = fitunits
         self.npeaks = npeaks
         self.shortvarnames = shortvarnames
-
-        temp_pardict = dict([(varname, np.zeros(self.npars, dtype='bool')) if locals()[varname] is None else (varname, locals()[varname])
-            for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
+        self.multisingle = multisingle
 
         if parinfo is not None:
             self.parinfo = parinfo
         else:
+            # this is a clever way to turn the parameter lists into a dict of lists
+            # clever = hard to read
+            temp_pardict = dict([(varname, np.zeros(self.npars, dtype='bool')) if locals()[varname] is None else (varname, locals()[varname])
+                for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
             # generate the parinfo dict
             # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
             # parlimited, parfixed, and parlimits are all two-element items (tuples or lists)
@@ -102,8 +108,22 @@ class SpectralModel(fitter.SimpleFitter):
             def f(p,fjac=None): return [0,(y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))/err]
         return f
 
-    def __call__(self, xax, data, err=None, params=(), quiet=True, 
-            veryverbose=False, npeaks=None, debug=False, **kwargs):
+    def __call__(self, *args, **kwargs):
+        if self.multisingle == 'single':
+            # I can only admit to myself that this is too many layers of abstraction....
+            # oh well.
+            # Generate a variable-height version of the model
+            func = fitter.vheightmodel(self.modelfunc)
+            # Pass that into the four-parameter fitter 
+            # this REALLY needs to be replaced with an "npar+1" model fitter
+            return self._fourparfitter(func)(*args,**kwargs)
+        elif self.multisingle == 'multi':
+            return self.fitter(*args,**kwargs)
+
+
+    def fitter(self, xax, data, err=None, params=(), quiet=True,
+            veryverbose=False, npeaks=None, debug=False, parinfo=None,
+            **kwargs):
         """
         Run the fitter.  Must pass the x-axis and data.  Can include
         error, parameter guesses, and a number of verbosity parameters.
@@ -114,6 +134,10 @@ class SpectralModel(fitter.SimpleFitter):
         veryverbose - print out a variety of mpfit output parameters
 
         debug - raise an exception (rather than a warning) if chi^2 is nan
+
+        parinfo - You can override the class parinfo dict with this, though
+            that largely defeats the point of having the wrapper class.  This class
+            does NO checking for whether the parinfo dict is valid.
 
         kwargs are passed to mpfit
         """
@@ -151,7 +175,9 @@ class SpectralModel(fitter.SimpleFitter):
             err[np.isnan(data) + np.isinf(data)] = np.inf
             data[np.isnan(data) + np.isinf(data)] = 0
 
-        mp = mpfit(self.mpfitfun(xax,data,err),parinfo=self.parinfo,quiet=quiet,**kwargs)
+        parinfo = self.parinfo if parinfo is None else parinfo
+
+        mp = mpfit(self.mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
         mpp = mp.params
         if mp.perror is not None: mpperr = mp.perror
         else: mpperr = mpp*0
@@ -180,6 +206,13 @@ class SpectralModel(fitter.SimpleFitter):
                 print "Warning: chi^2 is nan"
         return mpp,self.model,mpperr,chi2
 
+    def slope(self, x):
+        """
+        Find the local slope of the model
+        """
+        if hasattr(self, 'model'):
+            dm = np.diff(self.model)
+            return np.average(dm[x-1:x+1])
 
     def annotations(self, shortvarnames=None):
         """

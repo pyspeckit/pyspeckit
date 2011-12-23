@@ -269,14 +269,14 @@ class Measurements(object):
                 
             # Otherwise, we have to figure out where the multicomponent peak is
             else:    
-                f = lambda x: self.specfit.fitter.multipeakgaussianslope(x, pars)
+                f = lambda x: self.specfit.fitter.slope(x)
                 xfmax = self.bisection(f, start)
-                fmax = self.specfit.fitter.multipeakgaussian(xfmax, pars)
+                fmax = self.specfit.fitter.slope(xfmax)
             
             hmax = 0.5 * fmax    
                 
             # current height relative to half max - we want to minimize this function.  Could be asymmetric.
-            f = lambda x: self.specfit.fitter.multipeakgaussian(x, pars) - hmax                   
+            f = lambda x: self.specfit.fitter.n_modelfunc(x, pars) - hmax                   
             xhmax1 = self.bisection(f, start)
             xhmax2 = self.bisection(f, start + (start - xhmax1))
                                         
