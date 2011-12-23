@@ -9,6 +9,7 @@ from mpfit import mpfit
 import copy
 import matplotlib.cbook as mpcb
 import fitter
+from . import mpfit_messages
 
 class SpectralModel(fitter.SimpleFitter):
     """
@@ -24,7 +25,10 @@ class SpectralModel(fitter.SimpleFitter):
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
             partied=None, fitunits=None, parsteps=None, npeaks=1,
             shortvarnames=("A","v","\\sigma"), parinfo=None,
-            multisingle='multi', **kwargs):
+            multisingle='multi', 
+            names=None, values=None, limits=None, limited=None, fixed=None,
+            error=None, tied=None, steps=None,
+            **kwargs):
         """
         modelfunc: the model function to be fitted.  Should take an X-axis (spectroscopic axis)
         as an input, followed by input parameters.
@@ -55,6 +59,11 @@ class SpectralModel(fitter.SimpleFitter):
         multisingle - Are there multiple peaks (no background will be fit) or
             just a single peak (a background may/will be fit)
         """
+        
+        # for backwards compatibility - partied = tied, etc.
+        for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",","):
+            if locals()[varname.replace("par","")] is not None:
+                locals()[varname] = locals()[varname.replace("par","")] 
 
         self.modelfunc = modelfunc
         self.npars = npars
@@ -135,6 +144,9 @@ class SpectralModel(fitter.SimpleFitter):
 
         debug - raise an exception (rather than a warning) if chi^2 is nan
 
+        accepts *tied*, *limits*, *limited*, and *fixed* as keyword arguments.
+            They must be lists of length len(params)
+
         parinfo - You can override the class parinfo dict with this, though
             that largely defeats the point of having the wrapper class.  This class
             does NO checking for whether the parinfo dict is valid.
@@ -158,12 +170,14 @@ class SpectralModel(fitter.SimpleFitter):
             for par,guess in zip(self.parinfo,params):
                 par['value'] = guess
         
+        # allow these 4 names to be specified
         for varname in str.split("limits,limited,fixed,tied",","):
             if varname in kwargs:
                 var = kwargs.pop(varname)
                 for pi in self.parinfo:
                     pi[varname] = var[pi['n']]
 
+        self.xax = xax # the 'stored' xax is just a link to the original
         if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
             # some models will depend on the input units.  For these, pass in an X-axis in those units
             # (gaussian, voigt, lorentz profiles should not depend on units.  Ammonia, formaldehyde,
@@ -176,6 +190,8 @@ class SpectralModel(fitter.SimpleFitter):
             data[np.isnan(data) + np.isinf(data)] = 0
 
         parinfo = self.parinfo if parinfo is None else parinfo
+
+        print parinfo
 
         mp = mpfit(self.mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
         mpp = mp.params
@@ -206,13 +222,20 @@ class SpectralModel(fitter.SimpleFitter):
                 print "Warning: chi^2 is nan"
         return mpp,self.model,mpperr,chi2
 
-    def slope(self, x):
+    def slope(self, xinp):
         """
-        Find the local slope of the model
+        Find the local slope of the model at location x
+        (x must be in xax's units)
         """
         if hasattr(self, 'model'):
             dm = np.diff(self.model)
-            return np.average(dm[x-1:x+1])
+            # convert requested x to pixels
+            xpix = self.xax.x_to_pix(xinp)
+            dmx = np.average(dm[xpix-1:xpix+1])
+            if np.isfinite(dmx):
+                return dmx
+            else:
+                return 0
 
     def annotations(self, shortvarnames=None):
         """
@@ -233,7 +256,7 @@ class SpectralModel(fitter.SimpleFitter):
         Return a numpy ndarray of the independent components of the fits
         """
 
-        modelcomponents = np.concatenate(
+        modelcomponents = np.array(
             [self.modelfunc(xarr,
                 *pars[i*self.npars:(i+1)*self.npars],
                 return_components=True,

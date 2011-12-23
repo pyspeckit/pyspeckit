@@ -1,12 +1,14 @@
 import model
 import numpy 
 
-def gaussian(x,A,dx,w):
+def gaussian(x,A,dx,w, return_components=False):
     """
     Returns a 1-dimensional gaussian of form
     H+A*numpy.exp(-(x-dx)**2/(2*w**2))
     
     [height,amplitude,center,width]
+
+    return_components does nothing but is required by all fitters
     
     """
     x = numpy.array(x) # make sure xarr is no longer a spectroscopic axis

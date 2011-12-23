@@ -72,6 +72,10 @@ class Measurements(object):
         self.reflines = self.speclines.optical.optical_lines
         self.refpos = self.reflines['xarr']
         self.refname = self.reflines['name']
+        print "DEBUG: ",self.refpos
+        print "DEBUG: ",Spectrum.xarr
+        print "DEBUG: ",[self.specfit.Spectrum.xarr.x_to_pix(i) for i in self.refpos]
+        print "DEBUG: ",[self.specfit.fitter.slope(i) for i in self.refpos]
         
         # If distance or redshift has been provided, we can compute luminosities from fluxes
         if d is not None: self.d = d
@@ -112,7 +116,7 @@ class Measurements(object):
         refpos = self.refpos * (1.0+self.redshift)
                     
         condition = (refpos >= 0.9 * min(self.obspos)) & (refpos <= 1.1 * max(self.obspos))   # Speeds things up
-        refpos = self.refpos[condition]
+        refpos = refpos[condition]
                 
         combos = itertools.combinations(refpos, self.Nlines - len(where))        
         for i, combo in enumerate(combos):
@@ -124,11 +128,11 @@ class Measurements(object):
         ALLloc = []                                  # x-values of best fit lines in reference dictionary
         
         # Fill lines dictionary        
-        for element in self.IDresults[MINloc][1]: ALLloc.append(np.argmin(np.abs(self.refpos - element)))        
+        for element in self.IDresults[MINloc][1]: ALLloc.append(np.argmin(np.abs(refpos - element)))        
         for i, element in enumerate(ALLloc): 
             line = self.refname[element]
             self.lines[line] = {}
-            loc = np.argmin(np.abs(self.obspos - self.refpos[element]))                
+            loc = np.argmin(np.abs(self.obspos - refpos[element]))                
             self.lines[line]['modelpars'] = list(self.modelpars[loc])            
             self.lines[line]['modelerrs'] = list(self.modelerrs[loc])            
                     
@@ -153,7 +157,7 @@ class Measurements(object):
                         self.lines[line]['modelpars'].extend(tmp1[i:i+3])
                         self.lines[line]['modelerrs'].extend(tmp2[i:i+3])
                 except TypeError:
-                    loc = np.argmin(np.abs(tmp1[1] - self.refpos))                       
+                    loc = np.argmin(np.abs(tmp1[1] - refpos))                       
                     line = self.refname[loc]
                     self.lines[line]['modelpars'].extend(tmp1)
                     self.lines[line]['modelerrs'].extend(tmp2)
@@ -276,7 +280,7 @@ class Measurements(object):
             hmax = 0.5 * fmax    
                 
             # current height relative to half max - we want to minimize this function.  Could be asymmetric.
-            f = lambda x: self.specfit.fitter.n_modelfunc(x, pars) - hmax                   
+            f = lambda x: self.specfit.fitter.n_modelfunc(pars)(x) - hmax                   
             xhmax1 = self.bisection(f, start)
             xhmax2 = self.bisection(f, start + (start - xhmax1))
                                         
