@@ -99,7 +99,7 @@ class gaussian_fitter(fitter.SimpleFitter):
             fixed=[False,False,False], limitedmin=[False,False,True],
             limitedmax=[False,False,False], minpars=[0,0,0], maxpars=[0,0,0],
             quiet=True, shh=True, veryverbose=False, negamp=None,
-            tied = ['', '', ''], **kwargs):
+            tied = ['', '', ''], parinfo=None, **kwargs):
         """
         An improvement on onepeakgaussfit.  Lets you fit multiple gaussians.
 
@@ -180,11 +180,12 @@ class gaussian_fitter(fitter.SimpleFitter):
 
         parnames = {0:"AMPLITUDE",1:"SHIFT",2:"WIDTH"}
 
-        parinfo = [ {'n':ii, 'value':params[ii],
-            'limits':[minpars[ii],maxpars[ii]],
-            'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-            'parname':parnames[ii%3]+str(ii/3), 'error':ii, 'tied':tied[ii]} 
-            for ii in xrange(len(params)) ]
+        if parinfo is None:
+            parinfo = [ {'n':ii, 'value':params[ii],
+                'limits':[minpars[ii],maxpars[ii]],
+                'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
+                'parname':parnames[ii%3]+str(ii/3), 'error':ii, 'tied':tied[ii]} 
+                for ii in xrange(len(params)) ]
 
         if veryverbose:
             print "GUESSES: "

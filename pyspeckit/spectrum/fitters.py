@@ -358,12 +358,14 @@ class Specfit(object):
             mpperr[self.fitter.npars*ii] *= scalefactor
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
-        self.parinfo = self.fitter.mp.parinfo
+        self.parinfo = self.fitter.mp.parinfo_in
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.specplotter.axis is not None:
-            self.plot_fit(annotate=annotate, 
-                color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
-                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components)
+            self.plot_fit(annotate=annotate, color=color,
+                    composite_fit_color=composite_fit_color,
+                    component_fit_color=component_fit_color, lw=lw,
+                    composite_lw=composite_lw, component_lw=component_lw,
+                    show_components=show_components)
                 
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
         if self.fitkwargs.has_key('tied'):

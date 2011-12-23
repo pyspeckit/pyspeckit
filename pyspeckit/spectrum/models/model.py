@@ -23,7 +23,7 @@ class SpectralModel(fitter.SimpleFitter):
     def __init__(self, modelfunc, npars, parnames=None, parvalues=None,
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
             partied=None, fitunits=None, parsteps=None, npeaks=1,
-            shortvarnames=("A","v","\\sigma"), **kwargs):
+            shortvarnames=("A","v","\\sigma"), parinfo=None, **kwargs):
         """
         modelfunc: the model function to be fitted.  Should take an X-axis (spectroscopic axis)
         as an input, followed by input parameters.
@@ -62,19 +62,22 @@ class SpectralModel(fitter.SimpleFitter):
         temp_pardict = dict([(varname, np.zeros(self.npars, dtype='bool')) if locals()[varname] is None else (varname, locals()[varname])
             for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
 
-        # generate the parinfo dict
-        # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
-        # parlimited, parfixed, and parlimits are all two-element items (tuples or lists)
-        self.parinfo = [ {'n':ii,
-            'value':temp_pardict['parvalues'][ii],
-            'step':temp_pardict['parsteps'][ii],
-            'limits':temp_pardict['parlimits'][ii],
-            'limited':temp_pardict['parlimited'][ii],
-            'fixed':temp_pardict['parfixed'][ii],
-            'parname':temp_pardict['parnames'][ii]+"%0i" % jj,
-            'error':temp_pardict['parerror'][ii],
-            'tied':temp_pardict['partied'][ii] if temp_pardict['partied'][ii] else ""} 
-            for ii in xrange(self.npars) for jj in xrange(self.npeaks)]
+        if parinfo is not None:
+            self.parinfo = parinfo
+        else:
+            # generate the parinfo dict
+            # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
+            # parlimited, parfixed, and parlimits are all two-element items (tuples or lists)
+            self.parinfo = [ {'n':ii,
+                'value':temp_pardict['parvalues'][ii],
+                'step':temp_pardict['parsteps'][ii],
+                'limits':temp_pardict['parlimits'][ii],
+                'limited':temp_pardict['parlimited'][ii],
+                'fixed':temp_pardict['parfixed'][ii],
+                'parname':temp_pardict['parnames'][ii]+"%0i" % jj,
+                'error':temp_pardict['parerror'][ii],
+                'tied':temp_pardict['partied'][ii] if temp_pardict['partied'][ii] else ""} 
+                for ii in xrange(self.npars) for jj in xrange(self.npeaks)]
 
         self.modelfunc_kwargs = kwargs
 
