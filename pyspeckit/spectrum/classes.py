@@ -60,7 +60,7 @@ class Spectrum(object):
 
     from arithmetic import interpnans
 
-    def __init__(self,filename=None, filetype=None, xarr=None, data=None,
+    def __init__(self, filename=None, filetype=None, xarr=None, data=None,
             error=None, header=None, doplot=False, maskdata=True,
             plotkwargs={}, xarrkwargs={}, **kwargs):
         """

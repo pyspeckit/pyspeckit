@@ -9,8 +9,8 @@ SIIb = 6732.68
 
 # Initialize spectrum object and plot region surrounding Halpha-[NII] complex
 spec = pyspeckit.Spectrum('sample_sdss.txt', errorcol=2)
-spec.units = 'erg s^{-1} cm^{-2} \\AA^{-1}'
-spec.xarr.units='angstroms'
+#spec.units = 'erg s^{-1} cm^{-2} \\AA^{-1}'
+#spec.xarr.units='angstroms'
 spec.xarr.redshift=0.05
 spec.crop(6450,6755)
 spec.plotter(xmin = 6450, xmax = 6775, ymin = 0, ymax = 150)

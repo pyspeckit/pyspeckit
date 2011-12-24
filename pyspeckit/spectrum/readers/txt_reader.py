@@ -16,23 +16,33 @@ except ImportError:
     atpyOK = False
 from .. import units
 import numpy as np
+import warnings
 
-def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2, **kwargs):
+def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2,
+        text_reader='simple', atpytype='ascii', **kwargs):
     """
-    Attempt to read a 1D spectrum from a text file assuming
-    wavelength as the first column, data as the second, and
-    (optionally) error as the third.  
+    Attempt to read a 1D spectrum from a text file assuming wavelength as the
+    first column, data as the second, and (optionally) error as the third.  
+
+    Reading can be done either with atpy or a 'simple' reader.  If you have an
+    IPAC, CDS, or formally formatted table, you'll want to use atpy.
+
+    If you have a simply formatted file of the form, e.g.
+    # name name
+    # unit unit
+    data data
+    data data
 
     kwargs are passed to atpy.Table
     """
-    if not atpyOK:
-        print "WARNING: atpy not installed; will use simple reader instead."
+    if text_reader=='simple' or not atpyOK:
+        warnings.warn("WARNING: atpy not installed; will use simple reader instead.")
         
         data, error, XAxis, T = simple_txt(filename, xaxcol = xaxcol, 
             datacol = datacol, errorcol = errorcol, **kwargs)
         
-    else:
-        T = atpy.Table(filename, type='ascii', masked=True, **kwargs)
+    elif text_reader in ('atpy','asciitable'):
+        T = atpy.Table(filename, type=atpytype, masked=True, **kwargs)
         
         xarr = T.data[T.data.dtype.names[xaxcol]]
         data = T.data[T.data.dtype.names[datacol]]
@@ -71,8 +81,8 @@ def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, **kwargs):
         
         # Possibly read in header
         if line.split()[0][0] == '#': 
-            if i == 0: hdr = line.split()[1:]
-            if i == 1: colunits = line.split()[1:]
+            if i == 0: hdr = line[1:].split()
+            if i == 1: colunits = line[1:].split()
             
             continue
         
@@ -96,9 +106,12 @@ def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, **kwargs):
     data = coldata[datacol]
     xarr = coldata[xaxcol]
     if errorcol > N - 1:
-        error = data*0
+        error = np.array(data)*0
     else:
         error = coldata[errorcol]
+
+    if len(error) != len(data):
+        raise ValueError("Data and Error lengths do not match.")
 
     XAxis = units.SpectroscopicAxis(xarr, colunits[xaxcol]) 
     
