@@ -90,10 +90,16 @@ in ascending order.</p>
 will use a very simple routine for reading in the data.</p>
 <dl class="function">
 <dt id="pyspeckit.spectrum.readers.txt_reader.open_1d_txt">
-<tt class="descclassname">pyspeckit.spectrum.readers.txt_reader.</tt><tt class="descname">open_1d_txt</tt><big>(</big><em>filename</em>, <em>xaxcol=0</em>, <em>datacol=1</em>, <em>errorcol=2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.txt_reader.open_1d_txt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attempt to read a 1D spectrum from a text file assuming
-wavelength as the first column, data as the second, and
-(optionally) error as the third.</p>
+<tt class="descclassname">pyspeckit.spectrum.readers.txt_reader.</tt><tt class="descname">open_1d_txt</tt><big>(</big><em>filename</em>, <em>xaxcol=0</em>, <em>datacol=1</em>, <em>errorcol=2</em>, <em>text_reader='simple'</em>, <em>atpytype='ascii'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.txt_reader.open_1d_txt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to read a 1D spectrum from a text file assuming wavelength as the
+first column, data as the second, and (optionally) error as the third.</p>
+<p>Reading can be done either with atpy or a &#8216;simple&#8217; reader.  If you have an
+IPAC, CDS, or formally formatted table, you&#8217;ll want to use atpy.</p>
+<p>If you have a simply formatted file of the form, e.g.
+# name name
+# unit unit
+data data
+data data</p>
 <p>kwargs are passed to atpy.Table</p>
 </dd></dl>
 
@@ -147,7 +153,7 @@ wavelength as the first column, data as the second, and
 
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Last updated on Dec 22, 2011.
+      Last updated on Dec 23, 2011.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
     <a href="pyspeckit.pdf">PDF version of this document</a>
     <script type="text/javascript">
