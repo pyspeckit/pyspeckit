@@ -1,92 +1,98 @@
 #!/usr/bin/env python
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
-# Use "distribute" - the setuptools fork that supports python 3.
-from distribute_setup import use_setuptools
-use_setuptools()
-
 import glob
-from setuptools import setup, find_packages
+import os
+import sys
 
-from astropy import setup_helpers
-from astropy.version_helper import get_git_devstr, generate_version_py
+import ah_bootstrap
+from setuptools import setup
 
-# Set affiliated package-specific settings
-PACKAGENAME = 'packagename'
-DESCRIPTION = 'Astropy affiliated package'
-LONG_DESCRIPTION = ''
-AUTHOR = ''
-AUTHOR_EMAIL = ''
-LICENSE = 'BSD'
-URL = 'http://astropy.org'
+#A dirty hack to get around some early import/configurations ambiguities
+if sys.version_info[0] >= 3:
+    import builtins
+else:
+    import __builtin__ as builtins
+builtins._ASTROPY_SETUP_ = True
 
-#version should be PEP386 compatible (http://www.python.org/dev/peps/pep-0386)
-version = '0.0.dev'
+from astropy_helpers.setup_helpers import (
+    register_commands, adjust_compiler, get_debug_option, get_package_info)
+from astropy_helpers.git_helpers import get_git_devstr
+from astropy_helpers.version_helpers import generate_version_py
+
+# Get some values from the setup.cfg
+from distutils import config
+conf = config.ConfigParser()
+conf.read(['setup.cfg'])
+metadata = dict(conf.items('metadata'))
+
+PACKAGENAME = metadata.get('package_name', 'packagename')
+DESCRIPTION = metadata.get('description', 'Astropy affiliated package')
+AUTHOR = metadata.get('author', '')
+AUTHOR_EMAIL = metadata.get('author_email', '')
+LICENSE = metadata.get('license', 'unknown')
+URL = metadata.get('url', 'http://astropy.org')
+
+# Get the long description from the package's docstring
+__import__(PACKAGENAME)
+package = sys.modules[PACKAGENAME]
+LONG_DESCRIPTION = package.__doc__
+
+# Store the package name in a built-in variable so it's easy
+# to get from other parts of the setup infrastructure
+builtins._ASTROPY_PACKAGE_NAME_ = PACKAGENAME
+
+# VERSION should be PEP386 compatible (http://www.python.org/dev/peps/pep-0386)
+VERSION = '0.0.dev'
 
 # Indicates if this version is a release version
-release = 'dev' not in version
+RELEASE = 'dev' not in VERSION
+
+if not RELEASE:
+    VERSION += get_git_devstr(False)
+
+# Populate the dict of setup command overrides; this should be done before
+# invoking any other functionality from distutils since it can potentially
+# modify distutils' behavior.
+cmdclassd = register_commands(PACKAGENAME, VERSION, RELEASE)
 
 # Adjust the compiler in case the default on this platform is to use a
 # broken one.
-setup_helpers.adjust_compiler()
+adjust_compiler(PACKAGENAME)
 
-# Indicate that we are in building mode
-setup_helpers.set_build_mode()
-
-if not release:
-    version += get_git_devstr(False)
-generate_version_py(PACKAGENAME, version, release,
-                    setup_helpers.get_debug_option())
-
-# Use the find_packages tool to locate all packages and modules
-packagenames = find_packages()
+# Freeze build information in version.py
+generate_version_py(PACKAGENAME, VERSION, RELEASE,
+                    get_debug_option(PACKAGENAME))
 
 # Treat everything in scripts except README.rst as a script to be installed
-scripts = glob.glob('scripts/*')
-scripts.remove('scripts/README.rst')
+scripts = [fname for fname in glob.glob(os.path.join('scripts', '*'))
+           if os.path.basename(fname) != 'README.rst']
 
-# Check that Numpy is installed.
-# NOTE: We cannot use setuptools/distribute/packaging to handle this
-# dependency for us, since some of the subpackages need to be able to
-# access numpy at build time, and they are configured before
-# setuptools has a chance to check and resolve the dependency.
-setup_helpers.check_numpy()
 
-# This dictionary stores the command classes used in setup below
-cmdclassd = {'test': setup_helpers.setup_test_command(PACKAGENAME)}
+# Get configuration information from all of the various subpackages.
+# See the docstring for setup_helpers.update_package_files for more
+# details.
+package_info = get_package_info()
 
-# Additional C extensions that are not Cython-based should be added here.
-extensions = []
+# Add the project-global data
+package_info['package_data'].setdefault(PACKAGENAME, [])
+package_info['package_data'][PACKAGENAME].append('data/*')
 
-# A dictionary to keep track of all package data to install
-package_data = {PACKAGENAME: ['data/*']}
-
-# A dictionary to keep track of extra packagedir mappings
-package_dirs = {}
-
-# Update extensions, package_data, packagenames and package_dirs from
-# any sub-packages that define their own extension modules and package
-# data.  See the docstring for setup_helpers.update_package_files for
-# more details.
-setup_helpers.update_package_files(PACKAGENAME, extensions, package_data,
-                                   packagenames, package_dirs)
-
-if setup_helpers.HAVE_CYTHON and not release:
-    from Cython.Distutils import build_ext
-    # Builds Cython->C if in dev mode and Cython is present
-    cmdclassd['build_ext'] = build_ext
-
-if setup_helpers.AstropyBuildSphinx is not None:
-    cmdclassd['build_sphinx'] = setup_helpers.AstropyBuildSphinx
-
+# Include all .c files, recursively, including those generated by
+# Cython, since we can not do this in MANIFEST.in with a "dynamic"
+# directory name.
+c_files = []
+for root, dirs, files in os.walk(PACKAGENAME):
+    for filename in files:
+        if filename.endswith('.c'):
+            c_files.append(
+                os.path.join(
+                    os.path.relpath(root, PACKAGENAME), filename))
+package_info['package_data'][PACKAGENAME].extend(c_files)
 
 setup(name=PACKAGENAME,
-      version=version,
+      version=VERSION,
       description=DESCRIPTION,
-      packages=packagenames,
-      package_data=package_data,
-      package_dir=package_dirs,
-      ext_modules=extensions,
       scripts=scripts,
       requires=['astropy'],
       install_requires=['astropy'],
@@ -98,5 +104,6 @@ setup(name=PACKAGENAME,
       long_description=LONG_DESCRIPTION,
       cmdclass=cmdclassd,
       zip_safe=False,
-      use_2to3=True
-      )
+      use_2to3=True,
+      **package_info
+)
