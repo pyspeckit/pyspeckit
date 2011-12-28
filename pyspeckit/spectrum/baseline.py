@@ -9,6 +9,28 @@ right click to disconnect and perform the fit.
 """
 
 class Baseline:
+    """
+    Class to measure and subtract baselines from spectra.
+
+    While the term 'baseline' is generally used in the radio to refer to
+    broad-band features in a spectrum not necessarily associated with a source,
+    in this package it refers to general continuum fitting.  In principle,
+    there's no reason to separate 'continuum' and 'spectral feature' fitting
+    into different categories (both require some model, data, and optional
+    weights when fitting).  In practice, however, 'continuum' is frequently
+    something to be removed and ignored, while spectral features are the
+    desired measurable quantity.  In order to accurately measure spectral
+    features, it is necessary to allow baselines of varying complexity.
+
+    The Baseline class has both interactive and command-based data selection
+    features.  It can be used to fit both polynomial and power-law continua.
+    Blackbody fitting is not yet implemented [12/21/2011].  Baseline fitting is
+    a necessary prerequisite for Equivalent Width measurement.
+
+    As you may observe in the comments on this code, this has been one of the
+    buggiest and least adequately tested components of pyspeckit.  Bug reports
+    are welcome.
+    """
     def __init__(self,Spectrum):
         self.baselinepars  = None
         self.order = None
@@ -34,7 +56,7 @@ class Baseline:
     @cfgdec
     def __call__(self, order=1, annotate=False, excludefit=False, save=True,
             exclude=None, exclusionlevel=0.01, interactive=False, 
-            LoudDebug=False, fit_original=True, baseline_fit_color = 'orange',
+            LoudDebug=False, fit_original=True, baseline_fit_color='orange',
             **kwargs):
         """
         Fit and remove a polynomial from the spectrum.  

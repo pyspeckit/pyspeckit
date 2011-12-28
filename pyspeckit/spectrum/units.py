@@ -3,16 +3,17 @@
 Units and SpectroscopicAxes
 ===========================
 
-.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
-Affiliation: University of Colorado at Boulder
-Created on March 9th, 2011
-
 Unit parsing and conversion tool.  
 The SpectroscopicAxis class is meant to deal with unit conversion internally
 
-Open Question: Are there other FITS-valid projection types, unit types, etc. that should be included?
+Open Questions: Are there other FITS-valid projection types, unit types, etc.
+    that should be included?
     What about for other fields (e.g., wavenumber?)
 """
+#.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+#Affiliation: University of Colorado at Boulder
+#Created on March 9th, 2011
+
 
 import numpy as np
 
@@ -125,6 +126,9 @@ unit_type_dict = {
 
 unit_type_dict = CaseInsensitiveDict(unit_type_dict)
 
+# to-do
+# unit_prettyprint = dict([(a,a.replace('angstroms','\\AA')) for a in unit_type_dict.keys() if a is not None])
+
 xtype_dict = {
         'VLSR':'velocity','VRAD':'velocity','VELO':'velocity',
         'VELO-LSR':'velocity',
@@ -159,11 +163,12 @@ frame_dict = {
         'WAVE':'rest',
         'wavelength':'rest',
         'lambda':'rest',
+        'redshift':'obs'
         }
 
 frame_type_dict = {'LSRK':'velocity','LSRD':'velocity','LSR':'velocity',
         'heliocentric':'velocity','topocentric':'velocity','geocentric':'velocity',
-        'rest':'frequency',}
+        'rest':'frequency','obs':'frequency','observed':'frequency'}
 
 fits_frame = {'rest':'REST','LSRK':'-LSR','heliocentric':'-HEL','geocentric':'-GEO'}
 fits_specsys = {'rest':'REST','LSRK':'LSRK','LSRD':'LSRD','heliocentric':'HEL','geocentric':'GEO'}
@@ -234,7 +239,7 @@ class SpectroscopicAxis(np.ndarray):
         else:
             subarr.velocity_convention = 'radio' # default
 
-        subarr.dxarr = subarr[1:]-subarr[:-1]
+        subarr.dxarr = np.diff(subarr)
 
         return subarr
 
@@ -445,7 +450,8 @@ class SpectroscopicAxis(np.ndarray):
     def convert_to_unit(self, unit, **kwargs):
         """
         Return the X-array in the specified units without changing it
-        (similar to convert_to_unit
+        Uses as_unit for the conversion, but changes internal values rather
+        than returning them.
         """
         self[:] = self.as_unit(unit, **kwargs)
         
@@ -455,14 +461,30 @@ class SpectroscopicAxis(np.ndarray):
             self.xtype = "Frequency"
 
         self.units = unit
-        self.dxarr = self[1:]-self[:-1]
+        self.dxarr = np.diff(self)
 
-    def as_unit(self,unit,frame=None, quiet=True,
-            center_frequency=None, center_frequency_units=None, **kwargs):
+    def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
+            center_frequency_units=None, **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
         to convert between frequency/velocity/wavelength and simply change the 
         units of the X axis.  Frame conversion is... not necessarily implemented.
+
+        *unit* [ string ] 
+            What unit do you want to 'view' the array as?
+
+        *frame* [ None ]
+            NOT IMPLEMENTED.  When it is, it will allow you to convert between
+            LSR, topocentric, heliocentric, rest, redshifted, and whatever other
+            frames we can come up with.  Right now the main holdup is finding a 
+            nice python interface to an LSR velocity calculator... and motivation.
+ 
+        *center_frequency* [ None | float ]
+        *center_frequency_units* [ None | string ]
+            If converting between velocity and any other spectroscopic type,
+            need to specify the central frequency around which that velocity is
+            calculated.
+            I think this can also accept wavelengths....
         """
 
         if unit is None:
@@ -527,12 +549,48 @@ class SpectroscopicAxis(np.ndarray):
 
         return newxarr
 
+    def change_frame(self, frame):
+        """
+        Change velocity frame
+        """
+        if self.frame == frame:
+            return
+        
+        if frame in frame_type_dict:
+            self[:] = self.in_frame(frame)
+            self.dxarr = np.diff(self)
+            self.frame = frame
+
+    def in_frame(self, frame):
+        """
+        Return a shifted xaxis
+        """
+        if self.frame in ('obs','observed') and frame in ('rest',):
+            if self.redshift is not None:
+                return self/(1.0+self.redshift)
+            else:
+                print "WARNING: Redshift is not specified, so no shift will be done."
+        elif self.frame in ('rest',) and frame in ('obs','observed'):
+            if self.redshift is not None:
+                return self*(1.0+self.redshift)
+            else:
+                print "WARNING: Redshift is not specified, so no shift will be done."
+        else:
+            print "Frame shift from %s to %s is not defined or implemented." % (self.frame, frame)
+            return self
+
+    def x_in_frame(self, xx, frame):
+        """
+        Return the value 'x' shifted to the target frame
+        """
+        return self.in_frame(frame)[self.x_to_pix(xx)]
+
     def cdelt(self, tolerance=1e-8):
         """
         Return the channel spacing if channels are linear
         """
         if not hasattr(self,'dxarr'): # if cropping happens...
-            self.dxarr = self[1:]-self[:-1]
+            self.dxarr = np.diff(self)
         if abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
             return self.dxarr.mean().flat[0]
 
@@ -540,7 +598,7 @@ class SpectroscopicAxis(np.ndarray):
         """
         Generate a set of WCS parameters for the X-array
         """
-        self.dxarr = self[1:]-self[:-1]
+        self.dxarr = np.diff(self)
 
         if self.wcshead is None:
             self.wcshead = {}

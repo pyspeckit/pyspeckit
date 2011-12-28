@@ -135,27 +135,41 @@ class Spectrum(object):
         self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         self.speclines = speclines
+        self._sort()
 
         if doplot: self.plotter(**plotkwargs)
 
-    def _register_fitters(self):
+    def _register_fitters(self, registry=None):
         """
         Register fitters independently for each spectrum instance
-        """
-        Registry = fitters.Registry()
-        Registry.add_fitter('ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
-        Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(multisingle='multi'),6,multisingle='multi')
-        # not implemented Registry.add_fitter(Registry,'ammonia',models.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
-        Registry.add_fitter('formaldehyde',models.formaldehyde_fitter,3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
-        Registry.add_fitter('formaldehyde',models.formaldehyde_vheight_fitter,3,multisingle='single')
-        Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
-        Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
-        Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
-        Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
-        Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5,multisingle='multi')
-        Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
-        self.Registry = Registry
 
+        This approach allows you to add fitters to a given Spectrum instance
+        without modifying the default registry
+        """
+        self.Registry = fitters.Registry()
+        if registry is None:
+            registry = fitters.default_Registry
+        elif not isinstance(registry, fitters.Registry):
+            raise TypeError("registry must be an instance of the fitters.Registry class")
+
+        for modelname, model in registry.multifitters.iteritems():
+            self.Registry.add_fitter(modelname, model,
+                    registry.npars[modelname], multisingle='multi',
+                    key=registry.associated_keys.get(modelname))
+        for modelname, model in registry.singlefitters.iteritems():
+            self.Registry.add_fitter(modelname, model,
+                    registry.npars[modelname], multisingle='single',
+                    key=registry.associated_keys.get(modelname))
+
+    def _sort(self):
+        """
+        Make sure X axis is monotonic.  
+        """
+        if self.xarr.dxarr.min() < 0:
+            argsort = np.argsort(self.xarr)
+            self.data = self.data[argsort]
+            self.error = self.error[argsort]
+            self.xarr = self.xarr[argsort]
         
     def write(self,filename,type=None,**kwargs):
         """
@@ -188,18 +202,22 @@ class Spectrum(object):
         xtype = Table.data.dtype.names[Table.xaxcol]
         if xtype in units.xtype_dict.values():
             self.xarr.xtype = xtype
+            self.xarr.units = Table.columns[xtype].unit
         elif xtype in units.xtype_dict:
             self.xarr.xtype = units.xtype_dict[xtype]
+            self.xarr.units = Table.columns[xtype].unit
         else:
-            raise ValueError("Invalid xtype in text header")
-        self.xarr.xunits = Table.columns[xtype].unit
+            print "Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels"
+            self.xarr.xtype = 'pixels'
+            self.xarr.units = 'none'
+            #raise ValueError("Invalid xtype in text header")
         self.ytype = Table.data.dtype.names[Table.datacol]
         self.units = Table.columns[self.ytype].unit
         self.header = pyfits.Header()
         self._update_header()
 
     def _update_header(self):
-        self.header.update('CUNIT1',self.xarr.xunits)
+        self.header.update('CUNIT1',self.xarr.units)
         self.header.update('CTYPE1',self.xarr.xtype)
         self.header.update('BUNIT',self.units)
         self.header.update('BTYPE',self.ytype)
@@ -246,12 +264,13 @@ class Spectrum(object):
         else:
             self.specname = ''
             
-    def measure(self, z=None, d=None, fluxnorm=None, miscline=None, misctol=None, ignore=None, derive=True):
+    def measure(self, z=None, d=None, fluxnorm=None, miscline=None, misctol=None, ignore=None, derive=True, **kwargs):
         """
         Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!
         """
-        self.measurements = measurements.Measurements(self, z = z, d = d, fluxnorm = fluxnorm, miscline = miscline, 
-            misctol = misctol, ignore = ignore, derive = derive)                
+        self.measurements=measurements.Measurements(self, z=z, d=d,
+                fluxnorm=fluxnorm, miscline=miscline, misctol=misctol,
+                ignore=ignore, derive=derive, **kwargs)
 
     def crop(self, x1, x2, units=None, **kwargs):
         """
@@ -436,6 +455,10 @@ class Spectra(Spectrum):
     operated on just like any Spectrum object, incuding fitting.  Useful for
     fitting multiple lines on non-continguous axes simultaneously.  Be wary of
     plotting these though...
+
+    Can be indexed like python lists.  
+
+    X array is forcibly sorted in increasing order
     """
 
     def __init__(self,speclist,xunits='GHz',**kwargs):
@@ -498,15 +521,6 @@ class Spectra(Spectrum):
 
     def __len__(self): return len(self.speclist)
 
-    def _sort(self):
-        """ Sort the data in order of increasing X (could be decreasing, but
-        must be monotonic for plotting reasons) """
-
-        indices = self.xarr.argsort()
-        self.xarr = self.xarr[indices]
-        self.data = self.data[indices]
-        self.error = self.error[indices]
-
     def smooth(self,smooth,**kwargs):
         """
         Smooth the spectrum by factor "smooth".  Options are defined in sm.smooth
@@ -564,6 +578,8 @@ class ObsBlock(Spectra):
 
     Consists of multiple spectra with a shared X-axis.  Intended to hold groups
     of observations of the same object in the same setup for later averaging.
+
+    ObsBlocks can be indexed like python lists.  
     """
 
     def __init__(self, speclist, xtype='frequency', xarr=None, force=False, **kwargs):

@@ -1,14 +1,4 @@
 """
-The spectrum module consists of the Spectrum class, with child classes ObsBlock
-and Spectra for multi-spectrum analysis of different types.
-
-The Spectrum class is the main functional code.
-ObsBlocks are containers of multiple spectra of different objects
-The Spectra class is a container of multiple spectra of the *same* object at
-   different wavelengths/frequencies
-
-:Author: Adam Ginsburg <adam.g.ginsburg@gmail.com> and Jordan Mirocha <mirochaj@gmail.com>
-.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
 from classes import Spectrum,Spectra,ObsBlock
 import fitters,plotters,baseline,units

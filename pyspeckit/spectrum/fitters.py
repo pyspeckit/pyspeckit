@@ -5,6 +5,7 @@ import numpy as np
 from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
 import units
+import models
 
 class Registry(object):
     """
@@ -15,8 +16,8 @@ class Registry(object):
         self.npars = {}
         self.multifitters = {}
         self.singlefitters = {}
-        self.writers = {}
         self.fitkeys = {}
+        self.associatedkeys = {}
 
         self.interactive_help_message = """
         Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
@@ -74,8 +75,20 @@ class Registry(object):
             self.fitkeys[key] = name
             self.interactive_help_message += "\n'%s' - select fitter %s" % (key,name)
         self.npars[name] = npars
+        self.associated_keys = dict(zip(self.fitkeys.values(),self.fitkeys.keys()))
 
-
+default_Registry = Registry()
+default_Registry.add_fitter('ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
+default_Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(multisingle='multi'),6,multisingle='multi')
+# not implemented default_Registry.add_fitter(Registry,'ammonia',models.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
+default_Registry.add_fitter('formaldehyde',models.formaldehyde_fitter,3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
+default_Registry.add_fitter('formaldehyde',models.formaldehyde_vheight_fitter,3,multisingle='single')
+default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
+default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
+default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
+default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
+default_Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5,multisingle='multi')
+default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
 
 
 class Specfit(object):
@@ -243,6 +256,13 @@ class Specfit(object):
                 self.specplotter.refresh()
         return eqw
 
+    def register_fitter(self,*args,**kwargs):
+        """
+        Register a model fitter
+        """
+        self.Registry.add_fitter(*args,**kwargs)
+
+    register_fitter.__doc__ += Registry.add_fitter.__doc__
     
     def seterrspec(self,usestd=None,useresiduals=True):
         """
@@ -338,12 +358,14 @@ class Specfit(object):
             mpperr[self.fitter.npars*ii] *= scalefactor
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
-        self.parinfo = self.fitter.mp.parinfo
+        self.parinfo = self.fitter.mp.parinfo_in
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
         if self.specplotter.axis is not None:
-            self.plot_fit(annotate=annotate, 
-                color = color, composite_fit_color = composite_fit_color, component_fit_color = component_fit_color, 
-                    lw = lw, composite_lw = composite_lw, component_lw = component_lw, show_components = show_components)
+            self.plot_fit(annotate=annotate, color=color,
+                    composite_fit_color=composite_fit_color,
+                    component_fit_color=component_fit_color, lw=lw,
+                    composite_lw=composite_lw, component_lw=component_lw,
+                    show_components=show_components)
                 
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
         if self.fitkwargs.has_key('tied'):
@@ -808,5 +830,19 @@ class Specfit(object):
             return integ,error
         else:
             return integ
+
+    def shift_pars(self, frame=None):
+        """
+        Shift the velocity / wavelength / frequency of the fitted parameters
+        into a different frame
+
+        Right now this only takes care of redshift and only if redshift is defined.
+        It should be extended to do other things later
+        """
+        for ii,pi in enumerate(self.parinfo):
+            for partype in ('shift','offset','velo'):
+                if partype in str.lower(pi['parname']):
+                    if frame is not None:
+                        self.modelpars[ii] = self.Spectrum.xarr.x_in_frame(self.modelpars[ii], frame)
 
 

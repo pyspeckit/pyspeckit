@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cubes &mdash; pyspeckit v0.1 documentation</title>
+    <title>Cubes &mdash; pyspeckit 0.1 documentation</title>
+    
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
@@ -23,8 +26,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit v0.1 documentation" href="index.html" />
-    <link rel="next" title="Models" href="models.html" />
+    <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
+    <link rel="up" title="Classes" href="classes.html" />
+    <link rel="next" title="Features" href="features.html" />
     <link rel="prev" title="spectrum" href="spectrum.html" />
      
     <script type="text/javascript">
@@ -43,7 +47,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit v0.1 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -62,19 +66,23 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-pyspeckit.cubes">
-<span id="cubes"></span><h1>cubes<a class="headerlink" href="#module-pyspeckit.cubes" title="Permalink to this headline">¶</a></h1>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Author:</th><td class="field-body">Adam Ginsburg &lt;<a class="reference external" href="mailto:adam&#46;g&#46;ginsburg&#37;&#52;&#48;gmail&#46;com">adam<span>&#46;</span>g<span>&#46;</span>ginsburg<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</td>
-</tr>
-</tbody>
-</table>
+  <div class="section" id="module-pyspeckit.cubes.SpectralCube">
+<span id="cubes"></span><h1>Cubes<a class="headerlink" href="#module-pyspeckit.cubes.SpectralCube" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>Cubes<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>Tools to deal with spectroscopic data cubes.</p>
+<dl class="docutils">
+<dt>Many features in Cubes require additional packages:</dt>
+<dd>smoothing - requires <a class="reference external" href="https://agpy.googlecode.com/svn/trunk">agpy</a>&#8216;s smooth and parallel_map routines
+<a class="reference external" href="https://www.stsci.edu/svn/ssb/astrolib/trunk/coords">coords</a>
+<a class="reference external" href="git://github.com/leejjoon/pyregion.git">pyregion</a>
+<a class="reference external" href="git://github.com/astropy/astropy.git">pywcs</a></dd>
+</dl>
+<p>The &#8216;grunt work&#8217; is performed by the <tt class="xref py py-mod docutils literal"><span class="pre">cubes</span></tt> module</p>
+</div>
 <dl class="class">
-<dt id="pyspeckit.cubes.Cube">
-<em class="property">class </em><tt class="descclassname">pyspeckit.cubes.</tt><tt class="descname">Cube</tt><big>(</big><em>filename</em>, <em>x0=0</em>, <em>y0=0</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube">
+<em class="property">class </em><tt class="descclassname">pyspeckit.cubes.SpectralCube.</tt><tt class="descname">Cube</tt><big>(</big><em>filename</em>, <em>x0=0</em>, <em>y0=0</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.classes.Spectrum</span></tt></p>
 <dl class="docutils">
 <dt>Initialize the Cube.  Accepts files in the following formats:</dt>
@@ -85,43 +93,43 @@
 </dl>
 <p>x0,y0 - initial spectrum to use (defaults to lower-left corner)</p>
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.copy">
-<tt class="descname">copy</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.copy" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a copy of the spectrum with its own plotter, fitter, etc.
 Useful for, e.g., comparing smoothed to unsmoothed data</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.crop">
-<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.crop" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.crop">
+<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace the current spectrum with a subset from x1 to x2 in current
 units</p>
 <p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.fiteach">
-<tt class="descname">fiteach</tt><big>(</big><em>errspec=None</em>, <em>errmap=None</em>, <em>guesses=()</em>, <em>verbose=True</em>, <em>verbose_level=1</em>, <em>quiet=True</em>, <em>signal_cut=3</em>, <em>usemomentcube=False</em>, <em>blank_value=0</em>, <em>integral=True</em>, <em>direct=False</em>, <em>**fitkwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.fiteach" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.fiteach">
+<tt class="descname">fiteach</tt><big>(</big><em>errspec=None</em>, <em>errmap=None</em>, <em>guesses=()</em>, <em>verbose=True</em>, <em>verbose_level=1</em>, <em>quiet=True</em>, <em>signal_cut=3</em>, <em>usemomentcube=False</em>, <em>blank_value=0</em>, <em>integral=True</em>, <em>direct=False</em>, <em>absorption=False</em>, <em>**fitkwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.fiteach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit a spectrum to each valid pixel in the cube</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.get_apspec">
-<tt class="descname">get_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.get_apspec" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.get_apspec">
+<tt class="descname">get_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.get_apspec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract an aperture using cubes.extract_aperture
 (defaults to Cube coordinates)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.get_spectrum">
-<tt class="descname">get_spectrum</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.get_spectrum" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.get_spectrum">
+<tt class="descname">get_spectrum</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.get_spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Very simple: get the spectrum at coordinates x,y</p>
 <p>Returns a SpectroscopicAxis instance</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.getlines">
-<tt class="descname">getlines</tt><big>(</big><em>linetype='radio'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.getlines" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.getlines">
+<tt class="descname">getlines</tt><big>(</big><em>linetype='radio'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.getlines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Access a registered database of spectral lines.  Will add an attribute
 with the name linetype, which then has properties defined by the
 speclines module (most likely, a table and a &#8220;show&#8221; function to display
@@ -129,32 +137,33 @@ the lines)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.interpnans">
-<tt class="descname">interpnans</tt><big>(</big><em>spec</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.interpnans" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.interpnans">
+<tt class="descname">interpnans</tt><big>(</big><em>spec</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.interpnans" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate over NAN values, replacing them with their neighbors...</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.measure">
-<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=None</em>, <em>ignore=None</em>, <em>derive=True</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.measure" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.measure">
+<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=None</em>, <em>ignore=None</em>, <em>derive=True</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.measure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.momenteach">
-<tt class="descname">momenteach</tt><big>(</big><em>verbose=True</em>, <em>verbose_level=1</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.momenteach" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.momenteach">
+<tt class="descname">momenteach</tt><big>(</big><em>verbose=True</em>, <em>verbose_level=1</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.momenteach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a cube of the moments of each pixel</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.moments">
-<tt class="descname">moments</tt><big>(</big><em>unit='km/s'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.moments" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Return the moments of the spectrum.  In order to assure that the 1st
-and 2nd moments are meaningful, a &#8216;default&#8217; unit is set.  If unit is not
+<dt id="pyspeckit.cubes.SpectralCube.Cube.moments">
+<tt class="descname">moments</tt><big>(</big><em>unit='km/s'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.moments" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Return the moments of the spectrum.  In order to assure that the 1st</dt>
+<dd><p class="first">and 2nd moments are meaningful, a &#8216;default&#8217; unit is set.  If unit is not
 set, will use current unit.</p>
-<p>Returns (height, amplitude, x, width_x)</p>
-</div></blockquote>
+<p class="last">Returns (height, amplitude, x, width_x)</p>
+</dd>
+</dl>
 <p>the gaussian parameters of a 1D distribution by calculating its
 moments.  Depending on the input parameters, will only output 
 a subset of the above.
@@ -169,60 +178,69 @@ or it will be &#8220;autodetected&#8221; (negamp=None)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.parse_header">
-<tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.parse_header" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.parse_hdf5_header">
+<tt class="descname">parse_hdf5_header</tt><big>(</big><em>hdr</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.parse_hdf5_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>HDF5 reader will create a hdr dictionary from HDF5 dataset
+attributes if they exist.  This routine will convert that dict
+to a pyfits header instance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.cubes.SpectralCube.Cube.parse_header">
+<tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.parse_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse parameters from a .fits header into required spectrum structure
 parameters</p>
 <p>This should be moved to the FITSSpectrum subclass when that is available</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.parse_text_header">
-<tt class="descname">parse_text_header</tt><big>(</big><em>Table</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.parse_text_header" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.parse_text_header">
+<tt class="descname">parse_text_header</tt><big>(</big><em>Table</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.parse_text_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Grab relevant parameters from a table header (xaxis type, etc)</p>
 <p>This function should only exist for Spectrum objects created from
 .txt or other atpy table type objects</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.plot_apspec">
-<tt class="descname">plot_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em>, <em>reset_ylimits=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.plot_apspec" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.plot_apspec">
+<tt class="descname">plot_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em>, <em>reset_ylimits=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.plot_apspec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract an aperture using cubes.extract_aperture
 (defaults to Cube coordinates)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.plot_spectrum">
-<tt class="descname">plot_spectrum</tt><big>(</big><em>x</em>, <em>y</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.plot_spectrum" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.plot_spectrum">
+<tt class="descname">plot_spectrum</tt><big>(</big><em>x</em>, <em>y</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.plot_spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fill the .data array with a real spectrum and plot it</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.set_apspec">
-<tt class="descname">set_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.set_apspec" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.set_apspec">
+<tt class="descname">set_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.set_apspec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract an aperture using cubes.extract_aperture
 (defaults to Cube coordinates)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.shape">
-<tt class="descname">shape</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.shape" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.shape">
+<tt class="descname">shape</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the data shape</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.slice">
-<tt class="descname">slice</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>copy=True</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.slice" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.slice">
+<tt class="descname">slice</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>copy=True</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.slice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Slice a spectrum.  Defaults to the current units.  Can specify &#8216;pixels&#8217;
 if you want to just slice by index</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.smooth">
-<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.smooth" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>Smooth the spectrum by factor &#8220;smooth&#8221;.  
-sm.smooth doc:</div></blockquote>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.smooth">
+<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.smooth" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Smooth the spectrum by factor &#8220;smooth&#8221;.  </dt>
+<dd>sm.smooth doc:</dd>
+</dl>
 <p>Smooth and downsample the data array
 smoothtype - &#8216;gaussian&#8217;,&#8217;hanning&#8217;, or &#8216;boxcar&#8217;
 downsample - Downsample the data?
@@ -233,16 +251,16 @@ convmode - see numpy.convolve.  &#8216;same&#8217; returns an array of the same 
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.stats">
-<tt class="descname">stats</tt><big>(</big><em>statrange=()</em>, <em>interactive=False</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.stats" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.stats">
+<tt class="descname">stats</tt><big>(</big><em>statrange=()</em>, <em>interactive=False</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return some statistical measures in a dictionary (somewhat self-explanatory)</p>
 <p>range - X-range over which to perform measures
 interactive - specify range interactively in plotter</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.cubes.Cube.write">
-<tt class="descname">write</tt><big>(</big><em>filename</em>, <em>type=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.Cube.write" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.cubes.SpectralCube.Cube.write">
+<tt class="descname">write</tt><big>(</big><em>filename</em>, <em>type=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the spectrum to a file.  The available file types are listed
 in spectrum.writers.writers</p>
 <p>type - what type of file to write to?  If not specified, will attempt
@@ -251,14 +269,148 @@ to determine type from suffix</p>
 
 </dd></dl>
 
-<span class="target" id="module-pyspeckit.cubes"></span><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Author:</th><td class="field-body">Adam Ginsburg &lt;<a class="reference external" href="mailto:adam&#46;g&#46;ginsburg&#37;&#52;&#48;gmail&#46;com">adam<span>&#46;</span>g<span>&#46;</span>ginsburg<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</td>
-</tr>
-</tbody>
-</table>
+<dl class="class">
+<dt id="pyspeckit.cubes.SpectralCube.CubeStack">
+<em class="property">class </em><tt class="descclassname">pyspeckit.cubes.SpectralCube.</tt><tt class="descname">CubeStack</tt><big>(</big><em>cubelist</em>, <em>xunits='GHz'</em>, <em>x0=0</em>, <em>y0=0</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.CubeStack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyspeckit.cubes.SpectralCube.Cube" title="pyspeckit.cubes.SpectralCube.Cube"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.cubes.SpectralCube.Cube</span></tt></a></p>
+<p>The Cube equivalent of Spectra: for stitching multiple cubes with the same
+spatial grid but different frequencies together</p>
+<dl class="docutils">
+<dt>Initialize the Cube.  Accepts files in the following formats:</dt>
+<dd><ul class="first last simple">
+<li>.fits</li>
+</ul>
+</dd>
+</dl>
+<p>x0,y0 - initial spectrum to use (defaults to lower-left corner)</p>
+</dd></dl>
+
+<div class="section" id="cubes-py">
+<h2>cubes.py<a class="headerlink" href="#cubes-py" title="Permalink to this headline">¶</a></h2>
+<p>From <cite>agpy &lt;http://code.google.com/p/agpy/source/browse/trunk/agpy/cubes.py&gt;</cite>,
+contains functions to perform various transformations on data cubes and their
+headers.</p>
+<span class="target" id="module-pyspeckit.cubes.cubes"></span><dl class="function">
+<dt id="pyspeckit.cubes.cubes.aper_world2pix">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">aper_world2pix</tt><big>(</big><em>ap</em>, <em>wcs</em>, <em>coordsys='galactic'</em>, <em>wunit='arcsec'</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.aper_world2pix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an elliptical aperture (x,y,width,height,PA) from
+WCS to pixel coordinates given an input wcs (an instance
+of the pywcs.WCS class).  Must be a 2D WCS header.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.coords_in_image">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">coords_in_image</tt><big>(</big><em>fitsfile</em>, <em>lon</em>, <em>lat</em>, <em>system='galactic'</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.coords_in_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine whether the coordinates are inside the image</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.extract_aperture">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">extract_aperture</tt><big>(</big><em>cube</em>, <em>ap</em>, <em>r_mask=False</em>, <em>wcs=None</em>, <em>coordsys='galactic'</em>, <em>wunit='arcsec'</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.extract_aperture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract an aperture from a data cube.  E.g. to acquire a spectrum
+of an outflow that is extended.</p>
+<p>Cube should have shape [z,y,x], e.g. 
+cube = pyfits.getdata(&#8216;datacube.fits&#8217;)</p>
+<p>Apertures are specified in PIXEL units with an origin of 0,0 (NOT the 1,1
+fits standard!) unless wcs and coordsys are specified</p>
+<dl class="docutils">
+<dt>INPUTS:</dt>
+<dd><p class="first">wcs - a pywcs.WCS instance associated with the data cube
+coordsys - the coordinate system the aperture is specified in.</p>
+<blockquote>
+<div>Options are &#8216;celestial&#8217; and &#8216;galactic&#8217;.  Default is &#8216;galactic&#8217;</div></blockquote>
+<p class="last">wunit - units of width/height.  default &#8216;arcsec&#8217;, options &#8216;arcmin&#8217; and &#8216;degree&#8217;</p>
+</dd>
+<dt>For a circular aperture, len(ap)=3:</dt>
+<dd>ap = [xcen,ycen,radius]</dd>
+<dt>For an elliptical aperture, len(ap)=5:</dt>
+<dd>ap = [xcen,ycen,height,width,PA]</dd>
+<dt>Optional inputs:</dt>
+<dd>r_mask - return mask in addition to spectrum (for error checking?)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.flatten_header">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">flatten_header</tt><big>(</big><em>header</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.flatten_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to turn an N-dimensional fits header into a 2-dimensional header
+Turns all CRPIX[&gt;2] etc. into new keywords with suffix &#8216;A&#8217;</p>
+<p>header must be a pyfits.Header instance</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.getspec">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">getspec</tt><big>(</big><em>lon</em>, <em>lat</em>, <em>rad</em>, <em>cube</em>, <em>header</em>, <em>r_fits=True</em>, <em>inherit=True</em>, <em>wunit='arcsec'</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.getspec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a longitude, latitude, aperture radius (arcsec), and a cube file,
+return a .fits file or a spectrum.</p>
+<dl class="docutils">
+<dt>lon,lat - longitude and latitude center of a circular aperture in WCS coordinates</dt>
+<dd>must be in coordinate system of the file</dd>
+</dl>
+<p>rad     - radius (default degrees) of aperture</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.getspec_reg">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">getspec_reg</tt><big>(</big><em>cubefilename</em>, <em>region</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.getspec_reg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aperture extraction from a cube using a pyregion circle region</p>
+<p>The region must be in the same coordinate system as the cube header</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.integ">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">integ</tt><big>(</big><em>file</em>, <em>vrange</em>, <em>xcen=None</em>, <em>xwidth=None</em>, <em>ycen=None</em>, <em>ywidth=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.integ" title="Permalink to this definition">¶</a></dt>
+<dd><p>wrapper of subimage_integ that defaults to using the full image</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.plane_smooth">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">plane_smooth</tt><big>(</big><em>cube</em>, <em>cubedim=0</em>, <em>parallel=True</em>, <em>numcores=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.plane_smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>parallel-map the smooth function</p>
+<dl class="docutils">
+<dt>parallel - defaults True.  Set to false if you want serial (for debug</dt>
+<dd>purposes?)</dd>
+</dl>
+<p>numcores - pass to parallel_map (None = use all available)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.speccen_header">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">speccen_header</tt><big>(</big><em>header</em>, <em>lon=None</em>, <em>lat=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.speccen_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn a cube header into a spectrum header, retaining RA/Dec vals where possible
+(speccen is like flatten; spec-ify would be better but, specify?  nah)</p>
+<p>Assumes 3rd axis is velocity</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.spectral_smooth">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">spectral_smooth</tt><big>(</big><em>cube</em>, <em>smooth_factor</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.spectral_smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth the cube along the spectral direction</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.subcube">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">subcube</tt><big>(</big><em>cube</em>, <em>xcen</em>, <em>xwidth</em>, <em>ycen</em>, <em>ywidth</em>, <em>header=None</em>, <em>dvmult=False</em>, <em>return_HDU=False</em>, <em>units='pixels'</em>, <em>widthunits='pixels'</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.subcube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crops a data cube</p>
+<p>All units assumed to be pixel units</p>
+<p>cube has dimensions (velocity, y, x)</p>
+<p>xwidth and ywidth are &#8220;radius&#8221; values, i.e. half the length that will be extracted</p>
+<p>if dvmult is set, multiple the average by DV (this is useful if you set
+average=sum and dvmul=True to get an integrated value)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.cubes.cubes.subimage_integ">
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">subimage_integ</tt><big>(</big><em>cube</em>, <em>xcen</em>, <em>xwidth</em>, <em>ycen</em>, <em>ywidth</em>, <em>vrange</em>, <em>header=None</em>, <em>average=&lt;function mean at 0x1044070c8&gt;</em>, <em>dvmult=False</em>, <em>return_HDU=False</em>, <em>units='pixels'</em>, <em>zunits=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.subimage_integ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a sub-image from a data cube integrated over the specified velocity range</p>
+<p>All units assumed to be pixel units</p>
+<p>cube has dimensions (velocity, y, x)</p>
+<p>xwidth and ywidth are &#8220;radius&#8221; values, i.e. half the length that will be extracted</p>
+<p>if dvmult is set, multiple the average by DV (this is useful if you set
+average=sum and dvmul=True to get an integrated value)</p>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -269,9 +421,17 @@ to determine type from suffix</p>
         <div class="sidebar">
           <h3>Table Of Contents</h3>
           <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="spectrum.html">spectrum</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">cubes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models &amp; Fitting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="classes.html">Base Classes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="spectrum.html">Spectrum, Spectra, and ObsBlocks</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">SpectroscopicCube and its supporting functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
 </ul>
 
           <h3 style="margin-top: 1.5em;">Search</h3>
@@ -291,7 +451,23 @@ to determine type from suffix</p>
 
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+      Last updated on Dec 22, 2011.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
+    <a href="pyspeckit.pdf">PDF version of this document</a>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-6253200-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+        
     </div>
   </body>
 </html>

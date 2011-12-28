@@ -14,22 +14,26 @@ spec.measure()
 cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
-    def __init__(self, Spectrum, z = None, d = None, xunits = None, fluxnorm = None, miscline = None, misctol = 10, ignore = None,
-        derive = True):
+    def __init__(self, Spectrum, z=None, d=None, xunits=None, fluxnorm=None,
+            miscline=None, misctol=10, ignore=None, derive=True, debug=False):
         """
-        This can be called after a fit is run.  It will inherit the specfit object and derive as much as it can from modelpars.
-        Just do: spec.measure(z, xunits, fluxnorm)
+        This can be called after a fit is run.  It will inherit the specfit
+        object and derive as much as it can from modelpars.  Just do:
+        spec.measure(z, xunits, fluxnorm)
         
-        Notes: If z (redshift) or d (distance) are present, we can compute ingrated line luminosities rather than just fluxes.
-            Provide distance in cm.
+        Notes: If z (redshift) or d (distance) are present, we can compute
+        integrated line luminosities rather than just fluxes.  Provide distance
+        in cm.
         
-        Currently will only work with Gaussians. to generalize:
-            1. make sure we manipulate modelpars correctly, i.e. read in entries corresponding to wavelength/frequency/whatever correctly.
+        Currently will only work with Gaussians.  To generalize:
+            1. make sure we manipulate modelpars correctly, i.e. read in
+            entries corresponding to wavelength/frequency/whatever correctly.
             
         misclines = dictionary
             miscline = {{'name': H_alpha', 'wavelength': 6565, 'etc': 0}, {}}
             
         """
+        self.debug = debug
                     
         # Inherit specfit object    
         self.specfit = Spectrum.specfit
@@ -76,6 +80,9 @@ class Measurements(object):
         if z is not None: 
             self.cosmology = cosmology.Cosmology()
             self.d = self.cosmology.LuminosityDistance(z) * cm_per_mpc
+            self.redshift = z
+        else:
+            self.redshift = 0.0
             
         self.identify()
         if derive: self.derive()
@@ -101,9 +108,13 @@ class Measurements(object):
             where = 0
             odiff = self.odiff
             multi = False
+
+        # need to account for redshift if self.redshift is set
+        # WRONG! Assume REST frame, do shifting elsewhere...
+        refpos = self.refpos #* (1.0+self.redshift)
                     
-        condition = (self.refpos >= 0.9 * min(self.obspos)) & (self.refpos <= 1.1 * max(self.obspos))   # Speeds things up
-        refpos = self.refpos[condition]
+        condition = (refpos >= 0.9 * min(self.obspos)) & (refpos <= 1.1 * max(self.obspos))   # Speeds things up
+        refpos = refpos[condition]
                 
         combos = itertools.combinations(refpos, self.Nlines - len(where))        
         for i, combo in enumerate(combos):
@@ -115,11 +126,11 @@ class Measurements(object):
         ALLloc = []                                  # x-values of best fit lines in reference dictionary
         
         # Fill lines dictionary        
-        for element in self.IDresults[MINloc][1]: ALLloc.append(np.argmin(np.abs(self.refpos - element)))        
+        for element in self.IDresults[MINloc][1]: ALLloc.append(np.argmin(np.abs(refpos - element)))        
         for i, element in enumerate(ALLloc): 
             line = self.refname[element]
             self.lines[line] = {}
-            loc = np.argmin(np.abs(self.obspos - self.refpos[element]))                
+            loc = np.argmin(np.abs(self.obspos - refpos[element]))                
             self.lines[line]['modelpars'] = list(self.modelpars[loc])            
             self.lines[line]['modelerrs'] = list(self.modelerrs[loc])            
                     
@@ -144,7 +155,7 @@ class Measurements(object):
                         self.lines[line]['modelpars'].extend(tmp1[i:i+3])
                         self.lines[line]['modelerrs'].extend(tmp2[i:i+3])
                 except TypeError:
-                    loc = np.argmin(np.abs(tmp1[1] - self.refpos))                       
+                    loc = np.argmin(np.abs(tmp1[1] - refpos))                       
                     line = self.refname[loc]
                     self.lines[line]['modelpars'].extend(tmp1)
                     self.lines[line]['modelerrs'].extend(tmp2)
@@ -172,6 +183,9 @@ class Measurements(object):
         """            
         
         for line in self.lines.keys():
+
+            if self.debug:
+                print "Computing parameters for line %s" % line
             
             self.lines[line]['fwhm'] = self.compute_fwhm(self.lines[line]['modelpars'])
             self.lines[line]['flux'] = self.compute_flux(self.lines[line]['modelpars'])
@@ -260,14 +274,14 @@ class Measurements(object):
                 
             # Otherwise, we have to figure out where the multicomponent peak is
             else:    
-                f = lambda x: self.specfit.fitter.multipeakgaussianslope(x, pars)
+                f = lambda x: self.specfit.fitter.slope(x)
                 xfmax = self.bisection(f, start)
-                fmax = self.specfit.fitter.multipeakgaussian(xfmax, pars)
+                fmax = self.specfit.fitter.slope(xfmax)
             
             hmax = 0.5 * fmax    
                 
             # current height relative to half max - we want to minimize this function.  Could be asymmetric.
-            f = lambda x: self.specfit.fitter.multipeakgaussian(x, pars) - hmax                   
+            f = lambda x: self.specfit.fitter.n_modelfunc(pars)(np.array([x])) - hmax                   
             xhmax1 = self.bisection(f, start)
             xhmax2 = self.bisection(f, start + (start - xhmax1))
                                         

@@ -1,3 +1,8 @@
+"""
+======================
+Simple Gaussian Fitter
+======================
+"""
 import pyspeckit
 
 def fit_gaussians_to_simple_spectra(filename, units='km/s', doplot=True,
@@ -7,6 +12,20 @@ def fit_gaussians_to_simple_spectra(filename, units='km/s', doplot=True,
     As stated in the name title, will fit Gaussians to simple spectra!
 
     kwargs will be passed to specfit
+
+    *figuresavename* [ None | string ] 
+        After fitting, save the figure to this filename if specified
+
+    *croprange* [ list of 2 floats ]
+        Crop the spectrum to (min,max) in the specified units
+
+    *savename* [ None | string ]
+        After fitting, save the spectrum to this filename
+
+    Note that this wrapper can be used from the command line:
+
+        python fit_gaussians_to_simple_spectra.py spectrum.fits
+    
     """
 
     # load a FITS-compliant spectrum

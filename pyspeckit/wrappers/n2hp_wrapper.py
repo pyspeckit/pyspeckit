@@ -1,3 +1,14 @@
+"""
+====================
+N2H+ fitter wrapper
+====================
+
+Wrapper to fit N2H+ using RADEX models.  This is meant to be used from the command line, e.g.:
+
+    python n2hp_wrapper.py file.fits
+
+and therefore has no independently defined functions.
+"""
 import pyspeckit
 import numpy as np
 import pyfits

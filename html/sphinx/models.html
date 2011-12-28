@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Models &mdash; pyspeckit v0.1 documentation</title>
+    <title>Models &mdash; pyspeckit 0.1 documentation</title>
+    
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
@@ -23,8 +26,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit v0.1 documentation" href="index.html" />
-    <link rel="prev" title="cubes" href="cubes.html" />
+    <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
+    <link rel="next" title="Classes" href="classes.html" />
+    <link rel="prev" title="Installation and Requirements" href="install.html" />
      
     <script type="text/javascript">
 
@@ -42,7 +46,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit v0.1 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -61,8 +65,8 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-models">
-<span id="models"></span><h1>Models<a class="headerlink" href="#module-models" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-pyspeckit.spectrum.models">
+<span id="models"></span><h1>Models<a class="headerlink" href="#module-pyspeckit.spectrum.models" title="Permalink to this headline">¶</a></h1>
 <p>The generic SpectralModel class is a wrapper for model functions.  A model
 should take in an X-axis and some number of parameters.  In order to declare a
 SpectralModel, you give SpectralModel the function name and the number of
@@ -73,7 +77,8 @@ your fitting code must deal with units internally:</p>
         <span class="n">parnames</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;tau&#39;</span><span class="p">,</span> <span class="s">&#39;v_lsr&#39;</span><span class="p">,</span>  <span class="s">&#39;v_infall&#39;</span><span class="p">,</span>  <span class="s">&#39;sigma&#39;</span><span class="p">,</span> <span class="s">&#39;tpeak&#39;</span><span class="p">],</span>
         <span class="n">parlimited</span><span class="o">=</span><span class="p">[(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">),(</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">),(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">),(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">),</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">)],</span>
         <span class="n">parlimits</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)],</span>
-        <span class="n">shortvarnames</span><span class="o">=</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">tau&quot;</span><span class="p">,</span><span class="s">&quot;v_{lsr}&quot;</span><span class="p">,</span><span class="s">&quot;v_{infall}&quot;</span><span class="p">,</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">sigma&quot;</span><span class="p">,</span><span class="s">&quot;T_{peak}&quot;</span><span class="p">),</span> <span class="c"># specify the parameter names (TeX is OK)</span>
+        <span class="c"># specify the parameter names (TeX is OK)</span>
+        <span class="n">shortvarnames</span><span class="o">=</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">tau&quot;</span><span class="p">,</span><span class="s">&quot;v_{lsr}&quot;</span><span class="p">,</span><span class="s">&quot;v_{infall}&quot;</span><span class="p">,</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">sigma&quot;</span><span class="p">,</span><span class="s">&quot;T_{peak}&quot;</span><span class="p">),</span>
         <span class="n">fitunits</span><span class="o">=</span><span class="s">&#39;Hz&#39;</span> <span class="p">)</span>
 </pre></div>
 </div>
@@ -81,7 +86,7 @@ your fitting code must deal with units internally:</p>
 <h2>Generic SpectralModel wrapper<a class="headerlink" href="#generic-spectralmodel-wrapper" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>parnames=None</em>, <em>parvalues=None</em>, <em>parlimits=None</em>, <em>parlimited=None</em>, <em>parfixed=None</em>, <em>parerror=None</em>, <em>partied=None</em>, <em>fitunits=None</em>, <em>parsteps=None</em>, <em>npeaks=1</em>, <em>shortvarnames=('A'</em>, <em>'v'</em>, <em>'\sigma')</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>multisingle='multi'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper class for a spectra model.  Includes internal functions to
 generate multi-component models, annotations, integrals, and individual
 components.  The declaration can be complex, since you should name
@@ -105,6 +110,10 @@ others, but it&#8217;s not clear if that&#8217;s a sensible default</dd>
 <p>parsteps - minimum step size for each paremeter          (defaults to ZEROS)</p>
 <p>npeaks   - default number of peaks to assume when fitting (can be overridden)</p>
 <p>shortvarnames - TeX names of the variables to use when annotating</p>
+<dl class="docutils">
+<dt>multisingle - Are there multiple peaks (no background will be fit) or</dt>
+<dd>just a single peak (a background may/will be fit)</dd>
+</dl>
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.annotations">
 <tt class="descname">annotations</tt><big>(</big><em>shortvarnames=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.annotations" title="Permalink to this definition">¶</a></dt>
@@ -115,6 +124,28 @@ others, but it&#8217;s not clear if that&#8217;s a sensible default</dd>
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.components">
 <tt class="descname">components</tt><big>(</big><em>xarr</em>, <em>pars</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.components" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a numpy ndarray of the independent components of the fits</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.fitter">
+<tt class="descname">fitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>quiet=True</em>, <em>veryverbose=False</em>, <em>debug=False</em>, <em>parinfo=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.fitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the fitter.  Must pass the x-axis and data.  Can include
+error, parameter guesses, and a number of verbosity parameters.</p>
+<dl class="docutils">
+<dt>quiet - pass to mpfit.  If False, will print out the parameter values</dt>
+<dd>for each iteration of the fitter</dd>
+</dl>
+<p>veryverbose - print out a variety of mpfit output parameters</p>
+<p>debug - raise an exception (rather than a warning) if chi^2 is nan</p>
+<dl class="docutils">
+<dt>accepts <em>tied</em>, <em>limits</em>, <em>limited</em>, and <em>fixed</em> as keyword arguments.</dt>
+<dd>They must be lists of length len(params)</dd>
+<dt>parinfo - You can override the class parinfo dict with this, though</dt>
+<dd>that largely defeats the point of having the wrapper class.  This class
+does NO checking for whether the parinfo dict is valid.</dd>
+</dl>
+<p>kwargs are passed to mpfit after going through _make_parinfo to strip out things
+used by this class</p>
 </dd></dl>
 
 <dl class="method">
@@ -137,6 +168,13 @@ just sums self.model</p>
 <dd><p>Simple wrapper to deal with N independent peaks for a given spectral model</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.slope">
+<tt class="descname">slope</tt><big>(</big><em>xinp</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.slope" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the local slope of the model at location x
+(x must be in xax&#8217;s units)</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -148,7 +186,7 @@ just sums self.model</p>
 <h3>Module API<a class="headerlink" href="#module-api" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.ammonia.ammonia">
-<tt class="descclassname">pyspeckit.spectrum.models.ammonia.</tt><tt class="descname">ammonia</tt><big>(</big><em>xarr</em>, <em>tkin=20</em>, <em>tex=None</em>, <em>ntot=100000000000000.0</em>, <em>width=1</em>, <em>xoff_v=0.0</em>, <em>fortho=1.0</em>, <em>tau11=None</em>, <em>fillingfraction=None</em>, <em>return_tau=False</em>, <em>thin=False</em>, <em>verbose=False</em>, <em>return_components=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.ammonia.ammonia" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.ammonia.</tt><tt class="descname">ammonia</tt><big>(</big><em>xarr</em>, <em>tkin=20</em>, <em>tex=None</em>, <em>ntot=100000000000000.0</em>, <em>width=1</em>, <em>xoff_v=0.0</em>, <em>fortho=0.0</em>, <em>tau=None</em>, <em>fillingfraction=None</em>, <em>return_tau=False</em>, <em>thin=False</em>, <em>verbose=False</em>, <em>return_components=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.ammonia.ammonia" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a model Ammonia spectrum based on input temperatures, column, and
 gaussian parameters</p>
 <p>ntot can be specified as a column density (e.g., 10^15) or a log-column-density (e.g., 15)</p>
@@ -156,13 +194,16 @@ gaussian parameters</p>
 <dt>tex can be specified or can be assumed LTE if unspecified, if tex&gt;tkin, or if &#8220;thin&#8221;</dt>
 <dd>is specified</dd>
 <dt>&#8220;thin&#8221; uses a different parametetrization and requires only the optical depth, width, offset,</dt>
-<dd>and tkin to be specified</dd>
+<dd>and tkin to be specified.  In the &#8216;thin&#8217; approximation, tex is not used in computation of
+the partition function - LTE is implicitly assumed</dd>
 </dl>
-<p>If tau11 is specified, ntot is NOT fit but is set to a fixed value
+<p>If tau is specified, ntot is NOT fit but is set to a fixed value
 fillingfraction is an arbitrary scaling factor to apply to the model
 fortho is the ortho/(ortho+para) fraction.  The default is to assume all ortho.
 xoff_v is the velocity offset in km/s</p>
-<p>(not implemented) if tau11 is specified, ntot is ignored</p>
+<p>tau refers to the optical depth of the 1-1 line.  The optical depths of the
+other lines are fixed relative to tau_oneone</p>
+<p>(not implemented) if tau is specified, ntot is ignored</p>
 </dd></dl>
 
 </div>
@@ -203,17 +244,26 @@ Draine 2011 textbook pgs 219-230)</dd>
 </dd></dl>
 
 </div>
-<span class="target" id="module-pyspeckit.spectrum.models.gaussfitter"></span><div class="section" id="gaussian-fitter">
-<h2>Gaussian fitter<a class="headerlink" href="#gaussian-fitter" title="Permalink to this headline">¶</a></h2>
-<p>Created 3/17/08</p>
-<p>Original version available at <a class="reference external" href="http://code.google.com/p/agpy/source/browse/trunk/agpy/gaussfitter.py">http://code.google.com/p/agpy/source/browse/trunk/agpy/gaussfitter.py</a>
-(the version below uses a Class instead of independent functions)</p>
-</div>
+<span class="target" id="module-pyspeckit.spectrum.models.inherited_gaussfitter"></span><dl class="function">
+<dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian">
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian</tt><big>(</big><em>x</em>, <em>A</em>, <em>dx</em>, <em>w</em>, <em>return_components=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a 1-dimensional gaussian of form
+H+A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
+<p>[height,amplitude,center,width]</p>
+<p>return_components does nothing but is required by all fitters</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_fitter">
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_fitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator for Gaussian fitter class</p>
+</dd></dl>
+
 <span class="target" id="module-pyspeckit.spectrum.models.hcn"></span><p>This is an HCN fitter...
 ref for line params: <a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat">http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat</a></p>
 <dl class="data">
 <dt id="pyspeckit.spectrum.models.hcn.aval_dict">
-<tt class="descclassname">pyspeckit.spectrum.models.hcn.</tt><tt class="descname">aval_dict</tt><a class="headerlink" href="#pyspeckit.spectrum.models.hcn.aval_dict" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hcn.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'10-01': 2.4075e-05, '12-01': 2.4075e-05, '11-01': 2.4075e-05}</em><a class="headerlink" href="#pyspeckit.spectrum.models.hcn.aval_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Line strengths of the 15 hyperfine components in J = 1 -  0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
 Line strengths are normalized in such a way that summing over all initial J = 1
@@ -292,6 +342,9 @@ strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.
 </dd></dl>
 
 </div>
+<span class="target" id="module-pyspeckit.spectrum.models.lorentzian"></span><div class="section" id="lorentzian-fitter">
+<h2>Lorentzian Fitter<a class="headerlink" href="#lorentzian-fitter" title="Permalink to this headline">¶</a></h2>
+</div>
 <span class="target" id="module-pyspeckit.spectrum.models.modelgrid"></span><div class="section" id="model-grid">
 <h2>Model Grid<a class="headerlink" href="#model-grid" title="Permalink to this headline">¶</a></h2>
 <p>Fit a line based on parameters output from a grid of models</p>
@@ -303,7 +356,7 @@ strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x106266410&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x106196668&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -326,7 +379,7 @@ Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 
 <a class="reference external" href="http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D">http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D</a></p>
 <dl class="data">
 <dt id="pyspeckit.spectrum.models.n2hp.aval_dict">
-<tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">aval_dict</tt><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.aval_dict" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'121-011': 1.512, '121-010': 2.015, '121-012': 0.101, '111-010': 1.209, '111-011': 0.907, '111-012': 1.512, '122-012': 0.907, '122-011': 2.721, '112-012': 2.721, '112-011': 0.907, '110-011': 3.628, '101-012': 2.016, '101-011': 1.209, '101-010': 0.403, '123-012': 3.628}</em><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.aval_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Line strengths of the 15 hyperfine components in J=1-0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
 Line strengths are normalized in such a way that summing over all initial J = 1
@@ -363,20 +416,24 @@ Draine 2011 textbook pgs 219-230)</dd>
         <div class="sidebar">
           <h3>Table Of Contents</h3>
           <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="spectrum.html">spectrum</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cubes.html">cubes</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Models</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Models &amp; Fitting</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#generic-spectralmodel-wrapper">Generic SpectralModel wrapper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ammonia-inversion-transition-tkin-fitter">Ammonia inversion transition TKIN fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#simplefitter-wrapper">SimpleFitter wrapper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#formaldehyde-cm-line-fitter">Formaldehyde cm-line fitter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#gaussian-fitter">Gaussian fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hill5-analytic-infall-model">Hill5 analytic infall model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generalized-hyperfine-component-fitter">Generalized hyperfine component fitter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lorentzian-fitter">Lorentzian Fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#model-grid">Model Grid</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#n2h-fitter">N2H+ fitter</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
 </ul>
 
           <h3 style="margin-top: 1.5em;">Search</h3>
@@ -396,7 +453,23 @@ Draine 2011 textbook pgs 219-230)</dd>
 
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+      Last updated on Dec 23, 2011.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
+    <a href="pyspeckit.pdf">PDF version of this document</a>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-6253200-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+        
     </div>
   </body>
 </html>

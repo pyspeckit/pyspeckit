@@ -5,18 +5,35 @@
 
 PySpecKit
 =====================================
-An extensible spectroscopic analysis toolkit for astronomy.
+An `extensible <registration.html>`_ spectroscopic analysis toolkit for astronomy.
+
+If you're just getting started, see the `examples page
+<../examples.html>`_.
+
+`Download <../../get/tip.tar.gz>`_ or see :doc:`install`
+
+
+Supported file types and their formats:
+
+    * :doc:`fitsfiles` 
+    * :doc:`txtfiles` 
+    * :doc:`hdf5files` 
+
+
+Classes
+=====================================
 
 * :doc:`spectrum` can read a variety of individual spectra types
 
   * :class:`~pyspeckit.spectrum.Spectrum` The Spectrum class, which is the core
-      of pyspeckit.  The __init__ procedure opens a spectrum file.
-  * :class:`~pyspeckit.spectrum.Spectra` A group of Spectrums.  Generally for use
-      when you have multiple wavelength observations you want to stitch together
-      (e.g., two filterbanks on a heterodyne system, or the red/blue spectra from a
-      multi-band spectrometer like the Double Imaging Spectrograph)
-  * :class:`~pyspeckit.spectrum.ObsBlock` An Observation Block - multiple spectra
-      of different objects or different times covering the same wavelength range
+    of pyspeckit.  The __init__ procedure opens a spectrum file.
+  * :class:`~pyspeckit.spectrum.Spectra` A group of Spectrums.  Generally for
+    when you have multiple wavelength observations you want to stitch together
+    (e.g., two filterbanks on a heterodyne system, or the red/blue spectra from
+    a multi-band spectrometer like the Double Imaging Spectrograph)
+  * :class:`~pyspeckit.spectrum.ObsBlock` An Observation Block - multiple
+    spectra of different objects or different times covering the same
+    wavelength range
 
 * :doc:`cubes` is used to deal with data cubes and has functionality similar to
   `GAIA <http://astro.dur.ac.uk/~pdraper/gaia/gaia.html>`_ and `ds9
@@ -28,20 +45,26 @@ An extensible spectroscopic analysis toolkit for astronomy.
     <http://astro.dur.ac.uk/~pdraper/gaia/gaia.html>`_ in some ways, but with
     less emphasis on speed and much greater emphasis on spectral line fitting.
 
+Features
+========
 
-Indices and tables
-==================
+* :doc:`baseline` describes baseline & continuum fitting.
+* :doc:`fitting` describes the general process of model fitting.
+* :doc:`measurements` is a toolkit for performing EQW, column, and other measurements...
+* :doc:`units` contains the all-important
+  :class:`~pyspeckit.units.SpectroscopicAxis` class that is used to deal with
+  coordinate transformations
+* :doc:`registration` describes the extensible qualities of pyspeckit
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
-Table of Contents:
-------------------
 .. toctree::
    :maxdepth: 2
+   :hidden:
 
-   spectrum
-   cubes
-   models
-
+   Index <self>
+   install
+   Models & Fitting <models>
+   Base Classes <classes>
+   Class Features <features>
+   File Readers <readers>
+   High-Level Wrappers <wrappers>

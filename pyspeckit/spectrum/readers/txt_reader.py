@@ -3,7 +3,7 @@
 PySpecKit ASCII Reader
 ==========================
 
-Routines for reading in ASCII format spectra.  If atPy is not installed,
+Routines for reading in ASCII format spectra.  If atpy is not installed,
 will use a very simple routine for reading in the data.  
 
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>

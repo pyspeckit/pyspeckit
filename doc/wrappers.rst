@@ -1,0 +1,24 @@
+Wrappers
+==================
+
+These are wrappers to simplify some of the more complicated (and even some of
+the simpler) functions in PySpecKit
+
+.. module:: pyspeckit.wrappers
+
+.. automodule:: pyspeckit.wrappers.cube_fit
+    :members:
+.. automodule:: pyspeckit.wrappers.fit_gaussians_to_simple_spectra
+    :members:
+.. automodule:: pyspeckit.wrappers.fitnh3
+    :members:
+.. automodule:: pyspeckit.wrappers.n2hp_wrapper
+    :show-inheritance:
+    :members:
+    :inherited-members:
+    :undoc-members:
+    
+In place of the actual contents of N2H+ fitter, here are the modules used to make the wrapper
+
+.. automethod:: pyspeckit.spectrum.models.model.SpectralModel
+.. automethod:: pyspeckit.spectrum.models.n2hp.n2hp_radex

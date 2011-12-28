@@ -15,9 +15,13 @@ from numpy import pi
 from mpfit import mpfit
 import matplotlib.cbook as mpcb
 from . import mpfit_messages
-from . import fitter
+from . import model
 
-class gaussian_fitter(fitter.SimpleFitter):
+class gaussian_fitter(model.SpectralModel):
+    """
+    A rather complicated Gaussian fitter class.  Inherits from, but overrides
+    most components of, :mod:`model.SpectralModel`
+    """
 
     def __init__(self,multisingle='multi'):
         self.npars = 3
@@ -57,15 +61,16 @@ class gaussian_fitter(fitter.SimpleFitter):
         for fit in pars: result += self.onepeakgaussian(x, 0, fit[0], fit[1], fit[2])
         return result
         
-    def multipeakgaussianslope(self, x, pars):
+    def slope(self, x):#, pars):
         """
         Return slope at position x for multicomponent Gaussian fit.  Need this in measurements class for
         finding the FWHM of multicomponent lines whose centroids are not identical.
         """    
         
-        pars = numpy.reshape(pars, (len(pars) / 3, 3))
+        pars = numpy.reshape(self.mpp, (len(self.mpp) / 3, 3))
         result = 0
-        for fit in pars: result += self.onepeakgaussian(x, 0, fit[0], fit[1], fit[2]) * (-2. * (x - fit[1]) / 2. / fit[2]**2)
+        for fit in pars:
+            result += self.onepeakgaussian(x, 0, fit[0], fit[1], fit[2]) * (-2. * (x - fit[1]) / 2. / fit[2]**2)
         return result
 
     def n_gaussian(self, pars=None,a=None,dx=None,sigma=None):
@@ -90,8 +95,8 @@ class gaussian_fitter(fitter.SimpleFitter):
 
         def g(x):
             v = numpy.zeros(len(x))
-            for i in range(len(dx)):
-                v += a[i] * numpy.exp( - ( x - dx[i] )**2 / (2.0*sigma[i]**2) )
+            for ii in range(len(pars)/3):
+                v += a[ii] * numpy.exp( - ( x - dx[ii] )**2 / (2.0*sigma[ii]**2) )
             return v
         return g
 
@@ -99,7 +104,7 @@ class gaussian_fitter(fitter.SimpleFitter):
             fixed=[False,False,False], limitedmin=[False,False,True],
             limitedmax=[False,False,False], minpars=[0,0,0], maxpars=[0,0,0],
             quiet=True, shh=True, veryverbose=False, negamp=None,
-            tied = ['', '', ''], **kwargs):
+            tied = ['', '', ''], parinfo=None, debug=False, **kwargs):
         """
         An improvement on onepeakgaussfit.  Lets you fit multiple gaussians.
 
@@ -180,15 +185,19 @@ class gaussian_fitter(fitter.SimpleFitter):
 
         parnames = {0:"AMPLITUDE",1:"SHIFT",2:"WIDTH"}
 
-        parinfo = [ {'n':ii, 'value':params[ii],
-            'limits':[minpars[ii],maxpars[ii]],
-            'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
-            'parname':parnames[ii%3]+str(ii/3), 'error':ii, 'tied':tied[ii]} 
-            for ii in xrange(len(params)) ]
+        if parinfo is None:
+            parinfo = [ {'n':ii, 'value':params[ii],
+                'limits':[minpars[ii],maxpars[ii]],
+                'limited':[limitedmin[ii],limitedmax[ii]], 'fixed':fixed[ii],
+                'parname':parnames[ii%3]+str(ii/3), 'error':ii, 'tied':tied[ii]} 
+                for ii in xrange(len(params)) ]
 
         if veryverbose:
             print "GUESSES: "
             print "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
+
+        if debug: 
+            for p in parinfo: print p
 
         mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
         mpp = mp.params
@@ -244,4 +253,6 @@ class gaussian_fitter(fitter.SimpleFitter):
                 integ += amp*width*numpy.sqrt(2.0*numpy.pi)
 
         return integ
+
+    n_modelfunc = n_gaussian
 

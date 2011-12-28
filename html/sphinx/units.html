@@ -1,0 +1,261 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Units &mdash; pyspeckit 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/logo.ico"/>
+    <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
+    <link rel="up" title="Features" href="features.html" />
+    <link rel="next" title="Registration" href="registration.html" />
+    <link rel="prev" title="Measurements" href="measurements.html" />
+     
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setDomainName', 'pyspeckit.bitbucket.org']);
+      _gaq.push(['_setAllowHash', false]);
+      _gaq.push(['_trackPageview']);
+
+
+    </script>
+  </head>
+  <body>
+    <div class="header-wrapper">
+      <div class="header">
+          <p class="logo"><a href="http://pyspeckit.bitbucket.org">
+            <img class="logo" src="_static/logo.png" alt="Logo"/>
+          </a></p>
+        <h1><a href="index.html">pyspeckit 0.1 documentation</a></h1>
+        <div class="rel">
+          <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
+          <a href=index.html>Docs Home </a>  |
+          <a href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/overview">Bitbucket Home </a>  |
+          <a href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/wiki/Home">Wiki</a>  |
+          <a href=search.html>Search </a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-pyspeckit.spectrum.units">
+<span id="units"></span><h1>Units<a class="headerlink" href="#module-pyspeckit.spectrum.units" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="units-and-spectroscopicaxes">
+<h2>Units and SpectroscopicAxes<a class="headerlink" href="#units-and-spectroscopicaxes" title="Permalink to this headline">¶</a></h2>
+<p>Unit parsing and conversion tool.  
+The SpectroscopicAxis class is meant to deal with unit conversion internally</p>
+<dl class="docutils">
+<dt>Open Questions: Are there other FITS-valid projection types, unit types, etc.</dt>
+<dd>that should be included?
+What about for other fields (e.g., wavenumber?)</dd>
+</dl>
+</div>
+<dl class="class">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis">
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.units.</tt><tt class="descname">SpectroscopicAxis</tt><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></p>
+<p>A Spectroscopic Axis object to store the current units of the spectrum and
+allow conversion to other units and frames.  Typically, units are velocity,
+wavelength, frequency, or redshift.  Wavenumber is also hypothetically
+possible.</p>
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.as_unit">
+<tt class="descname">as_unit</tt><big>(</big><em>unit</em>, <em>frame=None</em>, <em>quiet=True</em>, <em>center_frequency=None</em>, <em>center_frequency_units=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.as_unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the spectrum to the specified units.  This is a wrapper function
+to convert between frequency/velocity/wavelength and simply change the 
+units of the X axis.  Frame conversion is... not necessarily implemented.</p>
+<dl class="docutils">
+<dt><em>unit</em> [ string ] </dt>
+<dd>What unit do you want to &#8216;view&#8217; the array as?</dd>
+<dt><em>frame</em> [ None ]</dt>
+<dd>NOT IMPLEMENTED.  When it is, it will allow you to convert between
+LSR, topocentric, heliocentric, rest, redshifted, and whatever other
+frames we can come up with.  Right now the main holdup is finding a 
+nice python interface to an LSR velocity calculator... and motivation.</dd>
+</dl>
+<p><em>center_frequency</em> [ None | float ]
+<em>center_frequency_units</em> [ None | string ]</p>
+<blockquote>
+<div>If converting between velocity and any other spectroscopic type,
+need to specify the central frequency around which that velocity is
+calculated.
+I think this can also accept wavelengths....</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.cdelt">
+<tt class="descname">cdelt</tt><big>(</big><em>tolerance=1e-08</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.cdelt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the channel spacing if channels are linear</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.change_frame">
+<tt class="descname">change_frame</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.change_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change velocity frame</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.convert_to_unit">
+<tt class="descname">convert_to_unit</tt><big>(</big><em>unit</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.convert_to_unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the X-array in the specified units without changing it
+Uses as_unit for the conversion, but changes internal values rather
+than returning them.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.coord_to_x">
+<tt class="descname">coord_to_x</tt><big>(</big><em>xval</em>, <em>xunit</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.coord_to_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an X-value assumed to be in the coordinate axes, return that
+value converted to xunit
+e.g.:
+xarr.units = &#8216;km/s&#8217;
+xarr.refX = 5.0 
+xarr.refX_units = GHz
+xarr.coord_to_x(6000,&#8217;GHz&#8217;) == 5.1 # GHz</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.in_frame">
+<tt class="descname">in_frame</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.in_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a shifted xaxis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.umax">
+<tt class="descname">umax</tt><big>(</big><em>units=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.umax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the maximum value of the SpectroscopicAxis.  If units specified,
+convert to those units first</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.umin">
+<tt class="descname">umin</tt><big>(</big><em>units=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.umin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum value of the SpectroscopicAxis.  If units specified,
+convert to those units first</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.x_in_frame">
+<tt class="descname">x_in_frame</tt><big>(</big><em>xx</em>, <em>frame</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.x_in_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value &#8216;x&#8217; shifted to the target frame</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.x_to_coord">
+<tt class="descname">x_to_coord</tt><big>(</big><em>xval</em>, <em>xunit</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.x_to_coord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a wavelength/frequency/velocity, return the value in the SpectroscopicAxis&#8217;s units
+e.g.:
+xarr.units = &#8216;km/s&#8217;
+xarr.refX = 5.0 
+xarr.refX_units = GHz
+xarr.x_to_coord(5.1,&#8217;GHz&#8217;) == 6000 # km/s</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.x_to_pix">
+<tt class="descname">x_to_pix</tt><big>(</big><em>xval</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.x_to_pix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an X coordinate in SpectroscopicAxis&#8217; units, return the corresponding pixel number</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxes">
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.units.</tt><tt class="descname">SpectroscopicAxes</tt><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyspeckit.spectrum.units.SpectroscopicAxis" title="pyspeckit.spectrum.units.SpectroscopicAxis"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.units.SpectroscopicAxis</span></tt></a></p>
+<p>Counterpart to Spectra: takes a list of SpectroscopicAxis&#8217;s and
+concatenates them while checking for consistency and maintaining
+header parameters</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models &amp; Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Base Classes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="features.html">Class Features</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="baseline.html">Baseline Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fitting.html">Model Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="measurements.html">Measurements</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registration.html">Registration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
+</ul>
+
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="search.html" method="get">
+            <input type="text" name="q" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
+      Last updated on Dec 23, 2011.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
+    <a href="pyspeckit.pdf">PDF version of this document</a>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-6253200-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+        
+    </div>
+  </body>
+</html>

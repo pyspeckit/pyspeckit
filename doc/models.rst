@@ -1,8 +1,7 @@
 Models
 ==================
 
-.. module:: models
-.. currentmodule:: pyspeckit.spectrum.models
+.. module:: pyspeckit.spectrum.models
 
 The generic SpectralModel class is a wrapper for model functions.  A model
 should take in an X-axis and some number of parameters.  In order to declare a
@@ -15,7 +14,8 @@ your fitting code must deal with units internally::
             parnames=['tau', 'v_lsr',  'v_infall',  'sigma', 'tpeak'], 
             parlimited=[(True,False),(False,False),(True,False),(True,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
-            shortvarnames=("\\tau","v_{lsr}","v_{infall}","\\sigma","T_{peak}"), # specify the parameter names (TeX is OK)
+            # specify the parameter names (TeX is OK)
+            shortvarnames=("\\tau","v_{lsr}","v_{infall}","\\sigma","T_{peak}"), 
             fitunits='Hz' )
 
 
@@ -27,7 +27,7 @@ your fitting code must deal with units internally::
     :members:
 .. automodule:: pyspeckit.spectrum.models.formaldehyde
     :members:
-.. automodule:: pyspeckit.spectrum.models.gaussfitter
+.. automodule:: pyspeckit.spectrum.models.inherited_gaussfitter
     :members:
 .. automodule:: pyspeckit.spectrum.models.hcn
     :members:

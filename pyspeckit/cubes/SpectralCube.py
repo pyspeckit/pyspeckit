@@ -1,6 +1,19 @@
 """
-Author: Adam Ginsburg
-Created: 3/17/2011
+=====
+Cubes
+=====
+
+Tools to deal with spectroscopic data cubes.  
+
+
+Many features in Cubes require additional packages:
+    smoothing - requires `agpy <https://agpy.googlecode.com/svn/trunk>`_'s smooth and parallel_map routines
+    `coords <https://www.stsci.edu/svn/ssb/astrolib/trunk/coords>`_
+    `pyregion <git://github.com/leejjoon/pyregion.git>`_
+    `pywcs <git://github.com/astropy/astropy.git>`_
+    
+The 'grunt work' is performed by the :py:mod:`cubes` module
+
 """
 # import parent package
 import pyspeckit

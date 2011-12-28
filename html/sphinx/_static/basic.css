@@ -49,7 +49,7 @@ div.sphinxsidebarwrapper {
 
 div.sphinxsidebar {
     float: left;
-    width: 230px;
+    width: 0px;
     margin-left: -100%;
     font-size: 90%;
 }
@@ -445,6 +445,11 @@ dl.glossary dt {
 
 .classifier {
     font-style: oblique;
+}
+
+abbr, acronym {
+    border-bottom: dotted 1px;
+    cursor: help;
 }
 
 /* -- code displays --------------------------------------------------------- */

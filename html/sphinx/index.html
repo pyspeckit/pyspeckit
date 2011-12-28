@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PySpecKit &mdash; pyspeckit v0.1 documentation</title>
+    <title>PySpecKit &mdash; pyspeckit 0.1 documentation</title>
+    
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
@@ -23,8 +26,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit v0.1 documentation" href="#" />
-    <link rel="next" title="spectrum" href="spectrum.html" />
+    <link rel="top" title="pyspeckit 0.1 documentation" href="#" />
+    <link rel="next" title="Installation and Requirements" href="install.html" />
      
     <script type="text/javascript">
 
@@ -42,7 +45,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="#">pyspeckit v0.1 documentation</a></h1>
+        <h1><a href="#">pyspeckit 0.1 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=#>Docs Home </a>  |
@@ -63,36 +66,36 @@
             
   <div class="section" id="pyspeckit">
 <h1>PySpecKit<a class="headerlink" href="#pyspeckit" title="Permalink to this headline">¶</a></h1>
-<p>An extensible spectroscopic analysis toolkit for astronomy.</p>
-<ul>
-<li><p class="first"><a class="reference internal" href="spectrum.html"><em>spectrum</em></a> can read a variety of individual spectra types</p>
-<ul>
-<li><dl class="first docutils">
-<dt><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectrum" title="pyspeckit.spectrum.Spectrum"><tt class="xref py py-class docutils literal"><span class="pre">Spectrum</span></tt></a> The Spectrum class, which is the core</dt>
-<dd><p class="first last">of pyspeckit.  The __init__ procedure opens a spectrum file.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectra" title="pyspeckit.spectrum.Spectra"><tt class="xref py py-class docutils literal"><span class="pre">Spectra</span></tt></a> A group of Spectrums.  Generally for use</dt>
-<dd><p class="first last">when you have multiple wavelength observations you want to stitch together
-(e.g., two filterbanks on a heterodyne system, or the red/blue spectra from a
-multi-band spectrometer like the Double Imaging Spectrograph)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.ObsBlock" title="pyspeckit.spectrum.ObsBlock"><tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt></a> An Observation Block - multiple spectra</dt>
-<dd><p class="first last">of different objects or different times covering the same wavelength range</p>
-</dd>
-</dl>
-</li>
+<p>An <a class="reference external" href="registration.html">extensible</a> spectroscopic analysis toolkit for astronomy.</p>
+<p>If you&#8217;re just getting started, see the <a class="reference external" href="../examples.html">examples page</a>.</p>
+<p><a class="reference external" href="../../get/tip.tar.gz">Download</a> or see <a class="reference internal" href="install.html"><em>Installation and Requirements</em></a></p>
+<p>Supported file types and their formats:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="fitsfiles.html"><em>FITS</em></a></li>
+<li><a class="reference internal" href="txtfiles.html"><em>Plain Text</em></a></li>
+<li><a class="reference internal" href="hdf5files.html"><em>hdf5</em></a></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="classes">
+<h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="spectrum.html"><em>spectrum</em></a> can read a variety of individual spectra types<ul>
+<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectrum" title="pyspeckit.spectrum.Spectrum"><tt class="xref py py-class docutils literal"><span class="pre">Spectrum</span></tt></a> The Spectrum class, which is the core
+of pyspeckit.  The __init__ procedure opens a spectrum file.</li>
+<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectra" title="pyspeckit.spectrum.Spectra"><tt class="xref py py-class docutils literal"><span class="pre">Spectra</span></tt></a> A group of Spectrums.  Generally for
+when you have multiple wavelength observations you want to stitch together
+(e.g., two filterbanks on a heterodyne system, or the red/blue spectra from
+a multi-band spectrometer like the Double Imaging Spectrograph)</li>
+<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.ObsBlock" title="pyspeckit.spectrum.ObsBlock"><tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt></a> An Observation Block - multiple
+spectra of different objects or different times covering the same
+wavelength range</li>
 </ul>
 </li>
-<li><p class="first"><a class="reference internal" href="cubes.html"><em>cubes</em></a> is used to deal with data cubes and has functionality similar to
-<a class="reference external" href="http://astro.dur.ac.uk/~pdraper/gaia/gaia.html">GAIA</a> and <a class="reference external" href="http://hea-www.harvard.edu/RD/ds9/">ds9</a>.</p>
-<ul class="simple">
-<li><a class="reference internal" href="cubes.html#pyspeckit.cubes.Cube" title="pyspeckit.cubes.Cube"><tt class="xref py py-class docutils literal"><span class="pre">Cube</span></tt></a> A Cube of Spectra.  Has features to collapse
+<li><a class="reference internal" href="cubes.html"><em>Cubes</em></a> is used to deal with data cubes and has functionality similar to
+<a class="reference external" href="http://astro.dur.ac.uk/~pdraper/gaia/gaia.html">GAIA</a> and <a class="reference external" href="http://hea-www.harvard.edu/RD/ds9/">ds9</a>.<ul>
+<li><tt class="xref py py-class docutils literal"><span class="pre">Cube</span></tt> A Cube of Spectra.  Has features to collapse
 the cube along the spectral axis and fit spectra to each element of the
 cube.  Is meant to replicate <a class="reference external" href="http://astro.dur.ac.uk/~pdraper/gaia/gaia.html">Starlink&#8217;s GAIA</a> in some ways, but with
 less emphasis on speed and much greater emphasis on spectral line fitting.</li>
@@ -100,33 +103,18 @@ less emphasis on speed and much greater emphasis on spectral line fitting.</li>
 </li>
 </ul>
 </div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="features">
+<h1>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+<li><a class="reference internal" href="baseline.html"><em>Baseline Fitting</em></a> describes baseline &amp; continuum fitting.</li>
+<li><a class="reference internal" href="fitting.html"><em>Model Fitting</em></a> describes the general process of model fitting.</li>
+<li><a class="reference internal" href="measurements.html"><em>Measurements</em></a> is a toolkit for performing EQW, column, and other measurements...</li>
+<li><a class="reference internal" href="units.html"><em>Units</em></a> contains the all-important
+<tt class="xref py py-class docutils literal"><span class="pre">SpectroscopicAxis</span></tt> class that is used to deal with
+coordinate transformations</li>
+<li><a class="reference internal" href="registration.html"><em>Registration</em></a> describes the extensible qualities of pyspeckit</li>
 </ul>
-<div class="section" id="table-of-contents">
-<h2>Table of Contents:<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="spectrum.html">spectrum</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cubes.html">cubes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="models.html#generic-spectralmodel-wrapper">Generic SpectralModel wrapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#ammonia-inversion-transition-tkin-fitter">Ammonia inversion transition TKIN fitter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#simplefitter-wrapper">SimpleFitter wrapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#formaldehyde-cm-line-fitter">Formaldehyde cm-line fitter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#gaussian-fitter">Gaussian fitter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#hill5-analytic-infall-model">Hill5 analytic infall model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#generalized-hyperfine-component-fitter">Generalized hyperfine component fitter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#model-grid">Model Grid</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#n2h-fitter">N2H+ fitter</a></li>
-</ul>
-</li>
-</ul>
-</div>
 </div>
 </div>
 
@@ -137,10 +125,14 @@ less emphasis on speed and much greater emphasis on spectral line fitting.</li>
         </div>
         <div class="sidebar">
           <h3>Table Of Contents</h3>
-          <ul>
-<li class="toctree-l1"><a class="reference internal" href="spectrum.html">spectrum</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cubes.html">cubes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+          <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models &amp; Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
 </ul>
 
           <h3 style="margin-top: 1.5em;">Search</h3>
@@ -160,7 +152,23 @@ less emphasis on speed and much greater emphasis on spectral line fitting.</li>
 
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+      Last updated on Dec 23, 2011.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
+    <a href="pyspeckit.pdf">PDF version of this document</a>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-6253200-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+        
     </div>
   </body>
 </html>

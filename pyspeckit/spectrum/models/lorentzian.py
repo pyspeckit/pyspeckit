@@ -9,7 +9,7 @@ from numpy import pi
 from mpfit import mpfit
 from . import fitter
 
-class LorentzianFitter(fitter.SingleFitter):
+class LorentzianFitter(fitter.SimpleFitter):
 
     def __init__(self,multisingle='multi'):
         self.npars = 3

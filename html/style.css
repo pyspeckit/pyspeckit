@@ -78,6 +78,55 @@ a:active	{ color:#0022DD }
 a:hover		{ color:#2043FF }
 a {text-decoration: none; }
 
+/* http://stackoverflow.com/questions/8290447/remove-horizontal-spacing-when-using-positionrelative-in-navigation-bar */
+/* a.navbar { position:relative; left:-20px; right: 20px;} */
+a.navbar:link	 { color:#AAAAFF; text-shadow:none; padding: 5px 0px; white-space:nowrap; font-size:15px;}
+a.navbar:visited { color:#AAAAFF; text-shadow: #4444FF 0.0px 0.0px 2px}
+a.navbar:hover	 { color:#CCCCCC; background:#444488;  } /* font-weight: bold;} */
+a.navbar:active	 { color:grey; } /* font-weight: bold;} */
+a.navbar {padding:none; font-size:15px;}
+a.navbar:before {content:'['; display:inline; font-size:25pt; color:white; position:relative; left:-3px; top:3.5px}
+a.navbar:after {content:']'; display:inline; font-size:25pt; color:white; position:relative; right:-3px; top:3.5px}
+
+nav a:link    { color:#AAAAFF; text-decoration:none; 
+             padding: 5px 0; white-space:nowrap; font-size:15px;}
+nav a:visited { color:#AAAAFF; text-shadow: #4444FF 0.0px 0.0px 2px}
+nav a:hover   { color:#CCCCCC; background:#444488;  } 
+nav a:active  { color:grey; }
+nav li {padding:2px; font-size:15px; display:inline;}
+
+nav a:before {content:'['; display:inline; font-size:35px; position:relative; top:4px; left:-3px; color:white;}
+nav a:after {content:']'; display:inline; font-size:35px; position:relative; top:4px; right:-3px; color:white;}
+
+
+span.leftbraces { font-size:25pt; padding: 0px 0px; 
+    position:relative; right:-9px;  bottom:-3.75px;}
+span.rightbraces { font-size:25pt; padding: 0px 0px; 
+    position:relative; left:-9px;  bottom:-3.75px;}
+
+p.navbar {
+    /* background-color: #090909; */
+    color: white;
+    font-style: normal;
+    font-family: "Georgia";
+    font-size:   15px;
+}
+
+/*span.skipspace {position:relative; left:-20px; float:right;}*/
+span.skipspace {margin:-8px;}
+
+table.navbar { 
+    padding:0;
+    margin:0;
+    border:0;
+    cellspacing:0;
+    white-space:nowrap;
+    font-size:0px;
+    display:block;
+    }
+
+td.navbar { margin:-8px; }
+
 /* ASTR3520_site Link Style */
 a.astro:link		{ color:#66FF77 }
 a.astro:visited	{ color:#44DDBB }

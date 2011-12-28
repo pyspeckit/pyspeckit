@@ -1,0 +1,169 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Plain Text &mdash; pyspeckit 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/logo.ico"/>
+    <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
+    <link rel="up" title="Readers" href="readers.html" />
+    <link rel="next" title="FITS" href="fitsfiles.html" />
+    <link rel="prev" title="Readers" href="readers.html" />
+     
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setDomainName', 'pyspeckit.bitbucket.org']);
+      _gaq.push(['_setAllowHash', false]);
+      _gaq.push(['_trackPageview']);
+
+
+    </script>
+  </head>
+  <body>
+    <div class="header-wrapper">
+      <div class="header">
+          <p class="logo"><a href="http://pyspeckit.bitbucket.org">
+            <img class="logo" src="_static/logo.png" alt="Logo"/>
+          </a></p>
+        <h1><a href="index.html">pyspeckit 0.1 documentation</a></h1>
+        <div class="rel">
+          <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
+          <a href=index.html>Docs Home </a>  |
+          <a href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/overview">Bitbucket Home </a>  |
+          <a href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/wiki/Home">Wiki</a>  |
+          <a href=search.html>Search </a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="plain-text">
+<h1>Plain Text<a class="headerlink" href="#plain-text" title="Permalink to this headline">¶</a></h1>
+<p>Text files should be of the form:</p>
+<div class="highlight-python"><pre>wavelength flux err
+3637.390 0.314 0.000
+3638.227 0.717 0.000
+3639.065 1.482 0.000</pre>
+</div>
+<p>where there &#8216;err&#8217; column is optional but the others are not.  The most basic
+spectrum file allowed would have no header and two columns, e.g.:</p>
+<div class="highlight-python"><pre>1  0.5
+2  1.5
+3  0.1</pre>
+</div>
+<p>If the X-axis is not monotonic, the data will be sorted so that the X-axis is
+in ascending order.</p>
+<div class="section" id="module-pyspeckit.spectrum.readers.txt_reader">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-pyspeckit.spectrum.readers.txt_reader" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pyspeckit-ascii-reader">
+<h3>PySpecKit ASCII Reader<a class="headerlink" href="#pyspeckit-ascii-reader" title="Permalink to this headline">¶</a></h3>
+<p>Routines for reading in ASCII format spectra.  If atpy is not installed,
+will use a very simple routine for reading in the data.</p>
+<dl class="function">
+<dt id="pyspeckit.spectrum.readers.txt_reader.open_1d_txt">
+<tt class="descclassname">pyspeckit.spectrum.readers.txt_reader.</tt><tt class="descname">open_1d_txt</tt><big>(</big><em>filename</em>, <em>xaxcol=0</em>, <em>datacol=1</em>, <em>errorcol=2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.txt_reader.open_1d_txt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to read a 1D spectrum from a text file assuming
+wavelength as the first column, data as the second, and
+(optionally) error as the third.</p>
+<p>kwargs are passed to atpy.Table</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.spectrum.readers.txt_reader.simple_txt">
+<tt class="descclassname">pyspeckit.spectrum.readers.txt_reader.</tt><tt class="descname">simple_txt</tt><big>(</big><em>filename</em>, <em>xaxcol=0</em>, <em>datacol=1</em>, <em>errorcol=2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.txt_reader.simple_txt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Very simple method for reading columns from ASCII file.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models &amp; Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="readers.html">File Readers</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">Plain Text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fitsfiles.html">FITS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hdf5files.html">hdf5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classfiles.html">Gildas CLASS files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
+</ul>
+
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="search.html" method="get">
+            <input type="text" name="q" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
+      Last updated on Dec 22, 2011.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
+    <a href="pyspeckit.pdf">PDF version of this document</a>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-6253200-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+        
+    </div>
+  </body>
+</html>
