@@ -38,7 +38,7 @@ class Measurements(object):
         # Inherit specfit object    
         self.specfit = Spectrum.specfit
         self.speclines = Spectrum.speclines
-                
+                        
         # Bit of a hack - help identifying unmatched lines
         self.miscline = miscline        
         self.misctol = misctol

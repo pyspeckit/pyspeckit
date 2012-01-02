@@ -127,9 +127,9 @@ spec.plotter.axis.set_ylabel(r'Flux $(10^{-17} \mathrm{erg/s/cm^2/\AA})$')
 
 spec.plotter.refresh()
 
-print "Line   Flux (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)   Amplitude"
+print "Line   Pos   Flux (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)   Amplitude"
 for line in spec.measurements.lines.keys():
-    print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum'], \
+    print line, spec.measurements.lines[line]['pos'], spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum'], \
         spec.measurements.lines[line]['amp']
 
     
