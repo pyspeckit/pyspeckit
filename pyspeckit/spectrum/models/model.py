@@ -60,7 +60,7 @@ class SpectralModel(fitter.SimpleFitter):
         self.parinfo, kwargs = self._make_parinfo(**kwargs)
 
         self.modelfunc_kwargs = kwargs
-
+        
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
             partied=None, fitunits=None, parsteps=None, npeaks=1,
@@ -93,11 +93,11 @@ class SpectralModel(fitter.SimpleFitter):
 
         if limitedmin is not None:
             if limitedmax is not None:
-                parlimits = zip(limitedmin,limitedmax)
+                parlimited = zip(limitedmin,limitedmax)
             else:
-                parlimits = zip(limitedmin,(False,)*len(parnames))
+                parlimited = zip(limitedmin,(False,)*len(parnames))
         elif limitedmax is not None:
-            parlimits = zip((False,)*len(parnames),limitedmax)
+            parlimited = zip((False,)*len(parnames),limitedmax)
 
         if minpars is not None:
             if maxpars is not None:
@@ -106,7 +106,6 @@ class SpectralModel(fitter.SimpleFitter):
                 parlimits = zip(minpars,(False,)*len(parnames))
         elif maxpars is not None:
             parlimits = zip((False,)*len(parnames),maxpars)
-
 
         self.fitunits = fitunits
         self.npeaks = npeaks
@@ -148,7 +147,6 @@ class SpectralModel(fitter.SimpleFitter):
                         p['limits']  = (0, p['limits'][1])   
 
         return self.parinfo, kwargs
-
 
     def n_modelfunc(self, pars, **kwargs):
         """

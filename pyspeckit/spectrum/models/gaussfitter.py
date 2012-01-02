@@ -134,7 +134,7 @@ class gaussian_fitter(model.SpectralModel):
            Fit errors
            chi2
         """
-
+        
         if len(params) != npeaks and (len(params) / 3) > npeaks:
             self.npeaks = len(params) / 3 
         else:
@@ -198,7 +198,7 @@ class gaussian_fitter(model.SpectralModel):
 
         if debug: 
             for p in parinfo: print p
-
+            
         mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
         mpp = mp.params
         if mp.perror is not None: mpperr = mp.perror
