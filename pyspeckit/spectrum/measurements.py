@@ -73,7 +73,7 @@ class Measurements(object):
         self.reflines = self.speclines.optical.optical_lines
         self.refpos = self.reflines['xarr']
         self.refname = self.reflines['name']
-        
+                        
         # If distance or redshift has been provided, we can compute luminosities from fluxes
         if d is not None: self.d = d
         else: self.d = None
@@ -89,12 +89,15 @@ class Measurements(object):
         
     def identify(self):
         """
-        Determine identity of lines in self.fitpars.  Fill entries of self.lines dictionary.
+        Determine identity of lines in self.modelpars.  Fill entries of self.lines dictionary.
         
         Note: This method will be infinitely slow for more than 10 or so lines.
         """    
         
+        # List to keep track of line identification.  Each entry is (cost, (line1, line2, lin3,...))
         self.IDresults = []
+        
+        # Spacing between observed lines (odiff) and reference lines (rdiff)
         self.odiff = np.abs(np.diff(self.obspos))
         self.rdiff = np.abs(np.diff(self.refpos))
         self.rdmin = 0.5 * min(self.rdiff)
@@ -112,10 +115,13 @@ class Measurements(object):
         # need to account for redshift if self.redshift is set
         # WRONG! Assume REST frame, do shifting elsewhere...
         refpos = self.refpos #* (1.0+self.redshift)
-                    
-        condition = (refpos >= 0.9 * min(self.obspos)) & (refpos <= 1.1 * max(self.obspos))   # Speeds things up
+        refname = self.refname     
+                            
+        # Don't include elements of reference array that are far away from the observed lines (speeds things up)
+        condition = (refpos >= 0.9 * min(self.obspos)) & (refpos <= 1.1 * max(self.obspos)) 
         refpos = refpos[condition]
-                
+        refname = refname[condition]
+                        
         combos = itertools.combinations(refpos, self.Nlines - len(where))        
         for i, combo in enumerate(combos):
             rdiff = np.diff(combo)
@@ -124,19 +130,23 @@ class Measurements(object):
         # Pick best solution
         MINloc = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
         ALLloc = []                                  # x-values of best fit lines in reference dictionary
+                                
+        # Determine indices of matched reference lines       
+        for element in self.IDresults[MINloc][1]: 
+            ALLloc.append(np.argmin(np.abs(refpos - element)))                    
         
-        # Fill lines dictionary        
-        for element in self.IDresults[MINloc][1]: ALLloc.append(np.argmin(np.abs(refpos - element)))        
+        # Fill lines dictionary            
         for i, element in enumerate(ALLloc): 
-            line = self.refname[element]
+            line = refname[element]
             self.lines[line] = {}
             loc = np.argmin(np.abs(self.obspos - refpos[element]))                
             self.lines[line]['modelpars'] = list(self.modelpars[loc])            
             self.lines[line]['modelerrs'] = list(self.modelerrs[loc])            
-                    
-        # Track down odd lines
+                                                               
+        # Track down odd lines (i.e. broad components of lines already identified)
+        # This won't yet work for lines that are truly unidentified
         if len(ALLloc) < self.Nlines:
-            
+                                                
             # Eliminate all modelpars/errs that belong to lines that were identified
             tmp1 = list(np.ravel(self.modelpars))
             tmp2 = list(np.ravel(self.modelerrs))
@@ -151,12 +161,12 @@ class Measurements(object):
                 try:  
                     for i, x in enumerate(zip(*tmp1)[1]):    
                         loc = np.argmin(np.abs(ALLloc - x))
-                        line = self.refname[loc]
+                        line = refname[loc]
                         self.lines[line]['modelpars'].extend(tmp1[i:i+3])
                         self.lines[line]['modelerrs'].extend(tmp2[i:i+3])
                 except TypeError:
                     loc = np.argmin(np.abs(tmp1[1] - refpos))                       
-                    line = self.refname[loc]
+                    line = refname[loc]
                     self.lines[line]['modelpars'].extend(tmp1)
                     self.lines[line]['modelerrs'].extend(tmp2)
             
@@ -174,9 +184,11 @@ class Measurements(object):
                             self.lines[self.miscline[0]]['modelpars'].extend(tmp1)
                             self.lines[self.miscline[0]]['modelerrs'].extend(tmp2)
                             break #?
+        
+        
                                               
         self.separate() 
-                    
+                            
     def derive(self):
         """
         Calculate luminosity and FWHM for all spectral lines.

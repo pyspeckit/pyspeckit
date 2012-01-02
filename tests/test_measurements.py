@@ -132,4 +132,5 @@ for line in spec.measurements.lines.keys():
     print line, spec.measurements.lines[line]['pos'], spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum'], \
         spec.measurements.lines[line]['amp']
 
+raw_input('done')
     
