@@ -195,7 +195,6 @@ class Measurements(object):
         """            
         
         for line in self.lines.keys():
-
             if self.debug:
                 print "Computing parameters for line %s" % line
             
@@ -206,7 +205,7 @@ class Measurements(object):
             
             if self.d is not None:
                 self.lines[line]['lum'] = self.compute_luminosity(self.lines[line]['modelpars'])            
-        
+                
     def separate(self):
         """
         For multicomponent lines, separate into broad and narrow components (assume only one of components is narrow).
@@ -273,9 +272,9 @@ class Measurements(object):
         has only a single component.  Uses bisection technique for the former with absolute tolerance of 1e-4.
         """
 
-        if len(pars) == 3: return 2. * np.sqrt(2. * np.log(2.)) * abs(pars[2])
+        if len(pars) == 3: 
+            return 2. * np.sqrt(2. * np.log(2.)) * abs(pars[2])
         else:
-            
             atol = 1e-4
             pars2d = np.reshape(pars, (len(pars) / 3, 3))
             start = zip(*pars2d)[1][0]                    # start at central wavelength of first component
@@ -288,15 +287,15 @@ class Measurements(object):
             else:    
                 f = lambda x: self.specfit.fitter.slope(x)
                 xfmax = self.bisection(f, start)
-                fmax = self.specfit.fitter.slope(xfmax)
-            
+                fmax = self.specfit.fitter.n_modelfunc(pars)(np.array([xfmax, xfmax]))[0]
+                            
             hmax = 0.5 * fmax    
-                
+                                
             # current height relative to half max - we want to minimize this function.  Could be asymmetric.
             f = lambda x: self.specfit.fitter.n_modelfunc(pars)(np.array([x])) - hmax                   
             xhmax1 = self.bisection(f, start)
             xhmax2 = self.bisection(f, start + (start - xhmax1))
-                                        
+                                                    
             return abs(xhmax2 - xhmax1)      
             
     def bisection(self, f, x_guess):
@@ -307,16 +306,15 @@ class Measurements(object):
         x1, x2 = self.bracket_root(f, x_guess)
         
         # Narrow bracketed range with bisection until tolerance is met
-        i = 0
         while abs(x2 - x1) > 1e-4:
             midpt = np.mean([x1, x2])
             fmid = f(midpt)
-    
+        
             if np.sign(fmid) < 0: x1 = midpt
             else: x2 = midpt
             
             if fmid == 0.0: break
-            
+                        
         return x2    
         
     def bracket_root(self, f, x_guess, atol = 1e-4):

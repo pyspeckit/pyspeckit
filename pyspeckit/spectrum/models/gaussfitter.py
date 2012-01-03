@@ -61,7 +61,7 @@ class gaussian_fitter(model.SpectralModel):
         for fit in pars: result += self.onepeakgaussian(x, 0, fit[0], fit[1], fit[2])
         return result
         
-    def slope(self, x):#, pars):
+    def slope(self, x):
         """
         Return slope at position x for multicomponent Gaussian fit.  Need this in measurements class for
         finding the FWHM of multicomponent lines whose centroids are not identical.
