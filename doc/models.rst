@@ -8,7 +8,9 @@ should take in an X-axis and some number of parameters.  In order to declare a
 SpectralModel, you give SpectralModel the function name and the number of
 parameters it requires.  The rest of the options are optional, though parnames
 & shortvarnames are strongly recommended.  If you do not specify fitunits,
-your fitting code must deal with units internally::
+your fitting code must deal with units internally.
+
+Here are some examples of how to make your own fitters::
 
     hill5_fitter = model.SpectralModel(hill5_model, 5,
             parnames=['tau', 'v_lsr',  'v_infall',  'sigma', 'tpeak'], 
@@ -17,6 +19,17 @@ your fitting code must deal with units internally::
             # specify the parameter names (TeX is OK)
             shortvarnames=("\\tau","v_{lsr}","v_{infall}","\\sigma","T_{peak}"), 
             fitunits='Hz' )
+
+    gaussfitter = model.SpectralModel(gaussian, 3,
+            parnames=['amplitude','shift','width'], 
+            parlimited=[(False,False),(False,False),(True,False)], 
+            parlimits=[(0,0), (0,0), (0,0)],
+            shortvarnames=('A',r'\Delta x',r'\sigma'),
+            multisingle=multisingle,
+            )
+
+Then you can `register <registration.html>`_ these fitters.
+
 
 
 .. automodule:: pyspeckit.spectrum.models.model

@@ -72,7 +72,8 @@ should take in an X-axis and some number of parameters.  In order to declare a
 SpectralModel, you give SpectralModel the function name and the number of
 parameters it requires.  The rest of the options are optional, though parnames
 &amp; shortvarnames are strongly recommended.  If you do not specify fitunits,
-your fitting code must deal with units internally:</p>
+your fitting code must deal with units internally.</p>
+<p>Here are some examples of how to make your own fitters:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">hill5_fitter</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">SpectralModel</span><span class="p">(</span><span class="n">hill5_model</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
         <span class="n">parnames</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;tau&#39;</span><span class="p">,</span> <span class="s">&#39;v_lsr&#39;</span><span class="p">,</span>  <span class="s">&#39;v_infall&#39;</span><span class="p">,</span>  <span class="s">&#39;sigma&#39;</span><span class="p">,</span> <span class="s">&#39;tpeak&#39;</span><span class="p">],</span>
         <span class="n">parlimited</span><span class="o">=</span><span class="p">[(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">),(</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">),(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">),(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">),</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">)],</span>
@@ -80,8 +81,17 @@ your fitting code must deal with units internally:</p>
         <span class="c"># specify the parameter names (TeX is OK)</span>
         <span class="n">shortvarnames</span><span class="o">=</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">tau&quot;</span><span class="p">,</span><span class="s">&quot;v_{lsr}&quot;</span><span class="p">,</span><span class="s">&quot;v_{infall}&quot;</span><span class="p">,</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">sigma&quot;</span><span class="p">,</span><span class="s">&quot;T_{peak}&quot;</span><span class="p">),</span>
         <span class="n">fitunits</span><span class="o">=</span><span class="s">&#39;Hz&#39;</span> <span class="p">)</span>
+
+<span class="n">gaussfitter</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">SpectralModel</span><span class="p">(</span><span class="n">gaussian</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">parnames</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;amplitude&#39;</span><span class="p">,</span><span class="s">&#39;shift&#39;</span><span class="p">,</span><span class="s">&#39;width&#39;</span><span class="p">],</span>
+        <span class="n">parlimited</span><span class="o">=</span><span class="p">[(</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">),(</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">),(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">)],</span>
+        <span class="n">parlimits</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)],</span>
+        <span class="n">shortvarnames</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;A&#39;</span><span class="p">,</span><span class="s">r&#39;\Delta x&#39;</span><span class="p">,</span><span class="s">r&#39;\sigma&#39;</span><span class="p">),</span>
+        <span class="n">multisingle</span><span class="o">=</span><span class="n">multisingle</span><span class="p">,</span>
+        <span class="p">)</span>
 </pre></div>
 </div>
+<p>Then you can <a class="reference external" href="registration.html">register</a> these fitters.</p>
 <span class="target" id="module-pyspeckit.spectrum.models.model"></span><div class="section" id="generic-spectralmodel-wrapper">
 <h2>Generic SpectralModel wrapper<a class="headerlink" href="#generic-spectralmodel-wrapper" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -386,7 +396,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x105d76500&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x1064a45f0&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
