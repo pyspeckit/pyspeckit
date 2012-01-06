@@ -16,7 +16,10 @@ def write_history(header, string):
     """
     if isinstance(header, pyfits.Header):
         hdrstring = time.strftime("%m/%d/%y %H:%M:%S",time.localtime()) + " " + string
-        header.add_history(hdrstring)
+        try:
+            header.add_history(hdrstring)
+        except AttributeError:
+            print "WARNING: Error in history writing.  Could not add this string: %s" % hdrstring
 
     else:
         raise TypeError("Error: header is not a header instance!")

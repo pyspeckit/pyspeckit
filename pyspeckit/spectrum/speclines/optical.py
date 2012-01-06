@@ -20,26 +20,28 @@ lines = {
 }
 
 xarr = []
-for key in lines.keys(): xarr.append(lines[key][0])
+for key in lines.keys(): 
+    xarr.append(lines[key][0])
 xarr = np.array(xarr)
 
 indx = np.argsort(xarr)
 xarr = np.sort(xarr)
 
 name = []
-for i, key in enumerate(lines.keys()): name.append(lines.keys()[indx[i]])
+for i, key in enumerate(lines.keys()): 
+    name.append(lines.keys()[indx[i]])
 name = np.array(name)
 
 xunits = []
-for i, key in enumerate(lines.keys()): xunits.append(lines.keys()[indx[i]])
-xunits = np.array(xunits)
-
 xvac = []
-for i, key in enumerate(lines.keys()): xvac.append(lines.keys()[indx[i]])
-xvac = np.array(xvac)
-
 dname = []
-for i, key in enumerate(lines.keys()): dname.append(lines.keys()[indx[i]])
+for i, nombre in enumerate(name): 
+    xunits.append(lines[nombre][1])
+    xvac.append(lines[nombre][2])
+    dname.append(lines[nombre][3])
+
+xunits = np.array(xunits)
+xvac = np.array(xvac)
 dname = np.array(dname)
 
 optical_lines = {'name': name, 'xarr': xarr, 'xunits': xunits, 'xvac': xvac, 'dname': dname}

@@ -8,7 +8,7 @@ except ImportError: fitscheck = False
 
 class write_fits(Writer):
     def write_data(self, filename = None, newsuffix = 'out', clobber = True, tolerance=1e-8,
-            write_error=True ):
+            write_error=True, **kwargs ):
         """
         Write spectrum to fits file.
         """
@@ -47,7 +47,11 @@ class write_fits(Writer):
                 data = np.array( [self.Spectrum.xarr, self.Spectrum.data] )
             print "Writing a nonlinear X-axis spectrum to %s (header keywords are not FITS-compliant)" % (fn)
 
-        HDU = pyfits.PrimaryHDU(data=data, header=header)
+        try:
+            HDU = pyfits.PrimaryHDU(data=data, header=header)
+        except AttributeError:
+            print "Strange header error. Attempting workaround."
+            HDU = pyfits.PrimaryHDU(data=data, header=pyfits.Header([pyfits.card.Card(k,v)  for k,v in header.iteritems()]))
         
         HDU.verify('fix')
-        HDU.writeto(fn,clobber=clobber)
+        HDU.writeto(fn,clobber=clobber,**kwargs)
