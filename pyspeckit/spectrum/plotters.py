@@ -11,6 +11,7 @@ import matplotlib.figure
 import itertools
 from ..config import *
 import numpy as np
+from pyspeckit.specwarnings import warn
 
 interactive_help_message = """
 Interactive key commands for plotter.  An additional help message may appear if
@@ -176,7 +177,7 @@ class Plotter(object):
 
         if (self.Spectrum.xarr.max() < self.xmin or self.Spectrum.xarr.min() > self.xmax 
                 or reset_xlimits):
-            if not self.silent: print "Resetting X-axis min/max because the plot is out of bounds."
+            if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
             self.xmin = None
             self.xmax = None
         if xmin is not None: self.xmin = xmin
@@ -189,13 +190,13 @@ class Plotter(object):
         xpixmax = np.argmin(np.abs(self.Spectrum.xarr-self.xmax))
         if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
         elif xpixmin == xpixmax:
-            if not self.silent: print "ERROR: the X axis limits specified were invalid.  Resetting."
+            if not self.silent: warn( "ERROR: the X axis limits specified were invalid.  Resetting." )
             self.reset_limits(reset_xlimits=True, ymin=ymin, ymax=ymax, reset_ylimits=reset_ylimits, ypeakscale=ypeakscale, **kwargs)
             return
         
         if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
                 or reset_ylimits):
-            if not self.silent: print "Resetting Y-axis min/max because the plot is out of bounds."
+            if not self.silent: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
             self.ymin = None
             self.ymax = None
         if ymin is not None: self.ymin = ymin

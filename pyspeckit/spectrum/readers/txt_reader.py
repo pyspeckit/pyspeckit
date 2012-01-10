@@ -16,7 +16,7 @@ except ImportError:
     atpyOK = False
 from .. import units
 import numpy as np
-import warnings
+from pyspeckit.specwarnings import warn
 
 def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2,
         text_reader='simple', atpytype='ascii', **kwargs):
