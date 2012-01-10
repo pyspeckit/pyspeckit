@@ -36,7 +36,8 @@ def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2,
     kwargs are passed to atpy.Table
     """
     if text_reader=='simple' or not atpyOK:
-        warn("WARNING: atpy not installed; will use simple reader instead.")
+        if not atpyOK:
+            warn("WARNING: atpy not installed; will use simple reader instead.")
         
         data, error, XAxis, T = simple_txt(filename, xaxcol = xaxcol, 
             datacol = datacol, errorcol = errorcol, **kwargs)
