@@ -51,17 +51,18 @@ for i in range(len(files)):
     # fitting
     spec[i].specfit(guesses=guesses,quiet=False,annotate=False)
 
-    # one way 'tied' can be implemented:
-    parinfo = spec[i].specfit.parinfo
-    parinfo[7]['tied'] = 'p[4]+%f' % (guesses[7]-guesses[4])
-    parinfo[1]['tied'] = 'p[4]-%f' % (guesses[4]-guesses[1])
-    spec[i].specfit(guesses=guesses,quiet=False,annotate=False,parinfo=parinfo)
+    ## one way 'tied' can be implemented:
+    #parinfo = spec[i].specfit.parinfo
+    #parinfo[7]['tied'] = 'p[4]+%f' % (guesses[7]-guesses[4])
+    #parinfo[1]['tied'] = 'p[4]-%f' % (guesses[4]-guesses[1])
+    #spec[i].specfit(guesses=guesses,quiet=False,annotate=False,parinfo=parinfo)
 
-    ## here's another way:
-    #tied = [''] * 10 # make an empty 'tied' list
-    #tied[7] = 'p[1]+%f' % (guesses[7]-guesses[4])'
-    #tied[4] = 'p[1]+%f' % (guesses[4]-guesses[1])'
-    #spec[i].specfit(guesses=guesses,quiet=False,annotate=False,tied=tied)
+    # here's another way:
+    parinfo = spec[i].specfit.parinfo
+    tied = [''] * 10 # make an empty 'tied' list
+    tied[7] = 'p[1]+%f' % (guesses[7]-guesses[4])
+    tied[4] = 'p[1]+%f' % (guesses[4]-guesses[1])
+    spec[i].specfit(guesses=guesses,quiet=False,annotate=False,tied=tied)
 
     # you probably want to do this - iteratively determine continuum/baseline
     spec[i].baseline(excludefit=True) # fit the baseline excluding the emission lines

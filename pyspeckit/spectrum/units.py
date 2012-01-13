@@ -187,6 +187,10 @@ class SpectroscopicAxis(np.ndarray):
     allow conversion to other units and frames.  Typically, units are velocity,
     wavelength, frequency, or redshift.  Wavenumber is also hypothetically
     possible.
+
+    WARNING: If you index a SpectroscopicAxis, the resulting array will be
+    a SpectroscopicAxis without a dxarr attribute!  This can result in major problems;
+    a workaround is being sought but subclassing numpy arrays is harder than I thought
     """
 
     def __new__(self, xarr, unit="Hz", frame='rest', xtype=None, refX=None,
@@ -240,8 +244,6 @@ class SpectroscopicAxis(np.ndarray):
         else:
             subarr.velocity_convention = 'radio' # default
 
-        subarr.dxarr = np.diff(subarr)
-
         return subarr
 
     def __array_finalize__(self,obj):
@@ -258,6 +260,10 @@ class SpectroscopicAxis(np.ndarray):
         self.velocity_convention = getattr(obj, 'velocity_convention', None)
         self.redshift = getattr(obj, 'redshift', None)
         self.wcshead = getattr(obj, 'wcshead', None)
+        # moved from __init__ - needs to be done whenever viewed
+        # (this is slow, though - may be better not to do this)
+        if self.shape: # check to make sure non-scalar
+            self.dxarr = np.diff(np.array(self))
 
     def __array_wrap__(self,out_arr,context=None):
         """

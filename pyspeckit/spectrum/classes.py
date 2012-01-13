@@ -170,6 +170,7 @@ class Spectrum(object):
             self.data = self.data[argsort]
             self.error = self.error[argsort]
             self.xarr = self.xarr[argsort]
+            self.xarr.dxarr = np.diff(self.xarr)
         
     def write(self,filename,type=None,**kwargs):
         """
