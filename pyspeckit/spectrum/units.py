@@ -617,7 +617,7 @@ class SpectroscopicAxis(np.ndarray):
             ctype = fits_type[self.xtype]
         self.wcshead['CTYPE1'] = ctype+fits_frame[self.frame]
         self.wcshead['SPECSYS'] = fits_specsys[self.frame]
-        self.wcshead['refX'] = self.refX
+        self.wcshead['RESTFRQ'] = self.refX
 
         # check to make sure the X-axis is linear
         cdelt = self.cdelt(tolerance=tolerance)

@@ -377,7 +377,6 @@ def make_axis(header):
     """
 
     rest_frequency = header.get('RESTF')
-    print "Making axis.  Restfreq:",rest_frequency
     xunits = 'MHz'
     nchan = header.get('NCHAN')
     voff = header.get('VOFF')
@@ -424,6 +423,7 @@ def class_to_obsblocks(filename,telescope,line,DEBUG=False):
         if hdr['LINE'].strip() not in line:
             continue
         hdr.update({'RESTFREQ':hdr.get('RESTF')})
+        H.update('RESTFREQ',hdr.get('RESTF'))
 
         #print "Did not skip %s,%s.  Scannum, last: %i,%i" % (hdr['XTEL'],hdr['LINE'],scannum,lastscannum)
 

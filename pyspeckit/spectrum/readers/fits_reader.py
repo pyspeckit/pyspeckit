@@ -4,7 +4,7 @@ import numpy.ma as ma
 import numpy as np
 from . import make_axis
 import operator
-from pyspeckit.specwarning import warn
+from pyspeckit.specwarnings import warn
 
 def open_1d_fits(filename,**kwargs):
     """
