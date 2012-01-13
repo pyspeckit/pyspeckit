@@ -209,7 +209,7 @@ def read_index(f, DEBUG=False):
                 "XPROC" :numpy.fromfile(f,count=1,dtype='S8')[0],# 		 (8 char) Procedure  ID (PROPOSED) 
                 "XPROJ" :numpy.fromfile(f,count=1,dtype='S8')[0],# 		 (8 char) Project    ID (PROPOSED) 
                 "UNUSED":numpy.fromfile(f,count=1,dtype='S6')[0],
-                "BLANK" :numpy.fromfile(f,count=1,dtype='S4')[0]
+                "BLANKKW":numpy.fromfile(f,count=1,dtype='S4')[0] # BLANK is NOT ALLOWED!!! It is a special KW
             }
     if f.tell() - x0 != 128:
         X = f.read(128-(f.tell()-x0))
