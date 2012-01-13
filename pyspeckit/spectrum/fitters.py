@@ -618,6 +618,9 @@ class Specfit(object):
         (i.e., you probably shouldn't call this from the command line or a script)
 
         Defines the fitting region of the spectrum
+
+        .. TODO: Make this cumulative like baseline selectregion;
+        ..       and allow 'masking out' interactively
         """
         if event.xdata is None:
             if debug: print "Click outside of plot region"
