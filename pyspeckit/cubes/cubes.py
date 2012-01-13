@@ -7,6 +7,7 @@ import pyfits
 import tempfile
 import posang # agpy code
 import pyspeckit
+from pyspeckit.specwarnings import warn
 try:
     from agpy.convolve import smooth
     from agpy.contributed import parallel_map
@@ -16,18 +17,18 @@ except ImportError:
 try:
     import coords
 except ImportError:
-    print "cubes.py requires coords for aper_world2pix and coords_in_image"
+    warn( "cubes.py requires coords for aper_world2pix and coords_in_image" )
 try:
     import pyregion
 except ImportError:
-    print "cubes.py requires pyregion for getspec_reg"
+    warn( "cubes.py requires pyregion for getspec_reg" )
 try:
     import astropy.wcs as pywcs
 except ImportError:
     try:
         import pywcs
     except ImportError:
-        print "cubes.py requires astropy.wcs or pywcs for some subimage_integ,aper_wordl2pix,getspec, and coords_in_image"
+        warn( "cubes.py requires astropy.wcs or pywcs for some subimage_integ,aper_wordl2pix,getspec, and coords_in_image" )
 
 dtor = pi/180.0
 

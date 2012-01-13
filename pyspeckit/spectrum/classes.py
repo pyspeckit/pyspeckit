@@ -23,6 +23,7 @@ import fitters
 import models
 import history
 import copy
+from pyspeckit.specwarnings import warn
 try:
     import atpy
     atpyOK = True
@@ -118,7 +119,7 @@ class Spectrum(object):
             if hasattr(header,'get'):
                 self.header = header
             else: # set as blank
-                print "WARNING: Blank header."
+                warn( "WARNING: Blank header." )
                 self.header = pyfits.Header()
             self.parse_header(self.header)
 

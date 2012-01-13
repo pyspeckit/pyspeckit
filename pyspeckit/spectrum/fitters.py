@@ -6,6 +6,7 @@ from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
 import units
 import models
+from pyspeckit.specwarnings import warn
 
 class Registry(object):
     """
@@ -229,7 +230,7 @@ class Specfit(object):
         if np.median(self.Spectrum.baseline.basespec) == 0:
             raise ValueError("Baseline / continuum is zero: equivalent width is undefined.")
         elif np.median(self.Spectrum.baseline.basespec) < 0:
-            if mycfg.WARN: print "WARNING: Baseline / continuum is negative: equivalent width is poorly defined."
+            if mycfg.WARN: warn( "WARNING: Baseline / continuum is negative: equivalent width is poorly defined." )
         diffspec = (self.Spectrum.baseline.basespec - self.Spectrum.data)
         dx = np.abs((self.Spectrum.xarr[self.gx2-1]-self.Spectrum.xarr[self.gx1]) / (self.gx2-self.gx1))
         sumofspec = diffspec[self.gx1:self.gx2].sum() * dx
