@@ -4,6 +4,7 @@ import numpy.ma as ma
 import numpy as np
 from . import make_axis
 import operator
+from pyspeckit.specwarning import warn
 
 def open_1d_fits(filename,**kwargs):
     """
@@ -99,7 +100,12 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
         # F(n) = RESTFREQ + CRVALi + ( n - CRPIXi ) * CDELTi
         if verbose: print "Loading a CLASS .fits spectrum"
         dv = -1*hdr.get('CDELT1')
-        v0 = hdr.get('RESTFREQ') + hdr.get('CRVAL1')
+        if hdr.get('RESTFREQ'):
+            v0 = hdr.get('RESTFREQ') + hdr.get('CRVAL1')
+        elif hdr.get('RESTF'):
+            v0 = hdr.get('RESTF') + hdr.get('CRVAL1')
+        else:
+            warn("CLASS file does not have RESTF or RESTFREQ")
         p3 = hdr.get('CRPIX1')
     elif hdr.get(str('CD%s_%s%s' % (specaxis,specaxis,wcstype))):
         dv,v0,p3 = hdr['CD%s_%s%s' % (specaxis,specaxis,wcstype)],hdr['CRVAL%s%s' % (specaxis,wcstype)],hdr['CRPIX%s%s' % (specaxis,wcstype)]

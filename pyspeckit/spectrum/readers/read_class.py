@@ -377,6 +377,7 @@ def make_axis(header):
     """
 
     rest_frequency = header.get('RESTF')
+    print "Making axis.  Restfreq:",rest_frequency
     xunits = 'MHz'
     nchan = header.get('NCHAN')
     voff = header.get('VOFF')
