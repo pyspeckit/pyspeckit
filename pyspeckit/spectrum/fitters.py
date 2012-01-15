@@ -96,7 +96,7 @@ default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='mult
 class Specfit(interactive.Interactive):
 
     def __init__(self, Spectrum, Registry=None):
-        super().__init__(Spectrum, interactive_help_message=Registry.interactive_help_message)
+        super(Specfit, self).__init__(Spectrum, interactive_help_message=Registry.interactive_help_message)
         self.model = None
         self.modelpars = None
         self.modelerrs = None
@@ -113,7 +113,7 @@ class Specfit(interactive.Interactive):
         self.click = 0
         self.fitkwargs = {}
         self.auto = False
-        self.Spectrum = Spectrum
+        #self.Spectrum = Spectrum
         self.specplotter = self.Spectrum.plotter
         self.fitleg=None
         self.residuals=None
@@ -166,16 +166,12 @@ class Specfit(interactive.Interactive):
                 raise Exception("Interactive fitting requires a plotter.")
             else:
                 self.specplotter.axis.set_autoscale_on(False)
-            print self.interactive_help_message
             # reset button count & guesses on every __call__
             self.nclicks_b1 = 0
             self.nclicks_b2 = 0
             self.guesses = []
-            event_handler = self.event_handler_debug if debug else self.event_handler
-            
-            if clear_all_connections: self.clear_all_connections()
-            self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',event_handler)
-            self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',event_handler)
+
+            self.start_interactive(clear_all_connections=False, **kwargs)
         elif multifit and self.fittype in self.Registry.multifitters or guesses is not None:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
@@ -294,8 +290,8 @@ class Specfit(interactive.Interactive):
         self.spectofit[(True-OKmask)] = 0
         self.seterrspec()
         self.errspec[(True-OKmask)] = 1e10
-        if self.includemask.shape == self.errspec.shape:
-            self.errspec[not self.includemask] = 1e10
+        if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
+            self.errspec[True - self.includemask] = 1e10
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
             color='k', composite_fit_color='red', component_fit_color='red',

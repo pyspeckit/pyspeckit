@@ -2,13 +2,14 @@ import numpy as np
 import matplotlib
 from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
+import interactive
 
 interactive_help_message = """
 Left-click twice to select or add to the baseline fitting range.  Middle or
 right click to disconnect and perform the fit.
 """
 
-class Baseline:
+class Baseline(interactive.Interactive):
     """
     Class to measure and subtract baselines from spectra.
 
@@ -31,33 +32,35 @@ class Baseline:
     buggiest and least adequately tested components of pyspeckit.  Bug reports
     are welcome.
     """
-    def __init__(self,Spectrum):
+    def __init__(self, Spectrum):
+        super(Baseline, self).__init__(Spectrum,
+                interactive_help_message=interactive_help_message)
         self.baselinepars  = None
         self.order = None
         self.basespec = np.zeros(Spectrum.data.shape[0])
-        self.excludemask = np.zeros(Spectrum.data.shape[0],dtype='bool')
+        #self.excludemask = np.zeros(Spectrum.data.shape[0],dtype='bool')
         self.OKmask = np.ones(Spectrum.data.shape[0],dtype='bool')
-        self.Spectrum = Spectrum
+        #self.Spectrum = Spectrum
         self.specplotter = Spectrum.plotter
         self.blleg = None
         self.click = 0
-        self.nclicks_b1 = 0
-        self.fitregion=[]
+        #self.nclicks_b1 = 0
+        #self.fitregion=[]
         self.excludevelo = []
         self.excludepix  = []
         self.subtracted = False
-        self.bx1 = 0
-        self.bx2 = Spectrum.data.shape[0] - 1
-        self.include = [self.bx1,self.bx2]
-        self.includevelo = [Spectrum.xarr[self.bx1],Spectrum.xarr[self.bx2]]
+        #self.xmin = 0
+        #self.xmax = Spectrum.data.shape[0] - 1
+        #self.include = [self.xmin,self.xmax]
+        #self.includevelo = [Spectrum.xarr[self.xmin],Spectrum.xarr[self.xmax]]
         self.powerlaw=False
         self._plots = []
 
     @cfgdec
-    def __call__(self, order=1, annotate=False, excludefit=False, save=True,
+    def __call__(self, order=1, excludefit=False, save=True,
             exclude=None, exclusionlevel=0.01, interactive=False, 
-            LoudDebug=False, fit_original=True, baseline_fit_color='orange',
-            **kwargs):
+            debug=False, LoudDebug=False, fit_original=True,
+            baseline_fit_color='orange', **kwargs):
         """
         Fit and remove a polynomial from the spectrum.  
         It will be saved in the variable "self.basespec"
@@ -78,9 +81,6 @@ class Baseline:
         fitting so you can run this procedure multiple times without losing
         information
         """
-        if LoudDebug:
-            print "Range: %i:%i" % (self.bx1,self.bx2)
-            print "Excluded: %i" % (self.excludemask.sum())
         specfit = self.Spectrum.specfit
         self.order = order
         fitp = np.zeros(self.order+1)
@@ -91,14 +91,7 @@ class Baseline:
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:
             self.specplotter.axis.set_autoscale_on(False)
-            print interactive_help_message
-            self.excludemask[:] = True # exclude everything
-            self.excludevelo = []
-            self.excludepix  = []
-            self.includevelo = []
-            self.includepix  = []
-            selectregion_interactive = lambda(x): self.selectregion_interactive(x, LoudDebug=LoudDebug, **kwargs)
-            self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',selectregion_interactive)
+            self.start_interactive(**kwargs)
         else:
             self.selectregion(**kwargs)
             if excludefit and specfit.modelpars is not None:
@@ -106,100 +99,38 @@ class Baseline:
                 #vhi = self.specplotter.specfit.modelpars[1] + 2*self.specplotter.specfit.modelpars[2]
                 #exclude = [np.argmin(abs(self.Spectrum.xarr-vlo)),argmin(abs(self.Spectrum.xarr-vhi))]
                 specfit.fullsizemodel() # make sure the spectrum is the right size
-                self.excludemask = abs(specfit.model) > exclusionlevel*abs(min(specfit.modelpars[0::3]))
+                self.includemask = abs(specfit.model) > exclusionlevel*abs(min(specfit.modelpars[0::3]))
             else:
-                self.excludemask[:] = False
-            self.dofit(exclude=exclude,annotate=annotate,fit_original=fit_original, 
-                baseline_fit_color = baseline_fit_color, LoudDebug=LoudDebug, **kwargs)
+                self.includemask[:] = True
+            self.button3action(exclude=exclude, 
+                    fit_original=fit_original,
+                    baseline_fit_color=baseline_fit_color, **kwargs)
         if save: self.savefit()
-        if LoudDebug:
-            print "Range: %i:%i" % (self.bx1,self.bx2)
-            print "Excluded: %i" % (self.excludemask.sum())
 
-    def dofit(self, exclude=None, excludeunits='velo', annotate=False,
-            include=None, includeunits='velo', LoudDebug=False,
-            subtract=True, fit_original=False, powerlaw=False,
-            xarr_fit_units='pixels', baseline_fit_color = 'orange', **kwargs):
+    def button3action(self, event=None, debug=False, subtract=True,
+            fit_original=False, powerlaw=False, baseline_fit_color='orange',
+            **kwargs):
         """
         Do the baseline fitting and save and plot the results.
 
         Can specify a region to exclude using velocity units or pixel units
         """
-        if LoudDebug:
-            print "include: ",include," units: ",includeunits," exclude: ",exclude," units: ",excludeunits
-        if include is not None and includeunits in ['velo','km/s','wavelength','frequency','xarr']:
-            self.excludemask[:] = True
-            if len(include) % 2 == 0:
-                self.includevelo = include
-                self.includepix = []
-                for vl,vu in zip(include[::2],include[1::2]):
-                    xl = np.argmin(abs(self.Spectrum.xarr-vl))
-                    xu = np.argmin(abs(self.Spectrum.xarr-vu))
-                    if xl > xu: xl,xu=xu,xl
-                    self.excludemask[xl:xu] = False
-                    self.includepix += [xl,xu]
-        elif include is not None and includeunits in ['pix','pixel','chan','channel']:
-            self.excludemask[:] = True
-            if len(include) % 2 == 0:
-                self.includepix = []
-                for xl,xu in zip(include[::2],include[1::2]):
-                    if xl > xu: xl,xu=xu,xl
-                    self.excludemask[xl:xu] = False
-                    self.includepix += [xl,xu]
-        else:
-            self.includepix = []
-            self.includevelo = []
-
-        if self.includepix:
-            if self.bx1 < min(self.includepix):
-                self.bx1 = min(self.includepix)
-            if self.bx2 > max(self.includepix):
-                self.bx2 = max(self.includepix)
-
-        if exclude is not None and excludeunits in ['velo','km/s','wavelength','frequency','xarr']:
-            if len(exclude) % 2 == 0:
-                self.excludevelo = exclude
-                self.excludepix = []
-                for vl,vu in zip(exclude[::2],exclude[1::2]):
-                    xl = np.argmin(abs(self.Spectrum.xarr-vl))
-                    xu = np.argmin(abs(self.Spectrum.xarr-vu))
-                    if xl > xu: xl,xu=xu,xl
-                    self.excludemask[xl:xu] = True
-                    self.excludepix += [xl,xu]
-        elif exclude is not None and excludeunits in ['pix','pixel','chan','channel']:
-            if len(exclude) % 2 == 0:
-                self.excludepix = []
-                for xl,xu in zip(exclude[::2],exclude[1::2]):
-                    if xl > xu: xl,xu=xu,xl
-                    self.excludemask[xl:xu] = True
-                    self.excludepix += [xl,xu]
-        else:
-            self.excludepix = []
-            self.excludevelo = []
-
-        # instead of cropping the data with data[self.bx1:self.bx2], we need to
-        # mask out the undesired data because otherwise the "pixel" indexing
-        # leads to incorrect fits
-        OK_edges = self.OKmask*False + True
-        OK_edges[:self.bx1] = False
-        OK_edges[self.bx2:] = False
-
-        if LoudDebug:
-            print "Excluded: ",self.excludemask.sum()," out of ",self.bx2-self.bx1," range %i-%i " % (self.bx1,self.bx2)
-            print "Edges exclude %i out of %i OK points" % ((True-OK_edges).sum(),self.OKmask.sum())
-
+        if debug: print "Button 3 Baseline"
         if self.subtracted:
             self.unsubtract()
+
+        self.clear_highlights()
+
+        xarr_fit_units = self.Spectrum.xarr.units
 
         self.basespec, self.baselinepars = self._baseline(
                 self.spectofit,
                 xarr=self.Spectrum.xarr,
                 err=self.Spectrum.error,
-                order=self.order, exclude=None, 
-                mask=((True-self.OKmask)+self.excludemask)+(True-OK_edges),
+                order=self.order, 
+                mask=(True-self.includemask),
                 powerlaw=powerlaw,
                 xarr_fit_units=xarr_fit_units,
-                LoudDebug=LoudDebug,
                 **kwargs)
         # create the full baseline spectrum...
         if powerlaw:
@@ -222,9 +153,12 @@ class Baseline:
             self.subtracted = False
 
         if self.specplotter.axis is not None:
-            self.plot_baseline(baseline_fit_color = baseline_fit_color)
+            self.plot_baseline(baseline_fit_color=baseline_fit_color, **kwargs)
 
-    def plot_baseline(self, annotate=True, baseline_fit_color='orange'):
+    button2action = button3action
+
+    def plot_baseline(self, annotate=True, baseline_fit_color='orange',
+            **kwargs):
         """
         Overplot the baseline fit
         """
@@ -245,7 +179,7 @@ class Baseline:
                 for p in self.specplotter.axis.lines:
                     self.specplotter.axis.lines.remove(p)
             plotmask = self.OKmask*False # include nothing...
-            plotmask[self.bx1:self.bx2] = self.OKmask[self.bx1:self.bx2] # then include everything OK in range
+            plotmask[self.xmin:self.xmax] = self.OKmask[self.xmin:self.xmax] # then include everything OK in range
             self.specplotter.ymin = abs(self.Spectrum.data[plotmask].min())*1.1*np.sign(self.Spectrum.data[plotmask].min())
             self.specplotter.ymax = abs(self.Spectrum.data[plotmask].max())*1.1*np.sign(self.Spectrum.data[plotmask].max())
             self.specplotter.plot()
@@ -267,88 +201,29 @@ class Baseline:
         else: 
             print "Baseline wasn't subtracted; not unsubtracting."
 
-    def selectregion_interactive(self,event, debug=False, **kwargs):
-        """
-        select regions for baseline fitting
-        """
-        toolbar = self.specplotter.figure.canvas.manager.toolbar
-        if event.xdata is None:
-            # do nothing
-            if debug: print "Click outside of plot region"
-        elif toolbar.mode == '':
-            if hasattr(event,'button'):
-                xpix = self.Spectrum.xarr.x_to_pix(event.xdata)
-                if event.button == 1:
-                    if self.nclicks_b1 == 0:
-                        self.nclicks_b1 = 1
-                        self._xclick1 = xpix
-                        if debug: print "Click 1: clickx=%i bx1=%i, bx2=%i" % (xpix,self.bx1,self.bx2)
-                    elif self.nclicks_b1 == 1:
-                        self._xclick2 = xpix
-                        self.nclicks_b1 = 0
-                        # force click1 to be left
-                        if self._xclick1 > self._xclick2: self._xclick1,self._xclick2 = self._xclick2,self._xclick1
-
-                        # ensure that the fit/plot range is at least as large as the click range
-                        if self.bx1 < self._xclick2: self.bx1 = self._xclick2
-                        if self.bx2 > self._xclick1: self.bx2 = self._xclick1
-
-                        self.fitregion += self.specplotter.axis.plot(
-                                self.Spectrum.xarr[self._xclick1:self._xclick2],
-                                self.Spectrum.data[self._xclick1:self._xclick2]+self.specplotter.offset,
-                                drawstyle='steps-mid',
-                                color='g',alpha=0.5)
-                        self.specplotter.refresh()
-                        self.excludemask[self._xclick1:self._xclick2] = False
-                        self.includevelo += [self.xpectrum.xarr[self._xclick1], self.Spectrum.xarr[self._xclick2]]
-                        self.includepix  += [self._xclick1, self._xclick2]
-                        if debug: print "Click 2: clickx=%i bx1=%i, bx2=%i" % (xpix,self.bx1,self.bx2)
-                if event.button in [2,3]:
-                    self.specplotter.figure.canvas.mpl_disconnect(self.click)
-                    self.dofit(include=self.includepix, includeunits='pix', **kwargs)
-                    for p in self.fitregion:
-                        p.set_visible(False)
-                        if p in self.specplotter.axis.lines: self.specplotter.axis.lines.remove(p)
-                    self.fitregion=[] # I should be able to just remove from the list... but it breaks the loop...
-                    self.specplotter.refresh()
-                    if debug: print "Click to fit.  Includepix: %s" % (str(self.includepix))
-            elif hasattr(event,'key'):
-                if event.key == '?':
-                    print interactive_help_message
-
-    def show_fitregion(self):
-        bad = self.Spectrum.data*0
-        bad[self.excludemask] = np.nan
-        self.fitregion += self.specplotter.axis.plot(
-                self.Spectrum.xarr,
-                self.Spectrum.data+self.specplotter.offset+bad,
-                drawstyle='steps-mid',
-                color='g',alpha=0.5)
-        self.specplotter.refresh()
-
     def selectregion(self,xmin=None,xmax=None,xtype='wcs', highlight=False, **kwargs):
         """
         Pick a fitting region in either WCS units or pixel units
         """
         if xmin is not None and xmax is not None:
             if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
-                self.bx1 = np.argmin(abs(xmin-self.Spectrum.xarr))
-                self.bx2 = np.argmin(abs(xmax-self.Spectrum.xarr))
+                self.xmin = np.argmin(abs(xmin-self.Spectrum.xarr))
+                self.xmax = np.argmin(abs(xmax-self.Spectrum.xarr))
             else:
-                self.bx1 = xmin
-                self.bx2 = xmax
+                self.xmin = xmin
+                self.xmax = xmax
         elif self.specplotter.xmin is not None and self.specplotter.xmax is not None:
-            self.bx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))
-            self.bx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))
+            self.xmin = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))
+            self.xmax = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))
         else:
-            self.bx1 = 0
-            self.bx2 = self.Spectrum.data.shape[0]
+            self.xmin = 0
+            self.xmax = self.Spectrum.data.shape[0]
             #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
-        if self.bx1>self.bx2: self.bx1,self.bx2 = self.bx2,self.bx1
+        if self.xmin>self.xmax: self.xmin,self.xmax = self.xmax,self.xmin
         if highlight:
-            self.fitregion += self.specplotter.axis.plot(
-                    self.Spectrum.xarr[self.bx1:self.bx2],
-                    self.Spectrum.data[self.bx1:self.bx2]+self.specplotter.offset,
+            self.button1plot += self.specplotter.axis.plot(
+                    self.Spectrum.xarr[self.xmin:self.xmax],
+                    self.Spectrum.data[self.xmin:self.xmax]+self.specplotter.offset,
                     drawstyle='steps-mid',
                     color='g',alpha=0.5)
 
@@ -493,10 +368,11 @@ class Baseline:
         When spectrum.crop is called, this must be too
         """
         self.basespec = self.basespec[x1pix:x2pix]
-        self.excludemask = self.excludemask[x1pix:x2pix]
+        self.includemask = self.includemask[x1pix:x2pix]
         self.OKmask = self.OKmask[x1pix:x2pix]
 
     def downsample(self,factor):
         self.basespec = self.basespec[::factor]
-        self.excludemask = self.excludemask[::factor]
+        self.includemask = self.includemask[::factor]
         self.OKmask = self.OKmask[::factor]
+

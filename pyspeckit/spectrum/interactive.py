@@ -10,7 +10,7 @@ import numpy
 
 class Interactive(object):
 
-    def __init__(Spectrum, guesses=None,
+    def __init__(self, Spectrum, guesses=None,
             interactive_help_message="Replace this message"):
         """
         Declare interactive variables.
@@ -22,8 +22,7 @@ class Interactive(object):
         self.Spectrum = Spectrum
 
         self.interactive_help_message = interactive_help_message
-        self.includemask = None
-        self.excludemask = None
+        self.includemask = self.Spectrum.data.astype('bool') + True
         self.xclicks = []
         self.yclicks = []
         self.event_history = []
@@ -45,7 +44,7 @@ class Interactive(object):
         self.button1plot = []
         self.button2plot = []
 
-    def event_manager(self, event):
+    def event_manager(self, event, debug=False):
         """
         Decide what to do given input (click, keypress, etc.)
         """
@@ -59,21 +58,21 @@ class Interactive(object):
                 button = event.key
 
             if debug:
-                print "button: ",button
+                print "button: ",button," x,y: ",event.xdata,event.ydata
 
-            if button in ('p','P','1',1,'i','a'):
+            if button in ('p','P','1',1,'i','a'): # p for... parea?  a for area.  i for include
                 # button one is always region selection
                 self.selectregion_interactive(event,debug=debug)
-            elif button in ('e','x','r','E','X','R'):
+            elif button in ('e','x','r','E','X','R'): # e for exclude, x for x-clude, r for remove
                 # exclude/delete/remove
                 self.selectregion_interactive(event, mark_include=False, debug=debug)
-            elif button in ('m','M','2',2):
+            elif button in ('m','M','2',2): # m for mark
                 self.button2action(event,debug=debug)
-            elif button in ('d','D','3',3):
+            elif button in ('d','D','3',3): # d for done
                 self.button3action(event,debug=debug)
             elif button in ('?'):
                 print self.interactive_help_message
-            elif button in self.Registry.fitkeys:
+            elif hasattr(self,'Registry') and button in self.Registry.fitkeys:
                 fittername = self.Registry.fitkeys[button]
                 if fittername in self.Registry.multifitters:
                     self.fitter = self.Registry.multifitters[fittername]
@@ -123,14 +122,21 @@ class Interactive(object):
             self.includemask[self._xclick1:self._xclick2] = mark_include
             if debug: print "Click 2: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax)
 
-    def show_fitregion(self):
+    def highlight_fitregion(self,  drawstyle='steps-mid', color='g',alpha=0.5,
+            clear_highlights=True, **kwargs):
+        """
+        Re-highlight the fitted region
+
+        kwargs are passed to `matplotlib.plot`
+        """
+        if clear_highlights: self.clear_highlights()
         bad = self.Spectrum.data*0
-        bad[self.excludemask] = np.nan
+        bad[True-self.includemask] = numpy.nan
         self.button1plot += self.Spectrum.plotter.axis.plot(
                 self.Spectrum.xarr,
                 self.Spectrum.data+self.Spectrum.plotter.offset+bad,
-                drawstyle='steps-mid',
-                color='g',alpha=0.5)
+                drawstyle=drawstyle, color=color, alpha=alpha,
+                **kwargs)
         self.Spectrum.plotter.refresh()
 
     def firstclick_selection(self, include_all=False):
@@ -144,9 +150,6 @@ class Interactive(object):
         else:
             # default to including nothing
             self.includemask = numpy.array(self.Spectrum.data, dtype='bool') * False
-
-    def eventhandler_debug(self,event):
-        return self.makeguess(event,debug=True)
 
     def guesspeakwidth(self,event,debug=False):
         """
@@ -164,7 +167,7 @@ class Interactive(object):
             self.button2plot += [self.specplotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
             #self.specplotter.refresh() #plot(**self.specplotter.plotkwargs)
         elif self.nclicks_b2 % 2 == 1:
-            self.guesses[-1] = abs(event.xdata-self.guesses[-2]) / np.sqrt(2*np.log(2))
+            self.guesses[-1] = abs(event.xdata-self.guesses[-2]) / numpy.sqrt(2*numpy.log(2))
             self.nclicks_b2 += 1
             if debug: print "Width %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)
             self.button2plot += self.specplotter.axis.plot([event.xdata,
@@ -187,17 +190,7 @@ class Interactive(object):
             for ii in xrange(len(guesses)): 
                 self.guesses.pop()
 
-    def button2_baseline(self, event, debug):
-        self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.click)
-        self.dofit(include=self.includepix, includeunits='pix', **kwargs)
-        for p in self.button1plot
-            p.set_visible(False)
-            if p in self.Spectrum.plotter.axis.lines: self.Spectrum.plotter.axis.lines.remove(p)
-        self.button1plot=[] # I should be able to just remove from the list... but it breaks the loop...
-        self.Spectrum.plotter.refresh()
-        if debug: print "Click to fit.  Includepix: %s" % (str(self.includepix))
-
-    def clear_all_connections(self):
+    def clear_all_connections(self, debug=False):
         """
         Prevent overlapping interactive sessions
         """
@@ -212,3 +205,19 @@ class Interactive(object):
             self.Spectrum.plotter.figure.canvas.mpl_disconnect(cid)
 
 
+    def start_interactive(self, debug=False, LoudDebug=False, print_message=True, clear_all_connections=True, **kwargs):
+        """
+
+        """
+        if print_message: print self.interactive_help_message
+        if clear_all_connections: self.clear_all_connections()
+        event_manager = lambda(x): self.event_manager(x, debug=debug, **kwargs)
+        self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',event_manager)
+        self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',event_manager)
+
+    def clear_highlights(self):
+        for p in self.button1plot:
+            p.set_visible(False)
+            if p in self.Spectrum.plotter.axis.lines: self.Spectrum.plotter.axis.lines.remove(p)
+        self.button1plot=[] # I should be able to just remove from the list... but it breaks the loop...
+        self.Spectrum.plotter.refresh()
