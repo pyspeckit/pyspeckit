@@ -123,8 +123,14 @@ class SpectralModel(fitter.SimpleFitter):
         temp_pardict['parlimited'] = parlimited if parlimited is not None else [(False,False)] * (self.npars*self.npeaks)
 
         self.vheight = vheight
-        if vheight and len(self.parinfo) == self.default_npars:
+        if vheight and len(self.parinfo) == self.default_npars and len(parvalues) == self.default_npars + 1:
+            # if the right number of parameters are passed, the first is the height
             self.parinfo = [ {'n':0, 'value':parvalues.pop(0), 'limits':(0,0),
+                'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
+                'error': 0, 'tied':"" } ]
+        elif vheight and len(self.parinfo) == self.default_npars and len(parvalues) == self.default_npars:
+            # if you're one par short, guess zero
+            self.parinfo = [ {'n':0, 'value': 0, 'limits':(0,0),
                 'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
                 'error': 0, 'tied':"" } ]
         else:
@@ -167,11 +173,11 @@ class SpectralModel(fitter.SimpleFitter):
         pars = list(pars)
         def L(x):
             v = np.zeros(len(x))
-            if self.vheight: v += pars.pop(0)
+            if self.vheight: v += pars[0]
             # use len(pars) instead of self.npeaks because we want this to work
             # independent of the current best fit
-            for jj in xrange(len(pars)/self.npars):
-                v += self.modelfunc(x, *pars[jj*self.npars:(jj+1)*self.npars], **kwargs)
+            for jj in xrange((len(pars)-self.vheight)/self.npars):
+                v += self.modelfunc(x, *pars[jj*self.npars+self.vheight:(jj+1)*self.npars+self.vheight], **kwargs)
             return v
         return L
 

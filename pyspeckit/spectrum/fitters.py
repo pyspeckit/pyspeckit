@@ -7,6 +7,7 @@ from ..config import ConfigDescriptor as cfgdec
 import units
 import models
 from pyspeckit.specwarnings import warn
+import interactive
 
 class Registry(object):
     """
@@ -21,10 +22,13 @@ class Registry(object):
         self.associatedkeys = {}
 
         self.interactive_help_message = """
-        Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
-        'm' twice to select a peak and width.  When you're done, right-click or hit 'd'
-        to perform the fit and disconnect the mouse and keyboard.  '?' will print this
-        help message again.
+        Left-click or hit 'p' twice to select (/p/ick) a fitting range.  You
+        can e/x/clude or /r/emove parts of the spectrum by hitting 'x' or 'r'
+        twice.  Then middle-click or hit 'm' twice to select (/m/ark) a peak
+        and width.  When you're done, right-click or hit 'd' to perform the fit
+        and disconnect the mouse and keyboard (/d/isconnect because you're
+        /d/one).
+        '?' will print this help message again.
         You can select different fitters to use with the interactive fitting routine.
         The default is gaussian ('g')
         """
@@ -92,27 +96,27 @@ default_Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5,multisingl
 default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
 
 
-class Specfit(object):
+class Specfit(interactive.Interactive):
 
     def __init__(self, Spectrum, Registry=None):
+        super(Specfit, self).__init__(Spectrum, interactive_help_message=Registry.interactive_help_message)
         self.model = None
         self.modelpars = None
         self.modelerrs = None
         self.modelplot = []
         self.modelcomponents = None
-        self.guessplot = []
-        self.fitregion = []
         self._plotted_components = []
         self.npeaks = 0
-        self.nclicks_b1 = 0
-        self.nclicks_b2 = 0
-        self.gx1 = 0
-        self.gx2 = Spectrum.data.shape[0]
+        #self.nclicks_b1 = 0
+        #self.nclicks_b2 = 0
+        #self.gx1 = 0
+        #self.gx2 = Spectrum.data.shape[0]
+        self.button2action = self.guesspeakwidth
         self.guesses = []
         self.click = 0
         self.fitkwargs = {}
         self.auto = False
-        self.Spectrum = Spectrum
+        #self.Spectrum = Spectrum
         self.specplotter = self.Spectrum.plotter
         self.fitleg=None
         self.residuals=None
@@ -125,7 +129,7 @@ class Specfit(object):
         #self.seterrspec()
         
     @cfgdec
-    def __call__(self, interactive=False, usemoments=True, clear_all_connections=False, debug=False,
+    def __call__(self, interactive=False, usemoments=True, clear_all_connections=True, debug=False,
             multifit=False, guesses=None, save=True, fittype='gaussian', annotate=None,
             color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 0.5, composite_lw = 0.75, 
             component_lw = 0.75, show_components = None, verbose=True, clear=True, 
@@ -163,27 +167,12 @@ class Specfit(object):
         if interactive:
             if self.specplotter.axis is None:
                 raise Exception("Interactive fitting requires a plotter.")
-            else:
-                self.specplotter.axis.set_autoscale_on(False)
-            print self.Registry.interactive_help_message
+            # reset button count & guesses on every __call__
             self.nclicks_b1 = 0
             self.nclicks_b2 = 0
             self.guesses = []
-            makeguess = self.makeguess_debug if debug else self.makeguess
-            
-            if clear_all_connections:
-                # this is really ugly, but needs to be done in order to prevent multiple overlapping calls...
-                cids_to_remove = []
-                for eventtype in ('button_press_event','key_press_event'):
-                    for key,val in self.specplotter.figure.canvas.callbacks.callbacks[eventtype].iteritems():
-                        if "makeguess" in val.func.__name__:
-                            cids_to_remove.append(key)
-                            if debug: print "Removing CID #%i with attached function %s" % (key,val.func.__name__)
-                for cid in cids_to_remove:
-                    self.specplotter.figure.canvas.mpl_disconnect(cid)
 
-            self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',makeguess)
-            self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',makeguess)
+            self.start_interactive(clear_all_connections=clear_all_connections, debug=debug, **kwargs)
         elif multifit and self.fittype in self.Registry.multifitters or guesses is not None:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
@@ -302,6 +291,8 @@ class Specfit(object):
         self.spectofit[(True-OKmask)] = 0
         self.seterrspec()
         self.errspec[(True-OKmask)] = 1e10
+        if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
+            self.errspec[True - self.includemask] = 1e10
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
             color='k', composite_fit_color='red', component_fit_color='red',
@@ -455,8 +446,8 @@ class Specfit(object):
             self.model = model*scalefactor - mpp[0]*scalefactor
         else: self.model = model*scalefactor
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model*scalefactor
-        self.modelpars = mpp[1:].tolist()
-        self.modelerrs = mpperr[1:].tolist()
+        self.modelpars = mpp.tolist()
+        self.modelerrs = mpperr.tolist()
         self.modelpars[0] *= scalefactor
         self.modelerrs[0] *= scalefactor
         self.modelpars[1] *= scalefactor
@@ -612,73 +603,6 @@ class Specfit(object):
             if debug: print "Swapped endpoints because the left end was greater than the right"
 
 
-    def selectregion_interactive(self,event,debug=False):
-        """
-        ***For window-interactive use only!***
-        (i.e., you probably shouldn't call this from the command line or a script)
-
-        Defines the fitting region of the spectrum
-
-        .. TODO: Make this cumulative like baseline selectregion;
-        ..       and allow 'masking out' interactively
-        """
-        if event.xdata is None:
-            if debug: print "Click outside of plot region"
-        elif self.nclicks_b1 == 0:
-            self.gx1 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
-            if debug: print "Left at %g.  Click #%i" % (self.gx1,self.nclicks_b1)
-            self.nclicks_b1 += 1
-        elif self.nclicks_b1 == 1:
-            self.gx2 = np.argmin(abs(event.xdata-self.Spectrum.xarr))
-            if debug: print "Right at %g.  Click #%i" % (self.gx2,self.nclicks_b2)
-            self.nclicks_b1 -= 1
-            if self.gx1 > self.gx2: self.gx1,self.gx2 = self.gx2,self.gx1
-            if abs(self.gx1-self.gx2) > 3: # can't fit w/ fewer data than pars
-                self.fitregion = self.specplotter.axis.plot(
-                        self.Spectrum.xarr[self.gx1:self.gx2],
-                        self.Spectrum.data[self.gx1:self.gx2]+self.specplotter.offset,
-                        drawstyle='steps-mid',
-                        color='c')
-                #self.specplotter.plot(**self.specplotter.plotkwargs)
-                if self.guesses == []:
-                    self.guesses = self.Registry.singlefitters['gaussian'].moments(
-                            self.Spectrum.xarr[self.gx1:self.gx2],
-                            self.spectofit[self.gx1:self.gx2],
-                            vheight=0)
-                    self.npeaks = 1
-                    self.auto = True
-            else:
-                print "Fitting region is too small (channels %i:%i).  Try again." % (self.gx1,self.gx2)
-
-    def guesspeakwidth(self,event,debug=False):
-        """
-        Interactively guess the peak height and width from user input
-
-        Width is assumed to be half-width-half-max
-        """
-        if self.nclicks_b2 % 2 == 0:
-            if self.auto:
-                self.guesses[:2] = [event.ydata,event.xdata]
-            else:
-                self.guesses += [event.ydata,event.xdata,1]
-                self.npeaks += 1
-            self.nclicks_b2 += 1
-            if debug: print "Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)
-            self.guessplot += [self.specplotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
-            #self.specplotter.refresh() #plot(**self.specplotter.plotkwargs)
-        elif self.nclicks_b2 % 2 == 1:
-            self.guesses[-1] = abs(event.xdata-self.guesses[-2]) / np.sqrt(2*np.log(2))
-            self.nclicks_b2 += 1
-            if debug: print "Width %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)
-            self.guessplot += self.specplotter.axis.plot([event.xdata,
-                2*self.guesses[-2]-event.xdata],[event.ydata]*2,
-                color='r')
-            #self.specplotter.refresh() #plot(**self.specplotter.plotkwargs)
-            if self.auto:
-                self.auto = False
-            if self.nclicks_b2 / 2 > self.npeaks:
-                print "There have been %i middle-clicks but there are only %i gaussians" % (self.nclicks_b2,self.npeaks)
-                self.npeaks += 1
 
     def clear(self, legend=True, components=True):
         """
@@ -709,57 +633,6 @@ class Specfit(object):
                 self.specplotter.axis.artists.remove(self.fitleg)
         if self.specplotter.autorefresh: self.specplotter.refresh()
     
-
-    def makeguess_debug(self,event):
-        return self.makeguess(event,debug=True)
-
-    def makeguess(self,event,debug=False):
-        """
-        ***For window-interactive use only!***
-        (i.e., you probably shouldn't call this from the command line or a script)
-
-        Given a set of clicks or button presses, sets the fit guesses
-        """
-        toolbar = self.specplotter.figure.canvas.manager.toolbar
-        if toolbar.mode == '' and self.specplotter.axis in event.canvas.figure.axes:
-            if hasattr(event,'button'):
-                button = event.button
-            elif hasattr(event,'key'):
-                button = event.key
-
-            if debug:
-                print "button: ",button
-
-            if button in ('p','P','1',1):
-                self.selectregion_interactive(event,debug=debug)
-            elif button in ('m','M','2',2):
-                self.guesspeakwidth(event,debug=debug)
-            elif button in ('d','D','3',3):
-                self.specplotter.figure.canvas.mpl_disconnect(self.click)
-                self.specplotter.figure.canvas.mpl_disconnect(self.keyclick)
-                if self.npeaks > 0:
-                    print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.gx1,self.gx2
-                    if len(self.guesses) % 3 == 0:
-                        self.multifit()
-                        for p in self.guessplot + self.fitregion:
-                            p.set_visible(False)
-                    else: 
-                        print "error, wrong # of pars"
-            elif button in ('?'):
-                print self.Registry.interactive_help_message
-            elif button in self.Registry.fitkeys:
-                fittername = self.Registry.fitkeys[button]
-                if fittername in self.Registry.multifitters:
-                    self.fitter = self.Registry.multifitters[fittername]
-                    self.fittype = fittername
-                    print "Selected multi-fitter %s" % fittername
-                elif fittername in self.Registry.singlefitters:
-                    self.fitter = self.Registry.singlefitters[fittername]
-                    self.fittype = fittername
-                    print "Selected single-fitter %s" % fittername
-                else: 
-                    print "ERROR: Did not find fitter %s" % fittername
-            if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def savefit(self):
         """
@@ -863,4 +736,21 @@ class Specfit(object):
         return self.Registry.singlefitters[self.fittype].moments(
                 self.Spectrum.xarr[self.gx1:self.gx2],
                 self.spectofit[self.gx1:self.gx2],  **kwargs)
+
+    def button3action(self, event, debug=False):
+        """
+        Disconnect the interactiveness
+        Perform the fit (or die trying)
+        Hide the guesses
+        """
+        self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.click)
+        self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.keyclick)
+        if self.npeaks > 0:
+            print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.gx1,self.gx2
+            if len(self.guesses) % 3 == 0:
+                self.multifit()
+                for p in self.button2plot + self.button1plot:
+                    p.set_visible(False)
+            else: 
+                print "error, wrong # of pars"
 
