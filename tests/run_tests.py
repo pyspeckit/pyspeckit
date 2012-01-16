@@ -1,7 +1,7 @@
 interactive=False
 import subprocess
-versnum = subprocess.Popen(["hg","id","--num"],stdout=subprocess.PIPE).communicate()[0].strip("+")
-savedir = "tests_%s" % versnum
+versnum = subprocess.Popen(["hg","id","--num"],stdout=subprocess.PIPE).communicate()[0].strip().strip("+")
+savedir = "tests_%s/" % versnum
 import os
 if not os.path.exists(savedir):
     os.mkdir(savedir)
