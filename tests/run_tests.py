@@ -3,7 +3,8 @@ import subprocess
 versnum = subprocess.Popen(["hg","id","--num"],stdout=subprocess.PIPE).communicate()[0].strip("+")
 savedir = "tests_%s" % versnum
 import os
-os.mkdir(savedir)
+if not os.path.exists(savedir):
+    os.mkdir(savedir)
 
 print "*****test_fits.py*****"
 execfile('test_fits.py',{'interactive':interactive,'savedir':savedir})

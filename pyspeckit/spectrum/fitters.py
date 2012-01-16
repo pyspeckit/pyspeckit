@@ -151,7 +151,7 @@ class Specfit(interactive.Interactive):
         """
 
         if clear: self.clear()
-        self.selectregion(verbose=verbose, **kwargs)
+        self.selectregion(verbose=verbose, debug=debug, **kwargs)
         for arg in ['xmin','xmax','xtype','reset']: 
             if arg in kwargs: kwargs.pop(arg)
 
@@ -411,6 +411,8 @@ class Specfit(interactive.Interactive):
 
         self.fitter = self.Registry.singlefitters[self.fittype]
 
+        if debug: print "n(guesses): %s  Guesses: %s  vheight: %s " % (len(self.guesses),self.guesses,vheight)
+
         scalefactor = 1.0
         if renormalize in ('auto',True):
             datarange = self.spectofit[self.xmin:self.xmax].max() - self.spectofit[self.xmin:self.xmax].min()
@@ -420,7 +422,7 @@ class Specfit(interactive.Interactive):
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor
                 self.guesses[0] /= scalefactor
-                self.guesses[1] /= scalefactor
+                if vheight: self.guesses[1] /= scalefactor
 
         if debug: print "Guesses before fit: ",self.guesses
         mpp,model,mpperr,chi2 = self.fitter(
@@ -439,8 +441,8 @@ class Specfit(interactive.Interactive):
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
         self.dof  = self.xmax-self.xmin-self.npeaks*self.Registry.npars[self.fittype]-vheight
+        self.vheight=vheight
         if vheight: 
-            self.vheight=True
             self.Spectrum.baseline.baselinepars = mpp[:1]*scalefactor # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]*scalefactor
             self.model = model*scalefactor - mpp[0]*scalefactor
@@ -562,47 +564,6 @@ class Specfit(interactive.Interactive):
         self.specplotter.axis.add_artist(self.fitleg)
         self.fitleg.draggable(True)
         if self.specplotter.autorefresh: self.specplotter.refresh()
-
-    def selectregion(self,xmin=None,xmax=None,xtype='wcs', reset=False,
-            debug=False, verbose=True, **kwargs):
-        """
-        Pick a fitting region in either WCS units or pixel units
-
-        reset - if true, overrides input xmin,xmax and selects the full range
-        """
-        # need to add 1 to the second index to be inclusive b/c array[0:10] has 10 elements, 
-        # but argmin(abs(lastelt-array)) = 9
-        cdelt_is_pos = self.Spectrum.xarr[-1] > self.Spectrum.xarr[0]
-        if xmin is not None and xmax is not None:
-            if xmin > xmax: xmin,xmax = xmax,xmin
-            if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
-                self.xmin = np.argmin(abs(xmin-self.Spectrum.xarr))+1*(not cdelt_is_pos)
-                self.xmax = np.argmin(abs(xmax-self.Spectrum.xarr))+1*cdelt_is_pos
-            else:
-                self.xmin = xmin
-                self.xmax = xmax
-        elif self.specplotter.xmin is not None and self.specplotter.xmax is not None:
-            if self.specplotter.xmin > self.specplotter.xmax: self.specplotter.xmin,self.specplotter.xmax = self.specplotter.xmax,self.specplotter.xmin
-            self.xmin = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))+1*(not cdelt_is_pos)
-            self.xmax = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))+1*cdelt_is_pos
-        elif reset:
-            self.xmin = 0
-            self.xmax = self.Spectrum.data.shape[0]
-            #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
-        else:
-            if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax)
-
-        if self.xmin == self.xmax:
-            # Reset if there is no fitting region
-            self.xmin = 0
-            self.xmax = self.Spectrum.data.shape[0]
-            if debug: print "Reset to full range because the endpoints were equal"
-        elif self.xmin>self.xmax: 
-            # Swap endpoints if the axis has a negative delta-X
-            self.xmin,self.xmax = self.xmax,self.xmin
-            if debug: print "Swapped endpoints because the left end was greater than the right"
-
-
 
     def clear(self, legend=True, components=True):
         """

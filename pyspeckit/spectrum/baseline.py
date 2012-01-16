@@ -61,7 +61,8 @@ class Baseline(interactive.Interactive):
     def __call__(self, order=1, excludefit=False, save=True, exclude=None,
             exclusionlevel=0.01, interactive=False, debug=False,
             LoudDebug=False, fit_original=True, baseline_fit_color='orange',
-            clear_all_connections=True, **kwargs):
+            clear_all_connections=True, fit_plotted_area=True, highlight=False,
+            **kwargs):
         """
         Fit and remove a polynomial from the spectrum.  
         It will be saved in the variable "self.basespec"
@@ -77,6 +78,10 @@ class Baseline(interactive.Interactive):
         excludefit creates a mask based on the fitted gaussian model (assuming
         that it has a zero-height) using an exclusion level of (exclusionlevel)
         * the smallest gaussian peak that was fit
+
+        fit_plotted_area means that a fit will only be attempted on the region
+        currently shown in the plot.  Overridden by interactive=True or
+        exclude='interactive'
 
         if fit_original is set, "basespec" is added back to the spectrum before
         fitting so you can run this procedure multiple times without losing
@@ -94,7 +99,6 @@ class Baseline(interactive.Interactive):
             self.start_interactive(clear_all_connections=clear_all_connections,
                     debug=debug, **kwargs)
         else:
-            self.selectregion(**kwargs)
             if excludefit and specfit.modelpars is not None:
                 #vlo = self.specplotter.specfit.modelpars[1] - 2*self.specplotter.specfit.modelpars[2]
                 #vhi = self.specplotter.specfit.modelpars[1] + 2*self.specplotter.specfit.modelpars[2]
@@ -103,9 +107,13 @@ class Baseline(interactive.Interactive):
                 self.includemask = abs(specfit.model) < exclusionlevel*abs(min(specfit.modelpars[0::3]))
             else:
                 self.includemask[:] = True
+            # must select region (i.e., exclude edges) AFTER setting 'positive' include region
+            # also, DON'T highlight here because it will be cleared
+            self.selectregion(fit_plotted_area=fit_plotted_area, **kwargs)
             self.button3action(exclude=exclude, 
                     fit_original=fit_original,
                     baseline_fit_color=baseline_fit_color, **kwargs)
+            if highlight: self.highlight_fitregion()
         if save: self.savefit()
 
     def button3action(self, event=None, debug=False, subtract=True,
@@ -211,32 +219,6 @@ class Baseline(interactive.Interactive):
             self.subtracted = False
         else: 
             print "Baseline wasn't subtracted; not unsubtracting."
-
-    def selectregion(self,xmin=None,xmax=None,xtype='wcs', highlight=False, **kwargs):
-        """
-        Pick a fitting region in either WCS units or pixel units
-        """
-        if xmin is not None and xmax is not None:
-            if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
-                self.xmin = np.argmin(abs(xmin-self.Spectrum.xarr))
-                self.xmax = np.argmin(abs(xmax-self.Spectrum.xarr))
-            else:
-                self.xmin = xmin
-                self.xmax = xmax
-        elif self.specplotter.xmin is not None and self.specplotter.xmax is not None:
-            self.xmin = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))
-            self.xmax = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))
-        else:
-            self.xmin = 0
-            self.xmax = self.Spectrum.data.shape[0]
-            #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
-        if self.xmin>self.xmax: self.xmin,self.xmax = self.xmax,self.xmin
-        if highlight:
-            self.button1plot += self.specplotter.axis.plot(
-                    self.Spectrum.xarr[self.xmin:self.xmax],
-                    self.Spectrum.data[self.xmin:self.xmax]+self.specplotter.offset,
-                    drawstyle='steps-mid',
-                    color='g',alpha=0.5)
 
     def annotate(self,loc='upper left'):
         if self.powerlaw:

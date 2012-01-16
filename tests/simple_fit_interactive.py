@@ -45,4 +45,3 @@ spec.baseline(excludefit=True)
 spec.specfit(guesses=spec.specfit.modelpars)
 
 spec.plotter.figure.savefig(savedir+"simple_fit_interactive_HCOp.png")
-spec.specfit.residualaxis.figure.savefig(savedir+"simple_fit_interactive_HCOp_residuals.png")

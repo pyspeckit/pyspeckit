@@ -238,3 +238,42 @@ class Interactive(object):
             if p in self.Spectrum.plotter.axis.lines: self.Spectrum.plotter.axis.lines.remove(p)
         self.button1plot=[] # I should be able to just remove from the list... but it breaks the loop...
         self.Spectrum.plotter.refresh()
+
+    def selectregion(self, xmin=None, xmax=None, xtype='wcs', highlight=False,
+            fit_plotted_area=True, reset=False, verbose=False, debug=False,
+            **kwargs):
+        """
+        Pick a fitting region in either WCS units or pixel units
+        """
+        if xmin is not None and xmax is not None:
+            if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
+                self.xmin = self.Spectrum.xarr.x_to_pix(xmin)
+                self.xmax = self.Spectrum.xarr.x_to_pix(xmax)
+            else:
+                self.xmin = xmin
+                self.xmax = xmax
+        elif self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None and fit_plotted_area:
+            self.xmin = self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmin)
+            self.xmax = self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmax)
+        elif reset:
+            self.xmin = 0
+            self.xmax = self.Spectrum.data.shape[0]
+            #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
+        else:
+            if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax)
+        
+        if self.xmin == self.xmax:
+            # Reset if there is no fitting region
+            self.xmin = 0
+            self.xmax = self.Spectrum.data.shape[0]
+            if debug: print "Reset to full range because the endpoints were equal"
+        elif self.xmin>self.xmax: 
+            # Swap endpoints if the axis has a negative delta-X
+            self.xmin,self.xmax = self.xmax,self.xmin
+            if debug: print "Swapped endpoints because the left end was greater than the right"
+
+        self.includemask[:self.xmin] = False
+        self.includemask[self.xmax:] = False
+
+        if highlight:
+            self.highlight_fitregion()
