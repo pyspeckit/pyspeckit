@@ -126,7 +126,7 @@ class Specfit(interactive.Interactive):
         #self.seterrspec()
         
     @cfgdec
-    def __call__(self, interactive=False, usemoments=True, clear_all_connections=False, debug=False,
+    def __call__(self, interactive=False, usemoments=True, clear_all_connections=True, debug=False,
             multifit=False, guesses=None, save=True, fittype='gaussian', annotate=None,
             color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 0.5, composite_lw = 0.75, 
             component_lw = 0.75, show_components = None, verbose=True, clear=True, 
@@ -164,14 +164,12 @@ class Specfit(interactive.Interactive):
         if interactive:
             if self.specplotter.axis is None:
                 raise Exception("Interactive fitting requires a plotter.")
-            else:
-                self.specplotter.axis.set_autoscale_on(False)
             # reset button count & guesses on every __call__
             self.nclicks_b1 = 0
             self.nclicks_b2 = 0
             self.guesses = []
 
-            self.start_interactive(clear_all_connections=False, **kwargs)
+            self.start_interactive(clear_all_connections=clear_all_connections, debug=debug, **kwargs)
         elif multifit and self.fittype in self.Registry.multifitters or guesses is not None:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
@@ -445,8 +443,8 @@ class Specfit(interactive.Interactive):
             self.model = model*scalefactor - mpp[0]*scalefactor
         else: self.model = model*scalefactor
         self.residuals = self.spectofit[self.gx1:self.gx2] - self.model*scalefactor
-        self.modelpars = mpp[1:].tolist()
-        self.modelerrs = mpperr[1:].tolist()
+        self.modelpars = mpp.tolist()
+        self.modelerrs = mpperr.tolist()
         self.modelpars[0] *= scalefactor
         self.modelerrs[0] *= scalefactor
         self.modelpars[1] *= scalefactor

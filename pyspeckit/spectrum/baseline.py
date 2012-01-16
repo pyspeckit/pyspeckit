@@ -57,10 +57,10 @@ class Baseline(interactive.Interactive):
         self._plots = []
 
     @cfgdec
-    def __call__(self, order=1, excludefit=False, save=True,
-            exclude=None, exclusionlevel=0.01, interactive=False, 
-            debug=False, LoudDebug=False, fit_original=True,
-            baseline_fit_color='orange', **kwargs):
+    def __call__(self, order=1, excludefit=False, save=True, exclude=None,
+            exclusionlevel=0.01, interactive=False, debug=False,
+            LoudDebug=False, fit_original=True, baseline_fit_color='orange',
+            clear_all_connections=True, **kwargs):
         """
         Fit and remove a polynomial from the spectrum.  
         It will be saved in the variable "self.basespec"
@@ -90,8 +90,8 @@ class Baseline(interactive.Interactive):
             self.spectofit = self.Spectrum.data.copy()
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:
-            self.specplotter.axis.set_autoscale_on(False)
-            self.start_interactive(**kwargs)
+            self.start_interactive(clear_all_connections=clear_all_connections,
+                    debug=debug, **kwargs)
         else:
             self.selectregion(**kwargs)
             if excludefit and specfit.modelpars is not None:
@@ -99,7 +99,7 @@ class Baseline(interactive.Interactive):
                 #vhi = self.specplotter.specfit.modelpars[1] + 2*self.specplotter.specfit.modelpars[2]
                 #exclude = [np.argmin(abs(self.Spectrum.xarr-vlo)),argmin(abs(self.Spectrum.xarr-vhi))]
                 specfit.fullsizemodel() # make sure the spectrum is the right size
-                self.includemask = abs(specfit.model) > exclusionlevel*abs(min(specfit.modelpars[0::3]))
+                self.includemask = abs(specfit.model) < exclusionlevel*abs(min(specfit.modelpars[0::3]))
             else:
                 self.includemask[:] = True
             self.button3action(exclude=exclude, 
@@ -154,6 +154,9 @@ class Baseline(interactive.Interactive):
 
         if self.specplotter.axis is not None:
             self.plot_baseline(baseline_fit_color=baseline_fit_color, **kwargs)
+
+        # disconnect interactive window
+        self.clear_all_connections()
 
     button2action = button3action
 

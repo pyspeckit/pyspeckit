@@ -57,6 +57,9 @@ class Interactive(object):
             elif hasattr(event,'key'):
                 button = event.key
 
+            if event.xdata is None or event.ydata is None:
+                return
+
             if debug:
                 print "button: ",button," x,y: ",event.xdata,event.ydata
 
@@ -67,6 +70,7 @@ class Interactive(object):
                 # exclude/delete/remove
                 self.selectregion_interactive(event, mark_include=False, debug=debug)
             elif button in ('m','M','2',2): # m for mark
+                if debug: print "Button 2 action"
                 self.button2action(event,debug=debug)
             elif button in ('d','D','3',3): # d for done
                 self.button3action(event,debug=debug)
@@ -112,17 +116,29 @@ class Interactive(object):
             # ensure that the fit/plot range is at least as large as the click range
             if self.xmin > self._xclick1: self.xmin = self._xclick1
             if self.xmax < self._xclick2: self.xmax = self._xclick2
+        
+            if mark_include: 
+                color = 'g'
+                linewidth = 0.5
+            else:
+                try:
+                    color = self.Spectrum.plotter._spectrumplot[0].get_color()
+                    linewidth = self.Spectrum.plotter._spectrumplot[0].get_linewidth()
+                except IndexError:
+                    linewidth = 0.5
+                    color = 'k'
 
             self.button1plot += self.Spectrum.plotter.axis.plot(
                     self.Spectrum.xarr[self._xclick1:self._xclick2],
                     self.Spectrum.data[self._xclick1:self._xclick2]+self.Spectrum.plotter.offset,
                     drawstyle='steps-mid',
-                    color='g',alpha=0.5)
+                    color=color,
+                    linewidth=linewidth)
             self.Spectrum.plotter.refresh()
             self.includemask[self._xclick1:self._xclick2] = mark_include
             if debug: print "Click 2: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax)
 
-    def highlight_fitregion(self,  drawstyle='steps-mid', color='g',alpha=0.5,
+    def highlight_fitregion(self,  drawstyle='steps-mid', color='g',
             clear_highlights=True, **kwargs):
         """
         Re-highlight the fitted region
@@ -135,7 +151,7 @@ class Interactive(object):
         self.button1plot += self.Spectrum.plotter.axis.plot(
                 self.Spectrum.xarr,
                 self.Spectrum.data+self.Spectrum.plotter.offset+bad,
-                drawstyle=drawstyle, color=color, alpha=alpha,
+                drawstyle=drawstyle, color=color, 
                 **kwargs)
         self.Spectrum.plotter.refresh()
 
@@ -144,6 +160,7 @@ class Interactive(object):
         Initialize the include/exclude mask
         """
 
+        self.Spectrum.plotter.axis.set_autoscale_on(False)
         if include_all:
             # default to including everything
             self.includemask = numpy.array(self.Spectrum.data, dtype='bool') + True
@@ -164,18 +181,16 @@ class Interactive(object):
             self.npeaks += 1
             self.nclicks_b2 += 1
             if debug: print "Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)
-            self.button2plot += [self.specplotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
-            #self.specplotter.refresh() #plot(**self.specplotter.plotkwargs)
+            self.button2plot += [self.Spectrum.plotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
+            #self.Spectrum.plotter.refresh() #plot(**self.Spectrum.plotter.plotkwargs)
         elif self.nclicks_b2 % 2 == 1:
             self.guesses[-1] = abs(event.xdata-self.guesses[-2]) / numpy.sqrt(2*numpy.log(2))
             self.nclicks_b2 += 1
             if debug: print "Width %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)
-            self.button2plot += self.specplotter.axis.plot([event.xdata,
+            self.button2plot += self.Spectrum.plotter.axis.plot([event.xdata,
                 2*self.guesses[-2]-event.xdata],[event.ydata]*2,
                 color='r')
-            #self.specplotter.refresh() #plot(**self.specplotter.plotkwargs)
-            if self.auto:
-                self.auto = False
+            #self.Spectrum.plotter.refresh() #plot(**self.Spectrum.plotter.plotkwargs)
             if self.nclicks_b2 / 2 > self.npeaks:
                 print "There have been %i middle-clicks but there are only %i gaussians" % (self.nclicks_b2,self.npeaks)
                 self.npeaks += 1
@@ -184,6 +199,7 @@ class Interactive(object):
         """
         Initialize self.guesses
         """
+        self.Spectrum.plotter.axis.set_autoscale_on(False)
         if self.guesses is None:
             self.guesses = []
         elif len(self.guesses) > 0:
@@ -212,8 +228,9 @@ class Interactive(object):
         if print_message: print self.interactive_help_message
         if clear_all_connections: self.clear_all_connections()
         event_manager = lambda(x): self.event_manager(x, debug=debug, **kwargs)
-        self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',event_manager)
-        self.keyclick = self.specplotter.axis.figure.canvas.mpl_connect('key_press_event',event_manager)
+        self.click = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',event_manager)
+        self.keyclick = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('key_press_event',event_manager)
+        self._callbacks = self.Spectrum.plotter.figure.canvas.callbacks.callbacks
 
     def clear_highlights(self):
         for p in self.button1plot:
