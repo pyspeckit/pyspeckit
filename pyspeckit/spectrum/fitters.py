@@ -22,10 +22,13 @@ class Registry(object):
         self.associatedkeys = {}
 
         self.interactive_help_message = """
-        Left-click or hit 'p' twice to select a fitting range, then middle-click or hit
-        'm' twice to select a peak and width.  When you're done, right-click or hit 'd'
-        to perform the fit and disconnect the mouse and keyboard.  '?' will print this
-        help message again.
+        Left-click or hit 'p' twice to select (/p/ick) a fitting range.  You
+        can e/x/clude or /r/emove parts of the spectrum by hitting 'x' or 'r'
+        twice.  Then middle-click or hit 'm' twice to select (/m/ark) a peak
+        and width.  When you're done, right-click or hit 'd' to perform the fit
+        and disconnect the mouse and keyboard (/d/isconnect because you're
+        /d/one).
+        '?' will print this help message again.
         You can select different fitters to use with the interactive fitting routine.
         The default is gaussian ('g')
         """

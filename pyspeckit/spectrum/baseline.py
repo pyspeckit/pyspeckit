@@ -30,7 +30,8 @@ class Baseline(interactive.Interactive):
 
     As you may observe in the comments on this code, this has been one of the
     buggiest and least adequately tested components of pyspeckit.  Bug reports
-    are welcome.
+    are welcome.  (as of 1/15/2012, a major change has probably fixed most of
+    the bugs, and the code base is much simpler)
     """
     def __init__(self, Spectrum):
         super(Baseline, self).__init__(Spectrum,
