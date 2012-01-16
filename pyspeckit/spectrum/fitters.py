@@ -109,8 +109,8 @@ class Specfit(interactive.Interactive):
         self.npeaks = 0
         #self.nclicks_b1 = 0
         #self.nclicks_b2 = 0
-        #self.gx1 = 0
-        #self.gx2 = Spectrum.data.shape[0]
+        #self.xmin = 0
+        #self.xmax = Spectrum.data.shape[0]
         self.button2action = self.guesspeakwidth
         self.guesses = []
         self.click = 0
@@ -221,11 +221,11 @@ class Specfit(interactive.Interactive):
         elif np.median(self.Spectrum.baseline.basespec) < 0:
             if mycfg.WARN: warn( "WARNING: Baseline / continuum is negative: equivalent width is poorly defined." )
         diffspec = (self.Spectrum.baseline.basespec - self.Spectrum.data)
-        dx = np.abs((self.Spectrum.xarr[self.gx2-1]-self.Spectrum.xarr[self.gx1]) / (self.gx2-self.gx1))
-        sumofspec = diffspec[self.gx1:self.gx2].sum() * dx
+        dx = np.abs((self.Spectrum.xarr[self.xmax-1]-self.Spectrum.xarr[self.xmin]) / (self.xmax-self.xmin))
+        sumofspec = diffspec[self.xmin:self.xmax].sum() * dx
         eqw = sumofspec / np.median(self.Spectrum.baseline.basespec)
         if plot:
-            midpt_pixel = np.round((self.gx1+self.gx2)/2.0)
+            midpt_pixel = np.round((self.xmin+self.xmax)/2.0)
             midpt       = self.Spectrum.xarr[midpt_pixel]
             midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
             print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
@@ -320,7 +320,7 @@ class Specfit(interactive.Interactive):
         
         scalefactor = 1.0
         if renormalize in ('auto',True):
-            datarange = self.spectofit[self.gx1:self.gx2].max() - self.spectofit[self.gx1:self.gx2].min()
+            datarange = self.spectofit[self.xmin:self.xmax].max() - self.spectofit[self.xmin:self.xmax].min()
             if abs(datarange) < 1e-9:
                 scalefactor = np.median(np.abs(self.spectofit))
                 if verbose: print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
@@ -330,9 +330,9 @@ class Specfit(interactive.Interactive):
                     self.guesses[self.fitter.npars*ii] /= scalefactor
 
         mpp,model,mpperr,chi2 = self.fitter(
-                self.Spectrum.xarr[self.gx1:self.gx2], 
-                self.spectofit[self.gx1:self.gx2], 
-                err=self.errspec[self.gx1:self.gx2],
+                self.Spectrum.xarr[self.xmin:self.xmax], 
+                self.spectofit[self.xmin:self.xmax], 
+                err=self.errspec[self.xmin:self.xmax],
                 npeaks=self.npeaks,
                 params=self.guesses,
                 **self.fitkwargs)
@@ -343,7 +343,7 @@ class Specfit(interactive.Interactive):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.gx2-self.gx1-self.npeaks*self.Registry.npars[self.fittype]
+        self.dof  = self.xmax-self.xmin-self.npeaks*self.Registry.npars[self.fittype]
         self.model = model * scalefactor
         for ii in xrange(self.npeaks): # assume first parameter is amplitude
             mpp[self.fitter.npars*ii]    *= scalefactor
@@ -351,7 +351,7 @@ class Specfit(interactive.Interactive):
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
         self.parinfo = self.fitter.mp.parinfo_in
-        self.residuals = self.spectofit[self.gx1:self.gx2] - self.model
+        self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate, color=color,
                     composite_fit_color=composite_fit_color,
@@ -396,8 +396,8 @@ class Specfit(interactive.Interactive):
         if usemoments: # this can be done within gaussfit but I want to save them
             # use this INDEPENDENT of fittype for now (voigt and gauss get same guesses)
             self.guesses = self.Registry.singlefitters[self.fittype].moments(
-                    self.Spectrum.xarr[self.gx1:self.gx2],
-                    self.spectofit[self.gx1:self.gx2], vheight=vheight,
+                    self.Spectrum.xarr[self.xmin:self.xmax],
+                    self.spectofit[self.xmin:self.xmax], vheight=vheight,
                     negamp=negamp, **kwargs)
             #if vheight is False: self.guesses = [height]+self.guesses
         else:
@@ -413,7 +413,7 @@ class Specfit(interactive.Interactive):
 
         scalefactor = 1.0
         if renormalize in ('auto',True):
-            datarange = self.spectofit[self.gx1:self.gx2].max() - self.spectofit[self.gx1:self.gx2].min()
+            datarange = self.spectofit[self.xmin:self.xmax].max() - self.spectofit[self.xmin:self.xmax].min()
             if abs(datarange) < 1e-9:
                 scalefactor = np.median(np.abs(self.spectofit))
                 print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
@@ -424,9 +424,9 @@ class Specfit(interactive.Interactive):
 
         if debug: print "Guesses before fit: ",self.guesses
         mpp,model,mpperr,chi2 = self.fitter(
-                self.Spectrum.xarr[self.gx1:self.gx2],
-                self.spectofit[self.gx1:self.gx2],
-                err=self.errspec[self.gx1:self.gx2],
+                self.Spectrum.xarr[self.xmin:self.xmax],
+                self.spectofit[self.xmin:self.xmax],
+                err=self.errspec[self.xmin:self.xmax],
                 vheight=vheight,
                 params=self.guesses,
                 **self.fitkwargs)
@@ -438,14 +438,14 @@ class Specfit(interactive.Interactive):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.gx2-self.gx1-self.npeaks*self.Registry.npars[self.fittype]-vheight
+        self.dof  = self.xmax-self.xmin-self.npeaks*self.Registry.npars[self.fittype]-vheight
         if vheight: 
             self.vheight=True
             self.Spectrum.baseline.baselinepars = mpp[:1]*scalefactor # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]*scalefactor
             self.model = model*scalefactor - mpp[0]*scalefactor
         else: self.model = model*scalefactor
-        self.residuals = self.spectofit[self.gx1:self.gx2] - self.model*scalefactor
+        self.residuals = self.spectofit[self.xmin:self.xmax] - self.model*scalefactor
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
         self.modelpars[0] *= scalefactor
@@ -471,19 +471,19 @@ class Specfit(interactive.Interactive):
         kwargs are passed to the fitter's components attribute
         """
         if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
-            plot_offset = self.specplotter.offset+self.Spectrum.baseline.basespec[self.gx1:self.gx2]
+            plot_offset = self.specplotter.offset+self.Spectrum.baseline.basespec[self.xmin:self.xmax]
         else:
             plot_offset = self.specplotter.offset
         self.modelplot += self.specplotter.axis.plot(
-                self.Spectrum.xarr[self.gx1:self.gx2],
+                self.Spectrum.xarr[self.xmin:self.xmax],
                 self.model + plot_offset,
                 color=composite_fit_color, linewidth=lw)
         
         # Plot components
         if show_components:
-            self.modelcomponents = self.fitter.components(self.Spectrum.xarr[self.gx1:self.gx2],self.modelpars, **component_kwargs)
+            self.modelcomponents = self.fitter.components(self.Spectrum.xarr[self.xmin:self.xmax],self.modelpars, **component_kwargs)
             for data in self.modelcomponents:
-                self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
+                self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr[self.xmin:self.xmax],
                     data + plot_offset,
                     color=component_fit_color, linewidth=component_lw)                
                 
@@ -503,7 +503,7 @@ class Specfit(interactive.Interactive):
 
         if self.model.shape != self.Spectrum.data.shape:
             temp = np.zeros(self.Spectrum.data.shape)
-            temp[self.gx1:self.gx2] = self.model
+            temp[self.xmin:self.xmax] = self.model
             self.model = temp
             self.residuals = self.spectofit - self.model
             self.selectregion(reset=True)
@@ -523,7 +523,7 @@ class Specfit(interactive.Interactive):
         else:
             self.residualaxis = axis
             if clear: self.residualaxis.clear()
-        self.residualplot = self.residualaxis.plot(self.Spectrum.xarr[self.gx1:self.gx2],
+        self.residualplot = self.residualaxis.plot(self.Spectrum.xarr[self.xmin:self.xmax],
                 self.residuals,drawstyle='steps-mid',
                 linewidth=0.5, color='k', **kwargs)
         if self.specplotter.xmin is not None and self.specplotter.xmax is not None:
@@ -576,30 +576,30 @@ class Specfit(interactive.Interactive):
         if xmin is not None and xmax is not None:
             if xmin > xmax: xmin,xmax = xmax,xmin
             if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
-                self.gx1 = np.argmin(abs(xmin-self.Spectrum.xarr))+1*(not cdelt_is_pos)
-                self.gx2 = np.argmin(abs(xmax-self.Spectrum.xarr))+1*cdelt_is_pos
+                self.xmin = np.argmin(abs(xmin-self.Spectrum.xarr))+1*(not cdelt_is_pos)
+                self.xmax = np.argmin(abs(xmax-self.Spectrum.xarr))+1*cdelt_is_pos
             else:
-                self.gx1 = xmin
-                self.gx2 = xmax
+                self.xmin = xmin
+                self.xmax = xmax
         elif self.specplotter.xmin is not None and self.specplotter.xmax is not None:
             if self.specplotter.xmin > self.specplotter.xmax: self.specplotter.xmin,self.specplotter.xmax = self.specplotter.xmax,self.specplotter.xmin
-            self.gx1 = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))+1*(not cdelt_is_pos)
-            self.gx2 = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))+1*cdelt_is_pos
+            self.xmin = np.argmin(abs(self.specplotter.xmin-self.Spectrum.xarr))+1*(not cdelt_is_pos)
+            self.xmax = np.argmin(abs(self.specplotter.xmax-self.Spectrum.xarr))+1*cdelt_is_pos
         elif reset:
-            self.gx1 = 0
-            self.gx2 = self.Spectrum.data.shape[0]
+            self.xmin = 0
+            self.xmax = self.Spectrum.data.shape[0]
             #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
         else:
-            if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.gx1,self.gx2)
+            if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax)
 
-        if self.gx1 == self.gx2:
+        if self.xmin == self.xmax:
             # Reset if there is no fitting region
-            self.gx1 = 0
-            self.gx2 = self.Spectrum.data.shape[0]
+            self.xmin = 0
+            self.xmax = self.Spectrum.data.shape[0]
             if debug: print "Reset to full range because the endpoints were equal"
-        elif self.gx1>self.gx2: 
+        elif self.xmin>self.xmax: 
             # Swap endpoints if the axis has a negative delta-X
-            self.gx1,self.gx2 = self.gx2,self.gx1
+            self.xmin,self.xmax = self.xmax,self.xmin
             if debug: print "Swapped endpoints because the left end was greater than the right"
 
 
@@ -734,8 +734,8 @@ class Specfit(interactive.Interactive):
         see :mod:`moments`
         """
         return self.Registry.singlefitters[self.fittype].moments(
-                self.Spectrum.xarr[self.gx1:self.gx2],
-                self.spectofit[self.gx1:self.gx2],  **kwargs)
+                self.Spectrum.xarr[self.xmin:self.xmax],
+                self.spectofit[self.xmin:self.xmax],  **kwargs)
 
     def button3action(self, event, debug=False):
         """
@@ -746,7 +746,7 @@ class Specfit(interactive.Interactive):
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.click)
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.keyclick)
         if self.npeaks > 0:
-            print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.gx1,self.gx2
+            print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.xmin,self.xmax
             if len(self.guesses) % 3 == 0:
                 self.multifit()
                 for p in self.button2plot + self.button1plot:

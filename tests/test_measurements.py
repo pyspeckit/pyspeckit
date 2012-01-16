@@ -32,11 +32,11 @@ spec.xarr.units='angstroms'
 
 # H-alpha
 spec.specfit.selectregion(xmin = Halpha - 5, xmax = Halpha + 5)
-ampHa = np.max(spec.data[spec.specfit.gx1:spec.specfit.gx2])
+ampHa = np.max(spec.data[spec.specfit.xmin:spec.specfit.xmax])
 
 # SII
 spec.specfit.selectregion(xmin = SIIa - 20, xmax = SIIb + 20)
-smallamp = np.max(spec.data[spec.specfit.gx1:spec.specfit.gx2])    
+smallamp = np.max(spec.data[spec.specfit.xmin:spec.specfit.xmax])    
 
 spec.specfit(guesses = [smallamp, SIIa, narrow, smallamp, SIIb, narrow],
         tied=['', '', 'p[-1]', '', 'p[1] + {0}'.format(SIIb_off), ''],
@@ -132,5 +132,18 @@ for line in spec.measurements.lines.keys():
     print line, spec.measurements.lines[line]['pos'], spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum'], \
         spec.measurements.lines[line]['amp']
 
-raw_input('done')
+"""
+Correct result:
+Line   Pos   Flux (erg/s/cm^2)    FWHM (Angstrom)   Luminosity (erg/s)   Amplitude
+NIIa 6551.28531669 1.45663617387e-15 5.53353450775 8.58090267112e+39 2.47295525368e-16
+NIIb 6586.69531669 4.36990852161e-15 5.53353450775 2.57427080134e+40 7.41886576104e-16
+SIIb 6734.10531669 1.25342148139e-15 5.53353450775 7.38378459262e+39 2.12795431905e-16
+SIIa 6719.71531669 1.33401863855e-15 5.53353450775 7.85857464219e+39 2.26478544189e-16
+H_alpha_B 6566.03931669 4.83056497428e-14 68.3479980471 5.6912781152e+41 5.97961753041e-16
+H_alpha_N 6566.03931669 3.92425150256e-15 5.53353450775 2.31173856619e+40 6.66226649048e-16
+H_alpha 6566.03931669 5.22299012454e-14 10.9497680664 9.23043874266e+41 1.26418840209e-15
+    
+"""
+
+#raw_input('done')
     

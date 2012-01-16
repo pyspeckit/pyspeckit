@@ -47,8 +47,8 @@ class Baseline(interactive.Interactive):
         self.click = 0
         #self.nclicks_b1 = 0
         #self.fitregion=[]
-        self.excludevelo = []
-        self.excludepix  = []
+        #self.excludevelo = []
+        #self.excludepix  = []
         self.subtracted = False
         #self.xmin = 0
         #self.xmax = Spectrum.data.shape[0] - 1
@@ -110,7 +110,7 @@ class Baseline(interactive.Interactive):
 
     def button3action(self, event=None, debug=False, subtract=True,
             fit_original=False, powerlaw=False, baseline_fit_color='orange',
-            **kwargs):
+            exclude=None, **kwargs):
         """
         Do the baseline fitting and save and plot the results.
 
@@ -123,6 +123,13 @@ class Baseline(interactive.Interactive):
         self.clear_highlights()
 
         xarr_fit_units = self.Spectrum.xarr.units
+
+        # Exclude keyword-specified excludes.  Assumes exclusion in current X array units
+        if exclude is not None and len(exclude) % 2 == 0:
+            for x1,x2 in zip(exclude[::2],exclude[1::2]):
+                x1 = self.Spectrum.xarr.x_to_pix(x1)
+                x2 = self.Spectrum.xarr.x_to_pix(x2)
+                self.includemask[x1:x2] = False
 
         self.basespec, self.baselinepars = self._baseline(
                 self.spectofit,
@@ -262,7 +269,7 @@ class Baseline(interactive.Interactive):
                 self.Spectrum.header.update('BLCOEF%0.2i' % (ii),p,comment="Baseline power-law best-fit coefficient x^%i" % (self.order-ii-1))
 
     def _baseline(self, spectrum, xarr=None, err=None, xmin='default', xmax='default',
-            order=1, quiet=True, exclude=None, mask=None, powerlaw=False,
+            order=1, quiet=True, mask=None, powerlaw=False,
             xarr_fit_units='pixels', LoudDebug=False, renormalize='auto',
             zeroerr_is_OK=True, **kwargs):
         """
@@ -270,20 +277,17 @@ class Baseline(interactive.Interactive):
         If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum
         *unless* order > 1, in which case ignoring the ends tends to cause strange effects
 
-        exclude is a set of start/end indices to ignore when baseline fitting
-        (ignored by setting error to infinite in fitting procedure)
-
         EDIT Nov 21, 2011: DO NOT exclude ends by chopping them!  This results
         in bad fits when indexing by pixels
         """
 
         if xmin == 'default':
-            if order <= 1 and exclude is None and mask is None: xmin = np.floor( spectrum.shape[-1]*0.1 )
+            if order <= 1 and mask is None: xmin = np.floor( spectrum.shape[-1]*0.1 )
             else: xmin = 0
         elif xmin is None:
             xmin = 0
         if xmax == 'default':
-            if order <= 1 and exclude is None and mask is None: xmax = np.ceil( spectrum.shape[-1]*0.9 )
+            if order <= 1 and mask is None: xmax = np.ceil( spectrum.shape[-1]*0.9 )
             else: xmax = spectrum.shape[-1]
         elif xmax is None:
             xmax = spectrum.shape[-1]
@@ -308,8 +312,6 @@ class Baseline(interactive.Interactive):
 
         err[:xmin] = 1e10
         err[xmax:] = 1e10
-        if exclude is not None:
-            err[exclude[0]:exclude[1]] = 1e10
         if mask is not None:
             if mask.dtype.name != 'bool': mask = mask.astype('bool')
             err[mask] = 1e10

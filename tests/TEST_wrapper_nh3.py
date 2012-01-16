@@ -1,6 +1,11 @@
 import pyspeckit
 from pylab import *
 
+if not 'interactive' in globals():
+    interactive=False
+if not 'savedir' in globals():
+    savedir = ''
+
 filenames = {'oneone':'G032.751-00.071_nh3_11_Tastar.fits',
     'twotwo':'G032.751-00.071_nh3_22_Tastar.fits',
     'threethree':'G032.751-00.071_nh3_33_Tastar.fits',
@@ -70,12 +75,12 @@ if False:
     pyspeckit.wrappers.fitnh3.plot_nh3(spdict1,spectra1,fignum=7,show_components=True)
 
     figure(5)
-    savefig("example_G032_multi-temperature_four-line_fit.png")
+    savefig(savedir+"example_G032_multi-temperature_four-line_fit.png")
     figure(7)
-    savefig("example_G032_multi-temperature_four-line_fit_components.png")
+    savefig(savedir+"example_G032_multi-temperature_four-line_fit_components.png")
     figure(8)
-    savefig("example_G032_multi-temperature_four-line_fit_residuals.png")
+    savefig(savedir+"example_G032_multi-temperature_four-line_fit_residuals.png")
 
     figure(9,figsize=[16,12])
     pyspeckit.wrappers.fitnh3.plot_nh3(spdict1,spectra1,fignum=9,errstyle='fill')
-    savefig("example_G032_multi-temperature_four-line_fit_errbars.png")
+    savefig(savedir+"example_G032_multi-temperature_four-line_fit_errbars.png")

@@ -1,5 +1,10 @@
 import pyspeckit
 
+if not 'interactive' in globals():
+    interactive=False
+if not 'savedir' in globals():
+    savedir = ''
+
 # Rest wavelengths of the lines we are fitting - use as initial guesses
 NIIa = 6549.86
 NIIb = 6585.27
@@ -61,4 +66,4 @@ for line in spec.measurements.lines.keys():
 #raw_input("Done (again).")
 
 # Save the figure
-spec.plotter.figure.savefig("sdss_fit_example.png")
+spec.plotter.figure.savefig(savedir+"sdss_fit_example.png")

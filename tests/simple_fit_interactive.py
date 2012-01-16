@@ -1,6 +1,11 @@
 import pyspeckit
 import matplotlib
 
+if not 'interactive' in globals():
+    interactive=False
+if not 'savedir' in globals():
+    savedir = ''
+
 # load a FITS-compliant spectrum
 spec = pyspeckit.Spectrum('10074-190_HCOp.fits')
 # The units are originally frequency (check this by printing spec.xarr.units).
@@ -38,3 +43,6 @@ spec.specfit.event_manager(event5)
 
 spec.baseline(excludefit=True)
 spec.specfit(guesses=spec.specfit.modelpars)
+
+spec.plotter.figure.savefig(savedir+"simple_fit_interactive_HCOp.png")
+spec.specfit.residualaxis.figure.savefig(savedir+"simple_fit_interactive_HCOp_residuals.png")

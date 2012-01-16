@@ -2,6 +2,8 @@ import pyspeckit
 
 if not 'interactive' in globals():
     interactive=False
+if not 'savedir' in globals():
+    savedir = ''
 
 
 sp = pyspeckit.Spectrum('G031.947+00.076_nh3_11_Tastar.fits')#,wcstype='F')
@@ -16,7 +18,7 @@ import pylab; pylab.ioff(); pylab.draw()
 if interactive: raw_input("Plotter (smooth)")
 
 sp.specfit(negamp=False)
-sp.plotter.figure.savefig('nh3_gaussfit.png')
+sp.plotter.figure.savefig(savedir+'nh3_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
@@ -28,18 +30,18 @@ sp.specfit(fittype='ammonia',
         multifit=True,guesses=[5.9,4.45,14.919,0.84,96.2,0.43],quiet=False)
 sp.specfit.plotresiduals()
 if interactive: raw_input('Press enter to print guesses and zoom in.')
-sp.plotter.figure.savefig('nh3_ammonia_fit.png')
+sp.plotter.figure.savefig(savedir+'nh3_ammonia_fit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 sp.plotter(xmin=70,xmax=125)
 sp.specfit.plot_fit()
-sp.plotter.figure.savefig('nh3_ammonia_fit_zoom.png')
+sp.plotter.figure.savefig(savedir+'nh3_ammonia_fit_zoom.png')
 if interactive: raw_input('Press enter to multifit')
 sp.specfit(fittype='ammonia',multifit=True,
         guesses=[4,3.5,14.69,0.68,97.3,0.5]+[15,4.2,14.85,0.52,95.8,0.35],
         quiet=False)
 sp.specfit.plotresiduals()
-sp.plotter.figure.savefig('nh3_ammonia_multifit_zoom.png')
+sp.plotter.figure.savefig(savedir+'nh3_ammonia_multifit_zoom.png')
 
 
 if interactive: raw_input('Press enter to end code')

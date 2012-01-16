@@ -1,5 +1,10 @@
 import pyspeckit
 
+if not 'interactive' in globals():
+    interactive=False
+if not 'savedir' in globals():
+    savedir = ''
+
 # load a FITS-compliant spectrum
 spec = pyspeckit.Spectrum('10074-190_HCOp.fits')
 # The units are originally frequency (check this by printing spec.xarr.units).
@@ -23,8 +28,8 @@ spec.specfit.plotresiduals()
 spec.specfit(guesses=spec.specfit.modelpars)
 
 # Save the figures to put on the web....
-spec.plotter.figure.savefig("simple_fit_example_HCOp.png")
-spec.specfit.residualaxis.figure.savefig("simple_fit_example_HCOp_residuals.png")
+spec.plotter.figure.savefig(savedir+"simple_fit_example_HCOp.png")
+spec.specfit.residualaxis.figure.savefig(savedir+"simple_fit_example_HCOp_residuals.png")
 
 # Also, let's crop out stuff we don't want...
 spec.crop(-100,100)
@@ -34,4 +39,4 @@ spec.plotter()
 spec.specfit.plot_fit()
 # show the annotations again
 spec.specfit.annotate()
-spec.plotter.figure.savefig("simple_fit_example_HCOp_cropped.png")
+spec.plotter.figure.savefig(savedir+"simple_fit_example_HCOp_cropped.png")

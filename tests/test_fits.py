@@ -2,6 +2,8 @@ import pyspeckit
 
 if not 'interactive' in globals():
     interactive=False
+if not 'savedir' in globals():
+    savedir = ''
 
 sp = pyspeckit.Spectrum('sample_13CO.fits')
 
@@ -15,7 +17,7 @@ print "How about now? ",sp.plotter.axis
 # background level)
 sp.baseline.order = 0
 sp.specfit()
-sp.plotter.figure.savefig('fits_gaussfit.png')
+sp.plotter.figure.savefig(savedir+'fits_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
@@ -27,7 +29,7 @@ print "Best fit: ", sp.specfit.modelpars
 
 sp.specfit(interactive=True)
 if interactive: raw_input('Press enter to print guesses and best fit and end code')
-sp.plotter.figure.savefig('fits_interactive_fit.png')
+sp.plotter.figure.savefig(savedir+'fits_interactive_fit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
