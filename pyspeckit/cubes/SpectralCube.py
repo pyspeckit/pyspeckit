@@ -133,9 +133,33 @@ class Cube(spectrum.Spectrum):
     def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
             verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
             blank_value=0, integral=True, direct=False, absorption=False,
-            **fitkwargs):
+            use_nearest_as_guess=False, start_from_point=(0,0), **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
+
+        For guesses, priority is *use_nearest_as_guess*, *usemomentcube*,
+        *guesses*, None
+
+        *use_nearest_as_guess* [ False ] 
+            Unless the fitted point is the first, it will find the nearest
+            other point with a successful fit and use its best-fit parameters
+            as the guess
+
+        *start_from_point* [ 'center', (x,y) ]
+            Either start from the center or from a point defined by a tuple.
+            Work outward from that starting point.  
+
+        *guesses* [ tuple, ndarray[naxis=3] ]
+            Either a tuple/list of guesses with len(guesses) = npars or a cube
+            of guesses with shape [npars, ny, nx]
+
+        *signal_cut* [ float ]
+            Minimum signal-to-noise ratio to "cut" on (i.e., if peak in a given
+            spectrum has s/n less than this value, ignore it)
+
+        *blank_value* [ float ]
+            Value to replace non-fitted locations with.  A good alternative is
+            numpy.nan
         """
 
         if not hasattr(self.mapplot,'plane'):
@@ -147,7 +171,14 @@ class Cube(spectrum.Spectrum):
             OK = (True-self.mapplot.plane.mask) * self.maskmap
         else:
             OK = np.isfinite(self.mapplot.plane) * self.maskmap
-        valid_pixels = zip(xx[OK],yy[OK])
+
+        distance = ((xx)**2 + (yy)**2)**0.5
+        if start_from_point == 'center':
+            start_from_point = (xx.max()/2., yy.max/2.)
+        d_from_start = np.roll( np.roll( distance, start_from_point[0], 0), start_from_point[1], 1)
+        sort_distance = np.argsort(d_from_start)
+
+        valid_pixels = zip(xx[OK][sort_distance[OK]],yy[OK][sort_distance[OK]])
 
         if usemomentcube:
             npars = self.momentcube.shape[0]
@@ -182,6 +213,14 @@ class Cube(spectrum.Spectrum):
                     print "Fitting %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
             sp.specfit.Registry = self.Registry # copy over fitter registry
             
+            if use_nearest_as_guess:
+                if verbose_level > 1 and ii == 0: print "Using nearest fit as guess"
+                d = np.roll( np.roll( distance, x, 0), y, 1)
+                has_fit = self.errcube[0,:,:] > 0 # any fit has to have positive error
+                # If there's no fit, set its distance to be unreasonably large
+                nearest_ind = np.argmin(d+1e10*(True-has_fit))
+                nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
+                gg = self.parcube[:,nearest_y,nearest_x]
             if usemomentcube:
                 if verbose_level > 1 and ii == 0: print "Using moment cube"
                 gg = self.momentcube[:,y,x]
