@@ -164,9 +164,13 @@ class Cube(spectrum.Spectrum):
             sp.specfit.Registry = self.Registry # copy over fitter registry
             
             if usemomentcube:
-                guesses = self.momentcube[:,y,x]
+                gg = self.momentcube[:,y,x]
+            elif hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
+                gg = guesses[:,y,x]
+            else:
+                gg = guesses
 
-            sp.specfit(guesses=guesses,quiet=True, verbose=False, **fitkwargs)
+            sp.specfit(guesses=gg,quiet=True, verbose=False, **fitkwargs)
             self.parcube[:,y,x] = sp.specfit.modelpars
             self.errcube[:,y,x] = sp.specfit.modelerrs
             if integral: self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,return_error=True)
