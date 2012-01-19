@@ -178,7 +178,7 @@ class Cube(spectrum.Spectrum):
         d_from_start = np.roll( np.roll( distance, start_from_point[0], 0), start_from_point[1], 1)
         sort_distance = np.argsort(d_from_start.flat)
 
-        valid_pixels = zip(xx[OK][sort_distance[OK]],yy[OK][sort_distance[OK]])
+        valid_pixels = zip(xx[OK][sort_distance[OK.ravel()]],yy[OK][sort_distance[OK.ravel()]])
 
         if usemomentcube:
             npars = self.momentcube.shape[0]
