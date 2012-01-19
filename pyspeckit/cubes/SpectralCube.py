@@ -189,6 +189,9 @@ class Cube(spectrum.Spectrum):
         self.errcube = np.zeros((npars,)+self.mapplot.plane.shape) 
         if integral: self.integralmap = np.zeros((2,)+self.mapplot.plane.shape)
 
+        # array to store whether pixels have fits
+        has_fit = np.zeros(self.mapplot.plane.shape, dtype='bool')
+
         t0 = time.time()
 
         for ii,(x,y) in enumerate(valid_pixels):
@@ -213,10 +216,9 @@ class Cube(spectrum.Spectrum):
                     print "Fitting %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
             sp.specfit.Registry = self.Registry # copy over fitter registry
             
-            if use_nearest_as_guess:
+            if use_nearest_as_guess and has_fit.sum() > 0:
                 if verbose_level > 1 and ii == 0: print "Using nearest fit as guess"
                 d = np.roll( np.roll( distance, x, 0), y, 1)
-                has_fit = self.errcube[0,:,:] > 0 # any fit has to have positive error
                 # If there's no fit, set its distance to be unreasonably large
                 nearest_ind = np.argmin(d+1e10*(True-has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
@@ -235,6 +237,7 @@ class Cube(spectrum.Spectrum):
             self.parcube[:,y,x] = sp.specfit.modelpars
             self.errcube[:,y,x] = sp.specfit.modelerrs
             if integral: self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,return_error=True)
+            has_fit[y,x] = True
         
             if blank_value != 0:
                 self.errcube[self.parcube == 0] = blank_value
