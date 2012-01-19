@@ -2349,3 +2349,6 @@ class machar:
         self.minlog = numpy.log(self.minnum)
         self.rdwarf = numpy.sqrt(self.minnum*1.5) * 10
         self.rgiant = numpy.sqrt(self.maxnum) * 0.1
+
+class mpfitException(Exception):
+    pass

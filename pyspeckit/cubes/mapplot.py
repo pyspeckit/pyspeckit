@@ -53,7 +53,8 @@ class MapPlotter(object):
         self._clickY = None
 
         self.Cube = Cube
-        self.header = cubes.flatten_header(self.Cube.header)
+        if self.Cube is not None:
+            self.header = cubes.flatten_header(self.Cube.header)
         if pywcsOK:
             self.wcs = pywcs.WCS(self.header)
 
@@ -152,11 +153,11 @@ class MapPlotter(object):
                   print "Plotting spectrum from point %i,%i" % (clickX,clickY)
                   self._remove_circle()
                   self._add_click_mark(clickX,clickY,clear=True)
-                  self.Cube.plot_spectrum(clickY,clickX,clear=True)
+                  self.Cube.plot_spectrum(clickX,clickY,clear=True)
               elif event.button==2:
                   print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
                   self._add_click_mark(clickX,clickY,clear=False)
-                  self.Cube.plot_spectrum(clickY,clickX,clear=False)
+                  self.Cube.plot_spectrum(clickX,clickY,clear=False)
               elif event.button==3:
                   print "Disconnecting GAIA-like tool"
                   self.canvas.mpl_disconnect(self.clickid)

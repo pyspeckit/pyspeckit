@@ -107,7 +107,8 @@ class Spectrum(object):
             if isinstance(filename,str):
                 self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
         elif xarr is not None and data is not None:
-            if type(xarr) is units.SpectroscopicAxis:
+            # technically, this is unpythonic.  But I don't want to search for all 10 attributes required.
+            if issubclass(type(xarr),units.SpectroscopicAxis):
                 self.xarr = xarr
             else:
                 self.xarr = units.SpectroscopicAxis(xarr, **xarrkwargs)

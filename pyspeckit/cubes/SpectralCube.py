@@ -26,7 +26,7 @@ import numpy as np
 
 class Cube(spectrum.Spectrum):
 
-    def __init__(self,filename, x0=0, y0=0, maskfilename=None, maskmap=None, **kwargs):
+    def __init__(self, filename, x0=0, y0=0, maskfilename=None, maskmap=None, **kwargs):
         """
         Initialize the Cube.  Accepts files in the following formats:
             - .fits
@@ -34,20 +34,26 @@ class Cube(spectrum.Spectrum):
         x0,y0 - initial spectrum to use (defaults to lower-left corner)
         """
 
-        if ".fit" in filename: # allow .fit or .fits
-            try: 
-                self.cube,self.xarr,self.header,self.fitsfile = readers.open_3d_fits(filename, **kwargs)
-                self.data = self.cube[:,y0,x0]
-                self.error = None
-                self.parse_header(self.header)
-            except TypeError as inst:
-                print "Failed to read fits file: wrong TYPE."
-                print inst
-                raise inst
-        else:
-            raise TypeError('Not a .fits cube - what type of file did you give it?')
+        try: 
+            self.cube,self.xarr,self.header,self.fitsfile = readers.open_3d_fits(filename, **kwargs)
+            self.data = self.cube[:,y0,x0]
+            self.error = None
+            self.parse_header(self.header)
+        except TypeError as inst:
+            print "Failed to read fits file: wrong TYPE."
+            print inst
+            raise inst
 
-        self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
+        if maskmap is not None:
+            self.maskmap = maskmap
+        else:
+            self.maskmap = np.ones(self.cube.shape[1:],dtype='bool')
+
+        if isinstance(filename,str):
+            self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
+        else:
+            self.fileprefix = "pyfitsHDU"
+
         self.plotter = spectrum.plotters.Plotter(self)
         self._register_fitters()
         self.specfit = spectrum.fitters.Specfit(self,Registry=self.Registry)
@@ -58,19 +64,29 @@ class Cube(spectrum.Spectrum):
         for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
         self.mapplot = mapplot.MapPlotter(self)
 
-        if maskmap is not None:
-            self.maskmap = maskmap
-        else:
-            self.maskmap = np.ones(self.cube.shape[1:],dtype='bool')
-
     def plot_spectrum(self, x, y, **kwargs):
         """
         Fill the .data array with a real spectrum and plot it
         """
 
-        self.data = self.cube[:,x,y]
+        self.data = self.cube[:,y,x]
 
         self.plotter(**kwargs)
+
+    def plot_fit(self, x, y, **kwargs):
+        """
+        If fiteach has been run, plot the best fit
+        """
+        if not hasattr(self,'parcube'):
+            print "Must run fiteach before plotting a fit.  If you want to fit a single spectrum, use plot_spectrum() and specfit() directly."
+            return
+
+        self.data = self.cube[:,y,x]
+
+        self.specfit.modelpars = self.parcube[:,y,x]
+        self.specfit.model = self.specfit.fitter.n_modelfunc(self.specfit.modelpars)(self.xarr)
+
+        self.specfit.plot_fit(**kwargs)
 
     def plot_apspec(self, aperture, coordsys=None, reset_ylimits=True, **kwargs):
         """
@@ -87,7 +103,7 @@ class Cube(spectrum.Spectrum):
 
         Returns a SpectroscopicAxis instance
         """
-        return pyspeckit.Spectrum( xarr=self.xarr.copy(), data = self.cube[:,x,y],
+        return pyspeckit.Spectrum( xarr=self.xarr.copy(), data = self.cube[:,y,x],
                 header=self.header)
 
     def get_apspec(self, aperture, coordsys=None):
@@ -126,7 +142,7 @@ class Cube(spectrum.Spectrum):
             print "Must mapplot before fitting."
             return
 
-        yy,xx = np.indices(self.mapplot.plane.shape)
+        xx,yy = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
             OK = (True-self.mapplot.plane.mask) * self.maskmap
         else:
@@ -145,11 +161,14 @@ class Cube(spectrum.Spectrum):
         t0 = time.time()
 
         for ii,(x,y) in enumerate(valid_pixels):
-            sp = self.get_spectrum(y,x)
+            sp = self.get_spectrum(x,y)
             if errspec is not None:
                 sp.error = errspec
             elif errmap is not None:
                 sp.error = np.ones(sp.data.shape) * errmap[y,x]
+            else:
+                if verbose_level > 1 and ii==0: print "WARNING: using data std() as error."
+                sp.error[:] = sp.data.std()
             if sp.error is not None and signal_cut > 0:
                 if absorption:
                     max_sn = (-1*sp.data / sp.error).max()
@@ -164,13 +183,16 @@ class Cube(spectrum.Spectrum):
             sp.specfit.Registry = self.Registry # copy over fitter registry
             
             if usemomentcube:
+                if verbose_level > 1 and ii == 0: print "Using moment cube"
                 gg = self.momentcube[:,y,x]
             elif hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
+                if verbose_level > 1 and ii == 0: print "Using input guess cube"
                 gg = guesses[:,y,x]
             else:
+                if verbose_level > 1 and ii == 0: print "Using input guess"
                 gg = guesses
 
-            sp.specfit(guesses=gg,quiet=True, verbose=False, **fitkwargs)
+            sp.specfit(guesses=gg, quiet=True, verbose=verbose_level>3, **fitkwargs)
             self.parcube[:,y,x] = sp.specfit.modelpars
             self.errcube[:,y,x] = sp.specfit.modelerrs
             if integral: self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,return_error=True)
@@ -182,6 +204,10 @@ class Cube(spectrum.Spectrum):
             if verbose:
                 if ii % 10**(3-verbose_level) == 0:
                     print "Finished fit %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
+
+        # make sure the fitter / fittype are set for the cube
+        self.specfit.fitter = sp.specfit.fitter
+        self.specfit.fittype = sp.specfit.fittype
 
         if verbose:
             print "Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
@@ -196,7 +222,7 @@ class Cube(spectrum.Spectrum):
             print "Must mapplot before moment-fitting."
             return
 
-        yy,xx = np.indices(self.mapplot.plane.shape)
+        xx,yy = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
             OK = (True-self.mapplot.plane.mask) * self.maskmap
         else:
@@ -210,7 +236,7 @@ class Cube(spectrum.Spectrum):
         t0 = time.time()
 
         for ii,(x,y) in enumerate(valid_pixels):
-            sp = self.get_spectrum(y,x)
+            sp = self.get_spectrum(x,y)
             self.momentcube[:,y,x] = sp.moments(**kwargs)
             if verbose:
                 if ii % 10**(3-verbose_level) == 0:
@@ -231,6 +257,20 @@ class Cube(spectrum.Spectrum):
         self.mapplot.plane = self.momentcube[momentnumber,:,:].squeeze()
 
         self.mapplot(estimator=None)
+
+    def show_fit_param(self, parnumber, **kwargs):
+        """
+        If pars have been computed, display them in the mapplot window
+        """
+
+        if not hasattr(self,'parcube'):
+            print "Compute fit parameters first"
+            return
+
+        self.mapplot.plane = self.parcube[parnumber,:,:].squeeze()
+
+        self.mapplot(estimator=None)
+
 
 
 class CubeStack(Cube):
@@ -262,6 +302,9 @@ class CubeStack(Cube):
         print "Concatenating data"
         self.xarr = spectrum.units.SpectroscopicAxes([sp.xarr for sp in cubelist])
         self.cube = np.ma.concatenate([cube.cube for cube in cubelist])
+        if self.cube.mask in (False,np.bool_(False)):
+            # mask causes major problems internally for numpy...
+            self.cube = np.array(self.cube)
         self._sort()
         self.data = self.cube[:,y0,x0]
         self.error = None
@@ -277,8 +320,14 @@ class CubeStack(Cube):
             if cube.units != self.units: 
                 raise ValueError("Mismatched units")
 
-        self._register_fitters()
         self.fileprefix = cubelist[0].fileprefix # first is the best?
+
+        if maskmap is not None:
+            self.maskmap = maskmap
+        else:
+            self.maskmap = np.ones(self.cube.shape[1:],dtype='bool')
+
+        self._register_fitters()
         self.plotter = spectrum.plotters.Plotter(self)
         self.specfit = spectrum.fitters.Specfit(self,Registry=self.Registry)
         self.baseline = spectrum.baseline.Baseline(self)
@@ -287,11 +336,6 @@ class CubeStack(Cube):
         self.writer = {}
         for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
         self.mapplot = mapplot.MapPlotter(self)
-
-        if maskmap is not None:
-            self.maskmap = maskmap
-        else:
-            self.maskmap = np.ones(self.cube.shape[1:],dtype='bool')
 
     def _sort(self):
         """ Sort the data in order of increasing X (could be decreasing, but

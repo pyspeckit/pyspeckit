@@ -129,10 +129,12 @@ class Specfit(interactive.Interactive):
         #self.seterrspec()
         
     @cfgdec
-    def __call__(self, interactive=False, usemoments=True, clear_all_connections=True, debug=False,
-            multifit=False, guesses=None, save=True, fittype='gaussian', annotate=None,
-            color = 'k', composite_fit_color = 'red', component_fit_color = 'blue', lw = 0.5, composite_lw = 0.75, 
-            component_lw = 0.75, show_components = None, verbose=True, clear=True, 
+    def __call__(self, interactive=False, usemoments=True,
+            clear_all_connections=True, debug=False, multifit=None,
+            guesses=None, save=True, fittype='gaussian', annotate=None,
+            color='k', composite_fit_color='red', component_fit_color='blue',
+            lw=0.5, composite_lw=0.75, component_lw=0.75, show_components=None,
+            verbose=True, clear=True, 
             **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
@@ -173,7 +175,7 @@ class Specfit(interactive.Interactive):
             self.guesses = []
 
             self.start_interactive(clear_all_connections=clear_all_connections, debug=debug, **kwargs)
-        elif multifit and self.fittype in self.Registry.multifitters or guesses is not None:
+        elif ((multifit or multifit is None) and self.fittype in self.Registry.multifitters) or guesses is not None:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
                 return
@@ -547,18 +549,18 @@ class Specfit(interactive.Interactive):
         self._clearlegend()
         pl = matplotlib.collections.CircleCollection([0],edgecolors=['k'])
         if hasattr(self.fitter,'annotations'):
-            labels = self.fitter.annotations()
+            self._annotation_labels = self.fitter.annotations()
         else:
             raise Exception("Fitter %s has no annotations." % self.fitter)
 
         #xtypename = units.unit_type_dict[self.Spectrum.xarr.xtype]
         xcharconv = units.CaseInsensitiveDict({'frequency':'\\nu', 'wavelength':'\\lambda', 'velocity':'v', 'pixels':'x'})
         xchar = xcharconv[self.Spectrum.xarr.xtype]
-        labels = [L.replace('x',xchar) if L[1]=='x' else L for L in labels]
+        self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for L in self._annotation_labels]
 
         self.fitleg = self.specplotter.axis.legend(
                 tuple([pl]*self.fitter.npars*self.npeaks),
-                labels, loc=loc,markerscale=markerscale, borderpad=borderpad,
+                self._annotation_labels, loc=loc,markerscale=markerscale, borderpad=borderpad,
                 handlelength=handlelength, handletextpad=handletextpad,
                 labelspacing=labelspacing, frameon=frameon, **kwargs)
         self.specplotter.axis.add_artist(self.fitleg)

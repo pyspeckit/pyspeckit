@@ -246,6 +246,10 @@ class ammonia_model(fitter.SimpleFitter):
         self.npars = npars
         self.parnames = ['tkin','tex','ntot','width','xoff_v','fortho']
 
+        # all fitters must have declared modelfuncs, which should take the fitted pars...
+        self.modelfunc = ammonia
+        self.n_modelfunc = self.n_ammonia
+
         self.onepeakammonia = fitter.vheightmodel(ammonia)
         #self.onepeakammoniafit = self._fourparfitter(self.onepeakammonia)
 
@@ -397,9 +401,13 @@ class ammonia_model(fitter.SimpleFitter):
             for ii in xrange(len(partype_dict['params'])) ]
 
         # hack: remove 'fixed' pars
-        parinfo = [p for p in parinfo if not p['fixed']]
-        self.parnames = [p['parname'] for p in parinfo]
-        self.npars = len(parinfo)/self.npeaks
+        parinfo_with_fixed = parinfo
+        parinfo = [p for p in parinfo_with_fixed if not p['fixed']]
+        # don't do this - it breaks the NEXT call because npars != len(parnames) self.parnames = [p['parname'] for p in parinfo]
+        # this is OK - not a permanent change
+        parnames = [p['parname'] for p in parinfo]
+        # not OK self.npars = len(parinfo)/self.npeaks
+        npars = len(parinfo)/self.npeaks
 
         def mpfitfun(x,y,err):
             if err is None:
@@ -437,13 +445,14 @@ class ammonia_model(fitter.SimpleFitter):
         self.mp = mp
         self.mpp = mpp
         self.mpperr = mpperr
-        self.model = self.n_ammonia(pars=mpp, parnames=self.parnames, **kwargs)(xax)
-        indiv_parinfo = [parinfo[jj*self.npars:(jj+1)*self.npars] for jj in xrange(len(parinfo)/self.npars)]
+        self.model = self.n_ammonia(pars=mpp, parnames=parnames, **kwargs)(xax)
+        indiv_parinfo = [parinfo[jj*npars:(jj+1)*npars] for jj in xrange(len(parinfo)/npars)]
         modelkwargs = [
                 dict([(p['parname'].strip("0123456789").lower(),p['value']) for p in pi])
                 for pi in indiv_parinfo]
         self.tau_list = [ammonia(xax,return_tau=True,**mk) for mk in modelkwargs]
-        self.parinfo = parinfo
+        # self self.parinfo preserving the 'fixed' parameters 
+        self.parinfo = parinfo + [p for p in parinfo_with_fixed if p['fixed']]
         return mpp,self.model,mpperr,chi2
 
     def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
@@ -458,10 +467,20 @@ class ammonia_model(fitter.SimpleFitter):
         from decimal import Decimal # for formatting
         tex_key = {'tkin':'T_K','tex':'T_{ex}','ntot':'N','fortho':'F_o','width':'\\sigma','xoff_v':'v','fillingfraction':'FF','tau':'\\tau_{1-1}'}
         # small hack below: don't quantize if error > value.  We want to see the values.
-        label_list = [ "$%s(%i)$=%8s $\\pm$ %8s" % (tex_key[pinfo['parname'].strip("0123456789")],int(pinfo['parname'][-1]),
-            Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value'])))),
-            Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error'])),)
-            for pinfo in self.parinfo]
+        label_list = []
+        for pinfo in self.parinfo:
+            parname = tex_key[pinfo['parname'].strip("0123456789")]
+            parnum = int(pinfo['parname'][-1])
+            if pinfo['fixed']:
+                formatted_value = "%s" % pinfo['value']
+                pm = ""
+                formatted_error=""
+            else:
+                formatted_value = Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value']))))
+                pm = "$\\pm$"
+                formatted_error = Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error']))
+            label =  "$%s(%i)$=%8s %s %8s" % (parname, parnum, formatted_value, pm, formatted_error)
+            label_list.append(label)
         labels = tuple(mpcb.flatten(label_list))
         return labels
 

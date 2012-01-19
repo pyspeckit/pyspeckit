@@ -5,7 +5,7 @@ Generic SpectralModel wrapper
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
 import numpy as np
-from mpfit import mpfit
+from mpfit import mpfit,mpfitException
 import copy
 import matplotlib.cbook as mpcb
 import fitter
@@ -254,7 +254,7 @@ class SpectralModel(fitter.SimpleFitter):
         chi2 = mp.fnorm
 
         if mp.status == 0:
-            raise Exception(mp.errmsg)
+            raise mpfitException(mp.errmsg)
 
         if veryverbose:
             print "Fit status: ",mp.status
