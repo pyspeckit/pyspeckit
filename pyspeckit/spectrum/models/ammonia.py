@@ -443,17 +443,21 @@ class ammonia_model(fitter.SimpleFitter):
 
         if mpp[1] > mpp[0]: mpp[1] = mpp[0]  # force Tex>Tkin to Tex=Tkin (already done in n_ammonia)
         self.mp = mp
-        self.mpp = mpp
-        self.mpperr = mpperr
-        self.model = self.n_ammonia(pars=mpp, parnames=parnames, **kwargs)(xax)
-        indiv_parinfo = [parinfo[jj*npars:(jj+1)*npars] for jj in xrange(len(parinfo)/npars)]
+
+        # self self.parinfo preserving the 'fixed' parameters 
+        self.parinfo = parinfo + [p for p in parinfo_with_fixed if p['fixed']]
+
+        self.mpp = np.array([p['value'] for p in self.parinfo])
+        self.mpperr = np.array([p['error'] for p in self.parinfo])
+        self.model = self.n_ammonia(pars=self.mpp, parnames=[p['parname'] for p in self.parinfo], **kwargs)(xax)
+
+        indiv_parinfo = [self.parinfo[jj*self.npars:(jj+1)*self.npars] for jj in xrange(len(self.parinfo)/self.npars)]
         modelkwargs = [
                 dict([(p['parname'].strip("0123456789").lower(),p['value']) for p in pi])
                 for pi in indiv_parinfo]
         self.tau_list = [ammonia(xax,return_tau=True,**mk) for mk in modelkwargs]
-        # self self.parinfo preserving the 'fixed' parameters 
-        self.parinfo = parinfo + [p for p in parinfo_with_fixed if p['fixed']]
-        return mpp,self.model,mpperr,chi2
+
+        return self.mpp,self.model,self.mpperr,chi2
 
     def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
         """

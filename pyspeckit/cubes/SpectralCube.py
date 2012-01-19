@@ -73,12 +73,12 @@ class Cube(spectrum.Spectrum):
 
         self.plotter(**kwargs)
 
-    def plot_fit(self, x, y, **kwargs):
+    def plot_fit(self, x, y, silent=False, **kwargs):
         """
         If fiteach has been run, plot the best fit
         """
         if not hasattr(self,'parcube'):
-            print "Must run fiteach before plotting a fit.  If you want to fit a single spectrum, use plot_spectrum() and specfit() directly."
+            if not silent: print "Must run fiteach before plotting a fit.  If you want to fit a single spectrum, use plot_spectrum() and specfit() directly."
             return
 
         self.data = self.cube[:,y,x]
@@ -202,7 +202,7 @@ class Cube(spectrum.Spectrum):
                 self.parcube[self.parcube == 0] = blank_value
 
             if verbose:
-                if ii % 10**(3-verbose_level) == 0:
+                if ii % (min(10**(3-verbose_level),1)) == 0:
                     print "Finished fit %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
 
         # make sure the fitter / fittype are set for the cube
@@ -256,7 +256,7 @@ class Cube(spectrum.Spectrum):
 
         self.mapplot.plane = self.momentcube[momentnumber,:,:].squeeze()
 
-        self.mapplot(estimator=None)
+        self.mapplot(estimator=None, **kwargs)
 
     def show_fit_param(self, parnumber, **kwargs):
         """
@@ -269,7 +269,7 @@ class Cube(spectrum.Spectrum):
 
         self.mapplot.plane = self.parcube[parnumber,:,:].squeeze()
 
-        self.mapplot(estimator=None)
+        self.mapplot(estimator=None, **kwargs)
 
 
 

@@ -118,7 +118,7 @@ class MapPlotter(object):
             self._clickX = event.xdata
             self._clickY = event.ydata
 
-    def plot_spectrum(self, event):
+    def plot_spectrum(self, event, plot_fit=True):
         """
         Connects map cube to Spectrum...
         """
@@ -154,6 +154,7 @@ class MapPlotter(object):
                   self._remove_circle()
                   self._add_click_mark(clickX,clickY,clear=True)
                   self.Cube.plot_spectrum(clickX,clickY,clear=True)
+                  if plot_fit: self.Cube.plot_fit(clickX, clickY, silent=True)
               elif event.button==2:
                   print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
                   self._add_click_mark(clickX,clickY,clear=False)

@@ -559,10 +559,11 @@ class Specfit(interactive.Interactive):
         self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for L in self._annotation_labels]
 
         self.fitleg = self.specplotter.axis.legend(
-                tuple([pl]*self.fitter.npars*self.npeaks),
-                self._annotation_labels, loc=loc,markerscale=markerscale, borderpad=borderpad,
-                handlelength=handlelength, handletextpad=handletextpad,
-                labelspacing=labelspacing, frameon=frameon, **kwargs)
+                tuple([pl]*len(self._annotation_labels)),
+                self._annotation_labels, loc=loc, markerscale=markerscale,
+                borderpad=borderpad, handlelength=handlelength,
+                handletextpad=handletextpad, labelspacing=labelspacing,
+                frameon=frameon, **kwargs)
         self.specplotter.axis.add_artist(self.fitleg)
         self.fitleg.draggable(True)
         if self.specplotter.autorefresh: self.specplotter.refresh()
