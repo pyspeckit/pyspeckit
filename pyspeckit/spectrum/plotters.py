@@ -136,11 +136,11 @@ class Plotter(object):
 
         self.label(**kwargs)
         for arg in ['title','xlabel','ylabel']:
-            if kwargs.has_key(arg): kwargs.pop(arg)
+            if arg in kwargs: kwargs.pop(arg)
 
         reset_kwargs = {}
         for arg in ['xmin','xmax','ymin','ymax','reset_xlimits','reset_ylimits','ypeakscale']:
-            if kwargs.has_key(arg): reset_kwargs[arg] = kwargs.pop(arg)
+            if arg in kwargs: reset_kwargs[arg] = kwargs.pop(arg)
 
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr+xoffset,
                 self.Spectrum.data*self.plotscale+self.offset, color=color,

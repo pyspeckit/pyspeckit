@@ -64,9 +64,12 @@ class MapPlotter(object):
         return self.mapplot(**kwargs)
 
     def mapplot(self, estimator=np.mean, convention='calabretta',
-            colorbar=True, useaplpy=True, **kwargs):
+            colorbar=True, useaplpy=True, vmin=None, vmax=None, **kwargs):
         """
         Plot up a map based on an input data cube
+
+        `kwargs` are passed to aplpy.show_colorscale or
+        matplotlib.pyplot.imshow (depending on whether aplpy is installed)
         """
         if self.figure is None:
             self.figure = matplotlib.pyplot.figure()
@@ -84,19 +87,20 @@ class MapPlotter(object):
             elif estimator[-5:] == ".fits":
                 self.plane = pyfits.getdata(estimator)
 
+        if vmin is None: vmin = self.plane[self.plane==self.plane].min()
+        if vmax is None: vmax = self.plane[self.plane==self.plane].max()
+
         if icanhasaplpy and useaplpy:
             self.figure.clf()
             self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=self.header)
-            vmin = self.plane[self.plane==self.plane].min()
-            vmax = self.plane[self.plane==self.plane].max()
             self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure,convention=convention)
-            self.FITSFigure.show_colorscale(vmin=vmin,vmax=vmax)
+            self.FITSFigure.show_colorscale(vmin=vmin, vmax=vmax, **kwargs)
             self.axis = self.FITSFigure._ax1
             if colorbar: self.FITSFigure.add_colorbar()
         else:
             if self.axis is None:
                 self.axis = self.figure.add_subplot(111)
-            self.axis.imshow(self.plane)
+            self.axis.imshow(self.plane, vmin=vmin, vmax=vmax, **kwargs)
             if colorbar: self.colorbar = matplotlib.pyplot.colorbar()
 
         self.canvas = self.axis.figure.canvas

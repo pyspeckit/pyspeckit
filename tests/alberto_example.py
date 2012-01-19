@@ -36,13 +36,13 @@ for i in range(len(files)):
     spec[i].baseline()
     #spec[i].baseline.selectregion(xmin=9000, xmax=10500, xtype='wcs', highlight=True)
     spec[i].plotter.refresh()
-    spec[i].plotter.figure.savefig(savedir+'example1a.pdf')
+    spec[i].plotter.figure.savefig(savedir+'example1a.png')
     # remove continuum around the emission lines
     spec[i].crop(9000,10500)
     spec[i].baseline(subtract=False)
     spec[i].baseline()
     spec[i].plotter.refresh()
-    spec[i].plotter.figure.savefig(savedir+'example1b.pdf')
+    spec[i].plotter.figure.savefig(savedir+'example1b.png')
 
     # define my emission lines
     Hbeta = spec[i].speclines.optical.lines['H_beta'][0]
@@ -87,5 +87,5 @@ for i in range(len(files)):
     spec[i].plotter.axis.set_xlabel(r'$\lambda_{obs}$ [$\AA$]',fontsize=18)
     spec[i].plotter.axis.set_ylabel(r'$F_{\nu}$ [$\mu$Jy]',fontsize=18)
     spec[i].plotter.refresh()
-    spec[i].plotter.figure.savefig(savedir+'example1c.pdf')
+    spec[i].plotter.figure.savefig(savedir+'example1c.png')
 

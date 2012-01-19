@@ -360,7 +360,7 @@ class Specfit(interactive.Interactive):
                     show_components=show_components)
                 
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
-        if self.fitkwargs.has_key('tied'):
+        if 'tied' in self.fitkwargs:
             for ii, element in enumerate(self.fitkwargs['tied']):
                 if not element.strip(): continue
                 

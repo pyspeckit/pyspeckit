@@ -128,7 +128,7 @@ def ConfigDescriptor(f):
         
         # Read in config file and replace keyword arguments that have been defined in it
         for arg in new_kwargs:
-            if mycfg.has_key(arg): new_kwargs[arg] = mycfg[arg]
+            if arg in mycfg: new_kwargs[arg] = mycfg[arg]
                 
         # If we've changed anything on call, reflect this in new_kwargs
         for arg in kwargs:

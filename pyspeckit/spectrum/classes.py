@@ -82,7 +82,7 @@ class Spectrum(object):
         if filename:
             if filetype is None:
                 suffix = filename.rsplit('.',1)[1]
-                if readers.suffix_types.has_key(suffix):
+                if suffix in readers.suffix_types:
                     # use the default reader for that suffix
                     filetype = readers.suffix_types[suffix][0]
                     reader = readers.readers[filetype]
@@ -185,7 +185,7 @@ class Spectrum(object):
             self.writer = writers.writers[type](self)
         else:
             suffix = filename.rsplit('.',1)[1]
-            if writers.suffix_types.has_key(suffix):
+            if suffix in writers.suffix_types:
                 # use the default reader for that suffix
                 filetype = writers.suffix_types[suffix][0]
                 self.writer = writers.writers[filetype](self)
@@ -430,7 +430,7 @@ class Spectrum(object):
         # self.radio = speclines.radio.radio_lines(self)
         # or optical:
         # self.optical = speclines.optical.optical_lines(self)
-        if not self.__dict__.has_key(linetype): # don't replace it if it already exists
+        if not linetype in self.__dict__: # don't replace it if it already exists
             self.__dict__[linetype] = speclines.__dict__[linetype].__dict__[linetype+"_lines"](self,**kwargs)
 
     def moments(self, unit='km/s', **kwargs):
@@ -463,7 +463,7 @@ class Spectra(Spectrum):
     X array is forcibly sorted in increasing order
     """
 
-    def __init__(self,speclist,xunits='GHz',**kwargs):
+    def __init__(self, speclist, xunits='GHz', **kwargs):
         print "Creating spectra"
         speclist = list(speclist)
         for ii,spec in enumerate(speclist):

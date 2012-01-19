@@ -69,10 +69,10 @@ def speccen_header(header,lon=None,lat=None):
     newheader = header.copy()
     newheader.update('CRVAL1',header.get('CRVAL3'))
     newheader.update('CRPIX1',header.get('CRPIX3'))
-    if header.has_key('CD1_1'): newheader.rename_key('CD1_1','OLDCD1_1')
-    elif header.has_key('CDELT1'): newheader.rename_key('CDELT1','OLDCDEL1')
-    if header.has_key('CD3_3'): newheader.update('CDELT1',header.get('CD3_3'))
-    elif header.has_key('CDELT3'): newheader.update('CDELT1',header.get('CDELT3'))
+    if 'CD1_1' in header: newheader.rename_key('CD1_1','OLDCD1_1')
+    elif 'CDELT1' in header: newheader.rename_key('CDELT1','OLDCDEL1')
+    if 'CD3_3' in header: newheader.update('CDELT1',header.get('CD3_3'))
+    elif 'CDELT3' in header: newheader.update('CDELT1',header.get('CDELT3'))
     newheader.update('CTYPE1','VRAD')
     if header.get('CUNIT3'): newheader.update('CUNIT1',header.get('CUNIT3'))
     else: 
@@ -86,8 +86,8 @@ def speccen_header(header,lon=None,lat=None):
     if lon is not None: newheader.update('CRVAL2',lon)
     if lat is not None: newheader.update('CRVAL3',lat)
 
-    if header.has_key('CD2_2'): newheader.rename_key('CD2_2','OLDCD2_2')
-    if header.has_key('CD3_3'): newheader.rename_key('CD3_3','OLDCD3_3')
+    if 'CD2_2' in header: newheader.rename_key('CD2_2','OLDCD2_2')
+    if 'CD3_3' in header: newheader.rename_key('CD3_3','OLDCD3_3')
 
     return newheader
 

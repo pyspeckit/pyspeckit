@@ -45,6 +45,7 @@ class CaseInsensitiveDict(dict):
         return dict.__contains__(self, key.lower())
 
     def has_key(self, key):
+        """ This is deprecated, but we're keeping it around """
         return dict.has_key(self, key.lower())
 
     def get(self, key, def_val=None):

@@ -26,7 +26,7 @@ import numpy as np
 
 class Cube(spectrum.Spectrum):
 
-    def __init__(self,filename, x0=0, y0=0, **kwargs):
+    def __init__(self,filename, x0=0, y0=0, maskfilename=None, maskmap=None, **kwargs):
         """
         Initialize the Cube.  Accepts files in the following formats:
             - .fits
@@ -57,6 +57,11 @@ class Cube(spectrum.Spectrum):
         self.writer = {}
         for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
         self.mapplot = mapplot.MapPlotter(self)
+
+        if maskmap is not None:
+            self.maskmap = maskmap
+        else:
+            self.maskmap = np.ones(self.cube.shape[1:],dtype='bool')
 
     def plot_spectrum(self, x, y, **kwargs):
         """
@@ -123,9 +128,9 @@ class Cube(spectrum.Spectrum):
 
         yy,xx = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
-            OK = (True-self.mapplot.plane.mask)
+            OK = (True-self.mapplot.plane.mask) * self.maskmap
         else:
-            OK = np.isfinite(self.mapplot.plane)
+            OK = np.isfinite(self.mapplot.plane) * self.maskmap
         valid_pixels = zip(xx[OK],yy[OK])
 
         if usemomentcube:
@@ -183,11 +188,15 @@ class Cube(spectrum.Spectrum):
         Return a cube of the moments of each pixel
         """
 
+        if not hasattr(self.mapplot,'plane'):
+            print "Must mapplot before moment-fitting."
+            return
+
         yy,xx = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
-            OK = (True-self.mapplot.plane.mask)
+            OK = (True-self.mapplot.plane.mask) * self.maskmap
         else:
-            OK = np.isfinite(self.mapplot.plane)
+            OK = np.isfinite(self.mapplot.plane) * self.maskmap
         valid_pixels = zip(xx[OK],yy[OK])
 
         _temp_moment = self.get_spectrum(yy[OK][0],xx[OK][0]).moments(**kwargs)
@@ -206,6 +215,19 @@ class Cube(spectrum.Spectrum):
         if verbose:
             print "Finished final moment %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
 
+    def show_moment(self, momentnumber, **kwargs):
+        """
+        If moments have been computed, display them in the mapplot window
+        """
+
+        if not hasattr(self,'momentcube'):
+            print "Compute moments first"
+            return
+
+        self.mapplot.plane = self.momentcube[momentnumber,:,:].squeeze()
+
+        self.mapplot(estimator=None)
+
 
 class CubeStack(Cube):
     """
@@ -213,7 +235,7 @@ class CubeStack(Cube):
     spatial grid but different frequencies together
     """
 
-    def __init__(self, cubelist, xunits='GHz', x0=0, y0=0, **kwargs):
+    def __init__(self, cubelist, xunits='GHz', x0=0, y0=0, maskmap=None, **kwargs):
         """
         Initialize the Cube.  Accepts files in the following formats:
             - .fits
@@ -261,6 +283,11 @@ class CubeStack(Cube):
         self.writer = {}
         for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
         self.mapplot = mapplot.MapPlotter(self)
+
+        if maskmap is not None:
+            self.maskmap = maskmap
+        else:
+            self.maskmap = np.ones(self.cube.shape[1:],dtype='bool')
 
     def _sort(self):
         """ Sort the data in order of increasing X (could be decreasing, but
