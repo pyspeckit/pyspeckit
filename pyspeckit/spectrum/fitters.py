@@ -130,7 +130,7 @@ class Specfit(interactive.Interactive):
         
     @cfgdec
     def __call__(self, interactive=False, usemoments=True,
-            clear_all_connections=True, debug=False, multifit=None,
+            clear_all_connections=True, debug=False, multifit=False,
             guesses=None, save=True, fittype='gaussian', annotate=None,
             color='k', composite_fit_color='red', component_fit_color='blue',
             lw=0.5, composite_lw=0.75, component_lw=0.75, show_components=None,
