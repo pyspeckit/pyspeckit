@@ -14,6 +14,7 @@ from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb
 import copy
 import hyperfine
+from pyspeckit.specwarnings import warn
 try: # for model grid reading
     import pyfits
     pyfitsOK = True
@@ -245,10 +246,13 @@ def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
     """
 
     mdl = formaldehyde_vtau(xarr, Tex=amp*0.01, tau=0.01, xoff_v=xoff_v, width=width, return_components=return_components)
-    if amp > 0:
+    if amp > 0 and mdl.max() > 0:
         mdl *= amp/mdl.max() 
-    else:
+    elif mdl.min() < 0:
         mdl *= amp/mdl.min() 
+    else:
+        warn('Amplitude not used in generic formaldehyde fitter')
+
     return mdl
 
 

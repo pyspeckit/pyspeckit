@@ -160,6 +160,15 @@ class Cube(spectrum.Spectrum):
         *blank_value* [ float ]
             Value to replace non-fitted locations with.  A good alternative is
             numpy.nan
+
+        *verbose*       [ bool ]
+        *verbose_level* [ int ]
+            Controls how much is output.
+            0,1 - only changes frequency of updates in loop
+            2 - print out messages when skipping pixels
+            3 - print out messages when fitting pixels
+            4 - specfit will be verbose 
+
         """
 
         if not hasattr(self.mapplot,'plane'):
@@ -178,7 +187,7 @@ class Cube(spectrum.Spectrum):
         d_from_start = np.roll( np.roll( distance, start_from_point[0], 0), start_from_point[1], 1)
         sort_distance = np.argsort(d_from_start.flat)
 
-        valid_pixels = zip(xx[OK][sort_distance[OK.ravel()]],yy[OK][sort_distance[OK.ravel()]])
+        valid_pixels = zip(xx.flat[sort_distance][OK.flat[sort_distance]],yy.flat[sort_distance][OK.flat[sort_distance]])
 
         if usemomentcube:
             npars = self.momentcube.shape[0]

@@ -212,9 +212,13 @@ class Interactive(object):
         """
         # this is really ugly, but needs to be done in order to prevent multiple overlapping calls...
         cids_to_remove = []
+        if not hasattr(self.Spectrum.plotter.figure,'canvas'):
+            # just quit out; saves a tab...
+            if debug: print "Didn't find a canvas, quitting."
+            return
         for eventtype in ('button_press_event','key_press_event'):
             for key,val in self.Spectrum.plotter.figure.canvas.callbacks.callbacks[eventtype].iteritems():
-                if "event_handler" in val.func.__name__:
+                if "event_manager" in val.func.__name__:
                     cids_to_remove.append(key)
                     if debug: print "Removing CID #%i with attached function %s" % (key,val.func.__name__)
         for cid in cids_to_remove:
@@ -228,6 +232,7 @@ class Interactive(object):
         if print_message: print self.interactive_help_message
         if clear_all_connections: self.clear_all_connections()
         event_manager = lambda(x): self.event_manager(x, debug=debug, **kwargs)
+        event_manager.__name__ = "event_manager"
         self.click = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',event_manager)
         self.keyclick = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('key_press_event',event_manager)
         self._callbacks = self.Spectrum.plotter.figure.canvas.callbacks.callbacks
