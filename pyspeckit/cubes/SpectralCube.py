@@ -23,12 +23,7 @@ import mapplot
 import readers
 import time
 import numpy as np
-
-try:
-    from agpy import parallel_map
-    parallelOK = True
-except ImportError:
-    parallelOK = False
+from parallel_map import parallel_map
 
 class Cube(spectrum.Spectrum):
 
@@ -284,12 +279,9 @@ class Cube(spectrum.Spectrum):
                 if ii % (min(10**(3-verbose_level),1)) == 0:
                     print "Finished fit %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
 
-        if multicore > 0 and parallelOK:
+        if multicore > 0:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             parallel_map(fit_a_pixel, sequence,numcores=multicore)
-        elif not parallelOK:
-            print "parallel_map requires agpy"
-
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 fit_a_pixel((ii,x,y))
