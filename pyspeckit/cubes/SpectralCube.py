@@ -23,7 +23,12 @@ import mapplot
 import readers
 import time
 import numpy as np
-from multiprocessing import Pool
+
+try:
+    from agpy import parallel_map
+    parallelOK = True
+except ImportError:
+    parallelOK = False
 
 class Cube(spectrum.Spectrum):
 
@@ -217,7 +222,7 @@ class Cube(spectrum.Spectrum):
         t0 = time.time()
 
         def fit_a_pixel(iixy):
-            ii,(x,y) = iixy
+            ii,x,y = iixy
             sp = self.get_spectrum(x,y)
             if errspec is not None:
                 sp.error = errspec
@@ -279,12 +284,15 @@ class Cube(spectrum.Spectrum):
                 if ii % (min(10**(3-verbose_level),1)) == 0:
                     print "Finished fit %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
 
-        if multicore > 0:
-            #print "Not Implemented Yet"
-            pool = Pool(processes=multicore)
-            pool.map(fit_a_pixel,enumerate(valid_pixels))
-        for ii,(x,y) in enumerate(valid_pixels):
-            fit_a_pixel((ii,(x,y)))
+        if multicore > 0 and parallelOK:
+            sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
+            parallel_map(fit_a_pixel, sequence,numcores=multicore)
+        elif not parallelOK:
+            print "parallel_map requires agpy"
+
+        else:
+            for ii,(x,y) in enumerate(valid_pixels):
+                fit_a_pixel((ii,x,y))
 
         if verbose:
             print "Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
