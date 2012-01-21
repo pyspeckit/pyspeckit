@@ -177,7 +177,7 @@ class Cube(spectrum.Spectrum):
             4 - specfit will be verbose 
 
         *multicore* [ int ] 
-            if >0, try to use multiprocessing to run on multiple cores
+            if >0, try to use multiprocessing via parallel_map to run on multiple cores
 
         """
 
@@ -290,9 +290,12 @@ class Cube(spectrum.Spectrum):
             print "Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
 
 
-    def momenteach(self, verbose=True, verbose_level=1, **kwargs):
+    def momenteach(self, verbose=True, verbose_level=1, multicore=0, **kwargs):
         """
         Return a cube of the moments of each pixel
+
+        *multicore* [ int ] 
+            if >0, try to use multiprocessing via parallel_map to run on multiple cores
         """
 
         if not hasattr(self.mapplot,'plane'):
@@ -312,12 +315,20 @@ class Cube(spectrum.Spectrum):
 
         t0 = time.time()
 
-        for ii,(x,y) in enumerate(valid_pixels):
+        def moment_a_pixel(iixy):
+            ii,x,y = iixy
             sp = self.get_spectrum(x,y)
             self.momentcube[:,y,x] = sp.moments(**kwargs)
             if verbose:
                 if ii % 10**(3-verbose_level) == 0:
                     print "Finished moment %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
+
+        if multicore > 0:
+            sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
+            parallel_map(moment_a_pixel, sequence,numcores=multicore)
+        else:
+            for ii,(x,y) in enumerate(valid_pixels):
+                moment_a_pixel((ii,x,y))
 
         if verbose:
             print "Finished final moment %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
