@@ -235,6 +235,11 @@ class Cube(spectrum.Spectrum):
                     if verbose_level > 1:
                         print "Skipped %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
                     return
+                elif np.isnan(max_sn):
+                    if verbose_level > 1:
+                        print "Skipped %4i,%4i (s/n is nan; np.nanmax(data)=%0.2g, np.nanmin(error)=%0.2g)" % (x,y,np.nanmax(sp.data),np.nanmin(sp.error))
+                    return
+                elif np.isnan(max_sn)
                 if verbose_level > 2:
                     print "Fitting %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
             sp.specfit.Registry = self.Registry # copy over fitter registry
