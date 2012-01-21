@@ -138,7 +138,8 @@ class Cube(spectrum.Spectrum):
     def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
             verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
             blank_value=0, integral=True, direct=False, absorption=False,
-            use_nearest_as_guess=False, start_from_point=(0,0), **fitkwargs):
+            use_nearest_as_guess=False, start_from_point=(0,0), multicore=0,
+            **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
 
@@ -173,6 +174,9 @@ class Cube(spectrum.Spectrum):
             2 - print out messages when skipping pixels
             3 - print out messages when fitting pixels
             4 - specfit will be verbose 
+
+        *multicore* [ int ] 
+            if >0, try to use multiprocessing to run on multiple cores
 
         """
 
@@ -211,7 +215,7 @@ class Cube(spectrum.Spectrum):
 
         t0 = time.time()
 
-        for ii,(x,y) in enumerate(valid_pixels):
+        def fit_a_pixel(ii,x,y):
             sp = self.get_spectrum(x,y)
             if errspec is not None:
                 sp.error = errspec
@@ -272,6 +276,15 @@ class Cube(spectrum.Spectrum):
             if verbose:
                 if ii % (min(10**(3-verbose_level),1)) == 0:
                     print "Finished fit %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
+
+        if multicore > 0:
+            print "Not Implemented Yet"
+            #pool = Pool(processes=multicore)
+            #pool.map(fit_a_pixel,itertools.izip(enumerate(valid_pixels),valid_pixels))
+        for ii,(x,y) in enumerate(valid_pixels):
+            fit_a_pixel(ii,x,y)
+
+
 
         if verbose:
             print "Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
