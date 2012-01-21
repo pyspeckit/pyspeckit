@@ -86,6 +86,11 @@ class Cube(spectrum.Spectrum):
         self.specfit.modelpars = self.parcube[:,y,x]
         self.specfit.model = self.specfit.fitter.n_modelfunc(self.specfit.modelpars)(self.xarr)
 
+        # set the parinfo values correctly for annotations
+        for pi,p,e in zip(self.specfit.parinfo, self.specfit.modelpars, self.errcube[:,y,x]):
+            pi['value'] = p
+            pi['error'] = e
+
         self.specfit.plot_fit(**kwargs)
 
     def plot_apspec(self, aperture, coordsys=None, reset_ylimits=True, **kwargs):
@@ -189,6 +194,9 @@ class Cube(spectrum.Spectrum):
 
         valid_pixels = zip(xx.flat[sort_distance][OK.flat[sort_distance]],yy.flat[sort_distance][OK.flat[sort_distance]])
 
+        if verbose_level > 0:
+            print "Number of valid pixels: %i" % len(valid_pixels)
+
         if usemomentcube:
             npars = self.momentcube.shape[0]
         else:
@@ -247,6 +255,15 @@ class Cube(spectrum.Spectrum):
             self.errcube[:,y,x] = sp.specfit.modelerrs
             if integral: self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,return_error=True)
             has_fit[y,x] = True
+
+            if self.specfit.fittype != sp.specfit.fittype:
+                # make sure the fitter / fittype are set for the cube
+                # this has to be done within the loop because skipped-over spectra
+                # don't ever get their fittypes set
+                self.specfit.fitter = sp.specfit.fitter
+                self.specfit.fittype = sp.specfit.fittype
+                self.specfit.parinfo = sp.specfit.parinfo
+
         
             if blank_value != 0:
                 self.errcube[self.parcube == 0] = blank_value
@@ -255,10 +272,6 @@ class Cube(spectrum.Spectrum):
             if verbose:
                 if ii % (min(10**(3-verbose_level),1)) == 0:
                     print "Finished fit %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
-
-        # make sure the fitter / fittype are set for the cube
-        self.specfit.fitter = sp.specfit.fitter
-        self.specfit.fittype = sp.specfit.fittype
 
         if verbose:
             print "Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)

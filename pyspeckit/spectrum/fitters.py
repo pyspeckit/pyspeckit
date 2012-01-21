@@ -342,6 +342,8 @@ class Specfit(interactive.Interactive):
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
 
+        self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
+
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
@@ -438,6 +440,8 @@ class Specfit(interactive.Interactive):
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
+        
+        self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
 
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
