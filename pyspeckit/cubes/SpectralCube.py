@@ -232,7 +232,7 @@ class Cube(spectrum.Spectrum):
                 if max_sn < signal_cut:
                     if verbose_level > 1:
                         print "Skipped %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
-                    continue
+                    return
                 if verbose_level > 2:
                     print "Fitting %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
             sp.specfit.Registry = self.Registry # copy over fitter registry
