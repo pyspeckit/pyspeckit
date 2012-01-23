@@ -285,7 +285,7 @@ class Cube(spectrum.Spectrum):
             if verbose:
                 if ii % (min(10**(3-verbose_level),1)) == 0:
                     snmsg = " s/n=%0.1f" % (max_sn) if max_sn is not None else ""
-                    print "Finished fit %i at (%i,%i)%s. Elapsed time is %0.1f seconds" % (ii, x, y, snmsg, time.time()-t0)
+                    print "Finished fit %i of %i at (%i,%i)%s. Elapsed time is %0.1f seconds" % (ii, len(valid_pixels), x, y, snmsg, time.time()-t0)
 
             if integral:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs, self.integralmap[:,y,x])
@@ -300,8 +300,7 @@ class Cube(spectrum.Spectrum):
             # individual result can be None (I guess?) but apparently (and this
             # part I don't believe) any individual *fit* result can be None as
             # well (apparently the x,y pairs can also be None?)
-            merged_result = [r for core_result in result if core_result is not None for r in core_result ]
-            merged_result.remove(None)
+            merged_result = [core_result for core_result in result if core_result is not None ]
             for TEMP in merged_result:
                 ((x,y), modelpars, modelerrs) = TEMP
                 self.parcube[:,y,x] = modelpars
