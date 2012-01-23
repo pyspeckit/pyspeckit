@@ -24,6 +24,7 @@ import readers
 import time
 import numpy as np
 from parallel_map import parallel_map
+import multiprocessing
 
 class Cube(spectrum.Spectrum):
 
@@ -185,7 +186,7 @@ class Cube(spectrum.Spectrum):
             print "Must mapplot before fitting."
             return
 
-        xx,yy = np.indices(self.mapplot.plane.shape)
+        yy,xx = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
             OK = (True-self.mapplot.plane.mask) * self.maskmap
         else:
@@ -212,7 +213,7 @@ class Cube(spectrum.Spectrum):
         if integral: self.integralmap = np.zeros((2,)+self.mapplot.plane.shape)
 
         # array to store whether pixels have fits
-        has_fit = np.zeros(self.mapplot.plane.shape, dtype='bool')
+        self.has_fit = np.zeros(self.mapplot.plane.shape, dtype='bool')
 
         t0 = time.time()
 
@@ -239,16 +240,17 @@ class Cube(spectrum.Spectrum):
                     if verbose_level > 1:
                         print "Skipped %4i,%4i (s/n is nan; np.nanmax(data)=%0.2g, np.nanmin(error)=%0.2g)" % (x,y,np.nanmax(sp.data),np.nanmin(sp.error))
                     return
-                elif np.isnan(max_sn)
                 if verbose_level > 2:
                     print "Fitting %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
+            else:
+                max_sn = None
             sp.specfit.Registry = self.Registry # copy over fitter registry
             
-            if use_nearest_as_guess and has_fit.sum() > 0:
+            if use_nearest_as_guess and self.has_fit.sum() > 0:
                 if verbose_level > 1 and ii == 0: print "Using nearest fit as guess"
                 d = np.roll( np.roll( distance, x, 0), y, 1)
                 # If there's no fit, set its distance to be unreasonably large
-                nearest_ind = np.argmin(d+1e10*(True-has_fit))
+                nearest_ind = np.argmin(d+1e10*(True-self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
                 gg = self.parcube[:,nearest_y,nearest_x]
             if usemomentcube:
@@ -261,11 +263,11 @@ class Cube(spectrum.Spectrum):
                 if verbose_level > 1 and ii == 0: print "Using input guess"
                 gg = guesses
 
-            sp.specfit(guesses=gg, quiet=True, verbose=verbose_level>3, **fitkwargs)
+            sp.specfit(guesses=gg, quiet=verbose_level<=3, verbose=verbose_level>3, **fitkwargs)
             self.parcube[:,y,x] = sp.specfit.modelpars
             self.errcube[:,y,x] = sp.specfit.modelerrs
             if integral: self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,return_error=True)
-            has_fit[y,x] = True
+            self.has_fit[y,x] = True
 
             if self.specfit.fittype != sp.specfit.fittype:
                 # make sure the fitter / fittype are set for the cube
@@ -282,11 +284,29 @@ class Cube(spectrum.Spectrum):
 
             if verbose:
                 if ii % (min(10**(3-verbose_level),1)) == 0:
-                    print "Finished fit %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
+                    snmsg = " s/n=%0.1f" % (max_sn) if max_sn is not None else ""
+                    print "Finished fit %i at (%i,%i)%s. Elapsed time is %0.1f seconds" % (ii, x, y, snmsg, time.time()-t0)
+
+            if integral:
+                return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs, self.integralmap[:,y,x])
+            else:
+                return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs)
 
         if multicore > 0:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
-            parallel_map(fit_a_pixel, sequence,numcores=multicore)
+            result = parallel_map(fit_a_pixel, sequence, numcores=multicore)
+            # a lot of ugly hacking to deal with the way parallel_map returns
+            # its results needs TWO levels of None-filtering, because any
+            # individual result can be None (I guess?) but apparently (and this
+            # part I don't believe) any individual *fit* result can be None as
+            # well (apparently the x,y pairs can also be None?)
+            merged_result = [r for core_result in result if core_result is not None for r in core_result ]
+            merged_result.remove(None)
+            for TEMP in merged_result:
+                ((x,y), modelpars, modelerrs) = TEMP
+                self.parcube[:,y,x] = modelpars
+                self.errcube[:,y,x] = modelerrs
+                self.has_fit[y,x] = max(modelpars) > 0
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 fit_a_pixel((ii,x,y))
@@ -307,7 +327,7 @@ class Cube(spectrum.Spectrum):
             print "Must mapplot before moment-fitting."
             return
 
-        xx,yy = np.indices(self.mapplot.plane.shape)
+        yy,xx = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
             OK = (True-self.mapplot.plane.mask) * self.maskmap
         else:
@@ -328,9 +348,14 @@ class Cube(spectrum.Spectrum):
                 if ii % 10**(3-verbose_level) == 0:
                     print "Finished moment %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
 
+            return ((x,y), self.momentcube[:,y,x])
+
         if multicore > 0:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
-            parallel_map(moment_a_pixel, sequence,numcores=multicore)
+            result = parallel_map(moment_a_pixel, sequence, numcores=multicore)
+            for TEMP in (item for sublist in result if sublist is not None for item in sublist):
+                ((x,y), moments) = TEMP
+                self.momentcube[:,y,x] = moments
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 moment_a_pixel((ii,x,y))

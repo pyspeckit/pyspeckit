@@ -84,8 +84,11 @@ def run_tasks(procs, err_q, out_q, num):
     idx, result = out_q.get()
     results[idx] = result
 
-  # Remove extra dimension added by array_split
-  return list(numpy.concatenate(results))
+  try:
+      # Remove extra dimension added by array_split
+      return list(numpy.concatenate(results))
+  except ValueError:
+      return results
 
 
 def parallel_map(function, sequence, numcores=None):
