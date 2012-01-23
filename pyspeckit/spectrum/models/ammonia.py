@@ -118,6 +118,9 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
         # safe because ntot < 1e10 gives a spectrum of all zeros, and the
         # plausible range of columns is not outside the specified range
         ntot = 10**ntot
+    elif (25 < ntot < 1e5) or (ntot < 5):
+        # these are totally invalid for log/non-log
+        return 0
 
     # fillingfraction is an arbitrary scaling for the data
     # The model will be (normal model) * fillingfraction

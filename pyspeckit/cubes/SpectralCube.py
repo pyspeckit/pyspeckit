@@ -141,7 +141,7 @@ class Cube(spectrum.Spectrum):
             verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
             blank_value=0, integral=True, direct=False, absorption=False,
             use_nearest_as_guess=False, start_from_point=(0,0), multicore=0,
-            **fitkwargs):
+            max=np.nanmax, **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
 
@@ -229,9 +229,9 @@ class Cube(spectrum.Spectrum):
                 sp.error[:] = sp.data.std()
             if sp.error is not None and signal_cut > 0:
                 if absorption:
-                    max_sn = (-1*sp.data / sp.error).max()
+                    max_sn = max(-1*sp.data / sp.error)
                 else:
-                    max_sn = (sp.data / sp.error).max()
+                    max_sn = max(sp.data / sp.error)
                 if max_sn < signal_cut:
                     if verbose_level > 1:
                         print "Skipped %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
@@ -269,14 +269,6 @@ class Cube(spectrum.Spectrum):
             if integral: self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,return_error=True)
             self.has_fit[y,x] = True
 
-            if self.specfit.fittype != sp.specfit.fittype:
-                # make sure the fitter / fittype are set for the cube
-                # this has to be done within the loop because skipped-over spectra
-                # don't ever get their fittypes set
-                self.specfit.fitter = sp.specfit.fitter
-                self.specfit.fittype = sp.specfit.fittype
-                self.specfit.parinfo = sp.specfit.parinfo
-
         
             if blank_value != 0:
                 self.errcube[self.parcube == 0] = blank_value
@@ -309,6 +301,27 @@ class Cube(spectrum.Spectrum):
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 fit_a_pixel((ii,x,y))
+
+        x,y = start_from_point
+        sp = self.get_spectrum(x,y)
+        sp.specfit.Registry = self.Registry # copy over fitter registry
+        # this reproduced code is needed because the functional wrapping
+        # required for the multicore case prevents gg from being set earlier
+        if usemomentcube:
+            gg = self.momentcube[:,y,x]
+        elif hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
+            gg = guesses[:,y,x]
+        else:
+            gg = guesses
+
+        sp.specfit(guesses=gg, **fitkwargs)
+        if self.specfit.fittype != sp.specfit.fittype:
+            # make sure the fitter / fittype are set for the cube
+            # this has to be done within the loop because skipped-over spectra
+            # don't ever get their fittypes set
+            self.specfit.fitter = sp.specfit.fitter
+            self.specfit.fittype = sp.specfit.fittype
+            self.specfit.parinfo = sp.specfit.parinfo
 
         if verbose:
             print "Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
@@ -388,6 +401,35 @@ class Cube(spectrum.Spectrum):
 
         self.mapplot(estimator=None, **kwargs)
 
+
+    def load_model_fit(self, fitsfilename, npars, fittype=None, _temp_fit_loc=(0,0)):
+        """
+        Load a parameter + error cube into the .parcube and .errcube
+        attributes.
+        """
+        import pyfits
+
+        cubefile = pyfits.open(fitsfilename)
+        cube = cubefile[0].data
+
+        self.parcube = cube[:npars,:,:]
+        self.errcube = cube[npars:npars*2,:,:]
+
+        # grab a spectrum and fit it however badly you want
+        # this is just to __init__ the relevant data structures
+        x,y = _temp_fit_loc
+        sp = self.get_spectrum(x,y)
+        if fittype is None:
+            if cubefile[0].header.get('FITTYPE'):
+                fittype = cubefile[0].header.get('FITTYPE')
+            else:
+                raise KeyError("Must specify FITTYPE or include it in cube header.")
+
+        sp.specfit(fittype=fittype, guesses=self.parcube[:,y,x])
+
+        self.specfit.fitter = sp.specfit.fitter
+        self.specfit.fittype = sp.specfit.fittype
+        self.specfit.parinfo = sp.specfit.parinfo
 
 
 class CubeStack(Cube):

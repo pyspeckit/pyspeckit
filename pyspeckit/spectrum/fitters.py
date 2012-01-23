@@ -466,6 +466,12 @@ class Specfit(interactive.Interactive):
                 component_fit_color=component_fit_color, lw=lw,
                 composite_lw=composite_lw, component_lw=component_lw,
                 show_components=show_components)
+
+    def _full_model(self, **kwargs):
+        """
+        Compute the model for the whole spectrum
+        """
+        self.fullmodel = self.fitter.n_modelfunc(self.modelpars)(self.Spectrum.xarr)
                 
     def plot_fit(self, annotate=None, show_components=None, 
         color='k', composite_fit_color='red', component_fit_color='blue',
@@ -479,12 +485,14 @@ class Specfit(interactive.Interactive):
         kwargs are passed to the fitter's components attribute
         """
         if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
-            plot_offset = self.specplotter.offset+self.Spectrum.baseline.basespec[self.xmin:self.xmax]
+            plot_offset = self.specplotter.offset+self.Spectrum.baseline.basespec
         else:
             plot_offset = self.specplotter.offset
+
+        self._full_model()
         self.modelplot += self.specplotter.axis.plot(
-                self.Spectrum.xarr[self.xmin:self.xmax],
-                self.model + plot_offset,
+                self.Spectrum.xarr,
+                self.fullmodel + self.specplotter.offset+self.Spectrum.baseline.basespec,
                 color=composite_fit_color, linewidth=lw)
         
         # Plot components
