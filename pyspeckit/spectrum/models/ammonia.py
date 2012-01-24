@@ -470,7 +470,11 @@ class ammonia_model(fitter.SimpleFitter):
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
-        if mpp[1] > mpp[0]: mpp[1] = mpp[0]  # force Tex>Tkin to Tex=Tkin (already done in n_ammonia)
+        if any(['tex' in s for s in parnames]) and any(['tkin' in s for s in parnames]):
+            texnum = (i for i,s in enumerate(parnames) if 'tex' in s)
+            tkinnum = (i for i,s in enumerate(parnames) if 'tkin' in s)
+            for txn,tkn in zip(texnum,tkinnum):
+                if mpp[txn] > mpp[tkn]: mpp[txn] = mpp[tkn]  # force Tex>Tkin to Tex=Tkin (already done in n_ammonia)
         self.mp = mp
 
         if parinfo_with_fixed is not None:

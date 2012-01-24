@@ -434,6 +434,7 @@ class Specfit(interactive.Interactive):
                 err=self.errspec[self.xmin:self.xmax],
                 vheight=vheight,
                 params=self.guesses,
+                debug=debug,
                 **self.fitkwargs)
         if debug: print "Guesses, fits after: ",self.guesses, mpp
 
@@ -451,14 +452,20 @@ class Specfit(interactive.Interactive):
             self.Spectrum.baseline.baselinepars = mpp[:1]*scalefactor # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]*scalefactor
             self.model = model*scalefactor - mpp[0]*scalefactor
+            # I removed this recently for some reason, but more code depends on it being in place
+            # Need to figure out *WHY* anything would want an extra parameter
+            if len(mpp) == self.fitter.npars+1:
+                mpp = mpp[1:]
         else: self.model = model*scalefactor
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model*scalefactor
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
+        # ONLY the amplitude was changed
         self.modelpars[0] *= scalefactor
         self.modelerrs[0] *= scalefactor
-        self.modelpars[1] *= scalefactor
-        self.modelerrs[1] *= scalefactor
+        # this was for height, but that's now dealt with above
+        #self.modelpars[1] *= scalefactor
+        #self.modelerrs[1] *= scalefactor
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate,
                 color=color, composite_fit_color=composite_fit_color,
@@ -470,7 +477,15 @@ class Specfit(interactive.Interactive):
         """
         Compute the model for the whole spectrum
         """
-        self.fullmodel = self.fitter.n_modelfunc(self.modelpars)(self.Spectrum.xarr)
+        # requires self.modelpars to be a list... hope it is
+        if self.vheight:
+            if self.Spectrum.baseline.baselinepars is not None:
+                mpp = [self.Spectrum.baseline.baselinepars[0]] + self.modelpars
+            else:
+                mpp = [0] + self.modelpars
+        else:
+            mpp = self.modelpars
+        self.fullmodel = self.fitter.n_modelfunc(mpp)(self.Spectrum.xarr)
                 
     def plot_fit(self, annotate=None, show_components=None, 
         color='k', composite_fit_color='red', component_fit_color='blue',
@@ -491,16 +506,23 @@ class Specfit(interactive.Interactive):
         self._full_model()
         self.modelplot += self.specplotter.axis.plot(
                 self.Spectrum.xarr,
-                self.fullmodel + self.specplotter.offset+self.Spectrum.baseline.basespec,
+                self.fullmodel + plot_offset,
                 color=composite_fit_color, linewidth=lw)
         
         # Plot components
         if show_components:
-            self.modelcomponents = self.fitter.components(self.Spectrum.xarr[self.xmin:self.xmax],self.modelpars, **component_kwargs)
+            self.modelcomponents = self.fitter.components(self.Spectrum.xarr,self.modelpars, **component_kwargs)
             for data in self.modelcomponents:
-                self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr[self.xmin:self.xmax],
-                    data + plot_offset,
-                    color=component_fit_color, linewidth=component_lw)                
+                # can have multidimensional components
+                if len(data.shape) > 1:
+                    for d in data:
+                        self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr,
+                            d + plot_offset,
+                            color=component_fit_color, linewidth=component_lw)
+                else:
+                    self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr,
+                        data + plot_offset,
+                        color=component_fit_color, linewidth=component_lw)
                 
         self.specplotter.reset_limits(**self.specplotter.plotkwargs)
         if self.specplotter.autorefresh:
@@ -654,15 +676,24 @@ class Specfit(interactive.Interactive):
         will be returned as well
         """
 
+        dx = self.Spectrum.xarr.cdelt()
+        if dx is None:
+            dx = np.abs(np.concatenate([np.diff(self.Spectrum.xarr),[0]]))
+            warn("Irregular X-axis.  The last pixel is ignored.")
+        else:
+            # shouldn't shape be a 'propery'
+            dx = np.repeat(np.abs(dx), self.Spectrum.shape())
+
         if direct:
-            dx = np.abs(self.Spectrum.xarr.cdelt())
             if len(integration_limits) == 2:
                 x1 = np.argmin(np.abs(integration_limits[0]-self.Spectrum.xarr))
                 x2 = np.argmin(np.abs(integration_limits[1]-self.Spectrum.xarr))
                 if x1>x2: x1,x2 = x2,x1
-                integ = self.Spectrum.data[x1:x2] * dx
+                integ = (self.Spectrum.data[x1:x2] * dx[x1:x2]).sum()
                 if return_error:
-                    error = np.sqrt((self.Spectrum.error[x1:x2]**2).sum()) * dx
+                    # compute error assuming a "known mean" (not a sample mean).  If sample mean, multiply
+                    # by sqrt(len(dx)/(len(dx)-1))  (which should be very near 1)
+                    error = np.sqrt((dx[x1:x2] * self.Spectrum.error[x1:x2]**2).sum() / dx[x1:x2].sum())
                     return integ,error
                 else:
                     return integ
@@ -670,19 +701,23 @@ class Specfit(interactive.Interactive):
                 threshold = 0.01 * np.abs( self.model ).max()
 
             OK = np.abs( self.model ) > threshold
-            integ = self.spectofit[OK].sum() * dx
-            error = np.sqrt((self.errspec[OK]**2).sum()) * dx
+            integ = (self.spectofit[OK] * dx[OK]).sum()
+            error = np.sqrt((self.errspec[OK]**2 * dx[OK]).sum()/dx[OK].sum())
         else:
             if not hasattr(self.fitter,'integral'):
                 raise AttributeError("The fitter %s does not have an integral implemented" % self.fittype)
 
-            dx = np.abs(self.Spectrum.xarr.cdelt())
-            integ = self.fitter.integral(self.modelpars, **kwargs) * dx
-            if return_error:
-                if mycfg.WARN: print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."
-                OK = np.abs( self.model ) > threshold
-                error = np.sqrt((self.errspec[OK]**2).sum()) * dx
-                #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
+            if self.Spectrum.xarr.cdelt() is not None:
+                integ = self.fitter.integral(self.modelpars, **kwargs) * dx
+                if return_error:
+                    if mycfg.WARN: print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."
+                    OK = np.abs( self.model ) > threshold
+                    error = np.sqrt((self.errspec[OK]**2).sum()) * dx
+                    #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
+            else:
+                integ = 0
+                error = 0
+                warn("An analytic integal could not be computed.  Try direct=True when integrating, or find a way to linearize the X-axis")
         if return_error:
             return integ,error
         else:

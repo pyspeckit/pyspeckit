@@ -346,6 +346,7 @@ class Cube(spectrum.Spectrum):
             OK = np.isfinite(self.mapplot.plane) * self.maskmap
         valid_pixels = zip(xx[OK],yy[OK])
 
+        # run the moment process to find out how many elements are in a moment
         _temp_moment = self.get_spectrum(yy[OK][0],xx[OK][0]).moments(**kwargs)
 
         self.momentcube = np.zeros((len(_temp_moment),)+self.mapplot.plane.shape)
@@ -365,7 +366,8 @@ class Cube(spectrum.Spectrum):
         if multicore > 0:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             result = parallel_map(moment_a_pixel, sequence, numcores=multicore)
-            for TEMP in (item for sublist in result if sublist is not None for item in sublist):
+            merged_result = [core_result for core_result in result if core_result is not None ]
+            for TEMP in merged_result:
                 ((x,y), moments) = TEMP
                 self.momentcube[:,y,x] = moments
         else:
@@ -503,3 +505,42 @@ class CubeStack(Cube):
         indices = self.xarr.argsort()
         self.xarr = self.xarr[indices]
         self.cube = self.cube[indices,:,:]
+
+
+    def write_fit(self, fitcubefilename, clobber=False):
+        """
+        Write out a fit cube using the information in the fit's parinfo to set the header keywords
+
+        *fitcubefilename* [ string ] 
+            Filename to write to
+
+        *clobber* [ bool ] 
+            Overwrite file if it exists?
+        """
+
+        import pyfits
+        
+        try:
+            fitcubefile = pyfits.PrimaryHDU(data=np.concatenate([self.parcube,self.errcube]), header=self.header)
+            fitcubefile.header.update('FITTYPE',self.specfit.fittype)
+
+            for ii,par in enumerate(self.specfit.parinfo):
+                kw = "PLANE%i" % ii
+                parname = par['parname'].strip('0123456789')
+                fitcubefile.header.update(kw, parname)
+            # set error parameters
+            for jj,par in enumerate(self.specfit.parinfo):
+                kw = "PLANE%i" % (ii+jj)
+                parname = "e"+par['parname'].strip('0123456789')
+                fitcubefile.header.update(kw, parname)
+
+            # overwrite the WCS
+            fitcubefile.header.update('CDELT3',1)
+            fitcubefile.header.update('CTYPE3','FITPAR')
+            fitcubefile.header.update('CRVAL3',0)
+            fitcubefile.header.update('CRPIX3',1)
+        except AttributeError:
+            print "Make sure you run the cube fitter first."
+            return
+
+        fitcubefile.writeto(fitcubefilename, clobber=clobber)

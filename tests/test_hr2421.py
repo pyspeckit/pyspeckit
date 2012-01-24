@@ -36,6 +36,7 @@ print "Best fit: ", sp.specfit.modelpars
 print "EQW: ",sp.specfit.EQW()
 print "Chi2: ",sp.specfit.chi2
 gauss_model = sp.specfit.model+sp.baseline.basespec[sp.specfit.xmin:sp.specfit.xmax]
+print "A Gaussian has been fit.  There should be a red line overlaid on the spectrum with green highlighting the baseline fit region and yellow showing the baseline fit"
 if interactive: raw_input("Wait here a moment")
 
 print "FITTING VOIGT"
@@ -48,6 +49,7 @@ sp.plotter.axis.plot(sp.xarr[sp.specfit.xmin:sp.specfit.xmax],gauss_model,color=
 sp.plotter(clear=False)
 sp.plotter.figure.savefig(savedir+'hr2421_voigtfit.png')
 voigt_model = sp.specfit.model+sp.baseline.basespec[sp.specfit.xmin:sp.specfit.xmax]
+print "A voigt model has been fit.  The red line from before should have a blue line overlaid.  They should be only moderately different."
 if interactive: raw_input("Wait here a moment")
 
 

@@ -1,3 +1,5 @@
+print "This example has not been created yet."
+"""
 import pyspeckit
 
 # Load the spectrum
@@ -20,3 +22,4 @@ sp.specfit(fittype='hcn_vtau',multifit=True,guesses=[15,2,4,0.2],show_components
 
 # Save the figure (this step is just so that an image can be included on the web page)
 sp.plotter.savefig('hcn_example_fit.png')
+"""

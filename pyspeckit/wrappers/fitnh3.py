@@ -39,6 +39,8 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
 
     spdict[guessline].specfit(fittype='gaussian', negamp=False, vheight=False)
     ampguess,vguess,widthguess = spdict[guessline].specfit.modelpars
+    if widthguess < 0:
+        raise ValueError("Width guess was < 0.  This is impossible.")
     print "RMS guess (errspec): ",spdict[guessline].specfit.errspec.mean()
     print "RMS guess (residuals): ",spdict[guessline].specfit.residuals.std()
     errguess = spdict[guessline].specfit.residuals.std()

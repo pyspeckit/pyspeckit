@@ -22,7 +22,7 @@ sp.baseline(subtract = False)
 raw_input('Let\'s zoom in on the SII doublet (continue)')
 
 # Subtract the baseline fit and save
-sp.baseline()
+sp.baseline(subtract = True)
 sp.plotter.savefig('doublet_example_fullspectrum.png')
 
 # Guess for the redshift - otherwise we'll end up with the Halpha-NII complex

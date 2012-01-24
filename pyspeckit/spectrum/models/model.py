@@ -62,7 +62,9 @@ class SpectralModel(fitter.SimpleFitter):
         # this needs to be set once only
         self.shortvarnames = shortvarnames
         
-        self.parinfo, kwargs = self._make_parinfo(**kwargs)
+        self.default_parinfo = None
+        self.default_parinfo, kwargs = self._make_parinfo(**kwargs)
+        self.parinfo = copy.copy(self.default_parinfo)
 
         self.modelfunc_kwargs = kwargs
         
@@ -76,6 +78,7 @@ class SpectralModel(fitter.SimpleFitter):
             limitedmin=None, limitedmax=None,
             minpars=None, maxpars=None,
             vheight=False,
+            debug=False,
             **kwargs):
 
         # for backwards compatibility - partied = tied, etc.
@@ -94,6 +97,8 @@ class SpectralModel(fitter.SimpleFitter):
             self.parnames = parnames
         elif parnames is None and self.parnames is not None:
             parnames = self.parnames
+        elif self.default_parinfo is not None:
+            parnames = [p['parname'] for p in self.default_parinfo]
 
         if limitedmin is not None:
             if limitedmax is not None:
@@ -102,6 +107,8 @@ class SpectralModel(fitter.SimpleFitter):
                 parlimited = zip(limitedmin,(False,)*len(parnames))
         elif limitedmax is not None:
             parlimited = zip((False,)*len(parnames),limitedmax)
+        elif self.default_parinfo is not None:
+            parlimited = [p['limited'] for p in self.default_parinfo]
 
         if minpars is not None:
             if maxpars is not None:
@@ -110,6 +117,8 @@ class SpectralModel(fitter.SimpleFitter):
                 parlimits = zip(minpars,(False,)*len(parnames))
         elif maxpars is not None:
             parlimits = zip((False,)*len(parnames),maxpars)
+        elif self.default_parinfo is not None:
+            parlimits = [p['limits'] for p in self.default_parinfo]
 
         self.fitunits = fitunits
         self.npeaks = npeaks
@@ -133,8 +142,20 @@ class SpectralModel(fitter.SimpleFitter):
             self.parinfo = [ {'n':0, 'value': 0, 'limits':(0,0),
                 'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
                 'error': 0, 'tied':"" } ]
+        elif vheight and len(self.parinfo) == self.default_npars+1 and len(parvalues) == self.default_npars+1:
+            # the right numbers are passed *AND* there is already a height param
+            self.parinfo = [ {'n':0, 'value':parvalues.pop(0), 'limits':(0,0),
+                'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
+                'error': 0, 'tied':"" } ]
+            #heightparnum = (i for i,s in self.parinfo if 'HEIGHT' in s['parname'])
+            #for hpn in heightparnum:
+            #    self.parinfo[hpn]['value'] = parvalues[0]
+        elif vheight:
+            raise ValueError('VHEIGHT is specified but a case was found that did not allow it to be included.')
         else:
             self.parinfo = []
+
+        if debug: print "After VHEIGHT parse len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight)
 
         # generate the parinfo dict
         # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
@@ -150,6 +171,8 @@ class SpectralModel(fitter.SimpleFitter):
             'tied':temp_pardict['partied'][ii+self.npars*jj] if temp_pardict['partied'][ii+self.npars*jj] else ""} 
             for jj in xrange(self.npeaks)
             for ii in xrange(self.npars) ] # order matters!
+
+        if debug: print "After Generation step len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight)
 
         # special keyword to specify emission/absorption lines
         if negamp is not None:
@@ -225,11 +248,11 @@ class SpectralModel(fitter.SimpleFitter):
         """
 
         if parinfo is None:
-            parinfo, kwargs = self._make_parinfo(**kwargs)
+            parinfo, kwargs = self._make_parinfo(debug=debug, **kwargs)
         else:
             if debug: print "Using user-specified parinfo dict"
             # clean out disallowed kwargs (don't want to pass them to mpfit)
-            throwaway, kwargs = self._make_parinfo(**kwargs)
+            throwaway, kwargs = self._make_parinfo(debug=debug, **kwargs)
 
         self.xax = xax # the 'stored' xax is just a link to the original
         if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
@@ -245,7 +268,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         if debug:
             for p in parinfo: print p
-            print "\n".join(["%s %i: %s" % (p['parname'],p['n'],p['tied']) for p in parinfo])
+            print "\n".join(["%s %i: tied: %s value: %s" % (p['parname'],p['n'],p['tied'],p['value']) for p in parinfo])
 
         mp = mpfit(self.mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
         mpp = mp.params
@@ -266,9 +289,11 @@ class SpectralModel(fitter.SimpleFitter):
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
         self.mp = mp
-        self.mpp = mpp#[1:]
-        self.mpperr = mpperr#[1:]
+        self.mpp = mpp
+        self.mpperr = mpperr
         self.model = self.n_modelfunc(mpp,**self.modelfunc_kwargs)(xax)
+        if debug:
+            print "Modelpars: ",self.mpp
         if np.isnan(chi2):
             if debug:
                 raise ValueError("Error: chi^2 is nan")
