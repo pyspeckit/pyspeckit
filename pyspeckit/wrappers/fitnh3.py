@@ -37,7 +37,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
         for sp in splist:
             sp.smooth(smooth)
 
-    spdict[guessline].specfit(fittype='gaussian',negamp=False)
+    spdict[guessline].specfit(fittype='gaussian', negamp=False, vheight=False)
     ampguess,vguess,widthguess = spdict[guessline].specfit.modelpars
     print "RMS guess (errspec): ",spdict[guessline].specfit.errspec.mean()
     print "RMS guess (residuals): ",spdict[guessline].specfit.residuals.std()
