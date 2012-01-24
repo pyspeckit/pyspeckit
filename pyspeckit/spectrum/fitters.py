@@ -134,8 +134,7 @@ class Specfit(interactive.Interactive):
             guesses=None, save=True, fittype='gaussian', annotate=None,
             color='k', composite_fit_color='red', component_fit_color='blue',
             lw=0.5, composite_lw=0.75, component_lw=0.75, show_components=None,
-            verbose=True, clear=True, 
-            **kwargs):
+            verbose=True, clear=True, vheight=None, **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
 
@@ -190,7 +189,7 @@ class Specfit(interactive.Interactive):
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
-            if self.Spectrum.baseline.order is None:
+            if (self.Spectrum.baseline.order is None and vheight is None) or vheight:
                 self.Spectrum.baseline.order=0
                 self.peakbgfit(usemoments=usemoments, color=color,
                         composite_fit_color=composite_fit_color, annotate=annotate,
