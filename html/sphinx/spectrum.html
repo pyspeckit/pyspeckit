@@ -27,9 +27,6 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
-    <link rel="up" title="Classes" href="classes.html" />
-    <link rel="next" title="Cubes" href="cubes.html" />
-    <link rel="prev" title="Classes" href="classes.html" />
      
     <script type="text/javascript">
 
@@ -213,13 +210,20 @@ if you want to just slice by index</p>
 <dt>Smooth the spectrum by factor &#8220;smooth&#8221;.  </dt>
 <dd>sm.smooth doc:</dd>
 </dl>
-<p>Smooth and downsample the data array
-smoothtype - &#8216;gaussian&#8217;,&#8217;hanning&#8217;, or &#8216;boxcar&#8217;
-downsample - Downsample the data?
-downsample_factor - Downsample by the smoothing factor, or something else?
-convmode - see numpy.convolve.  &#8216;same&#8217; returns an array of the same length as</p>
-<blockquote>
-<div>&#8216;data&#8217; (assuming data is larger than the kernel)</div></blockquote>
+<p>Smooth and downsample the data array</p>
+<dl class="docutils">
+<dt><em>smooth</em> [ float ] </dt>
+<dd>Number of pixels to smooth by</dd>
+<dt><em>smoothtype</em> [ &#8216;gaussian&#8217;,&#8217;hanning&#8217;, or &#8216;boxcar&#8217; ]</dt>
+<dd>type of smoothing kernel to use</dd>
+<dt><em>downsample</em> [ bool ]</dt>
+<dd>Downsample the data?</dd>
+<dt><em>downsample_factor</em> [ int ]</dt>
+<dd>Downsample by the smoothing factor, or something else?</dd>
+<dt><em>convmode</em> [ &#8216;full&#8217;,&#8217;valid&#8217;,&#8217;same&#8217; ]</dt>
+<dd>see <cite>numpy.convolve</cite>.  &#8216;same&#8217; returns an array of the same length as
+&#8216;data&#8217; (assuming data is larger than the kernel)</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -352,15 +356,11 @@ for example.</dd>
         </div>
         <div class="sidebar">
           <h3>Table Of Contents</h3>
-          <ul class="current">
+          <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Index</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models &amp; Fitting</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="classes.html">Base Classes</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="">Spectrum, Spectra, and ObsBlocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cubes.html">SpectroscopicCube and its supporting functions</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Base Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
@@ -383,7 +383,7 @@ for example.</dd>
 
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Last updated on Dec 23, 2011.
+      Last updated on Jan 25, 2012.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
     <a href="pyspeckit.pdf">PDF version of this document</a>
     <script type="text/javascript">

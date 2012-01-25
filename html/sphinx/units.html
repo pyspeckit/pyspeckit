@@ -86,6 +86,9 @@ What about for other fields (e.g., wavenumber?)</dd>
 allow conversion to other units and frames.  Typically, units are velocity,
 wavelength, frequency, or redshift.  Wavenumber is also hypothetically
 possible.</p>
+<p>WARNING: If you index a SpectroscopicAxis, the resulting array will be
+a SpectroscopicAxis without a dxarr attribute!  This can result in major problems;
+a workaround is being sought but subclassing numpy arrays is harder than I thought</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.as_unit">
 <tt class="descname">as_unit</tt><big>(</big><em>unit</em>, <em>frame=None</em>, <em>quiet=True</em>, <em>center_frequency=None</em>, <em>center_frequency_units=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.as_unit" title="Permalink to this definition">¶</a></dt>
@@ -239,7 +242,7 @@ header parameters</p>
 
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Last updated on Dec 23, 2011.
+      Last updated on Jan 25, 2012.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
     <a href="pyspeckit.pdf">PDF version of this document</a>
     <script type="text/javascript">

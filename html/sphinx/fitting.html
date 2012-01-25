@@ -71,7 +71,7 @@
 <dl class="class">
 <dt id="pyspeckit.spectrum.fitters.Specfit">
 <em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.fitters.</tt><tt class="descname">Specfit</tt><big>(</big><em>Spectrum</em>, <em>Registry=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.interactive.Interactive</span></tt></p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.EQW">
 <tt class="descname">EQW</tt><big>(</big><em>plot=False</em>, <em>plotcolor='g'</em>, <em>annotate=False</em>, <em>alpha=0.5</em>, <em>loc='lower left'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.EQW" title="Permalink to this definition">¶</a></dt>
@@ -81,10 +81,18 @@ minus the spectrum) over the selected range</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.annotate">
-<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.1</em>, <em>handlelength=0.1</em>, <em>handletextpad=0.1</em>, <em>frameon=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.10000000000000001</em>, <em>handlelength=0.10000000000000001</em>, <em>handletextpad=0.10000000000000001</em>, <em>frameon=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a legend to the plot showing the fitted parameters</p>
 <p>clearlegend() will remove the legend</p>
 <p>kwargs passed to legend</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.button3action">
+<tt class="descname">button3action</tt><big>(</big><em>event</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.button3action" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnect the interactiveness
+Perform the fit (or die trying)
+Hide the guesses</p>
 </dd></dl>
 
 <dl class="method">
@@ -93,6 +101,17 @@ minus the spectrum) over the selected range</p>
 <dd><p>Remove the fitted model from the plot</p>
 <p>Also removes the legend by default</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.clear_all_connections">
+<tt class="descname">clear_all_connections</tt><big>(</big><em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.clear_all_connections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prevent overlapping interactive sessions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.clear_highlights">
+<tt class="descname">clear_highlights</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.clear_highlights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.crop">
@@ -105,6 +124,24 @@ minus the spectrum) over the selected range</p>
 <tt class="descname">downsample</tt><big>(</big><em>factor</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.downsample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downsample the model spectrum (and the spectofit spectra)
 This should only be done when Spectrum.smooth is called</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.event_manager">
+<tt class="descname">event_manager</tt><big>(</big><em>event</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.event_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decide what to do given input (click, keypress, etc.)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.firstclick_guess">
+<tt class="descname">firstclick_guess</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.firstclick_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.guesses</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.firstclick_selection">
+<tt class="descname">firstclick_selection</tt><big>(</big><em>include_all=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.firstclick_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the include/exclude mask</p>
 </dd></dl>
 
 <dl class="method">
@@ -122,6 +159,13 @@ expand it (with zeros) to fill the spectrum.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.highlight_fitregion">
+<tt class="descname">highlight_fitregion</tt><big>(</big><em>drawstyle='steps-mid'</em>, <em>color='g'</em>, <em>clear_highlights=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.highlight_fitregion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Re-highlight the fitted region</p>
+<p>kwargs are passed to <cite>matplotlib.plot</cite></p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.integral">
 <tt class="descname">integral</tt><big>(</big><em>direct=False</em>, <em>threshold='auto'</em>, <em>integration_limits=</em><span class="optional">[</span><span class="optional">]</span>, <em>return_error=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.integral" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the integral of the fitted spectrum</p>
@@ -133,19 +177,6 @@ if you&#8217;ve baselined without subtract=True, the baseline will be included i
 sigma = sqrt(sum(sigma_i^2)) * dx
 will be returned as well</p>
 </dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.fitters.Specfit.makeguess">
-<tt class="descname">makeguess</tt><big>(</big><em>event</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.makeguess" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>*For window-interactive use only!*</strong>
-(i.e., you probably shouldn&#8217;t call this from the command line or a script)</p>
-<p>Given a set of clicks or button presses, sets the fit guesses</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.fitters.Specfit.makeguess_debug">
-<tt class="descname">makeguess_debug</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.makeguess_debug" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.moments">
@@ -248,17 +279,14 @@ does it allow N copies of the fitting function?</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.selectregion">
-<tt class="descname">selectregion</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em>, <em>xtype='wcs'</em>, <em>reset=False</em>, <em>debug=False</em>, <em>verbose=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">selectregion</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em>, <em>xtype='wcs'</em>, <em>highlight=False</em>, <em>fit_plotted_area=True</em>, <em>reset=False</em>, <em>verbose=False</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pick a fitting region in either WCS units or pixel units</p>
-<p>reset - if true, overrides input xmin,xmax and selects the full range</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.selectregion_interactive">
-<tt class="descname">selectregion_interactive</tt><big>(</big><em>event</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion_interactive" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>*For window-interactive use only!*</strong>
-(i.e., you probably shouldn&#8217;t call this from the command line or a script)</p>
-<p>Defines the fitting region of the spectrum</p>
+<tt class="descname">selectregion_interactive</tt><big>(</big><em>event</em>, <em>mark_include=True</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion_interactive" title="Permalink to this definition">¶</a></dt>
+<dd><p>select regions for baseline fitting</p>
 </dd></dl>
 
 <dl class="method">
@@ -288,6 +316,11 @@ into a different frame</p>
 <p>Right now this only takes care of redshift and only if redshift is defined.
 It should be extended to do other things later</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.start_interactive">
+<tt class="descname">start_interactive</tt><big>(</big><em>debug=False</em>, <em>LoudDebug=False</em>, <em>print_message=True</em>, <em>clear_all_connections=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.start_interactive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -334,7 +367,7 @@ It should be extended to do other things later</p>
 
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Last updated on Dec 23, 2011.
+      Last updated on Jan 25, 2012.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
     <a href="pyspeckit.pdf">PDF version of this document</a>
     <script type="text/javascript">
