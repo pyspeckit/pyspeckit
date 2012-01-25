@@ -62,6 +62,7 @@ class Baseline(interactive.Interactive):
             exclusionlevel=0.01, interactive=False, debug=False,
             LoudDebug=False, fit_original=True, baseline_fit_color='orange',
             clear_all_connections=True, fit_plotted_area=True, highlight=False,
+            reset_selection=False,
             **kwargs):
         """
         Fit and remove a polynomial from the spectrum.  
@@ -104,8 +105,12 @@ class Baseline(interactive.Interactive):
                 #vhi = self.specplotter.specfit.modelpars[1] + 2*self.specplotter.specfit.modelpars[2]
                 #exclude = [np.argmin(abs(self.Spectrum.xarr-vlo)),argmin(abs(self.Spectrum.xarr-vhi))]
                 specfit.fullsizemodel() # make sure the spectrum is the right size
-                self.includemask = abs(specfit.model) < exclusionlevel*abs(min(specfit.modelpars[0::3]))
-            else:
+                if reset_selection:
+                    self.includemask = abs(specfit.model) < exclusionlevel*min(abs(np.array(specfit.modelpars[0::3])))
+                else:
+                    # only set additional FALSE
+                    self.includemask *= abs(specfit.model) < exclusionlevel*min(abs(np.array(specfit.modelpars[0::3])))
+            elif reset_selection:
                 self.includemask[:] = True
             # must select region (i.e., exclude edges) AFTER setting 'positive' include region
             # also, DON'T highlight here because it will be cleared

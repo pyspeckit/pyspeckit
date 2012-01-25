@@ -567,7 +567,7 @@ class Spectra(Spectrum):
             if inherit_fit:
                 sp.specfit.fitter = self.specfit.fitter
                 sp.specfit.modelpars = self.specfit.modelpars
-                sp.specfit.model = np.interp(sp.xarr.as_unit(self.xarr.units),self.xarr,self.specfit.model)
+                sp.specfit.model = np.interp(sp.xarr.as_unit(self.xarr.units),self.xarr,self.specfit.fullmodel)
 
             sp.plotter(**plotkwargs)
             

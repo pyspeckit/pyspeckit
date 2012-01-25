@@ -282,12 +282,15 @@ class SpectralModel(fitter.SimpleFitter):
         if mp.status == 0:
             raise mpfitException(mp.errmsg)
 
+        for i,(p,e) in enumerate(zip(mpp,mpperr)):
+            self.parinfo[i]['value'] = p
+            self.parinfo[i]['error'] = e
+
         if veryverbose:
             print "Fit status: ",mp.status
             print "Fit error message: ",mp.errmsg
             print "Fit message: ",mpfit_messages[mp.status]
             for i,p in enumerate(mpp):
-                self.parinfo[i]['value'] = p
                 print self.parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 

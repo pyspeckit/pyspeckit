@@ -212,6 +212,7 @@ class Specfit(interactive.Interactive):
             return
         if save: self.savefit()
 
+
     def EQW(self, plot=False, plotcolor='g', annotate=False, alpha=0.5, loc='lower left'):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
@@ -371,6 +372,9 @@ class Specfit(interactive.Interactive):
                 i2 = element.index(']')
                 loc = int(element[i1:i2])
                 self.modelerrs[ii] = self.modelerrs[loc]
+
+        # make sure the full model is populated
+        self._full_model()
                 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
             negamp=None, fittype=None, renormalize='auto', color='k',
@@ -472,6 +476,9 @@ class Specfit(interactive.Interactive):
                 component_fit_color=component_fit_color, lw=lw,
                 composite_lw=composite_lw, component_lw=component_lw,
                 show_components=show_components)
+
+        # make sure the full model is populated
+        self._full_model()
 
     def _full_model(self, **kwargs):
         """
@@ -600,6 +607,17 @@ class Specfit(interactive.Interactive):
         self.specplotter.axis.add_artist(self.fitleg)
         self.fitleg.draggable(True)
         if self.specplotter.autorefresh: self.specplotter.refresh()
+
+    def print_fit(self, print_baseline=True, **kwargs):
+        """
+        Print the best-fit parameters to the command line
+        """
+
+        if self.Spectrum.baseline.baselinepars is not None and print_baseline:
+            print "Baseline: " + " + ".join(["%12g x^%i" % (x,i) for i,x in enumerate(self.Spectrum.baseline.baselinepars[::-1])])
+
+        for i,p in enumerate(self.parinfo):
+            print "%15s: %12g +/- %12g" % (p['parname'],p['value'],p['error'])
 
     def clear(self, legend=True, components=True):
         """
