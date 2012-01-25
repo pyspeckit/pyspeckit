@@ -17,7 +17,7 @@ sp.plotter(xmin=-100,xmax=300)
 import pylab; pylab.ioff(); pylab.draw()
 if interactive: raw_input("Plotter (smooth)")
 
-sp.specfit(negamp=False)
+sp.specfit(negamp=False,debug=True)
 sp.plotter.figure.savefig(savedir+'nh3_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars

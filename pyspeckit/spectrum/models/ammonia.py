@@ -245,7 +245,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
 
 class ammonia_model(fitter.SimpleFitter):
 
-    def __init__(self,npeaks=1,npars=6,multisingle='multi'):
+    def __init__(self,npeaks=1,npars=6,multisingle='multi',**kwargs):
         self.npeaks = npeaks
         self.npars = npars
         self._default_parnames = ['tkin','tex','ntot','width','xoff_v','fortho']
@@ -262,6 +262,8 @@ class ammonia_model(fitter.SimpleFitter):
             self.multisingle = multisingle
         else:
             raise Exception("multisingle must be multi or single")
+
+        self.modelfunc_kwargs = kwargs
 
     def __call__(self,*args,**kwargs):
         if self.multisingle == 'single':

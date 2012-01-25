@@ -123,17 +123,8 @@ class SpectralModel(fitter.SimpleFitter):
         self.fitunits = fitunits
         self.npeaks = npeaks
 
-        # this is a clever way to turn the parameter lists into a dict of lists
-        # clever = hard to read
-        temp_pardict = dict([(varname, np.zeros(self.npars*self.npeaks, dtype='bool'))
-            if locals()[varname] is None else (varname, list(locals()[varname]) )
-            for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
-        temp_pardict['parlimits'] = parlimits if parlimits is not None else [(0,0)] * (self.npars*self.npeaks)
-        temp_pardict['parlimited'] = parlimited if parlimited is not None else [(False,False)] * (self.npars*self.npeaks)
-        for k,v in temp_pardict.iteritems():
-            if (self.npars*self.npeaks) / len(v) > 1:
-                temp_pardict[k] = list(v) * ((self.npars*self.npeaks) / len(v))
-
+        # the height / parvalue popping needs to be done before the temp_pardict is set in order to make sure
+        # that the height guess isn't assigned to the amplitude
         self.vheight = vheight
         if vheight and len(self.parinfo) == self.default_npars and len(parvalues) == self.default_npars + 1:
             # if the right number of parameters are passed, the first is the height
@@ -160,6 +151,18 @@ class SpectralModel(fitter.SimpleFitter):
 
         if debug: print "After VHEIGHT parse len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight)
 
+
+        # this is a clever way to turn the parameter lists into a dict of lists
+        # clever = hard to read
+        temp_pardict = dict([(varname, np.zeros(self.npars*self.npeaks, dtype='bool'))
+            if locals()[varname] is None else (varname, list(locals()[varname]) )
+            for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
+        temp_pardict['parlimits'] = parlimits if parlimits is not None else [(0,0)] * (self.npars*self.npeaks)
+        temp_pardict['parlimited'] = parlimited if parlimited is not None else [(False,False)] * (self.npars*self.npeaks)
+        for k,v in temp_pardict.iteritems():
+            if (self.npars*self.npeaks) / len(v) > 1:
+                temp_pardict[k] = list(v) * ((self.npars*self.npeaks) / len(v))
+
         # generate the parinfo dict
         # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
         # parlimited, parfixed, and parlimits are all two-element items (tuples or lists)
@@ -176,6 +179,8 @@ class SpectralModel(fitter.SimpleFitter):
             for ii in xrange(self.npars) ] # order matters!
 
         if debug: print "After Generation step len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight)
+
+        if debug > True: import pdb; pdb.set_trace()
 
         # special keyword to specify emission/absorption lines
         if negamp is not None:
