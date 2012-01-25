@@ -485,7 +485,7 @@ class Specfit(interactive.Interactive):
                 mpp = [0] + self.modelpars
         else:
             mpp = self.modelpars
-        self.fullmodel = self.fitter.n_modelfunc(mpp)(self.Spectrum.xarr)
+        self.fullmodel = self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(self.Spectrum.xarr)
                 
     def plot_fit(self, annotate=None, show_components=None, 
         color='k', composite_fit_color='red', component_fit_color='blue',
@@ -708,6 +708,7 @@ class Specfit(interactive.Interactive):
                 raise AttributeError("The fitter %s does not have an integral implemented" % self.fittype)
 
             if self.Spectrum.xarr.cdelt() is not None:
+                dx = np.median(dx)
                 integ = self.fitter.integral(self.modelpars, **kwargs) * dx
                 if return_error:
                     if mycfg.WARN: print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."

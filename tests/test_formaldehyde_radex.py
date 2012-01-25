@@ -96,20 +96,23 @@ if __name__ == "__main__":
     sp = pyspeckit.Spectra([sp1,sp2])
 
     sp.Registry.add_fitter('formaldehyde_radex',
-            formaldehyde_radex_fitter,4,multisingle='multi')
+            formaldehyde_radex_fitter,4,multisingle='multi',
+            )
     sp.Registry.add_fitter('formaldehyde_radex_sphere',
-            formaldehyde_radex_fitter_sphere,4,multisingle='multi')
+            formaldehyde_radex_fitter_sphere,4,multisingle='multi',
+            )
 
     sp.plotter()
-    sp.specfit(fittype='formaldehyde_radex',multifit=True,guesses=[4,12,options.vguess,0.43],quiet=False)
+    sp.specfit(fittype='formaldehyde_radex',multifit=True,guesses=[4,12,options.vguess,0.43],quiet=False,
+            )
 
     # these are just for pretty plotting:
     sp1.specfit.fitter = sp.specfit.fitter
     sp1.specfit.modelpars = sp.specfit.modelpars
-    sp1.specfit.model = np.interp(sp1.xarr,sp.xarr,sp.specfit.model)
+    sp1.specfit.model = np.interp(sp1.xarr,sp.xarr,sp.specfit.fullmodel)
     sp2.specfit.fitter = sp.specfit.fitter
     sp2.specfit.modelpars = sp.specfit.modelpars
-    sp2.specfit.model = np.interp(sp2.xarr,sp.xarr,sp.specfit.model)
+    sp2.specfit.model = np.interp(sp2.xarr,sp.xarr,sp.specfit.fullmodel)
 
     # previously, xarrs were in GHz to match the fitting scheme
     sp1.xarr.convert_to_unit('km/s')

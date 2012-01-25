@@ -25,4 +25,9 @@ execfile('simple_fit_interactive.py',{'interactive':interactive,'savedir':savedi
 print "*****alberto_example.py*****"
 execfile('alberto_example.py',{'interactive':interactive,'savedir':savedir})
 
+print "*****test_formaldehyde_radex.py*****"
+execfile('test_formaldehyde_radex.py',{'interactive':interactive,'savedir':savedir})
+print "*****test_formaldehyde.py*****"
+execfile('test_formaldehyde.py',{'interactive':interactive,'savedir':savedir})
+
 print "Success!  Or at least, no exceptions..."
