@@ -17,8 +17,9 @@ except ImportError:
 from .. import units
 import numpy as np
 from pyspeckit.specwarnings import warn
+import readcol
 
-def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2,
+def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2, 
         text_reader='simple', atpytype='ascii', **kwargs):
     """
     Attempt to read a 1D spectrum from a text file assuming wavelength as the
@@ -35,12 +36,31 @@ def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2,
 
     kwargs are passed to atpy.Table
     """
-    if text_reader=='simple' or not atpyOK:
+    if text_reader in ('simple','readcol') or not atpyOK:
         if not atpyOK:
             warn("WARNING: atpy not installed; will use simple reader instead.")
         
-        data, error, XAxis, T = simple_txt(filename, xaxcol = xaxcol, 
-            datacol = datacol, errorcol = errorcol, **kwargs)
+        if text_reader == 'simple':
+            data, error, XAxis, T = simple_txt(filename, xaxcol = xaxcol, 
+                datacol = datacol, errorcol = errorcol, **kwargs)
+        elif text_reader == 'readcol':
+            Tlist = readcol.readcol(filename, twod=False, **kwargs)
+            XAxis = units.SpectroscopicAxis(Tlist[xaxcol])
+            data = Tlist[datacol]
+            error = Tlist[errorcol]
+
+            T = dummy_class()
+            Tdict = readcol.readcol(filename, asDict=True, **kwargs)
+
+            T.data = dummy_class()
+            T.data.dtype = dummy_class()
+            T.data.dtype.names = hdr
+            T.columns = {}
+            T.columns[T.data.dtype.names[xaxcol]] = dummy_class()
+            T.columns[T.data.dtype.names[xaxcol]].unit = colunits[xaxcol]
+            T.columns[T.data.dtype.names[datacol]] = dummy_class()
+            T.columns[T.data.dtype.names[datacol]].unit = colunits[datacol]
+
         
     elif text_reader in ('atpy','asciitable'):
         T = atpy.Table(filename, type=atpytype, masked=True, **kwargs)
@@ -66,7 +86,7 @@ def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2,
 
     return data, error, XAxis, T
 
-def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, **kwargs):
+def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, skiplines=0, **kwargs):
     """
     Very simple method for reading columns from ASCII file.
     """
@@ -75,15 +95,15 @@ def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, **kwargs):
     
     colunits = []
     coldata = []
-    for i, line in enumerate(f):
+    for ii, line in enumerate(f):
         
         # Ignore blank lines
         if not line.strip(): continue
         
         # Possibly read in header
         if line.split()[0][0] == '#': 
-            if i == 0: hdr = line[1:].split()
-            if i == 1: colunits = line[1:].split()
+            if (ii) == (0+skiplines): hdr = line[1:].split()
+            if (ii) == (1+skiplines): colunits = line[1:].split()
             
             continue
         

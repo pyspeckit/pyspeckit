@@ -57,6 +57,11 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
                 specaxis="%i" % ii
 
     if hdr.get('NAXIS') == 2:
+        if hdr.get('WAT0_001') is not None:
+            if 'multispec' in hdr.get('WAT0_001'):
+                # treat as an Echelle spectrum from  IRAF
+                return read_echelle(pyfits_hdu, hdr)
+
         if isinstance(specnum,list):
             # allow averaging of multiple spectra (this should be modified
             # - each spectrum should be a Spectrum instance)
@@ -141,3 +146,51 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
 
     return spec,errspec,XAxis,hdr
 
+def read_echelle(pyfits_hdu, hdr):
+    """
+    Read an IRAF Echelle spectrum
+    
+    http://iraf.noao.edu/iraf/ftp/iraf/docs/specwcs.ps.Z
+    """
+
+    WAT1_dict = dict( [s.split('=') for s in hdr.get("WAT1_001").split()] )
+    # hdr.get does not preserve whitespace, but whitespace is ESSENTIAL here!
+    WAT_string = ""
+    ii = 0
+    while (hdr.get("WAT2_%03i" % (ii+1))) is not None:
+        WAT_string += hdr.get("WAT2_%03i" % (ii+1))+" "*(68-len(hdr.get("WAT2_%03i" % (ii+1))))
+        ii += 1
+
+    WAT_list = WAT_string.split("spec")
+
+    if "multi" in WAT_list[0]:
+        WAT_list.pop(0)
+    if ' ' in WAT_list:
+        WAT_list.remove(' ')
+    if '' in WAT_list:
+        WAT_list.remove('')
+
+    x_axes = []
+
+    specaxdict = dict( [ (int(s.split("=")[0]),s.split("=")[1]) for s in WAT_list ] )
+    for specnum, axstring in specaxdict.iteritems():
+        axsplit = axstring.replace('"','').split()
+        if specnum != int(axsplit[0]):
+            raise ValueError("Mismatch in IRAF Echelle specification")
+        num,beam,dtype,crval,cdelt,naxis,z,aplow,aphigh = axsplit[:9]
+        if len(axsplit) > 9:
+            functions = axsplit[9:]
+
+        if int(dtype) == 0:
+            xax = ( float(crval) + float(cdelt) * (np.arange(int(naxis)) + 1) ) / (1.+float(z))
+
+        headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt,
+                'NAXIS1':naxis, 'NAXIS':1, 'REDSHIFT':z,
+                'CTYPE1':'wavelength', 'CUNIT1':WAT1_dict['units']}
+        cards = [pyfits.Card(k,v) for (k,v) in headerkws.iteritems()]
+        header = pyfits.Header(cards)
+
+        xarr = make_axis(xax,header)
+        x_axes.append(xarr)
+    
+    return pyfits_hdu.data, pyfits_hdu.data*0, units.EchelleAxes(x_axes), hdr

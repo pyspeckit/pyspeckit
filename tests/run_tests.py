@@ -31,3 +31,6 @@ print "*****test_formaldehyde.py*****"
 execfile('test_formaldehyde.py',{'interactive':interactive,'savedir':savedir})
 
 print "Success!  Or at least, no exceptions..."
+
+print "Running comparison"
+execfile('compare_images.py')

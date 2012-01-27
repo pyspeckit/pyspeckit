@@ -42,7 +42,10 @@ class CaseInsensitiveDict(dict):
         dict.__setitem__(self, key.lower(), value)
 
     def __contains__(self, key):
-        return dict.__contains__(self, key.lower())
+        if hasattr(key,'lower'):
+            return dict.__contains__(self, key.lower())
+        else: # e.g., None will go here
+            return dict.__contains__(self, key)
 
     def has_key(self, key):
         """ This is deprecated, but we're keeping it around """
@@ -664,6 +667,56 @@ class SpectroscopicAxes(SpectroscopicAxis):
                     ValueError("Axis had wrong units and could not be converted.")
 
         subarr = np.concatenate([ax for ax in axislist])
+        subarr = subarr.view(self)
+        subarr.units = units
+        subarr.xtype = xtype
+        subarr.frame = frame
+        subarr.redshift = redshift
+        subarr.velocity_convention = velocity_convention
+
+        # if all the spectra have the same reference frequency, there is one common refX
+        # else, refX is undefined and velocity transformations should not be done
+        refXs_diff = np.sum([axislist[0].refX != ax.refX for ax in axislist])
+        if refXs_diff > 0:
+            subarr.refX = None
+            subarr.refX_units = None
+        else:
+            subarr.refX = axislist[0].refX
+            subarr.refX_units = axislist[0].refX_units
+
+        return subarr
+
+class EchelleAxes(SpectroscopicAxis):
+    """
+    Counterpart to Spectra: takes a list of SpectroscopicAxis's and
+    stacks them while checking for consistency and maintaining
+    header parameters
+    """
+
+    def __new__(self, axislist, frame='rest', xtype=None, refX=None,
+            redshift=None):
+
+        if type(axislist) is not list:
+            raise TypeError("SpectroscopicAxes must be initiated with a list of SpectroscopicAxis objects")
+
+        units = axislist[0].units
+        xtype = axislist[0].xtype
+        frame = axislist[0].frame
+        redshift = axislist[0].redshift
+        velocity_convention = axislist[0].velocity_convention
+        for ax in axislist:
+            if ax.xtype != xtype:
+                try: 
+                    ax.change_xtype(xtype)
+                except:
+                    ValueError("Axis had wrong xtype and could not be converted.")
+            if ax.units != units or ax.frame != frame:
+                try:
+                    ax.convert_to_unit(units,frame=frame)
+                except:
+                    ValueError("Axis had wrong units and could not be converted.")
+
+        subarr = np.array(axislist)
         subarr = subarr.view(self)
         subarr.units = units
         subarr.xtype = xtype

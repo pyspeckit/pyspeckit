@@ -23,6 +23,14 @@ def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True):
     if hdr.get('TELESCOP') == 'SDSS 2.5-M':   
         xunits = 'angstroms' 
 
+    # IRAF also doesn't use the same standard
+    if xunits is None:
+        if hdr.get('WAT1_001') is not None:
+            pairs = hdr.get('WAT1_001').split()
+            pdict = dict( [s.split("=") for s in pairs] )
+            if 'units' in pdict:
+                xunits = pdict['units']
+
     if hdr.get('REFFREQ'+wcstype):
         refX = hdr.get('REFFREQ'+wcstype)
     elif hdr.get('RESTFREQ'+wcstype):
