@@ -60,7 +60,12 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
         if hdr.get('WAT0_001') is not None:
             if 'multispec' in hdr.get('WAT0_001'):
                 # treat as an Echelle spectrum from  IRAF
-                return read_echelle(pyfits_hdu, hdr)
+                warn("""
+This looks like an Echelle spectrum.   You may want to load it
+using pyspeckit.wrappers.load_IRAF_multispec.  The file will still
+be successfully read if you continue, but the plotting and fitting packages
+will run into errors.""")
+                return read_echelle(pyfits_hdu)
 
         if isinstance(specnum,list):
             # allow averaging of multiple spectra (this should be modified
@@ -146,12 +151,14 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
 
     return spec,errspec,XAxis,hdr
 
-def read_echelle(pyfits_hdu, hdr):
+def read_echelle(pyfits_hdu):
     """
     Read an IRAF Echelle spectrum
     
     http://iraf.noao.edu/iraf/ftp/iraf/docs/specwcs.ps.Z
     """
+
+    hdr = pyfits_hdu.header
 
     WAT1_dict = dict( [s.split('=') for s in hdr.get("WAT1_001").split()] )
     # hdr.get does not preserve whitespace, but whitespace is ESSENTIAL here!

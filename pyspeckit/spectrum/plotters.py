@@ -103,8 +103,9 @@ class Plotter(object):
 
         self.plot(**kwargs)
 
-    def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid', linewidth=0.5,
-            errstyle=None, erralpha=0.2, silent=None, **kwargs):
+    def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid',
+            linewidth=0.5, errstyle=None, erralpha=0.2, silent=None,
+            reset=True, refresh=True, **kwargs):
         """
         Plot the spectrum!
 
@@ -127,6 +128,9 @@ class Plotter(object):
 
         errstyle - can be "fill", which draws partially transparent boxes around the data to show
             the error region, or "bars" which draws standard errorbars
+
+        *reset* [ bool ]
+            Reset the x/y axis limits?
         """
 
         if self.axis is None:
@@ -161,9 +165,10 @@ class Plotter(object):
         if silent is not None:
             self.silent = silent
 
-        self.reset_limits(**reset_kwargs)
+        if reset:
+            self.reset_limits(**reset_kwargs)
 
-        if self.autorefresh: self.refresh()
+        if self.autorefresh and refresh: self.refresh()
     
     def reset_limits(self,xmin=None, xmax=None, ymin=None, ymax=None,
             reset_xlimits=False, reset_ylimits=False, ypeakscale=1.2,

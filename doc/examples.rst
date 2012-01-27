@@ -20,6 +20,7 @@ Examples
    Radio NH3 <example_nh3>
    Radio HCO+ <example_hcop>
    Optical SDSS <example_sdss>
+   Optical Vega Echelle <example_vega_echelle>
 
 
 
