@@ -58,13 +58,15 @@ Features
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :hidden:
 
    Index <self>
    install
    Models & Fitting <models>
-   Base Classes <classes>
    Class Features <features>
    File Readers <readers>
    High-Level Wrappers <wrappers>
+   Examples <examples>
+
+..   Base Classes <classes>
