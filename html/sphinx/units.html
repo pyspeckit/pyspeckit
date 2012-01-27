@@ -152,6 +152,19 @@ xarr.coord_to_x(6000,&#8217;GHz&#8217;) == 5.1 # GHz</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.units.SpectroscopicAxis.make_dxarr">
+<tt class="descname">make_dxarr</tt><big>(</big><em>coordinate_location='center'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.make_dxarr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a &#8220;delta-x&#8221; array corresponding to the X array.</p>
+<dl class="docutils">
+<dt><em>coordinate_location</em> [ &#8216;left&#8217;, &#8216;center&#8217;, &#8216;right&#8217; ]</dt>
+<dd>Does the coordinate mark the left, center, or right edge of the
+pixel?  If &#8216;center&#8217; or &#8216;left&#8217;, the <em>last</em> pixel will have the same
+dx as the second to last pixel.  If right, the <em>first</em> pixel will
+have the same dx as the second pixel.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.umax">
 <tt class="descname">umax</tt><big>(</big><em>units=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.umax" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the maximum value of the SpectroscopicAxis.  If units specified,
@@ -242,7 +255,7 @@ header parameters</p>
 
     <div class="footer">
       &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
-      Last updated on Jan 25, 2012.
+      Last updated on Jan 27, 2012.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2pre.
     <a href="pyspeckit.pdf">PDF version of this document</a>
     <script type="text/javascript">

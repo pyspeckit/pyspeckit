@@ -470,6 +470,8 @@ class SpectroscopicAxis(np.ndarray):
             self.xtype = "Velocity"
         elif unit in frequency_dict:
             self.xtype = "Frequency"
+        elif unit in wavelength_dict:
+            self.xtype = "Wavelength"
 
         self.units = unit
         self.dxarr = np.diff(self)
@@ -520,20 +522,50 @@ class SpectroscopicAxis(np.ndarray):
             center_frequency_units = self.refX_units
 
         if change_xtype:
-            if unit in velocity_dict and conversion_dict[self.xtype] is frequency_dict:
-                newxarr = frequency_to_velocity(self,self.units,
-                        center_frequency=center_frequency,
-                        center_frequency_units=center_frequency_units,
-                        velocity_units=unit, convention=self.velocity_convention)
-                newxtype = "Velocity"
-                newunit = unit
-            elif unit in frequency_dict and conversion_dict[self.xtype] is velocity_dict:
-                newxarr = velocity_to_frequency(self,self.units,
-                        center_frequency=center_frequency,
-                        center_frequency_units=center_frequency_units,
-                        frequency_units=unit, convention=self.velocity_convention)
-                newxtype = "Frequency"
-                newunit = unit
+            if unit in velocity_dict:
+                if conversion_dict[self.xtype] is frequency_dict:
+                    newxarr = frequency_to_velocity(self,self.units,
+                            center_frequency=center_frequency,
+                            center_frequency_units=center_frequency_units,
+                            velocity_units=unit, convention=self.velocity_convention)
+                    newxtype = "Velocity"
+                    newunit = unit
+                elif conversion_dict[self.xtype] is wavelength_dict:
+                    freqx = wavelength_to_frequency(self, self.units) 
+                    newxarr = frequency_to_velocity(freqx, 'GHz',
+                            center_frequency=center_frequency,
+                            center_frequency_units=center_frequency_units,
+                            velocity_units=unit, convention=self.velocity_convention)
+                    newxtype = "Velocity"
+                    newunit = unit
+            elif unit in frequency_dict:
+                if conversion_dict[self.xtype] is velocity_dict:
+                    newxarr = velocity_to_frequency(self,self.units,
+                            center_frequency=center_frequency,
+                            center_frequency_units=center_frequency_units,
+                            frequency_units=unit, convention=self.velocity_convention)
+                    newxtype = "Frequency"
+                    newunit = unit
+                elif conversion_dict[self.xtype] is wavelength_dict:
+                    newxarr = wavelength_to_frequency(self, self.units,
+                            frequency_units=unit)
+                    newxtype = "Frequency"
+                    newunit = unit
+            elif unit in wavelength_dict:
+                if conversion_dict[self.xtype] is velocity_dict:
+                    freqx = velocity_to_frequency(self, self.units,
+                            center_frequency=center_frequency,
+                            center_frequency_units=center_frequency_units,
+                            frequency_units=unit, convention=self.velocity_convention)
+                    newxarr = frequency_to_wavelength(freqx, 'Hz',
+                            wavelength_units=unit)
+                    newxtype = "Wavelength"
+                    newunit = unit
+                elif conversion_dict[self.xtype] is frequency_dict:
+                    newxarr = frequency_to_wavelength(self, self.units,
+                            wavelength_units=unit)
+                    newxtype = "Wavelength"
+                    newunit = unit
             else:
                 warnings.warn("Could not convert from %s to %s" % (self.units,unit))
         else:
@@ -554,6 +586,9 @@ class SpectroscopicAxis(np.ndarray):
         if not change_units and not change_xtype and not change_frame and not quiet:
             if not quiet: print "Already in desired units, X-type, and frame"
 
+        if not quiet:
+            print "Converted to %s (%s)" % (newxtype,newunit)
+
         # this should be implemented but requires a callback to spectrum...
         #if replot:
         #    self.spectrum.plotter(reset_xlimits=True)
@@ -571,6 +606,18 @@ class SpectroscopicAxis(np.ndarray):
             self[:] = self.in_frame(frame)
             self.dxarr = np.diff(self)
             self.frame = frame
+
+    def make_dxarr(self, coordinate_location='center'):
+        """
+        Create a "delta-x" array corresponding to the X array.
+
+        *coordinate_location* [ 'left', 'center', 'right' ]
+            Does the coordinate mark the left, center, or right edge of the
+            pixel?  If 'center' or 'left', the *last* pixel will have the same
+            dx as the second to last pixel.  If right, the *first* pixel will
+            have the same dx as the second pixel.
+
+        """
 
     def in_frame(self, frame):
         """
