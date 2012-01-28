@@ -10,7 +10,7 @@ An `extensible <registration.html>`_ spectroscopic analysis toolkit for astronom
 If you're just getting started, see the `examples page
 <../examples.html>`_.
 
-`Download <../../get/tip.tar.gz>`_ or see :doc:`install`
+`Download <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz>`_ or see :doc:`install`
 
 
 Supported file types and their formats:

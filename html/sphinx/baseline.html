@@ -76,114 +76,8 @@ for baseline fitting.  Enter values as pairs of coordinates.</p>
 a (very low) threshold when fitting the baseline.  Going back and forth between
 <tt class="docutils literal"><span class="pre">baseline(excludefit=True)</span></tt> and <tt class="docutils literal"><span class="pre">specfit()</span></tt> is a nice way to iteratively measure
 the baseline &amp; emission/absorption line components.</p>
-<div class="section" id="module-pyspeckit.spectrum.baseline">
-<span id="api"></span><h2>API<a class="headerlink" href="#module-pyspeckit.spectrum.baseline" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="pyspeckit.spectrum.baseline.Baseline">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.baseline.</tt><tt class="descname">Baseline</tt><big>(</big><em>Spectrum</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class to measure and subtract baselines from spectra.</p>
-<p>While the term &#8216;baseline&#8217; is generally used in the radio to refer to
-broad-band features in a spectrum not necessarily associated with a source,
-in this package it refers to general continuum fitting.  In principle,
-there&#8217;s no reason to separate &#8216;continuum&#8217; and &#8216;spectral feature&#8217; fitting
-into different categories (both require some model, data, and optional
-weights when fitting).  In practice, however, &#8216;continuum&#8217; is frequently
-something to be removed and ignored, while spectral features are the
-desired measurable quantity.  In order to accurately measure spectral
-features, it is necessary to allow baselines of varying complexity.</p>
-<p>The Baseline class has both interactive and command-based data selection
-features.  It can be used to fit both polynomial and power-law continua.
-Blackbody fitting is not yet implemented [12/21/2011].  Baseline fitting is
-a necessary prerequisite for Equivalent Width measurement.</p>
-<p>As you may observe in the comments on this code, this has been one of the
-buggiest and least adequately tested components of pyspeckit.  Bug reports
-are welcome.  (as of 1/15/2012, a major change has probably fixed most of
-the bugs, and the code base is much simpler)</p>
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.__call__">
-<tt class="descname">__call__</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.__call__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fit and remove a polynomial from the spectrum.  
-It will be saved in the variable &#8220;self.basespec&#8221;
-and the fit parameters will be saved in &#8220;self.order&#8221;</p>
-<p>function baseline(spectrum,xarr=None,xmin=None,xmax=None,order=1,quiet=True,exclude=None):
-Subtract a baseline from a spectrum
-If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum</p>
-<p>exclude is a set of start/end indices to ignore when baseline fitting
-(ignored by setting error to infinite in fitting procedure)</p>
-<p>excludefit creates a mask based on the fitted gaussian model (assuming
-that it has a zero-height) using an exclusion level of (exclusionlevel)
-* the smallest gaussian peak that was fit</p>
-<p>fit_plotted_area means that a fit will only be attempted on the region
-currently shown in the plot.  Overridden by interactive=True or
-exclude=&#8217;interactive&#8217;</p>
-<p>if fit_original is set, &#8220;basespec&#8221; is added back to the spectrum before
-fitting so you can run this procedure multiple times without losing
-information</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>Spectrum</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.__init__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="pyspeckit.spectrum.baseline.Baseline.__module__">
-<tt class="descname">__module__</tt><em class="property"> = 'pyspeckit.spectrum.baseline'</em><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.__module__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.annotate">
-<tt class="descname">annotate</tt><big>(</big><em>loc='upper left'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.annotate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.button2action">
-<tt class="descname">button2action</tt><big>(</big><em>event=None</em>, <em>debug=False</em>, <em>subtract=True</em>, <em>fit_original=False</em>, <em>powerlaw=False</em>, <em>baseline_fit_color='orange'</em>, <em>exclude=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.button2action" title="Permalink to this definition">¶</a></dt>
-<dd><p>Do the baseline fitting and save and plot the results.</p>
-<p>Can specify a region to exclude using velocity units or pixel units</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.button3action">
-<tt class="descname">button3action</tt><big>(</big><em>event=None</em>, <em>debug=False</em>, <em>subtract=True</em>, <em>fit_original=False</em>, <em>powerlaw=False</em>, <em>baseline_fit_color='orange'</em>, <em>exclude=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.button3action" title="Permalink to this definition">¶</a></dt>
-<dd><p>Do the baseline fitting and save and plot the results.</p>
-<p>Can specify a region to exclude using velocity units or pixel units</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.clearlegend">
-<tt class="descname">clearlegend</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.clearlegend" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.crop">
-<tt class="descname">crop</tt><big>(</big><em>x1pix</em>, <em>x2pix</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.crop" title="Permalink to this definition">¶</a></dt>
-<dd><p>When spectrum.crop is called, this must be too</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.downsample">
-<tt class="descname">downsample</tt><big>(</big><em>factor</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.downsample" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.plot_baseline">
-<tt class="descname">plot_baseline</tt><big>(</big><em>annotate=True</em>, <em>baseline_fit_color='orange'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.plot_baseline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overplot the baseline fit</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.savefit">
-<tt class="descname">savefit</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.savefit" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pyspeckit.spectrum.baseline.Baseline.unsubtract">
-<tt class="descname">unsubtract</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.unsubtract" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -200,7 +94,7 @@ information</p>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models &amp; Fitting</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="features.html">Class Features</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="">Baseline Fitting</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#module-pyspeckit.spectrum.baseline">API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api">API</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="fitting.html">Model Fitting</a></li>
@@ -237,7 +131,7 @@ information</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Jan 27, 2012.
+      Last updated on Jan 28, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
