@@ -703,6 +703,7 @@ class Specfit(interactive.Interactive):
             dx = np.repeat(np.abs(dx), self.Spectrum.shape())
 
         if direct:
+            self._full_model()
             if len(integration_limits) == 2:
                 x1 = np.argmin(np.abs(integration_limits[0]-self.Spectrum.xarr))
                 x2 = np.argmin(np.abs(integration_limits[1]-self.Spectrum.xarr))
@@ -716,9 +717,9 @@ class Specfit(interactive.Interactive):
                 else:
                     return integ
             elif threshold=='auto':
-                threshold = 0.01 * np.abs( self.model ).max()
+                threshold = 0.01 * np.abs( self.fullmodel ).max()
 
-            OK = np.abs( self.model ) > threshold
+            OK = np.abs( self.fullmodel ) > threshold
             integ = (self.spectofit[OK] * dx[OK]).sum()
             error = np.sqrt((self.errspec[OK]**2 * dx[OK]).sum()/dx[OK].sum())
         else:
@@ -730,7 +731,8 @@ class Specfit(interactive.Interactive):
                 integ = self.fitter.integral(self.modelpars, **kwargs) * dx
                 if return_error:
                     if mycfg.WARN: print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."
-                    OK = np.abs( self.model ) > threshold
+                    self._full_model()
+                    OK = np.abs( self.fullmodel ) > threshold
                     error = np.sqrt((self.errspec[OK]**2).sum()) * dx
                     #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
             else:
