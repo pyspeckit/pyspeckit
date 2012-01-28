@@ -69,7 +69,7 @@ if __name__ == "__main__":
     from PIL import Image
 
     parser=optparse.OptionParser()
-    parser.add_option('--version',help='Version number to compare to',default='449')
+    parser.add_option('--version',help='Version number to compare to',default='497')
     parser.add_option('--currentversion',help='Current version',default='tip')
     parser.set_usage("%prog [options]")
     parser.set_description(
