@@ -23,7 +23,7 @@ You can acquire the code with this clone command::
     python setup.py install
 
 
-Or you can `Download the latest tarball version <../../get/tip.tar.gz>`_, 
+Or you can `Download the latest tarball version <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz>`_, 
 then extract and install using the standard python method::
 
     wget https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz

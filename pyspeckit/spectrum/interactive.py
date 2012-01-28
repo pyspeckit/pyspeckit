@@ -22,7 +22,9 @@ class Interactive(object):
         self.Spectrum = Spectrum
 
         self.interactive_help_message = interactive_help_message
-        self.includemask = self.Spectrum.data.astype('bool') + True
+        # includemask should not be a masked array even if data is
+        # masked arrays are apparently full of bugs...
+        self.includemask = numpy.array( self.Spectrum.data.astype('bool') + True )
         self.xclicks = []
         self.yclicks = []
         self.event_history = []
