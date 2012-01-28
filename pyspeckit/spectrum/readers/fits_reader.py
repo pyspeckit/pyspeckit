@@ -25,8 +25,9 @@ def open_1d_fits(filename,**kwargs):
     return open_1d_pyfits(f[0],**kwargs)
 
 
-def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None, autofix=True,
-        scale_keyword=None, scale_action=operator.div, verbose=False, **kwargs):
+def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
+        autofix=True, scale_keyword=None, scale_action=operator.div,
+        verbose=False, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
@@ -74,8 +75,10 @@ will run into errors.""")
         elif isinstance(specnum,int):
             spec = ma.array(data[specnum,:]).squeeze()
         else:
-            raise TypeError("Specnum is of wrong type (not a list of integers or an integer).  Type: %s" %
-                    str(type(specnum)))
+            raise TypeError(
+                "Specnum is of wrong type (not a list of integers or an integer)." +
+                "  Type: %s" %
+                str(type(specnum)))
         if errspecnum is not None:
             # SDSS supplies weights, not errors.    
             if hdr.get('TELESCOP') == 'SDSS 2.5-M':
@@ -118,11 +121,15 @@ will run into errors.""")
             warn("CLASS file does not have RESTF or RESTFREQ")
         p3 = hdr.get('CRPIX1')
     elif hdr.get(str('CD%s_%s%s' % (specaxis,specaxis,wcstype))):
-        dv,v0,p3 = hdr['CD%s_%s%s' % (specaxis,specaxis,wcstype)],hdr['CRVAL%s%s' % (specaxis,wcstype)],hdr['CRPIX%s%s' % (specaxis,wcstype)]
+        dv = hdr['CD%s_%s%s' % (specaxis,specaxis,wcstype)]
+        v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
+        p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
         hdr.update('CDELT%s' % specaxis,dv)
         if verbose: print "Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
     elif hdr.get(str('CDELT%s%s' % (specaxis,wcstype))):
-        dv,v0,p3 = hdr['CDELT%s%s' % (specaxis,wcstype)],hdr['CRVAL%s%s' % (specaxis,wcstype)],hdr['CRPIX%s%s' % (specaxis,wcstype)]
+        dv = hdr['CDELT%s%s' % (specaxis,wcstype)]
+        v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
+        p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
         if verbose: print "Using the FITS CDELT value.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
     elif len(data.shape) > 1:
         if verbose: print "No CDELT or CD in header.  Assuming 2D input with 1st line representing the spectral axis."
@@ -133,7 +140,9 @@ will run into errors.""")
             if data.shape[0] > 2:
                 errspec = data[2,:]
         else:
-            raise TypeError("Don't know what type of FITS file you've input; its header is not FITS compliant and it doesn't look like it was written by pyspeckit.")
+            raise TypeError("Don't know what type of FITS file you've input; "+
+                "its header is not FITS compliant and it doesn't look like it "+
+                "was written by pyspeckit.")
 
     # Deal with logarithmic wavelength binning if necessary
     if xarr is None:
@@ -165,7 +174,8 @@ def read_echelle(pyfits_hdu):
     WAT_string = ""
     ii = 0
     while (hdr.get("WAT2_%03i" % (ii+1))) is not None:
-        WAT_string += hdr.get("WAT2_%03i" % (ii+1))+" "*(68-len(hdr.get("WAT2_%03i" % (ii+1))))
+        WAT_string += (hdr.get("WAT2_%03i" % (ii+1))
+                + " "*(68-len(hdr.get("WAT2_%03i" % (ii+1)))))
         ii += 1
 
     WAT_list = WAT_string.split("spec")

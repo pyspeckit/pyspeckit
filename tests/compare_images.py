@@ -1,5 +1,6 @@
 import ImageChops
 import numpy
+import pylab
 
 def equal(im1, im2):
     return ImageChops.difference(im1, im2).getbbox() is None
@@ -10,6 +11,51 @@ def rmsdiff(im1, im2):
     diffim = ImageChops.difference(im1, im2)
 
     return (numpy.array(diffim)**2).sum()**0.5
+
+def plot_difference_image(im1, im2, savename=None):
+    """
+    In 3 subplots, show the input, output, and difference images
+    """
+    im1arr = numpy.array(im1) 
+    im2arr = numpy.array(im2) 
+    diffim = ImageChops.difference(im1,im2)
+    diffarr = numpy.array(diffim)
+    xmin,ymin,xmax,ymax = diffim.getbbox()
+    ignore_diff = ( (diffarr == 0).sum(axis=2) == 4 )[ymin:ymax,xmin:xmax]
+
+    pylab.figure(1)
+    pylab.clf()
+    pylab.subplot(2,3,1)
+    pylab.imshow(im1arr[ymin:ymax,xmin:xmax,:])
+    pylab.subplot(2,3,2)
+    pylab.imshow(im2arr[ymin:ymax,xmin:xmax,:])
+    pylab.subplot(2,3,3)
+    diffarr[ymin:ymax,xmin:xmax,3] = 255*(diffarr[ymin:ymax,xmin:xmax,:3].sum(axis=2) > 0)
+    pylab.imshow(diffarr[ymin:ymax,xmin:xmax,:])
+    
+    pylab.subplot(2,3,4)
+    ignore_im1 = ( (im1arr == 255).sum(axis=2) == 4 )[ymin:ymax,xmin:xmax]
+    #pylab.hist(im1arr[ymin:ymax,xmin:xmax,3][True-ignore_im1],edgecolor='black',color='black',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+    pylab.hist(im1arr[ymin:ymax,xmin:xmax,0][True-ignore_im1],edgecolor='red',color='red',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+    pylab.hist(im1arr[ymin:ymax,xmin:xmax,1][True-ignore_im1],edgecolor='green',color='green',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+    pylab.hist(im1arr[ymin:ymax,xmin:xmax,2][True-ignore_im1],edgecolor='blue',color='blue',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+
+    pylab.subplot(2,3,5)
+    ignore_im2 = ( (im2arr == 255).sum(axis=2) == 4 )[ymin:ymax,xmin:xmax]
+    #pylab.hist(im2arr[ymin:ymax,xmin:xmax,3][True-ignore_im2],edgecolor='black',color='black',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+    pylab.hist(im2arr[ymin:ymax,xmin:xmax,0][True-ignore_im2],edgecolor='red',color='red',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+    pylab.hist(im2arr[ymin:ymax,xmin:xmax,1][True-ignore_im2],edgecolor='green',color='green',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+    pylab.hist(im2arr[ymin:ymax,xmin:xmax,2][True-ignore_im2],edgecolor='blue',color='blue',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+
+    pylab.subplot(2,3,6)
+    #pylab.hist((diffarr)[ymin:ymax,xmin:xmax,3][True-ignore_diff],edgecolor='black',color='black',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+    pylab.hist((diffarr)[ymin:ymax,xmin:xmax,0][True-ignore_diff],edgecolor='red',color='red',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+    pylab.hist((diffarr)[ymin:ymax,xmin:xmax,1][True-ignore_diff],edgecolor='green',color='green',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+    pylab.hist((diffarr)[ymin:ymax,xmin:xmax,2][True-ignore_diff],edgecolor='blue',color='blue',alpha=0.25,bins=pylab.linspace(1,254,33),histtype='stepfilled')
+
+    if savename is not None:
+        pylab.savefig(savename)
+
 
 if __name__ == "__main__":
     import optparse
@@ -42,7 +88,10 @@ if __name__ == "__main__":
             im1 = Image.open(dir1+fn)
             im2 = Image.open(dir2+fn)
             if not equal(im1,im2):
-                print "%s differs from version %s to %s.  RMS: %f" % (fn, options.version, currentversion, rmsdiff(im1,im2))
+                RMS = rmsdiff(im1,im2)
+                print "%s differs from version %s to %s.  RMS: %f" % (fn, options.version, currentversion, RMS)
+                if RMS > 1000:
+                    plot_difference_image(im1,im2,dir2+fn.replace(".png","_compare.png"))
             else:
                 print "%s OK in both %s and %s" % (fn, options.version, currentversion)
         else:
