@@ -15,18 +15,27 @@
 
 {%- block footer %}
     <div class="footer">
-    {%- if hasdoc('copyright') %}
+    <table width=800><tr>
+            <td align=left>{%- if hasdoc('copyright') %}
       {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
     {%- else %}
       {% trans copyright=copyright|e %}&copy; Copyright {{ copyright }}.{% endtrans %}
     {%- endif %}
+    </td>
+    <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
+    </tr>
+    <tr><td>
     {%- if last_updated %}
       {% trans last_updated=last_updated|e %}Last updated on {{ last_updated }}.{% endtrans %}
     {%- endif %}
+    </td><td align=right>
     {%- if show_sphinx %}
-      {% trans sphinx_version=sphinx_version|e %}Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> {{ sphinx_version }}.{% endtrans %}
+      {% trans sphinx_version=sphinx_version|e %}Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.{% endtrans %}
     {%- endif %}
-    <a href="pyspeckit.pdf">PDF version of this document</a>
+    </td>
+    <tr>
+            <td align=left><a href="pyspeckit.pdf">PDF version of this document</a></td>
+    </tr></table>
     <script type="text/javascript">
 
       var _gaq = _gaq || [];
