@@ -15,6 +15,12 @@ def rmsdiff(im1, im2):
 def plot_difference_image(im1, im2, savename=None):
     """
     In 3 subplots, show the input, output, and difference images
+
+    For histogram normalization reasons, the values 0 and 255 are excluded.
+    The 'alpha' map is also excluded.  Ideally, we'd use log=True in these, but
+    there's a bug in matplotlib
+    (https://github.com/matplotlib/matplotlib/issues/196) that makes this too
+    ugly to be useful
     """
     im1arr = numpy.array(im1) 
     im2arr = numpy.array(im2) 
