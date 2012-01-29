@@ -68,7 +68,9 @@
 <h1>PySpecKit<a class="headerlink" href="#pyspeckit" title="Permalink to this headline">¶</a></h1>
 <p>An <a class="reference external" href="registration.html">extensible</a> spectroscopic analysis toolkit for astronomy.</p>
 <p>If you&#8217;re just getting started, see the <a class="reference external" href="../examples.html">examples page</a>.</p>
-<p><a class="reference external" href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz">Download</a> or see <a class="reference internal" href="install.html"><em>Installation and Requirements</em></a></p>
+<p><a class="reference external" href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/January2012_Prerelease.tar.gz">Download the January 2012 version</a>,
+the latest commit <a class="reference external" href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz">https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz</a> or see <a class="reference internal" href="install.html"><em>Installation and Requirements</em></a> or see
+our <a class="reference external" href="http://pypi.python.org/pypi/pyspeckit">pypi entry</a>.</p>
 <p>Supported file types and their formats:</p>
 <blockquote>
 <div><ul class="simple">
@@ -82,13 +84,13 @@
 <h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><a class="reference internal" href="spectrum.html"><em>spectrum</em></a> can read a variety of individual spectra types<ul>
-<li><tt class="xref py py-class docutils literal"><span class="pre">Spectrum</span></tt> The Spectrum class, which is the core
+<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectrum" title="pyspeckit.spectrum.Spectrum"><tt class="xref py py-class docutils literal"><span class="pre">Spectrum</span></tt></a> The Spectrum class, which is the core
 of pyspeckit.  The __init__ procedure opens a spectrum file.</li>
-<li><tt class="xref py py-class docutils literal"><span class="pre">Spectra</span></tt> A group of Spectrums.  Generally for
+<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectra" title="pyspeckit.spectrum.Spectra"><tt class="xref py py-class docutils literal"><span class="pre">Spectra</span></tt></a> A group of Spectrums.  Generally for
 when you have multiple wavelength observations you want to stitch together
 (e.g., two filterbanks on a heterodyne system, or the red/blue spectra from
 a multi-band spectrometer like the Double Imaging Spectrograph)</li>
-<li><tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt> An Observation Block - multiple
+<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.ObsBlock" title="pyspeckit.spectrum.ObsBlock"><tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt></a> An Observation Block - multiple
 spectra of different objects or different times covering the same
 wavelength range</li>
 </ul>

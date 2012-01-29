@@ -94,8 +94,88 @@ the semi-private method</p>
 <span class="n">sp</span><span class="o">.</span><span class="n">_register_fitters</span><span class="p">(</span><span class="n">registry</span><span class="o">=</span><span class="n">MyRegistry</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="section" id="api">
-<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyspeckit.spectrum.__init__">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-pyspeckit.spectrum.__init__" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyspeckit.spectrum.__init__.register_reader">
+<tt class="descclassname">pyspeckit.spectrum.__init__.</tt><tt class="descname">register_reader</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.__init__.register_reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a reader function.</p>
+<p>Required Arguments:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>filetype</em>: [ string ]</dt>
+<dd>The file type name</dd>
+<dt><em>function</em>: [ function ]</dt>
+<dd>The reader function.  Should take a filename as input
+and return an X-axis object (see units.py), a spectrum,
+an error spectrum (initialize it to 0&#8217;s if empty), and a
+pyfits header instance</dd>
+<dt><em>suffix</em>: [ int ]</dt>
+<dd>What suffix should the file have?</dd>
+</dl>
+</div></blockquote>
+<p>Optional Keyword Arguments:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.spectrum.__init__.register_writer">
+<tt class="descclassname">pyspeckit.spectrum.__init__.</tt><tt class="descname">register_writer</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.__init__.register_writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a writer function.</p>
+<p>Required Arguments:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>filetype</em>: [ string ]</dt>
+<dd>The file type name</dd>
+<dt><em>function</em>: [ function ]</dt>
+<dd>The writer function.  Will be an attribute of Spectrum
+object, and called as spectrum.Spectrum.write_hdf5(), 
+for example.</dd>
+<dt><em>suffix</em>: [ int ]</dt>
+<dd>What suffix should the file have?</dd>
+</dl>
+</div></blockquote>
+<p>Optional Keyword Arguments:</p>
+</dd></dl>
+
+<span class="target" id="module-pyspeckit.spectrum.fitters"></span><dl class="class">
+<dt id="pyspeckit.spectrum.fitters.Registry">
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.fitters.</tt><tt class="descname">Registry</tt><a class="headerlink" href="#pyspeckit.spectrum.fitters.Registry" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is a simple wrapper to prevent fitter properties from being globals</p>
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Registry.add_fitter">
+<tt class="descname">add_fitter</tt><big>(</big><em>name</em>, <em>function</em>, <em>npars</em>, <em>multisingle='single'</em>, <em>override=False</em>, <em>key=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Registry.add_fitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a fitter function.</p>
+<p>Required Arguments:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>name</em>: [ string ]</dt>
+<dd>The fit function name.</dd>
+<dt><em>function</em>: [ function ]</dt>
+<dd>The fitter function.  Single-fitters should take npars + 1 input
+parameters, where the +1 is for a 0th order baseline fit.  They
+should accept an X-axis and data and standard fitting-function
+inputs (see, e.g., gaussfitter).  Multi-fitters should take N *
+npars, but should also operate on X-axis and data arguments.</dd>
+<dt><em>npars</em>: [ int ]</dt>
+<dd>How many parameters does the function being fit accept?</dd>
+</dl>
+</div></blockquote>
+<p>Optional Keyword Arguments:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>multisingle</em>: [ &#8216;multi&#8217; | &#8216;single&#8217; ] </dt>
+<dd>Is the function a single-function fitter (with a background), or
+does it allow N copies of the fitting function?</dd>
+<dt><em>override</em>: [ True | False ]</dt>
+<dd>Whether to override any existing type if already present.</dd>
+<dt><em>key</em>: [ char ]</dt>
+<dd>Key to select the fitter in interactive mode</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -116,7 +196,7 @@ the semi-private method</p>
 <li class="toctree-l2"><a class="reference internal" href="measurements.html">Measurements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="units.html">Units</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="">Registration</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#api">API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyspeckit.spectrum.__init__">API</a></li>
 </ul>
 </li>
 </ul>
