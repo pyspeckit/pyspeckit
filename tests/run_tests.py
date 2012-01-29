@@ -6,11 +6,11 @@ import os
 if not os.path.exists(savedir):
     os.mkdir(savedir)
 
-import matplotlib
+from matplotlib.pyplot import ion,ioff
 if interactive:
-    matplotlib.ion()
+    ion()
 else:
-    matplotlib.ioff()
+    ioff()
 
 print "*****test_fits.py*****"
 execfile('test_fits.py',{'interactive':interactive,'savedir':savedir})
