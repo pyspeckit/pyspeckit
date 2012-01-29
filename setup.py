@@ -6,8 +6,19 @@ from distutils.core import setup
 with open('README.txt') as file:
     long_description = file.read()
 
+version_base="0.1"
+
+if os.path.exists(".hg"):
+    try:
+        import subprocess
+        currentversion = subprocess.Popen(["hg","id","--num"],stdout=subprocess.PIPE).communicate()[0].strip().strip("+")
+        version = version_base+"hg"+currentversion
+    except:
+        # is this bad practice?  I don't care if it's an import error, attribute error, or value error...
+        version = version_base
+
 setup(name='pyspeckit',
-      version='0.1',
+      version=version,
       description='Toolkit for fitting and manipulating spectroscopic data in python',
       long_description=long_description,
       author=['Adam Ginsburg','Jordan Mirocha'],
@@ -21,6 +32,13 @@ setup(name='pyspeckit',
       package_dir={'pyspeckit.spectrum.speclines':'pyspeckit/spectrum/speclines',
           'mpfit':'mpfit'}, 
       package_data={'pyspeckit.spectrum.speclines':['splatalogue.csv']},
+      requires=['matplotib','numpy'],
+      classifiers=[
+                   "Development Status :: 3 - Alpha",
+                   "Programming Language :: Python",
+                   "License :: OSI Approved :: MIT License",
+                  ],
+      
      )
 
 # Copy default config file to directory $HOME/.pyspeckit

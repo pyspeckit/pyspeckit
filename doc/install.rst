@@ -15,6 +15,9 @@ to enable `file reading <readers>`_
 * `atpy <http://atpy.github.com/>`_ (which depends on `asciitable <http://cxc.harvard.edu/contrib/asciitable/>`_ [`github link <https://github.com/taldcroft/asciitable>`_] )
 * `hdf5 <http://www.pytables.org/moin>`_
 
+If you have pip (see <http://pypi.python.org/pypi/pyspeckit>), you can install with::
+
+    pip install pyspeckit
 
 You can acquire the code with this clone command::
 

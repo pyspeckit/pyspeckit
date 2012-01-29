@@ -11,7 +11,8 @@ If you're just getting started, see the `examples page
 <../examples.html>`_.
 
 `Download the January 2012 version <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/January2012_Prerelease.tar.gz>`_,
-the latest commit `<https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz>`_ or see :doc:`install`
+the latest commit `<https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz>`_ or see :doc:`install` or see
+our `pypi entry <http://pypi.python.org/pypi/pyspeckit>`_.
 
 
 Supported file types and their formats:
