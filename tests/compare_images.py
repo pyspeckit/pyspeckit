@@ -33,11 +33,14 @@ def plot_difference_image(im1, im2, savename=None):
     pylab.clf()
     pylab.subplot(2,3,1)
     pylab.imshow(im1arr[ymin:ymax,xmin:xmax,:])
+    pylab.gca().invert_yaxis()
     pylab.subplot(2,3,2)
     pylab.imshow(im2arr[ymin:ymax,xmin:xmax,:])
+    pylab.gca().invert_yaxis()
     pylab.subplot(2,3,3)
     diffarr[ymin:ymax,xmin:xmax,3] = 255*(diffarr[ymin:ymax,xmin:xmax,:3].sum(axis=2) > 0)
     pylab.imshow(diffarr[ymin:ymax,xmin:xmax,:])
+    pylab.gca().invert_yaxis()
     
     pylab.subplot(2,3,4)
     ignore_im1 = ( (im1arr == 255).sum(axis=2) == 4 )[ymin:ymax,xmin:xmax]
