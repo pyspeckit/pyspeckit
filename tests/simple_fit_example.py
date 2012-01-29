@@ -18,7 +18,9 @@ spec.plotter()
 # Subtract a baseline (the data is only 'mostly' reduced)
 spec.baseline()
 # Fit a gaussian.  We know it will be an emission line, so we force a positive guess
-spec.specfit(negamp=False)
+# nsigcut_moments tells the moment analysis tool to only use high-significance
+# data points to estimate the width of the line (it's tricky)
+spec.specfit(negamp=False, nsigcut_moments=2)
 # Note that the errors on the fits are larger than the fitted parameters.
 # That's because this spectrum did not have an error assigned to it.  
 # Let's use the residuals:

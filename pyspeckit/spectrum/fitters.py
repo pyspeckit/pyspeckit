@@ -380,7 +380,7 @@ class Specfit(interactive.Interactive):
             negamp=None, fittype=None, renormalize='auto', color='k',
             composite_fit_color='red', component_fit_color='blue', lw=1.0,
             composite_lw=1.0, component_lw=1.0, show_components=None,
-            debug=False, **kwargs):
+            debug=False, nsigcut_moments=None, **kwargs):
         """
         Fit a single peak (plus a background)
 
@@ -395,6 +395,7 @@ class Specfit(interactive.Interactive):
             singlefitters dict
         renormalize - if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
             closer to 1 (scales by the median) so that the fit converges better
+        nsigcut_moments - pass to moment guesser; can do a sigma cut for moment guessing
         """
         self.npeaks = 1
         self.auto = True
@@ -405,7 +406,7 @@ class Specfit(interactive.Interactive):
             self.guesses = self.Registry.singlefitters[self.fittype].moments(
                     self.Spectrum.xarr[self.xmin:self.xmax],
                     self.spectofit[self.xmin:self.xmax], vheight=vheight,
-                    negamp=negamp, **kwargs)
+                    negamp=negamp, nsigcut=nsigcut_moments, **kwargs)
             #if vheight is False: self.guesses = [height]+self.guesses
         else:
             if negamp: self.guesses = [height,-1,0,1]
