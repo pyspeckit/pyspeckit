@@ -1,8 +1,6 @@
 import pyspeckit
 import matplotlib
 
-if not 'interactive' in globals():
-    interactive=False
 if not 'savedir' in globals():
     savedir = ''
 

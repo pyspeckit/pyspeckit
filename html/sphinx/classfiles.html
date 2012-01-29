@@ -72,7 +72,7 @@
 developers have stated that the GILDAS file format is private and will remain so,
 and therefore there are no guarantees that the CLASS reader will work for your
 file.</p>
-<p>Nonetheless, if you want to develop in python instead of SIC, the <tt class="xref py py-mod docutils literal"><span class="pre">read_class</span></tt>
+<p>Nonetheless, if you want to develop in python instead of SIC, the <a class="reference internal" href="#module-pyspeckit.spectrum.readers.read_class" title="pyspeckit.spectrum.readers.read_class"><tt class="xref py py-mod docutils literal"><span class="pre">read_class</span></tt></a>
 module is probably the best way to access CLASS data.</p>
 <p>The <a class="reference external" href="http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node56.html">CLASS file specification</a> is incomplete,
 so much of the data reading is hacked together.  The code style is based off of
@@ -83,7 +83,7 @@ they are just specified as such for clarity</p>
     <span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;N2HP(3-2)&#39;</span><span class="p">,</span><span class="s">&#39;N2H+(3-2)&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>This will generate a <tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt> from all data tagged with the &#8216;telescope&#8217;
+<p>This will generate a <a class="reference internal" href="spectrum.html#pyspeckit.spectrum.ObsBlock" title="pyspeckit.spectrum.ObsBlock"><tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt></a> from all data tagged with the &#8216;telescope&#8217;
 flags listed and lines matching either of those above.  The data selection is equivalent to a combination of</p>
 <div class="highlight-python"><pre>find /telescope SMT-F1M-HU
 find /telescope SMT-F1M-VU
@@ -93,8 +93,39 @@ find /line N2H+(3-2)</pre>
 <p>ALL of the data matching those criteria will be included in an ObsBlock.  They
 will then be accessible through the ObsBlock&#8217;s <cite>speclist</cite> attribute, or just by
 indexing the ObsBlock directly.</p>
-<div class="section" id="an-essentially-undocumented-api">
-<h2>An essentially undocumented API<a class="headerlink" href="#an-essentially-undocumented-api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyspeckit.spectrum.readers.read_class">
+<span id="an-essentially-undocumented-api"></span><h2>An essentially undocumented API<a class="headerlink" href="#module-pyspeckit.spectrum.readers.read_class" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gildas-class-file-reader">
+<h3>GILDAS CLASS file reader<a class="headerlink" href="#gildas-class-file-reader" title="Permalink to this headline">¶</a></h3>
+<p>Read a CLASS file into an <a class="reference internal" href="spectrum.html#pyspeckit.spectrum.ObsBlock" title="pyspeckit.spectrum.ObsBlock"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.ObsBlock</span></tt></a></p>
+<dl class="function">
+<dt id="pyspeckit.spectrum.readers.read_class.class_to_obsblocks">
+<tt class="descclassname">pyspeckit.spectrum.readers.read_class.</tt><tt class="descname">class_to_obsblocks</tt><big>(</big><em>*arg</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.read_class.class_to_obsblocks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an entire CLASS observing session into a list of ObsBlocks based on
+matches to the &#8216;telescope&#8217; and &#8216;line&#8217; names</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.spectrum.readers.read_class.class_to_spectra">
+<tt class="descclassname">pyspeckit.spectrum.readers.read_class.</tt><tt class="descname">class_to_spectra</tt><big>(</big><em>*arg</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.read_class.class_to_spectra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load each individual spectrum within a CLASS file into a list of Spectrum
+objects</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.spectrum.readers.read_class.make_axis">
+<tt class="descclassname">pyspeckit.spectrum.readers.read_class.</tt><tt class="descname">make_axis</tt><big>(</big><em>header</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.read_class.make_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <a class="reference internal" href="units.html#pyspeckit.spectrum.units.SpectroscopicAxis" title="pyspeckit.spectrum.units.SpectroscopicAxis"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.units.SpectroscopicAxis</span></tt></a> from the CLASS &#8220;header&#8221;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.spectrum.readers.read_class.read_class">
+<tt class="descclassname">pyspeckit.spectrum.readers.read_class.</tt><tt class="descname">read_class</tt><big>(</big><em>*arg</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.read_class.read_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>A hacked-together method to read a binary CLASS file.  It is strongly dependent on the incomplete
+<a class="reference external" href="http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html">GILDAS CLASS file type Specification</a></p>
+</dd></dl>
+
+</div>
 </div>
 </div>
 
@@ -115,7 +146,7 @@ indexing the ObsBlock directly.</p>
 <li class="toctree-l2"><a class="reference internal" href="fitsfiles.html">FITS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hdf5files.html">hdf5</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="">Gildas CLASS files</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#an-essentially-undocumented-api">An essentially undocumented API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyspeckit.spectrum.readers.read_class">An essentially undocumented API</a></li>
 </ul>
 </li>
 </ul>

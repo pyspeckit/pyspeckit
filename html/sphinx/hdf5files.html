@@ -69,8 +69,20 @@
   <div class="section" id="hdf5">
 <h1>hdf5<a class="headerlink" href="#hdf5" title="Permalink to this headline">¶</a></h1>
 <p>(work in progress)</p>
-<div class="section" id="api">
-<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyspeckit.spectrum.readers.hdf5_reader">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-pyspeckit.spectrum.readers.hdf5_reader" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pyspeckit-hdf5-reader">
+<h3>PySpecKit HDF5 Reader<a class="headerlink" href="#pyspeckit-hdf5-reader" title="Permalink to this headline">¶</a></h3>
+<p>Routines for reading in spectra from HDF5 files.</p>
+<p>Note: Current no routines for parsing HDF5 headers in classes.py.</p>
+<dl class="function">
+<dt id="pyspeckit.spectrum.readers.hdf5_reader.open_hdf5">
+<tt class="descclassname">pyspeckit.spectrum.readers.hdf5_reader.</tt><tt class="descname">open_hdf5</tt><big>(</big><em>filename</em>, <em>xaxkey='xarr'</em>, <em>datakey='data'</em>, <em>errkey='error'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.hdf5_reader.open_hdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>This reader expects three datasets to exist in the hdf5 file &#8216;filename&#8217;: 
+&#8216;xarr&#8217;, &#8216;data&#8217;, and &#8216;error&#8217;, by default.  Can specify other dataset names.</p>
+</dd></dl>
+
+</div>
 </div>
 </div>
 
@@ -90,7 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="txtfiles.html">Plain Text</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fitsfiles.html">FITS</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="">hdf5</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#api">API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyspeckit.spectrum.readers.hdf5_reader">API</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="classfiles.html">Gildas CLASS files</a></li>
