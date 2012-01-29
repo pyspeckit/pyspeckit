@@ -354,7 +354,7 @@ class Specfit(interactive.Interactive):
             mpperr[self.fitter.npars*ii] *= scalefactor
         self.modelpars = mpp.tolist()
         self.modelerrs = mpperr.tolist()
-        self.parinfo = self.fitter.mp.parinfo_in
+        self.parinfo = self.fitter.parinfo
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate, color=color,
@@ -446,6 +446,7 @@ class Specfit(interactive.Interactive):
         self.errspec   *= scalefactor
         
         self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
+        self.parinfo = self.fitter.parinfo
 
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
@@ -506,7 +507,8 @@ class Specfit(interactive.Interactive):
         kwargs are passed to the fitter's components attribute
         """
         if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
-            plot_offset = self.specplotter.offset+self.Spectrum.baseline.basespec
+            # don't display baseline if it's included in the fit
+            plot_offset = self.specplotter.offset+(self.Spectrum.baseline.basespec * (True-self.vheight))
         else:
             plot_offset = self.specplotter.offset
 
