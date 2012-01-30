@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os, shutil
+import setuptools
 from distutils.core import setup
 
 with open('README.txt') as file:

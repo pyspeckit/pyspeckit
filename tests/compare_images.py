@@ -72,7 +72,7 @@ if __name__ == "__main__":
     from PIL import Image
 
     parser=optparse.OptionParser()
-    parser.add_option('--version',help='Version number to compare to',default='500')
+    parser.add_option('--version',help='Version number to compare to',default='521')
     parser.add_option('--currentversion',help='Current version',default='tip')
     parser.set_usage("%prog [options]")
     parser.set_description(
@@ -88,10 +88,14 @@ if __name__ == "__main__":
     
     dir1 = "tests_%s/" % (options.version)
     dir2 = "tests_%s/" % (currentversion)
-    filelist1 = [s.split('/')[1] for s in glob.glob("%s*png" % dir1)]
-    filelist2 = [s.split('/')[1] for s in glob.glob("%s*png" % dir2)]
+    filelist1 = [s.split('/')[1] for s in glob.glob("%s*png" % dir1) if "compare.png" not in s]
+    filelist2 = [s.split('/')[1] for s in glob.glob("%s*png" % dir2) if "compare.png" not in s]
 
     print "Comparing %i files in %s to %i files in %s" % (len(filelist1), options.version, len(filelist2), currentversion)
+    if int(options.version) < 521:
+        print "WARNING: Before version 521, the figures may have been displayed\
+        in an interactive (ion()) window, which made them smaller, resulting in\
+        big differences."
     for fn in filelist1:
         if fn in filelist2:
             im1 = Image.open(dir1+fn)
