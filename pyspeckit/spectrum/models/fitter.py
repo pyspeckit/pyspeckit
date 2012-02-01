@@ -18,15 +18,7 @@ class SimpleFitter(object):
         """
         Get the spectral moments from the moments package
         """
-        if hasattr(self,'npars') and self.npars == 3:
-            return moments(*args,**kwargs)
-        elif hasattr(self,'npars') and self.npars > 3:
-            m = moments(*args,**kwargs)  
-            n_extra_pars = self.npars - len(m) + self.vheight
-            return m + ([0] * n_extra_pars)
-        else:
-            # this may raise an exception itself if npars not defined...
-            raise ValueError('Moments not defined for fitter with npars=%i' % self.npars)
+        return moments(*args,**kwargs)
 
 
 def vheightmodel(zeroheightmodel):

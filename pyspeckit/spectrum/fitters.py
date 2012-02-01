@@ -395,8 +395,6 @@ class Specfit(interactive.Interactive):
             if negamp: self.guesses = [height,-1,0,1]
             else:  self.guesses = [height,1,0,1]
 
-        print self.fittype,self.guesses
-
         NP = self.Registry.singlefitters[self.fittype].default_npars
         if NP > 3:
             for ii in xrange(3,NP):
@@ -440,7 +438,7 @@ class Specfit(interactive.Interactive):
         self.dof  = self.xmax-self.xmin-self.npeaks*self.Registry.npars[self.fittype]-vheight
         self.vheight=vheight
         if vheight: 
-            self.Spectrum.baseline.baselinepars = mpp[:1]*scalefactor # first item in list form
+            self.Spectrum.baseline.baselinepars = [mpp[0]*scalefactor] # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]*scalefactor
             self.model = model*scalefactor - mpp[0]*scalefactor
             # I removed this recently for some reason, but more code depends on it being in place
@@ -462,9 +460,11 @@ class Specfit(interactive.Interactive):
                 show_components=show_components, **kwargs)
 
         # make sure the full model is populated
-        self._full_model()
+        self._full_model(debug=debug)
 
-    def _full_model(self, **kwargs):
+        if debug: print "Guesses, fits after vheight removal: ",self.guesses, mpp
+
+    def _full_model(self, debug=False, **kwargs):
         """
         Compute the model for the whole spectrum
         """
@@ -476,6 +476,7 @@ class Specfit(interactive.Interactive):
                 mpp = [0] + self.modelpars
         else:
             mpp = self.modelpars
+        if debug: print "_full_model mpp: ",mpp
         self.fullmodel = self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(self.Spectrum.xarr)
                 
     def plot_fit(self, annotate=None, show_components=None, 
