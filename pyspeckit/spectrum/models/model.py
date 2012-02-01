@@ -344,7 +344,7 @@ class SpectralModel(fitter.SimpleFitter):
         labels = tuple(mpcb.flatten(label_list))
         return labels
 
-    def components(self, xarr, pars):
+    def components(self, xarr, pars, **kwargs):
         """
         Return a numpy ndarray of the independent components of the fits
         """
