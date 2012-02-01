@@ -338,13 +338,13 @@ class SpectralModel(fitter.SimpleFitter):
             svn = svn * self.npeaks
         label_list = [(
                 "$%s(%i)$=%8s $\\pm$ %8s" % (svn[ii+jj*self.npars],jj,
-                Decimal("%g" % self.mpp[ii+jj*self.npars]).quantize(Decimal("%0.2g" % (min(self.mpp[ii+jj*self.npars],self.mpperr[ii+jj*self.npars])))),
-                Decimal("%g" % self.mpperr[ii+jj*self.npars]).quantize(Decimal("%0.2g" % (self.mpperr[ii+jj*self.npars]))),)
+                Decimal("%g" % self.mpp[ii+jj*self.npars+self.vheight]).quantize(Decimal("%0.2g" % (min(self.mpp[ii+jj*self.npars+self.vheight],self.mpperr[ii+jj*self.npars+self.vheight])))),
+                Decimal("%g" % self.mpperr[ii+jj*self.npars+self.vheight]).quantize(Decimal("%0.2g" % (self.mpperr[ii+jj*self.npars+self.vheight]))),)
                           ) for jj in range(self.npeaks) for ii in range(self.npars)]
         labels = tuple(mpcb.flatten(label_list))
         return labels
 
-    def components(self, xarr, pars):
+    def components(self, xarr, pars, **kwargs):
         """
         Return a numpy ndarray of the independent components of the fits
         """

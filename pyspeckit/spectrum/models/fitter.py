@@ -15,6 +15,9 @@ class SimpleFitter(object):
         pass
 
     def moments(self, *args, **kwargs):
+        """
+        Get the spectral moments from the moments package
+        """
         return moments(*args,**kwargs)
 
 

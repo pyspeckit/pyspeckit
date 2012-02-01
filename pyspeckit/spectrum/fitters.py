@@ -8,6 +8,7 @@ import units
 import models
 from pyspeckit.specwarnings import warn
 import interactive
+import inspect
 
 class Registry(object):
     """
@@ -92,6 +93,8 @@ default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='multi
 default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
 default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
 default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
+default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(multisingle='multi'),3,multisingle='multi',key='L')
+default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(multisingle='single'),3,multisingle='single')
 default_Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5,multisingle='multi')
 default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
 
@@ -132,8 +135,7 @@ class Specfit(interactive.Interactive):
     def __call__(self, interactive=False, usemoments=True,
             clear_all_connections=True, debug=False, multifit=False,
             guesses=None, save=True, fittype='gaussian', annotate=None,
-            color='k', composite_fit_color='red', component_fit_color='blue',
-            lw=0.5, composite_lw=0.75, component_lw=0.75, show_components=None,
+            show_components=None,
             verbose=True, clear=True, vheight=None, **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
@@ -180,28 +182,16 @@ class Specfit(interactive.Interactive):
                 return
             else:
                 self.guesses = guesses
-                self.multifit(color=color,
-                        composite_fit_color=composite_fit_color, annotate=annotate,
-                        component_fit_color=component_fit_color, lw=lw,
-                        composite_lw=composite_lw, component_lw=component_lw,
-                        show_components=show_components, verbose=verbose,
-                        debug=debug)
+                self.multifit(show_components=show_components, verbose=verbose, debug=debug)
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
             if (self.Spectrum.baseline.order is None and vheight is None) or vheight:
                 self.Spectrum.baseline.order=0
-                self.peakbgfit(usemoments=usemoments, color=color,
-                        composite_fit_color=composite_fit_color, annotate=annotate,
-                        component_fit_color=component_fit_color, lw=lw,
-                        composite_lw=composite_lw, component_lw=component_lw,
-                        show_components=show_components, debug=debug, **kwargs)
+                self.peakbgfit(usemoments=usemoments, show_components=show_components, annotate=annotate, debug=debug, **kwargs)
             else:
                 self.peakbgfit(usemoments=usemoments, vheight=False,
-                        height=0.0, color=color, annotate=annotate,
-                        composite_fit_color=composite_fit_color,
-                        component_fit_color=component_fit_color, lw=lw,
-                        composite_lw=composite_lw, component_lw=component_lw,
+                        height=0.0, annotate=annotate,
                         show_components=show_components, debug=debug, **kwargs)
             if self.specplotter.autorefresh: self.specplotter.refresh()
         else:
@@ -297,8 +287,6 @@ class Specfit(interactive.Interactive):
             self.errspec[True - self.includemask] = 1e10
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
-            color='k', composite_fit_color='red', component_fit_color='red',
-            lw=0.5, composite_lw=0.75, component_lw=0.75,
             show_components=None, verbose=True, **kwargs):
         """
         Fit multiple gaussians (or other profiles)
@@ -357,11 +345,8 @@ class Specfit(interactive.Interactive):
         self.parinfo = self.fitter.parinfo
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
         if self.specplotter.axis is not None:
-            self.plot_fit(annotate=annotate, color=color,
-                    composite_fit_color=composite_fit_color,
-                    component_fit_color=component_fit_color, lw=lw,
-                    composite_lw=composite_lw, component_lw=component_lw,
-                    show_components=show_components)
+            self.plot_fit(annotate=annotate, 
+                    show_components=show_components, **kwargs)
                 
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
         if 'tied' in self.fitkwargs:
@@ -377,10 +362,8 @@ class Specfit(interactive.Interactive):
         self._full_model()
                 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
-            negamp=None, fittype=None, renormalize='auto', color='k',
-            composite_fit_color='red', component_fit_color='blue', lw=1.0,
-            composite_lw=1.0, component_lw=1.0, show_components=None,
-            debug=False, nsigcut_moments=None, **kwargs):
+            negamp=None, fittype=None, renormalize='auto', 
+            show_components=None, debug=False, nsigcut_moments=None, **kwargs):
         """
         Fit a single peak (plus a background)
 
@@ -455,7 +438,7 @@ class Specfit(interactive.Interactive):
         self.dof  = self.xmax-self.xmin-self.npeaks*self.Registry.npars[self.fittype]-vheight
         self.vheight=vheight
         if vheight: 
-            self.Spectrum.baseline.baselinepars = mpp[:1]*scalefactor # first item in list form
+            self.Spectrum.baseline.baselinepars = [mpp[0]*scalefactor] # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]*scalefactor
             self.model = model*scalefactor - mpp[0]*scalefactor
             # I removed this recently for some reason, but more code depends on it being in place
@@ -474,15 +457,14 @@ class Specfit(interactive.Interactive):
         #self.modelerrs[1] *= scalefactor
         if self.specplotter.axis is not None:
             self.plot_fit(annotate=annotate,
-                color=color, composite_fit_color=composite_fit_color,
-                component_fit_color=component_fit_color, lw=lw,
-                composite_lw=composite_lw, component_lw=component_lw,
-                show_components=show_components)
+                show_components=show_components, **kwargs)
 
         # make sure the full model is populated
-        self._full_model()
+        self._full_model(debug=debug)
 
-    def _full_model(self, **kwargs):
+        if debug: print "Guesses, fits after vheight removal: ",self.guesses, mpp
+
+    def _full_model(self, debug=False, **kwargs):
         """
         Compute the model for the whole spectrum
         """
@@ -494,11 +476,13 @@ class Specfit(interactive.Interactive):
                 mpp = [0] + self.modelpars
         else:
             mpp = self.modelpars
+        if debug: print "_full_model mpp: ",mpp
         self.fullmodel = self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(self.Spectrum.xarr)
                 
     def plot_fit(self, annotate=None, show_components=None, 
-        color='k', composite_fit_color='red', component_fit_color='blue',
-        lw=0.5, composite_lw=0.75, component_lw=0.75, **component_kwargs):
+        composite_fit_color='red', component_fit_color='blue', lw=0.5,
+        composite_lw=0.75, component_lw=0.75, component_kwargs={},
+        **kwargs):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
