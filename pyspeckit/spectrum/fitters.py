@@ -93,8 +93,8 @@ default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='multi
 default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
 default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
 default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
-default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(multisingle='multi'),4,multisingle='multi',key='v')
-default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(multisingle='single'),4,multisingle='single')
+default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(multisingle='multi'),3,multisingle='multi',key='L')
+default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(multisingle='single'),3,multisingle='single')
 default_Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5,multisingle='multi')
 default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
 
@@ -394,6 +394,8 @@ class Specfit(interactive.Interactive):
         else:
             if negamp: self.guesses = [height,-1,0,1]
             else:  self.guesses = [height,1,0,1]
+
+        print self.fittype,self.guesses
 
         NP = self.Registry.singlefitters[self.fittype].default_npars
         if NP > 3:
