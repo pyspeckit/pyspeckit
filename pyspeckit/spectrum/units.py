@@ -532,9 +532,11 @@ class SpectroscopicAxis(np.ndarray):
                     newunit = unit
                 elif conversion_dict[self.xtype] is wavelength_dict:
                     freqx = wavelength_to_frequency(self, self.units) 
+                    cf = wavelength_to_frequency(center_frequency, center_frequency_units)
+                    cfu = 'GHz'
                     newxarr = frequency_to_velocity(freqx, 'GHz',
-                            center_frequency=center_frequency,
-                            center_frequency_units=center_frequency_units,
+                            center_frequency=cf,
+                            center_frequency_units=cfu,
                             velocity_units=unit, convention=self.velocity_convention)
                     newxtype = "Velocity"
                     newunit = unit
