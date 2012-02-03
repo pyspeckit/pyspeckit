@@ -117,6 +117,14 @@ class Cube(spectrum.Spectrum):
         """
         Extract an aperture using cubes.extract_aperture
         (defaults to Cube coordinates)
+
+        *aperture* [tuple or list] (x, y, radius)
+            The aperture to use when extracting the data
+
+        *coordsys* [ 'celestial' | 'galactic' | None]
+            the coordinate system the aperture is specified in
+            None indicates pixel coordinates (default)
+
         """
 
         import cubes

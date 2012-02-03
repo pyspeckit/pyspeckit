@@ -19,6 +19,7 @@ you have initiated the fitter.
 '?' - bring up this message
 'f' - initiate the fitter 
 'b' - initiate the baseliner 
+'B' - initiate the baseliner (reset the selection too)
 """
 
 class Plotter(object):
@@ -201,7 +202,7 @@ class Plotter(object):
         
         if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
                 or reset_ylimits):
-            if not self.silent: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
+            if not self.silent and not reset_ylimits: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
             self.ymin = None
             self.ymax = None
         if ymin is not None: self.ymin = ymin
@@ -243,7 +244,8 @@ class Plotter(object):
                 # assume LaTeX already
                 self.axis.set_ylabel(self.Spectrum.units)
             elif len(self.Spectrum.units.split()) > 1: 
-                if self.Spectrum.units.split()[1] in ['erg/cm^2/s/Ang', 'erg/cm/s/Ang']:
+                if self.Spectrum.units.split()[1] in ['erg/cm^2/s/Ang',
+                        'erg/cm2/s/A', 'erg/cm2/s/Ang', 'erg/cm/s/Ang']:
                     norm = parse_norm(self.Spectrum.units.split()[0])
                     self.axis.set_ylabel("$%s \\mathrm{erg/s/cm^2/\\AA}$" % norm)
                 elif self.Spectrum.units.split()[1] in ['W/m^2/Hz','w/m^2/hz','W/m/hz','W/m/Hz']:
@@ -275,7 +277,10 @@ class Plotter(object):
                 self.Spectrum.specfit(interactive=True)
             elif event.key == 'b':
                 print "Baseline initiated from the interactive plotter."
-                self.Spectrum.baseline(interactive=True)
+                self.Spectrum.baseline(interactive=True, reset_selection=False)
+            elif event.key == 'B':
+                print "Baseline initiated from the interactive plotter (with reset)."
+                self.Spectrum.baseline(interactive=True, reset_selection=True)
 
     def get_two_clicks(self,event):
 

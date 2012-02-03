@@ -71,6 +71,8 @@ class MapPlotter(object):
 
         `kwargs` are passed to aplpy.show_colorscale or
         matplotlib.pyplot.imshow (depending on whether aplpy is installed)
+
+        TODO: Allow mapplot in subfigure
         """
         if self.figure is None:
             self.figure = matplotlib.pyplot.figure()
