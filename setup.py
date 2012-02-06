@@ -17,12 +17,12 @@ if os.path.exists(".hg"):
         currentversion = subprocess.Popen(["hg","id","--num"],stdout=subprocess.PIPE).communicate()[0].strip().strip("+")
         tags = subprocess.Popen(["hg","tags"],stdout=subprocess.PIPE).communicate()[0].split()
         tagdict = dict((tags[i],tags[i+1].split(':')) for i in range(0, len(tags), 2))
-        tagdict.remove('tip')
+        tagdict.pop('tip')
 
         # set "default" to be the tip
         version = version_base+"hg"+currentversion
         download_url = "https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz"
-
+        
         # find out if current version matches any tags.  If so, set version to be that
         for k,v in tagdict.iteritems():
             if currentversion in v:
