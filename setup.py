@@ -2,7 +2,7 @@
 
 import os, shutil
 import setuptools
-from distutils.core import setup
+from setuptools import setup
 
 with open('README.txt') as file:
     long_description = file.read()
