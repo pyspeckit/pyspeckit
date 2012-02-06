@@ -7,7 +7,7 @@ from distutils.core import setup
 with open('README.txt') as file:
     long_description = file.read()
 
-version_base="0.1"
+version_base="0.1.1"
 
 if os.path.exists(".hg"):
     try:
