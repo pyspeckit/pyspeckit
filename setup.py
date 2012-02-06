@@ -32,7 +32,7 @@ setup(name='pyspeckit',
           'pyspeckit.wrappers','mpfit','parallel_map'],
       package_dir={'pyspeckit.spectrum.speclines':'pyspeckit/spectrum/speclines',
           'mpfit':'mpfit'}, 
-      package_data={'pyspeckit.spectrum.speclines':['splatalogue.csv']},
+      package_data={'pyspeckit.spectrum.speclines':['splatalogue.csv'],'pyspeckit':['config_default']},
       requires=['matplotib','numpy'],
       classifiers=[
                    "Development Status :: 3 - Alpha",
