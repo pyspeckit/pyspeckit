@@ -21,6 +21,9 @@ if os.path.exists(".hg"):
         # is this bad practice?  I don't care if it's an import error, attribute error, or value error...
         version = version_base
         download_url = "https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/%s.tar.gz" % (tagname)
+else:
+    version = version_base
+    download_url = "https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/%s.tar.gz" % (tagname)
 
 setup(name='pyspeckit',
       version=version,
