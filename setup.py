@@ -8,15 +8,19 @@ with open('README.txt') as file:
     long_description = file.read()
 
 version_base="0.1.1"
+tagname = "0.1.1_pipfix"
 
 if os.path.exists(".hg"):
+    # if the installed version is from a mercurial clone, get the "tip", else get the latest release
     try:
         import subprocess
         currentversion = subprocess.Popen(["hg","id","--num"],stdout=subprocess.PIPE).communicate()[0].strip().strip("+")
         version = version_base+"hg"+currentversion
+        download_url = "https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz"
     except:
         # is this bad practice?  I don't care if it's an import error, attribute error, or value error...
         version = version_base
+        download_url = "https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/%s.tar.gz" % (tagname)
 
 setup(name='pyspeckit',
       version=version,
@@ -26,6 +30,7 @@ setup(name='pyspeckit',
       author_email=['adam.g.ginsburg@gmail.com', 'mirochaj@gmail.com',
           'pyspeckit@gmail.com'], 
       url='https://pyspeckit.bitbucket.org/',
+      download_url=download_url,
       packages=['pyspeckit', 'pyspeckit.spectrum', 'pyspeckit.spectrum.models',
           'pyspeckit.spectrum.readers', 'pyspeckit.spectrum.writers',
           'pyspeckit.spectrum.speclines', 'pyspeckit.cubes',
