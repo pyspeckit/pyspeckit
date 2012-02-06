@@ -8,7 +8,7 @@ with open('README.txt') as file:
     long_description = file.read()
 
 version_base="0.1.1"
-tagname = "0.1.1_pipfix"
+tagname = "pyspeckit_%s" % (version_base)
 
 if os.path.exists(".hg"):
     # if the installed version is from a mercurial clone, get the "tip", else get the latest release
