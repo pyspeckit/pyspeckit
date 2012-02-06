@@ -25,7 +25,7 @@ if os.path.exists(".hg"):
         
         # find out if current version matches any tags.  If so, set version to be that
         for k,v in tagdict.iteritems():
-            if int(currentversion) in [int(v),int(v)-1]:
+            if int(currentversion) in [int(v),int(v)+1]:
                 version = k.strip("pyspeckit_")
                 download_url = "https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/%s.tar.gz" % (k)
     except:
