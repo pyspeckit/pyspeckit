@@ -149,7 +149,7 @@ class Cube(spectrum.Spectrum):
             verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
             blank_value=0, integral=True, direct=False, absorption=False,
             use_nearest_as_guess=False, start_from_point=(0,0), multicore=0,
-            max=np.max, **fitkwargs):
+            **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
 
@@ -228,6 +228,13 @@ class Cube(spectrum.Spectrum):
         def fit_a_pixel(iixy):
             ii,x,y = iixy
             sp = self.get_spectrum(x,y)
+
+            # very annoying - cannot use min/max without checking type
+            if hasattr(sp.data,'mask'):
+                min,max = np.ma.min,np.ma.max
+            else:
+                min,max = np.nanmin,np.nanmax
+
             if errspec is not None:
                 sp.error = errspec
             elif errmap is not None:
@@ -237,8 +244,6 @@ class Cube(spectrum.Spectrum):
                 sp.error[:] = sp.data.std()
             if sp.error is not None and signal_cut > 0:
                 snr = sp.data / sp.error
-                if any(np.isnan(snr)):
-                    snr[snr!=snr] = 0  # because we're searching for max, 0 excludes
                 if absorption:
                     max_sn = max(-1*snr)
                 else:
@@ -249,10 +254,6 @@ class Cube(spectrum.Spectrum):
                     return
                 elif np.isnan(max_sn):
                     if verbose_level > 1:
-                        if hasattr(sp.data,'mask'):
-                            min,max = np.ma.min,np.ma.max
-                        else:
-                            min,max = np.nanmin,np.nanmax
                         print "Skipped %4i,%4i (s/n is nan; max(data)=%0.2g, min(error)=%0.2g)" % (x,y,max(sp.data),min(sp.error))
                     return
                 if verbose_level > 2:
