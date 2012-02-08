@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
 import os, shutil
-import setuptools
-from setuptools import setup
+try:
+    import setuptools
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 with open('README.txt') as file:
     long_description = file.read()
