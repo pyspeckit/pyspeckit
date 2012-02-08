@@ -231,9 +231,10 @@ class Cube(spectrum.Spectrum):
 
             # very annoying - cannot use min/max without checking type
             if hasattr(sp.data,'mask'):
-                min,max = np.ma.min,np.ma.max
-            else:
-                min,max = np.nanmin,np.nanmax
+                sp.data[sp.data.mask] = np.nan
+                sp.error[sp.data.mask] = np.nan
+                sp.data = np.array(sp.data)
+                sp.error = np.array(sp.error)
 
             if errspec is not None:
                 sp.error = errspec
@@ -245,16 +246,16 @@ class Cube(spectrum.Spectrum):
             if sp.error is not None and signal_cut > 0:
                 snr = sp.data / sp.error
                 if absorption:
-                    max_sn = max(-1*snr)
+                    max_sn = np.nanmax(-1*snr)
                 else:
-                    max_sn = max(snr)
+                    max_sn = np.nanmax(snr)
                 if max_sn < signal_cut:
                     if verbose_level > 1:
                         print "Skipped %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
                     return
                 elif np.isnan(max_sn):
                     if verbose_level > 1:
-                        print "Skipped %4i,%4i (s/n is nan; max(data)=%0.2g, min(error)=%0.2g)" % (x,y,max(sp.data),min(sp.error))
+                        print "Skipped %4i,%4i (s/n is nan; max(data)=%0.2g, min(error)=%0.2g)" % (x,y,np.nanmax(sp.data),np.nanmin(sp.error))
                     return
                 if verbose_level > 2:
                     print "Fitting %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
