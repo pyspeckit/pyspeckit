@@ -149,7 +149,7 @@ class Cube(spectrum.Spectrum):
             verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
             blank_value=0, integral=True, direct=False, absorption=False,
             use_nearest_as_guess=False, start_from_point=(0,0), multicore=0,
-            max=np.nanmax, **fitkwargs):
+            max=np.max, **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
 
@@ -236,10 +236,13 @@ class Cube(spectrum.Spectrum):
                 if verbose_level > 1 and ii==0: print "WARNING: using data std() as error."
                 sp.error[:] = sp.data.std()
             if sp.error is not None and signal_cut > 0:
+                snr = sp.data / sp.error
+                if any(np.isnan(snr)):
+                    snr[snr!=snr] = 0  # because we're searching for max, 0 excludes
                 if absorption:
-                    max_sn = max(-1*sp.data / sp.error)
+                    max_sn = max(-1*snr)
                 else:
-                    max_sn = max(sp.data / sp.error)
+                    max_sn = max(snr)
                 if max_sn < signal_cut:
                     if verbose_level > 1:
                         print "Skipped %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
