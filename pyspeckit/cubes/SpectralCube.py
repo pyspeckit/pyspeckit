@@ -249,7 +249,11 @@ class Cube(spectrum.Spectrum):
                     return
                 elif np.isnan(max_sn):
                     if verbose_level > 1:
-                        print "Skipped %4i,%4i (s/n is nan; np.nanmax(data)=%0.2g, np.nanmin(error)=%0.2g)" % (x,y,np.nanmax(sp.data),np.nanmin(sp.error))
+                        if hasattr(sp.data,'mask'):
+                            min,max = np.ma.min,np.ma.max
+                        else:
+                            min,max = np.nanmin,np.nanmax
+                        print "Skipped %4i,%4i (s/n is nan; max(data)=%0.2g, min(error)=%0.2g)" % (x,y,max(sp.data),min(sp.error))
                     return
                 if verbose_level > 2:
                     print "Fitting %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
