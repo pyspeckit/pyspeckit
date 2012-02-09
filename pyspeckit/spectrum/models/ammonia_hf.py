@@ -13,7 +13,7 @@ Module API
 
 """
 import numpy as np
-from mpfit import mpfit
+from pyspeckit.mpfit import mpfit
 import fitter
 import matplotlib.cbook as mpcb
 import copy

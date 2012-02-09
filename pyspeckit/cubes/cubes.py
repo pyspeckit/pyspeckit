@@ -10,7 +10,7 @@ import pyspeckit
 from pyspeckit.specwarnings import warn
 try:
     from agpy.convolve import smooth
-    from agpy.contributed import parallel_map
+    from pyspeckit.parallel_map import parallel_map
     smoothOK = True
 except ImportError:
     smoothOK = False

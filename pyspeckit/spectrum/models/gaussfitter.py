@@ -12,7 +12,7 @@ Original version available at http://code.google.com/p/agpy/source/browse/trunk/
 import numpy
 from numpy.ma import median
 from numpy import pi
-from mpfit import mpfit
+from pyspeckit.mpfit import mpfit
 import matplotlib.cbook as mpcb
 from . import mpfit_messages
 from . import model

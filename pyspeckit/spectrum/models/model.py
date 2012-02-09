@@ -5,7 +5,7 @@ Generic SpectralModel wrapper
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
 import numpy as np
-from mpfit import mpfit,mpfitException
+from pyspeckit.mpfit import mpfit,mpfitException
 import copy
 import matplotlib.cbook as mpcb
 import fitter

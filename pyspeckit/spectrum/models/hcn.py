@@ -6,7 +6,7 @@ This is an HCN fitter...
 ref for line params: http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn@hfs.dat
 """
 import numpy as np
-from mpfit import mpfit
+from pyspeckit.mpfit import mpfit
 from .. import units
 from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb

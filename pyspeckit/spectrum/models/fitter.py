@@ -5,7 +5,7 @@ SimpleFitter wrapper
 Adds a variable height (background) component to any model
 """
 import numpy
-from mpfit import mpfit
+from pyspeckit.mpfit import mpfit
 from numpy.ma import median
 from pyspeckit.spectrum.moments import moments
 

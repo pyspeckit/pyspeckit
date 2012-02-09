@@ -8,7 +8,7 @@ components of the formaldehyde lines and has both LTE and RADEX LVG based
 models
 """
 import numpy as np
-from mpfit import mpfit
+from pyspeckit.mpfit import mpfit
 from .. import units
 from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb

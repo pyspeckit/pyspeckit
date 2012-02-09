@@ -23,7 +23,7 @@ import mapplot
 import readers
 import time
 import numpy as np
-from parallel_map import parallel_map
+from pyspeckit.parallel_map import parallel_map
 import multiprocessing
 
 class Cube(spectrum.Spectrum):

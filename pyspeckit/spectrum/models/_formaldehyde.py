@@ -3,7 +3,7 @@ Ammonia inversion transition TKIN fitter translated from Erik Rosolowsky's
 http://svn.ok.ubc.ca/svn/signals/nh3fit/
 """
 import numpy as np
-from mpfit import mpfit
+from pyspeckit.mpfit import mpfit
 from .. import units
 import matplotlib.cbook as mpcb
 

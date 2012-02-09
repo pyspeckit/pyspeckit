@@ -343,7 +343,7 @@ class Baseline(interactive.Interactive):
         if LoudDebug:
             print "In _baseline, xmin: %i, xmax: %i, len(spectrum)=%i, len(err)=%i" % (xmin,xmax,len(spectrum),len(err))
 
-        import mpfit
+        import pyspeckit.mpfit as mpfit
         mp = mpfit.mpfit(mpfitfun(spectrum[OK],err[OK]),xall=pguess,quiet=quiet) # mpfit doesn't need to take kwargs, I think ,**kwargs)
         if np.isnan(mp.fnorm):
             raise ValueError("chi^2 is NAN in baseline fitting")

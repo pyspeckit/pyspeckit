@@ -6,7 +6,7 @@ Lorentzian Fitter
 import numpy
 from numpy.ma import median
 from numpy import pi
-from mpfit import mpfit
+from pyspeckit.mpfit import mpfit
 from . import fitter
 
 class LorentzianFitter(fitter.SimpleFitter):
