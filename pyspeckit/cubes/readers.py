@@ -27,7 +27,7 @@ def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
     else:
         f = pyfits.open(filename)
     hdr = f[0].header
-    cube = ma.array(f[0].data).squeeze()  # remove extra dimensions such as polarization
+    cube = ma.array(f[0].data.squeeze())  # remove extra dimensions such as polarization
     cube.mask = np.isnan(cube) + np.isinf(cube)
     if hdr.get('NAXIS') > 3 and average_extra is False:
         print "Extra dimensions in data cube will be ignored (only the first element of that dimension will be kept)."
