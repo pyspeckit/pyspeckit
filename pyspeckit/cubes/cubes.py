@@ -9,7 +9,7 @@ import posang # agpy code
 import pyspeckit
 from pyspeckit.specwarnings import warn
 try:
-    from agpy.convolve import smooth
+    from AG_fft_tools.convolve import smooth
     from pyspeckit.parallel_map import parallel_map
     smoothOK = True
 except ImportError:
@@ -478,7 +478,7 @@ def coords_in_image(fitsfile,lon,lat,system='galactic'):
     else:
         return False
 
-def spectral_smooth(cube, smooth_factor):
+def spectral_smooth(cube, smooth_factor, **kwargs):
     """
     Smooth the cube along the spectral direction
     """
@@ -487,7 +487,7 @@ def spectral_smooth(cube, smooth_factor):
     yy,xx = numpy.indices(cube.shape[1:])
 
     for (x,y) in zip(xx.flat,yy.flat):
-        newcube[:,y,x] = pyspeckit.smooth.smooth(cube[:,y,x], smooth_factor)
+        newcube[:,y,x] = pyspeckit.smooth.smooth(cube[:,y,x], smooth_factor, **kwargs)
 
     return newcube
 
@@ -507,7 +507,7 @@ def plane_smooth(cube,cubedim=0,parallel=True,numcores=None,**kwargs):
 
     cubelist = [cube[ii,:,:] for ii in xrange(cube.shape[0])]
 
-    Psmooth = lambda C: smooth.smooth(C,**kwargs)
+    Psmooth = lambda C: smooth(C,**kwargs)
 
     if parallel:
         smoothcube = array(parallel_map(Psmooth,cubelist,numcores=numcores))

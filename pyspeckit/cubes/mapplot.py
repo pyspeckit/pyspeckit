@@ -7,6 +7,8 @@ import matplotlib.pyplot
 import matplotlib.figure
 import numpy as np
 import pyfits
+import itertools
+from pyspeckit.specwarnings import warn
 try:
     import astropy.wcs as pywcs
     pywcsOK = True
@@ -51,6 +53,9 @@ class MapPlotter(object):
         self._circles = []
         self._clickX = None
         self._clickY = None
+
+        self.overplot_colorcycle = itertools.cycle(['b', 'g', 'r', 'c', 'm', 'y'])
+        self.overplot_linestyle = '-'
 
         self.Cube = Cube
         if self.Cube is not None:
@@ -124,52 +129,61 @@ class MapPlotter(object):
         """
         Connects map cube to Spectrum...
         """
+        self.event = event
         if event.inaxes:
-          clickX = event.xdata
-          clickY = event.ydata
+            clickX = event.xdata
+            clickY = event.ydata
+        
+            # grab toolbar info so that we don't do anything if a tool is selected
+            tb = self.canvas.toolbar
+            if tb.mode != '':
+                return
+            elif event.key is not None:
+                if event.key == 'c':
+                    self._center = (clickX,clickY)
+                    self._remove_circle()
+                    self._add_click_mark(clickX,clickY,clear=True)
+                elif event.key == 'r':
+                    x,y = self._center
+                    self._add_circle(x,y,clickX,clickY)
+                    self.circle(x,y,clickX,clickY)
+            elif event.button in (1,2) and not (self._clickX == clickX and self._clickY == clickY):
+                if event.button == 1:
+                    self._remove_circle()
+                    clear=True
+                    color = 'k'
+                    linestyle = 'steps-mid'
+                else:
+                    color = self.overplot.colorcycle.next()
+                    linestyle = self.overplot_linestyle
+                    clear=False
+                rad = ( (self._clickX-clickX)**2 + (self._clickY-clickY)**2 )**0.5
+                print "Plotting circle from point %i,%i to %i,%i (r=%f)" % (self._clickX,self._clickY,clickX,clickY,rad)
+                self._add_circle(self._clickX,self._clickY,clickX,clickY)
+                self.circle(self._clickX,self._clickY,clickX,clickY,clear=clear,linestyle=linestyle,color=color)
+            elif event.button is not None: #hasattr(event,'button'):
+                if event.button==1:
+                    print "Plotting spectrum from point %i,%i" % (clickX,clickY)
+                    self._remove_circle()
+                    self._add_click_mark(clickX,clickY,clear=True)
+                    self.Cube.plot_spectrum(clickX,clickY,clear=True)
+                    if plot_fit: self.Cube.plot_fit(clickX, clickY, silent=True)
+                elif event.button==2:
+                    print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
+                    color=self.overplot_colorcycle.next()
+                    self._add_click_mark(clickX,clickY,clear=False, color=color)
+                    self.Cube.plot_spectrum(clickX,clickY,clear=False, color=color, linestyle=self.overplot_linestyle)
+                elif event.button==3:
+                    print "Disconnecting GAIA-like tool"
+                    self.canvas.mpl_disconnect(self.clickid)
+                    self.canvas.mpl_disconnect(self.keyid)
+            else:
+                print "Call failed for some reason: "
+                print "event: ",event
+        else:
+            warn("Click outside of axes")
 
-          # grab toolbar info so that we don't do anything if a tool is selected
-          tb = self.canvas.toolbar
-          if tb.mode != '':
-              return
-          elif event.key is not None:
-              if event.key == 'c':
-                  self._center = (clickX,clickY)
-                  self._remove_circle()
-                  self._add_click_mark(clickX,clickY,clear=True)
-              elif event.key == 'r':
-                  x,y = self._center
-                  self._add_circle(x,y,clickX,clickY)
-                  self.circle(x,y,clickX,clickY)
-          elif event.button in (1,2) and not (self._clickX == clickX and self._clickY == clickY):
-              if event.button == 1:
-                  self._remove_circle()
-                  clear=True
-              else:
-                  clear=False
-              print "Plotting circle from point %i,%i to %i,%i" % (self._clickX,self._clickY,clickX,clickY)
-              self._add_circle(self._clickX,self._clickY,clickX,clickY)
-              self.circle(self._clickX,self._clickY,clickX,clickY,clear=clear)
-          elif event.button is not None: #hasattr(event,'button'):
-              if event.button==1:
-                  print "Plotting spectrum from point %i,%i" % (clickX,clickY)
-                  self._remove_circle()
-                  self._add_click_mark(clickX,clickY,clear=True)
-                  self.Cube.plot_spectrum(clickX,clickY,clear=True)
-                  if plot_fit: self.Cube.plot_fit(clickX, clickY, silent=True)
-              elif event.button==2:
-                  print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
-                  self._add_click_mark(clickX,clickY,clear=False)
-                  self.Cube.plot_spectrum(clickX,clickY,clear=False)
-              elif event.button==3:
-                  print "Disconnecting GAIA-like tool"
-                  self.canvas.mpl_disconnect(self.clickid)
-                  self.canvas.mpl_disconnect(self.keyid)
-          else:
-              print "Call failed for some reason: "
-              print "event: ",event
-
-    def _add_click_mark(self,x,y,clear=False):
+    def _add_click_mark(self,x,y,clear=False,color='k'):
         """
         Add an X at some position
         """
@@ -178,7 +192,7 @@ class MapPlotter(object):
         if self.FITSFigure is not None:
             label = 'xmark%i' % (len(self._click_marks)+1)
             x,y = self.FITSFigure.pixel2world(x,y)
-            self.FITSFigure.show_markers(x,y,marker='x',c='k',layer=label)
+            self.FITSFigure.show_markers(x,y,marker='x',c=color,layer=label)
             self._click_marks.append( label )
         else:
             self._click_marks.append( self.axis.plot(x,y,'kx') )
@@ -198,7 +212,7 @@ class MapPlotter(object):
                 self.axis.lines.remove(mark)
             self.refresh()
 
-    def _add_circle(self,x,y,x2,y2):
+    def _add_circle(self,x,y,x2,y2,**kwargs):
         """
         """
         if self.FITSFigure is not None:
@@ -207,11 +221,11 @@ class MapPlotter(object):
             r = (np.linalg.norm(np.array([x,y])-np.array([x2,y2])))
             #self.FITSFigure.show_markers(x,y,s=r,marker='o',facecolor='none',edgecolor='black',layer='circle')
             layername = "circle%02i" % len(self._circles)
-            self.FITSFigure.show_circles(x,y,r,edgecolor='black',facecolor='none',layer=layername)
+            self.FITSFigure.show_circles(x,y,r,edgecolor='black',facecolor='none',layer=layername,**kwargs)
             self._circles.append(layername)
         else:
             r = np.linalg.norm(np.array([x,y])-np.array([x2,y2]))
-            self._circles.append( matplotlib.patches.Circle([x,y],radius=r) )
+            self._circles.append( matplotlib.patches.Circle([x,y],radius=r,**kwargs) )
             self.axis.patches.append(circle)
             self.refresh()
 
