@@ -135,9 +135,9 @@ class MapPlotter(object):
                 self.plane = self.Cube.cube.sum(axis=0) * dx
             elif estimator[-5:] == ".fits":
                 self.plane = pyfits.getdata(estimator)
-            elif type(estimator) is int:
-                if hasattr(self.Cube,'parcube'):
-                    self.plane = self.Cube.parcube[int,:,:]
+        elif type(estimator) is int:
+            if hasattr(self.Cube,'parcube'):
+                self.plane = self.Cube.parcube[estimator,:,:]
 
         if self.plane is None:
             raise ValueError("Invalid estimator %s" % (str(estimator)))
