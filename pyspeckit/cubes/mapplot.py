@@ -83,6 +83,8 @@ class MapPlotter(object):
             self.figure = matplotlib.pyplot.figure()
 
         self.makeplane(**kwargs)
+        if 'estimator' in kwargs:
+            kwargs.pop('estimator')
 
         if vmin is None: vmin = self.plane[self.plane==self.plane].min()
         if vmax is None: vmax = self.plane[self.plane==self.plane].max()
@@ -106,7 +108,7 @@ class MapPlotter(object):
         self.clickupid = self.canvas.mpl_connect('button_release_event',self.plot_spectrum)
         self.keyid = self.canvas.mpl_connect('key_press_event',self.plot_spectrum)
 
-    def makeplane(self, estimator=np.mean,):
+    def makeplane(self, estimator=np.mean):
         """
 
         *estimator* [ function | 'max' | 'int' | FITS filename | integer ]
