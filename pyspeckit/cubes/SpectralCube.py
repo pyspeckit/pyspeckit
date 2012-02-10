@@ -191,8 +191,7 @@ class Cube(spectrum.Spectrum):
         """
 
         if not hasattr(self.mapplot,'plane'):
-            print "Must mapplot before fitting."
-            return
+            self.mapplot.makeplane()
 
         yy,xx = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
@@ -353,8 +352,7 @@ class Cube(spectrum.Spectrum):
         """
 
         if not hasattr(self.mapplot,'plane'):
-            print "Must mapplot before moment-fitting."
-            return
+            self.mapplot.makeplane()
 
         yy,xx = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 

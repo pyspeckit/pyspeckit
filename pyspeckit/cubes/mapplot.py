@@ -69,8 +69,8 @@ class MapPlotter(object):
         """ see mapplot """
         return self.mapplot(**kwargs)
 
-    def mapplot(self, estimator=np.mean, convention='calabretta',
-            colorbar=True, useaplpy=True, vmin=None, vmax=None, **kwargs):
+    def mapplot(self, convention='calabretta', colorbar=True, useaplpy=True,
+            vmin=None, vmax=None, **kwargs):
         """
         Plot up a map based on an input data cube
 
@@ -81,19 +81,8 @@ class MapPlotter(object):
         """
         if self.figure is None:
             self.figure = matplotlib.pyplot.figure()
-        # THIS IS A HACK!!!  isinstance(a function, function) must be a thing...
-        FUNCTION = type(np.max)
-        if type(estimator) is FUNCTION:
-            self.plane = estimator(self.Cube.cube,axis=0)
-        elif type(estimator) is str:
-            if estimator == 'max':
-                self.plane = self.Cube.cube.max(axis=0)
-            elif estimator == 'int':
-                dx = np.abs(self.cube.xarr[1:] - self.cube.xarr[:-1])
-                dx = np.concatenate(dx,dx[-1])
-                self.plane = self.Cube.cube.sum(axis=0) * dx
-            elif estimator[-5:] == ".fits":
-                self.plane = pyfits.getdata(estimator)
+
+        self.makeplane(**kwargs)
 
         if vmin is None: vmin = self.plane[self.plane==self.plane].min()
         if vmax is None: vmax = self.plane[self.plane==self.plane].max()
@@ -116,6 +105,40 @@ class MapPlotter(object):
         self.clickid = self.canvas.mpl_connect('button_press_event',self.click)
         self.clickupid = self.canvas.mpl_connect('button_release_event',self.plot_spectrum)
         self.keyid = self.canvas.mpl_connect('key_press_event',self.plot_spectrum)
+
+    def makeplane(self, estimator=np.mean,):
+        """
+
+        *estimator* [ function | 'max' | 'int' | FITS filename | integer ]
+            A non-pythonic, non-duck-typed variable.  If it's a function, apply that function
+            along the cube's spectral axis to obtain an estimate (e.g., mean, min, max, etc.).
+            'max' will do the same thing as passing np.max
+            'int' will attempt to integrate the image (which is why I didn't duck-type)
+            a .fits filename will be read using pyfits (so you can make your own cover figure)
+            an integer will get the n'th slice in the parcube if it exists
+
+        """
+        # THIS IS A HACK!!!  isinstance(a function, function) must be a thing...
+        FUNCTION = type(np.max)
+
+        # estimator is NOT duck-typed
+        if type(estimator) is FUNCTION:
+            self.plane = estimator(self.Cube.cube,axis=0)
+        elif type(estimator) is str:
+            if estimator == 'max':
+                self.plane = self.Cube.cube.max(axis=0)
+            elif estimator == 'int':
+                dx = np.abs(self.cube.xarr[1:] - self.cube.xarr[:-1])
+                dx = np.concatenate(dx,dx[-1])
+                self.plane = self.Cube.cube.sum(axis=0) * dx
+            elif estimator[-5:] == ".fits":
+                self.plane = pyfits.getdata(estimator)
+            elif type(estimator) is int:
+                if hasattr(self.Cube,'parcube'):
+                    self.plane = self.Cube.parcube[int,:,:]
+
+        if self.plane is None:
+            raise ValueError("Invalid estimator %s" % (str(estimator)))
 
     def click(self,event):
         """
