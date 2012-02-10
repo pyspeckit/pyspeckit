@@ -126,7 +126,7 @@ class Specfit(interactive.Interactive):
         self.setfitspec()
         self.fittype = 'gaussian'
         self.measurements = None
-        self.vheight=None
+        self.vheight=False # vheight must be a boolean, can't be none
         self.Registry = Registry
         self.autoannotate = mycfg['autoannotate']
         #self.seterrspec()
