@@ -139,6 +139,10 @@ class Spectrum(object):
         self.speclines = speclines
         self._sort()
 
+        # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
+        self.plot_special = None
+        self.plot_special_kwargs = {}
+
         if doplot: self.plotter(**plotkwargs)
 
     def _register_fitters(self, registry=None):
@@ -326,7 +330,8 @@ class Spectrum(object):
 
         sp.xarr = sp.xarr[x1pix:x2pix]
         sp.data = sp.data[x1pix:x2pix]
-        sp.error = sp.error[x1pix:x2pix]
+        if sp.error is not None:
+            sp.error = sp.error[x1pix:x2pix]
 
         return sp
 
@@ -370,17 +375,25 @@ class Spectrum(object):
         return len(self.data)
 
     def __repr__(self):
-        return r'<Spectrum object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s>' % \
-                (self.xarr.min(), self.xarr.max(), self.xarr.units, self.data.min(), self.data.max(), self.units)
+        return r'<Spectrum object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s at %s>' % \
+                (self.xarr.min(), self.xarr.max(), self.xarr.units,
+                        self.data.min(), self.data.max(), self.units,
+                        str(hex(self.__hash__())))
     
 
-    def copy(self):
+    def copy(self,deep=True):
         """
         Create a copy of the spectrum with its own plotter, fitter, etc.
         Useful for, e.g., comparing smoothed to unsmoothed data
         """
 
         newspec = copy.copy(self)
+        if deep:
+            newspec.xarr = copy.copy(self.xarr)
+            newspec.data = copy.copy(self.data)
+            if self.error is not None:
+                newspec.error = copy.copy(self.error)
+
         newspec.plotter = plotters.Plotter(newspec)
         newspec._register_fitters()
         newspec.specfit = fitters.Specfit(newspec,Registry=newspec.Registry)
@@ -496,6 +509,10 @@ class Spectra(Spectrum):
         for spec in speclist: 
             if spec.units != self.units: 
                 raise ValueError("Mismatched units")
+
+        # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
+        self.plot_special = None
+        self.plot_special_kwargs = {}
 
     def __add__(self,other):
         """

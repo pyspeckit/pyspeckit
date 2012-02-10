@@ -10,6 +10,11 @@ from matplotlib import pyplot
 import copy
 import random
 
+title_dict = {'oneone':'NH$_3(1,1)$', 
+'twotwo':'NH$_3(2,2)$', 
+'threethree':'NH$_3(3,3)$', 
+'fourfour':'NH$_3(4,4)$', }
+
 def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guessline='twotwo',
         tex=15,tkin=20,column=15.0,fortho=0.66, tau=None, thin=False, quiet=False, doplot=True, fignum=1,
         guessfignum=2, smooth=False, scale_keyword=None, rebase=False, npeaks=1, guesses=None,
@@ -90,7 +95,8 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, *
         sp.specfit.modelpars = spectra.specfit.modelpars
         sp.specfit.npeaks = spectra.specfit.npeaks
         sp.specfit.fitter.npeaks = spectra.specfit.npeaks
-        sp.specfit.model = sp.specfit.fitter.n_ammonia(pars=spectra.specfit.modelpars, parnames=spectra.specfit.fitter.parnames)(sp.xarr)
+        if spectra.specfit.modelpars is not None:
+            sp.specfit.model = sp.specfit.fitter.n_ammonia(pars=spectra.specfit.modelpars, parnames=spectra.specfit.fitter.parnames)(sp.xarr)
 
     if len(splist) == 2:
         axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
@@ -99,10 +105,14 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, *
     elif len(splist) == 4:
         axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
     for linename,sp in spdict.iteritems():
-        sp.plotter(axis=axdict[linename],title=linename, **plotkwargs)
+        sp.plotter.axis=axdict[linename] # permanent
+        sp.plotter(axis=axdict[linename],title=title_dict[linename], **plotkwargs)
+        sp.specfit.specplotter = sp.plotter
         sp.specfit.selectregion(reset=True)
-        sp.specfit.plot_fit(annotate=False, show_components=show_components)
-    spdict['oneone'].specfit.annotate(labelspacing=0.05,prop={'size':'small','stretch':'extra-condensed'},frameon=False)
+        if sp.specfit.modelpars is not None:
+            sp.specfit.plot_fit(annotate=False, show_components=show_components)
+    if spdict['oneone'].specfit.modelpars is not None:
+        spdict['oneone'].specfit.annotate(labelspacing=0.05,prop={'size':'small','stretch':'extra-condensed'},frameon=False)
 
     if residfignum is not None:
         pyplot.figure(residfignum)
@@ -134,3 +144,48 @@ def fitnh3(spectrum, vrange=[-100,100], vrangeunits='km/s', quiet=False,
         spectrum.specfit(fittype='ammonia_tau',quiet=quiet,multifit=True,guesses=[Tex,Tkin,tau,widthguess,vguess,fortho])
 
     return spectrum
+
+
+def BigSpectrum_to_NH3dict(sp, vrange=None):
+    """
+    A rather complicated way to make the spdicts above given a spectrum...
+    """
+
+    spdict = {}
+    for linename,freq in pyspeckit.spectrum.models.ammonia.freq_dict.iteritems():
+        if vrange is not None:
+            freq_test_low  = freq - freq * vrange[0]/pyspeckit.units.speedoflight_kms
+            freq_test_high = freq - freq * vrange[1]/pyspeckit.units.speedoflight_kms
+        else:
+            freq_test_low = freq_test_high = freq
+
+        if (sp.xarr.as_unit('Hz').in_range(freq_test_low) or
+                sp.xarr.as_unit('Hz').in_range(freq_test_high)):
+            spdict[linename] = sp.copy()
+            spdict[linename].xarr.convert_to_unit('GHz')
+            spdict[linename].xarr.refX = freq
+            spdict[linename].xarr.refX_units = 'Hz'
+            spdict[linename].specfit = copy.copy(sp.specfit)
+            spdict[linename].specfit.fitter = copy.copy(sp.specfit.fitter)
+            spdict[linename].specfit.Spectrum = spdict[linename]
+            spdict[linename].xarr.convert_to_unit('km/s')
+            if vrange is not None:
+                try:
+                    spdict[linename].crop(*vrange, units='km/s')
+                except IndexError:
+                    # if the freq in range, but there's no data in range, remove
+                    spdict.pop(linename)
+
+    return spdict
+                    
+def plotter_override(sp, vrange=None, **kwargs):
+    """
+    Do plot_nh3 with syntax similar to plotter()
+    """
+
+    spdict = BigSpectrum_to_NH3dict(sp, vrange=vrange)
+
+    if len(spdict) not in (2,3,4):
+        raise ValueError("Not enough lines; don't need to use the NH3 plot wrapper")
+
+    plot_nh3(spdict, sp, **kwargs)

@@ -362,6 +362,12 @@ class SpectroscopicAxis(np.ndarray):
         nearest_pix = np.argmin(np.abs(self-xval))
         return nearest_pix
 
+    def in_range(self, xval):
+        """
+        Given an X coordinate in SpectroscopicAxis' units, return whether the pixel is in range
+        """
+        return (xval > self.min()) * (xval < self.max())
+
     def x_to_coord(self, xval, xunit, verbose=False):
         """
         Given a wavelength/frequency/velocity, return the value in the SpectroscopicAxis's units

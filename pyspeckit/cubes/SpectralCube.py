@@ -25,6 +25,8 @@ import time
 import numpy as np
 from pyspeckit.parallel_map import parallel_map
 import multiprocessing
+import types
+import copy
 
 class Cube(spectrum.Spectrum):
 
@@ -66,14 +68,29 @@ class Cube(spectrum.Spectrum):
         for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
         self.mapplot = mapplot.MapPlotter(self)
 
+        # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
+        self.plot_special = None
+        self.plot_special_kwargs = {}
+
+
+    def __repr__(self):
+        return r'<Cube object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s with shape %r at %s>' % \
+                (self.xarr.min(), self.xarr.max(), self.xarr.units,
+                        self.data.min(), self.data.max(), self.units,
+                        self.cube.shape, str(hex(self.__hash__())))
+
     def plot_spectrum(self, x, y, **kwargs):
         """
         Fill the .data array with a real spectrum and plot it
         """
 
-        self.data = self.cube[:,y,x]
-
-        self.plotter(**kwargs)
+        if self.plot_special is None:
+            self.data = self.cube[:,y,x]
+            self.plotter(**kwargs)
+        else:
+            sp = self.get_spectrum(x,y)
+            sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
+            sp.plot_special(**dict(kwargs.items()+self.plot_special_kwargs.items()))
 
     def plot_fit(self, x, y, silent=False, **kwargs):
         """
@@ -83,9 +100,14 @@ class Cube(spectrum.Spectrum):
             if not silent: print "Must run fiteach before plotting a fit.  If you want to fit a single spectrum, use plot_spectrum() and specfit() directly."
             return
 
+        if self.plot_special is not None:
+            # don't try to overplot a fit on a "special" plot
+            return
+
         self.data = self.cube[:,y,x]
 
         self.specfit.modelpars = self.parcube[:,y,x]
+        self.specfit.npeaks = self.specfit.fitter.npeaks
         self.specfit.model = self.specfit.fitter.n_modelfunc(self.specfit.modelpars)(self.xarr)
 
         # set the parinfo values correctly for annotations
@@ -101,17 +123,41 @@ class Cube(spectrum.Spectrum):
         (defaults to Cube coordinates)
         """
 
-        self.set_apspec(aperture, coordsys=coordsys)
-        self.plotter(reset_ylimits=reset_ylimits, **kwargs)
+
+        if self.plot_special is None:
+            self.set_apspec(aperture, coordsys=coordsys)
+            self.plotter(reset_ylimits=reset_ylimits, **kwargs)
+        else:
+            #self.plot_special(reset_ylimits=reset_ylimits, **dict(kwargs.items()+self.plot_special_kwargs.items()))
+
+            sp = self.get_apspec(aperture, coordsys=coordsys)
+            sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
+            sp.plot_special(reset_ylimits=reset_ylimits, **dict(kwargs.items()+self.plot_special_kwargs.items()))
 
     def get_spectrum(self, x, y):
         """
         Very simple: get the spectrum at coordinates x,y
 
+        (inherits fitter from self)
+
         Returns a SpectroscopicAxis instance
         """
-        return pyspeckit.Spectrum( xarr=self.xarr.copy(), data = self.cube[:,y,x],
+        sp = pyspeckit.Spectrum( xarr=self.xarr.copy(), data = self.cube[:,y,x],
                 header=self.header)
+
+        sp.specfit = copy.copy(self.specfit)
+
+        if hasattr(self,'parcube'):
+            sp.specfit.modelpars = self.parcube[:,y,x]
+            sp.specfit.npeaks = self.specfit.fitter.npeaks
+            sp.specfit.model = self.specfit.fitter.n_modelfunc(sp.specfit.modelpars)(self.xarr)
+
+            # set the parinfo values correctly for annotations
+            for pi,p,e in zip(sp.specfit.parinfo, sp.specfit.modelpars, self.errcube[:,y,x]):
+                pi['value'] = p
+                pi['error'] = e
+
+        return sp
 
     def get_apspec(self, aperture, coordsys=None):
         """
@@ -129,9 +175,13 @@ class Cube(spectrum.Spectrum):
 
         import cubes
         if coordsys is not None:
-            return pyspeckit.Spectrum(xarr=self.xarr.copy(), data=cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs ), header=self.header)
+            sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs ), header=self.header)
         else:
-            return pyspeckit.Spectrum(xarr=self.xarr.copy(), data=cubes.extract_aperture( self.cube, aperture , coordsys=None), header=self.header)
+            sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=cubes.extract_aperture( self.cube, aperture , coordsys=None), header=self.header)
+
+        sp.specfit = copy.copy(self.specfit)
+
+        return sp
 
     def set_apspec(self, aperture, coordsys=None):
         """
@@ -430,9 +480,6 @@ class Cube(spectrum.Spectrum):
         cubefile = pyfits.open(fitsfilename)
         cube = cubefile[0].data
 
-        self.parcube = cube[:npars,:,:]
-        self.errcube = cube[npars:npars*2,:,:]
-
         # grab a spectrum and fit it however badly you want
         # this is just to __init__ the relevant data structures
         x,y = _temp_fit_loc
@@ -442,6 +489,9 @@ class Cube(spectrum.Spectrum):
                 fittype = cubefile[0].header.get('FITTYPE')
             else:
                 raise KeyError("Must specify FITTYPE or include it in cube header.")
+
+        self.parcube = cube[:npars,:,:]
+        self.errcube = cube[npars:npars*2,:,:]
 
         sp.specfit(fittype=fittype, guesses=self.parcube[:,y,x])
 
