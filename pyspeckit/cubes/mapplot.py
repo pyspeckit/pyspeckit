@@ -130,9 +130,9 @@ class MapPlotter(object):
             if estimator == 'max':
                 self.plane = self.Cube.cube.max(axis=0)
             elif estimator == 'int':
-                dx = np.abs(self.cube.xarr[1:] - self.cube.xarr[:-1])
-                dx = np.concatenate(dx,dx[-1])
-                self.plane = self.Cube.cube.sum(axis=0) * dx
+                dx = np.abs(self.Cube.xarr[1:] - self.Cube.xarr[:-1])
+                dx = np.concatenate([dx,[dx[-1]]])
+                self.plane = (self.Cube.cube * dx[:,np.newaxis,np.newaxis]).sum(axis=0)
             elif estimator[-5:] == ".fits":
                 self.plane = pyfits.getdata(estimator)
         elif type(estimator) is int:
