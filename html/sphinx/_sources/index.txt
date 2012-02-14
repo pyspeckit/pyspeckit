@@ -8,7 +8,7 @@ PySpecKit
 An `extensible <registration.html>`_ spectroscopic analysis toolkit for astronomy.
 
 If you're just getting started, see the `examples page
-<examples>`_.
+<examples>`.
 
 Download the `January 2012 version <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/January2012_Prerelease.tar.gz>`_,
 the `latest commit <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz>`_, see :doc:`install`, or see
