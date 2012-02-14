@@ -23,7 +23,11 @@
 
 <script type="text/javascript">
 if ((self.location.href.match('sphinx')) != ["sphinx"]){
-    self.location.href = self.location.href.replace("index.html","html/sphinx/index.html");
+    if ((self.location.href.match('index')) != ["index"]){
+        self.location.href = self.location.href.replace("pyspeckit.bitbucket.org","pyspeckit.bitbucket.org/html/sphinx/index.html");
+    } else {
+        self.location.href = self.location.href.replace("index.html","html/sphinx/index.html");
+    }
 }
 </script>
 
