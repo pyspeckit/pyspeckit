@@ -20,5 +20,15 @@
   })();
 
 </script>
+
+<script type="text/javascript">
+if (top.location!= self.location) {    //test if in an iframe
+    top.location = self.location.href; //if so, break out
+}
+if ((self.location.href.match('sphinx')) != ["sphinx"]){
+    self.location.href = self.location.href.replace("index.html","html/sphinx/index.html");
+}
+</script>
+
     
 </html>

@@ -91,7 +91,7 @@
 <p>x0,y0 - initial spectrum to use (defaults to lower-left corner)</p>
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.copy">
-<tt class="descname">copy</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.copy" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">copy</tt><big>(</big><em>deep=True</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a copy of the spectrum with its own plotter, fitter, etc.
 Useful for, e.g., comparing smoothed to unsmoothed data</p>
 </dd></dl>
@@ -106,7 +106,7 @@ units</p>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.fiteach">
-<tt class="descname">fiteach</tt><big>(</big><em>errspec=None</em>, <em>errmap=None</em>, <em>guesses=()</em>, <em>verbose=True</em>, <em>verbose_level=1</em>, <em>quiet=True</em>, <em>signal_cut=3</em>, <em>usemomentcube=False</em>, <em>blank_value=0</em>, <em>integral=True</em>, <em>direct=False</em>, <em>absorption=False</em>, <em>use_nearest_as_guess=False</em>, <em>start_from_point=(0</em>, <em>0)</em>, <em>multicore=0</em>, <em>max=&lt;function nanmax at 0x103c4f1b8&gt;</em>, <em>**fitkwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.fiteach" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">fiteach</tt><big>(</big><em>errspec=None</em>, <em>errmap=None</em>, <em>guesses=()</em>, <em>verbose=True</em>, <em>verbose_level=1</em>, <em>quiet=True</em>, <em>signal_cut=3</em>, <em>usemomentcube=False</em>, <em>blank_value=0</em>, <em>integral=True</em>, <em>direct=False</em>, <em>absorption=False</em>, <em>use_nearest_as_guess=False</em>, <em>start_from_point=(0</em>, <em>0)</em>, <em>multicore=0</em>, <em>**fitkwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.fiteach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit a spectrum to each valid pixel in the cube</p>
 <p>For guesses, priority is <em>use_nearest_as_guess</em>, <em>usemomentcube</em>,
 <em>guesses</em>, None</p>
@@ -147,12 +147,20 @@ numpy.nan</dd>
 <tt class="descname">get_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.get_apspec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract an aperture using cubes.extract_aperture
 (defaults to Cube coordinates)</p>
+<dl class="docutils">
+<dt><em>aperture</em> [tuple or list] (x, y, radius)</dt>
+<dd>The aperture to use when extracting the data</dd>
+<dt><em>coordsys</em> [ &#8216;celestial&#8217; | &#8216;galactic&#8217; | None]</dt>
+<dd>the coordinate system the aperture is specified in
+None indicates pixel coordinates (default)</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.get_spectrum">
 <tt class="descname">get_spectrum</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.get_spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Very simple: get the spectrum at coordinates x,y</p>
+<p>(inherits fitter from self)</p>
 <p>Returns a SpectroscopicAxis instance</p>
 </dd></dl>
 
@@ -477,7 +485,7 @@ return a .fits file or a spectrum.</p>
 
 <dl class="function">
 <dt id="pyspeckit.cubes.cubes.spectral_smooth">
-<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">spectral_smooth</tt><big>(</big><em>cube</em>, <em>smooth_factor</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.spectral_smooth" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">spectral_smooth</tt><big>(</big><em>cube</em>, <em>smooth_factor</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.spectral_smooth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooth the cube along the spectral direction</p>
 </dd></dl>
 
@@ -494,7 +502,7 @@ average=sum and dvmul=True to get an integrated value)</p>
 
 <dl class="function">
 <dt id="pyspeckit.cubes.cubes.subimage_integ">
-<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">subimage_integ</tt><big>(</big><em>cube</em>, <em>xcen</em>, <em>xwidth</em>, <em>ycen</em>, <em>ywidth</em>, <em>vrange</em>, <em>header=None</em>, <em>average=&lt;function mean at 0x103bef938&gt;</em>, <em>dvmult=False</em>, <em>return_HDU=False</em>, <em>units='pixels'</em>, <em>zunits=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.subimage_integ" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">subimage_integ</tt><big>(</big><em>cube</em>, <em>xcen</em>, <em>xwidth</em>, <em>ycen</em>, <em>ywidth</em>, <em>vrange</em>, <em>header=None</em>, <em>average=&lt;function mean at 0x105bd5488&gt;</em>, <em>dvmult=False</em>, <em>return_HDU=False</em>, <em>units='pixels'</em>, <em>zunits=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.subimage_integ" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a sub-image from a data cube integrated over the specified velocity range</p>
 <p>All units assumed to be pixel units</p>
 <p>cube has dimensions (velocity, y, x)</p>
@@ -546,7 +554,7 @@ average=sum and dvmul=True to get an integrated value)</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Jan 28, 2012.
+      Last updated on Feb 14, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

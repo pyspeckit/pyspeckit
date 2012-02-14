@@ -81,7 +81,7 @@ minus the spectrum) over the selected range</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.annotate">
-<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.1</em>, <em>handlelength=0.1</em>, <em>handletextpad=0.1</em>, <em>frameon=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.10000000000000001</em>, <em>handlelength=0.10000000000000001</em>, <em>handletextpad=0.10000000000000001</em>, <em>frameon=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a legend to the plot showing the fitted parameters</p>
 <p>clearlegend() will remove the legend</p>
 <p>kwargs passed to legend</p>
@@ -187,7 +187,7 @@ will be returned as well</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.multifit">
-<tt class="descname">multifit</tt><big>(</big><em>fittype=None</em>, <em>renormalize='auto'</em>, <em>annotate=None</em>, <em>color='k'</em>, <em>composite_fit_color='red'</em>, <em>component_fit_color='red'</em>, <em>lw=0.5</em>, <em>composite_lw=0.75</em>, <em>component_lw=0.75</em>, <em>show_components=None</em>, <em>verbose=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.multifit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">multifit</tt><big>(</big><em>fittype=None</em>, <em>renormalize='auto'</em>, <em>annotate=None</em>, <em>show_components=None</em>, <em>verbose=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.multifit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit multiple gaussians (or other profiles)</p>
 <dl class="docutils">
 <dt>fittype - What function will be fit?  fittype must have been Registryed in the</dt>
@@ -199,7 +199,7 @@ will be returned as well</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.peakbgfit">
-<tt class="descname">peakbgfit</tt><big>(</big><em>usemoments=True</em>, <em>annotate=None</em>, <em>vheight=True</em>, <em>height=0</em>, <em>negamp=None</em>, <em>fittype=None</em>, <em>renormalize='auto'</em>, <em>color='k'</em>, <em>composite_fit_color='red'</em>, <em>component_fit_color='blue'</em>, <em>lw=1.0</em>, <em>composite_lw=1.0</em>, <em>component_lw=1.0</em>, <em>show_components=None</em>, <em>debug=False</em>, <em>nsigcut_moments=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.peakbgfit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">peakbgfit</tt><big>(</big><em>usemoments=True</em>, <em>annotate=None</em>, <em>vheight=True</em>, <em>height=0</em>, <em>negamp=None</em>, <em>fittype=None</em>, <em>renormalize='auto'</em>, <em>show_components=None</em>, <em>debug=False</em>, <em>nsigcut_moments=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.peakbgfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit a single peak (plus a background)</p>
 <dl class="docutils">
 <dt>usemoments - The initial guess will be set by the fitter&#8217;s &#8216;moments&#8217; function</dt>
@@ -222,7 +222,7 @@ negamp - If True, assumes amplitude is negative.  If False, assumes positive.  I
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.plot_fit">
-<tt class="descname">plot_fit</tt><big>(</big><em>annotate=None</em>, <em>show_components=None</em>, <em>color='k'</em>, <em>composite_fit_color='red'</em>, <em>component_fit_color='blue'</em>, <em>lw=0.5</em>, <em>composite_lw=0.75</em>, <em>component_lw=0.75</em>, <em>**component_kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_fit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_fit</tt><big>(</big><em>annotate=None</em>, <em>show_components=None</em>, <em>composite_fit_color='red'</em>, <em>component_fit_color='blue'</em>, <em>lw=0.5</em>, <em>composite_lw=0.75</em>, <em>component_lw=0.75</em>, <em>component_kwargs={}</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the fit.  Must have fitted something before calling this!</p>
 <p>It will be automatically called whenever a spectrum is fit (assuming an
 axis for plotting exists)</p>
@@ -380,7 +380,7 @@ It should be extended to do other things later</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Jan 28, 2012.
+      Last updated on Feb 14, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

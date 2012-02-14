@@ -132,7 +132,7 @@ others, but it&#8217;s not clear if that&#8217;s a sensible default</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.components">
-<tt class="descname">components</tt><big>(</big><em>xarr</em>, <em>pars</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.components" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">components</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.components" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a numpy ndarray of the independent components of the fits</p>
 </dd></dl>
 
@@ -283,7 +283,7 @@ H+A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
 ref for line params: <a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat">http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat</a></p>
 <dl class="data">
 <dt id="pyspeckit.spectrum.models.hcn.aval_dict">
-<tt class="descclassname">pyspeckit.spectrum.models.hcn.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'10-01': 2.4075e-05, '12-01': 2.4075e-05, '11-01': 2.4075e-05}</em><a class="headerlink" href="#pyspeckit.spectrum.models.hcn.aval_dict" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hcn.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'10-01': 2.4074999999999999e-05, '12-01': 2.4074999999999999e-05, '11-01': 2.4074999999999999e-05}</em><a class="headerlink" href="#pyspeckit.spectrum.models.hcn.aval_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Line strengths of the 15 hyperfine components in J = 1 -  0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
 Line strengths are normalized in such a way that summing over all initial J = 1
@@ -350,13 +350,13 @@ strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.
 </dl>
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine">
-<tt class="descname">hyperfine</tt><big>(</big><em>xarr</em>, <em>Tex=5.0</em>, <em>tau=0.1</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_components=False</em>, <em>Tbackground=2.73</em>, <em>amp=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">hyperfine</tt><big>(</big><em>xarr</em>, <em>Tex=5.0</em>, <em>tau=0.10000000000000001</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_components=False</em>, <em>Tbackground=2.73</em>, <em>amp=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp">
-<tt class="descname">hyperfine_amp</tt><big>(</big><em>xarr</em>, <em>amp=None</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_components=False</em>, <em>Tbackground=2.73</em>, <em>Tex=5.0</em>, <em>tau=0.1</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">hyperfine_amp</tt><big>(</big><em>xarr</em>, <em>amp=None</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_components=False</em>, <em>Tbackground=2.73</em>, <em>Tex=5.0</em>, <em>tau=0.10000000000000001</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp" title="Permalink to this definition">¶</a></dt>
 <dd><p>wrapper of self.hyperfine with order of arguments changed</p>
 </dd></dl>
 
@@ -396,7 +396,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x1072ad7d0&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x10957a578&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -419,7 +419,7 @@ Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 
 <a class="reference external" href="http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D">http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D</a></p>
 <dl class="data">
 <dt id="pyspeckit.spectrum.models.n2hp.aval_dict">
-<tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'121-011': 1.512, '121-010': 2.015, '121-012': 0.101, '111-010': 1.209, '111-011': 0.907, '111-012': 1.512, '122-012': 0.907, '122-011': 2.721, '112-012': 2.721, '112-011': 0.907, '110-011': 3.628, '101-012': 2.016, '101-011': 1.209, '101-010': 0.403, '123-012': 3.628}</em><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.aval_dict" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'121-011': 1.512, '121-010': 2.0150000000000001, '121-012': 0.10100000000000001, '111-010': 1.2090000000000001, '111-011': 0.90700000000000003, '111-012': 1.512, '122-012': 0.90700000000000003, '122-011': 2.7210000000000001, '112-012': 2.7210000000000001, '112-011': 0.90700000000000003, '110-011': 3.6280000000000001, '101-012': 2.016, '101-011': 1.2090000000000001, '101-010': 0.40300000000000002, '123-012': 3.6280000000000001}</em><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.aval_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Line strengths of the 15 hyperfine components in J=1-0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
 Line strengths are normalized in such a way that summing over all initial J = 1
@@ -524,7 +524,7 @@ z = (x+i*gam)/(sig*sqrt(2))</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Jan 28, 2012.
+      Last updated on Feb 14, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
