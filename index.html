@@ -33,11 +33,12 @@ function stripTrailingSlash(str) {
 
 if ((self.location.href.match('sphinx')) != ["sphinx"]){
     if ((self.location.href.match('index')) != ["index"]){
-        self.location.href = stripTrailingSlash(
-                self.location.href.replace("pyspeckit.bitbucket.org",
-                    "pyspeckit.bitbucket.org/html/sphinx/index.html")
-                );
-    } else {
+        if ((self.location.href.match('pyspeckit.bitbucket.org')) {
+            self.location.href = stripTrailingSlash(
+                    self.location.href.replace("pyspeckit.bitbucket.org",
+                        "pyspeckit.bitbucket.org/html/sphinx/index.html")
+                    );
+    }} else {
         self.location.href = self.location.href.replace("index.html","html/sphinx/index.html");
     }
 }
