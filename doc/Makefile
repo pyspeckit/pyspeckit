@@ -103,6 +103,7 @@ latex:
 latexpdf:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
+	@echo "WARNING: Don't forget to ln -s ../../html/images . in the _build directory"
 	make -C $(BUILDDIR)/latex all-pdf
 	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
 	@echo "******** THIS HAS BEEN ADDED BY AG *******"
