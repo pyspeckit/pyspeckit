@@ -365,12 +365,19 @@ class Cube(spectrum.Spectrum):
             # this is absolutely perplexing.  I have DEFINITELY had success
             # using for TEMP in merged_result, but now it doesn't work any more?!
             # ?!!?!?!
-            for mr in merged_result:
-                for TEMP in mr:
+            try:
+                for TEMP in merged_results:
                     ((x,y), modelpars, modelerrs) = TEMP
                     self.parcube[:,y,x] = modelpars
                     self.errcube[:,y,x] = modelerrs
                     self.has_fit[y,x] = max(modelpars) > 0
+            except ValueError:
+                for mr in merged_result:
+                    for TEMP in mr:
+                        ((x,y), modelpars, modelerrs) = TEMP
+                        self.parcube[:,y,x] = modelpars
+                        self.errcube[:,y,x] = modelerrs
+                        self.has_fit[y,x] = max(modelpars) > 0
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 fit_a_pixel((ii,x,y))
@@ -439,10 +446,15 @@ class Cube(spectrum.Spectrum):
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             result = parallel_map(moment_a_pixel, sequence, numcores=multicore)
             merged_result = [core_result for core_result in result if core_result is not None]
-            for mr in merged_result:
-                for TEMP in mr:
+            try:
+                for TEMP in merged_results:
                     ((x,y), moments) = TEMP
                     self.momentcube[:,y,x] = moments
+            except ValueError:
+                for mr in merged_result:
+                    for TEMP in mr:
+                        ((x,y), moments) = TEMP
+                        self.momentcube[:,y,x] = moments
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 moment_a_pixel((ii,x,y))
