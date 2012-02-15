@@ -2,8 +2,7 @@
 
 import os, shutil
 try:
-    import setuptools
-    from setuptools import setup
+    from distribute import setup
 except ImportError:
     from distutils.core import setup
 
