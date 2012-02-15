@@ -423,7 +423,7 @@ class ammonia_model(fitter.SimpleFitter):
             # hack: remove 'fixed' pars
             parinfo_with_fixed = parinfo
             parinfo = [p for p in parinfo_with_fixed if not p['fixed']]
-            fixed_kwargs = dict((k,v) for k,v in parinfo_with_fixed if p['fixed'])
+            fixed_kwargs = dict((p['parname'],p['value']) for p in parinfo_with_fixed if p['fixed'])
             # don't do this - it breaks the NEXT call because npars != len(parnames) self.parnames = [p['parname'] for p in parinfo]
             # this is OK - not a permanent change
             parnames = [p['parname'] for p in parinfo]
