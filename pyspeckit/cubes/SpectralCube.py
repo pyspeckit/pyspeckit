@@ -366,7 +366,7 @@ class Cube(spectrum.Spectrum):
             # using for TEMP in merged_result, but now it doesn't work any more?!
             # ?!!?!?!
             try:
-                for TEMP in merged_results:
+                for TEMP in merged_result:
                     ((x,y), modelpars, modelerrs) = TEMP
                     self.parcube[:,y,x] = modelpars
                     self.errcube[:,y,x] = modelerrs
@@ -447,7 +447,7 @@ class Cube(spectrum.Spectrum):
             result = parallel_map(moment_a_pixel, sequence, numcores=multicore)
             merged_result = [core_result for core_result in result if core_result is not None]
             try:
-                for TEMP in merged_results:
+                for TEMP in merged_result:
                     ((x,y), moments) = TEMP
                     self.momentcube[:,y,x] = moments
             except ValueError:
