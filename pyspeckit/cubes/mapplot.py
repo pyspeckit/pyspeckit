@@ -72,7 +72,10 @@ class MapPlotter(object):
     def mapplot(self, convention='calabretta', colorbar=True, useaplpy=True,
             vmin=None, vmax=None, **kwargs):
         """
-        Plot up a map based on an input data cube
+        Plot up a map based on an input data cube.
+
+        The map to be plotted is selected using :function:`makeplane`.
+        The :param:`estimator` keyword argument is passed to that function.
 
         `kwargs` are passed to aplpy.show_colorscale or
         matplotlib.pyplot.imshow (depending on whether aplpy is installed)

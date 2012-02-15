@@ -32,6 +32,9 @@ def moments(Xax, data, vheight=True, estimator=np.median, negamp=None,
 
     Xax = np.array(Xax)
 
+    if data.min() == data.max():
+        return [0]*(3+vheight)
+
     dx = np.abs(np.mean(np.diff(Xax))) # assume a regular grid
     integral = (data*dx).sum()
     height = estimator(data)
@@ -42,11 +45,15 @@ def moments(Xax, data, vheight=True, estimator=np.median, negamp=None,
     height_cut_high = height+nsigcut*noise_guess if nsigcut is not None else height
     
     # try to figure out whether pos or neg based on the minimum width of the pos/neg peaks
-    Lpeakintegral = integral - height_cut_low*(data<height_cut_low).sum()*dx - (data[data>height_cut_low]*dx).sum()
+    data_gt_low = data>height_cut_low
+    data_lt_low = data<height_cut_low
+    Lpeakintegral = integral - height_cut_low*(data_lt_low).sum()*dx - (data[data_gt_low]*dx).sum()
     Lamplitude = data.min()-height
     Lwidth_x = Lpeakintegral / Lamplitude / np.sqrt(2*np.pi)
 
-    Hpeakintegral = integral - height*(data>height_cut_high).sum()*dx - (data[data<height_cut_high]*dx).sum()
+    data_gt_high = data>height_cut_high
+    data_lt_high = data<height_cut_high
+    Hpeakintegral = integral - height*(data_gt_high).sum()*dx - (data[data_lt_high]*dx).sum()
     Hamplitude = data.max()-height
     Hwidth_x = Hpeakintegral / Hamplitude / np.sqrt(2*np.pi)
 
