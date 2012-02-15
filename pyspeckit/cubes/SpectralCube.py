@@ -628,4 +628,4 @@ class CubeStack(Cube):
             print "Make sure you run the cube fitter first."
             return
 
-        fitcubefile.writeto(fitcubefilename, clobber=clobber)
+        fitcubefile.writeto(fitcubefilename, clobber=clobber, output_verify='fix')
