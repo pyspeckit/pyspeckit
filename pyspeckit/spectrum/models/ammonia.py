@@ -423,6 +423,7 @@ class ammonia_model(fitter.SimpleFitter):
             # hack: remove 'fixed' pars
             parinfo_with_fixed = parinfo
             parinfo = [p for p in parinfo_with_fixed if not p['fixed']]
+            fixed_kwargs = dict((k,v) for k,v in parinfo_with_fixed if p['fixed'])
             # don't do this - it breaks the NEXT call because npars != len(parnames) self.parnames = [p['parname'] for p in parinfo]
             # this is OK - not a permanent change
             parnames = [p['parname'] for p in parinfo]
@@ -430,6 +431,9 @@ class ammonia_model(fitter.SimpleFitter):
         else: 
             self.parinfo = parinfo
             parinfo_with_fixed = None
+            fixed_kwargs = {}
+
+        fitfun_kwargs = dict(kwargs.items()+fixed_kwargs.items())
 
         npars = len(parinfo)/self.npeaks
 
@@ -442,9 +446,9 @@ class ammonia_model(fitter.SimpleFitter):
 
         def mpfitfun(x,y,err):
             if err is None:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=[pi['parname'] for pi in parinfo], **kwargs)(x))]
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=[pi['parname'] for pi in parinfo], **fitfun_kwargs)(x))]
             else:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=[pi['parname'] for pi in parinfo], **kwargs)(x))/err]
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=[pi['parname'] for pi in parinfo], **fitfun_kwargs)(x))/err]
             return f
 
         if veryverbose:

@@ -430,7 +430,9 @@ class Spectrum(object):
         newspec.plotter = self.plotter.copy(parent=newspec)
         newspec._register_fitters()
         newspec.specfit = self.specfit.copy(parent=newspec)
+        newspec.specfit.specplotter = newspec.plotter
         newspec.baseline = self.baseline.copy(parent=newspec)
+        newspec.baseline.specplotter = newspec.plotter
 
         return newspec
 

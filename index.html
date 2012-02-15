@@ -33,7 +33,7 @@ function stripTrailingSlash(str) {
 
 if ((self.location.href.match('sphinx')) != ["sphinx"]){
     if ((self.location.href.match('index')) != ["index"]){
-        if ((self.location.href.match('pyspeckit.bitbucket.org')) {
+        if (self.location.href.match('pyspeckit.bitbucket.org')){
             self.location.href = stripTrailingSlash(
                     self.location.href.replace("pyspeckit.bitbucket.org",
                         "pyspeckit.bitbucket.org/html/sphinx/index.html")
