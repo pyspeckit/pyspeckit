@@ -604,9 +604,15 @@ class CubeStack(Cube):
         print "Concatenating data"
         self.xarr = spectrum.units.SpectroscopicAxes([sp.xarr for sp in cubelist])
         self.cube = np.ma.concatenate([cube.cube for cube in cubelist])
-        if self.cube.mask in (False,np.bool_(False)):
-            # mask causes major problems internally for numpy...
-            self.cube = np.array(self.cube)
+        if hasattr(self.cube,'mask'):
+            try:
+                if self.cube.mask in (False,np.bool_(False)):
+                    # mask causes major problems internally for numpy...
+                    self.cube = np.array(self.cube)
+            except ValueError:
+                # this means that self.cube.mask is an array;
+                # techically that's alright
+                pass
         self._sort()
         self.data = self.cube[:,y0,x0]
         self.error = None
