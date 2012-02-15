@@ -349,9 +349,13 @@ class Spectrum(object):
             allowed values are any supported physical unit, 'pixel'
         """
         
-        x_in_units = self.xarr.as_unit(units)
-        start_ind = x_in_units.x_to_pix(start)
-        stop_ind  = x_in_units.x_to_pix(stop)
+        if units in ('pixel','pixels'):
+            start_ind = start
+            stop_ind  = stop
+        else:
+            x_in_units = self.xarr.as_unit(units)
+            start_ind = x_in_units.x_to_pix(start)
+            stop_ind  = x_in_units.x_to_pix(stop)
         spectrum_slice = slice(start_ind,stop_ind)
 
         if copy:
