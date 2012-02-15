@@ -432,7 +432,7 @@ class Cube(spectrum.Spectrum):
         if multicore > 0:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             result = parallel_map(moment_a_pixel, sequence, numcores=multicore)
-            merged_result = [core_result for core_result in result if core_result is not None ]
+            merged_result = [tmp for tmp in core_result for core_result in result if core_result is not None ]
             for TEMP in merged_result:
                 ((x,y), moments) = TEMP
                 self.momentcube[:,y,x] = moments

@@ -10,7 +10,7 @@ except ImportError:
 with open('README.txt') as file:
     long_description = file.read()
 
-version_base="0.1.1"
+version_base="0.1.2"
 tagname = "pyspeckit_%s" % (version_base)
 
 if os.path.exists(".hg"):
