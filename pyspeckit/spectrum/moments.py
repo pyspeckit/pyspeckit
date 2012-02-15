@@ -32,8 +32,13 @@ def moments(Xax, data, vheight=True, estimator=np.median, negamp=None,
 
     Xax = np.array(Xax)
 
-    if data.min() == data.max():
+    # this is completely absurd.  How the hell do you test for masks?!
+    if (data.min() == data.max()):
         return [0]*(3+vheight)
+    elif hasattr(data,'mask'):
+        # why do I have to do this?  I shouldn't.
+        if data.mask.sum() > data.shape[0]-1:
+            return [0]*(3+vheight)
 
     dx = np.abs(np.mean(np.diff(Xax))) # assume a regular grid
     integral = (data*dx).sum()
