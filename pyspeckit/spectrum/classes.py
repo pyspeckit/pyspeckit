@@ -359,6 +359,16 @@ class Spectrum(object):
         if sp.error is not None:
             sp.error = sp.error[spectrum_slice]
         sp.xarr = sp.xarr[spectrum_slice]
+
+        # this should be done by deepcopy, but deepcopy fails with current pyfits
+        sp.plotter = copy.copy(self.plotter)
+        sp.plotter.Spectrum = sp
+        sp.specfit = copy.copy(self.specfit)
+        sp.specfit.Spectrum = sp
+        sp.specfit.specplotter = sp.plotter
+        sp.baseline = copy.copy(self.baseline)
+        sp.baseline.Spectrum = sp
+        sp.baseline.specplotter = sp.plotter
         
         return sp
     
@@ -373,6 +383,16 @@ class Spectrum(object):
         if sp.error is not None:
             sp.error = sp.error.__getitem__(indx)
         sp.xarr = sp.xarr.__getitem__(indx)
+
+        # this should be done by deepcopy, but deepcopy fails with current pyfits
+        sp.plotter = copy.copy(self.plotter)
+        sp.plotter.Spectrum = sp
+        sp.specfit = copy.copy(self.specfit)
+        sp.specfit.Spectrum = sp
+        sp.specfit.specplotter = sp.plotter
+        sp.baseline = copy.copy(self.baseline)
+        sp.baseline.Spectrum = sp
+        sp.baseline.specplotter = sp.plotter
         
         return sp
 

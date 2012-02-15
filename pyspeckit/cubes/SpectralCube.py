@@ -107,6 +107,18 @@ class Cube(spectrum.Spectrum):
             newcube.error = newcube.error[spectrum_slice]
         newcube.xarr = newcube.xarr[spectrum_slice]
         
+        # this should be done by deepcopy, but deepcopy fails with current pyfits
+        newcube.plotter = copy.copy(self.plotter)
+        newcube.plotter.Spectrum = newcube
+        newcube.specfit = copy.copy(self.specfit)
+        newcube.specfit.Spectrum = newcube
+        newcube.specfit.specplotter = newcube.plotter
+        newcube.baseline = copy.copy(self.baseline)
+        newcube.baseline.Spectrum = newcube
+        newcube.baseline.specplotter = newcube.plotter
+        newcube.mapplot = copy.copy(self.mapplot)
+        newcube.mapplot.Cube = newcube
+        
         return newcube
     
 
@@ -125,6 +137,18 @@ class Cube(spectrum.Spectrum):
             newcube.error = newcube.error.__getitem__(indx[0])
         newcube.xarr = newcube.xarr.__getitem__(indx[0])
         
+        # this should be done by deepcopy, but deepcopy fails with current pyfits
+        newcube.plotter = copy.copy(self.plotter)
+        newcube.plotter.Spectrum = newcube
+        newcube.specfit = copy.copy(self.specfit)
+        newcube.specfit.Spectrum = newcube
+        newcube.specfit.specplotter = newcube.plotter
+        newcube.baseline = copy.copy(self.baseline)
+        newcube.baseline.Spectrum = newcube
+        newcube.baseline.specplotter = newcube.plotter
+        newcube.mapplot = copy.copy(self.mapplot)
+        newcube.mapplot.Cube = newcube
+
         return newcube
 
     def plot_spectrum(self, x, y, **kwargs):
