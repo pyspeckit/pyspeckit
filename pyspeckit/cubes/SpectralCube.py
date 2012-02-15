@@ -79,6 +79,54 @@ class Cube(spectrum.Spectrum):
                         self.data.min(), self.data.max(), self.units,
                         self.cube.shape, str(hex(self.__hash__())))
 
+    def slice(self, start=None, stop=None, units='pixel'):
+        """Slicing the spectrum
+        
+        Parameters:
+        -----------
+        
+        start: numpy.float or int
+            start of slice
+        stop:  numpy.float or int
+            stop of slice
+        units: str
+            allowed values are any supported physical unit, 'pixel'
+        """
+        
+        x_in_units = self.xarr.as_unit(units)
+        start_ind = x_in_units.x_to_pix(start)
+        stop_ind  = x_in_units.x_to_pix(stop)
+        spectrum_slice = slice(start_ind,stop_ind)
+
+        newcube = copy.copy(self)
+        newcube.cube = newcube.cube[spectrum_slice,:,:]
+        if hasattr(newcube,'errcube'):
+            newcube.errcube = newcube.errcube[spectrum_slice,:,:]
+        newcube.data = newcube.data[spectrum_slice]
+        if newcube.error is not None:
+            newcube.error = newcube.error[spectrum_slice]
+        newcube.xarr = newcube.xarr[spectrum_slice]
+        
+        return newcube
+    
+
+    def __getitem__(self, indx):
+        """
+        If [] is used on a cube, slice on the cube and use
+        the first dimension to slice on the xarr and the data
+        """
+
+        newcube = copy.copy(self)
+        newcube.cube = newcube.cube.__getitem__(indx)
+        if hasattr(newcube,'errcube'):
+            newcube.errcube = newcube.errcube.__getitem__(indx)
+        newcube.data = newcube.data.__getitem__(indx[0])
+        if newcube.error is not None:
+            newcube.error = newcube.error.__getitem__(indx[0])
+        newcube.xarr = newcube.xarr.__getitem__(indx[0])
+        
+        return newcube
+
     def plot_spectrum(self, x, y, **kwargs):
         """
         Fill the .data array with a real spectrum and plot it
@@ -613,3 +661,4 @@ class CubeStack(Cube):
             return
 
         fitcubefile.writeto(fitcubefilename, clobber=clobber)
+

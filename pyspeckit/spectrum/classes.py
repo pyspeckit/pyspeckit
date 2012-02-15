@@ -335,6 +335,47 @@ class Spectrum(object):
 
         return sp
 
+    def slice(self, start=None, stop=None, units='pixel'):
+        """Slicing the spectrum
+        
+        Parameters:
+        -----------
+        
+        start: numpy.float or int
+            start of slice
+        stop:  numpy.float or int
+            stop of slice
+        units: str
+            allowed values are any supported physical unit, 'pixel'
+        """
+        
+        x_in_units = self.xarr.as_unit(units)
+        start_ind = x_in_units.x_to_pix(start)
+        stop_ind  = x_in_units.x_to_pix(stop)
+        spectrum_slice = slice(start_ind,stop_ind)
+
+        sp = copy.copy(self)
+        sp.data = sp.data[spectrum_slice]
+        if sp.error is not None:
+            sp.error = sp.error[spectrum_slice]
+        sp.xarr = sp.xarr[spectrum_slice]
+        
+        return sp
+    
+    def __getitem__(self, indx):
+        """
+        Slice the data using pixel units (not quite the same as self.slice
+        because indx can be a slice object or numbers)
+        """
+
+        sp = copy.copy(self)
+        sp.data = sp.data.__getitem__(indx)
+        if sp.error is not None:
+            sp.error = sp.error.__getitem__(indx)
+        sp.xarr = sp.xarr.__getitem__(indx)
+        
+        return sp
+
 
     def smooth(self,smooth,**kwargs):
         """
