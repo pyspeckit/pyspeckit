@@ -362,11 +362,15 @@ class Cube(spectrum.Spectrum):
             # part I don't believe) any individual *fit* result can be None as
             # well (apparently the x,y pairs can also be None?)
             merged_result = [core_result for core_result in result if core_result is not None ]
-            for TEMP in merged_result:
-                ((x,y), modelpars, modelerrs) = TEMP
-                self.parcube[:,y,x] = modelpars
-                self.errcube[:,y,x] = modelerrs
-                self.has_fit[y,x] = max(modelpars) > 0
+            # this is absolutely perplexing.  I have DEFINITELY had success
+            # using for TEMP in merged_result, but now it doesn't work any more?!
+            # ?!!?!?!
+            for mr in merged_result:
+                for TEMP in mr:
+                    ((x,y), modelpars, modelerrs) = TEMP
+                    self.parcube[:,y,x] = modelpars
+                    self.errcube[:,y,x] = modelerrs
+                    self.has_fit[y,x] = max(modelpars) > 0
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 fit_a_pixel((ii,x,y))
