@@ -335,7 +335,7 @@ class Spectrum(object):
 
         return sp
 
-    def slice(self, start=None, stop=None, units='pixel'):
+    def slice(self, start=None, stop=None, units='pixel', copy=True):
         """Slicing the spectrum
         
         Parameters:
@@ -354,21 +354,25 @@ class Spectrum(object):
         stop_ind  = x_in_units.x_to_pix(stop)
         spectrum_slice = slice(start_ind,stop_ind)
 
-        sp = copy.copy(self)
+        if copy:
+            sp = copy.copy(self)
+        else:
+            sp=self
         sp.data = sp.data[spectrum_slice]
         if sp.error is not None:
             sp.error = sp.error[spectrum_slice]
         sp.xarr = sp.xarr[spectrum_slice]
 
-        # this should be done by deepcopy, but deepcopy fails with current pyfits
-        sp.plotter = copy.copy(self.plotter)
-        sp.plotter.Spectrum = sp
-        sp.specfit = copy.copy(self.specfit)
-        sp.specfit.Spectrum = sp
-        sp.specfit.specplotter = sp.plotter
-        sp.baseline = copy.copy(self.baseline)
-        sp.baseline.Spectrum = sp
-        sp.baseline.specplotter = sp.plotter
+        if copy:
+            # this should be done by deepcopy, but deepcopy fails with current pyfits
+            sp.plotter = copy.copy(self.plotter)
+            sp.plotter.Spectrum = sp
+            sp.specfit = copy.copy(self.specfit)
+            sp.specfit.Spectrum = sp
+            sp.specfit.specplotter = sp.plotter
+            sp.baseline = copy.copy(self.baseline)
+            sp.baseline.Spectrum = sp
+            sp.baseline.specplotter = sp.plotter
         
         return sp
     
