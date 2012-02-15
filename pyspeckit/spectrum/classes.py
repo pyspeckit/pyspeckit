@@ -294,12 +294,13 @@ class Spectrum(object):
         if x1pix == x2pix:
             raise IndexError("ERROR: Trying to crop to zero size.")
 
-        self = self.slice(x1, x2, copy=False, **kwargs)
+        self = self.slice(x1pix, x2pix, units='pixels', copy=False, **kwargs)
         # a baseline spectrum is always defined, even if it is all zeros
         # this is needed to prevent size mismatches.  There may be a more
         # elegant way to do this...
         self.baseline.crop(x1pix,x2pix)
         self.specfit.crop(x1pix,x2pix)
+        self.specfit._full_model()
 
         if hasattr(self,'header'):
             history.write_history(self.header,"CROP: Cropped from %g to %g (pixel %i to %i)" % (x1,x2,x1pix,x2pix))
@@ -307,33 +308,6 @@ class Spectrum(object):
             if self.header.get('CRPIX1'):
                 self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
                 history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
-
-    def slice(self, x1, x2, units=None, copy=True):
-        """
-        Slice a spectrum.  Defaults to the current units.  Can specify 'pixels'
-        if you want to just slice by index
-        """
-        # do slice
-        x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(units)))
-        x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(units)))
-        if x1pix > x2pix: x1pix,x2pix = x2pix,x1pix
-        if x1pix == x2pix:
-            raise IndexError("ERROR: Trying to crop to zero size.")
-
-        if copy:
-            sp = self.copy()
-        else:
-            sp = self
-        # reset the plot window when cropping
-        sp.plotter.xmin = sp.xarr[x1pix]
-        sp.plotter.xmax = sp.xarr[x2pix]
-
-        sp.xarr = sp.xarr[x1pix:x2pix]
-        sp.data = sp.data[x1pix:x2pix]
-        if sp.error is not None:
-            sp.error = sp.error[x1pix:x2pix]
-
-        return sp
 
     def slice(self, start=None, stop=None, units='pixel', copy=True):
         """Slicing the spectrum
@@ -359,7 +333,7 @@ class Spectrum(object):
         spectrum_slice = slice(start_ind,stop_ind)
 
         if copy:
-            sp = copy.copy(self)
+            sp = self.copy()
         else:
             sp=self
         sp.data = sp.data[spectrum_slice]
@@ -367,17 +341,6 @@ class Spectrum(object):
             sp.error = sp.error[spectrum_slice]
         sp.xarr = sp.xarr[spectrum_slice]
 
-        if copy:
-            # this should be done by deepcopy, but deepcopy fails with current pyfits
-            sp.plotter = copy.copy(self.plotter)
-            sp.plotter.Spectrum = sp
-            sp.specfit = copy.copy(self.specfit)
-            sp.specfit.Spectrum = sp
-            sp.specfit.specplotter = sp.plotter
-            sp.baseline = copy.copy(self.baseline)
-            sp.baseline.Spectrum = sp
-            sp.baseline.specplotter = sp.plotter
-        
         return sp
     
     def __getitem__(self, indx):
@@ -463,10 +426,11 @@ class Spectrum(object):
             if self.error is not None:
                 newspec.error = copy.copy(self.error)
 
-        newspec.plotter = plotters.Plotter(newspec)
+        newspec.header = copy.copy(self.header)
+        newspec.plotter = self.plotter.copy(parent=newspec)
         newspec._register_fitters()
-        newspec.specfit = fitters.Specfit(newspec,Registry=newspec.Registry)
-        newspec.baseline = baseline.Baseline(newspec)
+        newspec.specfit = self.specfit.copy(parent=newspec)
+        newspec.baseline = self.baseline.copy(parent=newspec)
 
         return newspec
 

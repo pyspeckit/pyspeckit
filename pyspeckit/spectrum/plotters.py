@@ -12,6 +12,7 @@ import itertools
 from ..config import *
 import numpy as np
 from pyspeckit.specwarnings import warn
+import copy
 
 interactive_help_message = """
 Interactive key commands for plotter.  An additional help message may appear if
@@ -288,6 +289,23 @@ class Plotter(object):
             self._xclick1 = event.xdata
         elif self._xclick2 is None:
             self._xclick2 = event.xdata
+
+    def copy(self, parent=None):
+        """
+        Create a copy of the plotter with blank (uninitialized) axis & figure
+
+        [ parent ] 
+            A spectroscopic axis instance that is the parent of the specfit
+            instance.  This needs to be specified at some point, but defaults
+            to None to prevent overwriting a previous plot.
+        """
+
+        newplotter = copy.copy(self)
+        newplotter.Spectrum = parent
+        newplotter.axis = None
+        newplotter.figure = None
+
+        return newplotter
 
 def parse_units(labelstring):
     import re

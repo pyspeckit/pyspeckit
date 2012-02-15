@@ -3,6 +3,7 @@ import matplotlib
 from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
 import interactive
+import copy
 
 interactive_help_message = """
 Left-click twice to select or add to the baseline fitting range.  Middle or
@@ -369,3 +370,25 @@ class Baseline(interactive.Interactive):
         self.includemask = self.includemask[::factor]
         self.OKmask = self.OKmask[::factor]
 
+    def copy(self, parent=None):
+        """
+        Create a copy of the baseline fit
+
+        [ parent ] 
+            A spectroscopic axis instance that is the parent of the specfit
+            instance.  This needs to be specified at some point, but defaults
+            to None to prevent overwriting a previous plot.
+        """
+
+        newbaseline = copy.copy(self)
+        newbaseline.Spectrum = parent
+        newbaseline.OKmask = copy.copy( self.OKmask )
+        newbaseline.basespec = copy.copy( self.basespec )
+        newbaseline.baselinepars = copy.copy( self.baselinepars )
+
+        if parent is not None:
+            newbaseline.specplotter = parent.plotter
+        else:
+            newbaseline.specplotter = None
+
+        return newbaseline

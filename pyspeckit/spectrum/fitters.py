@@ -9,6 +9,7 @@ import models
 from pyspeckit.specwarnings import warn
 import interactive
 import inspect
+import copy
 
 class Registry(object):
     """
@@ -772,3 +773,31 @@ class Specfit(interactive.Interactive):
             else: 
                 print "error, wrong # of pars"
 
+    def copy(self, parent=None):
+        """
+        Create a copy of the spectral fit - includes copies of the _full_model,
+        the registry, the fitter, parinfo, modelpars, modelerrs, model, npeaks
+
+        [ parent ] 
+            A spectroscopic axis instance that is the parent of the specfit
+            instance.  This needs to be specified at some point, but defaults
+            to None to prevent overwriting a previous plot.
+        """
+
+        newspecfit = copy.copy(self)
+        newspecfit.Spectrum = parent
+        newspecfit.modelpars = self.modelpars
+        newspecfit.modelerrs = self.modelerrs
+        newspecfit.model = self.model
+        newspecfit.npeaks = self.npeaks
+        newspecfit.parinfo = copy.copy( self.parinfo )
+        newspecfit.fitter = copy.copy( self.fitter )
+        if hasattr(self,'fullmodel'):
+            newspecfit._full_model()
+
+        if parent is not None:
+            newspecfit.specplotter = parent.plotter
+        else:
+            newspecfit.specplotter = None
+
+        return newspecfit
