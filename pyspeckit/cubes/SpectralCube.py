@@ -218,6 +218,7 @@ class Cube(spectrum.Spectrum):
                 header=self.header)
 
         sp.specfit = copy.copy(self.specfit)
+        sp.specfit.Spectrum = sp
 
         if hasattr(self,'parcube'):
             sp.specfit.modelpars = self.parcube[:,y,x]
