@@ -107,7 +107,7 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, *
     for linename,sp in spdict.iteritems():
         sp.plotter.axis=axdict[linename] # permanent
         sp.plotter(axis=axdict[linename],title=title_dict[linename], **plotkwargs)
-        sp.specfit.specplotter = sp.plotter
+        sp.specfit.Spectrum.plotter = sp.plotter
         sp.specfit.selectregion(reset=True)
         if sp.specfit.modelpars is not None:
             sp.specfit.plot_fit(annotate=False, show_components=show_components)

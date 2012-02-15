@@ -43,7 +43,7 @@ class Baseline(interactive.Interactive):
         #self.excludemask = np.zeros(Spectrum.data.shape[0],dtype='bool')
         self.OKmask = np.ones(Spectrum.data.shape[0],dtype='bool')
         #self.Spectrum = Spectrum
-        self.specplotter = Spectrum.plotter
+        self.Spectrum.plotter = Spectrum.plotter
         self.blleg = None
         self.click = 0
         #self.nclicks_b1 = 0
@@ -102,8 +102,8 @@ class Baseline(interactive.Interactive):
                     debug=debug, **kwargs)
         else:
             if excludefit and specfit.modelpars is not None:
-                #vlo = self.specplotter.specfit.modelpars[1] - 2*self.specplotter.specfit.modelpars[2]
-                #vhi = self.specplotter.specfit.modelpars[1] + 2*self.specplotter.specfit.modelpars[2]
+                #vlo = self.Spectrum.plotter.specfit.modelpars[1] - 2*self.Spectrum.plotter.specfit.modelpars[2]
+                #vhi = self.Spectrum.plotter.specfit.modelpars[1] + 2*self.Spectrum.plotter.specfit.modelpars[2]
                 #exclude = [np.argmin(abs(self.Spectrum.xarr-vlo)),argmin(abs(self.Spectrum.xarr-vhi))]
                 specfit.fullsizemodel() # make sure the spectrum is the right size
                 if reset_selection:
@@ -174,7 +174,7 @@ class Baseline(interactive.Interactive):
                 self.unsubtract()
             self.subtracted = False
 
-        if self.specplotter.axis is not None:
+        if self.Spectrum.plotter.axis is not None:
             self.plot_baseline(baseline_fit_color=baseline_fit_color, **kwargs)
 
         # disconnect interactive window
@@ -189,35 +189,35 @@ class Baseline(interactive.Interactive):
         """
 
         # clear out the errorplot.  This should not be relevant...
-        if self.specplotter.errorplot is not None: 
-            for p in self.specplotter.errorplot:
+        if self.Spectrum.plotter.errorplot is not None: 
+            for p in self.Spectrum.plotter.errorplot:
                 if isinstance(p,matplotlib.collections.PolyCollection):
-                    if p in self.specplotter.axis.collections: 
-                        self.specplotter.axis.collections.remove(p)
+                    if p in self.Spectrum.plotter.axis.collections: 
+                        self.Spectrum.plotter.axis.collections.remove(p)
                 if isinstance(p,matplotlib.lines.Line2D):
-                    if p in self.specplotter.axis.lines: 
-                        self.specplotter.axis.lines.remove(p)
+                    if p in self.Spectrum.plotter.axis.lines: 
+                        self.Spectrum.plotter.axis.lines.remove(p)
 
         # if we subtract the baseline, replot the now-subtracted data with rescaled Y axes
         if self.subtracted:
-            if self.specplotter.axis is not None: 
-                for p in self.specplotter.axis.lines:
-                    self.specplotter.axis.lines.remove(p)
+            if self.Spectrum.plotter.axis is not None: 
+                for p in self.Spectrum.plotter.axis.lines:
+                    self.Spectrum.plotter.axis.lines.remove(p)
             plotmask = self.OKmask*False # include nothing...
             plotmask[self.xmin:self.xmax] = self.OKmask[self.xmin:self.xmax] # then include everything OK in range
-            self.specplotter.ymin = abs(self.Spectrum.data[plotmask].min())*1.1*np.sign(self.Spectrum.data[plotmask].min())
-            self.specplotter.ymax = abs(self.Spectrum.data[plotmask].max())*1.1*np.sign(self.Spectrum.data[plotmask].max())
-            self.specplotter.plot()
+            self.Spectrum.plotter.ymin = abs(self.Spectrum.data[plotmask].min())*1.1*np.sign(self.Spectrum.data[plotmask].min())
+            self.Spectrum.plotter.ymax = abs(self.Spectrum.data[plotmask].max())*1.1*np.sign(self.Spectrum.data[plotmask].max())
+            self.Spectrum.plotter.plot()
         else: # otherwise just overplot the fit
-            self.specplotter.axis.set_autoscale_on(False)
+            self.Spectrum.plotter.axis.set_autoscale_on(False)
             for p in self._plots:
                 # remove the old baseline plots
-                if p in self.specplotter.axis.lines:
-                    self.specplotter.axis.lines.remove(p)
-            self._plots += self.specplotter.axis.plot(self.Spectrum.xarr,self.basespec,color=baseline_fit_color)
+                if p in self.Spectrum.plotter.axis.lines:
+                    self.Spectrum.plotter.axis.lines.remove(p)
+            self._plots += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,self.basespec,color=baseline_fit_color)
 
         if annotate: self.annotate() # refreshes automatically
-        elif self.specplotter.autorefresh: self.specplotter.refresh()
+        elif self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
 
     def unsubtract(self):
         if self.subtracted:
@@ -233,23 +233,23 @@ class Baseline(interactive.Interactive):
         else:
             bltext = "bl: $y=$"+"".join(["$%+6.3gx^{%i}$" % (f,self.order-i)
                 for i,f in enumerate(self.baselinepars)])
-        #self.blleg = text(xloc,yloc     ,bltext,transform = self.specplotter.axis.transAxes)
+        #self.blleg = text(xloc,yloc     ,bltext,transform = self.Spectrum.plotter.axis.transAxes)
         self.clearlegend()
         pl = matplotlib.collections.CircleCollection([0],edgecolors=['k'])
-        self.blleg = self.specplotter.axis.legend(
+        self.blleg = self.Spectrum.plotter.axis.legend(
                 (pl,),
                 (bltext,),loc=loc,markerscale=0.001,
                 borderpad=0.1, handlelength=0.1, handletextpad=0.1, frameon = False
                 )
-        self.specplotter.axis.add_artist(self.blleg)
-        if self.specplotter.autorefresh: self.specplotter.refresh()
+        self.Spectrum.plotter.axis.add_artist(self.blleg)
+        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
   
     def clearlegend(self):
         if self.blleg is not None: 
             self.blleg.set_visible(False)
-            if self.blleg in self.specplotter.axis.artists:
-                self.specplotter.axis.artists.remove(self.blleg)
-        if self.specplotter.autorefresh: self.specplotter.refresh()
+            if self.blleg in self.Spectrum.plotter.axis.artists:
+                self.Spectrum.plotter.axis.artists.remove(self.blleg)
+        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
 
     def savefit(self):
         if self.baselinepars is not None and hasattr(self.Spectrum,'header'):
@@ -387,8 +387,8 @@ class Baseline(interactive.Interactive):
         newbaseline.baselinepars = copy.copy( self.baselinepars )
 
         if parent is not None:
-            newbaseline.specplotter = parent.plotter
+            newbaseline.Spectrum.plotter = parent.plotter
         else:
-            newbaseline.specplotter = None
+            newbaseline.Spectrum.plotter = None
 
         return newbaseline

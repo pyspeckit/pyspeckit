@@ -112,10 +112,8 @@ class Cube(spectrum.Spectrum):
         newcube.plotter.Spectrum = newcube
         newcube.specfit = copy.copy(self.specfit)
         newcube.specfit.Spectrum = newcube
-        newcube.specfit.specplotter = newcube.plotter
         newcube.baseline = copy.copy(self.baseline)
         newcube.baseline.Spectrum = newcube
-        newcube.baseline.specplotter = newcube.plotter
         newcube.mapplot = copy.copy(self.mapplot)
         newcube.mapplot.Cube = newcube
         
@@ -142,10 +140,10 @@ class Cube(spectrum.Spectrum):
         newcube.plotter.Spectrum = newcube
         newcube.specfit = copy.copy(self.specfit)
         newcube.specfit.Spectrum = newcube
-        newcube.specfit.specplotter = newcube.plotter
+        newcube.specfit.Spectrum.plotter = newcube.plotter
         newcube.baseline = copy.copy(self.baseline)
         newcube.baseline.Spectrum = newcube
-        newcube.baseline.specplotter = newcube.plotter
+        newcube.baseline.Spectrum.plotter = newcube.plotter
         newcube.mapplot = copy.copy(self.mapplot)
         newcube.mapplot.Cube = newcube
 

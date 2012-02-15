@@ -360,10 +360,10 @@ class Spectrum(object):
         sp.plotter.Spectrum = sp
         sp.specfit = copy.copy(self.specfit)
         sp.specfit.Spectrum = sp
-        sp.specfit.specplotter = sp.plotter
+        sp.specfit.Spectrum.plotter = sp.plotter
         sp.baseline = copy.copy(self.baseline)
         sp.baseline.Spectrum = sp
-        sp.baseline.specplotter = sp.plotter
+        sp.baseline.Spectrum.plotter = sp.plotter
         
         return sp
 
@@ -430,9 +430,9 @@ class Spectrum(object):
         newspec.plotter = self.plotter.copy(parent=newspec)
         newspec._register_fitters()
         newspec.specfit = self.specfit.copy(parent=newspec)
-        newspec.specfit.specplotter = newspec.plotter
+        newspec.specfit.Spectrum.plotter = newspec.plotter
         newspec.baseline = self.baseline.copy(parent=newspec)
-        newspec.baseline.specplotter = newspec.plotter
+        newspec.baseline.Spectrum.plotter = newspec.plotter
 
         return newspec
 

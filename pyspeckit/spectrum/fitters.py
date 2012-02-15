@@ -121,7 +121,7 @@ class Specfit(interactive.Interactive):
         self.fitkwargs = {}
         self.auto = False
         #self.Spectrum = Spectrum
-        self.specplotter = self.Spectrum.plotter
+        self.Spectrum.plotter = self.Spectrum.plotter
         self.fitleg=None
         self.residuals=None
         self.setfitspec()
@@ -169,7 +169,7 @@ class Specfit(interactive.Interactive):
         self.npeaks = 0
         self.fitkwargs = kwargs
         if interactive:
-            if self.specplotter.axis is None:
+            if self.Spectrum.plotter.axis is None:
                 raise Exception("Interactive fitting requires a plotter.")
             # reset button count & guesses on every __call__
             self.nclicks_b1 = 0
@@ -194,7 +194,7 @@ class Specfit(interactive.Interactive):
                 self.peakbgfit(usemoments=usemoments, vheight=False,
                         height=0.0, annotate=annotate,
                         show_components=show_components, debug=debug, **kwargs)
-            if self.specplotter.autorefresh: self.specplotter.refresh()
+            if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
         else:
             if multifit:
                 print "Can't fit with given fittype %s: it is not Registryed as a multifitter." % self.fittype
@@ -222,7 +222,7 @@ class Specfit(interactive.Interactive):
             midpt       = self.Spectrum.xarr[midpt_pixel]
             midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
             print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
-            self.specplotter.axis.fill_between(
+            self.Spectrum.plotter.axis.fill_between(
                     [midpt-eqw/2.0,midpt+eqw/2.0],
                     [0,0],
                     [midpt_level,midpt_level],
@@ -230,13 +230,13 @@ class Specfit(interactive.Interactive):
                     alpha=alpha,
                     label='EQW: %0.3g' % eqw)
             if annotate:
-                self.specplotter.axis.legend(
+                self.Spectrum.plotter.axis.legend(
                         [(matplotlib.collections.CircleCollection([0],facecolors=[plotcolor],edgecolors=[plotcolor]))],
                         [('EQW: %0.3g' % eqw)], 
                         markerscale=0.01, borderpad=0.1, handlelength=0.1,
                         handletextpad=0.1, loc=loc)
-            if self.specplotter.autorefresh:
-                self.specplotter.refresh()
+            if self.Spectrum.plotter.autorefresh:
+                self.Spectrum.plotter.refresh()
         return eqw
 
     def register_fitter(self,*args,**kwargs):
@@ -345,7 +345,7 @@ class Specfit(interactive.Interactive):
         self.modelerrs = mpperr.tolist()
         self.parinfo = self.fitter.parinfo
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
-        if self.specplotter.axis is not None:
+        if self.Spectrum.plotter.axis is not None:
             self.plot_fit(annotate=annotate, 
                     show_components=show_components, **kwargs)
                 
@@ -456,7 +456,7 @@ class Specfit(interactive.Interactive):
         # this was for height, but that's now dealt with above
         #self.modelpars[1] *= scalefactor
         #self.modelerrs[1] *= scalefactor
-        if self.specplotter.axis is not None:
+        if self.Spectrum.plotter.axis is not None:
             self.plot_fit(annotate=annotate,
                 show_components=show_components, **kwargs)
 
@@ -494,12 +494,12 @@ class Specfit(interactive.Interactive):
         """
         if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
             # don't display baseline if it's included in the fit
-            plot_offset = self.specplotter.offset+(self.Spectrum.baseline.basespec * (True-self.vheight))
+            plot_offset = self.Spectrum.plotter.offset+(self.Spectrum.baseline.basespec * (True-self.vheight))
         else:
-            plot_offset = self.specplotter.offset
+            plot_offset = self.Spectrum.plotter.offset
 
         self._full_model()
-        self.modelplot += self.specplotter.axis.plot(
+        self.modelplot += self.Spectrum.plotter.axis.plot(
                 self.Spectrum.xarr,
                 self.fullmodel + plot_offset,
                 color=composite_fit_color, linewidth=lw)
@@ -511,17 +511,17 @@ class Specfit(interactive.Interactive):
                 # can have multidimensional components
                 if len(data.shape) > 1:
                     for d in data:
-                        self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr,
+                        self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
                             d + plot_offset,
                             color=component_fit_color, linewidth=component_lw)
                 else:
-                    self._plotted_components += self.specplotter.axis.plot(self.Spectrum.xarr,
+                    self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
                         data + plot_offset,
                         color=component_fit_color, linewidth=component_lw)
                 
-        self.specplotter.reset_limits(**self.specplotter.plotkwargs)
-        if self.specplotter.autorefresh:
-            self.specplotter.refresh()
+        self.Spectrum.plotter.reset_limits(**self.Spectrum.plotter.plotkwargs)
+        if self.Spectrum.plotter.autorefresh:
+            self.Spectrum.plotter.refresh()
 
         if annotate or ((annotate is None) and self.autoannotate):
             self.annotate()
@@ -558,10 +558,10 @@ class Specfit(interactive.Interactive):
         self.residualplot = self.residualaxis.plot(self.Spectrum.xarr[self.xmin:self.xmax],
                 self.residuals,drawstyle='steps-mid',
                 linewidth=0.5, color='k', **kwargs)
-        if self.specplotter.xmin is not None and self.specplotter.xmax is not None:
-            self.residualaxis.set_xlim(self.specplotter.xmin,self.specplotter.xmax)
-        self.residualaxis.set_xlabel(self.specplotter.xlabel)
-        self.residualaxis.set_ylabel(self.specplotter.ylabel)
+        if self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None:
+            self.residualaxis.set_xlim(self.Spectrum.plotter.xmin,self.Spectrum.plotter.xmax)
+        self.residualaxis.set_xlabel(self.Spectrum.plotter.xlabel)
+        self.residualaxis.set_ylabel(self.Spectrum.plotter.ylabel)
         self.residualaxis.set_title("Residuals")
         self.residualaxis.figure.canvas.draw()
 
@@ -586,15 +586,15 @@ class Specfit(interactive.Interactive):
         xchar = xcharconv[self.Spectrum.xarr.xtype]
         self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for L in self._annotation_labels]
 
-        self.fitleg = self.specplotter.axis.legend(
+        self.fitleg = self.Spectrum.plotter.axis.legend(
                 tuple([pl]*len(self._annotation_labels)),
                 self._annotation_labels, loc=loc, markerscale=markerscale,
                 borderpad=borderpad, handlelength=handlelength,
                 handletextpad=handletextpad, labelspacing=labelspacing,
                 frameon=frameon, **kwargs)
-        self.specplotter.axis.add_artist(self.fitleg)
+        self.Spectrum.plotter.axis.add_artist(self.fitleg)
         self.fitleg.draggable(True)
-        if self.specplotter.autorefresh: self.specplotter.refresh()
+        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
 
     def print_fit(self, print_baseline=True, **kwargs):
         """
@@ -617,14 +617,14 @@ class Specfit(interactive.Interactive):
             p.set_visible(False)
         if legend: self._clearlegend()
         if components: self._clearcomponents()
-        if self.specplotter.autorefresh: self.specplotter.refresh()
+        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
 
     def _clearcomponents(self):
         for pc in self._plotted_components:
             pc.set_visible(False)
-            if pc in self.specplotter.axis.lines:
-                self.specplotter.axis.lines.remove(pc)
-        if self.specplotter.autorefresh: self.specplotter.refresh()
+            if pc in self.Spectrum.plotter.axis.lines:
+                self.Spectrum.plotter.axis.lines.remove(pc)
+        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
 
     def _clearlegend(self):
         """
@@ -632,9 +632,9 @@ class Specfit(interactive.Interactive):
         """
         if self.fitleg is not None: 
             # don't remove fitleg unless it's in the current axis self.fitleg.set_visible(False)
-            if self.fitleg in self.specplotter.axis.artists:
-                self.specplotter.axis.artists.remove(self.fitleg)
-        if self.specplotter.autorefresh: self.specplotter.refresh()
+            if self.fitleg in self.Spectrum.plotter.axis.artists:
+                self.Spectrum.plotter.axis.artists.remove(self.fitleg)
+        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
     
 
     def savefit(self):
@@ -796,8 +796,8 @@ class Specfit(interactive.Interactive):
             newspecfit._full_model()
 
         if parent is not None:
-            newspecfit.specplotter = parent.plotter
+            newspecfit.Spectrum.plotter = parent.plotter
         else:
-            newspecfit.specplotter = None
+            newspecfit.Spectrum.plotter = None
 
         return newspecfit
