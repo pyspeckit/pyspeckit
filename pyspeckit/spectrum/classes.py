@@ -300,7 +300,8 @@ class Spectrum(object):
         # elegant way to do this...
         self.baseline.crop(x1pix,x2pix)
         self.specfit.crop(x1pix,x2pix)
-        self.specfit._full_model()
+        if hasattr(self.specfit, 'fitter'):
+            self.specfit._full_model()
 
         if hasattr(self,'header'):
             history.write_history(self.header,"CROP: Cropped from %g to %g (pixel %i to %i)" % (x1,x2,x1pix,x2pix))
