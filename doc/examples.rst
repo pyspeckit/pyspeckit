@@ -1,6 +1,7 @@
 Examples
 --------
 
+Check out the `flickr gallery <http://flic.kr/s/aHsjykNJWt>`_
 
 ..
     Radio

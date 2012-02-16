@@ -208,9 +208,16 @@ parameters</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.slice">
-<tt class="descname">slice</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>copy=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.slice" title="Permalink to this definition">¶</a></dt>
-<dd><p>Slice a spectrum.  Defaults to the current units.  Can specify &#8216;pixels&#8217;
-if you want to just slice by index</p>
+<tt class="descname">slice</tt><big>(</big><em>start=None</em>, <em>stop=None</em>, <em>units='pixel'</em>, <em>copy=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slicing the spectrum</p>
+<dl class="docutils">
+<dt>start: numpy.float or int</dt>
+<dd>start of slice</dd>
+<dt>stop:  numpy.float or int</dt>
+<dd>stop of slice</dd>
+<dt>units: str</dt>
+<dd>allowed values are any supported physical unit, &#8216;pixel&#8217;</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -399,7 +406,7 @@ for example.</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Feb 14, 2012.
+      Last updated on Feb 15, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

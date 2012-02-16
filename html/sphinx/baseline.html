@@ -156,6 +156,18 @@ information</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.baseline.Baseline.copy">
+<tt class="descname">copy</tt><big>(</big><em>parent=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a copy of the baseline fit</p>
+<dl class="docutils">
+<dt>[ parent ] </dt>
+<dd>A spectroscopic axis instance that is the parent of the specfit
+instance.  This needs to be specified at some point, but defaults
+to None to prevent overwriting a previous plot.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.baseline.Baseline.crop">
 <tt class="descname">crop</tt><big>(</big><em>x1pix</em>, <em>x2pix</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>When spectrum.crop is called, this must be too</p>
@@ -237,7 +249,7 @@ information</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Feb 14, 2012.
+      Last updated on Feb 15, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
