@@ -456,6 +456,7 @@ class Cube(spectrum.Spectrum):
             except Exception as ex:
                 print "Fit number %i at %i,%i failed on error " % (ii,x,y), ex
                 print "Guesses were: ",gg
+                print "Fitkwargs were: ",fitkwargs
             self.parcube[:,y,x] = sp.specfit.modelpars
             self.errcube[:,y,x] = sp.specfit.modelerrs
             if integral: self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,return_error=True)
