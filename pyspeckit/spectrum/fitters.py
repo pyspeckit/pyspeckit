@@ -278,7 +278,9 @@ class Specfit(interactive.Interactive):
         """
         self.spectofit = np.copy(self.Spectrum.data)
         if hasattr(self.Spectrum,'baseline'):
-            if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
+            if (self.Spectrum.baseline.subtracted is False 
+                    and self.Spectrum.baseline.basespec is not None
+                    and len(self.spectofit) == len(self.Spectrum.baseline.basespec)):
                 self.spectofit -= self.Spectrum.baseline.basespec
         OKmask = (self.spectofit==self.spectofit)
         self.spectofit[(True-OKmask)] = 0
