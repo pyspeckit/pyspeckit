@@ -7,12 +7,15 @@ Tools to deal with spectroscopic data cubes.
 
 
 Many features in Cubes require additional packages:
-    smoothing - requires `agpy <https://agpy.googlecode.com/svn/trunk>`_'s smooth and parallel_map routines
-    `coords <https://www.stsci.edu/svn/ssb/astrolib/trunk/coords>`_
-    `pyregion <git://github.com/leejjoon/pyregion.git>`_
-    `pywcs <git://github.com/astropy/astropy.git>`_
+
+   * smoothing - requires `agpy <https://agpy.googlecode.com/svn/trunk>`_\'s smooth and parallel_map routines
+   * `coords <https://www.stsci.edu/svn/ssb/astrolib/trunk/coords>`_
+   * `pyregion <git://github.com/leejjoon/pyregion.git>`_
+   * `pywcs <git://github.com/astropy/astropy.git>`_
     
 The 'grunt work' is performed by the :py:mod:`cubes` module
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 """
 # import parent package
@@ -30,23 +33,40 @@ import copy
 
 class Cube(spectrum.Spectrum):
 
-    def __init__(self, filename, x0=0, y0=0, maskfilename=None, maskmap=None, **kwargs):
+    def __init__(self, filename=None, xarr=None, cube=None, errorcube=None,
+            header=None, x0=0, y0=0, maskfilename=None, maskmap=None,
+            **kwargs):
         """
         Initialize the Cube.  Accepts files in the following formats:
             - .fits
 
+        Alternatively, you can specify the *xarr*, *cube*, and *header* kwargs.
+        If nothing is specified, a blank :Cube: will be generated.
+
         x0,y0 - initial spectrum to use (defaults to lower-left corner)
         """
 
-        try: 
-            self.cube,self.xarr,self.header,self.fitsfile = readers.open_3d_fits(filename, **kwargs)
-            self.data = self.cube[:,y0,x0]
+        if filename is not None:
+            try: 
+                self.cube,self.xarr,self.header,self.fitsfile = readers.open_3d_fits(filename, **kwargs)
+                self.errorcube = errorcube
+                self.data = self.cube[:,y0,x0]
+                self.error = None
+            except TypeError as inst:
+                print "Failed to read fits file: wrong TYPE."
+                print inst
+                raise inst
+        else:
+            self.cube = cube
+            self.errorcube = errorcube
+            self.xarr = xarr
+            self.header = header
             self.error = None
+            if self.cube is not None:
+                self.data = self.cube[:,y0,x0]
+
+        if header is not None:
             self.parse_header(self.header)
-        except TypeError as inst:
-            print "Failed to read fits file: wrong TYPE."
-            print inst
-            raise inst
 
         if maskmap is not None:
             self.maskmap = maskmap
@@ -111,11 +131,11 @@ class Cube(spectrum.Spectrum):
         Parameters:
         -----------
         
-        start: numpy.float or int
+        *start* [ numpy.float or int ]
             start of slice
-        stop:  numpy.float or int
+        *stop*  [ numpy.float or int ]
             stop of slice
-        units: str
+        *units* [ str ]
             allowed values are any supported physical unit, 'pixel'
         """
         

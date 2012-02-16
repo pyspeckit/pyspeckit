@@ -1,6 +1,19 @@
 """
-Author: Adam Ginsburg
-Created: 03/17/2011
+MapPlot
+-------
+
+Make plots of the cube and interactively connect them to spectrum plotting.
+This is really an interactive component of the package; nothing in here is
+meant for publication-quality plots, but more for user interactive analysis.
+
+That said, the plotter makes use of `APLpy <https://github.com/aplpy/aplpy>`_,
+so it is possible to make publication-quality plots.
+
+:author: Adam Ginsburg
+:date: 03/17/2011
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 """
 import matplotlib
 import matplotlib.pyplot
@@ -108,9 +121,19 @@ class MapPlotter(object):
 
         self.canvas = self.axis.figure.canvas
 
+        self._connect()
+
+    def _connect(self):
+        """ Connect click, click up (release click), and key press to events """
         self.clickid = self.canvas.mpl_connect('button_press_event',self.click)
         self.clickupid = self.canvas.mpl_connect('button_release_event',self.plot_spectrum)
         self.keyid = self.canvas.mpl_connect('key_press_event',self.plot_spectrum)
+
+    def _disconnect(self):
+        """ Disconnect click, click up (release click), and key press from events """
+        self.canvas.mpl_disconnect(self.clickid)
+        self.canvas.mpl_disconnect(self.clickupid)
+        self.canvas.mpl_disconnect(self.keyid)
 
     def makeplane(self, estimator=np.mean):
         """
@@ -205,8 +228,7 @@ class MapPlotter(object):
                     self.Cube.plot_spectrum(clickX,clickY,clear=False, color=color, linestyle=self.overplot_linestyle)
                 elif event.button==3:
                     print "Disconnecting GAIA-like tool"
-                    self.canvas.mpl_disconnect(self.clickid)
-                    self.canvas.mpl_disconnect(self.keyid)
+                    self._disconnect()
             else:
                 print "Call failed for some reason: "
                 print "event: ",event

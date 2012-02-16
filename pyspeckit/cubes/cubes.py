@@ -1,3 +1,15 @@
+"""
+~~~~~~~~
+cubes.py
+~~~~~~~~
+
+From `agpy <http://code.google.com/p/agpy/source/browse/trunk/agpy/cubes.py>`_,
+contains functions to perform various transformations on data cubes and their
+headers.  
+
+########
+
+"""
 from numpy import sqrt,repeat,indices,newaxis,pi,cos,sin,array,mean,sum,nansum
 from math import acos,atan2,tan
 import numpy

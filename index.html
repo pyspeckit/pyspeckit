@@ -4,7 +4,9 @@
         <link rel="icon" type="image/gif" href="html/images/logo.ico">
         <title> PySpecKit - homepage moved </title>
     </head>
-    <iframe marginheight=0 marginwidth=0 scrolling=no frameBorder=0 width=100% height=100% hspace=0 vspace=0 src="html/sphinx/index.html"></iframe>
+    <iframe marginheight=0 marginwidth=0 frameBorder=0 width=100% height=100% hspace=0 vspace=0 src="html/sphinx/index.html"></iframe>
+
+
     
 
 <script type="text/javascript">
@@ -31,8 +33,8 @@ function stripTrailingSlash(str) {
 
 
 
-if ((self.location.href.match('sphinx')) != ["sphinx"]){
-    if ((self.location.href.match('index')) != ["index"]){
+if ((self.location.href.match('sphinx')) != "sphinx"){
+    if ((self.location.href.match('index')) != "index"){
         if (self.location.href.match('pyspeckit.bitbucket.org')){
             self.location.href = stripTrailingSlash(
                     self.location.href.replace("pyspeckit.bitbucket.org",

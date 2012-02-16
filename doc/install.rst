@@ -1,7 +1,18 @@
 Installation and Requirements
 =============================
 
-PySpecKit requires at least the basic scientific packages
+.. hint::
+    You can *easy_install* or *pip_install* pyspeckit: ::
+
+
+        pip install pyspeckit
+        easy_install pyspeckit
+
+
+
+-------
+
+PySpecKit requires at least the basic scientific packages:
 
 * `numpy <http://numpy.scipy.org/>`_
 * `matplotlib <http://matplotlib.sourceforge.net>`_
