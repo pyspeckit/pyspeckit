@@ -9,7 +9,7 @@ http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D
 
 """
 import numpy as np
-from mpfit import mpfit
+from pyspeckit.mpfit import mpfit
 from .. import units
 from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb

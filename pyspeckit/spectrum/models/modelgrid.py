@@ -5,7 +5,7 @@ Model Grid
 Fit a line based on parameters output from a grid of models
 """
 import numpy as np
-from mpfit import mpfit
+from pyspeckit.mpfit import mpfit
 import matplotlib.cbook as mpcb
 import copy
 try:

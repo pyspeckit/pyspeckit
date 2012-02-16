@@ -2,6 +2,10 @@
 
 import os, shutil
 try:
+    import setuptools # this is just for documentation uploading
+except ImportError:
+    pass
+try:
     from distribute import setup
 except ImportError:
     from distutils.core import setup

@@ -6,7 +6,7 @@ Voigt Profile Fitter
 import numpy
 from numpy.ma import median
 from numpy import pi
-from mpfit import mpfit
+from pyspeckit.mpfit import mpfit
 import matplotlib.cbook as mpcb
 from . import fitter
 
