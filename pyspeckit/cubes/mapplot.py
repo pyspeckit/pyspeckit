@@ -176,7 +176,8 @@ class MapPlotter(object):
                     x,y = self._center
                     self._add_circle(x,y,clickX,clickY)
                     self.circle(x,y,clickX,clickY)
-            elif event.button in (1,2) and not (self._clickX == clickX and self._clickY == clickY):
+            elif (hasattr(event,'button') and event.button in (1,2) 
+                    and not (self._clickX == clickX and self._clickY == clickY)):
                 if event.button == 1:
                     self._remove_circle()
                     clear=True
@@ -190,7 +191,7 @@ class MapPlotter(object):
                 print "Plotting circle from point %i,%i to %i,%i (r=%f)" % (self._clickX,self._clickY,clickX,clickY,rad)
                 self._add_circle(self._clickX,self._clickY,clickX,clickY)
                 self.circle(self._clickX,self._clickY,clickX,clickY,clear=clear,linestyle=linestyle,color=color)
-            elif event.button is not None: #hasattr(event,'button'):
+            elif hasattr(event,'button') and event.button is not None:
                 if event.button==1:
                     print "Plotting spectrum from point %i,%i" % (clickX,clickY)
                     self._remove_circle()

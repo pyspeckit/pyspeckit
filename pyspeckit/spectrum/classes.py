@@ -298,8 +298,8 @@ class Spectrum(object):
         # a baseline spectrum is always defined, even if it is all zeros
         # this is needed to prevent size mismatches.  There may be a more
         # elegant way to do this...
-        self.baseline.crop(x1pix,x2pix)
-        self.specfit.crop(x1pix,x2pix)
+        # this is taken care of in Slice now self.baseline.crop(x1pix,x2pix)
+        # this is taken care of in Slice now self.specfit.crop(x1pix,x2pix)
         if hasattr(self.specfit, 'fitter'):
             self.specfit._full_model()
 
@@ -342,10 +342,15 @@ class Spectrum(object):
             sp.error = sp.error[spectrum_slice]
         sp.xarr = sp.xarr[spectrum_slice]
 
-        # create new specfit / baseline instances (otherwise they'll be the wrong length)
-        sp._register_fitters()
-        sp.baseline = baseline.Baseline(sp)
-        sp.specfit = fitters.Specfit(sp,Registry=sp.Registry)
+        if copy:
+            # create new specfit / baseline instances (otherwise they'll be the wrong length)
+            sp._register_fitters()
+            sp.baseline = baseline.Baseline(sp)
+            sp.specfit = fitters.Specfit(sp,Registry=sp.Registry)
+        else:
+            # inplace modification
+            sp.baseline.crop(start_ind, stop_ind)
+            sp.specfit.crop(start_ind, stop_ind)
 
         if preserve_fits:
             sp.specfit.modelpars = self.specfit.modelpars
