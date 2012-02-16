@@ -1,7 +1,9 @@
 Examples
 --------
 
-Check out the `flickr gallery <http://flic.kr/s/aHsjykNJWt>`_
+Check out the `flickr gallery <http://flic.kr/s/aHsjykNJWt>`_.
+
+Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
 
 ..
     Radio
