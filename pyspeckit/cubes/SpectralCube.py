@@ -79,7 +79,33 @@ class Cube(spectrum.Spectrum):
                         self.data.min(), self.data.max(), self.units,
                         self.cube.shape, str(hex(self.__hash__())))
 
-    def slice(self, start=None, stop=None, units='pixel'):
+    def copy(self,deep=True):
+        """
+        Create a copy of the spectrum with its own plotter, fitter, etc.
+        Useful for, e.g., comparing smoothed to unsmoothed data
+        """
+
+        newcube = copy.copy(self)
+        if deep:
+            newcube.xarr = copy.copy(self.xarr)
+            newcube.data = copy.copy(self.data)
+            if self.error is not None:
+                newcube.error = copy.copy(self.error)
+
+        newcube.header = copy.copy(self.header)
+        newcube.plotter = self.plotter.copy(parent=newcube)
+        newcube._register_fitters()
+        newcube.specfit = self.specfit.copy(parent=newcube)
+        newcube.specfit.Spectrum.plotter = newcube.plotter
+        newcube.baseline = self.baseline.copy(parent=newcube)
+        newcube.baseline.Spectrum.plotter = newcube.plotter
+
+        newcube.mapplot = self.mapplot.copy(parent=newcube)
+        newcube.mapplot.Cube = newcube
+
+        return newcube
+
+    def slice(self, start=None, stop=None, units='pixel', preserve_fits=False):
         """Slicing the spectrum
         
         Parameters:
@@ -98,7 +124,7 @@ class Cube(spectrum.Spectrum):
         stop_ind  = x_in_units.x_to_pix(stop)
         spectrum_slice = slice(start_ind,stop_ind)
 
-        newcube = copy.copy(self)
+        newcube = self.copy()
         newcube.cube = newcube.cube[spectrum_slice,:,:]
         if hasattr(newcube,'errcube'):
             newcube.errcube = newcube.errcube[spectrum_slice,:,:]
@@ -107,16 +133,17 @@ class Cube(spectrum.Spectrum):
             newcube.error = newcube.error[spectrum_slice]
         newcube.xarr = newcube.xarr[spectrum_slice]
         
-        # this should be done by deepcopy, but deepcopy fails with current pyfits
-        newcube.plotter = copy.copy(self.plotter)
-        newcube.plotter.Spectrum = newcube
-        newcube.specfit = copy.copy(self.specfit)
-        newcube.specfit.Spectrum = newcube
-        newcube.baseline = copy.copy(self.baseline)
-        newcube.baseline.Spectrum = newcube
-        newcube.mapplot = copy.copy(self.mapplot)
-        newcube.mapplot.Cube = newcube
-        
+        # create new specfit / baseline instances (otherwise they'll be the wrong length)
+        newcube._register_fitters()
+        newcube.baseline = spectrum.baseline.Baseline(newcube)
+        newcube.specfit = spectrum.fitters.Specfit(newcube,Registry=newcube.Registry)
+
+        if preserve_fits:
+            newcube.specfit.modelpars = self.specfit.modelpars
+            newcube.specfit.parinfo = self.specfit.parinfo
+            newcube.baseline.baselinepars = self.baseline.baselinepars
+            newcube.baseline.order = self.baseline.order
+
         return newcube
     
 
@@ -149,7 +176,7 @@ class Cube(spectrum.Spectrum):
 
         return newcube
 
-    def plot_spectrum(self, x, y, **kwargs):
+    def plot_spectrum(self, x, y, plot_fit=False, **kwargs):
         """
         Fill the .data array with a real spectrum and plot it
         """
@@ -157,6 +184,7 @@ class Cube(spectrum.Spectrum):
         if self.plot_special is None:
             self.data = self.cube[:,y,x]
             self.plotter(**kwargs)
+            if plot_fit: self.plot_fit(x,y)
         else:
             sp = self.get_spectrum(x,y)
             sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
@@ -455,13 +483,12 @@ class Cube(spectrum.Spectrum):
             gg = guesses
 
         sp.specfit(guesses=gg, **fitkwargs)
-        if self.specfit.fittype != sp.specfit.fittype:
-            # make sure the fitter / fittype are set for the cube
-            # this has to be done within the loop because skipped-over spectra
-            # don't ever get their fittypes set
-            self.specfit.fitter = sp.specfit.fitter
-            self.specfit.fittype = sp.specfit.fittype
-            self.specfit.parinfo = sp.specfit.parinfo
+        # make sure the fitter / fittype are set for the cube
+        # this has to be done within the loop because skipped-over spectra
+        # don't ever get their fittypes set
+        self.specfit.fitter = sp.specfit.fitter
+        self.specfit.fittype = sp.specfit.fittype
+        self.specfit.parinfo = sp.specfit.parinfo
 
         if verbose:
             print "Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)

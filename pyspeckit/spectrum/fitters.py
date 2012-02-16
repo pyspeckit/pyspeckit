@@ -613,11 +613,12 @@ class Specfit(interactive.Interactive):
 
         Also removes the legend by default
         """
-        for p in self.modelplot:
-            p.set_visible(False)
-        if legend: self._clearlegend()
-        if components: self._clearcomponents()
-        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
+        if self.Spectrum.plotter.axis is not None:
+            for p in self.modelplot:
+                p.set_visible(False)
+            if legend: self._clearlegend()
+            if components: self._clearcomponents()
+            if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
 
     def _clearcomponents(self):
         for pc in self._plotted_components:
@@ -790,8 +791,10 @@ class Specfit(interactive.Interactive):
         newspecfit.modelerrs = self.modelerrs
         newspecfit.model = self.model
         newspecfit.npeaks = self.npeaks
-        newspecfit.parinfo = copy.copy( self.parinfo )
-        newspecfit.fitter = copy.copy( self.fitter )
+        if hasattr(self,'parinfo'):
+            newspecfit.parinfo = copy.copy( self.parinfo )
+        if hasattr(self,'fitter'):
+            newspecfit.fitter = copy.copy( self.fitter )
         if hasattr(self,'fullmodel'):
             newspecfit._full_model()
 

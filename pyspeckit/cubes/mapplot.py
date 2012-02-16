@@ -7,6 +7,7 @@ import matplotlib.pyplot
 import matplotlib.figure
 import numpy as np
 import pyfits
+import copy
 import itertools
 from pyspeckit.specwarnings import warn
 try:
@@ -282,3 +283,20 @@ class MapPlotter(object):
         self.Cube.plot_apspec([x1,y1,r],**kwargs)
         #self.Cube.data = cubes.extract_aperture( self.Cube.cube, [x1,y1,r] , coordsys=None )
         #self.Cube.plotter()
+
+    def copy(self, parent=None):
+        """
+        Create a copy of the map plotter with blank (uninitialized) axis & figure
+
+        [ parent ] 
+            A spectroscopic axis instance that is the parent of the specfit
+            instance.  This needs to be specified at some point, but defaults
+            to None to prevent overwriting a previous plot.
+        """
+
+        newmapplot = copy.copy(self)
+        newmapplot.Cube = parent
+        newmapplot.axis = None
+        newmapplot.figure = None
+
+        return newmapplot

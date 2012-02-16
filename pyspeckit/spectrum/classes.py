@@ -309,7 +309,7 @@ class Spectrum(object):
                 self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
                 history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
-    def slice(self, start=None, stop=None, units='pixel', copy=True):
+    def slice(self, start=None, stop=None, units='pixel', copy=True, preserve_fits=False):
         """Slicing the spectrum
         
         Parameters:
@@ -340,6 +340,17 @@ class Spectrum(object):
         if sp.error is not None:
             sp.error = sp.error[spectrum_slice]
         sp.xarr = sp.xarr[spectrum_slice]
+
+        # create new specfit / baseline instances (otherwise they'll be the wrong length)
+        sp._register_fitters()
+        sp.baseline = baseline.Baseline(sp)
+        sp.specfit = fitters.Specfit(sp,Registry=sp.Registry)
+
+        if preserve_fits:
+            sp.specfit.modelpars = self.specfit.modelpars
+            sp.specfit.parinfo = self.specfit.parinfo
+            sp.baseline.baselinepars = self.baseline.baselinepars
+            sp.baseline.order = self.baseline.order
 
         return sp
     

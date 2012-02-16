@@ -94,7 +94,7 @@ class Plotter(object):
             self.axis = self.figure.gca()
 
 
-        if clear: self.axis.clear()
+        if clear and self.axis is not None: self.axis.clear()
 
         if autorefresh is not None:
             self.autorefresh = autorefresh
