@@ -230,7 +230,14 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
         else:
             runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
         if runspec.min() < 0:
-            raise ValueError("Model dropped below zero.  That is not possible normally.")
+            raise ValueError("Model dropped below zero.  That is not possible normally.  Here are the input values: "+
+                    ("tex: %f " % tex) + 
+                    ("tkin: %f " % tkin) + 
+                    ("ntot: %f " % ntot) + 
+                    ("width: %f " % width) + 
+                    ("xoff_v: %f " % xoff_v) + 
+                    ("fortho: %f " % fortho)
+                    )
 
     if verbose:
         print "tkin: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (tkin,tex,ntot,width,xoff_v,fortho,fillingfraction)

@@ -366,7 +366,7 @@ class SpectroscopicAxis(np.ndarray):
         """
         Given an X coordinate in SpectroscopicAxis' units, return whether the pixel is in range
         """
-        return (xval > self.min()) * (xval < self.max())
+        return bool((xval > self.min()) * (xval < self.max()))
 
     def x_to_coord(self, xval, xunit, verbose=False):
         """
