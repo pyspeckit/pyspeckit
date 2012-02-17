@@ -51,7 +51,7 @@ def hydrogen(nu,nl, vacuum=True):
     Compute the rest wavelength of Hydrogen recombination lines in angstroms
     """
     rydberg = 10973731.6 # m^-1
-    protontoelectron = 1836.15266 # 
+    protontoelectron = 1836.15266 # ratio
 
     lvac = 1.0/rydberg * 1./(1/float(nl)**2 - 1/float(nu)**2) * 1e10 * (1.0+1.0/protontoelectron)
 
