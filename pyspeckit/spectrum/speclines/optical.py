@@ -45,3 +45,18 @@ xvac = np.array(xvac)
 dname = np.array(dname)
 
 optical_lines = {'name': name, 'xarr': xarr, 'xunits': xunits, 'xvac': xvac, 'dname': dname}
+
+def hydrogen(nu,nl, vacuum=True):
+    """
+    Compute the rest wavelength of Hydrogen recombination lines in angstroms
+    """
+    rydberg = 10973731.6 # m^-1
+    protontoelectron = 1836.15266 # 
+
+    lvac = 1.0/rydberg * 1./(1/float(nl)**2 - 1/float(nu)**2) * 1e10 * (1.0+1.0/protontoelectron)
+
+    if not vacuum:
+        import ref_index
+        return ref_index.vac2air(lvac/10)*10
+    else:
+        return lvac
