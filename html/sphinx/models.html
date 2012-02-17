@@ -396,7 +396,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x10dbd35f0&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x106e77cf8&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -418,8 +418,8 @@ Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 
 <a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/N2H+.html">http://www.strw.leidenuniv.nl/~moldata/N2H+.html</a>
 <a class="reference external" href="http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D">http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D</a></p>
 <dl class="data">
-<dt id="pyspeckit.spectrum.models.n2hp.aval_dict">
-<tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'121-011': 1.512, '121-010': 2.0150000000000001, '121-012': 0.10100000000000001, '111-010': 1.2090000000000001, '111-011': 0.90700000000000003, '111-012': 1.512, '122-012': 0.90700000000000003, '122-011': 2.7210000000000001, '112-012': 2.7210000000000001, '112-011': 0.90700000000000003, '110-011': 3.6280000000000001, '101-012': 2.016, '101-011': 1.2090000000000001, '101-010': 0.40300000000000002, '123-012': 3.6280000000000001}</em><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.aval_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.models.n2hp.line_strength_dict">
+<tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">line_strength_dict</tt><em class="property"> = {'121-011': 0.41699999999999998, '121-010': 0.55600000000000005, '121-012': 0.028000000000000001, '111-010': 0.33300000000000002, '111-011': 0.25, '111-012': 0.41699999999999998, '122-012': 0.41699999999999998, '122-011': 1.25, '112-012': 1.25, '112-011': 0.41699999999999998, '110-011': 0.33300000000000002, '101-012': 0.55000000000000004, '101-011': 0.33300000000000002, '101-010': 0.111, '123-012': 2.3300000000000001}</em><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.line_strength_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Line strengths of the 15 hyperfine components in J=1-0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
 Line strengths are normalized in such a way that summing over all initial J = 1
@@ -465,6 +465,62 @@ z = (x+i*gam)/(sig*sqrt(2))</p>
 </dd></dl>
 
 </div>
+<span class="target" id="module-pyspeckit.spectrum.models.hydrogen"></span><div class="section" id="hydrogen-models">
+<h2>Hydrogen Models<a class="headerlink" href="#hydrogen-models" title="Permalink to this headline">¶</a></h2>
+<p>Hydrogen in HII regions is typically assumed to follow Case B recombination
+theory.</p>
+<p>The values for the Case B recombination coefficients are given by <a class="reference internal" href="#hummerstorey1987">[HummerStorey1987]</a>.  
+They are also computed in <a class="reference internal" href="#hummer1994">[Hummer1994]</a> and tabulated at a <a class="reference internal" href="#wiki">[wiki]</a>.  I had to OCR and pull
+out by hand some of the coefficients.</p>
+<table class="docutils citation" frame="void" id="hummerstorey1987" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[HummerStorey1987]</a></td><td>: <a class="reference external" href="http://adsabs.harvard.edu/cgi-bin/nph-bib_query?bibcode=1987MNRAS.224..801H&amp;db_key=AST">Recombination-line intensities for hydrogenic ions.
+I - Case B calculations for H I and He II</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="hummer1994" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[Hummer1994]</a></td><td>: <a class="reference external" href="http://adsabs.harvard.edu/abs/1994MNRAS.268..109H">http://adsabs.harvard.edu/abs/1994MNRAS.268..109H</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="wiki" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[wiki]</a></td><td>:  <a class="reference external" href="http://wiki.hmet.net/index.php/HII_Case_B_Recombination_Coefficients">http://wiki.hmet.net/index.php/HII_Case_B_Recombination_Coefficients</a></td></tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="pyspeckit.spectrum.models.hydrogen.find_lines">
+<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">find_lines</tt><big>(</big><em>xarr</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.find_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.units.SpectrosopicAxis</span></tt> instance, finds all the
+lines that are in bounds.  Returns a list of line names.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.spectrum.models.hydrogen.hydrogen_fitter">
+<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">hydrogen_fitter</tt><big>(</big><em>sp</em>, <em>temperature=10000</em>, <em>tiedwidth=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.hydrogen_fitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a set of parameters identifying the hydrogen lines in your
+spectrum.  These come in groups of 3 assuming you&#8217;re fitting a gaussian to
+each.  You can tie the widths or choose not to.</p>
+<dl class="docutils">
+<dt><em>temperature</em> [ 5000, 10000, 20000 ]</dt>
+<dd>The case B coefficients are computed for 3 temperatures</dd>
+<dt><em>tiedwidth</em> [ bool ] </dt>
+<dd>Should the widths be tied?</dd>
+</dl>
+<p>Returns a list of <cite>tied</cite> and <cite>guesses</cite> in the xarr&#8217;s units</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.spectrum.models.hydrogen.rrl">
+<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">rrl</tt><big>(</big><em>n</em>, <em>dn=1</em>, <em>amu=1.007825</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.rrl" title="Permalink to this definition">¶</a></dt>
+<dd><p>compute Radio Recomb Line freqs in GHz
+from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -493,6 +549,7 @@ z = (x+i*gam)/(sig*sqrt(2))</p>
 <li class="toctree-l2"><a class="reference internal" href="#model-grid">Model Grid</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#n2h-fitter">N2H+ fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#voigt-profile-fitter">Voigt Profile Fitter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hydrogen-models">Hydrogen Models</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
@@ -524,7 +581,7 @@ z = (x+i*gam)/(sig*sqrt(2))</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Feb 15, 2012.
+      Last updated on Feb 16, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

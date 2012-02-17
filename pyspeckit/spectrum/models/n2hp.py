@@ -62,14 +62,7 @@ aval_dict = {
 '101-011':1.209,
 '101-012':2.016,
 }
-"""
-Line strengths of the 15 hyperfine components in J=1-0  transition. The
-thickness of the lines indicates their relative weight compared to the others.
-Line strengths are normalized in such a way that summing over all initial J = 1
-levels gives the degeneracy of the J = 0 levels, i.e.,  for JF1F  012,
-three for JF1F  011, and one for JF1F  010. Thus, the sum over all 15
-transitions gives the total spin degeneracy
-"""
+
 line_strength_dict = { # effectively the degeneracy per rotation state...
 '110-011':0.333,
 '112-011':0.417,
@@ -87,6 +80,14 @@ line_strength_dict = { # effectively the degeneracy per rotation state...
 '101-011':0.333,
 '101-012':0.55,
 }
+"""
+Line strengths of the 15 hyperfine components in J=1-0  transition. The
+thickness of the lines indicates their relative weight compared to the others.
+Line strengths are normalized in such a way that summing over all initial J = 1
+levels gives the degeneracy of the J = 0 levels, i.e.,  for JF1F  012,
+three for JF1F  011, and one for JF1F  010. Thus, the sum over all 15
+transitions gives the total spin degeneracy
+"""
 
 line_names = freq_dict.keys()
 

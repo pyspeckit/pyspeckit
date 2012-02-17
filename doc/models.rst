@@ -56,4 +56,6 @@ Then you can `register <registration.html>`_ these fitters.
     :members:
 .. automodule:: pyspeckit.spectrum.models.inherited_voigtfitter
     :members:
+.. automodule:: pyspeckit.spectrum.models.hydrogen
+    :members:
 

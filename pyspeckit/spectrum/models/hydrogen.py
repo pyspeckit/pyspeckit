@@ -6,16 +6,17 @@ Hydrogen Models
 Hydrogen in HII regions is typically assumed to follow Case B recombination
 theory.
 
-The values for the Case B recombination coefficients are given by [Hummer & Storey 1987].  
-They are also computed in [Hummer 1994] and tabulated at [a wiki]
+The values for the Case B recombination coefficients are given by [HummerStorey1987]_.  
+They are also computed in [Hummer1994]_ and tabulated at a [wiki]_.  I had to OCR and pull
+out by hand some of the coefficients.
 
-.. [Hummer & Storey 1987] `Recombination-line intensities for hydrogenic ions.
+.. [HummerStorey1987] : `Recombination-line intensities for hydrogenic ions.
     I - Case B calculations for H I and He II
     <http://adsabs.harvard.edu/cgi-bin/nph-bib_query?bibcode=1987MNRAS.224..801H&db_key=AST>`_
 
-.. [Hummer 1994] `<http://adsabs.harvard.edu/abs/1994MNRAS.268..109H>`_
+.. [Hummer1994] : `<http://adsabs.harvard.edu/abs/1994MNRAS.268..109H>`_
 
-.. [a wiki] `<http://wiki.hmet.net/index.php/HII_Case_B_Recombination_Coefficients>`_
+.. [wiki] :  `<http://wiki.hmet.net/index.php/HII_Case_B_Recombination_Coefficients>`_
 
 """
 import numpy as np
@@ -174,8 +175,10 @@ for series,values in table14dot2.iteritems():
 
 # not used right now, but it could be so I'm listing it here
 def rrl(n,dn=1,amu=1.007825):   
-    """compute Radio Recomb Line feqs in GHz
-     from Brown, Lockman & Knapp ARAA 1978 16 445"""
+    """
+    compute Radio Recomb Line freqs in GHz
+    from Brown, Lockman & Knapp ARAA 1978 16 445
+    """
     nu = 3.289842e6*(1-5.48593e-4/amu)*(1/float(n)**2 - 1/float(n+dn)**2)
     return nu
 
