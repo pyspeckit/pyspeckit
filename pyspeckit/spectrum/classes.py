@@ -424,8 +424,12 @@ class Spectrum(object):
         return len(self.data)
 
     def __repr__(self):
-        return r'<Spectrum object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s at %s>' % \
-                (self.xarr.min(), self.xarr.max(), self.xarr.units,
+        if hasattr(self,'specname'):
+            name = " named %s" % self.specname
+        else:
+            name = ""
+        return r'<Spectrum object%s over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s at %s>' % \
+                (name, self.xarr.min(), self.xarr.max(), self.xarr.units,
                         self.data.min(), self.data.max(), self.units,
                         str(hex(self.__hash__())))
     
