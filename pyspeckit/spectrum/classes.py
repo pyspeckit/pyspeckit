@@ -14,6 +14,7 @@ The Spectra class is a container of multiple spectra of the *same* object at
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 .. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
 """
+import Spectrum1D # inherit from astropy
 import numpy as np
 import smooth as sm
 import pyfits
@@ -30,7 +31,7 @@ try:
 except ImportError:
     atpyOK = False
 
-class Spectrum(object):
+class Spectrum(Spectrum1D.Spectrum1D):
     """
     The core class for the spectroscopic toolkit.  Contains the data and error
     arrays along with wavelength / frequency / velocity information in various
