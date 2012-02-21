@@ -6,7 +6,6 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from copy import copy, deepcopy
 
 # External packages
-from scipy import interpolate
 import numpy as np  
 
 # Local packages

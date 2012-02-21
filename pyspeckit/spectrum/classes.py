@@ -14,7 +14,6 @@ The Spectra class is a container of multiple spectra of the *same* object at
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 .. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
 """
-import Spectrum1D # inherit from astropy
 import numpy as np
 import smooth as sm
 import pyfits
@@ -30,6 +29,11 @@ try:
     atpyOK = True
 except ImportError:
     atpyOK = False
+
+try:
+    from Spectrum1D import Spectrum1D # inherit from astropy
+except ImportError:
+    Spectrum1D = object
 
 class Spectrum(Spectrum1D.Spectrum1D):
     """
