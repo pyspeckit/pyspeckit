@@ -35,7 +35,7 @@ try:
 except ImportError:
     Spectrum1D = object
 
-class Spectrum(Spectrum1D.Spectrum1D):
+class Spectrum(Spectrum1D):
     """
     The core class for the spectroscopic toolkit.  Contains the data and error
     arrays along with wavelength / frequency / velocity information in various
