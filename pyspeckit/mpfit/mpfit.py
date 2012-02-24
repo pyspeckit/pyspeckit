@@ -1501,7 +1501,10 @@ class mpfit:
     
     
     def enorm(self, vec):
-        ans = self.blas_enorm(vec)
+        # removed scipy dependency
+        # see http://fseoane.net/blog/2011/computing-the-vector-norm/#comment-73197
+        # in particular, see http://i51.tinypic.com/2912tg8.png
+        ans = numpy.sqrt(numpy.dot(vec.T, vec))
         return ans
     
     
