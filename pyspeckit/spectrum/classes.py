@@ -419,11 +419,13 @@ class Spectrum(Spectrum1D):
             history.write_history(self.header,"SMOOTH: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')*float(smooth),self.header.get('CRPIX1')))
             history.write_history(self.header,"SMOOTH: Changed CDELT1 from %f to %f" % (self.header.get('CRPIX1')/float(smooth),self.header.get('CRPIX1')))
 
-    def shape(self):
+    def _shape(self):
         """
         Return the data shape
         """
         return self.data.shape
+
+    shape = property(_shape)
 
     def __len__(self):
         return len(self.data)
@@ -523,7 +525,32 @@ class Spectrum(Spectrum1D):
 
     moments.__doc__ += moments_module.moments.__doc__
 
+    def _operation_wrapper(operation):
+        """
+        Perform an operation (addition, subtraction, mutiplication, division, etc.)
+        after checking for shape matching
+        """
 
+        def ofunc(self, other): 
+            if np.isscalar(other):
+                newspec = self.copy()
+                newspec.data = operation(newspec.data, other) 
+                return newspec
+            if self.shape == other.shape and all(self.xarr == other.xarr):
+                newspec = self.copy()
+                newspec.data = operation(newspec.data, other.data)
+                return newspec
+            elif self.shape != other.shape:
+                raise ValueError("Shape mismatch in data")
+            elif not all(self.xarr == other.xarr):
+                raise ValueError("X-axes do not match.")
+
+        return ofunc
+
+    __add__ = _operation_wrapper(np.add)
+    __sub__ = _operation_wrapper(np.subtract)
+    __mul__ = _operation_wrapper(np.multiply)
+    __div__ = _operation_wrapper(np.divide)
 
 class Spectra(Spectrum):
     """
@@ -709,20 +736,22 @@ class ObsBlock(Spectra):
             'erravgrtn' - the average of all input error spectra divided by sqrt(n_obs)
         """
 
+        wtarr = np.isfinite(self.data)
         if weight is not None:
             if inverse_weight:
-                wtarr = np.reshape( np.array([1.0/sp.header.get(weight) for sp in self.speclist]) , [self.nobs,1] )
+                for ii,sp in enumerate(self.speclist):
+                    wtarr[:,ii] *= 1.0/sp.header.get(weight)
             else:
-                wtarr = np.reshape( np.array([sp.header.get(weight) for sp in self.speclist]) , [self.nobs,1] )
-        else:
-            wtarr = np.ones(self.data.shape[1])
+                for ii,sp in enumerate(self.speclist):
+                    wtarr[:,ii] *= sp.header.get(weight)
 
         if self.header.get('EXPOSURE'):
             self.header['EXPOSURE'] = np.sum([sp.header['EXPOSURE'] for sp in self.speclist])
 
-        avgdata = (self.data * wtarr.swapaxes(0,1)).sum(axis=1) / wtarr.sum()
+        avgdata = (self.data * wtarr).sum(axis=1) / wtarr.sum(axis=1)
         if error is 'scanrms':
-            errspec = np.sqrt( (((self.data.swapaxes(0,1)-avgdata) * wtarr)**2 / wtarr**2).swapaxes(0,1).sum(axis=1) )
+            # axis swapping is for projection... avgdata = 0'th axis
+            errspec = np.sqrt( (((self.data.swapaxes(0,1)-avgdata) * wtarr.swapaxes(0,1))**2 / wtarr.swapaxes(0,1)**2).swapaxes(0,1).sum(axis=1) )
         elif error is 'erravg':
             errspec = self.error.mean(axis=1)
         elif error is 'erravgrtn':

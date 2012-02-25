@@ -207,9 +207,18 @@ class Plotter(object):
             self.ymin = None
             self.ymax = None
         if ymin is not None: self.ymin = ymin
-        elif self.ymin is None: self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
+        elif self.ymin is None: 
+            try:
+                self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
+            except TypeError:
+                # this is assumed to be a Masked Array error
+                pass
         if ymax is not None: self.ymax = ymax
-        elif self.ymax is None: self.ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin) * ypeakscale + self.ymin
+        elif self.ymax is None:
+            try:
+                self.ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin) * ypeakscale + self.ymin
+            except TypeError:
+                pass
         self.axis.set_ylim(self.ymin+self.offset,self.ymax+self.offset)
         
 
