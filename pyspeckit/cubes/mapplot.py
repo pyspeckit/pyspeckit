@@ -24,11 +24,13 @@ import copy
 import itertools
 from pyspeckit.specwarnings import warn
 try:
-    import astropy.wcs as pywcs
+    # pywcs is preferred over astropy.wcs because astropy.wcs failed on me
+    import pywcs
     pywcsOK = True
 except ImportError:
     try:
-        import pywcs
+        import astropy.wcs as pywcs
+        import astropy.io.fits as pyfits
         pywcsOK = True
     except ImportError:
         pywcsOK = False
