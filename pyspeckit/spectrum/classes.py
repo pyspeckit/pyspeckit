@@ -748,10 +748,11 @@ class ObsBlock(Spectra):
         if self.header.get('EXPOSURE'):
             self.header['EXPOSURE'] = np.sum([sp.header['EXPOSURE'] for sp in self.speclist])
 
-        avgdata = (self.data * wtarr).sum(axis=1) / wtarr.sum(axis=1)
+        data_nonan = np.nan_to_num(self.data)
+        avgdata = (data_nonan * wtarr).sum(axis=1) / wtarr.sum(axis=1)
         if error is 'scanrms':
             # axis swapping is for projection... avgdata = 0'th axis
-            errspec = np.sqrt( (((self.data.swapaxes(0,1)-avgdata) * wtarr.swapaxes(0,1))**2 / wtarr.swapaxes(0,1)**2).swapaxes(0,1).sum(axis=1) )
+            errspec = np.sqrt( (((data_nonan.swapaxes(0,1)-avgdata) * wtarr.swapaxes(0,1))**2 / wtarr.swapaxes(0,1)**2).swapaxes(0,1).sum(axis=1) )
         elif error is 'erravg':
             errspec = self.error.mean(axis=1)
         elif error is 'erravgrtn':

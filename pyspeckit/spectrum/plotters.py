@@ -206,19 +206,20 @@ class Plotter(object):
             if not self.silent and not reset_ylimits: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
             self.ymin = None
             self.ymax = None
+
         if ymin is not None: self.ymin = ymin
         elif self.ymin is None: 
             try:
-                self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
+                self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])+0.0
             except TypeError:
                 # this is assumed to be a Masked Array error
-                pass
+                self.ymin = self.Spectrum.data[xpixmin:xpixmax].min() + 0.0
         if ymax is not None: self.ymax = ymax
         elif self.ymax is None:
             try:
                 self.ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin) * ypeakscale + self.ymin
             except TypeError:
-                pass
+                self.ymax=((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin) * ypeakscale + self.ymin
         self.axis.set_ylim(self.ymin+self.offset,self.ymax+self.offset)
         
 
