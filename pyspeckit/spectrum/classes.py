@@ -150,6 +150,7 @@ class Spectrum(Spectrum1D):
 
         if doplot: self.plotter(**plotkwargs)
 
+
     def _register_fitters(self, registry=None):
         """
         Register fitters independently for each spectrum instance
@@ -536,21 +537,48 @@ class Spectrum(Spectrum1D):
                 newspec = self.copy()
                 newspec.data = operation(newspec.data, other) 
                 return newspec
-            if self.shape == other.shape and all(self.xarr == other.xarr):
-                newspec = self.copy()
-                newspec.data = operation(newspec.data, other.data)
-                return newspec
-            elif self.shape != other.shape:
-                raise ValueError("Shape mismatch in data")
-            elif not all(self.xarr == other.xarr):
-                raise ValueError("X-axes do not match.")
+            else: # purely for readability
+
+                if self._arithmetic_threshold == 'exact':
+                    xarrcheck = all(self.xarr == other.xarr)
+                else:
+                    if self._arithmetic_threshold_units is None:
+                        # not sure this should ever be allowed
+                        xarrcheck = all((self.xarr-other.xarr) < self._arithmetic_threshold)
+                    else:
+                        xarrcheck = all((self.xarr.as_unit(self._arithmetic_threshold_units)-other.xarr.as_unit(self._arithmetic_threshold_units)) < self._arithmetic_threshold)
+
+                if self.shape == other.shape and xarrcheck:
+                    newspec = self.copy()
+                    newspec.data = operation(newspec.data, other.data)
+                    return newspec
+                elif self.shape != other.shape:
+                    raise ValueError("Shape mismatch in data")
+                elif not xarrcheck:
+                    raise ValueError("X-axes do not match.")
 
         return ofunc
+
+    @property
+    def _arithmetic_threshold(self):
+        return self._arithmetic_threshold_value
+
+    @_arithmetic_threshold.setter
+    def _arithmetic_threshold(self, value, units=None):
+        self._arithmetic_threshold_value = value
+        if units is None:
+            self._arithmetic_threshold_units = self.xarr.units
+        else:
+            self._arithmetic_threshold_units = units
+
+    _arithmetic_threshold_value = 'exact'
+    _arithmetic_threshold_units = None
 
     __add__ = _operation_wrapper(np.add)
     __sub__ = _operation_wrapper(np.subtract)
     __mul__ = _operation_wrapper(np.multiply)
     __div__ = _operation_wrapper(np.divide)
+
 
 class Spectra(Spectrum):
     """
@@ -605,6 +633,7 @@ class Spectra(Spectrum):
     def __add__(self,other):
         """
         Adding "Spectra" together will concatenate them
+        * WARNING * this will probably fail now that I've implemented direct __add__...
         """
         if type(other) is Spectra or Spectrum:
             self.speclist += other.speclist
