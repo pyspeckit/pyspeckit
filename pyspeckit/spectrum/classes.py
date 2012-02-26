@@ -788,6 +788,7 @@ class ObsBlock(Spectra):
             errspec = self.error.mean(axis=1) / np.sqrt(self.error.shape[1])
 
         spec = Spectrum(data=avgdata,error=errspec,xarr=self.xarr.copy(),header=self.header)
+        spec._arithmetic_threshold = self._arithmetic_threshold
 
         return spec
 
