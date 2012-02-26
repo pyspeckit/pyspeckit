@@ -575,6 +575,7 @@ class Spectrum(Spectrum1D):
     _arithmetic_threshold_units = None
 
     __add__ = _operation_wrapper(np.add)
+    __radd__ = _operation_wrapper(np.add)
     __sub__ = _operation_wrapper(np.subtract)
     __mul__ = _operation_wrapper(np.multiply)
     __div__ = _operation_wrapper(np.divide)

@@ -5,14 +5,19 @@ import pyfits
 import pyspeckit
 import numpy as np
 import coords
+# OVERRIDE dict!  Order really really matters...
+from collections import OrderedDict as dict
 
-def list_targets(sdfitsfile):
+def list_targets(sdfitsfile, doprint=True):
     """
     List the targets, their location on the sky...
     """
     bintable = _get_bintable(sdfitsfile)
 
-    print "%18s  %10s %10s %26s%8s %9s %9s" % ("Object Name","RA","DEC","%12s%14s"%("RA","DEC"),"N(ptgs)","Exp.Time","requested")
+    # Things to include:
+    #   Scan           Source      Vel    Proc Seqn   RestF nIF nInt nFd     Az    El
+    #        1      G33.13-0.09     87.4     Nod    1  14.488   4   15   2  209.7  47.9
+    strings = [ "%18s  %10s %10s %26s%8s %9s %9s" % ("Object Name","RA","DEC","%12s%14s"%("RA","DEC"),"N(ptgs)","Exp.Time","requested") ]
     for objectname in set(bintable.data['OBJECT']):
         whobject = bintable.data['OBJECT'] == objectname
         RA,DEC = bintable.data['TRGTLONG'][whobject],bintable.data['TRGTLAT'][whobject]
@@ -23,7 +28,12 @@ def list_targets(sdfitsfile):
         firstsampler = bintable.data['SAMPLER']=='A9'
         exptime = bintable.data['EXPOSURE'][whobject*firstsampler].sum()
         duration = bintable.data['DURATION'][whobject*firstsampler].sum()
-        print "%18s  %10f %10f %26s%8i %9g %9g" % (objectname,midRA,midDEC,sexagesimal, npointings, exptime, duration)
+        strings.append( "%18s  %10f %10f %26s%8i %9g %9g" % (objectname,midRA,midDEC,sexagesimal, npointings, exptime, duration) )
+
+    if doprint:
+        print "\n".join(strings)
+
+    return strings
 
 def read_gbt_scan(sdfitsfile, obsnumber=0):
     """
@@ -103,7 +113,7 @@ def reduce_blocks(blocks, verbose=False):
     """
 
     # strip off trailing digit to define pairs
-    nodpairs = set([s[:-1].replace("ON","").replace("OFF","") for s in blocks])
+    nodpairs = uniq([s[:-1].replace("ON","").replace("OFF","") for s in blocks])
 
     reduced_nods = {}
 
@@ -115,6 +125,7 @@ def reduce_blocks(blocks, verbose=False):
         off2 = sampname+"OFF2"
 
         feednumber = blocks[on1].header.get('FEED')
+        reference_feednumber = blocks[on1].header.get('SRFEED')
         
         on1avg = blocks[on1].average()
         off1avg = blocks[off1].average()
@@ -132,10 +143,10 @@ def reduce_blocks(blocks, verbose=False):
         tp2 = totalpower(on2avg,off2avg)
 
         # then do the signal-reference bit
-        if feednumber == 1:
-            nod = sigref(tp1,tp2,tsys2)
-        elif feednumber == 2:
+        if feednumber == reference_feednumber:
             nod = sigref(tp2,tp1,tsys1)
+        else:
+            nod = sigref(tp1,tp2,tsys2)
 
         reduced_nods[sampname] = nod
 
@@ -149,6 +160,8 @@ def _get_bintable(sdfitsfile):
     if isinstance(sdfitsfile, pyfits.HDUList):
         bintable = sdfitsfile[1]
     elif isinstance(sdfitsfile, pyfits.BinTableHDU):
+        bintable = sdfitsfile
+    elif isinstance (sdfitsfile, pyfits.FITS_rec):
         bintable = sdfitsfile
     else:
         bintable = pyfits.open(sdfitsfile)[1]
@@ -208,6 +221,231 @@ def sigref(nod1, nod2, tsys_nod2):
     """
 
     return (nod1-nod2)/nod2*tsys_nod2
+
+def find_matched_freqs(reduced_blocks, debug=False):
+    """
+    Use frequency-matching to find which samplers observed the same parts of the spectrum
+
+    *WARNING* These IF numbers don't match GBTIDL's!  I don't know how to get those to match up!
+    """
+
+    # IF order 
+    sampler_numbers = [int(name[1:]) for name in reduced_blocks.keys()]
+    sorted_pairs = sorted(zip(sampler_numbers,reduced_blocks.keys()))
+    sorted_names = zip(*sorted_pairs)[1]
+
+    # how many IFs?
+    frequencies = dict((name,reduced_blocks[name].header.get('OBSFREQ')) for name in sorted_names)
+    if debug: print frequencies
+    round_frequencies = dict((name,
+        round_to_resolution(reduced_blocks[name].header.get('OBSFREQ'),
+                            reduced_blocks[name].header.get('FREQRES')))
+                 for name in sorted_names)
+    if debug: print round_frequencies
+    unique_frequencies = uniq(round_frequencies.values())
+    if debug: print unique_frequencies
+    nIFs = len(unique_frequencies)
+    if debug:
+        print frequencies.keys()
+        print round_frequencies.keys()
+        print unique_frequencies
+
+    IF_dict = {}
+    # most annoying part of this whole process... (besides the obvious 1+1=23452342345 error...)
+    # ifnumbers are approximately defined by the order things are written.... but only very approximately
+    for ifnum,freq in enumerate(unique_frequencies):
+        IF_dict[ifnum] = [sampler for (sampler,rf) in round_frequencies.iteritems() if rf == freq]
+        if debug: print ifnum,freq,IF_dict[ifnum]
+
+    return IF_dict
+
+def uniq(seq):
+    """ from http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order """
+    seen = set()
+    seen_add = seen.add
+    return [ x for x in seq if x not in seen and not seen_add(x)]
+
+
+def round_to_resolution(frequency, resolution):
+    """
+    kind of a hack, but round the frequency to the nearest integer multiple of the resolution,
+    then multiply it back into frequency space
+    """
+    # doesn't really work... divisor = 10**np.floor(np.log10(resolution))
+    divisor = resolution
+    return (np.round(frequency/divisor)) * divisor
+
+def find_pols(block):
+    """
+    Get a dictionary of the polarization for each sampler
+    """
+    pols = dict((name,polnum_to_pol[int(block[name].header.get('CRVAL4'))]) for name in block)
+    return pols
+
+def find_feeds(block):
+    """
+    Get a dictionary of the feed numbers for each sampler
+    """
+    feeds = dict((name,block[name].header.get('FEED')) for name in block)
+    return feeds
+
+def identify_samplers(block):
+    """
+    Identify each sampler with an IF number, a feed number, and a polarization
+    """
+    feeds = find_feeds(block)
+    pols = find_pols(block)
+    ifs = find_matched_freqs(block)
+
+    IDs = dict(
+            (name,
+                {'pol': pols[name],
+                 'feed': feeds[name],
+                 'IF': [k for k,v in ifs.iteritems() if name in v][0]})
+                for name in block.keys()
+                )
+
+    return IDs
+    
+def average_pols(block):
+    """
+    Average the polarizations for each feed in each IF
+    """
+
+    # will have names like "(IFnum)(feed)"
+    averaged_pol_dict = {}
+
+    ifdict = find_matched_freqs(block)
+    feeddict = find_feeds(block)
+    IDs = identify_samplers(block)
+
+    for ifnum,ifsampler in ifdict.iteritems():
+        for sampler,feednum in feeddict.iteritems():
+            if sampler not in ifsampler:
+                continue
+            newname = "if%ifd%i" % (ifnum, feednum)
+            matched_samplers = [sampler_name for (sampler_name,ID) in IDs.iteritems()
+                    if ID['feed'] == feednum and ID['IF'] == ifnum]
+            if len(matched_samplers) != 2:
+                raise ValueError("Too few/many matches: %s" % matched_samplers)
+
+            if newname not in averaged_pol_dict:
+                average = (block[matched_samplers[0]] + block[matched_samplers[1]]) / 2.
+                averaged_pol_dict[newname] = average
+
+    return averaged_pol_dict
+
+def average_IF(block, debug=False):
+    """
+    Average the polarizations for each feed in each IF
+    """
+
+    # will have names like "(IFnum)"
+    averaged_dict = {}
+
+    ifdict = find_matched_freqs(block, debug=debug)
+
+    import operator
+    for ifnum,ifsamplers in ifdict.iteritems():
+        if debug: print "if%i: freq %g" % (ifnum, block[ifsamplers[0]].header['OBSFREQ'])
+        averaged_dict["if%i" % ifnum] = reduce(operator.add,[block[name] for name in ifsamplers])
+
+    return averaged_dict
+
+
+polnum_to_pol = {
+    1: 'I',
+    2: 'Q',
+    3: 'U',
+    4: 'V',
+   -1: 'RR',
+   -2: 'LL',
+   -3: 'RL',
+   -4: 'LR',
+   -5: 'XX',
+   -6: 'YY',
+   -7: 'XY',
+   -8: 'YX'}
+
+
+class GBTSession(object):
+    """
+    A class wrapping all of the above features
+    """
+    def __init__(self, sdfitsfile):
+        """
+        Load an SDFITS file or a pre-loaded FITS file
+        """
+        self.bintable = _get_bintable(sdfitsfile)
+        self.targets = {}
+        self.print_header = "\n".join( ("Observer: " + self.bintable.data[0]['OBSERVER'],
+            "Project: %s" % self.bintable.header['PROJID'],
+            "Backend: %s" % self.bintable.header['BACKEND'],
+            "Telescope: %s" % self.bintable.header['TELESCOP'],
+            "Bandwidth: %s" % self.bintable.data[0]['BANDWID'],
+            "Date: %s" % self.bintable.data[0]['DATE-OBS']) )
+
+    def __repr__(self):
+        self.instance_info = super(GBTSession,self).__repr__()
+        if not hasattr(self,'StringDescription'):
+            self.StringDescription = list_targets(self.bintable, doprint=False)
+        return self.print_header+"\n".join(self.StringDescription)
+    
+    def __str__(self):
+        if not hasattr(self,'StringDescription'):
+            self.StringDescription = list_targets(self.bintable, doprint=False)
+        return self.print_header+"\n".join(self.StringDescription)
+
+    def load_target(self, target, **kwargs):
+        """
+        Load a Target...
+        """
+        self.targets[target] = GBTTarget(self, target)
+        return self.targets[target]
+
+    def reduce_target(self, target, **kwargs):
+        """
+        Reduce the data for a given object name
+        """
+        if not (target in self.targets):
+            self.load_target(target)
+
+        self.targets[target].reduce(**kwargs)
+
+        return self.targets[target]
+
+class GBTTarget(object):
+    """
+    A collection of ObsBlocks or Spectra
+    """
+    def __init__(self, Session, target, **kwargs):
+        """
+        Container for the individual scans of a target from a GBT session
+        """
+        self.name = target
+        self.Session = Session
+        self.blocks = read_gbt_target(Session.bintable, target, **kwargs)
+        self.spectra = {}
+
+    def reduce(self, obstype='nod', **kwargs):
+        """
+        Reduce nodded observations (they should have been read in __init__)
+        """
+        self.reduced_scans = reduce_blocks(self.blocks, **kwargs)
+
+    def average_pols(self):
+        if hasattr(self,'reduced_scans'):
+            self.averaged_pols = average_pols(self.reduced_scans)
+            self.spectra.update(self.averaged_pols)
+        else:
+            raise ValueError("Must reduce the scans before averaging pols")
+
+    def average_IFs(self, **kwargs):
+        if hasattr(self,'reduced_scans'):
+            self.averaged_IFs = average_IF(self.reduced_scans, **kwargs)
+            self.spectra.update(self.averaged_IFs)
+        else:
+            raise ValueError("Must reduce the scans before averaging IFs")
 
 """
 TEST CODE
