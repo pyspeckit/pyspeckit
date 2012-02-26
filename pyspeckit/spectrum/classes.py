@@ -754,7 +754,7 @@ class ObsBlock(Spectra):
         self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         
-    def average(self, weight=None, inverse_weight=False, error='erravgrtn'):
+    def average(self, weight=None, inverse_weight=False, error='erravgrtn', debug=False):
         """
         Average all scans in an ObsBlock.  Returns a single Spectrum object
 
@@ -778,7 +778,10 @@ class ObsBlock(Spectra):
             self.header['EXPOSURE'] = np.sum([sp.header['EXPOSURE'] for sp in self.speclist])
 
         data_nonan = np.nan_to_num(self.data)
-        avgdata = (data_nonan * wtarr).sum(axis=1) / wtarr.sum(axis=1)
+        weighted_data = (data_nonan * wtarr)
+        weighted_data_axsum = weighted_data.sum(axis=1)
+        weight_axsum = wtarr.sum(axis=1) 
+        avgdata =  weighted_data_axsum / weight_axsum 
         if error is 'scanrms':
             # axis swapping is for projection... avgdata = 0'th axis
             errspec = np.sqrt( (((data_nonan.swapaxes(0,1)-avgdata) * wtarr.swapaxes(0,1))**2 / wtarr.swapaxes(0,1)**2).swapaxes(0,1).sum(axis=1) )
@@ -789,6 +792,19 @@ class ObsBlock(Spectra):
 
         spec = Spectrum(data=avgdata,error=errspec,xarr=self.xarr.copy(),header=self.header)
         spec._arithmetic_threshold = self._arithmetic_threshold
+
+        if debug:
+            # this statement, and much of the text above, is to test an absolutely insane error:
+            # wtarr.sum(axis=1) randomly - say, one out of every 10-100 occurrences - fills with 
+            # nonsense values (1e-20, 1e-55, whatever).  There is no pattern to this; it occurs in
+            # while loops, but ONLY IN THIS FUNCTION.  This is unreproduceable anywhere else.
+            print "selfdata    min: %10g max: %10g" % (self.data.min(), self.data.max())
+            print "nonandata   min: %10g max: %10g" % (data_nonan.min(), data_nonan.max())
+            print "avgdata     min: %10g max: %10g" % (avgdata.min(), avgdata.max())
+            print "weight      sum: %10g" % (wtarr.sum())
+            print "data*weight sum: %10g" % ((data_nonan*wtarr).sum())
+            if np.abs(data_nonan.min()/avgdata.min()) > 1e10:
+                import pdb; pdb.set_trace()
 
         return spec
 

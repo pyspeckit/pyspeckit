@@ -156,6 +156,10 @@ def dcmeantsys(calon,caloff,tcal,debug=False):
 
     meanTsys = ( meanoff / meandiff * tcal + tcal/2.0 )
     if debug:
+        print caloff
+        print caloff.slice(pct10,pct90,units='pixels')
+        print calon
+        print calon.slice(pct10,pct90,units='pixels')
         print "pct10: %i  pct90: %i mean1: %f mean2: %f tcal: %f tsys: %f" % (pct10,pct90,meanoff,meandiff,tcal,meanTsys)
 
     return meanTsys
@@ -193,15 +197,20 @@ def sigref(nod1, nod2, tsys_nod2):
 TEST CODE
 for name in reduced_nods:
     for num in '1','2':
-        av1 = blocks[name+'ON'+num].average()
-        av2 = blocks[name+'OFF'+num].average()
-        tsys = dcmeantsys(av1, av2, blocks[name+'OFF'+num].header['TCAL'],debug=True)
-        if tsys < 5:
-            print "%s %s: %f" % (name,num,tsys),
-            print av1,np.mean(av1.slice(409,3687,units='pixels').data)
-            print av2,np.mean(av2.slice(409,3687,units='pixels').data)
-            print av1-av2,np.mean(av1.slice(409,3687,units='pixels').data-av2.slice(409,3687,units='pixels').data)
-            print blocks[name+'OFF'+num].header['TCAL']
+
+name='A10'
+num='1'
+tsys = 10
+while (tsys>5):
+    av1 = blocks[name+'ON'+num].average()
+    av2 = blocks[name+'OFF'+num].average()
+    tsys = dcmeantsys(av1, av2, blocks[name+'OFF'+num].header['TCAL'],debug=True)
+    if tsys < 5:
+        print "%s %s: %f" % (name,num,tsys),
+        print av1,np.mean(av1.slice(409,3687,units='pixels').data)
+        print av2,np.mean(av2.slice(409,3687,units='pixels').data)
+        print av1-av2,np.mean(av1.slice(409,3687,units='pixels').data-av2.slice(409,3687,units='pixels').data)
+        print blocks[name+'OFF'+num].header['TCAL']
 
 
 """
