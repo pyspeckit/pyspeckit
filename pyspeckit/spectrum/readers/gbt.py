@@ -4,6 +4,26 @@ GBTIDL SDFITS file
 import pyfits
 import pyspeckit
 import numpy as np
+import coords
+
+def list_targets(sdfitsfile):
+    """
+    List the targets, their location on the sky...
+    """
+    bintable = _get_bintable(sdfitsfile)
+
+    print "%18s  %10s %10s %26s%8s %9s %9s" % ("Object Name","RA","DEC","%12s%14s"%("RA","DEC"),"N(ptgs)","Exp.Time","requested")
+    for objectname in set(bintable.data['OBJECT']):
+        whobject = bintable.data['OBJECT'] == objectname
+        RA,DEC = bintable.data['TRGTLONG'][whobject],bintable.data['TRGTLAT'][whobject]
+        RADEC = zip(RA,DEC)
+        midRA,midDEC = np.median(RA),np.median(DEC)
+        npointings = len(set(RADEC))
+        sexagesimal = coords.Position((midRA,midDEC)).hmsdms()
+        firstsampler = bintable.data['SAMPLER']=='A9'
+        exptime = bintable.data['EXPOSURE'][whobject*firstsampler].sum()
+        duration = bintable.data['DURATION'][whobject*firstsampler].sum()
+        print "%18s  %10f %10f %26s%8i %9g %9g" % (objectname,midRA,midDEC,sexagesimal, npointings, exptime, duration)
 
 def read_gbt_scan(sdfitsfile, obsnumber=0):
     """
@@ -64,10 +84,6 @@ def read_gbt_target(sdfitsfile, objectname, verbose=True):
                     print "Maximum frequency difference > frequency resolution: %f > %f" % (maxdiff, freqres)
 
     return blocks
-
-def list_targets(sdfitsfile):
-    bintable = _get_bintable(sdfitsfile)
-    print "\n".join(np.unique(bintable.data['OBJECT']))
 
 def reduce_gbt_target(sdfitsfile, objectname, verbose=True):
     """
