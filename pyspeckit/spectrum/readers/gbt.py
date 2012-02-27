@@ -5,8 +5,24 @@ import pyfits
 import pyspeckit
 import numpy as np
 import coords
-# OVERRIDE dict!  Order really really matters...
-from collections import OrderedDict as dict
+
+def unique_targets(sdfitsfile):
+    bintable = _get_bintable(sdfitsfile)
+    return uniq(bintable.data['OBJECT'])
+
+def count_integrations(sdfitsfile, target):
+    """
+    Return the number of integrations for a given target
+    (uses one sampler; assumes same number for all samplers)
+    """
+    bintable = _get_bintable(sdfitsfile)
+
+    whobject = bintable.data['OBJECT'] == objectname
+    any_sampler = bintable.data['SAMPLER'][whobject][0]
+    whsampler = bintable.data['SAMPLER'][whobject] == any_sampler
+
+    return (whsampler).sum()
+
 
 def list_targets(sdfitsfile, doprint=True):
     """
@@ -17,18 +33,19 @@ def list_targets(sdfitsfile, doprint=True):
     # Things to include:
     #   Scan           Source      Vel    Proc Seqn   RestF nIF nInt nFd     Az    El
     #        1      G33.13-0.09     87.4     Nod    1  14.488   4   15   2  209.7  47.9
-    strings = [ "%18s  %10s %10s %26s%8s %9s %9s" % ("Object Name","RA","DEC","%12s%14s"%("RA","DEC"),"N(ptgs)","Exp.Time","requested") ]
-    for objectname in set(bintable.data['OBJECT']):
+    strings = [ "%18s  %10s %10s %26s%8s %9s %9s %9s" % ("Object Name","RA","DEC","%12s%14s"%("RA","DEC"),"N(ptgs)","Exp.Time","requested","n(ints)") ]
+    for objectname in uniq(bintable.data['OBJECT']):
         whobject = bintable.data['OBJECT'] == objectname
         RA,DEC = bintable.data['TRGTLONG'][whobject],bintable.data['TRGTLAT'][whobject]
         RADEC = zip(RA,DEC)
         midRA,midDEC = np.median(RA),np.median(DEC)
         npointings = len(set(RADEC))
         sexagesimal = coords.Position((midRA,midDEC)).hmsdms()
-        firstsampler = bintable.data['SAMPLER']=='A9'
+        firstsampler = bintable.data['SAMPLER'][whobject][0]
         exptime = bintable.data['EXPOSURE'][whobject*firstsampler].sum()
         duration = bintable.data['DURATION'][whobject*firstsampler].sum()
-        strings.append( "%18s  %10f %10f %26s%8i %9g %9g" % (objectname,midRA,midDEC,sexagesimal, npointings, exptime, duration) )
+        n_ints = count_integrations(bintable, objectname)
+        strings.append( "%18s  %10f %10f %26s%8i %9g %9g %9i" % (objectname,midRA,midDEC,sexagesimal, npointings, exptime, duration, n_ints) )
 
     if doprint:
         print "\n".join(strings)
@@ -54,6 +71,8 @@ def read_gbt_scan(sdfitsfile, obsnumber=0):
     HDU = pyfits.PrimaryHDU(data=data,header=header)
 
     sp = pyspeckit.Spectrum(HDU,filetype='pyfits')
+    sp.xarr.frame = 'topo'
+    sp.xarr.vlsr = header['VFRAME']
 
     return sp
 
@@ -125,6 +144,7 @@ def reduce_blocks(blocks, verbose=False):
         off2 = sampname+"OFF2"
 
         feednumber = blocks[on1].header.get('FEED')
+        # don't need this - if feednumber is 1, ref feed should be 2, and vice-versa
         reference_feednumber = blocks[on1].header.get('SRFEED')
         
         on1avg = blocks[on1].average()
@@ -143,10 +163,10 @@ def reduce_blocks(blocks, verbose=False):
         tp2 = totalpower(on2avg,off2avg)
 
         # then do the signal-reference bit
-        if feednumber == reference_feednumber:
-            nod = sigref(tp2,tp1,tsys1)
-        else:
+        if feednumber == 1:
             nod = sigref(tp1,tp2,tsys2)
+        elif feednumber == 2:
+            nod = sigref(tp2,tp1,tsys1)
 
         reduced_nods[sampname] = nod
 
@@ -242,7 +262,7 @@ def find_matched_freqs(reduced_blocks, debug=False):
                             reduced_blocks[name].header.get('FREQRES')))
                  for name in sorted_names)
     if debug: print round_frequencies
-    unique_frequencies = uniq(round_frequencies.values())
+    unique_frequencies = uniq(round_frequencies.values()) # uniq is an order-preserving function
     if debug: print unique_frequencies
     nIFs = len(unique_frequencies)
     if debug:
@@ -348,7 +368,7 @@ def average_IF(block, debug=False):
     import operator
     for ifnum,ifsamplers in ifdict.iteritems():
         if debug: print "if%i: freq %g" % (ifnum, block[ifsamplers[0]].header['OBSFREQ'])
-        averaged_dict["if%i" % ifnum] = reduce(operator.add,[block[name] for name in ifsamplers])
+        averaged_dict["if%i" % ifnum] = reduce(operator.add,[block[name] for name in ifsamplers]) / len(ifsamplers)
 
     return averaged_dict
 
@@ -377,7 +397,7 @@ class GBTSession(object):
         Load an SDFITS file or a pre-loaded FITS file
         """
         self.bintable = _get_bintable(sdfitsfile)
-        self.targets = {}
+        self.targets = dict((target,None) for target in unique_targets(self.bintable))
         self.print_header = "\n".join( ("Observer: " + self.bintable.data[0]['OBSERVER'],
             "Project: %s" % self.bintable.header['PROJID'],
             "Backend: %s" % self.bintable.header['BACKEND'],
@@ -389,12 +409,12 @@ class GBTSession(object):
         self.instance_info = super(GBTSession,self).__repr__()
         if not hasattr(self,'StringDescription'):
             self.StringDescription = list_targets(self.bintable, doprint=False)
-        return self.print_header+"\n".join(self.StringDescription)
+        return self.print_header+"\n"+"\n".join(self.StringDescription)
     
     def __str__(self):
         if not hasattr(self,'StringDescription'):
             self.StringDescription = list_targets(self.bintable, doprint=False)
-        return self.print_header+"\n".join(self.StringDescription)
+        return self.print_header+"\n"+"\n".join(self.StringDescription)
 
     def load_target(self, target, **kwargs):
         """
@@ -407,12 +427,19 @@ class GBTSession(object):
         """
         Reduce the data for a given object name
         """
-        if not (target in self.targets):
+        if self.targets[target] is None:
             self.load_target(target)
 
         self.targets[target].reduce(**kwargs)
 
         return self.targets[target]
+
+    def reduce_all(self):
+        """
+
+        """
+        for target in self.targets:
+            self.reduce_target(target)
 
 class GBTTarget(object):
     """
@@ -427,11 +454,15 @@ class GBTTarget(object):
         self.blocks = read_gbt_target(Session.bintable, target, **kwargs)
         self.spectra = {}
 
+    def __getitem__(self, ind):
+        return self.spectra[ind]
+
     def reduce(self, obstype='nod', **kwargs):
         """
         Reduce nodded observations (they should have been read in __init__)
         """
         self.reduced_scans = reduce_blocks(self.blocks, **kwargs)
+        self.spectra.update(self.reduced_scans)
 
     def average_pols(self):
         if hasattr(self,'reduced_scans'):

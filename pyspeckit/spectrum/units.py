@@ -152,13 +152,15 @@ xtype_dict = {
         # cm^-1 ? 'wavenumber':'wavenumber',
         }
 
-frame_dict = {
+frame_dict = CaseInsensitiveDict({
         'VLSR':'LSRK','VRAD':'LSRK','VELO':'LSRK',
         'VOPT':'LSRK',
         'VELO-LSR':'LSRK',
         'LSRD':'LSRD',
         'VHEL':'heliocentric',
         'VGEO':'geocentric',
+        'topo':'geocentric',
+        'topocentric':'geocentric',
         'velocity':'LSRK',
         'VREST':'rest',
         'Z':'rest',
@@ -169,7 +171,7 @@ frame_dict = {
         'wavelength':'rest',
         'lambda':'rest',
         'redshift':'obs'
-        }
+        })
 
 frame_type_dict = {'LSRK':'velocity','LSRD':'velocity','LSR':'velocity',
         'heliocentric':'velocity','topocentric':'velocity','geocentric':'velocity',
@@ -197,11 +199,48 @@ class SpectroscopicAxis(np.ndarray):
     a workaround is being sought but subclassing numpy arrays is harder than I thought
     """
 
-    def __new__(self, xarr, unit="Hz", frame='rest', xtype=None, refX=None,
-            redshift=None, refX_units=None):
+    def __new__(self, xarr, unit="Hz", frame='rest', frame_offset=0.0,
+            frame_offset_units='Hz', xtype=None, refX=None, redshift=None,
+            refX_units=None):
         """
         Make a new spectroscopic axis instance
         Default units Hz
+        
+        *xarr* [ np.ndarray ]
+            An array of X-axis values in whatever unit specified
+
+        *unit* [ string ]
+            Any valid spectroscopic X-axis unit (km/s, Hz, angstroms, etc.)
+
+        *xtype* [ string | None ]
+            irrelevant?
+
+        *refX* [ float ]
+            Reference frequency/wavelength
+
+        *refX_units* [ string ]
+            Units of the reference frequency/wavelength
+        
+        *frame* [ frame_dict key ]
+            **NOT IMPLEMENTED**
+            The frame of the axis, e.g. 
+                * Topocentric (observatory-center) [up to 0.5 km/s offset from Earth-center]
+                * Geocentric (earth-center) 
+                * Barycentric (Solar System center) 
+                * Heliocentric (Sun-center)
+                * Kinematic Local Standard of Rest (LSRK)
+                * Dynamic Local Standard of Rest (LSRD)
+                * Galactocentric
+                * Supergalactic
+                * CMB?
+                * "Rest" (relative to the rest frequency of the line)
+                * Redshifted
+            Unfortunately, there don't appear to be any implementations of this
+            available in python or wrapped in python.  I'll work on incorporating
+            GBTIDL's http://www.gb.nrao.edu/GBT/DA/gbtidl/release/user/toolbox/frame_velocity.html
+            but it's not easy!
+            http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
+            BUT THIS MIGHT BE IT: https://github.com/scottransom/pyslalib
         """
         subarr = np.array(xarr)
         subarr = subarr.view(self)
