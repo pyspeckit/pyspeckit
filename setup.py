@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
 import os, shutil
+# got rid of setuptools.  
+# 1. http://www.b-list.org/weblog/2008/dec/14/packaging/
+# 2. I just don't understand what it's doing
+# 3. my site-packages directory was disgustingly polluted
 #try:
 #    import setuptools # this is just for documentation uploading
 #except ImportError:
 #    pass
-try:
-    from distribute import setup
-except ImportError:
-    from distutils.core import setup
+from distutils.core import setup
 
 with open('README.txt') as file:
     long_description = file.read()
