@@ -14,7 +14,7 @@ from distutils.core import setup
 with open('README.txt') as file:
     long_description = file.read()
 
-version_base="0.1.4"
+from pyspeckit import __version__ as version_base
 tagname = "pyspeckit_%s" % (version_base)
 
 if os.path.exists(".hg"):
@@ -60,7 +60,7 @@ setup(name='pyspeckit',
           'mpfit':'mpfit'}, 
       package_data={'pyspeckit.spectrum.speclines':['splatalogue.csv'],
           '':['pyspeckit/config_default']},
-      include_package_data=True,
+      # doesn't exist for distutils include_package_data=True,
       requires=['matplotib','numpy'],
       classifiers=[
                    "Development Status :: 3 - Alpha",
