@@ -17,7 +17,7 @@ def count_integrations(sdfitsfile, target):
     """
     bintable = _get_bintable(sdfitsfile)
 
-    whobject = bintable.data['OBJECT'] == objectname
+    whobject = bintable.data['OBJECT'] == target
     any_sampler = bintable.data['SAMPLER'][whobject][0]
     whsampler = bintable.data['SAMPLER'][whobject] == any_sampler
 
@@ -33,7 +33,7 @@ def list_targets(sdfitsfile, doprint=True):
     # Things to include:
     #   Scan           Source      Vel    Proc Seqn   RestF nIF nInt nFd     Az    El
     #        1      G33.13-0.09     87.4     Nod    1  14.488   4   15   2  209.7  47.9
-    strings = [ "%18s  %10s %10s %26s%8s %9s %9s %9s" % ("Object Name","RA","DEC","%12s%14s"%("RA","DEC"),"N(ptgs)","Exp.Time","requested","n(ints)") ]
+    strings = [ "\n%18s  %10s %10s %26s%8s %9s %9s %9s" % ("Object Name","RA","DEC","%12s%14s"%("RA","DEC"),"N(ptgs)","Exp.Time","requested","n(ints)") ]
     for objectname in uniq(bintable.data['OBJECT']):
         whobject = bintable.data['OBJECT'] == objectname
         RA,DEC = bintable.data['TRGTLONG'][whobject],bintable.data['TRGTLAT'][whobject]
@@ -42,8 +42,9 @@ def list_targets(sdfitsfile, doprint=True):
         npointings = len(set(RADEC))
         sexagesimal = coords.Position((midRA,midDEC)).hmsdms()
         firstsampler = bintable.data['SAMPLER'][whobject][0]
-        exptime = bintable.data['EXPOSURE'][whobject*firstsampler].sum()
-        duration = bintable.data['DURATION'][whobject*firstsampler].sum()
+        whfirstsampler = bintable.data['SAMPLER'] == firstsampler
+        exptime = bintable.data['EXPOSURE'][whobject*whfirstsampler].sum()
+        duration = bintable.data['DURATION'][whobject*whfirstsampler].sum()
         n_ints = count_integrations(bintable, objectname)
         strings.append( "%18s  %10f %10f %26s%8i %9g %9g %9i" % (objectname,midRA,midDEC,sexagesimal, npointings, exptime, duration, n_ints) )
 
@@ -72,11 +73,16 @@ def read_gbt_scan(sdfitsfile, obsnumber=0):
 
     sp = pyspeckit.Spectrum(HDU,filetype='pyfits')
     sp.xarr.frame = 'topo'
-    sp.xarr.vlsr = header['VFRAME']
+
+    # HACK - temporary!
+    # Convert xarr to LSR units
+    sp.xarr.convert_to_unit('m/s')
+    sp.xarr -= header['VFRAME']
+    sp.xarr.convert_to_unit('Hz')
 
     return sp
 
-def read_gbt_target(sdfitsfile, objectname, verbose=True):
+def read_gbt_target(sdfitsfile, objectname, verbose=False):
     """
     Give an object name, get all observations of that object as an 'obsblock'
     """
@@ -114,7 +120,7 @@ def read_gbt_target(sdfitsfile, objectname, verbose=True):
 
     return blocks
 
-def reduce_gbt_target(sdfitsfile, objectname, verbose=True):
+def reduce_gbt_target(sdfitsfile, objectname, verbose=False):
     """
     Wrapper - read an SDFITS file, get an object, reduce it (assuming nodded) and return it
     """
@@ -456,6 +462,13 @@ class GBTTarget(object):
 
     def __getitem__(self, ind):
         return self.spectra[ind]
+
+    def __repr__(self):
+        self.instance_info = super(GBTSession,self).__repr__()
+        self.StringDescription = [("Object %s with %i scan blocks and %i 'reduced' spectra" %
+                (self.name,len(self.blocks),len(self.spectra)))]
+        self.StringDescription += ["%s" % ID for ID in identify_samplers(self.blocks)]
+        return "\n".join(self.StringDescription)
 
     def reduce(self, obstype='nod', **kwargs):
         """

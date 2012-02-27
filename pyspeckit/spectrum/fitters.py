@@ -691,7 +691,7 @@ class Specfit(interactive.Interactive):
             warn("Irregular X-axis.  The last pixel is ignored.")
         else:
             # shouldn't shape be a 'propery'
-            dx = np.repeat(np.abs(dx), self.Spectrum.shape())
+            dx = np.repeat(np.abs(dx), self.Spectrum.shape)
 
         if direct:
             self._full_model()

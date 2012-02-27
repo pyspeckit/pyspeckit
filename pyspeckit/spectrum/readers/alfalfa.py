@@ -6,13 +6,26 @@ import pyfits
 import pyspeckit
 import numpy as np
 
-def read_alfalfa(filename, sourcenumber=0):
+def read_alfalfa_file(filename):
+    """
+    Read the contents of a whole ALFALFA source file
+    """
+    savfile = idlsave.read(filename)
+
+    source_dict = dict([(name,read_alfalfa_src(savfile,ii)) for ii,name in
+        enumerate(savfile.src.SRCNAME)])
+
+    return source_dict
+
+def read_alfalfa_source(savfile, sourcenumber=0):
     """
     Create an Observation Block class for a single source in an ALFALFA
     'source' IDL save file
     """
+
+    if type(savfile) is str and ".src" in savfile:
+        savfile = idlsave.read(savfile)
     
-    savfile = idlsave.read(filename)
     src = savfile.src[sourcenumber]
 
     header = pyfits.Header()
