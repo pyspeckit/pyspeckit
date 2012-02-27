@@ -467,7 +467,8 @@ class GBTTarget(object):
         self.instance_info = super(GBTTarget,self).__repr__()
         self.StringDescription = [("Object %s with %i scan blocks and %i 'reduced' spectra" %
                 (self.name,len(self.blocks),len(self.spectra)))]
-        self.StringDescription += ["%s" % ID for ID in identify_samplers(self.blocks)]
+        if hasattr(self,'reduced_scans'):
+            self.StringDescription += ["%s" % ID for ID in identify_samplers(self.reduced_scans)]
         return "\n".join(self.StringDescription)
 
     def reduce(self, obstype='nod', **kwargs):
