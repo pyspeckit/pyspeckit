@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import os, shutil
-try:
-    import setuptools # this is just for documentation uploading
-except ImportError:
-    pass
+#try:
+#    import setuptools # this is just for documentation uploading
+#except ImportError:
+#    pass
 try:
     from distribute import setup
 except ImportError:
@@ -13,7 +13,7 @@ except ImportError:
 with open('README.txt') as file:
     long_description = file.read()
 
-version_base="0.1.3"
+version_base="0.1.4"
 tagname = "pyspeckit_%s" % (version_base)
 
 if os.path.exists(".hg"):
