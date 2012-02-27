@@ -12,7 +12,7 @@ def read_alfalfa_file(filename):
     """
     savfile = idlsave.read(filename)
 
-    source_dict = dict([(name,read_alfalfa_src(savfile,ii)) for ii,name in
+    source_dict = dict([(name,read_alfalfa_source(savfile,ii)) for ii,name in
         enumerate(savfile.src.SRCNAME)])
 
     return source_dict

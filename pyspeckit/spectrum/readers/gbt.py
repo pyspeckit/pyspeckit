@@ -464,7 +464,7 @@ class GBTTarget(object):
         return self.spectra[ind]
 
     def __repr__(self):
-        self.instance_info = super(GBTSession,self).__repr__()
+        self.instance_info = super(GBTTarget,self).__repr__()
         self.StringDescription = [("Object %s with %i scan blocks and %i 'reduced' spectra" %
                 (self.name,len(self.blocks),len(self.spectra)))]
         self.StringDescription += ["%s" % ID for ID in identify_samplers(self.blocks)]
