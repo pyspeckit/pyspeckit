@@ -4,7 +4,10 @@ GBTIDL SDFITS file
 import pyfits
 import pyspeckit
 import numpy as np
-import coords
+try:
+    import coords
+except ImportError:
+    coords = None
 
 def unique_targets(sdfitsfile):
     bintable = _get_bintable(sdfitsfile)
@@ -40,7 +43,10 @@ def list_targets(sdfitsfile, doprint=True):
         RADEC = zip(RA,DEC)
         midRA,midDEC = np.median(RA),np.median(DEC)
         npointings = len(set(RADEC))
-        sexagesimal = coords.Position((midRA,midDEC)).hmsdms()
+        if coords is not None:
+            sexagesimal = coords.Position((midRA,midDEC)).hmsdms()
+        else:
+            sexagesimal = ""
         firstsampler = bintable.data['SAMPLER'][whobject][0]
         whfirstsampler = bintable.data['SAMPLER'] == firstsampler
         exptime = bintable.data['EXPOSURE'][whobject*whfirstsampler].sum()

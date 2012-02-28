@@ -1,14 +1,6 @@
 #!/usr/bin/env python
 
 import os, shutil
-# got rid of setuptools.  
-# 1. http://www.b-list.org/weblog/2008/dec/14/packaging/
-# 2. I just don't understand what it's doing
-# 3. my site-packages directory was disgustingly polluted
-#try:
-#    import setuptools # this is just for documentation uploading
-#except ImportError:
-#    pass
 from distutils.core import setup
 
 with open('README.txt') as file:
@@ -60,7 +52,6 @@ setup(name='pyspeckit',
           'mpfit':'mpfit'}, 
       package_data={'pyspeckit.spectrum.speclines':['splatalogue.csv'],
           '':['pyspeckit/config_default']},
-      # doesn't exist for distutils include_package_data=True,
       requires=['matplotib','numpy'],
       classifiers=[
                    "Development Status :: 3 - Alpha",
