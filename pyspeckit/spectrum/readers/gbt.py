@@ -428,6 +428,9 @@ class GBTSession(object):
             self.StringDescription = list_targets(self.bintable, doprint=False)
         return self.print_header+"\n"+"\n".join(self.StringDescription)
 
+    def __getitem__(self, ind):
+        return self.targets[ind]
+
     def load_target(self, target, **kwargs):
         """
         Load a Target...
