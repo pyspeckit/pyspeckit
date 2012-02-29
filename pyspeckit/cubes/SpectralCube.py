@@ -230,7 +230,7 @@ class Cube(spectrum.Spectrum):
 
         self.specfit.modelpars = self.parcube[:,y,x]
         self.specfit.npeaks = self.specfit.fitter.npeaks
-        self.specfit.model = self.specfit.fitter.n_modelfunc(self.specfit.modelpars)(self.xarr)
+        self.specfit.model = self.specfit.fitter.n_modelfunc(self.specfit.modelpars, **self.specfit.fitter.modelfunc_kwargs)(self.xarr)
 
         # set the parinfo values correctly for annotations
         for pi,p,e in zip(self.specfit.parinfo, self.specfit.modelpars, self.errcube[:,y,x]):
@@ -276,7 +276,7 @@ class Cube(spectrum.Spectrum):
             sp.specfit.modelpars = self.parcube[:,y,x]
             if hasattr(self.specfit,'fitter'):
                 sp.specfit.npeaks = self.specfit.fitter.npeaks
-                sp.specfit.model = self.specfit.fitter.n_modelfunc(sp.specfit.modelpars)(self.xarr)
+                sp.specfit.model = self.specfit.fitter.n_modelfunc(sp.specfit.modelpars,**self.specfit.fitter.modelfunc_kwargs)(self.xarr)
 
             if hasattr(self.specfit,'parinfo'):
                 # set the parinfo values correctly for annotations
@@ -501,7 +501,7 @@ class Cube(spectrum.Spectrum):
             for ii,(x,y) in enumerate(valid_pixels):
                 fit_a_pixel((ii,x,y))
 
-        x,y = start_from_point
+        x,y = valid_pixels[0]
         sp = self.get_spectrum(x,y)
         sp.specfit.Registry = self.Registry # copy over fitter registry
         # this reproduced code is needed because the functional wrapping
