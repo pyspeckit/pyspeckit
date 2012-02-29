@@ -34,7 +34,7 @@ ckms = units.speedoflight_ms / 1e3 #2.99792458e5
 
 # http://adsabs.harvard.edu/abs/1971ApJ...169..429T has the most accurate freqs
 # http://adsabs.harvard.edu/abs/1972ApJ...174..463T [twotwo]
-freq_dict = { 
+central_freq_dict = { 
     'oneone':     4.82965996e9,
     'twotwo':     14.48847881e9,
     'threethree': 28.97480e9,
@@ -93,7 +93,7 @@ hf_freq_dict={
         'threethree_f44':28.97480e9,
         'threethree_f33':28.97481e9,
         }
-freq_dict.update(hf_freq_dict)
+freq_dict = dict(hf_freq_dict.items() + central_freq_dict.items())
 aval_dict = {
     'oneone':     10**-8.44801,  #64*!pi**4/(3*h*c**3)*nu11**3*mu0**2*(1/2.)
     'twotwo':     10**-7.49373,  #64*!pi**4/(3*h*c**3)*nu22**3*mu0**2*(2/3.)

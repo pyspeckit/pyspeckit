@@ -88,12 +88,12 @@ class Cube(spectrum.Spectrum):
         # Initialize writers
         self.writer = {}
         for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
-        self.mapplot = mapplot.MapPlotter(self)
 
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
         self.plot_special = None
         self.plot_special_kwargs = {}
 
+        self.mapplot = mapplot.MapPlotter(self)
 
     def __repr__(self):
         return r'<Cube object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s with shape %r at %s>' % \
@@ -696,6 +696,11 @@ class CubeStack(Cube):
         # Initialize writers TO DO: DO WRITERS WORK FOR CUBES?
         self.writer = {}
         for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
+        
+        # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
+        self.plot_special = None
+        self.plot_special_kwargs = {}
+
         self.mapplot = mapplot.MapPlotter(self)
 
     def _sort(self):

@@ -114,12 +114,20 @@ class MapPlotter(object):
             self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure,convention=convention)
             self.FITSFigure.show_colorscale(vmin=vmin, vmax=vmax, **kwargs)
             self.axis = self.FITSFigure._ax1
-            if colorbar: self.FITSFigure.add_colorbar()
+            if colorbar:
+                try:
+                    self.FITSFigure.add_colorbar()
+                except Exception as ex:
+                    print "ERROR: Could not create colorbar!  Error was %s" % str(ex)
         else:
             if self.axis is None:
                 self.axis = self.figure.add_subplot(111)
             self.axis.imshow(self.plane, vmin=vmin, vmax=vmax, **kwargs)
-            if colorbar: self.colorbar = matplotlib.pyplot.colorbar()
+            if colorbar: 
+                try:
+                    self.colorbar = matplotlib.pyplot.colorbar(self.axis.images[0])
+                except Exception as ex:
+                    print "ERROR: Could not create colorbar!  Error was %s" % str(ex)
 
         self.canvas = self.axis.figure.canvas
 
@@ -235,7 +243,8 @@ class MapPlotter(object):
                 print "Call failed for some reason: "
                 print "event: ",event
         else:
-            warn("Click outside of axes")
+            pass
+            # never really needed... warn("Click outside of axes")
 
     def _add_click_mark(self,x,y,clear=False,color='k'):
         """

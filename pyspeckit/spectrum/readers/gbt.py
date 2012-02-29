@@ -137,7 +137,7 @@ def reduce_gbt_target(sdfitsfile, objectname, verbose=False):
 
     return reduced_nods
 
-def reduce_blocks(blocks, verbose=False):
+def reduce_blocks(blocks, verbose=False, average=True):
     """
     Do a nodded on/off observation given a dict of observation blocks as
     produced by read_gbt_target
@@ -171,8 +171,12 @@ def reduce_blocks(blocks, verbose=False):
             print "Nod Pair %s (feed %i) has tsys1=%f tsys2=%f" % (sampname, feednumber, tsys1, tsys2)
 
         # then get the total power
-        tp1 = totalpower(on1avg,off1avg)
-        tp2 = totalpower(on2avg,off2avg)
+        if average:
+            tp1 = totalpower(on1avg, off1avg, average=False)
+            tp2 = totalpower(on2avg, off2avg, average=False)
+        else:
+            tp1 = totalpower(blocks[on1], blocks[off1], average=False)
+            tp2 = totalpower(blocks[on2], blocks[off2], average=False)
 
         # then do the signal-reference bit
         if feednumber == 1:
@@ -225,19 +229,23 @@ def dcmeantsys(calon,caloff,tcal,debug=False):
 
     return meanTsys
 
-def totalpower(calon, caloff):
+def totalpower(calon, caloff, average=True):
     """
     Do a total-power calibration of an on/off data set
     (see dototalpower.pro in GBTIDL)
     """
 
-    if hasattr(calon,'average'):
+    if hasattr(calon,'average') and average:
         ON = calon.average()
+    elif hasattr(calon,'average'):
+        ON = calon.data
     else:
         ON = calon
 
-    if hasattr(caloff,'average'):
+    if hasattr(caloff,'average') and average:
         OFF = caloff.average()
+    elif hasattr(caloff,'average'):
+        OFF = caloff.data
     else:
         OFF = caloff
 
