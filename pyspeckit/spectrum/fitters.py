@@ -565,7 +565,7 @@ class Specfit(interactive.Interactive):
         else:
             self.residualaxis = axis
             if clear: self.residualaxis.clear()
-        self.residualplot = self.residualaxis.plot(self.Spectrum.xarr[self.xmin:self.xmax],
+        self.residualplot = self.residualaxis.plot(self.Spectrum.xarr,
                 self.residuals,drawstyle='steps-mid',
                 linewidth=0.5, color='k', **kwargs)
         if self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None:
