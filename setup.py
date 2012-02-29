@@ -6,6 +6,9 @@ from distutils.core import setup
 with open('README.txt') as file:
     long_description = file.read()
 
+with open('CHANGES') as file:
+    long_description += file.read()
+
 from pyspeckit import __version__ as version_base
 tagname = "pyspeckit_%s" % (version_base)
 

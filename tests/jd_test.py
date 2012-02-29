@@ -11,13 +11,13 @@ print A029
 ob1 = A029.reduce_target('003918.9+402158.4')
 
 # now see what it contains
-print ob1.spectra
+print ob1.spectra.keys()
 
 # Average polarizations & feeds for each IF
 # (this may be poorly named)
 ob1.average_IFs()
 # again, check on the contents
-print ob1.spectra
+print ob1.spectra.keys()
 
 # now plot IF0
 ob1['if0'].plotter()
@@ -30,4 +30,5 @@ ob1['if0'].plotter()
 # crop the spectrum and replot
 ob1['if0'].crop(-600,-525,units='km/s')
 ob1['if0'].plotter(figure=figure(),reset_xlimits=True)
+ob1['if0'].specfit()
 
