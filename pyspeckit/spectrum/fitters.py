@@ -276,7 +276,13 @@ class Specfit(interactive.Interactive):
         However, it may be possible to do this using masked arrays instead of
         setting errors to be 1e10....
         """
+        if self.Spectrum.data.sum() is np.ma.masked:
+            self.spectofit = np.zeros_like(self.Spectrum.data)
+            self.errspec = np.zeros_like(self.Spectrum.data)
+            self._valid = False
+            return
         self.spectofit = np.copy(self.Spectrum.data)
+        self._valid = True
         if hasattr(self.Spectrum,'baseline'):
             if (self.Spectrum.baseline.subtracted is False 
                     and self.Spectrum.baseline.basespec is not None
@@ -300,6 +306,8 @@ class Specfit(interactive.Interactive):
             closer to 1 (scales by the median) so that the fit converges better
         """
         self.setfitspec()
+        if not self._valid:
+            raise ValueError("Data are invalid; cannot be fit.")
         #if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp') # We now do this in gaussfitter.py
         if fittype is not None: self.fittype = fittype
         if len(self.guesses) < self.Registry.npars[self.fittype]:
@@ -789,9 +797,10 @@ class Specfit(interactive.Interactive):
 
         newspecfit = copy.copy(self)
         newspecfit.Spectrum = parent
-        newspecfit.modelpars = self.modelpars
-        newspecfit.modelerrs = self.modelerrs
-        newspecfit.model = self.model
+        newspecfit.modelpars = copy.copy(self.modelpars)
+        newspecfit.modelerrs = copy.copy(self.modelerrs)
+        newspecfit.includemask = self.includemask.copy() 
+        newspecfit.model = copy.copy( self.model )
         newspecfit.npeaks = self.npeaks
         if hasattr(self,'parinfo'):
             newspecfit.parinfo = copy.copy( self.parinfo )

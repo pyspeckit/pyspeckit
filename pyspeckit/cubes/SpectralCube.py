@@ -127,7 +127,7 @@ class Cube(spectrum.Spectrum):
 
         return newcube
 
-    def slice(self, start=None, stop=None, units='pixel', preserve_fits=False):
+    def slice(self, start=None, stop=None, units='pixel', preserve_fits=False, copy=True):
         """Slicing the spectrum
         
         Parameters:
@@ -146,6 +146,8 @@ class Cube(spectrum.Spectrum):
         stop_ind  = x_in_units.x_to_pix(stop)
         spectrum_slice = slice(start_ind,stop_ind)
 
+        if not copy:
+            raise NotImplementedError("Must copy when slicing a cube.")
         newcube = self.copy()
         newcube.cube = newcube.cube[spectrum_slice,:,:]
         if hasattr(newcube,'errcube'):
@@ -203,8 +205,8 @@ class Cube(spectrum.Spectrum):
         Fill the .data array with a real spectrum and plot it
         """
 
+        self.data = self.cube[:,y,x]
         if self.plot_special is None:
-            self.data = self.cube[:,y,x]
             self.plotter(**kwargs)
             if plot_fit: self.plot_fit(x,y)
         else:
@@ -266,6 +268,8 @@ class Cube(spectrum.Spectrum):
                 header=self.header)
 
         sp.specfit = copy.copy(self.specfit)
+        # explicitly re-do this (test)
+        sp.specfit.includemask = self.specfit.includemask.copy()
         sp.specfit.Spectrum = sp
 
         if hasattr(self,'parcube'):

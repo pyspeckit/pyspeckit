@@ -385,6 +385,7 @@ class Baseline(interactive.Interactive):
         newbaseline.OKmask = copy.copy( self.OKmask )
         newbaseline.basespec = copy.copy( self.basespec )
         newbaseline.baselinepars = copy.copy( self.baselinepars )
+        newbaseline.includemask = self.includemask.copy() 
 
         if parent is not None:
             newbaseline.Spectrum.plotter = parent.plotter
