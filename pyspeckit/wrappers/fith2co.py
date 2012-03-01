@@ -83,11 +83,7 @@ def BigSpectrum_to_H2COdict(sp, vrange=None):
             spdict[linename].xarr.refX_units = 'Hz'
             #spdict[linename].baseline = copy.copy(sp.baseline)
             #spdict[linename].baseline.Spectrum = spdict[linename]
-            spdict[linename].specfit = sp.specfit.copy()
-            if hasattr(sp.specfit,'fitter'):
-                spdict[linename].specfit.fitter = copy.copy(sp.specfit.fitter)
-                spdict[linename].specfit._full_model()
-            spdict[linename].specfit.Spectrum = spdict[linename]
+            spdict[linename].specfit = sp.specfit.copy(parent=spdict[linename])
             spdict[linename].xarr.convert_to_unit('km/s')
             if vrange is not None:
                 try:
