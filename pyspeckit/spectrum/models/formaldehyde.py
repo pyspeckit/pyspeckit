@@ -236,7 +236,7 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
 
 
 def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0, 
-        return_components=False ):
+        return_hyperfine_components=False ):
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters
 
@@ -245,7 +245,7 @@ def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
     The final spectrum is then rescaled to that value
     """
 
-    mdl = formaldehyde_vtau(xarr, Tex=amp*0.01, tau=0.01, xoff_v=xoff_v, width=width, return_components=return_components)
+    mdl = formaldehyde_vtau(xarr, Tex=amp*0.01, tau=0.01, xoff_v=xoff_v, width=width, return_hyperfine_components=return_hyperfine_components)
     if amp > 0 and mdl.max() > 0:
         mdl *= amp/mdl.max() 
     elif mdl.min() < 0:

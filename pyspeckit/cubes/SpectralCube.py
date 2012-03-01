@@ -209,10 +209,12 @@ class Cube(spectrum.Spectrum):
         if self.plot_special is None:
             self.plotter(**kwargs)
             if plot_fit: self.plot_fit(x,y)
+            self.plotted_spectrum = self
         else:
             sp = self.get_spectrum(x,y)
             sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
             sp.plot_special(**dict(kwargs.items()+self.plot_special_kwargs.items()))
+            self.plotted_spectrum = sp
 
     def plot_fit(self, x, y, silent=False, **kwargs):
         """

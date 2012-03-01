@@ -61,17 +61,17 @@ class hyperfinemodel(object):
         return self.hyperfine(*args,**kwargs)
 
     def hyperfine_amp(self, xarr, amp=None, xoff_v=0.0, width=1.0, 
-            return_components=False, Tbackground=2.73, Tex=5.0, tau=0.1):
+            return_hyperfine_components=False, Tbackground=2.73, Tex=5.0, tau=0.1):
         """
         wrapper of self.hyperfine with order of arguments changed
         """ 
         return self.hyperfine(xarr, amp=amp, Tex=Tex, tau=tau, xoff_v=xoff_v,
-                width=width, return_components=return_components,
+                width=width, return_hyperfine_components=return_hyperfine_components,
                 Tbackground=Tbackground)
 
 
     def hyperfine(self, xarr, Tex=5.0, tau=0.1, xoff_v=0.0, width=1.0, 
-            return_components=False, Tbackground=2.73, amp=None ):
+            return_hyperfine_components=False, Tbackground=2.73, amp=None ):
         """
         Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.
         """
@@ -83,7 +83,7 @@ class hyperfinemodel(object):
         tau_nu_cumul = np.zeros(len(xarr))
         # Error check: inputing NANs results in meaningless output - return without computing a model
         if np.any(np.isnan((tau,Tex,width,xoff_v))):
-            if return_components:
+            if return_hyperfine_components:
                 return [tau_nu_cumul] * len(self.line_names)
             else:
                 return tau_nu_cumul
@@ -108,7 +108,7 @@ class hyperfinemodel(object):
 
         # add a list of the individual 'component' spectra to the total components...
 
-        if return_components:
+        if return_hyperfine_components:
             if amp is None:
                 return (1.0-np.exp(-np.array(components)))*(Tex-Tbackground)
             else:

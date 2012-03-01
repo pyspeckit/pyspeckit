@@ -356,8 +356,7 @@ class SpectralModel(fitter.SimpleFitter):
         modelcomponents = np.array(
             [self.modelfunc(xarr,
                 *pars[i*self.npars:(i+1)*self.npars],
-                return_components=True,
-                **self.modelfunc_kwargs)
+                **dict(self.modelfunc_kwargs.items()+kwargs.items()))
             for i in range(self.npeaks)])
 
         return modelcomponents
