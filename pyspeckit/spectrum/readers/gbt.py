@@ -422,8 +422,8 @@ class GBTSession(object):
             "Project: %s" % self.bintable.header.get('PROJID'),
             "Backend: %s" % self.bintable.header.get('BACKEND'),
             "Telescope: %s" % self.bintable.header.get('TELESCOP'),
-            "Bandwidth: %s" % self.bintable.data[0].get('BANDWID'),
-            "Date: %s" % self.bintable.data[0].get('DATE-OBS')) )
+            "Bandwidth: %s" % self.bintable.data[0]['BANDWID'],
+            "Date: %s" % self.bintable.data[0]['DATE-OBS']) )
 
     def __repr__(self):
         self.instance_info = super(GBTSession,self).__repr__()
