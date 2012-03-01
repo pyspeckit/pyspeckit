@@ -274,6 +274,7 @@ class Cube(spectrum.Spectrum):
 
         if hasattr(self,'parcube'):
             sp.specfit.modelpars = self.parcube[:,y,x]
+            sp.specfit.fitter.mpp = sp.specfit.modelpars # also for annotations (differs depending on which function... sigh... need to unify)
             if hasattr(self.specfit,'parinfo'):
                 # set the parinfo values correctly for annotations
                 for pi,p,e in zip(sp.specfit.parinfo, sp.specfit.modelpars, self.errcube[:,y,x]):

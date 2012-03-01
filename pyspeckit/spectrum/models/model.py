@@ -336,11 +336,15 @@ class SpectralModel(fitter.SimpleFitter):
         # if pars need to be replicated....
         if len(svn) < self.npeaks*self.npars:
             svn = svn * self.npeaks
+        loop_list = [(self.mpp[ii+jj*self.npars+self.vheight],
+                      self.mpperr[ii+jj*self.npars+self.vheight],
+                      svn[ii+jj*self.npars],
+                      jj) for jj in range(self.npeaks) for ii in range(self.npars)]
         label_list = [(
-                "$%s(%i)$=%8s $\\pm$ %8s" % (svn[ii+jj*self.npars],jj,
-                Decimal("%g" % self.mpp[ii+jj*self.npars+self.vheight]).quantize(Decimal("%0.2g" % (min(self.mpp[ii+jj*self.npars+self.vheight],self.mpperr[ii+jj*self.npars+self.vheight])))),
-                Decimal("%g" % self.mpperr[ii+jj*self.npars+self.vheight]).quantize(Decimal("%0.2g" % (self.mpperr[ii+jj*self.npars+self.vheight]))),)
-                          ) for jj in range(self.npeaks) for ii in range(self.npars)]
+                "$%s(%i)$=%8s $\\pm$ %8s" % (varname,varnumber,
+                Decimal("%g" % value).quantize( Decimal("%0.2g" % (min(np.abs([value,error])))) ),
+                Decimal("%g" % error).quantize(Decimal("%0.2g" % (error))),)
+                          ) for (value, error, varname, varnumber) in loop_list]
         labels = tuple(mpcb.flatten(label_list))
         return labels
 

@@ -30,7 +30,7 @@ class Plotter(object):
 
 
     def __init__(self, Spectrum, autorefresh=True, title="", ylabel="",
-            xlabel="", silent=False, plotscale=1.0, **kwargs):
+            xlabel="", silent=True, plotscale=1.0, **kwargs):
         self.figure = None
         self.axis = None
         self.Spectrum = Spectrum
@@ -174,7 +174,7 @@ class Plotter(object):
     
     def reset_limits(self,xmin=None, xmax=None, ymin=None, ymax=None,
             reset_xlimits=True, reset_ylimits=True, ypeakscale=1.2,
-            silent=True, **kwargs):
+            silent=None, **kwargs):
         """
         Automatically or manually reset the plot limits
         """
