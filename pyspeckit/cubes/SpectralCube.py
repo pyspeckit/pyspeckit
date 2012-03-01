@@ -274,15 +274,16 @@ class Cube(spectrum.Spectrum):
 
         if hasattr(self,'parcube'):
             sp.specfit.modelpars = self.parcube[:,y,x]
-            if hasattr(self.specfit,'fitter'):
-                sp.specfit.npeaks = self.specfit.fitter.npeaks
-                sp.specfit.model = self.specfit.fitter.n_modelfunc(sp.specfit.modelpars,**self.specfit.fitter.modelfunc_kwargs)(self.xarr)
-
             if hasattr(self.specfit,'parinfo'):
                 # set the parinfo values correctly for annotations
                 for pi,p,e in zip(sp.specfit.parinfo, sp.specfit.modelpars, self.errcube[:,y,x]):
                     pi['value'] = p
                     pi['error'] = e
+
+            if hasattr(self.specfit,'fitter'):
+                sp.specfit.npeaks = self.specfit.fitter.npeaks
+                sp.specfit.fitter.parinfo = sp.specfit.parinfo
+                sp.specfit.model = self.specfit.fitter.n_modelfunc(sp.specfit.modelpars,**self.specfit.fitter.modelfunc_kwargs)(self.xarr)
 
         return sp
 

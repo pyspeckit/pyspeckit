@@ -1,3 +1,5 @@
+0.1.6 - [not released yet]
+    H2CO fit / plot wrapper
 0.1.5 - Added GBT (GBTIDL SDFITS file) and ALFALFA (ALFALFA idlsave .src) readers
     added extinction model (just a function, not a complete model yet)
 0.1.4 - removed setuptools & distribute (they fail)

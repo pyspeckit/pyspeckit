@@ -173,8 +173,8 @@ class Plotter(object):
         if self.autorefresh and refresh: self.refresh()
     
     def reset_limits(self,xmin=None, xmax=None, ymin=None, ymax=None,
-            reset_xlimits=False, reset_ylimits=False, ypeakscale=1.2,
-            silent=None, **kwargs):
+            reset_xlimits=True, reset_ylimits=True, ypeakscale=1.2,
+            silent=True, **kwargs):
         """
         Automatically or manually reset the plot limits
         """

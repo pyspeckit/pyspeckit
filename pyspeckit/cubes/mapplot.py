@@ -135,9 +135,9 @@ class MapPlotter(object):
 
     def _connect(self):
         """ Connect click, click up (release click), and key press to events """
-        self.clickid = self.canvas.mpl_connect('button_press_event',self.click)
-        self.clickupid = self.canvas.mpl_connect('button_release_event',self.plot_spectrum)
-        self.keyid = self.canvas.mpl_connect('key_press_event',self.plot_spectrum)
+        self.clickid = self.canvas.callbacks.connect('button_press_event',self.click)
+        self.clickupid = self.canvas.callbacks.connect('button_release_event',self.plot_spectrum)
+        self.keyid = self.canvas.callbacks.connect('key_press_event',self.plot_spectrum)
 
     def _disconnect(self):
         """ Disconnect click, click up (release click), and key press from events """

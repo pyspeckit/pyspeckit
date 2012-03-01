@@ -489,6 +489,7 @@ class Specfit(interactive.Interactive):
             mpp = self.modelpars
         if debug: print "_full_model mpp: ",mpp
         self.fullmodel = self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(self.Spectrum.xarr)
+        self.residuals = self.data.spectrum - self.fullmodel
                 
     def plot_fit(self, annotate=None, show_components=None, 
         composite_fit_color='red', component_fit_color='blue', lw=0.5,
