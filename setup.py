@@ -64,11 +64,12 @@ setup(name='pyspeckit',
       
      )
 
-# Copy default config file to directory $HOME/.pyspeckit
-HOME = os.environ.get('HOME')
-CWD = os.getcwd()
-if not os.path.exists('%s/.pyspeckit' % HOME):
-    os.mkdir('%s/.pyspeckit' % HOME)
-    
-if not os.path.exists('%s/.pyspeckit/config' % HOME):
-    shutil.copyfile('%s/pyspeckit/config_default' % CWD, '%s/.pyspeckit/config' % HOME)
+# These lines break the configuration:
+# # Copy default config file to directory $HOME/.pyspeckit
+# HOME = os.environ.get('HOME')
+# CWD = os.getcwd()
+# if not os.path.exists('%s/.pyspeckit' % HOME):
+#     os.mkdir('%s/.pyspeckit' % HOME)
+#     
+# if not os.path.exists('%s/.pyspeckit/config' % HOME):
+#     shutil.copyfile('%s/pyspeckit/config_default' % CWD, '%s/.pyspeckit/config' % HOME)
