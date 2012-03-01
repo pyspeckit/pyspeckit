@@ -419,11 +419,11 @@ class GBTSession(object):
         self.bintable = _get_bintable(sdfitsfile)
         self.targets = dict((target,None) for target in unique_targets(self.bintable))
         self.print_header = "\n".join( ("Observer: " + self.bintable.data[0]['OBSERVER'],
-            "Project: %s" % self.bintable.header['PROJID'],
-            "Backend: %s" % self.bintable.header['BACKEND'],
-            "Telescope: %s" % self.bintable.header['TELESCOP'],
-            "Bandwidth: %s" % self.bintable.data[0]['BANDWID'],
-            "Date: %s" % self.bintable.data[0]['DATE-OBS']) )
+            "Project: %s" % self.bintable.header.get('PROJID'),
+            "Backend: %s" % self.bintable.header.get('BACKEND'),
+            "Telescope: %s" % self.bintable.header.get('TELESCOP'),
+            "Bandwidth: %s" % self.bintable.data[0].get('BANDWID'),
+            "Date: %s" % self.bintable.data[0].get('DATE-OBS')) )
 
     def __repr__(self):
         self.instance_info = super(GBTSession,self).__repr__()
