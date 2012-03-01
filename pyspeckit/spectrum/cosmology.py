@@ -89,7 +89,8 @@ class Cosmology:
         """
         
         integrand = lambda z: 1. / self.EvolutionFunction(z)
-        return romberg(integrand, z_i, z_f) * c / self.HubbleParameterNow / cm_per_mpc
+        if scipyOK:
+            return romberg(integrand, z_i, z_f) * c / self.HubbleParameterNow / cm_per_mpc
         
     def LuminosityDistance(self, z_f):
         """
