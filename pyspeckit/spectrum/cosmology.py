@@ -74,6 +74,7 @@ class Cosmology:
         
         if scipyOK:
             return (romberg(Integrand, z_i, z_f) / self.HubbleParameterNow)    
+        else: return 0
         
     def TimeToRedshiftConverter(self, z_i, dt):
         """
@@ -91,6 +92,7 @@ class Cosmology:
         integrand = lambda z: 1. / self.EvolutionFunction(z)
         if scipyOK:
             return romberg(integrand, z_i, z_f) * c / self.HubbleParameterNow / cm_per_mpc
+        else: return 0
         
     def LuminosityDistance(self, z_f):
         """
