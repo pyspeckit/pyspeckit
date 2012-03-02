@@ -577,6 +577,8 @@ class Specfit(interactive.Interactive):
                 linewidth=linewidth, color=color, **kwargs)
         if self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None:
             self.residualaxis.set_xlim(self.Spectrum.plotter.xmin,self.Spectrum.plotter.xmax)
+        if self.Spectrum.plotter.ymin is not None and self.Spectrum.plotter.ymax is not None:
+            self.residualaxis.set_ylim(self.Spectrum.plotter.ymin,self.Spectrum.plotter.ymax)
         self.residualaxis.set_xlabel(self.Spectrum.plotter.xlabel)
         self.residualaxis.set_ylabel(self.Spectrum.plotter.ylabel)
         self.residualaxis.set_title("Residuals")
