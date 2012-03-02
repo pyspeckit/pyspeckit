@@ -556,7 +556,7 @@ class Specfit(interactive.Interactive):
             self.selectregion(reset=True)
 
     def plotresiduals(self, fig=2, axis=None, clear=True, color='k',
-            linewidth=linewidth, **kwargs):
+            linewidth=0.5, **kwargs):
         """
         Plot residuals of the fit.  Specify a figure or
         axis; defaults to figure(2).
