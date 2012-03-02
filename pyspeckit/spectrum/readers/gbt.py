@@ -103,6 +103,9 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
         print "Number of individual scans for Object %s: %i" % (objectname,whobject.sum())
 
     calON = bintable.data['CAL'] == 'T'
+    # HACK: apparently bintable.data can sometimes treat itself as scalar...
+    if calON in (True,False):
+        calON = np.array([(val in ['T',True]) for val in bintable.data['CAL'])
 
     n_nods = np.unique(bintable.data['PROCSIZE'])
 
