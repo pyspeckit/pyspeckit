@@ -247,17 +247,14 @@ class Specfit(interactive.Interactive):
 
     register_fitter.__doc__ += Registry.add_fitter.__doc__
     
-    def seterrspec(self,usestd=None,useresiduals=True,useinclude=True):
+    def seterrspec(self,usestd=None,useresiduals=True):
         """
         Simple wrapper function to set the error spectrum; will either use the
         input spectrum or determine the error using the RMS of the residuals,
         depending on whether the residuals exist.
         """
         if self.residuals is not None and useresiduals: 
-            if useinclude:
-                self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals[self.includemask].std()
-            else:
-                self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
+            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
         elif self.Spectrum.error is not None and not usestd:
             if (self.Spectrum.error == 0).all():
                 if type(self.Spectrum.error) is np.ma.masked_array:
@@ -360,7 +357,7 @@ class Specfit(interactive.Interactive):
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
         if self.Spectrum.plotter.axis is not None:
             if color is not None:
-                kwargs.update('composite_fit_color',color)
+                kwargs.update({'composite_fit_color':color})
             self.plot_fit(annotate=annotate, 
                     show_components=show_components, **kwargs)
                 
@@ -473,7 +470,7 @@ class Specfit(interactive.Interactive):
         #self.modelerrs[1] *= scalefactor
         if self.Spectrum.plotter.axis is not None:
             if color is not None:
-                kwargs.update('composite_fit_color',color)
+                kwargs.update({'composite_fit_color':color})
             self.plot_fit(annotate=annotate,
                 show_components=show_components, **kwargs)
 
@@ -496,7 +493,7 @@ class Specfit(interactive.Interactive):
             mpp = self.modelpars
         if debug: print "_full_model mpp: ",mpp
         self.fullmodel = self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(self.Spectrum.xarr)
-        self.residuals = self.Spectrum.data - self.fullmodel
+        self.fullresiduals = self.Spectrum.data - self.fullmodel
                 
     def plot_fit(self, annotate=None, show_components=None, 
         composite_fit_color='red', component_fit_color='blue', lw=0.5,
@@ -573,7 +570,7 @@ class Specfit(interactive.Interactive):
         else:
             self.residualaxis = axis
             if clear: self.residualaxis.clear()
-        self.residualplot = self.residualaxis.plot(self.Spectrum.xarr,
+        self.residualplot = self.residualaxis.plot(self.Spectrum.xarr[self.includemask],
                 self.residuals,drawstyle='steps-mid',
                 linewidth=0.5, color='k', **kwargs)
         if self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None:
