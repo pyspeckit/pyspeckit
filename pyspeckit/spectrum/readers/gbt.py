@@ -105,7 +105,7 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
     calON = bintable.data['CAL'] == 'T'
     # HACK: apparently bintable.data can sometimes treat itself as scalar...
     if calON in (True,False):
-        calON = np.array([(val in ['T',True]) for val in bintable.data['CAL'])
+        calON = np.array([(val in ['T',True]) for val in bintable.data['CAL']])
 
     n_nods = np.unique(bintable.data['PROCSIZE'])
 
@@ -118,6 +118,8 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
             for onoff in ('ON','OFF'):
                 calOK = (calON - (onoff=='OFF'))
                 whOK = (whobject*whsampler*calOK*whnod)
+                if whOK.sum() == 0:
+                    continue
                 if verbose:
                     print "Number of spectra for sampler %s, nod %i, cal%s: %i" % (sampler,nod,onoff,whOK.sum())
                 crvals = bintable.data[whOK]['CRVAL1']
