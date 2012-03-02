@@ -1,2 +1,3 @@
 include pyspeckit/config_default
 include pyspeckit/spectrum/speclines/splatalogue.csv
+include CHANGES
