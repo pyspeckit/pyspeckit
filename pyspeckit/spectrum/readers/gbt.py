@@ -72,7 +72,10 @@ def read_gbt_scan(sdfitsfile, obsnumber=0):
 
     for par in bintable.data.dtype.names:
         if par not in ('DATA',):
-            header.update(par[:8], bintable.data[obsnumber][par])
+            try:
+                header.update(par[:8], bintable.data[obsnumber][par])
+            except ValueError:
+                header.update(par[:8], str(bintable.data[obsnumber][par]))
     header.update('CUNIT1','Hz')
 
     HDU = pyfits.PrimaryHDU(data=data,header=header)
