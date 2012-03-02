@@ -247,14 +247,17 @@ class Specfit(interactive.Interactive):
 
     register_fitter.__doc__ += Registry.add_fitter.__doc__
     
-    def seterrspec(self,usestd=None,useresiduals=True):
+    def seterrspec(self,usestd=None,useresiduals=True,useinclude=True):
         """
         Simple wrapper function to set the error spectrum; will either use the
         input spectrum or determine the error using the RMS of the residuals,
         depending on whether the residuals exist.
         """
         if self.residuals is not None and useresiduals: 
-            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
+            if useinclude:
+                self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals[self.includemask].std()
+            else:
+                self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
         elif self.Spectrum.error is not None and not usestd:
             if (self.Spectrum.error == 0).all():
                 if type(self.Spectrum.error) is np.ma.masked_array:
@@ -296,7 +299,7 @@ class Specfit(interactive.Interactive):
             self.errspec[True - self.includemask] = 1e10
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
-            show_components=None, verbose=True, **kwargs):
+            show_components=None, verbose=True, color=None, **kwargs):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -356,6 +359,8 @@ class Specfit(interactive.Interactive):
         self.parinfo = self.fitter.parinfo
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
         if self.Spectrum.plotter.axis is not None:
+            if color is not None:
+                kwargs.update('composite_fit_color',color)
             self.plot_fit(annotate=annotate, 
                     show_components=show_components, **kwargs)
                 
@@ -373,7 +378,7 @@ class Specfit(interactive.Interactive):
         self._full_model()
                 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
-            negamp=None, fittype=None, renormalize='auto', 
+            negamp=None, fittype=None, renormalize='auto', color=None,
             show_components=None, debug=False, nsigcut_moments=None, **kwargs):
         """
         Fit a single peak (plus a background)
@@ -467,6 +472,8 @@ class Specfit(interactive.Interactive):
         #self.modelpars[1] *= scalefactor
         #self.modelerrs[1] *= scalefactor
         if self.Spectrum.plotter.axis is not None:
+            if color is not None:
+                kwargs.update('composite_fit_color',color)
             self.plot_fit(annotate=annotate,
                 show_components=show_components, **kwargs)
 
