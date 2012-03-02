@@ -555,7 +555,8 @@ class Specfit(interactive.Interactive):
             self.residuals = self.spectofit - self.model
             self.selectregion(reset=True)
 
-    def plotresiduals(self,fig=2,axis=None,clear=True,**kwargs):
+    def plotresiduals(self, fig=2, axis=None, clear=True, color='k',
+            linewidth=linewidth, **kwargs):
         """
         Plot residuals of the fit.  Specify a figure or
         axis; defaults to figure(2).
@@ -572,7 +573,7 @@ class Specfit(interactive.Interactive):
             if clear: self.residualaxis.clear()
         self.residualplot = self.residualaxis.plot(self.Spectrum.xarr[self.includemask],
                 self.residuals,drawstyle='steps-mid',
-                linewidth=0.5, color='k', **kwargs)
+                linewidth=linewidth, color=color, **kwargs)
         if self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None:
             self.residualaxis.set_xlim(self.Spectrum.plotter.xmin,self.Spectrum.plotter.xmax)
         self.residualaxis.set_xlabel(self.Spectrum.plotter.xlabel)
