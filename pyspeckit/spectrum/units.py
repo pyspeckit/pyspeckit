@@ -518,7 +518,8 @@ class SpectroscopicAxis(np.ndarray):
         elif unit in wavelength_dict:
             self.xtype = "Wavelength"
 
-        self.units = unit
+        if unit in unit_type_dict and units not in (None, 'unknown'):
+            self.units = unit
         self.dxarr = np.diff(self)
 
     def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
