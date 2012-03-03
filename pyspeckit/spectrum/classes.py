@@ -657,7 +657,11 @@ class Spectra(Spectrum):
         """
         return self.speclist[index]
 
-    def __len__(self): return len(self.speclist)
+    def __len__(self): 
+        """
+        len(spectra) != len(spectrum) !
+        """
+        return len(self.speclist)
 
     def smooth(self,smooth,**kwargs):
         """
@@ -831,3 +835,7 @@ class ObsBlock(Spectra):
         self.specfit.downsample(smooth)
     
         self._smooth_header(smooth)
+
+class XCorrSpectrum(Spectrum):
+    """ extraordinarily thin spectrum; just a name right now """
+    pass
