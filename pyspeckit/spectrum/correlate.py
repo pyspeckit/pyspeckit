@@ -1,6 +1,6 @@
 import numpy as np
 import arithmetic
-import units
+import units as units_module
 import classes
 import pyfits
 import headers
@@ -15,7 +15,7 @@ def correlate(spectrum1, spectrum2, range=None, units=None):
         spectrum1 = spectrum1.slice(*range, units=units)
         spectrum2 = spectrum2.slice(*range, units=units)
 
-    if not all(spectrum1.xarr1 == spectrum2.xarr2):
+    if not all(spectrum1.xarr == spectrum2.xarr):
         spectrum2 = arithmetic.interp(spectrum2, spectrum1)
 
     data1 = spectrum1.data
@@ -29,12 +29,15 @@ def correlate(spectrum1, spectrum2, range=None, units=None):
     xmax =  xrange/2.
     offset_values = np.linspace(xmin, xmax, len(xarr))
 
-    offset_xarr = units.SpectroscopicAxis(offset_values, unit=xarr.units) 
+    offset_xarr = units_module.SpectroscopicAxis(offset_values, unit=xarr.units) 
 
     header = headers.intersection(spectrum1.header, spectrum2.header)
-    header['CRPIX1'] = 1
-    header['CRVAL1'] = xmin
-    header['CDELT1'] = offset_xarr.cdelt()
+    header.update('CRPIX1',1)
+    try:
+        header.update('CRVAL1',xmin)
+    except ValueError:
+        header.update('CRVAL1',xmin.tolist())
+    header.update('CDELT1',offset_xarr.cdelt())
 
     return classes.XCorrSpectrum(xarr=offset_xarr, data=xcorr, header=header)
 
