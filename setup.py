@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import os, shutil
+import os
+import shutil
+import sys
 from distutils.core import setup, Command
 
 with open('README.txt') as file:
@@ -56,7 +58,7 @@ class PyTest(Command):
         pass
 
     def run(self):
-        errno = subprocess.call([sys.executable, 'runtests.py', '-q'])
+        errno = subprocess.call([sys.executable, 'tests/runtests.py', '-q'])
         raise SystemExit(errno)
 
 setup(name='pyspeckit',
