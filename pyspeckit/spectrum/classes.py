@@ -337,6 +337,7 @@ class Spectrum(Spectrum1D):
             x_in_units = self.xarr.as_unit(units)
             start_ind = x_in_units.x_to_pix(start)
             stop_ind  = x_in_units.x_to_pix(stop)
+        if start_ind > stop_ind: start_ind,stop_ind = stop_ind,start_ind
         spectrum_slice = slice(start_ind,stop_ind)
 
         if copy:
