@@ -604,7 +604,7 @@ class SpectroscopicAxis(np.ndarray):
                     freqx = velocity_to_frequency(self, self.units,
                             center_frequency=center_frequency,
                             center_frequency_units=center_frequency_units,
-                            frequency_units=unit, convention=self.velocity_convention)
+                            frequency_units='Hz', convention=self.velocity_convention)
                     newxarr = frequency_to_wavelength(freqx, 'Hz',
                             wavelength_units=unit)
                     newxtype = "Wavelength"
@@ -923,7 +923,7 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
     """
     if input_units in frequency_dict:
         print "Already in frequency units"
-        return
+        return wavelengths
     if frequency_units not in frequency_dict:
         raise ValueError("Frequency units %s not valid" % wavelength_units)
 
