@@ -5,6 +5,7 @@ Release 0.1.7
 ~~~~~~~~~~~~~
     
     * Added cross-correlation
+    * Added (some) unit tests
 
 Release 0.1.6 
 ~~~~~~~~~~~~~
