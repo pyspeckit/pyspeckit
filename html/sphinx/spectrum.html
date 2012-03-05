@@ -200,9 +200,9 @@ parameters</p>
 .txt or other atpy table type objects</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="attribute">
 <dt id="pyspeckit.spectrum.Spectrum.shape">
-<tt class="descname">shape</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.shape" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">shape</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the data shape</p>
 </dd></dl>
 
@@ -305,7 +305,7 @@ of observations of the same object in the same setup for later averaging.</p>
 <p>ObsBlocks can be indexed like python lists.</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.ObsBlock.average">
-<tt class="descname">average</tt><big>(</big><em>weight=None</em>, <em>inverse_weight=False</em>, <em>error='erravgrtn'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.average" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">average</tt><big>(</big><em>weight=None</em>, <em>inverse_weight=False</em>, <em>error='erravgrtn'</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.average" title="Permalink to this definition">¶</a></dt>
 <dd><p>Average all scans in an ObsBlock.  Returns a single Spectrum object</p>
 <p>weight - a header keyword to weight by
 error - estimate the error spectrum.  Can be:</p>
@@ -406,7 +406,7 @@ for example.</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Feb 16, 2012.
+      Last updated on Mar 05, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
