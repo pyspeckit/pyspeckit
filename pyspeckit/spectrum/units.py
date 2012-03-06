@@ -640,6 +640,9 @@ class SpectroscopicAxis(np.ndarray):
         #if replot:
         #    self.spectrum.plotter(reset_xlimits=True)
 
+        newxarr.unit = newunit
+        newxarr.xtype = newxtype
+
         return newxarr
 
     def change_frame(self, frame):
