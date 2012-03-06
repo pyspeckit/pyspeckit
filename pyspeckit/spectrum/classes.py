@@ -337,6 +337,7 @@ class Spectrum(Spectrum1D):
             x_in_units = self.xarr.as_unit(units)
             start_ind = x_in_units.x_to_pix(start)
             stop_ind  = x_in_units.x_to_pix(stop)
+        if start_ind > stop_ind: start_ind,stop_ind = stop_ind,start_ind
         spectrum_slice = slice(start_ind,stop_ind)
 
         if copy:
@@ -657,7 +658,11 @@ class Spectra(Spectrum):
         """
         return self.speclist[index]
 
-    def __len__(self): return len(self.speclist)
+    def __len__(self): 
+        """
+        len(spectra) != len(spectrum) !
+        """
+        return len(self.speclist)
 
     def smooth(self,smooth,**kwargs):
         """
@@ -831,3 +836,7 @@ class ObsBlock(Spectra):
         self.specfit.downsample(smooth)
     
         self._smooth_header(smooth)
+
+class XCorrSpectrum(Spectrum):
+    """ extraordinarily thin spectrum; just a name right now """
+    pass

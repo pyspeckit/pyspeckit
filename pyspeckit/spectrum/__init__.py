@@ -3,6 +3,8 @@
 from classes import Spectrum,Spectra,ObsBlock
 import fitters,plotters,baseline,units
 import smooth
+import correlate
+import headers
 import logger
 from .. import config
 import moments

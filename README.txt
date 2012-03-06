@@ -1,6 +1,6 @@
 PySpecKit Spectroscopic Toolkit
 -------------------------------
-<pyspeckit.bitbucket.org>
+`<pyspeckit.bitbucket.org>`_
 
 This is a code framework designed to allow for analysis of spectroscopic data
 from a wide variety of astronomical instruments.  It is motivated by the lack
@@ -47,8 +47,7 @@ Authors:
 `Jordan Mirocha <mirochaj@gmail.com>`_
 (or both of us at pyspeckit@gmail.com)
 
-The PySpecKit logo uses the Voyager 1 image of Earth known as the "Pale Blue
-Dot" [ `original source <http://visibleearth.nasa.gov/view_rec.php?id=601>`_ |
-`reprocessed image
-<http://instructors.cwrl.utexas.edu/mcginnis/sites/instructors.cwrl.utexas.edu.mcginnis/files/pale_blue_dot2.jpg>`_
-]
+The PySpecKit logo uses the Voyager 1 image of Earth known as the "Pale Blue Dot"
+[ `original source <http://visibleearth.nasa.gov/view_rec.php?id=601>`_ |  `reprocessed image <http://instructors.cwrl.utexas.edu/mcginnis/sites/instructors.cwrl.utexas.edu.mcginnis/files/pale_blue_dot2.jpg>`_ ]
+
+

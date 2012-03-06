@@ -1,16 +1,50 @@
-0.1.6 - 
-    H2CO fit / plot wrapper
-    bugfixes
-    setup.py no longer tries to write config files
-0.1.5 - Added GBT (GBTIDL SDFITS file) and ALFALFA (ALFALFA idlsave .src) readers
-    added extinction model (just a function, not a complete model yet)
-0.1.4 - removed setuptools & distribute (they fail)
-    added hydrogen.py to models
-    first release to inherit from astropy's Spectrum1D
-0.1.3 - some internal cleanup / refactoring
-    override slicing (__getitem__ features)
-    parallel moment & fitting in Cubes repaired
-0.1.2 - added MIT license, moved mpfit and parallel_map inside pyspeckit as
-    submodules
-0.1.1 - bugfixes and versioning work
-0.1.0 - Initial creation
+CHANGES
+*******
+
+Release 0.1.7
+~~~~~~~~~~~~~
+    
+    * Added cross-correlation
+
+Release 0.1.6 
+~~~~~~~~~~~~~
+
+    * H2CO fit / plot wrapper
+    * bugfixes
+    * setup.py no longer tries to write config files
+
+Release 0.1.5 
+~~~~~~~~~~~~~
+
+    * Added GBT (GBTIDL SDFITS file) and ALFALFA (ALFALFA idlsave .src) readers
+    * added extinction model (just a function, not a complete model yet)
+
+Release 0.1.4 
+~~~~~~~~~~~~~
+
+    * removed setuptools & distribute (they fail)
+    * added hydrogen.py to models
+    * first release to inherit from astropy's Spectrum1D
+
+Release 0.1.3 
+~~~~~~~~~~~~~
+
+    * some internal cleanup / refactoring
+    * override slicing (__getitem__ features)
+    * parallel moment & fitting in Cubes repaired
+
+Release 0.1.2 
+~~~~~~~~~~~~~
+
+    * added MIT license, moved mpfit and parallel_map inside pyspeckit as
+    * submodules
+
+Release 0.1.1 
+~~~~~~~~~~~~~
+
+    * bugfixes and versioning work
+
+Release 0.1.0 
+~~~~~~~~~~~~~
+
+    * Initial creation

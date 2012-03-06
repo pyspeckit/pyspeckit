@@ -1,13 +1,21 @@
 #!/usr/bin/env python
 
-import os, shutil
-from distutils.core import setup
+import os
+import shutil
+import sys
+from distutils.core import setup, Command
 
 with open('README.txt') as file:
     long_description = file.read()
 
 with open('CHANGES') as file:
     long_description += file.read()
+
+try:  # Python 3.x
+    from distutils.command.build_py import build_py_2to3 as build_py
+except ImportError:  # Python 2.x
+    from distutils.command.build_py import build_py
+
 
 from pyspeckit import __version__ as version_base
 tagname = "pyspeckit_%s" % (version_base)
@@ -38,6 +46,21 @@ else:
     version = version_base
     download_url = "https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/%s.tar.gz" % (tagname)
 
+
+class PyTest(Command):
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        errno = subprocess.call([sys.executable, 'tests/runtests.py', '-q'])
+        raise SystemExit(errno)
+
 setup(name='pyspeckit',
       version=version,
       description='Toolkit for fitting and manipulating spectroscopic data in python',
@@ -55,7 +78,8 @@ setup(name='pyspeckit',
           'mpfit':'mpfit'}, 
       package_data={'pyspeckit.spectrum.speclines':[],
           '':['pyspeckit/config_default']},
-      requires=['matplotib','numpy'],
+      requires=['matplotlib (>=1.1.0)','numpy (>=1.4.1)'],
+      cmdclass={'build_py': build_py, 'test': PyTest},
       classifiers=[
                    "Development Status :: 3 - Alpha",
                    "Programming Language :: Python",
