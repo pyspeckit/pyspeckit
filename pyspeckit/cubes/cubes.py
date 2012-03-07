@@ -29,11 +29,11 @@ except ImportError:
 try:
     import coords
 except ImportError:
-    warn( "cubes.py requires coords for aper_world2pix and coords_in_image" )
+    warn( "Warning: cubes.py requires coords for aper_world2pix and coords_in_image (the rest of pyspeckit does not require coords)" )
 try:
     import pyregion
 except ImportError:
-    warn( "cubes.py requires pyregion for getspec_reg" )
+    warn( "Warning: cubes.py requires pyregion for getspec_reg (the rest of pyspeckit does not require pyregion)" )
 try:
     import astropy.wcs as pywcs
 except ImportError:

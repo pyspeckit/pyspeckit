@@ -9,7 +9,7 @@ Tools to deal with spectroscopic data cubes.
 Many features in Cubes require additional packages:
 
    * smoothing - requires `agpy <https://agpy.googlecode.com/svn/trunk>`_\'s smooth and parallel_map routines
-   * `coords <https://www.stsci.edu/svn/ssb/astrolib/trunk/coords>`_
+   * `coords <http://stsdas.stsci.edu/astrolib/coords-0.37.tar.gz>`_ (`homepage <http://www.scipy.org/AstroLibCoordsHome>`_)
    * `pyregion <git://github.com/leejjoon/pyregion.git>`_
    * `pywcs <git://github.com/astropy/astropy.git>`_
     

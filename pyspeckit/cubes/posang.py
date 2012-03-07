@@ -2,7 +2,7 @@ from pyspeckit.specwarnings import warn
 try:
     import coords
 except ImportError:
-    warn( "posang requires coords" )
+    warn( "Warning: posang requires coords.  The rest of pyspeckit does not." )
 from numpy import pi,arctan2,sin,cos,tan
 
 def posang(l1,b1,l2,b2,system='galactic',**kwargs):
