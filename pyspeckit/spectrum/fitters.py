@@ -126,6 +126,7 @@ class Specfit(interactive.Interactive):
         self.fittype = 'gaussian'
         self.measurements = None
         self.vheight=False # vheight must be a boolean, can't be none
+        self._component_kwargs = {}
         self.Registry = Registry
         self.autoannotate = mycfg['autoannotate']
         #self.seterrspec()
@@ -481,11 +482,15 @@ class Specfit(interactive.Interactive):
         """
         Compute the model for the whole spectrum
         """
-        self.fullmodel = self.get_full_model()
+        self.fullmodel = self.get_full_model(debug=debug)
         self.fullresiduals = self.Spectrum.data - self.fullmodel
 
     def get_full_model(self, mpp=None, debug=False):
         """ compute the model over the full axis """ 
+        return self.get_model(self.Spectrum.xarr, mpp=mpp, debug=debug)
+
+    def get_model(self, xarr, mpp=None, debug=False):
+        """ Compute the model over a given axis """
         if mpp is None:
             # requires self.modelpars to be a list... hope it is
             if self.vheight:
@@ -496,7 +501,7 @@ class Specfit(interactive.Interactive):
             else:
                 mpp = self.modelpars
         if debug: print "_full_model mpp: ",mpp
-        return self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(self.Spectrum.xarr)
+        return self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(xarr)
                 
     def plot_fit(self, annotate=None, show_components=None, 
         composite_fit_color='red', component_fit_color='blue', lw=0.5,
@@ -524,6 +529,7 @@ class Specfit(interactive.Interactive):
         
         # Plot components
         if show_components:
+            self._component_kwargs = component_kwargs
             self.modelcomponents = self.fitter.components(self.Spectrum.xarr,self.modelpars, **component_kwargs)
             for data in self.modelcomponents:
                 # can have multidimensional components
@@ -841,7 +847,20 @@ class Specfit(interactive.Interactive):
         def update(value):
             mpp = [slider.val for slider in self.sliders]
             for line in self.modelplot:
-                self.modelplot[0].set_ydata(self.get_full_model(mpp))
+                line.set_ydata(self.get_model(line.get_xdata(),mpp))
+
+            # update components too
+            for ii,line in enumerate(self._plotted_components):
+                xdata = line.get_xdata()
+                modelcomponents = self.fitter.components(xdata, mpp, **self._component_kwargs)
+                for jj,data in enumerate(modelcomponents):
+                    if ii % 2 == jj:
+                        # can have multidimensional components
+                        if len(data.shape) > 1:
+                            for d in (data):
+                                line.set_ydata(d)
+                        else:
+                            line.set_ydata(data)
 
             self.Spectrum.plotter.refresh()
 
