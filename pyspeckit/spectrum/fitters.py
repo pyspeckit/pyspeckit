@@ -828,7 +828,7 @@ class Specfit(interactive.Interactive):
 
         return newspecfit
 
-    def add_sliders(self, parlimitdict=None):
+    def add_sliders(self, parlimitdict={}):
         """
         Add sliders to control values of parameters
         """
