@@ -18,6 +18,7 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 rootpath = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, rootpath)
+sys.path.append(os.path.abspath('.'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -27,7 +28,7 @@ sys.path.insert(0, rootpath)
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', ]
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'flickr']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
