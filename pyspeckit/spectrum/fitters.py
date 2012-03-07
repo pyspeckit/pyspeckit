@@ -120,8 +120,6 @@ class Specfit(interactive.Interactive):
         self.click = 0
         self.fitkwargs = {}
         self.auto = False
-        #self.Spectrum = Spectrum
-        self.Spectrum.plotter = self.Spectrum.plotter
         self.fitleg=None
         self.residuals=None
         self.setfitspec()
@@ -483,17 +481,22 @@ class Specfit(interactive.Interactive):
         """
         Compute the model for the whole spectrum
         """
-        # requires self.modelpars to be a list... hope it is
-        if self.vheight:
-            if self.Spectrum.baseline.baselinepars is not None:
-                mpp = [self.Spectrum.baseline.baselinepars[0]] + self.modelpars
-            else:
-                mpp = [0] + self.modelpars
-        else:
-            mpp = self.modelpars
-        if debug: print "_full_model mpp: ",mpp
-        self.fullmodel = self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(self.Spectrum.xarr)
+        self.fullmodel = self.get_full_model()
         self.fullresiduals = self.Spectrum.data - self.fullmodel
+
+    def get_full_model(self, mpp=None, debug=False):
+        """ compute the model over the full axis """ 
+        if mpp is None:
+            # requires self.modelpars to be a list... hope it is
+            if self.vheight:
+                if self.Spectrum.baseline.baselinepars is not None:
+                    mpp = [self.Spectrum.baseline.baselinepars[0]] + self.modelpars
+                else:
+                    mpp = [0] + self.modelpars
+            else:
+                mpp = self.modelpars
+        if debug: print "_full_model mpp: ",mpp
+        return self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(self.Spectrum.xarr)
                 
     def plot_fit(self, annotate=None, show_components=None, 
         composite_fit_color='red', component_fit_color='blue', lw=0.5,
@@ -824,3 +827,62 @@ class Specfit(interactive.Interactive):
             newspecfit.Spectrum.plotter = None
 
         return newspecfit
+
+    def add_sliders(self, parlimitdict=None):
+        """
+        Add sliders to control values of parameters
+        """
+
+        from matplotlib.widgets import Slider
+
+        if hasattr(self,'sliders'):
+            self.remove_sliders()
+
+        def update(value):
+            mpp = [slider.val for slider in self.sliders]
+            for line in self.modelplot:
+                self.modelplot[0].set_ydata(self.get_full_model(mpp))
+
+            self.Spectrum.plotter.refresh()
+
+        self.sliders = []
+        for param in self.parinfo:
+            name = param['parname']
+            value = param['value']
+            limited = param['limited']
+            limits = param['limits']
+            if name in parlimitdict:
+                limits = parlimitdict[name]
+                limited = [True,True]
+            if limited[0]:
+                vmin = limits[0]
+            elif value != 0:
+                vmin = min([value/4.0,value*4.0])
+            else:
+                vmin = -1
+
+            if limited[1]:
+                vmax = limits[1]
+            elif value != 0:
+                vmax = max([value/4.0,value*4.0])
+            else:
+                vmax = 1
+
+            self.sliders += [Slider(pyplot.axes([0.1,0.01+0.03*param['n'],0.8,0.02]), 
+                name, vmin, vmax, valinit=value)]
+
+            self.sliders[-1].on_changed(update)
+
+    def remove_sliders(self):
+        """
+        Get rid of the sliders
+        """
+        if hasattr(self,'sliders'):
+            try:
+                for sl in self.sliders:
+                    sl.ax.remove()
+            except NotImplementedError:
+                for sl in self.sliders:
+                    self.Spectrum.plotter.figure.delaxes(sl.ax)
+
+            self.Spectrum.plotter.refresh()

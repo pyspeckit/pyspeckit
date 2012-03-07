@@ -11,7 +11,7 @@ def intersection(header1, header2, if_conflict=None):
 
     newheader = pyfits.Header()
 
-    for key,value in header1.iteritems():
+    for key,value in header1.items():
         if key in header2:
             try:
                 if value == header2[key]:
