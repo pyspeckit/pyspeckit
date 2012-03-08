@@ -26,6 +26,7 @@ class FitterTool(Widget):
             tbar = matplotlib.rcParams['toolbar'] # turn off the navigation toolbar for the toolfig
             matplotlib.rcParams['toolbar'] = 'None'
             self.toolfig = pyplot.figure(figsize=(6,3))
+            self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.title())
             self.toolfig.subplots_adjust(top=0.9,left=0.2,right=0.9)
             matplotlib.rcParams['toolbar'] = tbar
         else:
@@ -124,7 +125,9 @@ class FitterTool(Widget):
             limited = param['limited']
             limits = param['limits']
 
-            ax = self.toolfig.add_subplot(npars,1,param['n'])
+            # make one less subplot so that there's room for buttons
+            # param['n'] is zero-indexed, subplots are 1-indexed
+            ax = self.toolfig.add_subplot(npars+1,1,param['n']+1)
             ax.set_navigate(False)
 
             if name in parlimitdict:

@@ -834,12 +834,27 @@ class Specfit(interactive.Interactive):
 
         return newspecfit
 
-    def add_sliders(self, **kwargs):
+    def add_sliders(self, parlimitdict=None, **kwargs):
         """
+        Add a Sliders window in a new figure
         """
         import widgets
+
+        if parlimitdict is None:
+            # try to create a reasonable parlimit dict
+            parlimitdict = {}
+            for param in self.parinfo:
+                if any( (x in param['parname'].lower() for x in ('shift','xoff')) ):
+                    parlimitdict[param['parname']] = (self.Spectrum.xarr[self.includemask].min(),self.Spectrum.xarr[self.includemask].max())
+                elif any( (x in param['parname'].lower() for x in ('width','fwhm')) ):
+                    xvalrange = (self.Spectrum.xarr[self.includemask].max()-self.Spectrum.xarr[self.includemask].min())
+                    parlimitdict[param['parname']] = (0,xvalrange)
+                elif any( (x in param['parname'].lower() for x in ('amp','peak','height')) ):
+                    datarange = self.spectofit.max() - self.spectofit.min()
+                    parlimitdict[param['parname']] = (param['value']-datarange, param['value']+datarange)
+
         if hasattr(self,'fitter'):
-            self.SliderWidget = widgets.FitterTool(self, self.Spectrum.plotter.figure, npars=self.fitter.npars, **kwargs)
+            self.SliderWidget = widgets.FitterTool(self, self.Spectrum.plotter.figure, npars=self.fitter.npars, parlimitdict=parlimitdict, **kwargs)
         else:
             print "Must have a fitter instantiated before creating sliders"
 
