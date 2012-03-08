@@ -836,7 +836,13 @@ class Specfit(interactive.Interactive):
 
     def add_sliders(self, parlimitdict=None, **kwargs):
         """
-        Add a Sliders window in a new figure
+        Add a Sliders window in a new figure appropriately titled
+
+        *parlimitdict* [ dict ]
+            Each parameter needs to have displayed limits; these are set in
+            min-max pairs.  If this is left empty, the widget will try to guess
+            at reasonable limits, but the guessing is not very sophisticated
+            yet.
         """
         import widgets
 
