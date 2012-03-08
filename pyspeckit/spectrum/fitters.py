@@ -843,6 +843,9 @@ class Specfit(interactive.Interactive):
             min-max pairs.  If this is left empty, the widget will try to guess
             at reasonable limits, but the guessing is not very sophisticated
             yet.
+
+        .. TODO:: Add a button in the navbar that makes this window pop up
+        http://stackoverflow.com/questions/4740988/add-new-navigate-modes-in-matplotlib
         """
         import widgets
 
