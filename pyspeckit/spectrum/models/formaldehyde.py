@@ -234,6 +234,93 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
   
     return spec
 
+def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13, xoff_v=0.0, width=1.0, 
+        orthopara=1.0,
+        temperature=15.0,
+        grid_vwidth=1.0,
+        grid_vwidth_scale=False,
+        texgrid=None,
+        taugrid=None,
+        hdr=None,
+        path_to_texgrid='',
+        path_to_taugrid='',
+        debug=False,
+        verbose=False,
+        **kwargs):
+    """
+    Use a grid of RADEX-computed models to make a model line spectrum
+
+    The RADEX models have to be available somewhere.
+    OR they can be passed as arrays.  If as arrays, the form should be:
+    texgrid = ((minfreq1,maxfreq1,texgrid1),(minfreq2,maxfreq2,texgrid2))
+
+    xarr must be a SpectroscopicAxis instance
+    xoff_v, width are both in km/s
+
+    grid_vwidth is the velocity assumed when computing the grid in km/s
+        this is important because tau = modeltau / width (see, e.g., 
+        Draine 2011 textbook pgs 219-230)
+    grid_vwidth_scale is True or False: False for LVG, True for Sphere
+    """
+
+    if texgrid is None and taugrid is None:
+        if path_to_texgrid == '' or path_to_taugrid=='':
+            raise IOError("Must specify model grids to use.")
+        else:
+            taugrid = [pyfits.getdata(path_to_taugrid)]
+            texgrid = [pyfits.getdata(path_to_texgrid)]
+            hdr = pyfits.getheader(path_to_taugrid)
+            winds,zinds,yinds,xinds = np.indices(taugrid[0].shape)
+            densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
+            columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+            temparr  = (zinds+hdr['CRPIX3']-1)*hdr['CD3_3']+hdr['CRVAL3'] # temperature
+            oprarr  = (winds+hdr['CRPIX4']-1)*hdr['CD4_4']+hdr['CRVAL4'] # log ortho/para ratio
+            minfreq = (4.8,)
+            maxfreq = (5.0,)
+    elif len(taugrid)==len(texgrid) and hdr is not None:
+        minfreq,maxfreq,texgrid = zip(*texgrid)
+        minfreq,maxfreq,taugrid = zip(*taugrid)
+        winds,zinds,yinds,xinds = np.indices(taugrid[0].shape)
+        densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
+        columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+        temparr  = (zinds+hdr['CRPIX3']-1)*hdr['CD3_3']+hdr['CRVAL3'] # temperature
+        oprarr  = (winds+hdr['CRPIX4']-1)*hdr['CD4_4']+hdr['CRVAL4'] # log ortho/para ratio
+    else:
+        raise Exception
+    
+    # Convert X-units to frequency in GHz
+    xarr = copy.copy(xarr)
+    xarr.convert_to_unit('Hz', quiet=True)
+
+    tau_nu_cumul = np.zeros(len(xarr))
+
+    gridval1 = np.interp(density,     densityarr[0,0,0,:],  xinds[0,0,0,:])
+    gridval2 = np.interp(column,      columnarr[0,0,:,0],   yinds[0,0,:,0])
+    gridval3 = np.interp(temperature, temparr[0,:,0,0],     zinds[0,:,0,0])
+    gridval4 = np.interp(orthopara,   oprarr[:,0,0,0],      winds[:,0,0,0])
+    if np.isnan(gridval1) or np.isnan(gridval2):
+        raise ValueError("Invalid column/density")
+
+    if scipyOK:
+        tau = [scipy.ndimage.map_coordinates(tg,np.array([[gridval4],[gridval3],[gridval2],[gridval1]]),order=1) for tg in taugrid]
+        tex = [scipy.ndimage.map_coordinates(tg,np.array([[gridval4],[gridval3],[gridval2],[gridval1]]),order=1) for tg in texgrid]
+    else:
+        raise ImportError("Couldn't import scipy, therefore cannot interpolate")
+    #tau = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,taugrid[temperature_gridnumber,:,:])
+    #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
+
+    if verbose:
+        print "density %20.12g column %20.12g: tau %20.12g tex %20.12g temperature: %20.12g opr: %20.12g" % (density, column, tau, tex, temperature, opr)
+
+    if debug:
+        import pdb; pdb.set_trace()
+
+    spec = np.sum([(formaldehyde_vtau(xarr,Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)
+                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
+                axis=0)
+  
+    return spec
+
 
 def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0, 
         return_hyperfine_components=False ):
