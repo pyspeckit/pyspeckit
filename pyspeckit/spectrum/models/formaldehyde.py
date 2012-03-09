@@ -234,9 +234,10 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
   
     return spec
 
-def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13, xoff_v=0.0, width=1.0, 
+def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13, 
         orthopara=1.0,
         temperature=15.0,
+        xoff_v=0.0, width=1.0, 
         grid_vwidth=1.0,
         grid_vwidth_scale=False,
         texgrid=None,
@@ -273,8 +274,8 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13, xoff_v=0.0, wi
             winds,zinds,yinds,xinds = np.indices(taugrid[0].shape)
             densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
             columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
-            temparr  = (zinds+hdr['CRPIX3']-1)*hdr['CD3_3']+hdr['CRVAL3'] # temperature
-            oprarr  = (winds+hdr['CRPIX4']-1)*hdr['CD4_4']+hdr['CRVAL4'] # log ortho/para ratio
+            temparr  = (zinds+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # temperature
+            oprarr  = (winds+hdr['CRPIX4']-1)*hdr['CDELT4']+hdr['CRVAL4'] # log ortho/para ratio
             minfreq = (4.8,)
             maxfreq = (5.0,)
     elif len(taugrid)==len(texgrid) and hdr is not None:
@@ -283,8 +284,8 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13, xoff_v=0.0, wi
         winds,zinds,yinds,xinds = np.indices(taugrid[0].shape)
         densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
         columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
-        temparr  = (zinds+hdr['CRPIX3']-1)*hdr['CD3_3']+hdr['CRVAL3'] # temperature
-        oprarr  = (winds+hdr['CRPIX4']-1)*hdr['CD4_4']+hdr['CRVAL4'] # log ortho/para ratio
+        temparr  = (zinds+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # temperature
+        oprarr  = (winds+hdr['CRPIX4']-1)*hdr['CDELT4']+hdr['CRVAL4'] # log ortho/para ratio
     else:
         raise Exception
     
