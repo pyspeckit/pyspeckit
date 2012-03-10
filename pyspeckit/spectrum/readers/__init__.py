@@ -2,6 +2,7 @@ from .. import units
 import numpy as np
 import numpy.ma as ma
 import read_class
+from pyspeckit.specwarnings import warn
 
 readers = {}
 suffix_types = {}
@@ -38,7 +39,7 @@ def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True):
     elif hdr.get('RESTFRQ'+wcstype):
         refX = hdr.get('RESTFRQ'+wcstype)
     else:
-        if verbose: print "No reference frequency found.  Velocity transformations will not be possible"
+        if verbose: warn( "Warning: No reference frequency found.  Velocity transformations will not be possible unless you set a reference frequency/wavelength" )
         refX = None
 
     if hdr.get('CTYPE%s%s' % (specaxis,wcstype)):

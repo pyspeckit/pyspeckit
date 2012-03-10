@@ -259,13 +259,16 @@ class Interactive(object):
             else:
                 self.xmin = xmin
                 self.xmax = xmax
-        elif self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None and fit_plotted_area:
-            self.xmin = self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmin)
-            self.xmax = self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmax)
         elif reset:
             self.xmin = 0
             self.xmax = self.Spectrum.data.shape[0]
+            self.includemask[self.xmin:self.xmax] = True
             #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
+        elif self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None and fit_plotted_area:
+            self.xmin = self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmin)
+            self.xmax = self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmax)
+            if verbose: print "Including all plotted area for baseline fit"
+            self.includemask[self.xmin:self.xmax] = True
         else:
             if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax)
         

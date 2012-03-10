@@ -219,10 +219,19 @@ class Baseline(interactive.Interactive):
         if annotate: self.annotate() # refreshes automatically
         elif self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
 
-    def unsubtract(self):
+    def unsubtract(self, replot=True):
+        """
+        Restore the spectrum to "pristine" state (un-subtract the baseline)
+
+        *replot* [ True ]
+            Re-plot the spectrum?  (only happens if unsubtraction proceeds,
+            i.e. if there was a baseline to unsubtract)
+        """
         if self.subtracted:
             self.Spectrum.data += self.basespec
             self.subtracted = False
+            if replot:
+                self.Spectrum.plotter()
         else: 
             print "Baseline wasn't subtracted; not unsubtracting."
 

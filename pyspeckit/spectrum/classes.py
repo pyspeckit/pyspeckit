@@ -220,7 +220,7 @@ class Spectrum(Spectrum1D):
             self.xarr.xtype = units.xtype_dict[xtype]
             self.xarr.units = Table.columns[xtype].unit
         else:
-            print "Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels"
+            warn( "Warning: Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels unless you set them manually (e.g., sp.xarr.unit='angstroms')")
             self.xarr.xtype = 'pixels'
             self.xarr.units = 'none'
             #raise ValueError("Invalid xtype in text header")
