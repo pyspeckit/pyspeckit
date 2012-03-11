@@ -4,7 +4,7 @@ CHANGES
 Release 0.1.7
 ~~~~~~~~~~~~~
     
-    * Added cross-correlation
+    * Added cross-correlation 
     * Added (some) unit tests
     * New interactive slider widget for manipulating models (Spectrum.specfit.add_sliders())
 
