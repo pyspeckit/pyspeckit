@@ -1,5 +1,9 @@
 
 class ParinfoList(list):
+    """
+    Store a list of model parameter values and their associated metadata (name,
+    error, order, limits, etc.) in a class-friendly manner
+    """
     def __init__(self, *args):
         list.__init__(self, *args)
 
@@ -9,6 +13,7 @@ class ParinfoList(list):
 
         self._check_names()
         self._set_attributes()
+        self._dict = dict([(pp['parname'],pp) for pp in self])
 
     @property
     def names(self):
@@ -30,6 +35,12 @@ class ParinfoList(list):
         return [v.n for v in self]
 
     order=n
+
+    def __getitem__(self, key):
+        if type(key) is int:
+            return super(ParinfoList,self).__getitem__(key)
+        else:
+            return self._dict[key]
 
     def _set_attributes(self):
         self.__dict__.update(dict([(pp['parname'],pp) for pp in self]))
@@ -62,9 +73,15 @@ class ParinfoList(list):
 
 
 class Parinfo(dict):
+    """
+    A class for storing attributes of a fitted model parameter.  It is based on
+    mpfit's parinfo dictionary, which is just a dictionary containing a few set
+    values.  This implements them as 'gettable' attributes instead, but far
+    more importantly, includes sanity checks when setting values.
+    """
     def __init__(self, values=None):
         dict.__init__(self, {'value':0.0, 'error':0.0,
-                'n':0, 'fixed':(False,False),
+                'n':0, 'fixed':False,
                 'limits':(0.0,0.0),
                 'limited':(False,False),
                 'step':False,
@@ -99,7 +116,7 @@ class Parinfo(dict):
                 if self.limited[1] and value > self.limits[1]:
                     raise ValueError('Set parameter value %r > limit value %r' % (value,self.limits[1]))
 
-        if key in ('limits','limited','fixed'):
+        if key in ('limits','limited'):
             try:
                 if len(value) != 2:
                     raise ValueError("%s must be a 2-tuple" % key)
@@ -109,6 +126,12 @@ class Parinfo(dict):
         if key in ('parname','tied'):
             if type(value) is not str:
                 raise TypeError("%s must be a string" % key)
+
+        if key in ('fixed',):
+            try:
+                value = bool(value)
+            except:
+                raise ValueError("%s had value %s, which could not be converted to boolean" % (key,value))
 
     def update(self, *args, **kwargs):
         if args:
@@ -145,17 +168,33 @@ if __name__=="__main__":
     def check_limits(value):
         P = Parinfo()
         P.limits = value
+
+    def check_index(key):
+        PL = ParinfoList([Parinfo({'parname':'HEIGHT'}), 
+                        Parinfo({'value':15,'parname':'AMPLITUDE'}),
+                        Parinfo({'value':3,'parname':'WIDTH'}),
+                        Parinfo({'value':4,'parname':'WIDTH'})])
+        return PL[key]
     
     class MyTestCase(unittest.TestCase):
-        def test_checks(self):
+        def test_checks_value_fail(self):
             check_failure(0.5)
             self.assertRaises(ValueError, check_failure, 5)
             self.assertRaises(ValueError, check_failure, -5)
+
+        def test_checks_tied_fail(self):
             check_tied('p[0]')
             self.assertRaises(TypeError, check_tied, 5)
             self.assertRaises(TypeError, check_tied, (1,2,3))
+
+        def test_checks_limits_fail(self):
             check_limits((1,2))
             self.assertRaises(ValueError, check_limits, -5)
             self.assertRaises(ValueError, check_limits, (1,2,3))
+
+        def test_indexing(self):
+            self.assertEqual(check_index(0), check_index('HEIGHT'))
+            self.assertEqual(check_index(1), check_index('AMPLITUDE'))
+            self.assertEqual(check_index(2), check_index('WIDTH0'))
 
     unittest.main()

@@ -6,6 +6,7 @@ Generic SpectralModel wrapper
 """
 import numpy as np
 from pyspeckit.mpfit import mpfit,mpfitException
+from pyspeckit.spectrum.parinfo import ParinfoList,Parinfo
 import copy
 import matplotlib.cbook as mpcb
 import fitter
@@ -199,6 +200,11 @@ class SpectralModel(fitter.SimpleFitter):
                     if 'AMP' in p['parname']:
                         p['limited'] = (True, p['limited'][1])
                         p['limits']  = (0, p['limits'][1])   
+
+        # This is effectively an override of all that junk above (3/11/2012)
+        # Much of it is probably unnecessary, but it was easier to do this than
+        # rewrite the above
+        self.parinfo = ParinfoList([Parinfo(p) for p in self.parinfo])
 
         return self.parinfo, kwargs
 
