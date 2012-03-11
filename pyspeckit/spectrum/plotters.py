@@ -60,9 +60,9 @@ class Plotter(object):
         """
         if self.figure is not None:
             self._mpl_key_callbacks = dict([(k,self.figure.canvas.callbacks.callbacks['key_press_event'].pop(k)) 
-                    for k in self.figure.canvas.callbacks.callbacks['key_press_event'].keys()])
+                    for k in self.figure.canvas.callbacks.callbacks['key_press_event'].keys()[0:1]])
 
-    def _reconnect_matplotlib_keys(self)
+    def _reconnect_matplotlib_keys(self):
         """
         Reconnect the previously disconnected matplotlib keys
         """
@@ -299,14 +299,20 @@ class Plotter(object):
             if event.key == '?':
                 print interactive_help_message
             elif event.key == 'f':
-                print "\n\nFitter initiated from the interactive plotter."
+                print "\n\nFitter initiated from the interactive plotter.  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
+                self._disconnect_matplotlib_keys()
                 self.Spectrum.specfit(interactive=True)
             elif event.key == 'b':
-                print "\n\nBaseline initiated from the interactive plotter."
+                print "\n\nBaseline initiated from the interactive plotter.  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
+                self._disconnect_matplotlib_keys()
                 self.Spectrum.baseline(interactive=True, reset_selection=False)
             elif event.key == 'B':
-                print "\n\nBaseline initiated from the interactive plotter (with reset)."
+                print "\n\nBaseline initiated from the interactive plotter (with reset).  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
+                self._disconnect_matplotlib_keys()
                 self.Spectrum.baseline(interactive=True, reset_selection=True)
+            elif event.key == 'r':
+                print "\n\nReconnected matplotlib shortcut keys."
+                self._reconnect_matplotlib_keys()
 
     def get_two_clicks(self,event):
 
