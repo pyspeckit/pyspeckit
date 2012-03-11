@@ -80,6 +80,11 @@ class SpectralModel(fitter.SimpleFitter):
             vheight=False,
             debug=False,
             **kwargs):
+        """
+        Generate a parinfo dict that matches the inputs
+
+        .. todo:: Make parinfo a dict that checks for limits when setting values
+        """
 
         # for backwards compatibility - partied = tied, etc.
         for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",","):
