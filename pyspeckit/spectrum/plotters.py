@@ -54,6 +54,21 @@ class Plotter(object):
         self._xclick1 = None
         self._xclick2 = None
 
+    def _disconnect_matplotlib_keys(self):
+        """
+        Disconnected the matplotlib key-press callbacks
+        """
+        if self.figure is not None:
+            self._mpl_key_callbacks = dict([(k,self.figure.canvas.callbacks.callbacks['key_press_event'].pop(k)) 
+                    for k in self.figure.canvas.callbacks.callbacks['key_press_event'].keys()])
+
+    def _reconnect_matplotlib_keys(self)
+        """
+        Reconnect the previously disconnected matplotlib keys
+        """
+        if self.figure is not None and hasattr(self,'_mpl_key_callbacks'):
+            self.figure.canvas.callbacks.callbacks['key_press_event'].update(self._mpl_key_callbacks)
+
     def __call__(self, figure=None, axis=None, clear=True, autorefresh=None, plotscale=1.0, **kwargs):
         """
         Plot a spectrum

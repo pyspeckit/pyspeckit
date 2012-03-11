@@ -34,7 +34,6 @@ and disconnect the mouse and keyboard (/d/isconnect because you're
 '?' will print this help message again.
 You can select different fitters to use with the interactive fitting routine.
 The default is gaussian ('g')
-
         """
         self._make_interactive_help_message()
 
@@ -885,74 +884,3 @@ class Specfit(interactive.Interactive):
         else:
             print "Must have a fitter instantiated before creating sliders"
 
-#    def add_sliders(self, parlimitdict={}):
-#        """
-#        Add sliders to control values of parameters
-#        """
-#
-#        from matplotlib.widgets import Slider
-#
-#        if hasattr(self,'sliders'):
-#            self.remove_sliders()
-#
-#        def update(value):
-#            mpp = [slider.val for slider in self.sliders]
-#            for line in self.modelplot:
-#                line.set_ydata(self.get_model(line.get_xdata(),mpp))
-#
-#            # update components too
-#            for ii,line in enumerate(self._plotted_components):
-#                xdata = line.get_xdata()
-#                modelcomponents = self.fitter.components(xdata, mpp, **self._component_kwargs)
-#                for jj,data in enumerate(modelcomponents):
-#                    if ii % 2 == jj:
-#                        # can have multidimensional components
-#                        if len(data.shape) > 1:
-#                            for d in (data):
-#                                line.set_ydata(d)
-#                        else:
-#                            line.set_ydata(data)
-#
-#            self.Spectrum.plotter.refresh()
-#
-#        self.sliders = []
-#        for param in self.parinfo:
-#            name = param['parname']
-#            value = param['value']
-#            limited = param['limited']
-#            limits = param['limits']
-#            if name in parlimitdict:
-#                limits = parlimitdict[name]
-#                limited = [True,True]
-#            if limited[0]:
-#                vmin = limits[0]
-#            elif value != 0:
-#                vmin = min([value/4.0,value*4.0])
-#            else:
-#                vmin = -1
-#
-#            if limited[1]:
-#                vmax = limits[1]
-#            elif value != 0:
-#                vmax = max([value/4.0,value*4.0])
-#            else:
-#                vmax = 1
-#
-#            self.sliders += [Slider(pyplot.axes([0.1,0.01+0.03*param['n'],0.8,0.02]), 
-#                name, vmin, vmax, valinit=value)]
-#
-#            self.sliders[-1].on_changed(update)
-#
-#    def remove_sliders(self):
-#        """
-#        Get rid of the sliders
-#        """
-#        if hasattr(self,'sliders'):
-#            try:
-#                for sl in self.sliders:
-#                    sl.ax.remove()
-#            except NotImplementedError:
-#                for sl in self.sliders:
-#                    self.Spectrum.plotter.figure.delaxes(sl.ax)
-#
-#            self.Spectrum.plotter.refresh()
