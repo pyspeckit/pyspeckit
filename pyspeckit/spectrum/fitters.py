@@ -24,15 +24,16 @@ class Registry(object):
         self.associatedkeys = {}
 
         self._interactive_help_message_root = """
-        Left-click or hit 'p' twice to select (/p/ick) a fitting range.  You
-        can e/x/clude or /r/emove parts of the spectrum by hitting 'x' or 'r'
-        twice.  Then middle-click or hit 'm' twice to select (/m/ark) a peak
-        and width.  When you're done, right-click or hit 'd' to perform the fit
-        and disconnect the mouse and keyboard (/d/isconnect because you're
-        /d/one).
-        '?' will print this help message again.
-        You can select different fitters to use with the interactive fitting routine.
-        The default is gaussian ('g')
+
+Left-click or hit 'p' twice to select (/p/ick) a fitting range.  You
+can e/x/clude or /r/emove parts of the spectrum by hitting 'x' or 'r'
+twice.  Then middle-click or hit 'm' twice to select (/m/ark) a peak
+and width.  When you're done, right-click or hit 'd' to perform the fit
+and disconnect the mouse and keyboard (/d/isconnect because you're
+/d/one).
+'?' will print this help message again.
+You can select different fitters to use with the interactive fitting routine.
+The default is gaussian ('g')
 
         """
         self._make_interactive_help_message()
@@ -92,7 +93,9 @@ class Registry(object):
         """
         self.interactive_help_message = (
                 self._interactive_help_message_root + 
-                "\n".join(["'%s' - select fitter %s" % (key,name) for key,name in self.fitkeys.items()])
+                "\n" +
+                "\n".join(["'%s' - select fitter %s" % (key,name) for key,name in self.fitkeys.items()]) +
+                "\n" # trailing \n so that users' input is on a fresh line
                 )
 
 

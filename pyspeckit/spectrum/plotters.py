@@ -284,13 +284,13 @@ class Plotter(object):
             if event.key == '?':
                 print interactive_help_message
             elif event.key == 'f':
-                print "Fitter initiated from the interactive plotter."
+                print "\n\nFitter initiated from the interactive plotter."
                 self.Spectrum.specfit(interactive=True)
             elif event.key == 'b':
-                print "Baseline initiated from the interactive plotter."
+                print "\n\nBaseline initiated from the interactive plotter."
                 self.Spectrum.baseline(interactive=True, reset_selection=False)
             elif event.key == 'B':
-                print "Baseline initiated from the interactive plotter (with reset)."
+                print "\n\nBaseline initiated from the interactive plotter (with reset)."
                 self.Spectrum.baseline(interactive=True, reset_selection=True)
 
     def get_two_clicks(self,event):
