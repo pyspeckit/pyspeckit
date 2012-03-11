@@ -183,9 +183,9 @@ fits_type = {'velocity':'VELO','frequency':'FREQ','wavelength':'WAVE','length':'
         'Velocity':'VELO','Frequency':'FREQ','Wavelength':'WAVE','Length':'WAVE','Redshift':'REDS'}
 convention_suffix = {'radio':'RAD','optical':'OPT','relativistic':'REL','redshift':'RED'}
 
-speedoflight_ms = 2.99792458e8 # m/s
-speedoflight_kms = 2.99792458e5 # km/s
-speedoflight_cms = 2.99792458e10 # cm/s
+speedoflight_ms  = np.float64(2.99792458e8) # m/s
+speedoflight_kms = np.float64(2.99792458e5) # km/s
+speedoflight_cms = np.float64(2.99792458e10) # cm/s
 
 class SpectroscopicAxis(np.ndarray):
     """
@@ -201,7 +201,7 @@ class SpectroscopicAxis(np.ndarray):
 
     def __new__(self, xarr, unit="Hz", frame='rest', frame_offset=0.0,
             frame_offset_units='Hz', xtype=None, refX=None, redshift=None,
-            refX_units=None):
+            refX_units=None, use128bits=False):
         """
         Make a new spectroscopic axis instance
         Default units Hz
@@ -242,7 +242,11 @@ class SpectroscopicAxis(np.ndarray):
             http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
             BUT THIS MIGHT BE IT: https://github.com/scottransom/pyslalib
         """
-        subarr = np.array(xarr)
+        if use128bits:
+            dtype='float128'
+        else:
+            dtype='float64'
+        subarr = np.array(xarr,dtype=dtype)
         subarr = subarr.view(self)
         if unit in unit_type_dict:
             subarr.units = unit
@@ -523,7 +527,7 @@ class SpectroscopicAxis(np.ndarray):
         self.dxarr = np.diff(self)
 
     def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
-            center_frequency_units=None, **kwargs):
+            center_frequency_units=None, debug=False, **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
         to convert between frequency/velocity/wavelength and simply change the 
@@ -569,7 +573,9 @@ class SpectroscopicAxis(np.ndarray):
 
         if change_xtype:
             if unit in velocity_dict:
+                if debug: print "Converting to velocity"
                 if conversion_dict[self.xtype] is frequency_dict:
+                    if debug: print "Converting frequency to velocity"
                     newxarr = frequency_to_velocity(self,self.units,
                             center_frequency=center_frequency,
                             center_frequency_units=center_frequency_units,
@@ -577,6 +583,7 @@ class SpectroscopicAxis(np.ndarray):
                     newxtype = "Velocity"
                     newunit = unit
                 elif conversion_dict[self.xtype] is wavelength_dict:
+                    if debug: print "Converting wavelength to velocity"
                     freqx = wavelength_to_frequency(self, self.units) 
                     cf = wavelength_to_frequency(center_frequency, center_frequency_units)
                     cfu = 'GHz'
@@ -586,8 +593,12 @@ class SpectroscopicAxis(np.ndarray):
                             velocity_units=unit, convention=self.velocity_convention)
                     newxtype = "Velocity"
                     newunit = unit
+                else: 
+                    raise ValueError("Could not convert from %s to %s" % (self.units,unit))
             elif unit in frequency_dict:
+                if debug: print "Converting to frequency"
                 if conversion_dict[self.xtype] is velocity_dict:
+                    if debug: print "Converting velocity to frequency"
                     newxarr = velocity_to_frequency(self,self.units,
                             center_frequency=center_frequency,
                             center_frequency_units=center_frequency_units,
@@ -595,12 +606,17 @@ class SpectroscopicAxis(np.ndarray):
                     newxtype = "Frequency"
                     newunit = unit
                 elif conversion_dict[self.xtype] is wavelength_dict:
+                    if debug: print "Converting wavelength to frequency"
                     newxarr = wavelength_to_frequency(self, self.units,
                             frequency_units=unit)
                     newxtype = "Frequency"
                     newunit = unit
+                else: 
+                    raise ValueError("Could not convert from %s to %s" % (self.units,unit))
             elif unit in wavelength_dict:
+                if debug: print "Converting to wavelength"
                 if conversion_dict[self.xtype] is velocity_dict:
+                    if debug: print "Converting velocity to wavelength"
                     freqx = velocity_to_frequency(self, self.units,
                             center_frequency=center_frequency,
                             center_frequency_units=center_frequency_units,
@@ -610,16 +626,22 @@ class SpectroscopicAxis(np.ndarray):
                     newxtype = "Wavelength"
                     newunit = unit
                 elif conversion_dict[self.xtype] is frequency_dict:
+                    if debug: print "Converting frequency to wavelength"
                     newxarr = frequency_to_wavelength(self, self.units,
                             wavelength_units=unit)
                     newxtype = "Wavelength"
                     newunit = unit
+                else: 
+                    raise ValueError("Could not convert from %s to %s" % (self.units,unit))
             else:
                 warnings.warn("Could not convert from %s to %s" % (self.units,unit))
         else:
             newxtype = self.xtype
             newxarr = self
             newunit = self.units
+
+        if debug: 
+            print "Converted from %s:%s to %s:%s" % (self.xtype, self.units, newxtype, newunit)
 
         # re-check whether units need to be changed; it is possible that change_xtype left you 
         # with the correct units
@@ -631,7 +653,7 @@ class SpectroscopicAxis(np.ndarray):
         if change_frame and not quiet:
             if not quiet: print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
 
-        if not change_units and not change_xtype and not change_frame and not quiet:
+        if not change_units and not change_xtype and not change_frame:
             if not quiet: print "Already in desired units, X-type, and frame"
 
         if not quiet:
@@ -641,7 +663,7 @@ class SpectroscopicAxis(np.ndarray):
         #if replot:
         #    self.spectrum.plotter(reset_xlimits=True)
 
-        newxarr.unit = newunit
+        newxarr.units = newunit
         newxarr.xtype = newxtype
 
         return newxarr
@@ -846,8 +868,8 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
     * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
     """
     if input_units in frequency_dict:
-        print "Already in frequency units"
-        return
+        print "Already in frequency units (%s)" % input_units
+        return velocities
     if center_frequency is None:
         raise ValueError("Cannot convert velocity to frequency without specifying a central frequency.")
     if frequency_units not in frequency_dict:
@@ -877,8 +899,8 @@ def frequency_to_velocity(frequencies, input_units, center_frequency=None,
     * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
     """
     if input_units in velocity_dict:
-        print "Already in velocity units"
-        return
+        print "Already in velocity units (%s)" % input_units
+        return frequencies
     if center_frequency is None:
         raise ValueError("Cannot convert frequency to velocity without specifying a central frequency.")
     if center_frequency_units not in frequency_dict:
@@ -907,7 +929,7 @@ def frequency_to_wavelength(frequencies, input_units, wavelength_units='um'):
     lambda = c / nu
     """
     if input_units in wavelength_dict:
-        print "Already in wavelength units"
+        print "Already in wavelength units (%s)" % input_units
         return
     if wavelength_units not in length_dict:
         raise ValueError("Wavelength units %s not valid" % wavelength_units)
@@ -925,7 +947,7 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
     nu = c / lambda
     """
     if input_units in frequency_dict:
-        print "Already in frequency units"
+        print "Already in frequency units (%s)" % input_units
         return wavelengths
     if frequency_units not in frequency_dict:
         raise ValueError("Frequency units %s not valid" % wavelength_units)

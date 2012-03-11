@@ -54,6 +54,8 @@ print "Line   Flux (erg/s/cm^2)     Amplitude (erg/s/cm^2)    FWHM (Angstrom)   
 for line in spec.measurements.lines.keys():
     print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['amp'], \
         spec.measurements.lines[line]['fwhm'], spec.measurements.lines[line]['lum']
+
+spec.specfit.add_sliders()
         
 # Notice that because we supplied the objects redshift and flux normalization, the measurements class
 # automatically calculated line luminosities.  Also, it separates the broad and narrow H-alpha components, and identifies which lines are which. How nice!

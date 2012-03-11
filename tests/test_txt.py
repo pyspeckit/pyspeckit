@@ -50,6 +50,8 @@ print "EQW: ",sp.specfit.EQW(plot=True,annotate=True)
 sp.plotter.refresh()
 sp.plotter.figure.savefig(savedir+'txt_EQW.png')
 
+sp.specfit.add_sliders()
+
 if interactive: raw_input('Press enter to print guesses and best fit and end code')
 
 

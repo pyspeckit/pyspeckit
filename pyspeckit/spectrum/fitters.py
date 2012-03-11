@@ -694,6 +694,9 @@ class Specfit(interactive.Interactive):
         """
         if self.model is not None:
             self.model = self.model[x1pix:x2pix]
+        if hasattr(self,'fullmodel'):
+            self.fullmodel = self.fullmodel[x1pix:x2pix]
+        self.includemask = self.includemask[x1pix:x2pix]
 
     def integral(self, direct=False, threshold='auto', integration_limits=[],
             return_error=False, **kwargs):
