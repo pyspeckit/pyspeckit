@@ -1,7 +1,7 @@
-import spectrum
+import pyspeckit
 
 # Grab a .fits spectrum with a legitimate header
-sp = spectrum.Spectrum('../tests/G031.947+00.076_nh3_11_Tastar.fits')
+sp = pyspeckit.Spectrum('../tests/G031.947+00.076_nh3_11_Tastar.fits')
 """ HEADER:
 SIMPLE  =                    T / Written by IDL:  Tue Aug 31 18:17:01 2010
 BITPIX  = -64
@@ -68,8 +68,7 @@ print "Best fit: ", sp.specfit.modelpars
 
 # Run the ammonia spec fitter with a reasonable guess 
 sp.specfit(fittype='ammonia',
-        multifit=True,guesses=[5.9,4.45,8.3e14,0.84,96.2,0.43],quiet=False,
-        xunits=sp.xarr.units, line='oneone')
+        multifit=True,guesses=[5.9,4.45,8.3e14,0.84,96.2,0.43],quiet=False)
 
 # plot up the residuals in a different window.  The residuals strongly suggest
 # the presence of a second velocity component.
@@ -89,7 +88,7 @@ sp.plotter.figure.savefig('nh3_ammonia_fit_zoom.png')
 # refit with two components
 sp.specfit(fittype='ammonia',multifit=True,
         guesses=[4,3.5,5e14,0.68,97.3,0.5]+[15,4.2,7e14,0.52,95.8,0.35],
-        quiet=False,xunits=sp.xarr.units)
+        quiet=False)
 sp.specfit.plotresiduals()
 sp.plotter.figure.savefig('nh3_ammonia_multifit_zoom.png')
 

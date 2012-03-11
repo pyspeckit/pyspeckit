@@ -23,7 +23,7 @@ class Registry(object):
         self.fitkeys = {}
         self.associatedkeys = {}
 
-        self.interactive_help_message = """
+        self._interactive_help_message_root = """
         Left-click or hit 'p' twice to select (/p/ick) a fitting range.  You
         can e/x/clude or /r/emove parts of the spectrum by hitting 'x' or 'r'
         twice.  Then middle-click or hit 'm' twice to select (/m/ark) a peak
@@ -33,7 +33,9 @@ class Registry(object):
         '?' will print this help message again.
         You can select different fitters to use with the interactive fitting routine.
         The default is gaussian ('g')
+
         """
+        self._make_interactive_help_message()
 
     def add_fitter(self, name, function, npars, multisingle='single',
         override=False, key=None):
@@ -80,9 +82,19 @@ class Registry(object):
 
         if key is not None:
             self.fitkeys[key] = name
-            self.interactive_help_message += "\n'%s' - select fitter %s" % (key,name)
+            self._make_interactive_help_message()
         self.npars[name] = npars
         self.associated_keys = dict(zip(self.fitkeys.values(),self.fitkeys.keys()))
+
+    def _make_interactive_help_message(self):
+        """
+        Generate the interactive help message from the fitkeys
+        """
+        self.interactive_help_message = (
+                self._interactive_help_message_root + 
+                "\n".join(["'%s' - select fitter %s" % (key,name) for key,name in self.fitkeys.items()])
+                )
+
 
 default_Registry = Registry()
 default_Registry.add_fitter('ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')

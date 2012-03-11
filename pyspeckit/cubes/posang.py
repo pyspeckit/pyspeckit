@@ -1,8 +1,9 @@
 from pyspeckit.specwarnings import warn
 try:
     import coords
+    coordsOK = True
 except ImportError:
-    warn( "Warning: posang requires coords.  The rest of pyspeckit does not." )
+    coordsOK = False
 from numpy import pi,arctan2,sin,cos,tan
 
 def posang(l1,b1,l2,b2,system='galactic',**kwargs):
@@ -16,6 +17,8 @@ def posang(l1,b1,l2,b2,system='galactic',**kwargs):
 
     Defaults to GALACTIC coordinates.  **kwargs are passed to coords.Position
     """
+    if not coordsOK:
+        raise ImportError( "posang requires coords." )
     pos1 = coords.Position([l1,b1],system=system,**kwargs)
     ra1,dec1 = pos1.j2000()
     pos2 = coords.Position([l2,b2],system=system,**kwargs)

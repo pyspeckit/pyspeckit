@@ -28,19 +28,18 @@ except ImportError:
     smoothOK = False
 try:
     import coords
+    coordsOK = True
 except ImportError:
-    warn( "Warning: cubes.py requires coords for aper_world2pix and coords_in_image (the rest of pyspeckit does not require coords)" )
-try:
-    import pyregion
-except ImportError:
-    warn( "Warning: cubes.py requires pyregion for getspec_reg (the rest of pyspeckit does not require pyregion)" )
+    coordsOK = False
 try:
     import astropy.wcs as pywcs
+    wcsOK = True
 except ImportError:
     try:
         import pywcs
+        wcsOK = True
     except ImportError:
-        warn( "cubes.py requires astropy.wcs or pywcs for some subimage_integ,aper_wordl2pix,getspec, and coords_in_image" )
+        wcsOK = False
 
 dtor = pi/180.0
 
@@ -327,6 +326,9 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
 
 
     """
+    if not coordsOK:
+        raise ImportError( "cubes.py requires coords for aper_world2pix and coords_in_image" )
+
     convopt = {'arcsec':3600.0,'arcmin':60.0,'degree':1.0}
     try:
         conv = convopt[wunit]
@@ -396,6 +398,8 @@ def getspec(lon,lat,rad,cube,header,r_fits=True,inherit=True,wunit='arcsec'):
                 must be in coordinate system of the file
     rad     - radius (default degrees) of aperture
     """
+    if not wcsOK:
+        raise ImportError( "cubes.py requires astropy.wcs or pywcs for some subimage_integ,aper_wordl2pix,getspec, and coords_in_image" )
 
     convopt = {'arcsec':1.0,'arcmin':60.0,'degree':3600.0}
 
@@ -446,6 +450,9 @@ def getspec_reg(cubefilename,region,**kwargs):
     Aperture extraction from a cube using a pyregion circle region
 
     The region must be in the same coordinate system as the cube header
+
+    .. warning:: The second argument of getspec_reg requires a pyregion region list, 
+        and therefore this code depends on `pyregion <http://leejjoon.github.com/pyregion/>`_.
     """
 
     ds9tocoords = {'fk5':'celestial','galactic':'galactic','icrs':'celestial'}
@@ -471,6 +478,10 @@ def coords_in_image(fitsfile,lon,lat,system='galactic'):
     """
     Determine whether the coordinates are inside the image
     """
+    if not coordsOK:
+        raise ImportError( "cubes.py requires coords for aper_world2pix and coords_in_image" )
+    if not wcsOK:
+        raise ImportError( "cubes.py requires astropy.wcs or pywcs for some subimage_integ,aper_wordl2pix,getspec, and coords_in_image" )
     if not isinstance(fitsfile,pyfits.HDUList):
         fitsfile = pyfits.open(fitsfile)
 
@@ -544,6 +555,8 @@ try:
 
         cubefile = pyfits.open(cubename)
 
+        if not coordsOK:
+            raise ImportError( "cubes.py requires coords for rotcrop_cube" )
         pos1 = coords.Position([x1,y1],system=in_system)
         pos2 = coords.Position([x2,y2],system=in_system)
 
