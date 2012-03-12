@@ -7,6 +7,8 @@ Release 0.1.7
     * Added cross-correlation 
     * Added (some) unit tests
     * New interactive slider widget for manipulating models (Spectrum.specfit.add_sliders())
+    * Subtle but very significant bug-fix: parinfo is now a single uniform
+      list, based on the ParinfoList class.
 
 Release 0.1.6 
 ~~~~~~~~~~~~~

@@ -832,15 +832,15 @@ class Specfit(interactive.Interactive):
 
         newspecfit = copy.copy(self)
         newspecfit.Spectrum = parent
-        newspecfit.modelpars = copy.copy(self.modelpars)
-        newspecfit.modelerrs = copy.copy(self.modelerrs)
+        newspecfit.parinfo = copy.deepcopy(self.parinfo)
+        newspecfit.modelpars = newspecfit.parinfo.values
+        newspecfit.modelerrs = newspecfit.parinfo.errors
         newspecfit.includemask = self.includemask.copy() 
         newspecfit.model = copy.copy( self.model )
         newspecfit.npeaks = self.npeaks
-        if hasattr(self,'parinfo'):
-            newspecfit.parinfo = copy.copy( self.parinfo )
         if hasattr(self,'fitter'):
             newspecfit.fitter = copy.copy( self.fitter )
+            newspecfit.fitter.parinfo = newspecfit.parinfo
         if hasattr(self,'fullmodel'):
             newspecfit._full_model()
 
