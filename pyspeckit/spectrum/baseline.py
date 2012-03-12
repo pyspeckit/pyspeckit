@@ -160,14 +160,9 @@ class Baseline(interactive.Interactive):
                 powerlaw=powerlaw,
                 xarr_fit_units=xarr_fit_units,
                 **kwargs)
-        # create the full baseline spectrum...
-        if powerlaw:
-            self.powerlaw = True
-            #self.basespec = (self.baselinepars[0]*(self.Spectrum.xarr.as_unit(xarr_fit_units)-self.baselinepars[2])**(-self.baselinepars[1])).squeeze()
-            self.basespec = (self.baselinepars[0]*(self.Spectrum.xarr.as_unit(xarr_fit_units)/self.baselinepars[2])**(-self.baselinepars[1])).squeeze()
-        else:
-            self.powerlaw = False
-            self.basespec = np.poly1d(self.baselinepars)(self.Spectrum.xarr.as_unit(xarr_fit_units))
+
+        self.basespec = self.get_model(xarr=self.Spectrum.xarr, powerlaw=powerlaw, fit_units=xarr_fit_units)
+
         if subtract:
             if self.subtracted and fit_original: 
                 # use the spectrum with the old baseline added in (that's what we fit to)
@@ -189,6 +184,21 @@ class Baseline(interactive.Interactive):
 
         # disconnect interactive window
         self.clear_all_connections()
+
+    def get_model(self, xarr=None, baselinepars=None, powerlaw=False, fit_units='pixels'):
+        # create the full baseline spectrum...
+        if xarr is None:
+            xarr = self.Spectrum.xarr.as_unit(xarr_fit_units)
+        if baselinepars is None:
+            baselinepars = self.baselinepars
+        if powerlaw:
+            self.powerlaw = True
+            #self.basespec = (self.baselinepars[0]*(self.Spectrum.xarr.as_unit(xarr_fit_units)-self.baselinepars[2])**(-self.baselinepars[1])).squeeze()
+            return (baselinepars[0]*(xarr/baselinepars[2])**(-baselinepars[1])).squeeze()
+        else:
+            self.powerlaw = False
+            return np.poly1d(baselinepars)(xarr)
+
 
     def button3action(self, *args, **kwargs):
         """

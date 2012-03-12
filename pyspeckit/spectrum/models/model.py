@@ -238,7 +238,10 @@ class SpectralModel(fitter.SimpleFitter):
         return f
 
     def __call__(self, *args, **kwargs):
-        if self.use_lmfit:
+        
+        use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
+        print "in %r using lmfit = %s" % (self,use_lmfit)
+        if use_lmfit:
             return self.lmfitter(*args,**kwargs)
         if self.multisingle == 'single':
             # Generate a variable-height version of the model
@@ -265,7 +268,7 @@ class SpectralModel(fitter.SimpleFitter):
                 return (y-self.n_modelfunc(pars,**kwargs)(x))/err
         return f
 
-    def lmfitter(self, xax, data, err=None, parinfo=None, debug=False, **kwargs):
+    def lmfitter(self, xax, data, err=None, parinfo=None, quiet=True, debug=False, **kwargs):
         """
         Use lmfit instead of mpfit to do the fitting
         """
@@ -298,6 +301,8 @@ class SpectralModel(fitter.SimpleFitter):
             print parinfo
         minimizer = lmfit.Minimizer(self.lmfitfun(xax,np.array(data),err),LMParams,**kwargs)
         lmstatus = minimizer.leastsq()
+        if not quiet:
+            print "There were %i function evaluations" % (minimizer.nfev)
         #modelpars = [p.value for p in parinfo.values()]
         #modelerrs = [p.stderr for p in parinfo.values() if p.stderr is not None else 0]
         chi2 = minimizer.chisqr

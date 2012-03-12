@@ -207,7 +207,7 @@ class Specfit(interactive.Interactive):
             #print "Non-interactive, 1D fit with automatic guessing"
             if (self.Spectrum.baseline.order is None and vheight is None) or vheight:
                 self.Spectrum.baseline.order=0
-                self.peakbgfit(usemoments=usemoments, show_components=show_components, annotate=annotate, debug=debug, **kwargs)
+                self.peakbgfit(usemoments=usemoments, show_components=show_components, annotate=annotate, debug=debug, use_lmfit=use_lmfit, **kwargs)
             else:
                 self.peakbgfit(usemoments=usemoments, vheight=False,
                         height=0.0, annotate=annotate, use_lmfit=use_lmfit,
@@ -315,7 +315,7 @@ class Specfit(interactive.Interactive):
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
             show_components=None, verbose=True, color=None, 
-            use_window_limits=None, **kwargs):
+            use_window_limits=None, use_lmfit=False, **kwargs):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -355,12 +355,14 @@ class Specfit(interactive.Interactive):
                 err=self.errspec[self.xmin:self.xmax],
                 npeaks=self.npeaks,
                 params=self.guesses,
+                use_lmfit=use_lmfit,
                 **self.fitkwargs)
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
 
-        self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
+        if hasattr(self.fitter.mp,'status'):
+            self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
 
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
@@ -396,7 +398,7 @@ class Specfit(interactive.Interactive):
         self._full_model()
                 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
-            negamp=None, fittype=None, renormalize='auto', color=None,
+            negamp=None, fittype=None, renormalize='auto', color=None, use_lmfit=False,
             show_components=None, debug=False, nsigcut_moments=None, **kwargs):
         """
         Fit a single peak (plus a background)
@@ -457,13 +459,15 @@ class Specfit(interactive.Interactive):
                 vheight=vheight,
                 params=self.guesses,
                 debug=debug,
+                use_lmfit=use_lmfit,
                 **self.fitkwargs)
         if debug: print "Guesses, fits after: ",self.guesses, mpp
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
         
-        self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
+        if hasattr(self.fitter.mp,'status'):
+            self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
         self.parinfo = self.fitter.parinfo
 
         if model is None:
@@ -517,13 +521,16 @@ class Specfit(interactive.Interactive):
             # requires self.modelpars to be a list... hope it is
             if self.vheight:
                 if self.Spectrum.baseline.baselinepars is not None:
-                    mpp = [self.Spectrum.baseline.baselinepars[0]] + self.modelpars.tolist()
+                    mpp = [self.Spectrum.baseline.baselinepars[0]] + list(self.modelpars)
                 else:
-                    mpp = [0] + self.modelpars.tolist()
+                    mpp = [0] + list(self.modelpars)
             else:
                 mpp = self.modelpars
         if debug: print "_full_model mpp: ",mpp
-        return self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(xarr)
+        if self.Spectrum.baseline.subtracted or self.vheight:
+            return self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(xarr)
+        else:
+            return self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
                 
     def plot_fit(self, annotate=None, show_components=None, 
         composite_fit_color='red', component_fit_color='blue', lw=0.5,
@@ -537,11 +544,11 @@ class Specfit(interactive.Interactive):
 
         kwargs are passed to the fitter's components attribute
         """
-        if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
-            # don't display baseline if it's included in the fit
-            plot_offset = self.Spectrum.plotter.offset+(self.Spectrum.baseline.basespec * (True-self.vheight))
-        else:
-            plot_offset = self.Spectrum.plotter.offset
+        #if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
+        #    # don't display baseline if it's included in the fit
+        #    plot_offset = self.Spectrum.plotter.offset+(self.Spectrum.baseline.basespec * (True-self.vheight))
+        #else:
+        plot_offset = self.Spectrum.plotter.offset
 
         self._full_model()
         self.modelplot += self.Spectrum.plotter.axis.plot(
