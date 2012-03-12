@@ -17,6 +17,7 @@ from pyspeckit.mpfit import mpfit
 import fitter
 import matplotlib.cbook as mpcb
 import copy
+import model
 
 
 line_names = ['oneone','twotwo','threethree','fourfour']
@@ -250,7 +251,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
   
     return runspec
 
-class ammonia_model(fitter.SimpleFitter):
+class ammonia_model(model.SpectralModel):
 
     def __init__(self,npeaks=1,npars=6,multisingle='multi',**kwargs):
         self.npeaks = npeaks
@@ -273,6 +274,7 @@ class ammonia_model(fitter.SimpleFitter):
         self.modelfunc_kwargs = kwargs
 
     def __call__(self,*args,**kwargs):
+        if 'use_lmfit' in kwargs: kwargs.pop('use_lmfit')
         if self.multisingle == 'single':
             return self.onepeakammoniafit(*args,**kwargs)
         elif self.multisingle == 'multi':

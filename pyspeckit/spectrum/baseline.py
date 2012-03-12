@@ -191,6 +191,8 @@ class Baseline(interactive.Interactive):
             xarr = self.Spectrum.xarr.as_unit(xarr_fit_units)
         if baselinepars is None:
             baselinepars = self.baselinepars
+        if baselinepars is None: # still...
+            return 0 # no baseline has been computed
         if powerlaw:
             self.powerlaw = True
             #self.basespec = (self.baselinepars[0]*(self.Spectrum.xarr.as_unit(xarr_fit_units)-self.baselinepars[2])**(-self.baselinepars[1])).squeeze()
