@@ -314,7 +314,8 @@ class Specfit(interactive.Interactive):
             self.errspec[True - self.includemask] = 1e10
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
-            show_components=None, verbose=True, color=None, **kwargs):
+            show_components=None, verbose=True, color=None, 
+            use_window_limits=None, **kwargs):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -377,7 +378,9 @@ class Specfit(interactive.Interactive):
             if color is not None:
                 kwargs.update({'composite_fit_color':color})
             self.plot_fit(annotate=annotate, 
-                    show_components=show_components, **kwargs)
+                    show_components=show_components,
+                    use_window_limits=use_window_limits,
+                    **kwargs)
                 
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
         if 'tied' in self.fitkwargs:
@@ -525,7 +528,7 @@ class Specfit(interactive.Interactive):
     def plot_fit(self, annotate=None, show_components=None, 
         composite_fit_color='red', component_fit_color='blue', lw=0.5,
         composite_lw=0.75, component_lw=0.75, component_kwargs={},
-        **kwargs):
+        use_window_limits=None, **kwargs):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
@@ -562,7 +565,12 @@ class Specfit(interactive.Interactive):
                         data + plot_offset,
                         color=component_fit_color, linewidth=component_lw)
                 
-        self.Spectrum.plotter.reset_limits(**self.Spectrum.plotter.plotkwargs)
+
+        uwl = use_window_limits if use_window_limits is not None else self.use_window_limits
+        plotkwargs = {}
+        plotkwargs.update(self.Spectrum.plotter.plotkwargs)
+        plotkwargs['use_window_limits'] = uwl
+        self.Spectrum.plotter.reset_limits(**plotkwargs)
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
 
@@ -818,7 +826,7 @@ class Specfit(interactive.Interactive):
         if self.npeaks > 0:
             print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.xmin,self.xmax
             if len(self.guesses) % 3 == 0:
-                self.multifit()
+                self.multifit(use_window_limits=True)
                 for p in self.button2plot + self.button1plot:
                     p.set_visible(False)
             else: 

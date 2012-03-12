@@ -18,9 +18,9 @@ interactive_help_message = """
 Interactive key commands for plotter.  An additional help message may appear if
 you have initiated the fitter.
 '?' - bring up this message
-'f' - initiate the fitter 
-'b' - initiate the baseliner 
-'B' - initiate the baseliner (reset the selection too)
+'f' - initiate the /f/itter 
+'b' - initiate the /b/aseliner 
+'B' - initiate the /b/aseliner (reset the selection too)
 """
 
 class Plotter(object):

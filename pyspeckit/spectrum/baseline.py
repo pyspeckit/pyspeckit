@@ -6,8 +6,12 @@ import interactive
 import copy
 
 interactive_help_message = """
-Left-click twice to select or add to the baseline fitting range.  Middle or
-right click to disconnect and perform the fit.
+(1) Left-click or press 1 (one) at two positions to select or add to the baseline fitting range - it will be 
+highlighted in green if the selection is successful.  
+    You can select regions to e/x/clude by pressing 'x' at two positions
+(2) Middle or right click or press '2','m', '3', or 'd' to /d/isconnect and perform the fit.
+    If you press '2','m', or middle-click, the baseline will be subtracted
+    If you press '3','d', or right-click, the baseline will be plotted but not subtracted
 """
 
 class Baseline(interactive.Interactive):
@@ -116,14 +120,14 @@ class Baseline(interactive.Interactive):
             # must select region (i.e., exclude edges) AFTER setting 'positive' include region
             # also, DON'T highlight here because it will be cleared
             self.selectregion(fit_plotted_area=fit_plotted_area, debug=debug, **kwargs)
-            self.button3action(exclude=exclude, 
+            self.button2action(exclude=exclude, 
                     fit_original=fit_original,
                     baseline_fit_color=baseline_fit_color, 
                     debug=debug, **kwargs)
             if highlight: self.highlight_fitregion()
         if save: self.savefit()
 
-    def button3action(self, event=None, debug=False, subtract=True,
+    def button2action(self, event=None, debug=False, subtract=True,
             fit_original=False, powerlaw=False, baseline_fit_color='orange',
             exclude=None, **kwargs):
         """
@@ -131,7 +135,7 @@ class Baseline(interactive.Interactive):
 
         Can specify a region to exclude using velocity units or pixel units
         """
-        if debug: print "Button 3 Baseline"
+        if debug: print "Button 2/3 Baseline.  Subtract=",subtract
         if self.subtracted:
             self.unsubtract()
 
@@ -178,12 +182,22 @@ class Baseline(interactive.Interactive):
 
         if self.Spectrum.plotter.axis is not None:
             if debug: print "Plotting baseline"
+            if event is not None: 
+                # preserve frame if fitting interactively
+                kwargs.update({'use_window_limits':True})
             self.plot_baseline(baseline_fit_color=baseline_fit_color, **kwargs)
 
         # disconnect interactive window
         self.clear_all_connections()
 
-    button2action = button3action
+    def button3action(self, *args, **kwargs):
+        """
+        Wrapper - same as button2action, but with subtract=False
+        """
+        if 'subtract' in kwargs:
+            kwargs.pop(subtract)
+
+        return self.button2action(*args, subtract=False, **kwargs)
 
     def plot_baseline(self, annotate=True, baseline_fit_color='orange',
             use_window_limits=None, **kwargs):

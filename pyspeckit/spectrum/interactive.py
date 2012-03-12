@@ -229,6 +229,8 @@ class Interactive(object):
         for cid in cids_to_remove:
             self.Spectrum.plotter.figure.canvas.mpl_disconnect(cid)
 
+        self.Spectrum.plotter._reconnect_matplotlib_keys()
+
 
     def start_interactive(self, debug=False, LoudDebug=False, print_message=True, clear_all_connections=True, **kwargs):
         """
