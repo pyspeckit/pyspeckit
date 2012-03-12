@@ -880,19 +880,21 @@ class Specfit(interactive.Interactive):
             parlimitdict = {}
             for param in self.parinfo:
                 if any( (x in param['parname'].lower() for x in ('shift','xoff')) ):
-                    parlimitdict[param['parname']] = (self.Spectrum.xarr[self.includemask].min(),self.Spectrum.xarr[self.includemask].max())
+                    lower,upper = (self.Spectrum.xarr[self.includemask].min(),self.Spectrum.xarr[self.includemask].max())
                 elif any( (x in param['parname'].lower() for x in ('width','fwhm')) ):
                     xvalrange = (self.Spectrum.xarr[self.includemask].max()-self.Spectrum.xarr[self.includemask].min())
-                    parlimitdict[param['parname']] = (0,xvalrange)
+                    lower,upper = (0,xvalrange)
                 elif any( (x in param['parname'].lower() for x in ('amp','peak','height')) ):
                     datarange = self.spectofit.max() - self.spectofit.min()
-                    parlimitdict[param['parname']] = (param['value']-datarange, param['value']+datarange)
+                    lower,upper = (param['value']-datarange, param['value']+datarange)
 
                 # override guesses with limits
                 if param.limited[0]:
-                    parlimitdict[param.parname][0] = param.limits[0]
+                    lower = param.limits[0]
                 if param.limited[1]:
-                    parlimitdict[param.parname][1] = param.limits[1]
+                    upper = param.limits[1]
+
+                parlimitdict[param.parname] = (lower,upper)
 
         if hasattr(self,'fitter'):
             self.SliderWidget = widgets.FitterTool(self, self.Spectrum.plotter.figure, npars=self.fitter.npars, parlimitdict=parlimitdict, **kwargs)
