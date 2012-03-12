@@ -838,8 +838,12 @@ class Specfit(interactive.Interactive):
         newspecfit = copy.copy(self)
         newspecfit.Spectrum = parent
         newspecfit.parinfo = copy.deepcopy(self.parinfo)
-        newspecfit.modelpars = newspecfit.parinfo.values
-        newspecfit.modelerrs = newspecfit.parinfo.errors
+        if newspecfit.parinfo is None:
+            newspecfit.modelpars = None
+            newspecfit.modelerrs = None
+        else:
+            newspecfit.modelpars = newspecfit.parinfo.values
+            newspecfit.modelerrs = newspecfit.parinfo.errors
         newspecfit.includemask = self.includemask.copy() 
         newspecfit.model = copy.copy( self.model )
         newspecfit.npeaks = self.npeaks

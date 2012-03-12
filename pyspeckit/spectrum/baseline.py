@@ -278,7 +278,7 @@ class Baseline(interactive.Interactive):
     def _baseline(self, spectrum, xarr=None, err=None, xmin='default', xmax='default',
             order=1, quiet=True, mask=None, powerlaw=False,
             xarr_fit_units='pixels', LoudDebug=False, renormalize='auto',
-            zeroerr_is_OK=True, **kwargs):
+            zeroerr_is_OK=True, spline=False, **kwargs):
         """
         Subtract a baseline from a spectrum
         If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum
