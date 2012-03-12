@@ -15,25 +15,27 @@ class ParinfoList(list):
         self._set_attributes()
         self._dict = dict([(pp['parname'],pp) for pp in self])
 
-    @property
-    def names(self):
-        return [v.parname for v in self]
+    def _getter(attributename):
+        def getattribute(self):
+            return [v[attributename] for v in self]
+        return getattribute
 
+    def _setter(attributename):
+        def setattribute(self, values):
+            if len(values) == len(self):
+                for parinf,newval in zip(self,values):
+                    parinf[attributename] = newval
+            else:
+                raise ValueError("Must have len(new values) = %i (was %i)" % (len(self),len(values)))
+        return setattribute
+
+    names = property(fget=_getter('parname'), fset=_setter('parname'))
     parnames=names
-
-    @property
-    def values(self):
-        return [v.value for v in self]
-
-    @property
-    def errors(self):
-        return [v.error for v in self]
-
-
-    @property
-    def n(self):
-        return [v.n for v in self]
-
+    shortnames = property(fget=_getter('shortparname'), fset=_setter('shortparname'))
+    shortparnames=shortnames
+    values = property(fget=_getter('value'), fset=_setter('value'))
+    errors = property(fget=_getter('error'))
+    n = property(fget=_getter('n'))
     order=n
 
     def __getitem__(self, key):
@@ -86,7 +88,8 @@ class Parinfo(dict):
                 'limited':(False,False),
                 'step':False,
                 'tied':'',
-                'parname':''})
+                'parname':'',
+                'shortparname':''})
 
         if values is not None:
             self.update(values)
@@ -123,7 +126,7 @@ class Parinfo(dict):
             except TypeError: # if the input was scalar
                 raise ValueError("%s must be a 2-tuple" % key)
 
-        if key in ('parname','tied'):
+        if key in ('parname','tied','shortparname'):
             if type(value) is not str:
                 raise TypeError("%s must be a string" % key)
 
@@ -175,6 +178,15 @@ if __name__=="__main__":
                         Parinfo({'value':3,'parname':'WIDTH'}),
                         Parinfo({'value':4,'parname':'WIDTH'})])
         return PL[key]
+
+    def check_set_list(values):
+        PL = ParinfoList([Parinfo({'parname':'HEIGHT'}), 
+                        Parinfo({'value':15,'parname':'AMPLITUDE'}),
+                        Parinfo({'value':3,'parname':'WIDTH','limits':(0,5),'limited':(True,True)}),
+                        Parinfo({'value':4,'parname':'WIDTH'})])
+        PL.shortparnames = ['a','b','c','d']
+        PL.values = values
+        return PL.values
     
     class MyTestCase(unittest.TestCase):
         def test_checks_value_fail(self):
@@ -196,5 +208,9 @@ if __name__=="__main__":
             self.assertEqual(check_index(0), check_index('HEIGHT'))
             self.assertEqual(check_index(1), check_index('AMPLITUDE'))
             self.assertEqual(check_index(2), check_index('WIDTH0'))
+
+        def test_set_list(self):
+            self.assertEqual(check_set_list([1,2,3,4]),[1,2,3,4])
+            self.assertRaises(ValueError,check_set_list,[1,2,10,4])
 
     unittest.main()

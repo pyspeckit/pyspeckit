@@ -888,6 +888,12 @@ class Specfit(interactive.Interactive):
                     datarange = self.spectofit.max() - self.spectofit.min()
                     parlimitdict[param['parname']] = (param['value']-datarange, param['value']+datarange)
 
+                # override guesses with limits
+                if param.limited[0]:
+                    parlimitdict[param.parname][0] = param.limits[0]
+                if param.limited[1]:
+                    parlimitdict[param.parname][1] = param.limits[1]
+
         if hasattr(self,'fitter'):
             self.SliderWidget = widgets.FitterTool(self, self.Spectrum.plotter.figure, npars=self.fitter.npars, parlimitdict=parlimitdict, **kwargs)
         else:
