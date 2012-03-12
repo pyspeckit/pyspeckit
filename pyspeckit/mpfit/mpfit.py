@@ -410,6 +410,7 @@ Perform Levenberg-Marquardt least-squares minimization, based on MINPACK-1.
 
 import numpy
 import types
+from pyspeckit.spectrum.parinfo import ParinfoList,Parinfo
 
 #    Original FORTRAN documentation
 #    **********
@@ -870,7 +871,9 @@ class mpfit:
 
         # Be sure that PARINFO is of the right type
         if parinfo is not None:
-            if type(parinfo) != types.ListType:
+            if type(parinfo) is ParinfoList:
+                pass
+            elif type(parinfo) != types.ListType:
                 self.errmsg = 'ERROR: PARINFO must be a list of dictionaries.'
                 return
             else:

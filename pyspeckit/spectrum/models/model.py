@@ -311,8 +311,9 @@ class SpectralModel(fitter.SimpleFitter):
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
         self.mp = mp
-        self.mpp = mpp
-        self.mpperr = mpperr
+        self.mpp = self.parinfo.values
+        self.mpperr = self.parinfo.errors
+        self.mppnames = self.parinfo.names
         self.model = self.n_modelfunc(mpp,**self.modelfunc_kwargs)(xax)
         if debug:
             print "Modelpars: ",self.mpp

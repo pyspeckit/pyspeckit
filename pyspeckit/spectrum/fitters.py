@@ -308,40 +308,6 @@ class Specfit(interactive.Interactive):
         if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
             self.errspec[True - self.includemask] = 1e10
 
-    @property
-    def modelpars(self):
-        """ Get model parameters from parinfo """
-        return [p['value'] for p in self.parinfo]
-
-    @modelpars.setter
-    def modelpars(self, values):
-        """ Set model parameters from input """
-        if (len(values) == len(self.parinfo)-1) and self.vheight:
-            for p,v in zip(self.parinfo[1:],values):
-                p['value'] = v
-        elif len(values) != len(self.parinfo):
-            raise ValueError("Must have same number of parameters.  len(input) = %i, len(needed) = %i" % (len(values),len(self.parinfo)))
-        else:
-            for p,v in zip(self.parinfo,values):
-                p['value'] = v
-
-    @property
-    def modelerrs(self):
-        """ Get model parameters from parinfo """
-        return [p['error'] for p in self.parinfo]
-
-    @modelerrs.setter
-    def modelerrs(self, values):
-        """ Set model parameters from input """
-        if (len(values) == len(self.parinfo)-1) and self.vheight:
-            for p,v in zip(self.parinfo[1:],values):
-                p['error'] = v
-        elif len(values) != len(self.parinfo):
-            raise ValueError("Must have same number of parameters.  len(input) = %i, len(needed) = %i" % (len(values),len(self.parinfo)))
-        else:
-            for p,v in zip(self.parinfo,values):
-                p['error'] = v
-
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
             show_components=None, verbose=True, color=None, **kwargs):
         """
@@ -398,8 +364,8 @@ class Specfit(interactive.Interactive):
         for ii in xrange(self.npeaks): # assume first parameter is amplitude
             mpp[self.fitter.npars*ii]    *= scalefactor
             mpperr[self.fitter.npars*ii] *= scalefactor
-        self.modelpars = mpp.tolist()
-        self.modelerrs = mpperr.tolist()
+        self.modelpars = mpp
+        self.modelerrs = mpperr
         self.parinfo = self.fitter.parinfo
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
         if self.Spectrum.plotter.axis is not None:
