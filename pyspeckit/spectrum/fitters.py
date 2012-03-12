@@ -154,8 +154,8 @@ class Specfit(interactive.Interactive):
     def __call__(self, interactive=False, usemoments=True,
             clear_all_connections=True, debug=False, multifit=False,
             guesses=None, save=True, fittype='gaussian', annotate=None,
-            show_components=None, 
-            verbose=True, clear=True, vheight=None, **kwargs):
+            show_components=None, use_lmfit=False, verbose=True, clear=True,
+            vheight=None, **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
 
@@ -201,7 +201,7 @@ class Specfit(interactive.Interactive):
                 return
             else:
                 self.guesses = guesses
-                self.multifit(show_components=show_components, verbose=verbose, debug=debug)
+                self.multifit(show_components=show_components, verbose=verbose, debug=debug, use_lmfit=use_lmfit)
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
@@ -210,7 +210,7 @@ class Specfit(interactive.Interactive):
                 self.peakbgfit(usemoments=usemoments, show_components=show_components, annotate=annotate, debug=debug, **kwargs)
             else:
                 self.peakbgfit(usemoments=usemoments, vheight=False,
-                        height=0.0, annotate=annotate,
+                        height=0.0, annotate=annotate, use_lmfit=use_lmfit,
                         show_components=show_components, debug=debug, **kwargs)
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
         else:
