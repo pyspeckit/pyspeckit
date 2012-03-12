@@ -119,8 +119,8 @@ class Specfit(interactive.Interactive):
     def __init__(self, Spectrum, Registry=None):
         super(Specfit, self).__init__(Spectrum, interactive_help_message=Registry.interactive_help_message)
         self.model = None
-        #self.modelpars = None
-        #self.modelerrs = None
+        self.modelpars = None
+        self.modelerrs = None
         self.modelplot = []
         self.modelcomponents = None
         self._plotted_components = []
@@ -473,8 +473,8 @@ class Specfit(interactive.Interactive):
                 mpp = mpp[1:]
         else: self.model = model*scalefactor
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model*scalefactor
-        self.modelpars = mpp.tolist()
-        self.modelerrs = mpperr.tolist()
+        self.modelpars = mpp
+        self.modelerrs = mpperr
         # ONLY the amplitude was changed
         self.modelpars[0] *= scalefactor
         self.modelerrs[0] *= scalefactor
