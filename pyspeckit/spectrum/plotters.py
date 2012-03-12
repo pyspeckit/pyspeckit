@@ -158,7 +158,7 @@ class Plotter(object):
 
     def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid',
             linewidth=0.5, errstyle=None, erralpha=0.2, silent=None,
-            reset=True, refresh=True, use_window_limits=False, **kwargs):
+            reset=True, refresh=True, use_window_limits=None, **kwargs):
         """
         Plot the spectrum!
 
@@ -199,6 +199,9 @@ class Plotter(object):
         for arg in ['xmin','xmax','ymin','ymax','reset_xlimits','reset_ylimits','ypeakscale']:
             if arg in kwargs: reset_kwargs[arg] = kwargs.pop(arg)
 
+        if use_window_limits == None and any(k in reset_kwargs for k in ('xmin','xmax','reset_xlimits')):
+            use_window_limits = False
+
         if use_window_limits: self._stash_window_limits()
 
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr+xoffset,
@@ -223,7 +226,7 @@ class Plotter(object):
             self.silent = silent
 
         if reset:
-            self.reset_limits(use_window_limits=True, **reset_kwargs)
+            self.reset_limits(use_window_limits=use_window_limits, **reset_kwargs)
 
         if self.autorefresh and refresh: self.refresh()
 

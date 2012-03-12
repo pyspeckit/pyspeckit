@@ -47,7 +47,7 @@ class Interactive(object):
         self.button1plot = []
         self.button2plot = []
 
-        self.use_window_limits = True
+        self.use_window_limits = None
 
     def event_manager(self, event, debug=False):
         """

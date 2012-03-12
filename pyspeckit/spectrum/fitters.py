@@ -514,9 +514,9 @@ class Specfit(interactive.Interactive):
             # requires self.modelpars to be a list... hope it is
             if self.vheight:
                 if self.Spectrum.baseline.baselinepars is not None:
-                    mpp = [self.Spectrum.baseline.baselinepars[0]] + self.modelpars
+                    mpp = [self.Spectrum.baseline.baselinepars[0]] + self.modelpars.tolist()
                 else:
-                    mpp = [0] + self.modelpars
+                    mpp = [0] + self.modelpars.tolist()
             else:
                 mpp = self.modelpars
         if debug: print "_full_model mpp: ",mpp
