@@ -5,6 +5,17 @@ class ParinfoList(list):
     error, order, limits, etc.) in a class-friendly manner
     """
     def __init__(self, *args):
+
+        try:
+            from lmfit import Parameters,Parameter
+            list.__init__(self,[])
+            if len(args) == 1 and isinstance(args[0],Parameters):
+                self._from_Parameters(args[0])
+                self._dict = dict([(pp['parname'],pp) for pp in self])
+                return
+        except ImportError:
+            pass
+
         list.__init__(self, *args)
 
         for ii,pp in enumerate(self):
@@ -34,8 +45,8 @@ class ParinfoList(list):
     shortnames = property(fget=_getter('shortparname'), fset=_setter('shortparname'))
     shortparnames=shortnames
     values = property(fget=_getter('value'), fset=_setter('value'))
-    errors = property(fget=_getter('error'))
-    n = property(fget=_getter('n'))
+    errors = property(fget=_getter('error'), fset=_setter('error'))
+    n = property(fget=_getter('n'), fset=_setter('n'))
     order=n
 
     def __getitem__(self, key):
@@ -72,6 +83,43 @@ class ParinfoList(list):
         self._check_names()
         self._set_attributes()
 
+    def as_Parameters(self):
+        """
+        Convert a ParinfoList to an lmfit Parameters class
+        """
+        try:
+            from lmfit import Parameters,Parameter
+        except ImportError:
+            print "Cannot import lmfit."
+            return
+
+        P = Parameters()
+        P.add_many(*[(par.parname, par.value, not(par.fixed),
+            par.limits[0] if par.limited[0] else None,
+            par.limits[1] if par.limited[1] else None,
+            par.tied if par.tied is not '' else None)
+            for par in self])
+
+        return P
+
+    def _from_Parameters(self, lmpars):
+        """
+        Read from an lmfit Parameters instance
+        """
+
+        if len(lmpars) == len(self):
+            self.names = [p.name for p in lmpars.values()]
+            self.values = [p.value for p in lmpars.values()]
+            self.errors = [p.stderr for p in lmpars.values()]
+            for ii,P in enumerate(lmpars.values()):
+                self[ii].limits = (P.min,P.max)
+                self[ii].limited = (P.min not in (None,False),P.max not in (None,False))
+                self[ii].expr = '' if P.expr is None else P.expr
+        else:
+            for par in lmpars.values():
+                self.append(Parinfo(par))
+
+
 
 
 class Parinfo(dict):
@@ -82,6 +130,7 @@ class Parinfo(dict):
     more importantly, includes sanity checks when setting values.
     """
     def __init__(self, values=None):
+
         dict.__init__(self, {'value':0.0, 'error':0.0,
                 'n':0, 'fixed':False,
                 'limits':(0.0,0.0),
@@ -91,10 +140,52 @@ class Parinfo(dict):
                 'parname':'',
                 'shortparname':''})
 
+        try:
+            from lmfit import Parameter
+            if isinstance(values,Parameter):
+                self._from_Parameter(values)
+                self.__dict__ = self
+                return
+        except ImportError:
+            pass
+
         if values is not None:
             self.update(values)
         
         self.__dict__ = self
+
+    @property
+    def max(self):
+        return self.limits[1]
+
+    @max.setter
+    def max(self, value):
+        self.limits = (self.limits[0], value)
+
+    @property
+    def min(self):
+        return self.limits[0]
+
+    @min.setter
+    def min(self, value):
+        self.limits = (value, self.limits[1])
+
+    @property
+    def vary(self):
+        return not self.fixed
+
+    @vary.setter
+    def vary(self, value):
+        self.fixed = not value
+
+    @property
+    def expr(self):
+        return self.tied
+
+    @expr.setter
+    def expr(self, value):
+        self._check_OK('tied',value)
+        self.tied = value
 
     def __setattr__(self, key, value):
         # DEBUG print "Setting attribute %s = %s" % (key,value)
@@ -150,6 +241,17 @@ class Parinfo(dict):
         if key not in self:
             self[key] = value
         return self[key]
+
+    def _from_Parameter(self, lmpar):
+        """
+        Read a Parinfo instance from and lmfit Parameter
+        """
+        self['limits'] = lmpar.min,lmpar.max
+        self['limited'] = (lmpar.min not in (None,False),lmpar.max not in (None,False))
+        self['value'] = lmpar.value
+        self['error'] = lmpar.stderr
+        self['parname'] = lmpar.name
+        self['fixed'] = not(lmpar.vary)
 
 
 if __name__=="__main__":

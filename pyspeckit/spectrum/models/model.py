@@ -11,6 +11,7 @@ import copy
 import matplotlib.cbook as mpcb
 import fitter
 from . import mpfit_messages
+from pyspeckit.specwarnings import warn
 
 class SpectralModel(fitter.SimpleFitter):
     """
@@ -23,7 +24,8 @@ class SpectralModel(fitter.SimpleFitter):
     """
 
     def __init__(self, modelfunc, npars, 
-            shortvarnames=("A","\\Delta x","\\sigma"), multisingle='multi', **kwargs):
+            shortvarnames=("A","\\Delta x","\\sigma"), multisingle='multi',
+            use_lmfit=False, **kwargs):
         """
         modelfunc: the model function to be fitted.  Should take an X-axis (spectroscopic axis)
         as an input, followed by input parameters.
@@ -68,6 +70,8 @@ class SpectralModel(fitter.SimpleFitter):
         self.parinfo = copy.copy(self.default_parinfo)
 
         self.modelfunc_kwargs = kwargs
+
+        self.use_lmfit = use_lmfit
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
@@ -173,13 +177,13 @@ class SpectralModel(fitter.SimpleFitter):
         # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
         # parlimited, parfixed, and parlimits are all two-element items (tuples or lists)
         self.parinfo += [ {'n':ii+self.npars*jj+vheight,
-            'value':temp_pardict['parvalues'][ii+self.npars*jj],
+            'value':float(temp_pardict['parvalues'][ii+self.npars*jj]),
             'step':temp_pardict['parsteps'][ii+self.npars*jj],
             'limits':temp_pardict['parlimits'][ii+self.npars*jj],
             'limited':temp_pardict['parlimited'][ii+self.npars*jj],
             'fixed':temp_pardict['parfixed'][ii+self.npars*jj],
             'parname':temp_pardict['parnames'][ii].upper()+"%0i" % jj,
-            'error':temp_pardict['parerror'][ii+self.npars*jj],
+            'error':float(temp_pardict['parerror'][ii+self.npars*jj]),
             'tied':temp_pardict['partied'][ii+self.npars*jj] if temp_pardict['partied'][ii+self.npars*jj] else ""} 
             for jj in xrange(self.npeaks)
             for ii in xrange(self.npars) ] # order matters!
@@ -234,12 +238,85 @@ class SpectralModel(fitter.SimpleFitter):
         return f
 
     def __call__(self, *args, **kwargs):
+        if self.use_lmfit:
+            return self.lmfitter(*args,**kwargs)
         if self.multisingle == 'single':
             # Generate a variable-height version of the model
             func = fitter.vheightmodel(self.modelfunc)
             return self.fitter(*args, **kwargs)
         elif self.multisingle == 'multi':
             return self.fitter(*args,**kwargs)
+
+    def lmfitfun(self,x,y,err=None):
+        """
+        Wrapper function to compute the fit residuals in an lmfit-friendly format
+        """
+        if err is None:
+            def f(p): 
+                pars = [par.value for par in p.values()]
+                kwargs = {}
+                kwargs.update(self.modelfunc_kwargs)
+                return (y-self.n_modelfunc(pars,**kwargs)(x))
+        else:
+            def f(p): 
+                pars = [par.value for par in p.values()]
+                kwargs = {}
+                kwargs.update(self.modelfunc_kwargs)
+                return (y-self.n_modelfunc(pars,**kwargs)(x))/err
+        return f
+
+    def lmfitter(self, xax, data, err=None, parinfo=None, debug=False, **kwargs):
+        """
+        Use lmfit instead of mpfit to do the fitting
+        """
+        try:
+            import lmfit
+        except ImportError:
+            print "Could not import lmfit, try using mpfit instead."
+            return
+
+        self.xax = xax # the 'stored' xax is just a link to the original
+        if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
+            # some models will depend on the input units.  For these, pass in an X-axis in those units
+            # (gaussian, voigt, lorentz profiles should not depend on units.  Ammonia, formaldehyde,
+            # H-alpha, etc. should)
+            xax = copy.copy(xax)
+            xax.convert_to_unit(self.fitunits, quiet=quiet)
+
+        if np.any(np.isnan(data)) or np.any(np.isinf(data)):
+            err[np.isnan(data) + np.isinf(data)] = np.inf
+            data[np.isnan(data) + np.isinf(data)] = 0
+
+        if parinfo is None:
+            parinfo, kwargs = self._make_parinfo(debug=debug, **kwargs)
+            if debug:
+                print parinfo
+
+        LMParams = parinfo.as_Parameters()
+        if debug:
+            print LMParams
+            print parinfo
+        minimizer = lmfit.Minimizer(self.lmfitfun(xax,np.array(data),err),LMParams,**kwargs)
+        lmstatus = minimizer.leastsq()
+        #modelpars = [p.value for p in parinfo.values()]
+        #modelerrs = [p.stderr for p in parinfo.values() if p.stderr is not None else 0]
+        chi2 = minimizer.chisqr
+
+        self.parinfo._from_Parameters(LMParams)
+        if debug:
+            print LMParams
+            print parinfo
+
+        self.mp = minimizer
+        self.mpp = self.parinfo.values
+        self.mpperr = self.parinfo.errors
+        self.mppnames = self.parinfo.names
+        modelkwargs = {}
+        modelkwargs.update(self.modelfunc_kwargs)
+        self.model = self.n_modelfunc(self.mpp, **modelkwargs)(xax)
+        if np.isnan(chi2):
+            warn( "Warning: chi^2 is nan" )
+        return self.mpp,self.model,self.mpperr,chi2
 
 
     def fitter(self, xax, data, err=None, quiet=True, veryverbose=False,
