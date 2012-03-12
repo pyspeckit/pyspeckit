@@ -11,7 +11,6 @@ try:
     import atpy
     atpyOK = True
 except ImportError:
-    print "Failed to import atpy"
     import readcol
     atpyOK = False
 
