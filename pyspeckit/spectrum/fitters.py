@@ -123,6 +123,7 @@ class Specfit(interactive.Interactive):
     def __init__(self, Spectrum, Registry=None):
         super(Specfit, self).__init__(Spectrum, interactive_help_message=Registry.interactive_help_message)
         self.model = None
+        self.parinfo = None
         self.modelpars = None
         self.modelerrs = None
         self.modelplot = []
