@@ -25,15 +25,19 @@ class Registry(object):
 
         self._interactive_help_message_root = """
 
-Left-click or hit 'p' twice to select (/p/ick) a fitting range.  You
-can e/x/clude or /r/emove parts of the spectrum by hitting 'x' or 'r'
-twice.  Then middle-click or hit 'm' twice to select (/m/ark) a peak
-and width.  When you're done, right-click or hit 'd' to perform the fit
-and disconnect the mouse and keyboard (/d/isconnect because you're
-/d/one).
-'?' will print this help message again.
+'?' will print this help message again. The / / keys are mnemonics.
+1. Left-click or hit 'p' (/p/ick) with the cursor over the plot at both of the
+two desired X-values to select a fitting range.  You can e/x/clude parts of the
+spectrum by hitting 'x' at two positions.  
+2. Then /m/iddle-click or hit 'm' twice to select (/m/ark) a peak and width -
+the first mark should be on the peak of the line, the second should be at the
+approximate half-max point on the curve.  
+3. When you're done, right-click or hit 'd' to perform the fit and disconnect
+the mouse and keyboard (/d/isconnect because you're /d/one).  Any time before
+you're /d/one, you can select a different fitter (see below).
+
 You can select different fitters to use with the interactive fitting routine.
-The default is gaussian ('g')
+The default is gaussian ('g'), all options are listed below:
         """
         self._make_interactive_help_message()
 
