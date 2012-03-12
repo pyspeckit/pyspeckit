@@ -7,6 +7,7 @@ A general module for selecting regions and inputting guesses via the
 interactive window.
 """
 import numpy
+import pyspeckit
 
 class Interactive(object):
 
@@ -45,6 +46,8 @@ class Interactive(object):
         # Init button 1/2 plots
         self.button1plot = []
         self.button2plot = []
+
+        self.use_window_limits = True
 
     def event_manager(self, event, debug=False):
         """
@@ -248,12 +251,37 @@ class Interactive(object):
 
     def selectregion(self, xmin=None, xmax=None, xtype='wcs', highlight=False,
             fit_plotted_area=True, reset=False, verbose=False, debug=False,
-            **kwargs):
+            use_window_limits=None, **kwargs):
         """
         Pick a fitting region in either WCS units or pixel units
+
+        *xmin / xmax* [ float ]
+            The min/max X values to use in X-axis units (or pixel units if xtype is set).
+            TAKES PRECEDENCE ALL OTHER BOOLEAN OPTIONS
+
+        *xtype* [ string ]
+            A string specifying the xtype that xmin/xmax are specified in.  It can be either
+            'wcs' or any valid xtype from :class:`pyspeckit.spectrum.units`
+
+        *reset* [ bool ]
+            Reset the selected region to the full spectrum?  Only takes effect
+            if xmin and xmax are not (both) specified.   
+            TAKES PRECEDENCE ALL SUBSEQUENT BOOLEAN OPTIONS
+
+        Now things get a little complicated...
+        *fit_plotted_area* [ bool ]
+            Use the plot limits *as specified in :class:`pyspeckit.spectrum.plotters`*?
+            Note that this is not necessarily the same as the window plot limits!
+
+        *use_window_limits* [ bool ] 
+            Use the plot limits *as displayed*.  Defaults to
+            :attr:`pyspeckit.spectrum.interactive.use_window_limits`.
+            Overwrites xmin,xmax set by plotter
+            
         """
+        if debug: print "selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits
         if xmin is not None and xmax is not None:
-            if xtype in ('wcs','WCS','velo','velocity','wavelength','frequency','freq','wav'):
+            if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
                 self.xmin = self.Spectrum.xarr.x_to_pix(xmin)
                 self.xmax = self.Spectrum.xarr.x_to_pix(xmax)
             else:
@@ -265,9 +293,15 @@ class Interactive(object):
             self.includemask[self.xmin:self.xmax] = True
             #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
         elif self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None and fit_plotted_area:
+            if use_window_limits or (use_window_limits is None and self.use_window_limits):
+                if debug: print "Resetting plotter xmin,xmax and ymin,ymax to the currently visible region"
+                self.Spectrum.plotter.set_limits_from_visible_window(debug=debug)
             self.xmin = self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmin)
             self.xmax = self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmax)
-            if verbose: print "Including all plotted area for baseline fit"
+            if self.xmin>self.xmax: 
+                self.xmin,self.xmax = self.xmax,self.xmin
+            if debug: print "Including all plotted area (as defined by [plotter.xmin,plotter.xmax]) for fit"
+            if debug: print "Including self.xmin:self.xmax = %f:%f" % (self.xmin,self.xmax)
             self.includemask[self.xmin:self.xmax] = True
         else:
             if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax)

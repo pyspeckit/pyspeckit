@@ -9,6 +9,8 @@ Release 0.1.7
     * New interactive slider widget for manipulating models (Spectrum.specfit.add_sliders())
     * Subtle but very significant bug-fix: parinfo is now a single uniform
       list, based on the ParinfoList class.
+    * You can now fit based on what you see by using the 'use_window_limits=True' kwarg
+      *WARNING* This changes the default behavior in interactive mode!
 
 Release 0.1.6 
 ~~~~~~~~~~~~~

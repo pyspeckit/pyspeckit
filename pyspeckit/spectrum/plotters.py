@@ -43,16 +43,52 @@ class Plotter(object):
         self.title  = title
         self.errorplot = None
         self.plotkwargs = kwargs
-        self.xmax = None
-        self.xmin = None
-        self.ymax = None
-        self.ymin = None
+        self._xlim = [None,None]
+        self._ylim = [None,None]
+        self.debug = False
+
         self.keyclick = None
         self.silent = silent
         self.plotscale = plotscale
 
         self._xclick1 = None
         self._xclick2 = None
+
+
+    def _get_prop(xy, minmax):
+        def getprop(self):
+            if xy == 'x':
+                if minmax == 'min':
+                    return self._xlim[0]
+                elif minmax == 'max':
+                    return self._xlim[1]
+            elif xy == 'y':
+                if minmax == 'min':
+                    return self._ylim[0]
+                elif minmax == 'max':
+                    return self._ylim[1]
+        return getprop
+
+    def _set_prop(xy, minmax):
+        def setprop(self, value):
+            if self.debug: print "Setting %s%s to %s" % (xy,minmax,value)
+            if xy == 'x':
+                if minmax == 'min':
+                    self._xlim[0] = value
+                elif minmax == 'max':
+                    self._xlim[1] = value
+            elif xy == 'y':
+                if minmax == 'min':
+                    self._ylim[0] = value
+                elif minmax == 'max':
+                    self._ylim[1] = value
+        return setprop
+
+    xmin = property(fget=_get_prop('x','min'),fset=_set_prop('x','min'))
+    xmax = property(fget=_get_prop('x','max'),fset=_set_prop('x','max'))
+    ymin = property(fget=_get_prop('y','min'),fset=_set_prop('y','min'))
+    ymax = property(fget=_get_prop('y','max'),fset=_set_prop('y','max'))
+
 
     def _disconnect_matplotlib_keys(self):
         """
@@ -122,7 +158,7 @@ class Plotter(object):
 
     def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid',
             linewidth=0.5, errstyle=None, erralpha=0.2, silent=None,
-            reset=True, refresh=True, **kwargs):
+            reset=True, refresh=True, use_window_limits=False, **kwargs):
         """
         Plot the spectrum!
 
@@ -163,6 +199,8 @@ class Plotter(object):
         for arg in ['xmin','xmax','ymin','ymax','reset_xlimits','reset_ylimits','ypeakscale']:
             if arg in kwargs: reset_kwargs[arg] = kwargs.pop(arg)
 
+        if use_window_limits: self._stash_window_limits()
+
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr+xoffset,
                 self.Spectrum.data*self.plotscale+self.offset, color=color,
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
@@ -179,63 +217,84 @@ class Plotter(object):
                         yerr=self.Spectrum.error*self.plotscale, ecolor=color, fmt=None,
                         **kwargs)
 
+        if use_window_limits: self._reset_to_stashed_limits()
+
         if silent is not None:
             self.silent = silent
 
         if reset:
-            self.reset_limits(**reset_kwargs)
+            self.reset_limits(use_window_limits=True, **reset_kwargs)
 
         if self.autorefresh and refresh: self.refresh()
+
+    def _stash_window_limits(self):
+        self._window_limits = self.axis.get_xlim(),self.axis.get_ylim()
+        if self.debug: print "Stashed window limits: ",self._window_limits
+    
+    def _reset_to_stashed_limits(self):
+        self.axis.set_xlim(*self._window_limits[0])
+        self.axis.set_ylim(*self._window_limits[1])
+        self.xmin,self.xmax = self._window_limits[0]
+        self.ymin,self.ymax = self._window_limits[1]
+        if self.debug: print "Recovered window limits: ",self._window_limits
     
     def reset_limits(self,xmin=None, xmax=None, ymin=None, ymax=None,
             reset_xlimits=True, reset_ylimits=True, ypeakscale=1.2,
-            silent=None, **kwargs):
+            silent=None, use_window_limits=False, **kwargs):
         """
         Automatically or manually reset the plot limits
         """
 
-        if silent is not None:
-            self.silent = silent
+        if use_window_limits:
+            # this means DO NOT reset!
+            self.set_limits_from_visible_window()
+        else:
+            if silent is not None:
+                self.silent = silent
 
-        if (self.Spectrum.xarr.max() < self.xmin or self.Spectrum.xarr.min() > self.xmax 
-                or reset_xlimits):
-            if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
-            self.xmin = None
-            self.xmax = None
-        if xmin is not None: self.xmin = xmin
-        elif self.xmin is None: self.xmin=self.Spectrum.xarr.min()
-        if xmax is not None: self.xmax = xmax
-        elif self.xmax is None: self.xmax=self.Spectrum.xarr.max()
+            if (self.Spectrum.xarr.max() < self.xmin or self.Spectrum.xarr.min() > self.xmax 
+                    or reset_xlimits):
+                if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
+                self.xmin = None
+                self.xmax = None
+            if xmin is not None: self.xmin = xmin
+            elif self.xmin is None: self.xmin=self.Spectrum.xarr.min()
+            if xmax is not None: self.xmax = xmax
+            elif self.xmax is None: self.xmax=self.Spectrum.xarr.max()
+
+            xpixmin = np.argmin(np.abs(self.Spectrum.xarr-self.xmin))
+            xpixmax = np.argmin(np.abs(self.Spectrum.xarr-self.xmax))
+            if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
+            elif xpixmin == xpixmax:
+                if not self.silent: warn( "ERROR: the X axis limits specified were invalid.  Resetting." )
+                self.reset_limits(reset_xlimits=True, ymin=ymin, ymax=ymax, reset_ylimits=reset_ylimits, ypeakscale=ypeakscale, **kwargs)
+                return
+            
+            if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
+                    or reset_ylimits):
+                if not self.silent and not reset_ylimits: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
+                self.ymin = None
+                self.ymax = None
+
+            if ymin is not None: self.ymin = ymin
+            elif self.ymin is None: 
+                try:
+                    self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])+0.0
+                except TypeError:
+                    # this is assumed to be a Masked Array error
+                    self.ymin = self.Spectrum.data[xpixmin:xpixmax].min() + 0.0
+            if ymax is not None: self.ymax = ymax
+            elif self.ymax is None:
+                try:
+                    self.ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin) * ypeakscale + self.ymin
+                except TypeError:
+                    self.ymax=((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin) * ypeakscale + self.ymin
+
+            self.ymin += self.offset
+            self.ymax += self.offset
+
         self.axis.set_xlim(self.xmin,self.xmax)
-
-        xpixmin = np.argmin(np.abs(self.Spectrum.xarr-self.xmin))
-        xpixmax = np.argmin(np.abs(self.Spectrum.xarr-self.xmax))
-        if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
-        elif xpixmin == xpixmax:
-            if not self.silent: warn( "ERROR: the X axis limits specified were invalid.  Resetting." )
-            self.reset_limits(reset_xlimits=True, ymin=ymin, ymax=ymax, reset_ylimits=reset_ylimits, ypeakscale=ypeakscale, **kwargs)
-            return
-        
-        if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
-                or reset_ylimits):
-            if not self.silent and not reset_ylimits: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
-            self.ymin = None
-            self.ymax = None
-
-        if ymin is not None: self.ymin = ymin
-        elif self.ymin is None: 
-            try:
-                self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])+0.0
-            except TypeError:
-                # this is assumed to be a Masked Array error
-                self.ymin = self.Spectrum.data[xpixmin:xpixmax].min() + 0.0
-        if ymax is not None: self.ymax = ymax
-        elif self.ymax is None:
-            try:
-                self.ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin) * ypeakscale + self.ymin
-            except TypeError:
-                self.ymax=((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin) * ypeakscale + self.ymin
-        self.axis.set_ylim(self.ymin+self.offset,self.ymax+self.offset)
+        self.axis.set_ylim(self.ymin,self.ymax)
         
 
     def label(self, title=None, xlabel=None, ylabel=None, **kwargs):
@@ -320,6 +379,19 @@ class Plotter(object):
             self._xclick1 = event.xdata
         elif self._xclick2 is None:
             self._xclick2 = event.xdata
+
+    def set_limits_from_visible_window(self, debug=False):
+        """ Hopefully self-descriptive: set the x and y limits from the
+        currently visible window (use this if you use the pan/zoom tools or
+        manually change the limits) """
+        if debug:
+            print "Changing x limits from %f,%f to %f,%f" % (self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1])
+            print "Changing y limits from %f,%f to %f,%f" % (self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1])
+        self.xmin, self.xmax = self.axis.get_xlim()
+        self.ymin, self.ymax = self.axis.get_ylim()
+        if debug:
+            print "New x limits %f,%f == %f,%f" % (self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1])
+            print "New y limits %f,%f == %f,%f" % (self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1])
 
     def copy(self, parent=None):
         """

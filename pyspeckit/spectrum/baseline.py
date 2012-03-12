@@ -115,10 +115,11 @@ class Baseline(interactive.Interactive):
                 self.includemask[:] = True
             # must select region (i.e., exclude edges) AFTER setting 'positive' include region
             # also, DON'T highlight here because it will be cleared
-            self.selectregion(fit_plotted_area=fit_plotted_area, **kwargs)
+            self.selectregion(fit_plotted_area=fit_plotted_area, debug=debug, **kwargs)
             self.button3action(exclude=exclude, 
                     fit_original=fit_original,
-                    baseline_fit_color=baseline_fit_color, **kwargs)
+                    baseline_fit_color=baseline_fit_color, 
+                    debug=debug, **kwargs)
             if highlight: self.highlight_fitregion()
         if save: self.savefit()
 
@@ -145,6 +146,7 @@ class Baseline(interactive.Interactive):
                 x2 = self.Spectrum.xarr.x_to_pix(x2)
                 self.includemask[x1:x2] = False
 
+        if debug: print "Fitting baseline"
         self.basespec, self.baselinepars = self._baseline(
                 self.spectofit,
                 xarr=self.Spectrum.xarr,
@@ -175,6 +177,7 @@ class Baseline(interactive.Interactive):
             self.subtracted = False
 
         if self.Spectrum.plotter.axis is not None:
+            if debug: print "Plotting baseline"
             self.plot_baseline(baseline_fit_color=baseline_fit_color, **kwargs)
 
         # disconnect interactive window
@@ -183,7 +186,7 @@ class Baseline(interactive.Interactive):
     button2action = button3action
 
     def plot_baseline(self, annotate=True, baseline_fit_color='orange',
-            **kwargs):
+            use_window_limits=None, **kwargs):
         """
         Overplot the baseline fit
         """
@@ -207,7 +210,9 @@ class Baseline(interactive.Interactive):
             plotmask[self.xmin:self.xmax] = self.OKmask[self.xmin:self.xmax] # then include everything OK in range
             self.Spectrum.plotter.ymin = abs(self.Spectrum.data[plotmask].min())*1.1*np.sign(self.Spectrum.data[plotmask].min())
             self.Spectrum.plotter.ymax = abs(self.Spectrum.data[plotmask].max())*1.1*np.sign(self.Spectrum.data[plotmask].max())
-            self.Spectrum.plotter.plot()
+            # don't change the zoom (by default)!
+            uwl = use_window_limits if use_window_limits is not None else self.use_window_limits
+            self.Spectrum.plotter.plot(use_window_limits=uwl)
         else: # otherwise just overplot the fit
             self.Spectrum.plotter.axis.set_autoscale_on(False)
             for p in self._plots:
@@ -219,19 +224,24 @@ class Baseline(interactive.Interactive):
         if annotate: self.annotate() # refreshes automatically
         elif self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
 
-    def unsubtract(self, replot=True):
+    def unsubtract(self, replot=True, preserve_limits=True):
         """
         Restore the spectrum to "pristine" state (un-subtract the baseline)
 
         *replot* [ True ]
             Re-plot the spectrum?  (only happens if unsubtraction proceeds,
             i.e. if there was a baseline to unsubtract)
+
+        *preserve_limits* [ True ] 
+            Preserve the current x,y limits
         """
         if self.subtracted:
             self.Spectrum.data += self.basespec
             self.subtracted = False
             if replot:
-                self.Spectrum.plotter()
+                kwargs = self.Spectrum.plotter.plotkwargs
+                kwargs.update({'use_window_limits':preserve_limits})
+                self.Spectrum.plotter(**kwargs)
         else: 
             print "Baseline wasn't subtracted; not unsubtracting."
 

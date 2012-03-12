@@ -43,3 +43,24 @@ spec.baseline(excludefit=True)
 spec.specfit(guesses=spec.specfit.modelpars)
 
 spec.plotter.figure.savefig(savedir+"simple_fit_interactive_HCOp.png")
+
+print "Doing the interactive thing now"
+event1 = matplotlib.backend_bases.KeyEvent('key_press_event', spec.plotter.axis.figure.canvas,key='o')
+event2 = matplotlib.backend_bases.MouseEvent('button_press_event', spec.plotter.axis.figure.canvas,button=1,x=-100,y=-0.07)
+event2.xdata, event2.ydata = -100,-0.07
+event2.x, event2.y= spec.plotter.axis.transData.transform_point((-100,-0.07))
+event2.inaxes = spec.plotter.axis
+event3 = matplotlib.backend_bases.MouseEvent('motion_notify_event', spec.plotter.axis.figure.canvas,button=1,x=20,y=0.16)
+event3.inaxes = spec.plotter.axis
+event4 = matplotlib.backend_bases.MouseEvent('button_release_event', spec.plotter.axis.figure.canvas,button=1,x=20,y=0.16)
+event4.inaxes = spec.plotter.axis
+event4.xdata, event4.ydata = 20,0.16
+event4.x, event4.y= spec.plotter.axis.transData.transform_point((20,0.16))
+spec.plotter.figure.canvas.toolbar.press_zoom(event2)
+spec.plotter.figure.canvas.toolbar._xypress=[(event2.x,event2.y,spec.plotter.axis,0,spec.plotter.axis.viewLim.frozen(),spec.plotter.axis.transData.frozen())]
+spec.plotter.figure.canvas.toolbar.drag_zoom(event3)
+spec.plotter.figure.canvas.toolbar.release_zoom(event4)
+
+#spec.plotter.debug=True
+spec.baseline(excludefit=True,use_window_limits=True,highlight=True)
+spec.specfit(use_window_limits=True)

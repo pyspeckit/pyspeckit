@@ -149,7 +149,7 @@ class Specfit(interactive.Interactive):
     def __call__(self, interactive=False, usemoments=True,
             clear_all_connections=True, debug=False, multifit=False,
             guesses=None, save=True, fittype='gaussian', annotate=None,
-            show_components=None,
+            show_components=None, 
             verbose=True, clear=True, vheight=None, **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
