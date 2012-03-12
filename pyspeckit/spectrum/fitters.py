@@ -853,6 +853,9 @@ class Specfit(interactive.Interactive):
         if hasattr(self,'fullmodel'):
             newspecfit._full_model()
 
+        # this is ridiculous, absurd, and infuriating...
+        newspecfit.button2action = newspecfit.guesspeakwidth
+
         if parent is not None:
             newspecfit.Spectrum.plotter = parent.plotter
         else:

@@ -103,7 +103,8 @@ class Interactive(object):
 
         xpix = self.Spectrum.xarr.x_to_pix(event.xdata)
         if self.xclicks == []:
-            self.firstclick_selection(not mark_include)
+            print "self.Spectrum.plotter.axis ID: ",id(self.Spectrum.plotter.axis)
+            self._firstclick_selection(not mark_include)
 
         if self.nclicks_b1 == 0:
             self.nclicks_b1 = 1
@@ -160,11 +161,12 @@ class Interactive(object):
                 **kwargs)
         self.Spectrum.plotter.refresh()
 
-    def firstclick_selection(self, include_all=False):
+    def _firstclick_selection(self, include_all=False):
         """
         Initialize the include/exclude mask
         """
 
+        print "self.Spectrum.plotter.axis ID: ",id(self.Spectrum.plotter.axis)
         self.Spectrum.plotter.axis.set_autoscale_on(False)
         if include_all:
             # default to including everything
