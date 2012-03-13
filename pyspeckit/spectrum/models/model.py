@@ -240,7 +240,6 @@ class SpectralModel(fitter.SimpleFitter):
     def __call__(self, *args, **kwargs):
         
         use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
-        print "in %r using lmfit = %s" % (self,use_lmfit)
         if use_lmfit:
             return self.lmfitter(*args,**kwargs)
         if self.multisingle == 'single':
