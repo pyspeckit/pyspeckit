@@ -299,13 +299,11 @@ class SpectralModel(fitter.SimpleFitter):
         if debug:
             print LMParams
             print parinfo
-        minimizer = lmfit.Minimizer(self.lmfitfun(xax,np.array(data),err),LMParams,**kwargs)
-        lmstatus = minimizer.leastsq()
+        minimizer = lmfit.minimize(self.lmfitfun(xax,np.array(data),err),LMParams,**kwargs)
         if not quiet:
             print "There were %i function evaluations" % (minimizer.nfev)
         #modelpars = [p.value for p in parinfo.values()]
         #modelerrs = [p.stderr for p in parinfo.values() if p.stderr is not None else 0]
-        chi2 = minimizer.chisqr
 
         self.parinfo._from_Parameters(LMParams)
         if debug:
@@ -319,6 +317,13 @@ class SpectralModel(fitter.SimpleFitter):
         modelkwargs = {}
         modelkwargs.update(self.modelfunc_kwargs)
         self.model = self.n_modelfunc(self.mpp, **modelkwargs)(xax)
+        if hasattr(minimizer,'chisqr'):
+            chi2 = minimizer.chisqr
+        else:
+            try:
+                chi2 = (((data-self.model)/err)**2).sum()
+            except TypeError:
+                chi2 = ((data-self.model)**2).sum()
         if np.isnan(chi2):
             warn( "Warning: chi^2 is nan" )
         return self.mpp,self.model,self.mpperr,chi2

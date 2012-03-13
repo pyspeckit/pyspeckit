@@ -489,7 +489,8 @@ class Specfit(interactive.Interactive):
         self.modelerrs = mpperr
         # ONLY the amplitude was changed
         self.modelpars[0] *= scalefactor
-        self.modelerrs[0] *= scalefactor
+        if self.modelerrs[0] is not None:
+            self.modelerrs[0] *= scalefactor
         # this was for height, but that's now dealt with above
         #self.modelpars[1] *= scalefactor
         #self.modelerrs[1] *= scalefactor
