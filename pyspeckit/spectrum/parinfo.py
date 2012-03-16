@@ -48,6 +48,10 @@ class ParinfoList(list):
     errors = property(fget=_getter('error'), fset=_setter('error'))
     n = property(fget=_getter('n'), fset=_setter('n'))
     order=n
+    fixed = property(fget=_getter('fixed'), fset=_setter('fixed'))
+    limits = property(fget=_getter('limits'), fset=_setter('limits'))
+    limited = property(fget=_getter('limited'), fset=_setter('limited'))
+    tied = property(fget=_getter('tied'), fset=_setter('tied'))
 
     def __getitem__(self, key):
         if type(key) is int:

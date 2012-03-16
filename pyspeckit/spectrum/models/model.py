@@ -12,6 +12,10 @@ import matplotlib.cbook as mpcb
 import fitter
 from . import mpfit_messages
 from pyspeckit.specwarnings import warn
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 
 class SpectralModel(fitter.SimpleFitter):
     """
@@ -107,7 +111,7 @@ class SpectralModel(fitter.SimpleFitter):
             self.parnames = parnames
         elif parnames is None and self.parnames is not None:
             parnames = self.parnames
-        elif self.default_parinfo is not None:
+        elif self.default_parinfo is not None and parnames is None:
             parnames = [p['parname'] for p in self.default_parinfo]
 
         if limitedmin is not None:
@@ -117,7 +121,7 @@ class SpectralModel(fitter.SimpleFitter):
                 parlimited = zip(limitedmin,(False,)*len(parnames))
         elif limitedmax is not None:
             parlimited = zip((False,)*len(parnames),limitedmax)
-        elif self.default_parinfo is not None:
+        elif self.default_parinfo is not None and parlimited is None:
             parlimited = [p['limited'] for p in self.default_parinfo]
 
         if minpars is not None:
@@ -127,7 +131,7 @@ class SpectralModel(fitter.SimpleFitter):
                 parlimits = zip(minpars,(False,)*len(parnames))
         elif maxpars is not None:
             parlimits = zip((False,)*len(parnames),maxpars)
-        elif self.default_parinfo is not None:
+        elif self.default_parinfo is not None and parlimits is None:
             parlimits = [p['limits'] for p in self.default_parinfo]
 
         self.fitunits = fitunits
@@ -164,7 +168,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         # this is a clever way to turn the parameter lists into a dict of lists
         # clever = hard to read
-        temp_pardict = dict([(varname, np.zeros(self.npars*self.npeaks, dtype='bool'))
+        temp_pardict = OrderedDict([(varname, np.zeros(self.npars*self.npeaks, dtype='bool'))
             if locals()[varname] is None else (varname, list(locals()[varname]) )
             for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
         temp_pardict['parlimits'] = parlimits if parlimits is not None else [(0,0)] * (self.npars*self.npeaks)
