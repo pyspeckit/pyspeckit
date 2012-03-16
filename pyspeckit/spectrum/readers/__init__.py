@@ -52,6 +52,7 @@ def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True):
         vframe = hdr.get('VFRAME') if hdr.get('VFRAME') is not None else 0.0
     else:
         convention, frame = None,None
+        vframe = 0.0
 
     XAxis = units.SpectroscopicAxis(xarr, xunits, xtype=xtype, refX=refX,
             velocity_convention=convention, frame=frame, frame_offset=vframe)
