@@ -12,6 +12,8 @@ Release 0.1.7
     * You can now fit based on what you see by using the 'use_window_limits=True' kwarg
       .. warning:: This changes the default behavior in interactive mode!
     * lmfit-py can now be used for fitting via the 'use_lmfit' kwarg
+    * BUGFIX: SpectroscopicAxis can be converted between units even when scalar
+    * velocity frames are read from FITS headers following the VELDEF conventions
 
 Release 0.1.6 
 ~~~~~~~~~~~~~
