@@ -4,8 +4,6 @@ print session
 session.load_target('3C286')
 target = session['3C286']
 sp = target.blocks['A13OFF2'][0] # there are 4 identical spectra
-print sp.xarr
-sp.xarr.velocity_convention='optical'
 sp.xarr.convert_to_unit('km/s')
 sp.plotter(xmin=207408,xmax=207598)
 sp.plotter.label(verbose_label=True)
@@ -13,11 +11,9 @@ stats = sp.stats(statrange=(-20+207458,20+207458))
 sp.error[:] = stats['std']
 sp.specfit(fittype='gaussian')
 sp.specfit.plotresiduals(drawstyle='line')
-print sp.specfit.modelpars
 print "Gaussian chi^2: %g  chi^2/n: %g" % (sp.specfit.chi2, sp.specfit.chi2/sp.specfit.dof)
 sp.specfit(fittype='voigt', clear=False, composite_fit_color='blue')
 sp.specfit.plotresiduals(clear=False, color='blue', drawstyle='line')
-print sp.specfit.modelpars
 print "Voigt   chi^2: %g  chi^2/n: %g" % (sp.specfit.chi2, sp.specfit.chi2/sp.specfit.dof)
 sp.specfit.residualaxis.set_ylim(-0.2,0.2)
 
@@ -29,9 +25,7 @@ pylab.show()
 
 import pyspeckit
 sp1 = target.blocks['A13OFF2'][0]
-sp1.xarr.velocity_convention='optical'
 sp2 = target.blocks['A13OFF2'][1]
-sp2.xarr.velocity_convention='optical'
 xc = pyspeckit.correlate.correlate(sp1,sp2,range=[207408,207698],units='km/s')
 xc.plotter()
 xc.specfit()
