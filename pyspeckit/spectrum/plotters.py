@@ -300,7 +300,7 @@ class Plotter(object):
         self.axis.set_ylim(self.ymin,self.ymax)
         
 
-    def label(self, title=None, xlabel=None, ylabel=None, **kwargs):
+    def label(self, title=None, xlabel=None, ylabel=None, verbose_label=False, **kwargs):
    
         if title is not None:
             self.title = title
@@ -313,6 +313,10 @@ class Plotter(object):
             self.xlabel = xlabel
         elif isinstance(self.Spectrum.xarr.xtype,str):
             self.xlabel = self.Spectrum.xarr.xtype.title()
+            if verbose_label:
+                self.xlabel = "%s %s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
+                        self.Spectrum.xarr.frame.title(),
+                        self.xlabel )
             if isinstance(self.Spectrum.xarr.units,str):
                 self.xlabel += " ("+self.Spectrum.xarr.units+")"
         if self.xlabel is not None:

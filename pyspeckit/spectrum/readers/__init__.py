@@ -47,7 +47,14 @@ def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True):
     else:
         xtype = 'VLSR'
 
-    XAxis = units.SpectroscopicAxis(xarr,xunits,xtype=xtype,refX=refX)
+    if hdr.get('VELDEF'):
+        convention, frame = units.parse_veldef(hdr['VELDEF'])
+        vframe = hdr.get('VFRAME') if hdr.get('VFRAME') is not None else 0.0
+    else:
+        convention, frame = None,None
+
+    XAxis = units.SpectroscopicAxis(xarr, xunits, xtype=xtype, refX=refX,
+            velocity_convention=convention, frame=frame, frame_offset=vframe)
 
     return XAxis
 

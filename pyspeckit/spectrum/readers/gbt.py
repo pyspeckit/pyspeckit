@@ -81,13 +81,15 @@ def read_gbt_scan(sdfitsfile, obsnumber=0):
     HDU = pyfits.PrimaryHDU(data=data,header=header)
 
     sp = pyspeckit.Spectrum(HDU,filetype='pyfits')
-    sp.xarr.frame = 'topo'
+    #sp.xarr.frame = 'topo' # sp.header.get('VELDEF') #'topo'
 
     # HACK - temporary!
     # Convert xarr to LSR units
-    sp.xarr.convert_to_unit('m/s')
-    sp.xarr -= header['VFRAME']
-    sp.xarr.convert_to_unit('Hz')
+    #sp.xarr.convert_to_unit('m/s')
+    obsfreq = header['OBSFREQ']
+    centerfreq = pyspeckit.spectrum.units.SpectroscopicAxis(np.float(obsfreq),'Hz',refX=obsfreq,refX_units='Hz')
+    delta_freq = (centerfreq.as_unit('m/s') + header['VFRAME']).as_unit(centerfreq.units) - centerfreq
+    sp.xarr -= delta_freq
 
     return sp
 

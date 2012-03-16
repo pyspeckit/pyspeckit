@@ -157,6 +157,12 @@ frame_dict = CaseInsensitiveDict({
         'VOPT':'LSRK',
         'VELO-LSR':'LSRK',
         'LSRD':'LSRD',
+        '-LSR':'LSRK',
+        '-HEL':'heliocentric',
+        '-BAR':'barycentric',
+        'BAR':'barycentric',
+        'BARY':'barycentric',
+        '-OBS':'obs',
         'VHEL':'heliocentric',
         'VGEO':'geocentric',
         'topo':'geocentric',
@@ -201,7 +207,7 @@ class SpectroscopicAxis(np.ndarray):
 
     def __new__(self, xarr, unit="Hz", frame='rest', frame_offset=0.0,
             frame_offset_units='Hz', xtype=None, refX=None, redshift=None,
-            refX_units=None, use128bits=False):
+            refX_units=None, velocity_convention=None, use128bits=False):
         """
         Make a new spectroscopic axis instance
         Default units Hz
@@ -255,6 +261,7 @@ class SpectroscopicAxis(np.ndarray):
         if subarr.units is None:
             subarr.units = 'none'
         subarr.frame = frame
+
         if xtype in xtype_dict:
             subarr.xtype = xtype_dict[xtype]
             subarr.frame = frame_dict[xtype]
@@ -267,6 +274,7 @@ class SpectroscopicAxis(np.ndarray):
             if xtype is not None:
                 warnings.warn("WARNING: xtype has been specified but was not recognized as a string.")
             subarr.xtype = 'unknown'
+
         subarr.refX = refX
         if refX_units is None:
             if subarr.units in frequency_dict:
@@ -277,19 +285,22 @@ class SpectroscopicAxis(np.ndarray):
             subarr.refX_units = refX_units
         subarr.redshift = redshift
         subarr.wcshead = {}
-        if subarr.xtype is not None:
-            if 'RAD' in subarr.xtype:
-                subarr.velocity_convention = 'radio'
-            elif 'OPT' in subarr.xtype:
-                subarr.velocity_convention = 'optical'
-            elif 'REL' in subarr.xtype:
-                subarr.velocity_convention = 'relativistic'
-            elif subarr.xtype is 'unknown':
-                subarr.velocity_convention = 'radio' # default
+        if velocity_convention is None:
+            if subarr.xtype is not None:
+                if 'RAD' in subarr.xtype:
+                    subarr.velocity_convention = 'radio'
+                elif 'OPT' in subarr.xtype:
+                    subarr.velocity_convention = 'optical'
+                elif 'REL' in subarr.xtype:
+                    subarr.velocity_convention = 'relativistic'
+                elif subarr.xtype is 'unknown':
+                    subarr.velocity_convention = 'radio' # default
+                else:
+                    subarr.velocity_convention = 'radio' # default
             else:
                 subarr.velocity_convention = 'radio' # default
         else:
-            subarr.velocity_convention = 'radio' # default
+            subarr.velocity_convention = velocity_convention
 
         return subarr
 
@@ -326,11 +337,11 @@ class SpectroscopicAxis(np.ndarray):
 
     def __repr__(self):
         if self.shape is ():
-            rep = ("SpectroscopicAxis([%r], units=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r)" %
-                (self.__array__(), self.units, self.refX, self.refX_units, self.frame, self.redshift, self.xtype))
+            rep = ("SpectroscopicAxis([%r], units=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
+                (self.__array__(), self.units, self.refX, self.refX_units, self.frame, self.redshift, self.xtype, self.velocity_convention))
         else:
-            rep = ("SpectroscopicAxis([%r,...,%r], units=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r)" %
-                (self[0], self[-1], self.units, self.refX, self.refX_units, self.frame, self.redshift, self.xtype))
+            rep = ("SpectroscopicAxis([%r,...,%r], units=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
+                (self[0], self[-1], self.units, self.refX, self.refX_units, self.frame, self.redshift, self.xtype, self.velocity_convention))
         return rep
 
     def __str__(self):
@@ -863,7 +874,7 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
     * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
-    * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )-1
+    * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )^-1
     * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
     * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
     """
@@ -877,11 +888,11 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
 
     velocity_ms = velocities / velocity_dict['m/s'] * velocity_dict[input_units]
     if convention == 'radio':
-        freq = center_frequency * (1.0 - velocity_ms / speedoflight_ms)
+        freq = (velocity_ms / speedoflight_ms - 1.0) * center_frequency * -1
     elif convention == 'optical':
-        freq = center_frequency * (1.0 + velocity_ms / speedoflight_ms) - 1.0
+        freq = (velocity_ms / speedoflight_ms + 1.0)**-1 * center_frequency
     elif convention == 'relativistic':
-        freq = center_frequency * (1.0 - (velocity_ms / speedoflight_ms)**2)**0.5 / (1.0 + velocity_ms/speedoflight_ms)
+        freq = (-(velocity_ms / speedoflight_ms)**2 + 1.0)**0.5 / (1.0 + velocity_ms/speedoflight_ms) * center_frequency
     else:
         raise ValueError('Convention "%s" is not allowed.' % (convention))
     frequencies = freq / frequency_dict[frequency_units] * frequency_dict[center_frequency_units]
@@ -911,12 +922,13 @@ def frequency_to_velocity(frequencies, input_units, center_frequency=None,
     frequency_hz = frequencies / frequency_dict['Hz'] * frequency_dict[input_units]
     center_frequency_hz = center_frequency / frequency_dict['Hz'] * frequency_dict[center_frequency_units]
 
+    # the order is very ugly because otherwise, if scalar, the spectroscopic axis attributes won't be inherited
     if convention == 'radio':
-        velocity = speedoflight_ms * ( center_frequency_hz - frequency_hz ) / center_frequency_hz
+        velocity = ( frequency_hz - center_frequency_hz ) / center_frequency_hz * speedoflight_ms * -1
     elif convention == 'optical':
-        velocity = speedoflight_ms * ( frequency_hz - center_frequency_hz ) / frequency_hz
+        velocity = ( frequency_hz - center_frequency_hz ) / frequency_hz * speedoflight_ms * -1
     elif convention == 'relativistic':
-        velocity = speedoflight_ms * ( center_frequency_hz**2 - frequency_hz**2 ) / ( center_frequency_hz**2 + frequency_hz )**2
+        velocity = ( frequency_hz**2 - center_frequency_hz**2 ) / ( center_frequency_hz**2 + frequency_hz )**2 * speedoflight_ms * -1
     else:
         raise ValueError('Convention "%s" is not allowed.' % (convention))
     velocities = velocity * velocity_dict['m/s'] / velocity_dict[velocity_units]
@@ -961,3 +973,19 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
 
 class InconsistentTypeError(Exception):
     pass
+
+def parse_veldef(veldef):
+    """
+    Try to parse an 8-character FITS veldef
+    """
+
+    vconv_dict = {'OPTI':'optical','RADI':'radio','RELA':'relativistic'}
+
+    vconv = veldef[:4]
+    velocity_convention = vconv_dict[vconv]
+
+    frame = veldef[4:]
+    frame_type = frame_dict[frame]
+
+    return velocity_convention,frame_type
+
