@@ -201,7 +201,7 @@ class Specfit(interactive.Interactive):
                 return
             else:
                 self.guesses = guesses
-                self.multifit(show_components=show_components, verbose=verbose, debug=debug, use_lmfit=use_lmfit)
+                self.multifit(show_components=show_components, verbose=verbose, debug=debug, use_lmfit=use_lmfit, **kwargs)
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
@@ -533,10 +533,10 @@ class Specfit(interactive.Interactive):
         else:
             return self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
                 
-    def plot_fit(self, annotate=None, show_components=None, 
-        composite_fit_color='red', component_fit_color='blue', lw=0.5,
-        composite_lw=0.75, component_lw=0.75, component_kwargs={},
-        use_window_limits=None, **kwargs):
+    def plot_fit(self, annotate=None, show_components=None,
+            composite_fit_color='red', component_fit_color='blue', lw=0.5,
+            composite_lw=0.75, component_lw=0.75, component_kwargs={},
+            use_window_limits=None, show_hyperfine_components=None, **kwargs):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
@@ -559,8 +559,10 @@ class Specfit(interactive.Interactive):
         
         # Plot components
         if show_components:
+            if show_hyperfine_components is not None:
+                component_kwargs['return_hyperfine_components'] = show_hyperfine_components
             self._component_kwargs = component_kwargs
-            self.modelcomponents = self.fitter.components(self.Spectrum.xarr,self.modelpars, **component_kwargs)
+            self.modelcomponents = self.fitter.components(self.Spectrum.xarr, self.modelpars, **component_kwargs)
             for data in self.modelcomponents:
                 # can have multidimensional components
                 if len(data.shape) > 1:
