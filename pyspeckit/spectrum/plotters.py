@@ -13,6 +13,7 @@ from ..config import *
 import numpy as np
 from pyspeckit.specwarnings import warn
 import copy
+import widgets
 
 interactive_help_message = """
 Interactive key commands for plotter.  An additional help message may appear if
@@ -131,14 +132,13 @@ class Plotter(object):
             else:
                 self.figure = matplotlib.pyplot.figure()
 
-        if self.keyclick is None:
-            self.keyclick = self.figure.canvas.mpl_connect('key_press_event',self.parse_keys)
+        self._mpl_connect()
 
         if axis is not None:
-            self.figure.canvas.mpl_disconnect(self.keyclick)
+            self._mpl_disconnect()
             self.axis = axis
             self.figure = axis.figure
-            self.keyclick = self.figure.canvas.mpl_connect('key_press_event',self.parse_keys)
+            self._mpl_connect()
         elif len(self.figure.axes) > 0 and self.axis is None:
             self.axis = self.figure.axes[0] # default to first axis
         elif self.axis is None:
@@ -155,6 +155,18 @@ class Plotter(object):
         self.plotkwargs = kwargs
 
         self.plot(**kwargs)
+
+    def _mpl_connect(self):
+        if self.keyclick is None:
+            self.keyclick = self.figure.canvas.mpl_connect('key_press_event',self.parse_keys)
+
+    def _mpl_disconnect(self):
+        self.figure.canvas.mpl_disconnect(self.keyclick)
+        self.keyclick = None
+
+    def _mpl_reconnect(self):
+        self._mpl_disconnect()
+        self._mpl_connect()
 
     def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid',
             linewidth=0.5, errstyle=None, erralpha=0.2, silent=None,
@@ -368,10 +380,18 @@ class Plotter(object):
                 print "\n\nFitter initiated from the interactive plotter.  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
                 self._disconnect_matplotlib_keys()
                 self.Spectrum.specfit(interactive=True)
+                if not hasattr(self,'FitterTool'):
+                    self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
+                elif self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
+                    self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
             elif event.key == 'b':
                 print "\n\nBaseline initiated from the interactive plotter.  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
                 self._disconnect_matplotlib_keys()
                 self.Spectrum.baseline(interactive=True, reset_selection=False)
+                if not hasattr(self,'FitterTool'):
+                    self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
+                elif self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
+                    self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
             elif event.key == 'B':
                 print "\n\nBaseline initiated from the interactive plotter (with reset).  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
                 self._disconnect_matplotlib_keys()

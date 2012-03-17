@@ -2,7 +2,51 @@ from matplotlib.widgets import Widget,Button,Slider
 from matplotlib import pyplot
 import matplotlib
 
-class FitterTool(Widget):
+class dictlist(list):
+    def __init__(self, *args):
+        list.__init__(self, *args)
+        
+        self._dict = {}
+        self._dict_index = {}
+        for ii,value in enumerate(self):
+            if len(value) == 2:
+                self._dict[value[0]] = value[1]
+                self._dict_index[value[0]] = ii
+                self._dict_index[ii] = value[0]
+            else:
+                self._dict[ii] = value
+                self._dict_index[ii] = ii
+
+    def __getitem__(self, key):
+        if type(key) is int:
+            return super(dictlist,self).__getitem__(key)
+        else:
+            return self._dict[key]
+
+    def __setitem__(self, key, value):
+        if type(key) is int:
+            super(dictlist,self).__setitem__(key,value)
+            self._dict[self._dict_index[key]] = value
+        else:
+            if key in self._dict:
+                self._dict[key] = value
+                self[self._dict_index[key]] = value
+            else:
+                self._dict[key] = value
+                self._dict_index[key] = len(self)
+                self._dict_index[len(self)] = key
+                self.append(value)
+
+    def __slice__(self, s1, s2):
+        pass
+
+    def values(self):
+        return [self._dict[self._dict_index[ii]] for ii in xrange(len(self))]
+
+    def keys(self):
+        return [self._dict_index[ii] for ii in xrange(len(self))]
+
+class FitterSliders(Widget):
     """
     A tool to adjust to subplot params of a :class:`matplotlib.figure.Figure`
     """
@@ -16,7 +60,6 @@ class FitterTool(Widget):
             None, a default figure will be created. If you are using
             this from the GUI
         """
-        # FIXME: The docstring seems to just abruptly end without...
 
         self.targetfig = targetfig
         self.specfit = specfit
@@ -151,3 +194,191 @@ class FitterTool(Widget):
                 name, vmin, vmax, valinit=value)]
 
             self.sliders[-1].on_changed(update)
+
+class FitterTools(Widget):
+    """
+    A tool to monitor and play with :class:`pyspeckit.spectrum.fitter` properties
+
+--------------------------
+| Baseline range  [x,x]  |
+| Baseline order  -      |
+| (Baseline subtracted)  |
+|                        |
+| Fitter range    [x,x]  |
+| Fitter type    ------- |
+| Fitter Guesses  [p,w]  |
+|        ...      ...    |
+|        ...      ...    |
+|                        |
+| (Fit) (BL fit) (reset) |
+--------------------------
+
+
+    """
+    def __init__(self, specfit, targetfig, toolfig=None, nsubplots=12):
+        """
+        *targetfig*
+            The figure instance to adjust
+
+        *toolfig*
+            The figure instance to embed the subplot tool into. If
+            None, a default figure will be created. If you are using
+            this from the GUI
+        """
+
+        self.targetfig = targetfig
+        self.specfit = specfit
+        self.baseline = specfit.Spectrum.baseline
+        self.plotter = specfit.Spectrum.plotter
+
+        if toolfig is None:
+            tbar = matplotlib.rcParams['toolbar'] # turn off the navigation toolbar for the toolfig
+            matplotlib.rcParams['toolbar'] = 'None'
+            self.toolfig = pyplot.figure(figsize=(6,3))
+            self.toolfig.canvas.set_window_title("Fit Tools for "+targetfig.canvas.manager.window.title())
+            self.toolfig.subplots_adjust(top=0.9,left=0.05,right=0.95)
+            matplotlib.rcParams['toolbar'] = tbar
+        else:
+            self.toolfig = toolfig
+            self.toolfig.subplots_adjust(left=0.0, right=1.0)
+
+
+        #bax = self.toolfig.add_axes([0.6, 0.05, 0.15, 0.075])
+        #self.buttonrefresh = Button(bax, 'Refresh')
+
+        fax = self.toolfig.add_axes([0.1, 0.05, 0.15, 0.075])
+        self.buttonfit = Button(fax, 'Fit')
+        
+        resetax = self.toolfig.add_axes([0.7, 0.05, 0.15, 0.075])
+        self.buttonreset = Button(resetax, 'Reset')
+
+        resetblax = self.toolfig.add_axes([0.3, 0.05, 0.15, 0.075])
+        self.buttonresetbl = Button(resetblax, 'Reset BL')
+
+        resetfitax = self.toolfig.add_axes([0.5, 0.05, 0.15, 0.075])
+        self.buttonresetfit = Button(resetfitax, 'Reset fit')
+
+        def refresh(event):
+            thisdrawon = self.drawon
+
+            self.drawon = False
+
+            self.update_information()
+
+            # draw the canvas
+            self.drawon = thisdrawon
+            if self.drawon:
+                self.toolfig.canvas.draw()
+                self.targetfig.canvas.draw()
+
+        def fit(event):
+            self.specfit.button3action(event)
+
+        def reset_fit(event):
+            self.specfit.guesses = []
+            self.specfit.npeaks = 0
+            self.specfit.includemask[:] = True
+            self.refresh()
+
+        def reset_baseline(event):
+            self.baseline.unsubtract()
+            self.refresh()
+
+        def reset(event):
+            reset_baseline(event)
+            reset_fit(event)
+            self.plotter()
+            self.refresh()
+
+        # during refresh there can be a temporary invalid state
+        # depending on the order of the refresh so we turn off
+        # validation for the refreshting
+        #validate = self.toolfig.subplotpars.validate
+        #self.toolfig.subplotpars.validate = False
+        #self.buttonrefresh.on_clicked(refresh)
+        #self.toolfig.subplotpars.validate = validate
+
+        self.buttonfit.on_clicked(fit)
+        self.buttonresetfit.on_clicked(reset_fit)
+        self.buttonresetbl.on_clicked(reset_baseline)
+        self.buttonreset.on_clicked(reset)
+
+        self.axes = [self.toolfig.add_subplot(nsubplots,1,spnum, frame_on=False, navigate=False, xticks=[], yticks=[]) 
+                for spnum in xrange(1,nsubplots+1)]
+        #self.axes = self.toolfig.add_axes([0,0,1,1])
+
+        self.use_axes = [0,1,2,4,5,6,7,8,9,10,11]
+        self.labels = dict([(axnum,None) for axnum in self.use_axes])
+        self.update_information()
+
+        self.targetfig.canvas.mpl_connect('button_press_event',self.refresh)
+        self.targetfig.canvas.mpl_connect('key_press_event',self.refresh)
+        self.targetfig.canvas.mpl_connect('draw_event',self.refresh)
+
+    def refresh(self, event):
+        try:
+            thisdrawon = self.drawon
+
+            self.drawon = False
+
+            self.update_information()
+
+            # draw the canvas
+            self.drawon = thisdrawon
+            if self.drawon:
+                self.toolfig.canvas.draw()
+        except:
+            # ALWAYS fail silently
+            # this is TERRIBLE coding practice, but I have no idea how to tell the object to disconnect
+            # when the figure is closed
+            pass
+
+    def update_information(self, **kwargs):
+        self.information = [
+            ("Baseline Range","(%g,%g)" % (self.baseline.xmin,self.baseline.xmax)),
+            ("Baseline Order","%i" % (self.baseline.order)),
+            ("Baseline Subtracted?","%s" % (self.baseline.subtracted)),
+            ("Fitter Range","(%g,%g)" % (self.specfit.xmin,self.specfit.xmax)),
+            ("Fitter Type","%s" % (self.specfit.fittype)),
+            ]
+
+        for ii in xrange(self.specfit.npeaks):
+            guesses = tuple(self.specfit.guesses[ii:ii+3])
+            if len(guesses) == 3:
+                self.information += [("Fitter guesses%i:" % ii , "p: %g c: %g w: %g" % guesses) ]
+            else:
+                break
+
+        self.show_labels(**kwargs)
+
+    def show_selected_region(self):
+        self.specfit.highlight_fitregion()
+
+    def show_label(self, axis, text, xloc=0.0, yloc=0.5, **kwargs):
+        return axis.text(xloc, yloc, text, **kwargs)
+
+    def show_value(self, axis, text, xloc=0.5, yloc=0.5, **kwargs):
+        return axis.text(xloc, yloc, text, **kwargs)
+
+    def show_labels(self, **kwargs):
+        for axnum,(label,text) in zip(self.use_axes, self.information):
+            if self.labels[axnum] is not None and len(self.labels[axnum]) == 2:
+                labelobject,textobject = self.labels[axnum]
+                labelobject.set_label(label)
+                textobject.set_text(text)
+            else:
+                self.labels[axnum] = (self.show_label(self.axes[axnum],label),
+                        self.show_value(self.axes[axnum],text))
+
+    def update_info_texts(self):
+        for newtext,textobject in zip(self.information.values(), self.info_texts):
+            textobject.set_text(newtext)
+
+
+#import parinfo
+#
+#class ParameterButton(parinfo.Parinfo):
+#    """
+#    A class to manipulate individual parameter values
+#    """
+#    def __init__(self, 
