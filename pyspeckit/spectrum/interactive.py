@@ -329,7 +329,10 @@ class Interactive(object):
         self._update_xminmax()
 
     def _update_xminmax(self):
-        whinclude = numpy.where(self.includemask)
-        self.xmin = whinclude[0][0]
-        self.xmax = whinclude[0][-1]
+        try:
+            whinclude = numpy.where(self.includemask)
+            self.xmin = whinclude[0][0]
+            self.xmax = whinclude[0][-1]
+        except IndexError:
+            pass
 

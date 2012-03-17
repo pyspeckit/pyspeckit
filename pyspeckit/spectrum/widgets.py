@@ -246,17 +246,18 @@ class FitterTools(Widget):
         #bax = self.toolfig.add_axes([0.6, 0.05, 0.15, 0.075])
         #self.buttonrefresh = Button(bax, 'Refresh')
 
-        fax = self.toolfig.add_axes([0.1, 0.05, 0.15, 0.075])
-        self.buttonfit = Button(fax, 'Fit')
-        
-        resetax = self.toolfig.add_axes([0.7, 0.05, 0.15, 0.075])
-        self.buttonreset = Button(resetax, 'Reset')
+        # buttons ruin everything.
+        # fax = self.toolfig.add_axes([0.1, 0.05, 0.15, 0.075])
+        # self.buttonfit = Button(fax, 'Fit')
+        # 
+        # resetax = self.toolfig.add_axes([0.7, 0.05, 0.15, 0.075])
+        # self.buttonreset = Button(resetax, 'Reset')
 
-        resetblax = self.toolfig.add_axes([0.3, 0.05, 0.15, 0.075])
-        self.buttonresetbl = Button(resetblax, 'Reset BL')
+        # resetblax = self.toolfig.add_axes([0.3, 0.05, 0.15, 0.075])
+        # self.buttonresetbl = Button(resetblax, 'Reset BL')
 
-        resetfitax = self.toolfig.add_axes([0.5, 0.05, 0.15, 0.075])
-        self.buttonresetfit = Button(resetfitax, 'Reset fit')
+        # resetfitax = self.toolfig.add_axes([0.5, 0.05, 0.15, 0.075])
+        # self.buttonresetfit = Button(resetfitax, 'Reset fit')
 
         def refresh(event):
             thisdrawon = self.drawon
@@ -278,17 +279,17 @@ class FitterTools(Widget):
             self.specfit.guesses = []
             self.specfit.npeaks = 0
             self.specfit.includemask[:] = True
-            self.refresh()
+            self.refresh(event)
 
         def reset_baseline(event):
             self.baseline.unsubtract()
-            self.refresh()
+            self.refresh(event)
 
         def reset(event):
             reset_baseline(event)
             reset_fit(event)
             self.plotter()
-            self.refresh()
+            self.refresh(event)
 
         # during refresh there can be a temporary invalid state
         # depending on the order of the refresh so we turn off
@@ -298,10 +299,11 @@ class FitterTools(Widget):
         #self.buttonrefresh.on_clicked(refresh)
         #self.toolfig.subplotpars.validate = validate
 
-        self.buttonfit.on_clicked(fit)
-        self.buttonresetfit.on_clicked(reset_fit)
-        self.buttonresetbl.on_clicked(reset_baseline)
-        self.buttonreset.on_clicked(reset)
+        # these break everything.
+        # self.buttonfit.on_clicked(fit)
+        # self.buttonresetfit.on_clicked(reset_fit)
+        # self.buttonresetbl.on_clicked(reset_baseline)
+        # self.buttonreset.on_clicked(reset)
 
         self.axes = [self.toolfig.add_subplot(nsubplots,1,spnum, frame_on=False, navigate=False, xticks=[], yticks=[]) 
                 for spnum in xrange(1,nsubplots+1)]
