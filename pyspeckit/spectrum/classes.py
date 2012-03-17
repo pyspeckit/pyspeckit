@@ -752,8 +752,8 @@ class ObsBlock(Spectra):
         self.nobs = len(self.speclist)
 
         # Create a 2-dimensional array of the data
-        self.data = np.array([sp.data for sp in self.speclist]).swapaxes(0,1)
-        self.error = np.array([sp.error for sp in self.speclist]).swapaxes(0,1)
+        self.data = np.array([sp.data for sp in self.speclist]).swapaxes(0,1).squeeze()
+        self.error = np.array([sp.error for sp in self.speclist]).swapaxes(0,1).squeeze()
 
         self.plotter = plotters.Plotter(self)
         self._register_fitters()

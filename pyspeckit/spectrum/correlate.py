@@ -15,7 +15,7 @@ def correlate(spectrum1, spectrum2, range=None, units=None):
         spectrum1 = spectrum1.slice(*range, units=units)
         spectrum2 = spectrum2.slice(*range, units=units)
 
-    if not all(spectrum1.xarr == spectrum2.xarr):
+    if not (spectrum1.xarr.shape == spectrum2.xarr.shape) or not all(spectrum1.xarr == spectrum2.xarr):
         spectrum2 = arithmetic.interp(spectrum2, spectrum1)
 
     data1 = spectrum1.data
