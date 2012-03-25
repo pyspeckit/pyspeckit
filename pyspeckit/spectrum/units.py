@@ -193,6 +193,8 @@ speedoflight_ms  = np.float64(2.99792458e8) # m/s
 speedoflight_kms = np.float64(2.99792458e5) # km/s
 speedoflight_cms = np.float64(2.99792458e10) # cm/s
 
+astronomical_unit_cm = np.float64(1.49597870e13)
+
 class SpectroscopicAxis(np.ndarray):
     """
     A Spectroscopic Axis object to store the current units of the spectrum and

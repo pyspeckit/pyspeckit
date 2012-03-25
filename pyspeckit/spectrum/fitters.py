@@ -281,7 +281,7 @@ class Specfit(interactive.Interactive):
                 else:
                     self.errspec = self.Spectrum.error + 1
             else:
-                self.errspec = self.Spectrum.error
+                self.errspec = self.Spectrum.error.copy()
         else: self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
 
     def setfitspec(self):
