@@ -941,7 +941,7 @@ ge=Registry.interactive_help_message)
                 parlimitdict[param.parname] = (lower,upper)
 
         if hasattr(self,'fitter'):
-            self.SliderWidget = widgets.FitterTool(self, self.Spectrum.plotter.figure, npars=self.fitter.npars, parlimitdict=parlimitdict, **kwargs)
+            self.SliderWidget = widgets.FitterSliders(self, self.Spectrum.plotter.figure, npars=self.fitter.npars, parlimitdict=parlimitdict, **kwargs)
         else:
             print "Must have a fitter instantiated before creating sliders"
 
