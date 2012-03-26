@@ -53,14 +53,11 @@ class Spectrum(Spectrum1D):
 
     Example usage:
 
-    # automatically load a "compliant" (linear X-axis) FITS file
+    >>> # automatically load a "compliant" (linear X-axis) FITS file
+    >>> spec = pyspeckit.Spectrum('test.fits')
 
-    spec = pyspeckit.Spectrum('test.fits')
-
-    # plot the spectrum
-
-    spec.plotter()
-
+    >>> # plot the spectrum
+    >>> spec.plotter()
 
     """
 
@@ -79,10 +76,37 @@ class Spectrum(Spectrum1D):
         Must either pass in a filename or ALL of xarr, data, and header, plus
         optionally error.
 
+        kwargs are passed to the file reader
+
         Parameters
         ----------
-
-        kwargs are passed to the reader, not the plotter
+        filename : string or pyfits.HDU
+            The file to read the spectrum from.  
+        filetype : string
+            Specify the file type (only needed if it cannot be automatically
+            determined from the filename)
+        xarr : `units.SpectroscopicAxis` or `np.ndarray`
+            The X-axis of the data.  If it is an np.ndarray, you must pass
+            `xarrkwargs` or a valid header if you want to use any of the unit
+            functionality.
+        data : `np.ndarray`
+            The data array (must have same length as xarr)
+        error : `np.ndarray` 
+            The error array (must have same length as the data and xarr arrays)
+        header : `pyfits.Header` or dict
+            The header from which to read unit information.  Needs to be a
+            `pyfits.Header` instance or another dictionary-like object with the
+            appropriate information
+        maskdata : boolean
+            turn the array into a masked array with all nan and inf values masked
+        doplot : boolean
+            Plot the spectrum after loading it?
+        plotkwargs : dict
+            keyword arguments to pass to the plotter
+        xarrkwargs : dict
+            keyword arguments to pass to the SpectroscopicAxis initialization
+            (can be used in place of a header)
+    
         """
 
         if filename:
