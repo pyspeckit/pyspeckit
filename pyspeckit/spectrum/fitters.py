@@ -293,13 +293,13 @@ class Specfit(interactive.Interactive):
         """
         if (self.Spectrum.error is not None) and not usestd:
             if (self.Spectrum.error == 0).all():
-                if type(self.Spectrum.error) is np.ma.masked_array:
+                if self.residuals is not None and useresiduals: 
+                    self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
+                elif type(self.Spectrum.error) is np.ma.masked_array:
                     # force errspec to be a non-masked array of ones
                     self.errspec = self.Spectrum.error.data + 1
                 else:
                     self.errspec = self.Spectrum.error + 1
-            elif self.residuals is not None and useresiduals: 
-                self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
             else:
                 # this is the default behavior if spectrum.error is set
                 self.errspec = self.Spectrum.error
