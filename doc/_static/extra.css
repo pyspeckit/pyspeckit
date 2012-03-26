@@ -1,6 +1,7 @@
 /* Extra formatting stuff that is not included in the default themes */
-@import "default.css";
 @import "scipy.css";
+@import "astropy.css";
+@import "agogo.css";
 @import "agogo.css";
 
 div.bodywrapper {
@@ -13,4 +14,9 @@ div.bodywrapper {
 
 .field-name th {
     white-space: nowrap;
+    color: rgb(0,102,204);
+}
+
+a:visited {
+  color: #4a8f43;
 }

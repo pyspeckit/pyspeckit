@@ -104,14 +104,14 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = 'agogo'
-#html_style = 'extra.css'
+html_style = 'extra.css'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #html_theme_options = {}
 html_theme_options = dict(
-    pagewidth = '960px',
+    pagewidth = '1000px',
     documentwidth = '760px',
     sidebarwidth = '200px',
 
@@ -145,7 +145,7 @@ html_favicon = "../html/images/logo.ico"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static','_static/extra.css','_static/scipy.css']
+html_static_path = ['_static','_static/extra.css','_static/scipy.css','_static/astropy.css']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

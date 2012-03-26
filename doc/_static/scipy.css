@@ -72,7 +72,7 @@ div.body h4 {
  * Scipy colors
  */
 
-body { 
+/* body { 
   background-color: rgb(100,135,220);
 }
 
@@ -80,12 +80,12 @@ div.document {
   background-color: rgb(230,230,230);
 }
 
-div.sphinxsidebar {
-  background-color: rgb(230,230,230);
-}
-
 div.related {
   background-color: rgb(100,135,220);
+}
+
+div.sphinxsidebar {
+  background-color: rgb(230,230,230);
 }
 
 div.sphinxsidebar h3 {
@@ -110,7 +110,7 @@ div.sphinxsidebar a {
 
 div.sphinxsidebar ul.want-points {
   list-style: disc;
-}
+} */
 
 .field-list th {
   color: rgb(0,102,204);

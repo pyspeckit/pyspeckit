@@ -10,7 +10,7 @@
     
     <title>Cubes &mdash; pyspeckit 0.1.7 documentation</title>
     
-    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -161,6 +161,11 @@ numpy.nan</dd>
 <dd>if &gt;0, try to use multiprocessing via parallel_map to run on multiple cores</dd>
 </dl>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="pyspeckit.cubes.SpectralCube.Cube.flux">
+<tt class="descname">flux</tt><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.flux" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.get_apspec">
@@ -460,7 +465,7 @@ can be specified. For example,</p>
 <dt id="pyspeckit.cubes.SpectralCube.Cube.smooth">
 <tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.smooth" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
-<dt>Smooth the spectrum by factor &#8220;smooth&#8221;.  </dt>
+<dt>Smooth the spectrum by factor <cite>smooth</cite>.  </dt>
 <dd>sm.smooth doc:</dd>
 </dl>
 <p>Smooth and downsample the data array</p>
@@ -621,7 +626,7 @@ to None to prevent overwriting a previous plot.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.mapplot.MapPlotter.makeplane">
-<tt class="descname">makeplane</tt><big>(</big><em>estimator=&lt;function mean at 0x109a96b18&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.mapplot.MapPlotter.makeplane" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">makeplane</tt><big>(</big><em>estimator=&lt;function mean at 0x105db3c80&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.mapplot.MapPlotter.makeplane" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt><em>estimator</em> [ function | &#8216;max&#8217; | &#8216;int&#8217; | FITS filename | integer ]</dt>
 <dd>A non-pythonic, non-duck-typed variable.  If it&#8217;s a function, apply that function
@@ -786,7 +791,7 @@ average=sum and dvmul=True to get an integrated value)</p>
 
 <dl class="function">
 <dt id="pyspeckit.cubes.cubes.subimage_integ">
-<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">subimage_integ</tt><big>(</big><em>cube</em>, <em>xcen</em>, <em>xwidth</em>, <em>ycen</em>, <em>ywidth</em>, <em>vrange</em>, <em>header=None</em>, <em>average=&lt;function mean at 0x109a96b18&gt;</em>, <em>dvmult=False</em>, <em>return_HDU=False</em>, <em>units='pixels'</em>, <em>zunits=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.subimage_integ" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">subimage_integ</tt><big>(</big><em>cube</em>, <em>xcen</em>, <em>xwidth</em>, <em>ycen</em>, <em>ywidth</em>, <em>vrange</em>, <em>header=None</em>, <em>average=&lt;function mean at 0x105db3c80&gt;</em>, <em>dvmult=False</em>, <em>return_HDU=False</em>, <em>units='pixels'</em>, <em>zunits=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.subimage_integ" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a sub-image from a data cube integrated over the specified velocity range</p>
 <p>All units assumed to be pixel units</p>
 <p>cube has dimensions (velocity, y, x)</p>
