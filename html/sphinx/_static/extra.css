@@ -1,0 +1,22 @@
+/* Extra formatting stuff that is not included in the default themes */
+@import "scipy.css";
+@import "astropy.css";
+@import "agogo.css";
+@import "agogo.css";
+
+div.bodywrapper {
+    margin: 0 0 0 0;
+}
+
+.field-list th {
+    white-space: nowrap;
+}
+
+.field-name th {
+    white-space: nowrap;
+    color: rgb(0,102,204);
+}
+
+a:visited {
+  color: #4a8f43;
+}
