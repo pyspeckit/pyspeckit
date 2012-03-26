@@ -1,150 +1,150 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-eing globals
-
-
-
-
-
-
-
-
-
-
-
-
-h of the
-ts of the
-
-width -
- at the
-
-connect
- before
-
-
-outine.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- + 1 input
-it.  They
-function
- take N *
-ments.
-
-
-?
-
-
-
-
-round), or
-
-
-
-nt.
-
-
-
-
-
-
-
-
-
-
-
-
-
- name)
-
-
-
-
-
-keys.keys()))
-
-
-
-
-
-
-
-
-key,name in self.fitkeys.items()]) +
-line
-
-
-
-
-='multi'),6,multisingle='multi',key='a')
-ltisingle='multi'),6,multisingle='multi')
-s.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
-3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
-_fitter,3,multisingle='single')
-gle='multi'),3,multisingle='multi',key='g')
-gle='single'),3,multisingle='single')
-ulti'),4,multisingle='multi',key='v')
-ingle'),4,multisingle='single')
-isingle='multi'),3,multisingle='multi',key='L')
-isingle='single'),3,multisingle='single')
-multisingle='multi')
-ngle='multi')
-
-
-
-
-
-ge=Registry.interactive_help_message)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import matplotlib
+import matplotlib.cbook as mpcb
+import matplotlib.pyplot as pyplot
+import numpy as np
+from ..config import mycfg
+from ..config import ConfigDescriptor as cfgdec
+import units
+import models
+from pyspeckit.specwarnings import warn
+import interactive
+import inspect
+import copy
+
+class Registry(object):
+    """
+    This class is a simple wrapper to prevent fitter properties from being globals
+    """
+
+    def __init__(self):
+        self.npars = {}
+        self.multifitters = {}
+        self.singlefitters = {}
+        self.fitkeys = {}
+        self.associatedkeys = {}
+
+        self._interactive_help_message_root = """
+
+'?' will print this help message again. The / / keys are mnemonics.
+1. Left-click or hit 'p' (/p/ick) with the cursor over the plot at both of the
+two desired X-values to select a fitting range.  You can e/x/clude parts of the
+spectrum by hitting 'x' at two positions.  
+2. Then /m/iddle-click or hit 'm' twice to select (/m/ark) a peak and width -
+the first mark should be on the peak of the line, the second should be at the
+approximate half-max point on the curve.  
+3. When you're done, right-click or hit 'd' to perform the fit and disconnect
+the mouse and keyboard (/d/isconnect because you're /d/one).  Any time before
+you're /d/one, you can select a different fitter (see below).
+
+You can select different fitters to use with the interactive fitting routine.
+The default is gaussian ('g'), all options are listed below:
+        """
+        self._make_interactive_help_message()
+
+    def add_fitter(self, name, function, npars, multisingle='single',
+        override=False, key=None):
+        ''' 
+        Register a fitter function.
+
+        Required Arguments:
+
+            *name*: [ string ]
+                The fit function name. 
+
+            *function*: [ function ]
+                The fitter function.  Single-fitters should take npars + 1 input
+                parameters, where the +1 is for a 0th order baseline fit.  They
+                should accept an X-axis and data and standard fitting-function
+                inputs (see, e.g., gaussfitter).  Multi-fitters should take N *
+                npars, but should also operate on X-axis and data arguments.
+
+            *npars*: [ int ]
+                How many parameters does the function being fit accept?
+
+        Optional Keyword Arguments:
+
+            *multisingle*: [ 'multi' | 'single' ] 
+                Is the function a single-function fitter (with a background), or
+                does it allow N copies of the fitting function?
+
+            *override*: [ True | False ]
+                Whether to override any existing type if already present.
+
+            *key*: [ char ]
+                Key to select the fitter in interactive mode
+        '''
+
+
+        if multisingle == 'single':
+            if not name in self.singlefitters or override:
+                self.singlefitters[name] = function
+        elif multisingle == 'multi':
+            if not name in self.multifitters or override:
+                self.multifitters[name] = function
+        elif name in self.singlefitters or name in self.multifitters:
+            raise Exception("Fitting function %s is already defined" % name)
+
+        if key is not None:
+            self.fitkeys[key] = name
+            self._make_interactive_help_message()
+        self.npars[name] = npars
+        self.associated_keys = dict(zip(self.fitkeys.values(),self.fitkeys.keys()))
+
+    def _make_interactive_help_message(self):
+        """
+        Generate the interactive help message from the fitkeys
+        """
+        self.interactive_help_message = (
+                self._interactive_help_message_root + 
+                "\n" +
+                "\n".join(["'%s' - select fitter %s" % (key,name) for key,name in self.fitkeys.items()]) +
+                "\n" # trailing \n so that users' input is on a fresh line
+                )
+
+
+default_Registry = Registry()
+default_Registry.add_fitter('ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
+default_Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(multisingle='multi'),6,multisingle='multi')
+# not implemented default_Registry.add_fitter(Registry,'ammonia',models.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
+default_Registry.add_fitter('formaldehyde',models.formaldehyde_fitter,3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
+default_Registry.add_fitter('formaldehyde',models.formaldehyde_vheight_fitter,3,multisingle='single')
+default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
+default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
+default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
+default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
+default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(multisingle='multi'),3,multisingle='multi',key='L')
+default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(multisingle='single'),3,multisingle='single')
+default_Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5,multisingle='multi')
+default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
+
+
+class Specfit(interactive.Interactive):
+
+    def __init__(self, Spectrum, Registry=None):
+        super(Specfit, self).__init__(Spectrum, interactive_help_message=Registry.interactive_help_message)
+        self.model = None
+        self.parinfo = None
+        self.modelpars = None
+        self.modelerrs = None
+        self.modelplot = []
+        self.modelcomponents = None
+        self._plotted_components = []
+        self.npeaks = 0
+        #self.nclicks_b1 = 0
+        #self.nclicks_b2 = 0
+        #self.xmin = 0
+        #self.xmax = Spectrum.data.shape[0]
+        self.button2action = self.guesspeakwidth
+        self.guesses = []
+        self.click = 0
+        self.fitkwargs = {}
+        self.auto = False
+        self.fitleg=None
+        self.residuals=None
+        self.setfitspec()
+        self.fittype = 'gaussian'
+        self.measurements = None
+        self.vheight=False # vheight must be a boolean, can't be none
         self._component_kwargs = {}
         self.Registry = Registry
         self.autoannotate = mycfg['autoannotate']
@@ -944,4 +944,3 @@ ge=Registry.interactive_help_message)
             self.SliderWidget = widgets.FitterSliders(self, self.Spectrum.plotter.figure, npars=self.fitter.npars, parlimitdict=parlimitdict, **kwargs)
         else:
             print "Must have a fitter instantiated before creating sliders"
-
