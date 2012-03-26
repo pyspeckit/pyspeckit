@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Units &mdash; pyspeckit 0.1 documentation</title>
+    <title>Units &mdash; pyspeckit 0.1.7 documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.1.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1.7 documentation" href="index.html" />
     <link rel="up" title="Features" href="features.html" />
     <link rel="next" title="Registration" href="registration.html" />
     <link rel="prev" title="Measurements" href="measurements.html" />
@@ -40,6 +40,7 @@
 
 
     </script>
+    <link rel="stylesheet" type="text/css" href="_static/extra.css" />
   </head>
   <body>
     <div class="header-wrapper">
@@ -47,7 +48,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit 0.1 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1.7 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -68,8 +69,6 @@
             
   <div class="section" id="module-pyspeckit.spectrum.units">
 <span id="units"></span><h1>Units<a class="headerlink" href="#module-pyspeckit.spectrum.units" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="units-and-spectroscopicaxes">
-<h2>Units and SpectroscopicAxes<a class="headerlink" href="#units-and-spectroscopicaxes" title="Permalink to this headline">¶</a></h2>
 <p>Unit parsing and conversion tool.  
 The SpectroscopicAxis class is meant to deal with unit conversion internally</p>
 <dl class="docutils">
@@ -77,7 +76,6 @@ The SpectroscopicAxis class is meant to deal with unit conversion internally</p>
 <dd>that should be included?
 What about for other fields (e.g., wavenumber?)</dd>
 </dl>
-</div>
 <dl class="class">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis">
 <em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.units.</tt><tt class="descname">SpectroscopicAxis</tt><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis" title="Permalink to this definition">¶</a></dt>
@@ -89,9 +87,10 @@ possible.</p>
 <p>WARNING: If you index a SpectroscopicAxis, the resulting array will be
 a SpectroscopicAxis without a dxarr attribute!  This can result in major problems;
 a workaround is being sought but subclassing numpy arrays is harder than I thought</p>
+<p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.as_unit">
-<tt class="descname">as_unit</tt><big>(</big><em>unit</em>, <em>frame=None</em>, <em>quiet=True</em>, <em>center_frequency=None</em>, <em>center_frequency_units=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.as_unit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">as_unit</tt><big>(</big><em>unit</em>, <em>frame=None</em>, <em>quiet=True</em>, <em>center_frequency=None</em>, <em>center_frequency_units=None</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.as_unit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert the spectrum to the specified units.  This is a wrapper function
 to convert between frequency/velocity/wavelength and simply change the 
 units of the X axis.  Frame conversion is... not necessarily implemented.</p>
@@ -216,6 +215,7 @@ xarr.x_to_coord(5.1,&#8217;GHz&#8217;) == 6000 # km/s</p>
 <p>Counterpart to Spectra: takes a list of SpectroscopicAxis&#8217;s and
 concatenates them while checking for consistency and maintaining
 header parameters</p>
+<p class="rubric">Methods</p>
 </dd></dl>
 
 </div>
@@ -235,10 +235,7 @@ header parameters</p>
 <li class="toctree-l2"><a class="reference internal" href="baseline.html">Baseline Fitting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fitting.html">Model Fitting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="measurements.html">Measurements</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">Units</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#units-and-spectroscopicaxes">Units and SpectroscopicAxes</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="registration.html">Registration</a></li>
 </ul>
 </li>
@@ -270,7 +267,7 @@ header parameters</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Mar 05, 2012.
+      Last updated on Mar 26, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

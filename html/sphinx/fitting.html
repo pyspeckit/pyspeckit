@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Model Fitting &mdash; pyspeckit 0.1 documentation</title>
+    <title>Model Fitting &mdash; pyspeckit 0.1.7 documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.1.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1.7 documentation" href="index.html" />
     <link rel="up" title="Features" href="features.html" />
     <link rel="next" title="Measurements" href="measurements.html" />
     <link rel="prev" title="Baseline Fitting" href="baseline.html" />
@@ -40,6 +40,7 @@
 
 
     </script>
+    <link rel="stylesheet" type="text/css" href="_static/extra.css" />
   </head>
   <body>
     <div class="header-wrapper">
@@ -47,7 +48,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit 0.1 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1.7 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -72,6 +73,7 @@
 <dt id="pyspeckit.spectrum.fitters.Specfit">
 <em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.fitters.</tt><tt class="descname">Specfit</tt><big>(</big><em>Spectrum</em>, <em>Registry=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.interactive.Interactive</span></tt></p>
+<p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.EQW">
 <tt class="descname">EQW</tt><big>(</big><em>plot=False</em>, <em>plotcolor='g'</em>, <em>annotate=False</em>, <em>alpha=0.5</em>, <em>loc='lower left'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.EQW" title="Permalink to this definition">¶</a></dt>
@@ -80,8 +82,22 @@ minus the spectrum) over the selected range</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.add_sliders">
+<tt class="descname">add_sliders</tt><big>(</big><em>parlimitdict=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.add_sliders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a Sliders window in a new figure appropriately titled</p>
+<dl class="docutils">
+<dt><em>parlimitdict</em> [ dict ]</dt>
+<dd>Each parameter needs to have displayed limits; these are set in
+min-max pairs.  If this is left empty, the widget will try to guess
+at reasonable limits, but the guessing is not very sophisticated
+yet.</dd>
+</dl>
+<p><a class="reference external" href="http://stackoverflow.com/questions/4740988/add-new-navigate-modes-in-matplotlib">http://stackoverflow.com/questions/4740988/add-new-navigate-modes-in-matplotlib</a></p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.annotate">
-<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.1</em>, <em>handlelength=0.1</em>, <em>handletextpad=0.1</em>, <em>frameon=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.10000000000000001</em>, <em>handlelength=0.10000000000000001</em>, <em>handletextpad=0.10000000000000001</em>, <em>frameon=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a legend to the plot showing the fitted parameters</p>
 <p>clearlegend() will remove the legend</p>
 <p>kwargs passed to legend</p>
@@ -152,16 +168,22 @@ This should only be done when Spectrum.smooth is called</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.fitters.Specfit.firstclick_selection">
-<tt class="descname">firstclick_selection</tt><big>(</big><em>include_all=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.firstclick_selection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the include/exclude mask</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.fullsizemodel">
 <tt class="descname">fullsizemodel</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.fullsizemodel" title="Permalink to this definition">¶</a></dt>
 <dd><p>If the gaussian was fit to a sub-region of the spectrum,
 expand it (with zeros) to fill the spectrum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.get_full_model">
+<tt class="descname">get_full_model</tt><big>(</big><em>mpp=None</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_full_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>compute the model over the full axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.get_model">
+<tt class="descname">get_model</tt><big>(</big><em>xarr</em>, <em>mpp=None</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the model over a given axis</p>
 </dd></dl>
 
 <dl class="method">
@@ -200,7 +222,7 @@ will be returned as well</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.multifit">
-<tt class="descname">multifit</tt><big>(</big><em>fittype=None</em>, <em>renormalize='auto'</em>, <em>annotate=None</em>, <em>show_components=None</em>, <em>verbose=True</em>, <em>color=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.multifit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">multifit</tt><big>(</big><em>fittype=None</em>, <em>renormalize='auto'</em>, <em>annotate=None</em>, <em>show_components=None</em>, <em>verbose=True</em>, <em>color=None</em>, <em>use_window_limits=None</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.multifit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit multiple gaussians (or other profiles)</p>
 <dl class="docutils">
 <dt>fittype - What function will be fit?  fittype must have been Registryed in the</dt>
@@ -212,7 +234,7 @@ will be returned as well</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.peakbgfit">
-<tt class="descname">peakbgfit</tt><big>(</big><em>usemoments=True</em>, <em>annotate=None</em>, <em>vheight=True</em>, <em>height=0</em>, <em>negamp=None</em>, <em>fittype=None</em>, <em>renormalize='auto'</em>, <em>color=None</em>, <em>show_components=None</em>, <em>debug=False</em>, <em>nsigcut_moments=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.peakbgfit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">peakbgfit</tt><big>(</big><em>usemoments=True</em>, <em>annotate=None</em>, <em>vheight=True</em>, <em>height=0</em>, <em>negamp=None</em>, <em>fittype=None</em>, <em>renormalize='auto'</em>, <em>color=None</em>, <em>use_lmfit=False</em>, <em>show_components=None</em>, <em>debug=False</em>, <em>nsigcut_moments=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.peakbgfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit a single peak (plus a background)</p>
 <dl class="docutils">
 <dt>usemoments - The initial guess will be set by the fitter&#8217;s &#8216;moments&#8217; function</dt>
@@ -235,7 +257,7 @@ negamp - If True, assumes amplitude is negative.  If False, assumes positive.  I
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.plot_fit">
-<tt class="descname">plot_fit</tt><big>(</big><em>annotate=None</em>, <em>show_components=None</em>, <em>composite_fit_color='red'</em>, <em>component_fit_color='blue'</em>, <em>lw=0.5</em>, <em>composite_lw=0.75</em>, <em>component_lw=0.75</em>, <em>component_kwargs={}</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_fit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_fit</tt><big>(</big><em>annotate=None</em>, <em>show_components=None</em>, <em>composite_fit_color='red'</em>, <em>component_fit_color='blue'</em>, <em>lw=0.5</em>, <em>composite_lw=0.75</em>, <em>component_lw=0.75</em>, <em>component_kwargs={}</em>, <em>use_window_limits=None</em>, <em>show_hyperfine_components=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the fit.  Must have fitted something before calling this!</p>
 <p>It will be automatically called whenever a spectrum is fit (assuming an
 axis for plotting exists)</p>
@@ -299,8 +321,31 @@ does it allow N copies of the fitting function?</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.selectregion">
-<tt class="descname">selectregion</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em>, <em>xtype='wcs'</em>, <em>highlight=False</em>, <em>fit_plotted_area=True</em>, <em>reset=False</em>, <em>verbose=False</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">selectregion</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em>, <em>xtype='wcs'</em>, <em>highlight=False</em>, <em>fit_plotted_area=True</em>, <em>reset=False</em>, <em>verbose=False</em>, <em>debug=False</em>, <em>use_window_limits=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pick a fitting region in either WCS units or pixel units</p>
+<dl class="docutils">
+<dt><em>xmin / xmax</em> [ float ]</dt>
+<dd>The min/max X values to use in X-axis units (or pixel units if xtype is set).
+TAKES PRECEDENCE ALL OTHER BOOLEAN OPTIONS</dd>
+<dt><em>xtype</em> [ string ]</dt>
+<dd>A string specifying the xtype that xmin/xmax are specified in.  It can be either
+&#8216;wcs&#8217; or any valid xtype from <a class="reference internal" href="units.html#module-pyspeckit.spectrum.units" title="pyspeckit.spectrum.units"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.units</span></tt></a></dd>
+<dt><em>reset</em> [ bool ]</dt>
+<dd>Reset the selected region to the full spectrum?  Only takes effect
+if xmin and xmax are not (both) specified.   
+TAKES PRECEDENCE ALL SUBSEQUENT BOOLEAN OPTIONS</dd>
+</dl>
+<p>Now things get a little complicated...
+<em>fit_plotted_area</em> [ bool ]</p>
+<blockquote>
+<div>Use the plot limits <em>as specified in :class:`pyspeckit.spectrum.plotters`</em>?
+Note that this is not necessarily the same as the window plot limits!</div></blockquote>
+<dl class="docutils">
+<dt><em>use_window_limits</em> [ bool ] </dt>
+<dd>Use the plot limits <em>as displayed</em>.  Defaults to
+<tt class="xref py py-attr docutils literal"><span class="pre">pyspeckit.spectrum.interactive.use_window_limits</span></tt>.
+Overwrites xmin,xmax set by plotter</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -393,7 +438,7 @@ It should be extended to do other things later</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Mar 05, 2012.
+      Last updated on Mar 26, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

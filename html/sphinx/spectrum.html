@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>spectrum &mdash; pyspeckit 0.1 documentation</title>
+    <title>spectrum &mdash; pyspeckit 0.1.7 documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.1.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1.7 documentation" href="index.html" />
      
     <script type="text/javascript">
 
@@ -37,6 +37,7 @@
 
 
     </script>
+    <link rel="stylesheet" type="text/css" href="_static/extra.css" />
   </head>
   <body>
     <div class="header-wrapper">
@@ -44,7 +45,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit 0.1 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1.7 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -68,7 +69,7 @@
 <dl class="class">
 <dt id="pyspeckit.spectrum.Spectrum">
 <em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.</tt><tt class="descname">Spectrum</tt><big>(</big><em>filename=None</em>, <em>filetype=None</em>, <em>xarr=None</em>, <em>data=None</em>, <em>error=None</em>, <em>header=None</em>, <em>doplot=False</em>, <em>maskdata=True</em>, <em>plotkwargs={}</em>, <em>xarrkwargs={}</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.Spectrum1D.Spectrum1D</span></tt></p>
 <p>The core class for the spectroscopic toolkit.  Contains the data and error
 arrays along with wavelength / frequency / velocity information in various
 formats.</p>
@@ -90,23 +91,102 @@ formats.</p>
 </dd>
 </dl>
 <p>Example usage:</p>
-<p># automatically load a &#8220;compliant&#8221; (linear X-axis) FITS file</p>
-<p>spec = pyspeckit.Spectrum(&#8216;test.fits&#8217;)</p>
-<p># plot the spectrum</p>
-<p>spec.plotter()</p>
-<p>__init__
-Initialize the Spectrum.  Accepts files in the following formats:</p>
-<blockquote>
-<div><ul class="simple">
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># automatically load a &quot;compliant&quot; (linear X-axis) FITS file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spec</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;test.fits&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># plot the spectrum</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spec</span><span class="o">.</span><span class="n">plotter</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="rubric">Methods</p>
+<dl class="docutils">
+<dt>Initialize the Spectrum.  Accepts files in the following formats:</dt>
+<dd><ul class="first last simple">
 <li>.fits</li>
 <li>.txt</li>
 <li>.hdf5</li>
 </ul>
-</div></blockquote>
+</dd>
+</dl>
 <p>Must either pass in a filename or ALL of xarr, data, and header, plus
 optionally error.</p>
-<p>doplot - if specified, will generate a plot when created</p>
-<p>kwargs are passed to the reader, not the plotter</p>
+<p>kwargs are passed to the file reader</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>filename</strong> : string or pyfits.HDU</p>
+<blockquote>
+<div><p>The file to read the spectrum from.</p>
+</div></blockquote>
+<p><strong>filetype</strong> : string</p>
+<blockquote>
+<div><p>Specify the file type (only needed if it cannot be automatically
+determined from the filename)</p>
+</div></blockquote>
+<p><strong>xarr</strong> : <cite>units.SpectroscopicAxis</cite> or <cite>np.ndarray</cite></p>
+<blockquote>
+<div><p>The X-axis of the data.  If it is an np.ndarray, you must pass
+<cite>xarrkwargs</cite> or a valid header if you want to use any of the unit
+functionality.</p>
+</div></blockquote>
+<p><strong>data</strong> : <cite>np.ndarray</cite></p>
+<blockquote>
+<div><p>The data array (must have same length as xarr)</p>
+</div></blockquote>
+<p><strong>error</strong> : <cite>np.ndarray</cite></p>
+<blockquote>
+<div><p>The error array (must have same length as the data and xarr arrays)</p>
+</div></blockquote>
+<p><strong>header</strong> : <cite>pyfits.Header</cite> or dict</p>
+<blockquote>
+<div><p>The header from which to read unit information.  Needs to be a
+<cite>pyfits.Header</cite> instance or another dictionary-like object with the
+appropriate information</p>
+</div></blockquote>
+<p><strong>maskdata</strong> : boolean</p>
+<blockquote>
+<div><p>turn the array into a masked array with all nan and inf values masked</p>
+</div></blockquote>
+<p><strong>doplot</strong> : boolean</p>
+<blockquote>
+<div><p>Plot the spectrum after loading it?</p>
+</div></blockquote>
+<p><strong>plotkwargs</strong> : dict</p>
+<blockquote>
+<div><p>keyword arguments to pass to the plotter</p>
+</div></blockquote>
+<p><strong>xarrkwargs</strong> : dict</p>
+<blockquote class="last">
+<div><p>keyword arguments to pass to the SpectroscopicAxis initialization
+(can be used in place of a header)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;test.fits&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+<span class="go">            xarr=np.linspace(-50, 50, 100), error=np.ones(100)*0.1, </span>
+<span class="go">            xarrkwargs={&#39;unit&#39;:&#39;km/s&#39;, refX=4.829, refX_units=&#39;Hz&#39;,</span>
+<span class="go">                xtype=&#39;VLSR-RAD&#39;})</span>
+</pre></div>
+</div>
+<p class="rubric">Methods</p>
+<dl class="attribute">
+<dt id="pyspeckit.spectrum.Spectrum.boolmask">
+<tt class="descname">boolmask</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.boolmask" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mask as a boolean array (or None if the mask is None).</p>
+<p>This mask is True where the data is <em>valid</em>, and False where the data
+should be <em>masked</em>.  This is the opposite of the convention used for
+<cite>mask</cite>, but allows simple retrieval of the unmasked data points as
+<tt class="docutils literal"><span class="pre">ndd.data[ndd.boolmask]</span></tt>.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.copy">
 <tt class="descname">copy</tt><big>(</big><em>deep=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.copy" title="Permalink to this definition">¶</a></dt>
@@ -122,6 +202,12 @@ units</p>
 <p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="pyspeckit.spectrum.Spectrum.dtype">
+<tt class="descname">dtype</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.dtype" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>numpy.dtype</cite> of this object&#8217;s data.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.getlines">
 <tt class="descname">getlines</tt><big>(</big><em>linetype='radio'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.getlines" title="Permalink to this definition">¶</a></dt>
@@ -135,6 +221,44 @@ the lines)</p>
 <dt id="pyspeckit.spectrum.Spectrum.interpnans">
 <tt class="descname">interpnans</tt><big>(</big><em>spec</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.interpnans" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate over NAN values, replacing them with their neighbors...</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.Spectrum.interpolate_bspline">
+<tt class="descname">interpolate_bspline</tt><big>(</big><em>new_dispersion</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.interpolate_bspline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses B-spline interpolation to resample the internal arrays onto
+the specified dispersion axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>new_dispersion</strong> : <cite>~numpy.ndarray</cite></p>
+<blockquote class="last">
+<div><p>The new dispersion array to interpolate on to</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.Spectrum.interpolate_linear">
+<tt class="descname">interpolate_linear</tt><big>(</big><em>new_dispersion</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.interpolate_linear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses linear interpolation to resample the internal arrays onto
+the specified dispersion axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>new_dispersion</strong> : <cite>~numpy.ndarray</cite></p>
+<blockquote class="last">
+<div><p>The new dispersion array to interpolate on to</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -176,6 +300,12 @@ sigma = integral / amp / sqrt(2*pi)</p>
 <p>in the presence of noise, this gets much more complicated</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="pyspeckit.spectrum.Spectrum.ndim">
+<tt class="descname">ndim</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.ndim" title="Permalink to this definition">¶</a></dt>
+<dd><p>integer dimensions of this object&#8217;s data</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.parse_hdf5_header">
 <tt class="descname">parse_hdf5_header</tt><big>(</big><em>hdr</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.parse_hdf5_header" title="Permalink to this definition">¶</a></dt>
@@ -200,24 +330,99 @@ parameters</p>
 .txt or other atpy table type objects</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="pyspeckit.spectrum.Spectrum.plot">
+<tt class="descname">plot</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plotting utility for the spectrum.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>axes</strong> : <cite>~matplotlib.pyplot.Axes</cite>, optional</p>
+<blockquote>
+<div><p>A matplotlib Axes() object to plot the spectrum on</p>
+</div></blockquote>
+<p><strong>filename</strong> : str, optional</p>
+<blockquote>
+<div><p>A filename to save the plot to</p>
+</div></blockquote>
+<p><strong>show_error</strong> : bool, optional</p>
+<blockquote class="last">
+<div><p>Decide whether to use the error data when plotting</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Where it makes sense (i.e. not conflicting), multiple parameters
+can be specified. For example,</p>
+<p>s.plot(filename=&#8221;myPlot.pdf&#8221;, axes=ax)</p>
+<p>will both write a file to the disk and return a matplotlib.Axes() object.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="pyspeckit.spectrum.Spectrum.shape">
 <tt class="descname">shape</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the data shape</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="pyspeckit.spectrum.Spectrum.size">
+<tt class="descname">size</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>integer size of this object&#8217;s data.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.slice">
 <tt class="descname">slice</tt><big>(</big><em>start=None</em>, <em>stop=None</em>, <em>units='pixel'</em>, <em>copy=True</em>, <em>preserve_fits=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.slice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Slicing the spectrum</p>
-<dl class="docutils">
-<dt>start: numpy.float or int</dt>
-<dd>start of slice</dd>
-<dt>stop:  numpy.float or int</dt>
-<dd>stop of slice</dd>
-<dt>units: str</dt>
-<dd>allowed values are any supported physical unit, &#8216;pixel&#8217;</dd>
-</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.Spectrum.slice_dispersion">
+<tt class="descname">slice_dispersion</tt><big>(</big><em>start=None</em>, <em>end=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.slice_dispersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slices the data arrays based on values in the dispersion array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>start</strong> : any numeric type, optional</p>
+<blockquote>
+<div><p>The minimum value in the dispersion axis to slice on</p>
+</div></blockquote>
+<p><strong>end</strong> : any numeric type, optional</p>
+<blockquote class="last">
+<div><p>The maximum value in the dispersion axis to slice on</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.Spectrum.slice_pixel">
+<tt class="descname">slice_pixel</tt><big>(</big><em>start=None</em>, <em>end=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.slice_pixel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slices the data arrays on pixel index (e.g. array index)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>start</strong> : int, optional</p>
+<blockquote>
+<div><p>The starting index to slice the arrays on</p>
+</div></blockquote>
+<p><strong>end</strong> : int, optional</p>
+<blockquote class="last">
+<div><p>The ending index to slice the arrays on</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This is equivalent to slicing each array like array[start:end]</p>
 </dd></dl>
 
 <dl class="method">
@@ -241,6 +446,47 @@ parameters</p>
 <dd>see <cite>numpy.convolve</cite>.  &#8216;same&#8217; returns an array of the same length as
 &#8216;data&#8217; (assuming data is larger than the kernel)</dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.Spectrum.smooth_boxcar">
+<tt class="descname">smooth_boxcar</tt><big>(</big><em>width</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.smooth_boxcar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses boxcar smoothing to smooth the internal arrays.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>width</strong> : integer</p>
+<blockquote>
+<div><p>The boxcar width in pixels.</p>
+</div></blockquote>
+<p class="last"><strong>Reference: &lt;a href=&#8221;http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.boxcar.html&#8221; target=&#8221;_blank&#8221;&gt;scipy.signal.boxcar&lt;/a&gt;</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.Spectrum.smooth_custom">
+<tt class="descname">smooth_custom</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.smooth_custom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows for a user defined smoothing operation.</p>
+<p>This is simply a template function meant to be overwritten
+by a custom function e.g.:</p>
+<dl class="docutils">
+<dt>def so_smooth(self):</dt>
+<dd># Do something with flux, dispersion, error</dd>
+</dl>
+<p>spectrumObject.custom_smooth = so_smooth
+spectrumObject.custom_smooth()</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyspeckit.spectrum.Spectrum.spectrum1DBase">
+<tt class="descname">spectrum1DBase</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.spectrum1DBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new Spectrum1DBase object from this spectrum.</p>
+<p>This basically is the same thing but without the dispersion array,
+but we&#8217;ll see how this develops.</p>
 </dd></dl>
 
 <dl class="method">
@@ -273,6 +519,7 @@ fitting multiple lines on non-continguous axes simultaneously.  Be wary of
 plotting these though...</p>
 <p>Can be indexed like python lists.</p>
 <p>X array is forcibly sorted in increasing order</p>
+<p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectra.fiteach">
 <tt class="descname">fiteach</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectra.fiteach" title="Permalink to this definition">¶</a></dt>
@@ -303,6 +550,7 @@ inherit_fit - if specified, will grab the fitter &amp; fitter properties from Sp
 <p>Consists of multiple spectra with a shared X-axis.  Intended to hold groups
 of observations of the same object in the same setup for later averaging.</p>
 <p>ObsBlocks can be indexed like python lists.</p>
+<p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.ObsBlock.average">
 <tt class="descname">average</tt><big>(</big><em>weight=None</em>, <em>inverse_weight=False</em>, <em>error='erravgrtn'</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.average" title="Permalink to this definition">¶</a></dt>
@@ -406,7 +654,7 @@ for example.</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Mar 05, 2012.
+      Last updated on Mar 26, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

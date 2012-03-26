@@ -400,7 +400,17 @@ class Spectrum(Spectrum1D):
             sp.baseline.baselinepars = self.baseline.baselinepars
             sp.baseline.order = self.baseline.order
 
+
         return sp
+
+    # For Spectrum1D compatibility, flux = data
+    @property
+    def flux(self):
+        return self.data
+
+    @flux.setter
+    def flux(self,value):
+        self.data = value
     
     def __getitem__(self, indx):
         """
@@ -429,7 +439,7 @@ class Spectrum(Spectrum1D):
 
     def smooth(self,smooth,**kwargs):
         """
-        Smooth the spectrum by factor "smooth".  
+        Smooth the spectrum by factor `smooth`.  
         """
         smooth = round(smooth)
         self.data = sm.smooth(self.data,smooth,**kwargs)

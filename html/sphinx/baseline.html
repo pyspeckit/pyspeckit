@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Baseline Fitting &mdash; pyspeckit 0.1 documentation</title>
+    <title>Baseline Fitting &mdash; pyspeckit 0.1.7 documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.1.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit 0.1 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1.7 documentation" href="index.html" />
     <link rel="up" title="Features" href="features.html" />
     <link rel="next" title="Model Fitting" href="fitting.html" />
     <link rel="prev" title="Features" href="features.html" />
@@ -40,6 +40,7 @@
 
 
     </script>
+    <link rel="stylesheet" type="text/css" href="_static/extra.css" />
   </head>
   <body>
     <div class="header-wrapper">
@@ -47,7 +48,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit 0.1 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1.7 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -99,6 +100,7 @@ a necessary prerequisite for Equivalent Width measurement.</p>
 buggiest and least adequately tested components of pyspeckit.  Bug reports
 are welcome.  (as of 1/15/2012, a major change has probably fixed most of
 the bugs, and the code base is much simpler)</p>
+<p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.baseline.Baseline.__call__">
 <tt class="descname">__call__</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.__call__" title="Permalink to this definition">¶</a></dt>
@@ -145,9 +147,8 @@ information</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.baseline.Baseline.button3action">
-<tt class="descname">button3action</tt><big>(</big><em>event=None</em>, <em>debug=False</em>, <em>subtract=True</em>, <em>fit_original=False</em>, <em>powerlaw=False</em>, <em>baseline_fit_color='orange'</em>, <em>exclude=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.button3action" title="Permalink to this definition">¶</a></dt>
-<dd><p>Do the baseline fitting and save and plot the results.</p>
-<p>Can specify a region to exclude using velocity units or pixel units</p>
+<tt class="descname">button3action</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.button3action" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper - same as button2action, but with subtract=False</p>
 </dd></dl>
 
 <dl class="method">
@@ -179,8 +180,13 @@ to None to prevent overwriting a previous plot.</dd>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.baseline.Baseline.get_model">
+<tt class="descname">get_model</tt><big>(</big><em>xarr=None</em>, <em>baselinepars=None</em>, <em>powerlaw=False</em>, <em>fit_units='pixels'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.get_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.baseline.Baseline.plot_baseline">
-<tt class="descname">plot_baseline</tt><big>(</big><em>annotate=True</em>, <em>baseline_fit_color='orange'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.plot_baseline" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_baseline</tt><big>(</big><em>annotate=True</em>, <em>baseline_fit_color='orange'</em>, <em>use_window_limits=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.plot_baseline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overplot the baseline fit</p>
 </dd></dl>
 
@@ -191,8 +197,16 @@ to None to prevent overwriting a previous plot.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.baseline.Baseline.unsubtract">
-<tt class="descname">unsubtract</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.unsubtract" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descname">unsubtract</tt><big>(</big><em>replot=True</em>, <em>preserve_limits=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.unsubtract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the spectrum to &#8220;pristine&#8221; state (un-subtract the baseline)</p>
+<dl class="docutils">
+<dt><em>replot</em> [ True ]</dt>
+<dd>Re-plot the spectrum?  (only happens if unsubtraction proceeds,
+i.e. if there was a baseline to unsubtract)</dd>
+<dt><em>preserve_limits</em> [ True ] </dt>
+<dd>Preserve the current x,y limits</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -249,7 +263,7 @@ to None to prevent overwriting a previous plot.</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Mar 05, 2012.
+      Last updated on Mar 26, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
