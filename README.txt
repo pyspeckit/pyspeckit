@@ -38,6 +38,7 @@ Preferably at least one of:
 
 Optional:
 `scipy <http://www.scipy.org/>`_
+`lmfit-py <https://github.com/newville/lmfit-py>`_
 
 A good model for our code is `atpy`_, from which we derived inspiration for the
 "register functions" capability.

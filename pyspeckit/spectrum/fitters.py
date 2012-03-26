@@ -151,25 +151,45 @@ class Specfit(interactive.Interactive):
         #self.seterrspec()
         
     @cfgdec
-    def __call__(self, interactive=False, usemoments=True,
-            clear_all_connections=True, debug=False, multifit=False,
+    def __call__(self, interactive=False, multifit=False, usemoments=True,
+            clear_all_connections=True, debug=False, 
             guesses=None, save=True, fittype='gaussian', annotate=None,
             show_components=None, use_lmfit=False, verbose=True, clear=True,
             vheight=None, **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
 
+        Parameters
+        ----------
+        interactive : boolean
+            The plotter window will go into interactive mode.  See
+            self.interactive_help_message for details on how to use the
+            interactive fitter.
+        multifit : boolean
+            If false, only a single peak is allower, but a "height" (0'th-order
+            baseline) will be fit simultaneously with that peak.
+        fittype : str
+            The model to use.  Model must be registered in self.Registry.  
+            gaussian, lorentzian, and voigt profiles are registered by default
+        annotate : None or boolean
+        
+        Advanced Parameters
+        -------------------
+        clear_all_connections : boolean
+            Clear all of the interactive connections from a previous interactive
+            session (e.g., a baseline fitting session) before continuing?
+        usemoments : boolean
+            Use the moments of the spectrum as input guesses.  Only works
+            for gaussian and gaussian-like models.  Only works for single-fit
+            mode (not multifit)
+            DEPRECATED
+        debug : boolean
+            Print debug statements?
+        
+            
+
         guesses = [height,amplitude,center,width]
 
-        If you pass interactive=True, you can fit n gaussians using the mouse
-        and/or keyboard:
-            Left click or 'p': Set fitting region.  Two clicks sets the region,
-                which will be highlighted.
-            Middle click or 'm': Select peaks and peak widths.  The first click
-                will mark a peak X-location and height with an X, the second
-                click will mark the half-width-half-max location with a red
-                line that represents the full-width-half-max
-            Right click or 'd': Disconnect the plot and perform the fit.
         """
 
         if clear: self.clear()
@@ -271,17 +291,20 @@ class Specfit(interactive.Interactive):
         input spectrum or determine the error using the RMS of the residuals,
         depending on whether the residuals exist.
         """
-        if self.residuals is not None and useresiduals: 
-            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
-        elif self.Spectrum.error is not None and not usestd:
+        if (self.Spectrum.error is not None) and not usestd:
             if (self.Spectrum.error == 0).all():
                 if type(self.Spectrum.error) is np.ma.masked_array:
                     # force errspec to be a non-masked array of ones
                     self.errspec = self.Spectrum.error.data + 1
                 else:
                     self.errspec = self.Spectrum.error + 1
+            elif self.residuals is not None and useresiduals: 
+                self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
             else:
+                # this is the default behavior if spectrum.error is set
                 self.errspec = self.Spectrum.error
+        elif self.residuals is not None and useresiduals: 
+            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
         else: self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
 
     def setfitspec(self):
