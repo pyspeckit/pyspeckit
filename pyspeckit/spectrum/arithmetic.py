@@ -22,13 +22,16 @@ def interp(spec1,spec2):
     Interpolate spec1 onto spec2's axes
     """
 
-    if spec1.xarr.units != spec2.xarr.units:
-        spec1.xarr.convert_to_unit(spec2.xarr.units)
+    xarr1 = spec1.xarr.as_unit(spec2.xarr.units)
 
-    newdata = _interp(spec2.xarr,spec1.xarr,spec1.data)
+    newdata = _interp(spec2.xarr,xarr1,spec1.data)
 
     if spec1.error is not None:
-        newerror = _interp(spec2.xarr,spec1.xarr,spec1.error) 
+        if xarr1.cdelt() and spec2.xarr.cdelt():
+            binsizeratio = xarr1.cdelt() / spec2.xarr.cdelt()
+            # reduce errors by sqrt(binsize) if going from small to large bins
+            # else increase errors by similar factor (WARNING!  THEY WILL BE CORRELATED!)
+            newerror = _interp(spec2.xarr,xarr1,spec1.error) * binsizeratio**0.5
     else:
         newerror = None
 

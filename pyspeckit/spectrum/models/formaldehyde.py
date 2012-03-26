@@ -204,8 +204,7 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
         raise Exception
     
     # Convert X-units to frequency in GHz
-    xarr = copy.copy(xarr)
-    xarr.convert_to_unit('Hz', quiet=True)
+    xarr = xarr.as_unit('Hz', quiet=True)
 
     tau_nu_cumul = np.zeros(len(xarr))
 
@@ -289,10 +288,6 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
     else:
         raise Exception
     
-    # Convert X-units to frequency in GHz
-    xarr = copy.copy(xarr)
-    xarr.convert_to_unit('Hz', quiet=True)
-
     tau_nu_cumul = np.zeros(len(xarr))
 
     gridval1 = np.interp(density,     densityarr[0,0,0,:],  xinds[0,0,0,:])
@@ -303,8 +298,8 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
         raise ValueError("Invalid column/density")
 
     if scipyOK:
-        tau = [scipy.ndimage.map_coordinates(tg,np.array([[gridval4],[gridval3],[gridval2],[gridval1]]),order=1) for tg in taugrid]
-        tex = [scipy.ndimage.map_coordinates(tg,np.array([[gridval4],[gridval3],[gridval2],[gridval1]]),order=1) for tg in texgrid]
+        tau = [scipy.ndimage.map_coordinates(tg,np.array([[gridval4],[gridval3],[gridval2],[gridval1]]),order=1,prefilter=False) for tg in taugrid]
+        tex = [scipy.ndimage.map_coordinates(tg,np.array([[gridval4],[gridval3],[gridval2],[gridval1]]),order=1,prefilter=False) for tg in texgrid]
     else:
         raise ImportError("Couldn't import scipy, therefore cannot interpolate")
     #tau = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,taugrid[temperature_gridnumber,:,:])
@@ -316,7 +311,7 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
     if debug:
         import pdb; pdb.set_trace()
 
-    spec = np.sum([(formaldehyde_vtau(xarr,Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)
+    spec = np.sum([(formaldehyde_vtau(xarr.as_unit('Hz',quiet=True),Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)
                 * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
                 axis=0)
   

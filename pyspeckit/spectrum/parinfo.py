@@ -26,6 +26,9 @@ class ParinfoList(list):
         self._set_attributes()
         self._dict = dict([(pp['parname'],pp) for pp in self])
 
+    def __str__(self):
+        return "\n".join([repr(p) for p in self])
+
     def _getter(attributename):
         def getattribute(self):
             return [v[attributename] for v in self]
@@ -157,6 +160,24 @@ class Parinfo(dict):
             self.update(values)
         
         self.__dict__ = self
+
+    def __repr__(self):
+        reprint = "Param #%i %12s = %15g" % (self.n, self.parname, self.value)
+        if self.fixed:
+            reprint += " (fixed)"
+        else:
+            reprint += " +/- %15g " % (self.error)
+            if any(self.limited):
+                lolim = "[%g," % self.limits[0] if self.limited[0] else "(-inf,"
+                uplim = "[%g" % self.limits[1] if self.limited[1] else "inf)"
+                myrange = lolim + uplim
+                reprint += "  Range:%10s" % myrange
+        if self.tied is not '':
+            reprint += " Tied: %s" % self.tied
+        if self.shortparname is not '':
+            reprint += " Shortparname: %s" % self.shortparname
+
+        return reprint
 
     @property
     def max(self):

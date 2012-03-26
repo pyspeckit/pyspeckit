@@ -143,6 +143,8 @@ class Interactive(object):
             self.includemask[self._xclick1:self._xclick2] = mark_include
             if debug: print "Click 2: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax)
 
+        self._update_xminmax()
+
     def highlight_fitregion(self,  drawstyle='steps-mid', color='g',
             clear_highlights=True, **kwargs):
         """
@@ -323,3 +325,14 @@ class Interactive(object):
 
         if highlight:
             self.highlight_fitregion()
+        
+        self._update_xminmax()
+
+    def _update_xminmax(self):
+        try:
+            whinclude = numpy.where(self.includemask)
+            self.xmin = whinclude[0][0]
+            self.xmax = whinclude[0][-1]
+        except IndexError:
+            pass
+
