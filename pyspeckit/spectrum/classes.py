@@ -106,6 +106,16 @@ class Spectrum(Spectrum1D):
         xarrkwargs : dict
             keyword arguments to pass to the SpectroscopicAxis initialization
             (can be used in place of a header)
+
+        Examples
+        --------
+
+        >>> sp = pyspeckit.Spectrum('test.fits')
+        
+        >>> sp = pyspeckit.Spectrum(data=np.random.randn(100),
+                    xarr=np.linspace(-50, 50, 100), error=np.ones(100)*0.1, 
+                    xarrkwargs={'unit':'km/s', refX=4.829, refX_units='Hz',
+                        xtype='VLSR-RAD'})
     
         """
 

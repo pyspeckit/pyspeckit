@@ -209,7 +209,8 @@ class SpectroscopicAxis(np.ndarray):
 
     def __new__(self, xarr, unit="Hz", frame='rest', frame_offset=0.0,
             frame_offset_units='Hz', xtype=None, refX=None, redshift=None,
-            refX_units=None, velocity_convention=None, use128bits=False):
+            refX_units=None, velocity_convention=None, use128bits=False,
+            units=None):
         """
         Make a new spectroscopic axis instance
         Default units Hz
@@ -217,7 +218,7 @@ class SpectroscopicAxis(np.ndarray):
         *xarr* [ np.ndarray ]
             An array of X-axis values in whatever unit specified
 
-        *unit* [ string ]
+        *unit* or *units* [ string ]
             Any valid spectroscopic X-axis unit (km/s, Hz, angstroms, etc.)
 
         *xtype* [ string | None ]
@@ -243,12 +244,8 @@ class SpectroscopicAxis(np.ndarray):
                 * CMB?
                 * "Rest" (relative to the rest frequency of the line)
                 * Redshifted
-            Unfortunately, there don't appear to be any implementations of this
-            available in python or wrapped in python.  I'll work on incorporating
-            GBTIDL's http://www.gb.nrao.edu/GBT/DA/gbtidl/release/user/toolbox/frame_velocity.html
-            but it's not easy!
-            http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
-            BUT THIS MIGHT BE IT: https://github.com/scottransom/pyslalib
+            SOME tools for frame shifting are now incorporated into 
+            velocity_frames.py
         """
         if use128bits:
             dtype='float128'
@@ -256,6 +253,11 @@ class SpectroscopicAxis(np.ndarray):
             dtype='float64'
         subarr = np.array(xarr,dtype=dtype)
         subarr = subarr.view(self)
+
+        # allow either plural or singular unit
+        if units is not None and units in unit_type_dict and unit=='Hz':
+            unit=units
+
         if unit in unit_type_dict:
             subarr.units = unit
         else:
