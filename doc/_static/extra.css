@@ -1,0 +1,16 @@
+/* Extra formatting stuff that is not included in the default themes */
+@import "default.css";
+@import "scipy.css";
+@import "agogo.css";
+
+div.bodywrapper {
+    margin: 0 0 0 0;
+}
+
+.field-list th {
+    white-space: nowrap;
+}
+
+.field-name th {
+    white-space: nowrap;
+}
