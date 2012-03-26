@@ -171,7 +171,29 @@ class Specfit(interactive.Interactive):
         fittype : str
             The model to use.  Model must be registered in self.Registry.  
             gaussian, lorentzian, and voigt profiles are registered by default
+        guesses : list
+            A list of guesses.  Guesses must have length = n*number of parameters
+            in model.  Guesses are *required* for multifit fits (there is no
+            automated guessing for most models)
+            EXAMPLE: for single-fit gaussian
+            guesses = [height,amplitude,center,width]
+        use_lmfit : boolean
+            If lmfit-py (https://github.com/newville/lmfit-py) is installed, you
+            can use it instead of the pure-python (but slow) mpfit.
+
+
+        Plotter-related Parameters
+        --------------------------
         annotate : None or boolean
+            If None, will use the default stored in self.annotate, otherwise
+            overwrites.  Annotations will appear on the plot if a plotter
+            exists.
+        show_components : boolean
+            Show the individual components of a multi-component fit (defaults
+            to blue)
+        clear : boolean
+            Clear previous fitter plots before overplotting the fit?
+
         
         Advanced Parameters
         -------------------
@@ -185,10 +207,16 @@ class Specfit(interactive.Interactive):
             DEPRECATED
         debug : boolean
             Print debug statements?
+        save : boolean
+            Save best fits in the FITS header as keywords?  ONLY IMPLEMENTED
+            FOR GAUSSIANS
+        verbose : boolean
+            Print out extra stuff
+        vheight : None or boolean
+            if None, defaults to self.vheight, otherwise overrides
+            Determines whether a 0th order baseline will be fit along with the
+            line
         
-            
-
-        guesses = [height,amplitude,center,width]
 
         """
 
@@ -302,7 +330,7 @@ class Specfit(interactive.Interactive):
                     self.errspec = self.Spectrum.error + 1
             else:
                 # this is the default behavior if spectrum.error is set
-                self.errspec = self.Spectrum.error
+                self.errspec = self.Spectrum.error.copy()
         elif self.residuals is not None and useresiduals: 
             self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
         else: self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()

@@ -70,7 +70,7 @@ class Spectrum(Spectrum1D):
             error=None, header=None, doplot=False, maskdata=True,
             plotkwargs={}, xarrkwargs={}, **kwargs):
         """
-        __init__
+
         Initialize the Spectrum.  Accepts files in the following formats:
             - .fits
             - .txt
@@ -79,7 +79,8 @@ class Spectrum(Spectrum1D):
         Must either pass in a filename or ALL of xarr, data, and header, plus
         optionally error.
 
-        doplot - if specified, will generate a plot when created
+        Parameters
+        ----------
 
         kwargs are passed to the reader, not the plotter
         """
