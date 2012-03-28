@@ -277,13 +277,13 @@ class Cube(spectrum.Spectrum):
         if hasattr(self,'parcube'):
             sp.specfit.modelpars = self.parcube[:,y,x]
             sp.specfit.fitter.mpp = sp.specfit.modelpars # also for annotations (differs depending on which function... sigh... need to unify)
-            if hasattr(self.specfit,'parinfo'):
+            if hasattr(self.specfit,'parinfo') and self.specfit.parinfo is not None:
                 # set the parinfo values correctly for annotations
                 for pi,p,e in zip(sp.specfit.parinfo, sp.specfit.modelpars, self.errcube[:,y,x]):
                     pi['value'] = p
                     pi['error'] = e
 
-            if hasattr(self.specfit,'fitter'):
+            if hasattr(self.specfit,'fitter') and self.specfit.fitter is not None:
                 sp.specfit.npeaks = self.specfit.fitter.npeaks
                 sp.specfit.fitter.parinfo = sp.specfit.parinfo
                 sp.specfit.model = self.specfit.fitter.n_modelfunc(sp.specfit.modelpars,**self.specfit.fitter.modelfunc_kwargs)(self.xarr)
@@ -401,6 +401,10 @@ class Cube(spectrum.Spectrum):
         self.errcube = np.zeros((npars,)+self.mapplot.plane.shape) 
         if integral: self.integralmap = np.zeros((2,)+self.mapplot.plane.shape)
 
+        # newly needed as of March 27, 2012.  Don't know why.
+        if 'fittype' in fitkwargs: self.specfit.fittype = fitkwargs['fittype']
+        self.specfit.fitter = self.specfit.Registry.multifitters[self.specfit.fittype]
+
         # array to store whether pixels have fits
         self.has_fit = np.zeros(self.mapplot.plane.shape, dtype='bool')
 
@@ -411,6 +415,7 @@ class Cube(spectrum.Spectrum):
             sp = self.get_spectrum(x,y)
 
             # very annoying - cannot use min/max without checking type
+            # maybe can use np.asarray here?
             if hasattr(sp.data,'mask'):
                 sp.data[sp.data.mask] = np.nan
                 sp.error[sp.data.mask] = np.nan

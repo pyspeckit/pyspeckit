@@ -173,7 +173,7 @@ div.document {
 
 div.body {
   padding-right: 2em;
-  text-align: justify;
+  text-align: left;
 }
 
 div.document h1 {

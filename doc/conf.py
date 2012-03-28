@@ -34,7 +34,7 @@ print "rootpath: ",rootpath
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.doctest', 'sphinx.ext.autodoc',
-        'sphinx.ext.intersphinx', 'numpydoc'] #'flickr', 'numpy']
+        'sphinx.ext.intersphinx', 'numpydoc', 'flickr']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -120,6 +120,7 @@ html_theme_options = dict(
     headercolor2="#000000",
     headerlinkcolor="#FF9522",
     linkcolor="#4a8f43",
+    textalign='left',
 )
 
 
