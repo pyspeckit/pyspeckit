@@ -29,6 +29,7 @@ class SpectralModel(fitter.SimpleFitter):
 
     def __init__(self, modelfunc, npars, 
             shortvarnames=("A","\\Delta x","\\sigma"), multisingle='multi',
+            fitunits=None,
             use_lmfit=False, **kwargs):
         """
         modelfunc: the model function to be fitted.  Should take an X-axis (spectroscopic axis)
@@ -65,6 +66,7 @@ class SpectralModel(fitter.SimpleFitter):
         self.npars = npars 
         self.default_npars = npars
         self.multisingle = multisingle
+        self.fitunits = fitunits
         
         # this needs to be set once only
         self.shortvarnames = shortvarnames
@@ -282,7 +284,7 @@ class SpectralModel(fitter.SimpleFitter):
             return
 
         self.xax = xax # the 'stored' xax is just a link to the original
-        if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
+        if hasattr(xax,'convert_to_unit') and hasattr(self,'fitunits') and self.fitunits is not None:
             # some models will depend on the input units.  For these, pass in an X-axis in those units
             # (gaussian, voigt, lorentz profiles should not depend on units.  Ammonia, formaldehyde,
             # H-alpha, etc. should)

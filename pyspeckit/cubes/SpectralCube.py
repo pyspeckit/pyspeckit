@@ -30,6 +30,7 @@ from pyspeckit.parallel_map import parallel_map
 import multiprocessing
 import types
 import copy
+import itertools
 
 class Cube(spectrum.Spectrum):
 
@@ -501,8 +502,25 @@ class Cube(spectrum.Spectrum):
             # part I don't believe) any individual *fit* result can be None as
             # well (apparently the x,y pairs can also be None?)
             merged_result = [core_result for core_result in result if core_result is not None ]
+            # for some reason, every other time I run this code, merged_result
+            # ends up with a different intrinsic shape.  This is an attempt to
+            # force it to maintain a sensible shape.
+            try:
+                ((x,y), m1, m2) = merged_result[0]
+            except ValueError:
+                merged_result = itertools.chain.from_iterable(merged_result)
             for TEMP in merged_result:
-                ((x,y), modelpars, modelerrs) = TEMP
+                if TEMP is None:
+                    # this shouldn't be possible, but it appears to happen
+                    # anyway.  parallel_map is great, up to a limit that was
+                    # reached long before this level of complexity
+                    continue
+                try:
+                    ((x,y), modelpars, modelerrs) = TEMP
+                except TypeError:
+                    # implies that TEMP does not have the shape ((a,b),c,d)
+                    # as above, shouldn't be possible, but it happens...
+                    continue
                 self.parcube[:,y,x] = modelpars
                 self.errcube[:,y,x] = modelerrs
                 self.has_fit[y,x] = max(modelpars) > 0

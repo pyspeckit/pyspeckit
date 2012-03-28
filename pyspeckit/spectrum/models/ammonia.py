@@ -14,6 +14,7 @@ Module API
 """
 import numpy as np
 from pyspeckit.mpfit import mpfit
+from pyspeckit.spectrum.parinfo import ParinfoList,Parinfo
 import fitter
 import matplotlib.cbook as mpcb
 import copy
@@ -274,7 +275,10 @@ class ammonia_model(model.SpectralModel):
         self.modelfunc_kwargs = kwargs
 
     def __call__(self,*args,**kwargs):
-        if 'use_lmfit' in kwargs: kwargs.pop('use_lmfit')
+        #if 'use_lmfit' in kwargs: kwargs.pop('use_lmfit')
+        use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
+        if use_lmfit:
+            return self.lmfitter(*args,**kwargs)
         if self.multisingle == 'single':
             return self.onepeakammoniafit(*args,**kwargs)
         elif self.multisingle == 'multi':
@@ -437,8 +441,9 @@ class ammonia_model(model.SpectralModel):
             # this is OK - not a permanent change
             parnames = [p['parname'] for p in parinfo]
             # not OK self.npars = len(parinfo)/self.npeaks
+            parinfo = ParinfoList([Parinfo(p) for p in parinfo])
         else: 
-            self.parinfo = parinfo
+            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo])
             parinfo_with_fixed = None
             fixed_kwargs = {}
 
@@ -455,9 +460,9 @@ class ammonia_model(model.SpectralModel):
 
         def mpfitfun(x,y,err):
             if err is None:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=[pi['parname'] for pi in parinfo], **fitfun_kwargs)(x))]
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=parinfo.parnames, **fitfun_kwargs)(x))]
             else:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=[pi['parname'] for pi in parinfo], **fitfun_kwargs)(x))/err]
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=parinfo.parnames, **fitfun_kwargs)(x))/err]
             return f
 
         if veryverbose:
@@ -501,10 +506,12 @@ class ammonia_model(model.SpectralModel):
         else:
             self.parinfo = parinfo
         #self.parinfo = parinfo
+        self.parinfo = ParinfoList([Parinfo(p) for p in self.parinfo])
 
-        self.mpp = np.array([p['value'] for p in self.parinfo])
-        self.mpperr = np.array([p['error'] for p in self.parinfo])
-        self.model = self.n_ammonia(pars=self.mpp, parnames=[p['parname'] for p in self.parinfo], **kwargs)(xax)
+        self.mpp = self.parinfo.values
+        self.mpperr = self.parinfo.errors
+        self.mppnames = self.parinfo.names
+        self.model = self.n_ammonia(pars=self.mpp, parnames=self.mppnames, **kwargs)(xax)
         #if self.model.sum() == 0:
         #    print "DON'T FORGET TO REMOVE THIS ERROR!"
         #    raise ValueError("Model is zeros.")
