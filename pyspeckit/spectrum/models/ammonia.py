@@ -339,11 +339,14 @@ class ammonia_model(model.SpectralModel):
         else:
             parvals = pars
         if len(pars) != len(parnames):
-            ## this is needed because lmfit doesn't know to pass parnames twice?
-            #if len(pars) % len(parnames) == 0:
-            #    parnames = [p for ii in range(len(pars)/len(parnames)) for p in parnames]
-            #else:
-            raise ValueError("Wrong array lengths passed to n_ammonia!")
+            # this should only be needed when other codes are changing the number of peaks
+            # during a copy, as opposed to letting them be set by a __call__
+            # (n_modelfuncs = n_ammonia can be called directly)
+            # n_modelfuncs doesn't care how many peaks there are
+            if len(pars) % len(parnames) == 0:
+                parnames = [p for ii in range(len(pars)/len(parnames)) for p in parnames]
+            else:
+                raise ValueError("Wrong array lengths passed to n_ammonia!")
         else:
             npars = len(pars) / self.npeaks
 

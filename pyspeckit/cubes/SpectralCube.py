@@ -493,6 +493,9 @@ class Cube(spectrum.Spectrum):
             else:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs)
 
+        # try a first fit for exception-catching
+        try0 = fit_a_pixel((0,valid_pixels[0][0],valid_pixels[0][1]))
+
         if multicore > 0:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             result = parallel_map(fit_a_pixel, sequence, numcores=multicore)
