@@ -345,10 +345,11 @@ class ammonia_model(model.SpectralModel):
             # n_modelfuncs doesn't care how many peaks there are
             if len(pars) % len(parnames) == 0:
                 parnames = [p for ii in range(len(pars)/len(parnames)) for p in parnames]
+                npars = len(parvals) / self.npeaks
             else:
                 raise ValueError("Wrong array lengths passed to n_ammonia!")
         else:
-            npars = len(pars) / self.npeaks
+            npars = len(parvals) / self.npeaks
 
 
         self._components = []

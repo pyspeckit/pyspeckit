@@ -286,8 +286,9 @@ class Cube(spectrum.Spectrum):
 
             if hasattr(self.specfit,'fitter') and self.specfit.fitter is not None:
                 sp.specfit.npeaks = self.specfit.fitter.npeaks
+                sp.specfit.fitter.npeaks = len(sp.specfit.modelpars) / sp.specfit.fitter.npars
                 sp.specfit.fitter.parinfo = sp.specfit.parinfo
-                sp.specfit.model = self.specfit.fitter.n_modelfunc(sp.specfit.modelpars,**self.specfit.fitter.modelfunc_kwargs)(self.xarr)
+                sp.specfit.model = sp.specfit.fitter.n_modelfunc(sp.specfit.modelpars,**sp.specfit.fitter.modelfunc_kwargs)(sp.xarr)
 
         return sp
 
