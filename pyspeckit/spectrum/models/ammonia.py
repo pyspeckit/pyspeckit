@@ -241,7 +241,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
                     ("fortho: %f " % fortho)
                     )
 
-    if verbose:
+    if verbose or debug:
         print "tkin: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (tkin,tex,ntot,width,xoff_v,fortho,fillingfraction)
 
     if return_components:
@@ -272,7 +272,35 @@ class ammonia_model(model.SpectralModel):
         else:
             raise Exception("multisingle must be multi or single")
 
+        self.default_parinfo = None
+        self.default_parinfo, kwargs = self._make_parinfo(**kwargs)
+
+        # enforce ammonia-specific parameter limits
+        for par in self.default_parinfo:
+            if 'tex' in par.parname.lower():
+                par.limited = (True,par.limited[1])
+                par.limits = (max(par.limits[0],2.73), par.limits[1])
+            if 'tkin' in par.parname.lower():
+                par.limited = (True,par.limited[1])
+                par.limits = (max(par.limits[0],2.73), par.limits[1])
+            if 'width' in par.parname.lower():
+                par.limited = (True,par.limited[1])
+                par.limits = (max(par.limits[0],0), par.limits[1])
+            if 'fortho' in par.parname.lower():
+                par.limited = (True,True)
+                if par.limits[1] != 0:
+                    par.limits = (max(par.limits[0],0), min(par.limits[1],1))
+                else:
+                    par.limits = (max(par.limits[0],0), 1)
+            if 'ntot' in par.parname.lower():
+                par.limited = (True,par.limited[1])
+                par.limits = (max(par.limits[0],0), par.limits[1])
+
+        self.parinfo = copy.copy(self.default_parinfo)
+
+
         self.modelfunc_kwargs = kwargs
+        # lower case? self.modelfunc_kwargs.update({'parnames':self.parinfo.parnames})
 
     def __call__(self,*args,**kwargs):
         #if 'use_lmfit' in kwargs: kwargs.pop('use_lmfit')
@@ -300,12 +328,25 @@ class ammonia_model(model.SpectralModel):
             len(parnames) must = len(pars).  parnames determine how the ammonia
             function parses the arguments
         """
-        if parnames is None:
+        if hasattr(pars,'values'):
+            # important to treat as Dictionary, since lmfit params & parinfo both have .items
+            parnames,parvals = zip(*pars.items())
+            parnames = [p.lower() for p in parnames]
+            parvals = [p.value for p in parvals]
+        elif parnames is None:
+            parvals = pars
             parnames = self.parnames
+        else:
+            parvals = pars
         if len(pars) != len(parnames):
+            ## this is needed because lmfit doesn't know to pass parnames twice?
+            #if len(pars) % len(parnames) == 0:
+            #    parnames = [p for ii in range(len(pars)/len(parnames)) for p in parnames]
+            #else:
             raise ValueError("Wrong array lengths passed to n_ammonia!")
         else:
             npars = len(pars) / self.npeaks
+
 
         self._components = []
         def L(x):
@@ -313,7 +354,8 @@ class ammonia_model(model.SpectralModel):
             for jj in xrange(self.npeaks):
                 modelkwargs = kwargs.copy()
                 for ii in xrange(npars):
-                    modelkwargs.update({parnames[ii+jj*npars].strip('0123456789'):pars[ii+jj*npars]})
+                    name = parnames[ii+jj*npars].strip('0123456789').lower()
+                    modelkwargs.update({name:parvals[ii+jj*npars]})
                 v += ammonia(x,**modelkwargs)
             return v
         return L
@@ -436,7 +478,7 @@ class ammonia_model(model.SpectralModel):
             # hack: remove 'fixed' pars
             parinfo_with_fixed = parinfo
             parinfo = [p for p in parinfo_with_fixed if not p['fixed']]
-            fixed_kwargs = dict((p['parname'].strip("0123456789"),p['value']) for p in parinfo_with_fixed if p['fixed'])
+            fixed_kwargs = dict((p['parname'].strip("0123456789").lower(),p['value']) for p in parinfo_with_fixed if p['fixed'])
             # don't do this - it breaks the NEXT call because npars != len(parnames) self.parnames = [p['parname'] for p in parinfo]
             # this is OK - not a permanent change
             parnames = [p['parname'] for p in parinfo]
@@ -497,15 +539,15 @@ class ammonia_model(model.SpectralModel):
                 if mpp[txn] > mpp[tkn]: mpp[txn] = mpp[tkn]  # force Tex>Tkin to Tex=Tkin (already done in n_ammonia)
         self.mp = mp
 
-        if parinfo_with_fixed is not None:
-            # self self.parinfo preserving the 'fixed' parameters 
-            self.parinfo = parinfo_with_fixed
-            # ORDER MATTERS!
-            for p in parinfo:
-                self.parinfo[p['n']] = p
-        else:
-            self.parinfo = parinfo
-        #self.parinfo = parinfo
+        #if parinfo_with_fixed is not None:
+        #    # self self.parinfo preserving the 'fixed' parameters 
+        #    self.parinfo = parinfo_with_fixed
+        #    # ORDER MATTERS!
+        #    for p in parinfo:
+        #        self.parinfo[p['n']] = p
+        #else:
+        #    self.parinfo = parinfo
+        self.parinfo = parinfo
         self.parinfo = ParinfoList([Parinfo(p) for p in self.parinfo])
 
         self.mpp = self.parinfo.values
@@ -538,7 +580,7 @@ class ammonia_model(model.SpectralModel):
         # small hack below: don't quantize if error > value.  We want to see the values.
         label_list = []
         for pinfo in self.parinfo:
-            parname = tex_key[pinfo['parname'].strip("0123456789")]
+            parname = tex_key[pinfo['parname'].strip("0123456789").lower()]
             parnum = int(pinfo['parname'][-1])
             if pinfo['fixed']:
                 formatted_value = "%s" % pinfo['value']

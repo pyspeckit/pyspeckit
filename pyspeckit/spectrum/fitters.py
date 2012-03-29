@@ -563,26 +563,16 @@ class Specfit(interactive.Interactive):
         self.fullmodel = self.get_full_model(debug=debug)
         self.fullresiduals = self.Spectrum.data - self.fullmodel
 
-    def get_full_model(self, mpp=None, debug=False):
+    def get_full_model(self, debug=False):
         """ compute the model over the full axis """ 
-        return self.get_model(self.Spectrum.xarr, mpp=mpp, debug=debug)
+        return self.get_model(self.Spectrum.xarr, debug=debug)
 
-    def get_model(self, xarr, mpp=None, debug=False):
+    def get_model(self, xarr, debug=False):
         """ Compute the model over a given axis """
-        if mpp is None:
-            # requires self.modelpars to be a list... hope it is
-            if self.vheight:
-                if self.Spectrum.baseline.baselinepars is not None:
-                    mpp = [self.Spectrum.baseline.baselinepars[0]] + list(self.modelpars)
-                else:
-                    mpp = [0] + list(self.modelpars)
-            else:
-                mpp = self.modelpars
-        if debug: print "_full_model mpp: ",mpp
         if self.Spectrum.baseline.subtracted or self.vheight:
-            return self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(xarr)
+            return self.fitter.n_modelfunc(self.parinfo,**self.fitter.modelfunc_kwargs)(xarr)
         else:
-            return self.fitter.n_modelfunc(mpp,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
+            return self.fitter.n_modelfunc(self.parinfo,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
                 
     def plot_fit(self, annotate=None, show_components=None,
             composite_fit_color='red', component_fit_color='blue', lw=0.5,

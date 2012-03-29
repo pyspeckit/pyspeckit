@@ -43,6 +43,19 @@ class ParinfoList(list):
                 raise ValueError("Must have len(new values) = %i (was %i)" % (len(self),len(values)))
         return setattribute
 
+    def keys(self):
+        """ Dictionary-like behavior """
+        return self.parnames
+
+    def items(self):
+        """ Dictionary-like behavior """
+        return zip(self.parnames, self[:])
+
+    #def values(self):
+    #    """ Dictionary-like behavior """
+    #    return [v['value'] for v in self]
+
+
     names = property(fget=_getter('parname'), fset=_setter('parname'))
     parnames=names
     shortnames = property(fget=_getter('shortparname'), fset=_setter('shortparname'))
@@ -120,7 +133,7 @@ class ParinfoList(list):
             self.errors = [p.stderr for p in lmpars.values()]
             for ii,P in enumerate(lmpars.values()):
                 self[ii].limits = (P.min,P.max)
-                self[ii].limited = (P.min not in (None,False),P.max not in (None,False))
+                self[ii].limited = (P.min is not None,P.max is not None)
                 self[ii].expr = '' if P.expr is None else P.expr
         else:
             for par in lmpars.values():
@@ -167,11 +180,11 @@ class Parinfo(dict):
             reprint += " (fixed)"
         else:
             reprint += " +/- %15g " % (self.error)
-            if any(self.limited):
-                lolim = "[%g," % self.limits[0] if self.limited[0] else "(-inf,"
-                uplim = "[%g" % self.limits[1] if self.limited[1] else "inf)"
-                myrange = lolim + uplim
-                reprint += "  Range:%10s" % myrange
+        if any(self.limited):
+            lolim = "[%g," % self.limits[0] if self.limited[0] else "(-inf,"
+            uplim = "%g]" % self.limits[1] if self.limited[1] else "inf)"
+            myrange = lolim + uplim
+            reprint += "  Range:%10s" % myrange
         if self.tied is not '':
             reprint += " Tied: %s" % self.tied
         if self.shortparname is not '':
@@ -278,6 +291,53 @@ class Parinfo(dict):
         self['parname'] = lmpar.name
         self['fixed'] = not(lmpar.vary)
 
+    def _operation_wrapper(operation, reverse=False):
+        """
+        Perform an operation (addition, subtraction, mutiplication, division, etc.)
+        """
+
+        def ofunc(self, other): 
+            """ Operation Function """
+            intypes = type(other),type(self.value)
+            try:
+                returnval = getattr(self.value,'__%s__' % operation)(other)
+                if type(returnval) not in intypes:
+                    raise TypeError("return value had wrong type: %s" % str(type(returnval)))
+                else:
+                    return returnval
+            except TypeError as err: # integers don't have defined operations with floats
+                #print err
+                #print "TypeError1: ",self, self.value, other
+                try:
+                    if hasattr(other,'__r%s__' % operation):
+                        #print "r",operation,": ",self, self.value, other
+                        return getattr(other,'__r%s__' % operation)(self.value)
+                    elif hasattr(other,'__%s__' % operation[1:]):
+                        #print operation,": ",self, self.value, other
+                        return getattr(other,'__%s__' % operation[1:])(self.value)
+                except:
+                    raise TypeError("Neither side of the operation has a %s attribute!" % operation)
+
+        return ofunc
+
+    __add__ = _operation_wrapper('add')
+    __radd__ = _operation_wrapper('radd')
+    __sub__ = _operation_wrapper('sub')
+    __rsub__ = _operation_wrapper('rsub')
+    __mul__ = _operation_wrapper('mul')
+    __rmul__ = _operation_wrapper('rmul')
+    __div__ = _operation_wrapper('div')
+    __rdiv__ = _operation_wrapper('rdiv')
+    __pow__ = _operation_wrapper('pow')
+    __rpow__ = _operation_wrapper('rpow')
+
+    try: 
+        def __array__(self):
+            import numpy as np
+            return np.array(self.value)
+    except ImportError:
+        pass
+
 
 if __name__=="__main__":
 
@@ -316,6 +376,10 @@ if __name__=="__main__":
         return PL.values
     
     class MyTestCase(unittest.TestCase):
+        def __init__(self, methodName='runTest', param=None):
+            super(MyTestCase, self).__init__(methodName)
+            self.param = param
+        
         def test_checks_value_fail(self):
             check_failure(0.5)
             self.assertRaises(ValueError, check_failure, 5)
@@ -339,5 +403,69 @@ if __name__=="__main__":
         def test_set_list(self):
             self.assertEqual(check_set_list([1,2,3,4]),[1,2,3,4])
             self.assertRaises(ValueError,check_set_list,[1,2,10,4])
+
+        def test_arithmetic(self):
+            value = 25
+            par = Parinfo({'parname':'TEST', 'value': value})
+            assert par+5 == value+5
+            assert par-5 == value-5
+            assert par/5 == value/5
+            assert par*5 == value*5
+
+        def test_arithmetic2(self):
+            value = 25.
+            par = Parinfo({'parname':'TEST', 'value': value})
+            assert par+5 == value+5
+            assert par-5 == value-5
+            assert par/5 == value/5
+            assert par*5 == value*5
+
+        def test_arithmetic3(self):
+            value = 25.
+            par = Parinfo({'parname':'TEST', 'value': value})
+            assert par+5. == value+5.
+            assert par-5. == value-5.
+            assert par/5. == value/5.
+            assert par*5. == value*5.
+
+        def test_arithmetic4(self):
+            value = 25
+            par = Parinfo({'parname':'TEST', 'value': value})
+            assert par+5. == value+5.
+            assert par-5. == value-5.
+            assert par/5. == value/5.
+            assert par*5. == value*5.
+
+        def test_arithmetic5(self):
+            value = 25.
+            par = Parinfo({'parname':'TEST', 'value': value})
+            assert 5.+par == 5.+value
+            assert 5.-par == 5.-value
+            assert 5./par == 5./value
+            assert 5.*par == 5.*value
+
+        def test_arithmetic6(self):
+            value = 25
+            par = Parinfo({'parname':'TEST', 'value': value})
+            assert 5.+par == 5.+value
+            assert 5.-par == 5.-value
+            assert 5./par == 5./value
+            assert 5.*par == 5.*value
+
+        def test_arithmetic7(self):
+            value = 25.
+            par = Parinfo({'parname':'TEST', 'value': value})
+            assert 5+par == 5+value
+            assert 5-par == 5-value
+            assert 5/par == 5/value
+            assert 5*par == 5*value
+
+        def test_arithmetic8(self):
+            value = 25
+            par = Parinfo({'parname':'TEST', 'value': value})
+            assert 5+par == 5+value
+            assert 5-par == 5-value
+            assert 5/par == 5/value
+            assert 5*par == 5*value
 
     unittest.main()

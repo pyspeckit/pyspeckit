@@ -18,6 +18,7 @@ PySpecKit requires at least the basic scientific packages:
 * `matplotlib <http://matplotlib.sourceforge.net>`_
 * `mpfit is included <http://code.google.com/p/astrolibpy/source/browse/trunk/mpfit>`_
 * `scipy <http://www.scipy.org/>`_ is optional. It is  only required for RADEX grid interpolation
+* python2.7 or `ordereddict <http://pypi.python.org/pypi/ordereddict>`_ 
 
 You'll most likely want at least one of the following packages
 to enable `file reading <readers>`_

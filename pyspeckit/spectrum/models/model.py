@@ -222,14 +222,20 @@ class SpectralModel(fitter.SimpleFitter):
         """
         Simple wrapper to deal with N independent peaks for a given spectral model
         """
-        pars = list(pars)
+        if hasattr(pars,'values'):
+            # important to treat as Dictionary, since lmfit params & parinfo both have .items
+            parnames,parvals = zip(*pars.items())
+            parnames = [p.lower() for p in parnames]
+            parvals = [p.value for p in parvals]
+        else:
+            parvals = list(pars)
         def L(x):
             v = np.zeros(len(x))
-            if self.vheight: v += pars[0]
+            if self.vheight: v += parvals[0]
             # use len(pars) instead of self.npeaks because we want this to work
             # independent of the current best fit
-            for jj in xrange((len(pars)-self.vheight)/self.npars):
-                v += self.modelfunc(x, *pars[jj*self.npars+self.vheight:(jj+1)*self.npars+self.vheight], **kwargs)
+            for jj in xrange((len(parvals)-self.vheight)/self.npars):
+                v += self.modelfunc(x, *parvals[jj*self.npars+self.vheight:(jj+1)*self.npars+self.vheight], **kwargs)
             return v
         return L
 
@@ -261,16 +267,16 @@ class SpectralModel(fitter.SimpleFitter):
         """
         if err is None:
             def f(p): 
-                pars = [par.value for par in p.values()]
+                #pars = [par.value for par in p.values()]
                 kwargs = {}
                 kwargs.update(self.modelfunc_kwargs)
-                return (y-self.n_modelfunc(pars,**kwargs)(x))
+                return (y-self.n_modelfunc(p,**kwargs)(x))
         else:
             def f(p): 
-                pars = [par.value for par in p.values()]
+                #pars = [par.value for par in p.values()]
                 kwargs = {}
                 kwargs.update(self.modelfunc_kwargs)
-                return (y-self.n_modelfunc(pars,**kwargs)(x))/err
+                return (y-self.n_modelfunc(p,**kwargs)(x))/err
         return f
 
     def lmfitter(self, xax, data, err=None, parinfo=None, quiet=True, debug=False, **kwargs):
@@ -302,8 +308,8 @@ class SpectralModel(fitter.SimpleFitter):
 
         LMParams = parinfo.as_Parameters()
         if debug:
-            print LMParams
-            print parinfo
+            print "LMParams: ","\n".join([repr(p) for p in LMParams.values()])
+            print "parinfo:  ",parinfo
         minimizer = lmfit.minimize(self.lmfitfun(xax,np.array(data),err),LMParams,**kwargs)
         if not quiet:
             print "There were %i function evaluations" % (minimizer.nfev)
@@ -322,7 +328,7 @@ class SpectralModel(fitter.SimpleFitter):
         self.mppnames = self.parinfo.names
         modelkwargs = {}
         modelkwargs.update(self.modelfunc_kwargs)
-        self.model = self.n_modelfunc(self.mpp, **modelkwargs)(xax)
+        self.model = self.n_modelfunc(self.parinfo, **modelkwargs)(xax)
         if hasattr(minimizer,'chisqr'):
             chi2 = minimizer.chisqr
         else:
@@ -407,7 +413,7 @@ class SpectralModel(fitter.SimpleFitter):
         self.mpp = self.parinfo.values
         self.mpperr = self.parinfo.errors
         self.mppnames = self.parinfo.names
-        self.model = self.n_modelfunc(mpp,**self.modelfunc_kwargs)(xax)
+        self.model = self.n_modelfunc(self.parinfo,**self.modelfunc_kwargs)(xax)
         if debug:
             print "Modelpars: ",self.mpp
         if np.isnan(chi2):

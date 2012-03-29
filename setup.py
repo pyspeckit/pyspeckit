@@ -78,7 +78,7 @@ setup(name='pyspeckit',
           'mpfit':'mpfit'}, 
       package_data={'pyspeckit.spectrum.speclines':[],
           '':['pyspeckit/config_default']},
-      requires=['matplotlib (>=1.1.0)','numpy (>=1.4.1)'],
+      requires=['matplotlib (>=1.1.0)','numpy (>=1.4.1)','ordereddict'],
       cmdclass={'build_py': build_py, 'test': PyTest},
       classifiers=[
                    "Development Status :: 3 - Alpha",
