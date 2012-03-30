@@ -58,7 +58,8 @@ class Spectrum(Spectrum1D):
         Parameters
         ----------
         filename : string or pyfits.HDU
-            The file to read the spectrum from.  
+            The file to read the spectrum from.  If data, xarr, and error are
+            specified, leave filename blank.
         filetype : string
             Specify the file type (only needed if it cannot be automatically
             determined from the filename)

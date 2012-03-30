@@ -148,6 +148,46 @@ class Parinfo(dict):
     mpfit's parinfo dictionary, which is just a dictionary containing a few set
     values.  This implements them as 'gettable' attributes instead, but far
     more importantly, includes sanity checks when setting values.
+
+    Attributes
+    ----------
+    value: number
+        The value of the parameter.  Arithmetic operations (*,/,+,-,**) will
+        use this value
+    error: number
+        The error on the value
+    n: int
+        The order of the parameter in the model or ParinfoList
+    fixed: bool
+        Can the value change?  If False, error should be 0.
+    limits: (min,max)
+        The limits on the value of the parameter.  Only applied
+        if limited
+    limited: (bool, bool)
+        Is the parameter value limited?
+    step: number 
+        from MPFIT: the step size to be used in calculating the numerical
+        derivatives.  If set to zero, then the step size is computed
+        automatically.  Ignored when AUTODERIVATIVE=0.
+    scaleable: bool
+        Is the value scaled with the data?  Important for normalization
+        procedures
+    tied: string
+        mpfit/lmift parameter.  Allows you to specify arbitrary expressions for
+        how the parameter depends on other parameters
+        mpfit:
+            a string expression which "ties" the parameter to other free or
+            fixed parameters.  Any expression involving constants and the
+            parameter array P are permitted.  Example: if parameter 2 is always
+            to be twice parameter 1 then use the following: parinfo(2).tied =
+            '2 * p(1)'.  Since they are totally constrained, tied parameters
+            are considered to be fixed; no errors are computed for them.  
+            NOTE: the PARNAME can't be used in expressions. 
+    parname: string
+        The parameter name
+    shortparname: string (tex)
+        A shortened version of the parameter name for plotting display
+
     """
     def __init__(self, values=None):
 
@@ -156,6 +196,7 @@ class Parinfo(dict):
                 'limits':(0.0,0.0),
                 'limited':(False,False),
                 'step':False,
+                'scaleable':False,
                 'tied':'',
                 'parname':'',
                 'shortparname':''})

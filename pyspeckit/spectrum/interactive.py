@@ -283,8 +283,9 @@ class Interactive(object):
             Overwrites xmin,xmax set by plotter
             
         """
-        if debug: print "selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits
+        if debug: print "selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset
         if xmin is not None and xmax is not None:
+            if verbose or debug: print "Setting xmin,xmax from keywords %g,%g" % (xmin,xmax)
             if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
                 self.xmin = self.Spectrum.xarr.x_to_pix(xmin)
                 self.xmax = self.Spectrum.xarr.x_to_pix(xmax)
@@ -292,6 +293,7 @@ class Interactive(object):
                 self.xmin = xmin
                 self.xmax = xmax
         elif reset:
+            if verbose or debug: print "Resetting xmin/xmax to full limits of data"
             self.xmin = 0
             self.xmax = self.Spectrum.data.shape[0]
             self.includemask[self.xmin:self.xmax] = True
@@ -305,7 +307,9 @@ class Interactive(object):
             if self.xmin>self.xmax: 
                 self.xmin,self.xmax = self.xmax,self.xmin
             if debug: print "Including all plotted area (as defined by [plotter.xmin,plotter.xmax]) for fit"
-            if debug: print "Including self.xmin:self.xmax = %f:%f" % (self.xmin,self.xmax)
+            if debug: print "Including self.xmin:self.xmax = %f:%f (and excluding the rest)" % (self.xmin,self.xmax)
+            self.includemask[:self.xmin] = False
+            self.includemask[self.xmax:] = False
             self.includemask[self.xmin:self.xmax] = True
         else:
             if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax)

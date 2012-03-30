@@ -398,7 +398,9 @@ class Specfit(interactive.Interactive):
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor
                 for ii in xrange(self.npeaks): # assume first parameter is amplitude
-                    self.guesses[self.fitter.npars*ii] /= scalefactor
+                    for jj,par in enumerate(self.fitter.parinfo):
+                        if par.scaleable:
+                            self.guesses[self.fitter.npars*ii+jj] /= scalefactor
 
         mpp,model,mpperr,chi2 = self.fitter(
                 self.Spectrum.xarr[self.xmin:self.xmax], 
@@ -420,12 +422,17 @@ class Specfit(interactive.Interactive):
         self.chi2 = chi2
         self.dof  = self.xmax-self.xmin-self.npeaks*self.Registry.npars[self.fittype]
         self.model = model * scalefactor
-        for ii in xrange(self.npeaks): # assume first parameter is amplitude
-            mpp[self.fitter.npars*ii]    *= scalefactor
-            mpperr[self.fitter.npars*ii] *= scalefactor
-        self.modelpars = mpp
-        self.modelerrs = mpperr
+
         self.parinfo = self.fitter.parinfo
+
+        # rescale any scaleable parameters
+        for par in self.parinfo:
+            if par.scaleable:
+                par.value = par.value * scalefactor
+                par.error = par.error * scalefactor
+
+        self.modelpars = self.parinfo.values
+        self.modelerrs = self.parinfo.errors
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
         if self.Spectrum.plotter.axis is not None:
             if color is not None:
@@ -538,13 +545,13 @@ class Specfit(interactive.Interactive):
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model*scalefactor
         self.modelpars = mpp
         self.modelerrs = mpperr
-        # ONLY the amplitude was changed
-        self.modelpars[0] *= scalefactor
-        if self.modelerrs[0] is not None:
-            self.modelerrs[0] *= scalefactor
-        # this was for height, but that's now dealt with above
-        #self.modelpars[1] *= scalefactor
-        #self.modelerrs[1] *= scalefactor
+        
+        # rescale any scaleable parameters
+        for par in self.parinfo:
+            if par.scaleable:
+                par.value = par.value * scalefactor
+                par.error = par.error * scalefactor
+
         if self.Spectrum.plotter.axis is not None:
             if color is not None:
                 kwargs.update({'composite_fit_color':color})

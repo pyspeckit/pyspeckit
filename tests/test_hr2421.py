@@ -47,7 +47,7 @@ try:
     print "EQW: ",sp.specfit.EQW()
     print "Chi2: ",sp.specfit.chi2
     sp.plotter.axis.plot(sp.xarr[sp.specfit.xmin:sp.specfit.xmax],gauss_model,color='b',linewidth=0.5)
-    sp.plotter(clear=False)
+    sp.plotter(clear=False,reset=False)
     sp.plotter.figure.savefig(savedir+'hr2421_voigtfit.png')
     voigt_model = sp.specfit.model+sp.baseline.basespec[sp.specfit.xmin:sp.specfit.xmax]
     print "A voigt model has been fit.  The red line from before should have a blue line overlaid.  They should be only moderately different."

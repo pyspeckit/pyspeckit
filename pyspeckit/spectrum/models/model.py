@@ -216,6 +216,11 @@ class SpectralModel(fitter.SimpleFitter):
         # rewrite the above
         self.parinfo = ParinfoList([Parinfo(p) for p in self.parinfo])
 
+        # New feature: scaleability
+        for par in self.parinfo:
+            if par.parname.lower().strip('0123456789') in ('amplitude','amp'):
+                par.scaleable = True
+
         return self.parinfo, kwargs
 
     def n_modelfunc(self, pars, **kwargs):
@@ -441,14 +446,32 @@ class SpectralModel(fitter.SimpleFitter):
     def annotations(self, shortvarnames=None, debug=False):
         """
         Return a list of TeX-formatted labels
+
+        The values and errors are formatted so that only the significant digits
+        are displayed.  Rounding is performed using the decimal package.
+
+        Parameters
+        ----------
+        shortvarnames: list
+            A list of variable names (tex is allowed) to include in the
+            annotations.  Defaults to self.shortvarnames
+
+        Examples
+        --------
+        >>> # Annotate a Gaussian
+        >>> sp.specfit.annotate(shortvarnames=['A','\\Delta x','\\sigma'])
         """
         from decimal import Decimal # for formatting
         svn = self.shortvarnames if shortvarnames is None else shortvarnames
         # if pars need to be replicated....
         if len(svn) < self.npeaks*self.npars:
             svn = svn * self.npeaks
-        loop_list = [(self.mpp[ii+jj*self.npars+self.vheight],
-                      self.mpperr[ii+jj*self.npars+self.vheight],
+
+        parvals = self.parinfo.values
+        parerrs = self.parinfo.errors
+
+        loop_list = [(parvals[ii+jj*self.npars+self.vheight],
+                      parerrs[ii+jj*self.npars+self.vheight],
                       svn[ii+jj*self.npars],
                       self.parinfo.fixed[ii+jj*self.npars+self.vheight],
                       jj) 

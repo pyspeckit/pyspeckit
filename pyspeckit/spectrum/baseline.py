@@ -74,24 +74,52 @@ class Baseline(interactive.Interactive):
         It will be saved in the variable "self.basespec"
         and the fit parameters will be saved in "self.order"
 
-        function baseline(spectrum,xarr=None,xmin=None,xmax=None,order=1,quiet=True,exclude=None):
-        Subtract a baseline from a spectrum
-        If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum
+        Parameters
+        ----------
+        order: int
+            Order of the polynomial to fit
+        excludefit: bool
+            If there is a spectroscopic line fit, you can automatically exclude
+            the region with signal above some tolerance set by `exclusionlevel`
+            (it works for absorption lines by using the absolute value of the
+            signal)
+        exclusionlevel: float
+            The minimum value of the spectroscopic fit to exclude when fitting
+            the baseline
+        save: bool
+            Write the baseline fit coefficients into the spectrum's header in the
+            keywords BLCOEFnn
+        exclude: {list of length 2n,'interactive', None}
+            * interactive: start an interactive session to select the
+              include/exclude regions
+            * list: parsed as a series of (startpoint, endpoint) in the
+              spectrum's X-axis units.  Will exclude the regions between
+              startpoint and endpoint
+            * None: No exclusion
+        interactive: bool
+            Specify the include/exclude regions through the interactive plot
+            window
+        fit_original: bool
+            Fit the original spectrum instead of the baseline-subtracted spectrum.
+            If disabled, will overwrite the original data with the
+            baseline-subtracted version.
+            .. warning:: If this is set False, behavior of `unsubtract` may be unexpected
+        fit_plotted_area: bool
+            Will respect user-specified zoom (using the pan/zoom buttons)
+            unless xmin/xmax have been set manually
+        reset_selection: bool
+            Reset the selected region to those specified by this command only
+            (will override previous xmin/xmax settings)
 
-        exclude is a set of start/end indices to ignore when baseline fitting
-        (ignored by setting error to infinite in fitting procedure)
+        Plotting Parameters
+        -------------------
+        baseline_fit_color: color name (string)
+            Color to plot the baseline
+        clear_all_connections: bool
+            Disable any previous interactive sessions
+        highlight_fitregion: bool
+            Highlight the selected region for baseline fitting (default green)
 
-        excludefit creates a mask based on the fitted gaussian model (assuming
-        that it has a zero-height) using an exclusion level of (exclusionlevel)
-        * the smallest gaussian peak that was fit
-
-        fit_plotted_area means that a fit will only be attempted on the region
-        currently shown in the plot.  Overridden by interactive=True or
-        exclude='interactive'
-
-        if fit_original is set, "basespec" is added back to the spectrum before
-        fitting so you can run this procedure multiple times without losing
-        information
         """
         specfit = self.Spectrum.specfit
         self.order = order
