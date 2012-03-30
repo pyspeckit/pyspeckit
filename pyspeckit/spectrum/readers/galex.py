@@ -23,7 +23,10 @@ def read_galex(fitsfilename, orderselection='obj'):
     $ wget http://galex.stsci.edu/data/GR6/pipe/01-vsn/05697-VAR_J000836p545700/g/01-main/0001-img/07-try/VAR_J000836p545700-xg-gsp.fits.gz
     $ gunzip VAR_J000836p545700-xg-gsp.fits.gz
 
-    >>> sp = read_galex('VAR_J000836p545700-xg-gsp.fits')
+    >>> spblock = read_galex('VAR_J000836p545700-xg-gsp.fits')
+    >>> spavg = spblock.average() # average over all spectra of the source (naive)
+    >>> spblock.plotter()
+    >>> spavg.plotter()
     """
 
     ff = pyfits.open(fitsfilename)
