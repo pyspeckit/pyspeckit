@@ -40,25 +40,6 @@ class Spectrum(Spectrum1D):
     The core class for the spectroscopic toolkit.  Contains the data and error
     arrays along with wavelength / frequency / velocity information in various
     formats.
-
-    Contains functions / classes to:
-        -read and write FITS-compliant spectroscopic data sets
-            -read fits binaries? (not implemented)
-        -plot a spectrum
-        -fit a spectrum both interactively and non-interactively
-            -with gaussian, voigt, lorentzian, and multiple (gvl) profiles
-        -fit a continuum "baseline" to a selected region with an n-order
-          polynomial
-        -perform fourier transforms and operations in fourier space on a spectrum (not implemented)
-
-    Example usage:
-
-    >>> # automatically load a "compliant" (linear X-axis) FITS file
-    >>> spec = pyspeckit.Spectrum('test.fits')
-
-    >>> # plot the spectrum
-    >>> spec.plotter()
-
     """
 
     from arithmetic import interpnans
@@ -67,11 +48,7 @@ class Spectrum(Spectrum1D):
             error=None, header=None, doplot=False, maskdata=True,
             plotkwargs={}, xarrkwargs={}, **kwargs):
         """
-
-        Initialize the Spectrum.  Accepts files in the following formats:
-            - .fits
-            - .txt
-            - .hdf5
+        Create a Spectrum object.
 
         Must either pass in a filename or ALL of xarr, data, and header, plus
         optionally error.
@@ -110,13 +87,19 @@ class Spectrum(Spectrum1D):
         Examples
         --------
 
-        >>> sp = pyspeckit.Spectrum('test.fits')
-        
         >>> sp = pyspeckit.Spectrum(data=np.random.randn(100),
                     xarr=np.linspace(-50, 50, 100), error=np.ones(100)*0.1, 
-                    xarrkwargs={'unit':'km/s', refX=4.829, refX_units='Hz',
-                        xtype='VLSR-RAD'})
-    
+                    xarrkwargs={'unit':'km/s', 'refX':4.829, 'refX_units':'GHz',
+                        'xtype':'VLSR-RAD'}, header={})
+
+        >>> xarr = pyspeckit.units.SpectroscopicAxis(np.linspace(-50,50,100),
+                    units='km/s', refX=6562.83, refX_units='angstroms')
+        >>> data = np.random.randn(100)*5 + np.random.rand(100)*100
+        >>> err = np.sqrt(data/5.)*5. # Poisson noise
+        >>> sp = pyspeckit.Spectrum(data=data, error=err, xarr=xarr, header={}) 
+        
+        >>> # if you already have a simple fits file
+        >>> sp = pyspeckit.Spectrum('test.fits')
         """
 
         if filename:
@@ -888,3 +871,8 @@ class ObsBlock(Spectra):
 class XCorrSpectrum(Spectrum):
     """ extraordinarily thin spectrum; just a name right now """
     pass
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+
