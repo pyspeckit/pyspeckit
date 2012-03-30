@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Readers &mdash; pyspeckit 0.1.7 documentation</title>
+    <title>GALEX FITS files &mdash; pyspeckit 0.1.7 documentation</title>
     
     <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -27,8 +27,9 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.7 documentation" href="index.html" />
-    <link rel="next" title="Plain Text" href="txtfiles.html" />
-    <link rel="prev" title="Registration" href="registration.html" />
+    <link rel="up" title="Readers" href="readers.html" />
+    <link rel="next" title="GBTIDL FITS files" href="gbtfiles.html" />
+    <link rel="prev" title="Gildas CLASS files" href="classfiles.html" />
      
     <script type="text/javascript">
 
@@ -66,17 +67,43 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="readers">
-<h1>Readers<a class="headerlink" href="#readers" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="txtfiles.html">Plain Text</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fitsfiles.html">FITS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hdf5files.html">hdf5</a></li>
-<li class="toctree-l1"><a class="reference internal" href="classfiles.html">Gildas CLASS files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="galexfiles.html">GALEX FITS files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gbtfiles.html">GBTIDL FITS files</a></li>
-</ul>
+  <div class="section" id="galex-fits-files">
+<h1>GALEX FITS files<a class="headerlink" href="#galex-fits-files" title="Permalink to this headline">¶</a></h1>
+<p>GALEX FITS files of the form defined <a class="reference external" href="http://www.galex.caltech.edu/DATA/gr1_docs/GR1_Column_descriptions_for_-xg-gsp.fits.htm">here</a>
+can be loaded using the GALEX reader:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">galex_block</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">readers</span><span class="o">.</span><span class="n">galex_reader</span><span class="p">(</span><span class="s">&#39;my_galex_fitsfile.fits&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="module-pyspeckit.spectrum.readers.galex">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-pyspeckit.spectrum.readers.galex" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyspeckit.spectrum.readers.galex.read_galex">
+<tt class="descclassname">pyspeckit.spectrum.readers.galex.</tt><tt class="descname">read_galex</tt><big>(</big><em>fitsfilename</em>, <em>orderselection='obj'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.galex.read_galex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in a GALEX xg-gsp.fits file 
+Definition of the file is here: 
+<a class="reference external" href="http://www.galex.caltech.edu/DATA/gr1_docs/GR1_Column_descriptions_for_-xg-gsp.fits.htm">http://www.galex.caltech.edu/DATA/gr1_docs/GR1_Column_descriptions_for_-xg-gsp.fits.htm</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>fitsfilename: string</strong> :</p>
+<blockquote>
+<div><p>The file name (must be a valid FITS file)</p>
+</div></blockquote>
+<p><strong>orderselection: {&#8216;obj&#8217;,&#8217;objs&#8217;}</strong> :</p>
+<blockquote class="last">
+<div><p>&#8216;obj&#8217; selects the NUV 1st and FUV 2nd orders
+&#8216;objs&#8217; selects the NUV 2nd and FUV 3rd orders</p>
+<blockquote>
+<div><p>(higher resolution, lower S/N)</p>
+</div></blockquote>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 </div>
 
@@ -92,12 +119,15 @@
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models &amp; Fitting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">File Readers</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="readers.html">File Readers</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="txtfiles.html">Plain Text</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fitsfiles.html">FITS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hdf5files.html">hdf5</a></li>
 <li class="toctree-l2"><a class="reference internal" href="classfiles.html">Gildas CLASS files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="galexfiles.html">GALEX FITS files</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">GALEX FITS files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-pyspeckit.spectrum.readers.galex">API</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="gbtfiles.html">GBTIDL FITS files</a></li>
 </ul>
 </li>

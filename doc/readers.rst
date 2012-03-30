@@ -8,6 +8,9 @@ Readers
     fitsfiles
     hdf5files
     classfiles
+    galexfiles
+    gbtfiles
+
 
 ..
     .. include:: txtfiles.rst

@@ -1,5 +1,11 @@
 """
 GBTIDL SDFITS file
+==================
+
+GBTIDL SDFITS files representing GBT observing sessions can be read into
+pyspeckit.  Additional documentation is needed.  Nodding reduction is
+supported, frequency switching is not.
+
 """
 import pyfits
 import pyspeckit
