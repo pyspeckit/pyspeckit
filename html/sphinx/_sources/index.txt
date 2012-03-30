@@ -70,5 +70,6 @@ Features
    File Readers <readers>
    High-Level Wrappers <wrappers>
    Examples <examples>
+   Interactive Use <interactive>
 
 ..   Base Classes <classes>
