@@ -95,7 +95,7 @@ your fitting code must deal with units internally.</p>
 <p>Then you can <a class="reference external" href="registration.html">register</a> these fitters.</p>
 <span class="target" id="module-pyspeckit.spectrum.models.model"></span><dl class="class">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>shortvarnames=('A'</em>, <em>'\Delta x'</em>, <em>'\sigma')</em>, <em>multisingle='multi'</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>shortvarnames=('A'</em>, <em>'\Delta x'</em>, <em>'\sigma')</em>, <em>multisingle='multi'</em>, <em>fitunits=None</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper class for a spectra model.  Includes internal functions to
 generate multi-component models, annotations, integrals, and individual
 components.  The declaration can be complex, since you should name
@@ -401,7 +401,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x10cf44500&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x107776488&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -569,7 +569,7 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Mar 26, 2012.
+      Last updated on Mar 30, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
