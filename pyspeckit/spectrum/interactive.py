@@ -184,7 +184,11 @@ class Interactive(object):
         if self.nclicks_b2 == 0:
             self.firstclick_guess()
         if self.nclicks_b2 % 2 == 0:
-            self.guesses += [event.ydata,event.xdata,1]
+            if self.Spectrum.baseline.subtracted:
+                peakguess = event.ydata
+            else:
+                peakguess = event.ydata - self.Spectrum.baseline.basespec[self.Spectrum.xarr.x_to_pix(event.xdata)]
+            self.guesses += [peakguess,event.xdata,1]
             self.npeaks += 1
             self.nclicks_b2 += 1
             if debug: print "Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)

@@ -5,8 +5,8 @@ Radio Fitting: H\ :sub:`2`\ CO RADEX example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Because an LVG model grid is being used as the basis for the fitting in this example, there are fewer free parameters.  
 If you want to create your own model grid, there is a set of tools for creating RADEX model grids (in parallel) at 
-` the agpy RADEX page  <http://code.google.com/p/agpy/source/browse/trunk/radex>`.  The model grids used below
-are available on the `pyspeckit bitbucket download page <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/downloads>`.
+` the agpy RADEX page  <http://code.google.com/p/agpy/source/browse/trunk/radex>`_.  The model grids used below
+are available on the `pyspeckit bitbucket download page <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/downloads>`_.
 
 ::
 
