@@ -107,20 +107,68 @@ the bugs, and the code base is much simpler)</p>
 <dd><p>Fit and remove a polynomial from the spectrum.  
 It will be saved in the variable &#8220;self.basespec&#8221;
 and the fit parameters will be saved in &#8220;self.order&#8221;</p>
-<p>function baseline(spectrum,xarr=None,xmin=None,xmax=None,order=1,quiet=True,exclude=None):
-Subtract a baseline from a spectrum
-If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum</p>
-<p>exclude is a set of start/end indices to ignore when baseline fitting
-(ignored by setting error to infinite in fitting procedure)</p>
-<p>excludefit creates a mask based on the fitted gaussian model (assuming
-that it has a zero-height) using an exclusion level of (exclusionlevel)
-* the smallest gaussian peak that was fit</p>
-<p>fit_plotted_area means that a fit will only be attempted on the region
-currently shown in the plot.  Overridden by interactive=True or
-exclude=&#8217;interactive&#8217;</p>
-<p>if fit_original is set, &#8220;basespec&#8221; is added back to the spectrum before
-fitting so you can run this procedure multiple times without losing
-information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>order: int</strong> :</p>
+<blockquote>
+<div><p>Order of the polynomial to fit</p>
+</div></blockquote>
+<p><strong>excludefit: bool</strong> :</p>
+<blockquote>
+<div><p>If there is a spectroscopic line fit, you can automatically exclude
+the region with signal above some tolerance set by <cite>exclusionlevel</cite>
+(it works for absorption lines by using the absolute value of the
+signal)</p>
+</div></blockquote>
+<p><strong>exclusionlevel: float</strong> :</p>
+<blockquote>
+<div><p>The minimum value of the spectroscopic fit to exclude when fitting
+the baseline</p>
+</div></blockquote>
+<p><strong>save: bool</strong> :</p>
+<blockquote>
+<div><p>Write the baseline fit coefficients into the spectrum&#8217;s header in the
+keywords BLCOEFnn</p>
+</div></blockquote>
+<p><strong>exclude: {list of length 2n,&#8217;interactive&#8217;, None}</strong> :</p>
+<blockquote>
+<div><ul class="simple">
+<li>interactive: start an interactive session to select the
+include/exclude regions</li>
+<li>list: parsed as a series of (startpoint, endpoint) in the
+spectrum&#8217;s X-axis units.  Will exclude the regions between
+startpoint and endpoint</li>
+<li>None: No exclusion</li>
+</ul>
+</div></blockquote>
+<p><strong>interactive: bool</strong> :</p>
+<blockquote>
+<div><p>Specify the include/exclude regions through the interactive plot
+window</p>
+</div></blockquote>
+<p><strong>fit_original: bool</strong> :</p>
+<blockquote>
+<div><p>Fit the original spectrum instead of the baseline-subtracted spectrum.
+If disabled, will overwrite the original data with the
+baseline-subtracted version.
+.. warning:: If this is set False, behavior of <cite>unsubtract</cite> may be unexpected</p>
+</div></blockquote>
+<p><strong>fit_plotted_area: bool</strong> :</p>
+<blockquote>
+<div><p>Will respect user-specified zoom (using the pan/zoom buttons)
+unless xmin/xmax have been set manually</p>
+</div></blockquote>
+<p><strong>reset_selection: bool</strong> :</p>
+<blockquote class="last">
+<div><p>Reset the selected region to those specified by this command only
+(will override previous xmin/xmax settings)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -263,7 +311,7 @@ i.e. if there was a baseline to unsubtract)</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Mar 26, 2012.
+      Last updated on Mar 30, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

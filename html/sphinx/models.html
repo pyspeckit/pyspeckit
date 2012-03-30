@@ -129,6 +129,26 @@ others, but it&#8217;s not clear if that&#8217;s a sensible default</dd>
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.annotations">
 <tt class="descname">annotations</tt><big>(</big><em>shortvarnames=None</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.annotations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of TeX-formatted labels</p>
+<p>The values and errors are formatted so that only the significant digits
+are displayed.  Rounding is performed using the decimal package.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>shortvarnames: list</strong> :</p>
+<blockquote class="last">
+<div><p>A list of variable names (tex is allowed) to include in the
+annotations.  Defaults to self.shortvarnames</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Annotate a Gaussian</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">shortvarnames</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">,</span><span class="s">&#39;\Delta x&#39;</span><span class="p">,</span><span class="s">&#39;\sigma&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -401,7 +421,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x107776488&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x10d974488&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
