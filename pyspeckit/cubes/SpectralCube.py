@@ -237,8 +237,12 @@ class Cube(spectrum.Spectrum):
 
         # set the parinfo values correctly for annotations
         for pi,p,e in zip(self.specfit.parinfo, self.specfit.modelpars, self.errcube[:,y,x]):
-            pi['value'] = p
-            pi['error'] = e
+            try:
+                pi['value'] = p
+                pi['error'] = e
+            except ValueError:
+                # likely to happen for failed fits
+                pass
 
         self.specfit.plot_fit(**kwargs)
 
@@ -281,8 +285,11 @@ class Cube(spectrum.Spectrum):
             if hasattr(self.specfit,'parinfo') and self.specfit.parinfo is not None:
                 # set the parinfo values correctly for annotations
                 for pi,p,e in zip(sp.specfit.parinfo, sp.specfit.modelpars, self.errcube[:,y,x]):
-                    pi['value'] = p
-                    pi['error'] = e
+                    try:
+                        pi['value'] = p
+                        pi['error'] = e
+                    except ValueError:
+                        pass
 
             if hasattr(self.specfit,'fitter') and self.specfit.fitter is not None:
                 sp.specfit.npeaks = self.specfit.fitter.npeaks

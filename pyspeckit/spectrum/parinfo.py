@@ -216,22 +216,25 @@ class Parinfo(dict):
         self.__dict__ = self
 
     def __repr__(self):
-        reprint = "Param #%i %12s = %15g" % (self.n, self.parname, self.value)
-        if self.fixed:
-            reprint += " (fixed)"
-        else:
-            reprint += " +/- %15g " % (self.error)
-        if any(self.limited):
-            lolim = "[%g," % self.limits[0] if self.limited[0] else "(-inf,"
-            uplim = "%g]" % self.limits[1] if self.limited[1] else "inf)"
-            myrange = lolim + uplim
-            reprint += "  Range:%10s" % myrange
-        if self.tied is not '':
-            reprint += " Tied: %s" % self.tied
-        if self.shortparname is not '':
-            reprint += " Shortparname: %s" % self.shortparname
+        try:
+            reprint = "Param #%i %12s = %15g" % (self.n, self.parname, self.value)
+            if self.fixed:
+                reprint += " (fixed)"
+            else:
+                reprint += " +/- %15g " % (self.error)
+            if any(self.limited):
+                lolim = "[%g," % self.limits[0] if self.limited[0] else "(-inf,"
+                uplim = "%g]" % self.limits[1] if self.limited[1] else "inf)"
+                myrange = lolim + uplim
+                reprint += "  Range:%10s" % myrange
+            if self.tied is not '':
+                reprint += " Tied: %s" % self.tied
+            if self.shortparname is not '':
+                reprint += " Shortparname: %s" % self.shortparname
 
-        return reprint
+            return reprint
+        except AttributeError:
+            return super(Parinfo,self).__repr__()
 
     @property
     def max(self):

@@ -340,15 +340,15 @@ class Spectrum(Spectrum1D):
         
         Parameters:
         -----------
-        start: numpy.float or int
+        start : numpy.float or int
             start of slice
-        stop:  numpy.float or int
+        stop :  numpy.float or int
             stop of slice
-        units: str
+        units : str
             allowed values are any supported physical unit, 'pixel'
-        copy: bool
+        copy : bool
             Return a 'view' of the data or a copy?
-        preserve_fits: bool
+        preserve_fits : bool
             Save the fitted parameters from self.fitter?
         """
         

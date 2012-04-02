@@ -452,7 +452,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         Parameters
         ----------
-        shortvarnames: list
+        shortvarnames : list
             A list of variable names (tex is allowed) to include in the
             annotations.  Defaults to self.shortvarnames
 
