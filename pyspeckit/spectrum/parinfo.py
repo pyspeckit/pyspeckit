@@ -236,6 +236,16 @@ class Parinfo(dict):
         except AttributeError:
             return super(Parinfo,self).__repr__()
 
+    def __deepcopy__(self, memo):
+        copy = Parinfo(self)
+        copy.__dict__ = copy
+        return copy
+
+    def __copy__(self):
+        copy = Parinfo(self)
+        copy.__dict__ = copy
+        return copy
+
     @property
     def max(self):
         return self.limits[1]
@@ -511,5 +521,14 @@ if __name__=="__main__":
             assert 5-par == 5-value
             assert 5/par == 5/value
             assert 5*par == 5*value
+
+        def test_copy(self):
+            import copy
+            value = 25
+            par = Parinfo({'parname':'TEST', 'value': value})
+            parcopy = copy.copy(par)
+            assert parcopy.value == value
+            parcopy = copy.deepcopy(par)
+            assert parcopy.value == value
 
     unittest.main()

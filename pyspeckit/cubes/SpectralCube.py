@@ -665,7 +665,16 @@ class Cube(spectrum.Spectrum):
         self.parcube = cube[:npars,:,:]
         self.errcube = cube[npars:npars*2,:,:]
 
-        sp.specfit(fittype=fittype, guesses=self.parcube[:,y,x])
+        # make sure params are within limits
+        guesses,throwaway = self.specfit.Registry.multifitters[fittype]._make_parinfo()
+        try:
+            guesses.values = self.parcube[:,y,x]
+        except ValueError:
+            OKmask = (self.parcube != 0).sum(axis=0) > 0
+            whereOK = np.where(OKmask)
+            guesses.values = self.parcube[:,whereOK[0][0],whereOK[1][0]]
+
+        sp.specfit(fittype=fittype, guesses=guesses.values)
 
         self.specfit.fitter = sp.specfit.fitter
         self.specfit.fittype = sp.specfit.fittype
