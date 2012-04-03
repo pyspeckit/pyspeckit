@@ -31,38 +31,55 @@ class SpectralModel(fitter.SimpleFitter):
             shortvarnames=("A","\\Delta x","\\sigma"), multisingle='multi',
             fitunits=None,
             use_lmfit=False, **kwargs):
-        """
-        modelfunc: the model function to be fitted.  Should take an X-axis (spectroscopic axis)
-        as an input, followed by input parameters.
-        npars - number of parameters required by the model
+        """Spectral Model Initialization
 
-        parnames - a list or tuple of the parameter names
+        Create a Spectral Model class for data fitting
 
-        parvalues - the initial guesses for the input parameters (defaults to ZEROS)
-
-        parlimits - the upper/lower limits for each variable     (defaults to ZEROS)
-
-        parfixed  - Can declare any variables to be fixed        (defaults to ZEROS)
-
-        parerror  - technically an output parameter... hmm       (defaults to ZEROS)
-
-        partied   - not the past tense of party.  Can declare, via text, that
+        Parameters
+        ----------
+        modelfunc : function
+            the model function to be fitted.  Should take an X-axis
+            (spectroscopic axis) as an input followed by input parameters.
+            Returns an array with the same shape as the input X-axis
+        npars : int
+            number of parameters required by the model
+        parnames : list (optional)
+            a list or tuple of the parameter names
+        parvalues : list (optional)
+            the initial guesses for the input parameters (defaults to ZEROS)
+        parlimits :  list (optional)
+            the upper/lower limits for each variable     (defaults to ZEROS)
+        parfixed  : list (optional)
+            Can declare any variables to be fixed        (defaults to ZEROS)
+        parerror  : list (optional)
+            technically an output parameter... hmm       (defaults to ZEROS)
+        partied   : list (optional)
+            not the past tense of party.  Can declare, via text, that
             some parameters are tied to each other.  Defaults to zeros like the
             others, but it's not clear if that's a sensible default
-
-        fitunits - convert X-axis to these units before passing to model
-
-        parsteps - minimum step size for each paremeter          (defaults to ZEROS)
-
-        npeaks   - default number of peaks to assume when fitting (can be overridden)
-
-        shortvarnames - TeX names of the variables to use when annotating
-
-        multisingle - Are there multiple peaks (no background will be fit) or
+        fitunits : list (optional)
+            convert X-axis to these units before passing to model
+        parsteps : list (optional)
+            minimum step size for each paremeter          (defaults to ZEROS)
+        npeaks   : list (optional)
+            default number of peaks to assume when fitting (can be overridden)
+        shortvarnames : list (optional)
+            TeX names of the variables to use when annotating
+        multisingle : list (optional)
+            Are there multiple peaks (no background will be fit) or
             just a single peak (a background may/will be fit)
+
+        Returns
+        -------
+        A tuple containing (model best-fit parameters, the model, parameter
+        errors, chi^2 value)
         """
 
         self.modelfunc = modelfunc
+        if self.__doc__ is None:
+            self.__doc__ = modelfunc.__doc__
+        else:
+            self.__doc__ += modelfunc.__doc__
         self.npars = npars 
         self.default_npars = npars
         self.multisingle = multisingle
@@ -92,9 +109,12 @@ class SpectralModel(fitter.SimpleFitter):
             debug=False,
             **kwargs):
         """
-        Generate a parinfo dict that matches the inputs
+        Generate a `ParinfoList` that matches the inputs
 
-        .. todo:: Make parinfo a dict that checks for limits when setting values
+        This code is complicated - it can take inputs in a variety of different
+        forms with different priority.  It will return a `ParinfoList` (and
+        therefore must have values within parameter ranges)
+
         """
 
         # for backwards compatibility - partied = tied, etc.
@@ -287,6 +307,21 @@ class SpectralModel(fitter.SimpleFitter):
     def lmfitter(self, xax, data, err=None, parinfo=None, quiet=True, debug=False, **kwargs):
         """
         Use lmfit instead of mpfit to do the fitting
+
+        Parameters
+        ----------
+        xax : SpectroscopicAxis 
+            The X-axis of the spectrum
+        data : ndarray
+            The data to fit
+        err : ndarray (optional)
+            The error on the data.  If unspecified, will be uniform unity
+        parinfo : ParinfoList
+            The guesses, parameter limits, etc.  See
+            `pyspeckit.spectrum.parinfo` for details
+        quiet : bool
+            If false, print out some messages about the fitting
+
         """
         try:
             import lmfit
@@ -349,25 +384,28 @@ class SpectralModel(fitter.SimpleFitter):
     def fitter(self, xax, data, err=None, quiet=True, veryverbose=False,
             debug=False, parinfo=None, **kwargs):
         """
-        Run the fitter.  Must pass the x-axis and data.  Can include
-        error, parameter guesses, and a number of verbosity parameters.
+        Run the fitter using mpfit.
+        
+        kwargs will be passed to _make_parinfo and mpfit.
 
-        quiet - pass to mpfit.  If False, will print out the parameter values
-            for each iteration of the fitter
-
-        veryverbose - print out a variety of mpfit output parameters
-
-        debug - raise an exception (rather than a warning) if chi^2 is nan
-
-        accepts *tied*, *limits*, *limited*, and *fixed* as keyword arguments.
-            They must be lists of length len(params)
-
-        parinfo - You can override the class parinfo dict with this, though
-            that largely defeats the point of having the wrapper class.  This class
-            does NO checking for whether the parinfo dict is valid.
-
-        kwargs are passed to mpfit after going through _make_parinfo to strip out things
-        used by this class
+        Parameters
+        ----------
+        xax : SpectroscopicAxis 
+            The X-axis of the spectrum
+        data : ndarray
+            The data to fit
+        err : ndarray (optional)
+            The error on the data.  If unspecified, will be uniform unity
+        parinfo : ParinfoList
+            The guesses, parameter limits, etc.  See
+            `pyspeckit.spectrum.parinfo` for details
+        quiet : bool
+            pass to mpfit.  If False, will print out the parameter values for
+            each iteration of the fitter
+        veryverbose : bool
+            print out a variety of mpfit output parameters
+        debug : bool
+            raise an exception (rather than a warning) if chi^2 is nan
         """
 
         if parinfo is None:
@@ -494,7 +532,8 @@ class SpectralModel(fitter.SimpleFitter):
 
     def components(self, xarr, pars, **kwargs):
         """
-        Return a numpy ndarray of the independent components of the fits
+        Return a numpy ndarray of shape [npeaks x modelshape] of the
+        independent components of the fits
         """
 
         modelcomponents = np.array(
@@ -502,6 +541,10 @@ class SpectralModel(fitter.SimpleFitter):
                 *pars[i*self.npars:(i+1)*self.npars],
                 **dict(self.modelfunc_kwargs.items()+kwargs.items()))
             for i in range(self.npeaks)])
+
+        if len(modelcomponents.shape) == 3:
+            newshape = [modelcomponents.shape[0]*modelcomponents.shape[1], modelcomponents.shape[2]]
+            modelcomponents = np.reshape(modelcomponents, newshape)
 
         return modelcomponents
 

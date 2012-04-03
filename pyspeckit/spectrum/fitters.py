@@ -606,7 +606,7 @@ class Specfit(interactive.Interactive):
                 color=composite_fit_color, linewidth=lw)
         
         # Plot components
-        if show_components:
+        if show_components or show_hyperfine_components:
             if show_hyperfine_components is not None:
                 component_kwargs['return_hyperfine_components'] = show_hyperfine_components
             self._component_kwargs = component_kwargs

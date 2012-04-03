@@ -139,10 +139,10 @@ class Baseline(interactive.Interactive):
                 #exclude = [np.argmin(abs(self.Spectrum.xarr-vlo)),argmin(abs(self.Spectrum.xarr-vhi))]
                 specfit.fullsizemodel() # make sure the spectrum is the right size
                 if reset_selection:
-                    self.includemask = abs(specfit.model) < exclusionlevel*min(abs(np.array(specfit.modelpars[0::3])))
+                    self.includemask = abs(specfit.model) < exclusionlevel*np.abs(specfit.model).max()
                 else:
                     # only set additional FALSE
-                    self.includemask *= abs(specfit.model) < exclusionlevel*min(abs(np.array(specfit.modelpars[0::3])))
+                    self.includemask *= abs(specfit.model) < exclusionlevel*np.abs(specfit.model).max()
             elif reset_selection:
                 self.includemask[:] = True
             # must select region (i.e., exclude edges) AFTER setting 'positive' include region
