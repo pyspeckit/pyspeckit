@@ -306,7 +306,9 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
     #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
 
     if verbose:
-        print "density %20.12g column %20.12g: tau %20.12g tex %20.12g temperature: %20.12g opr: %20.12g" % (density, column, tau, tex, temperature, opr)
+        print "density %20.12g column %20.12g: temperature: %20.12g opr: %20.12g xoff_v: %20.12g  width: %20.12g" % (density, column, temperature, orthopara, xoff_v, width)
+        print "tau: ",tau," tex: ",tex
+        print "minfreq: ",minfreq," maxfreq: ",maxfreq
 
     if debug:
         import pdb; pdb.set_trace()
@@ -380,3 +382,31 @@ formaldehyde_vheight_fitter = formaldehyde_model(fitter.vheightmodel(formaldehyd
         shortvarnames=("H","A","v","\\sigma"), # specify the parameter names (TeX is OK)
         fitunits='Hz' )
 
+
+try:
+    import pymodelfit
+
+    class pmfFormaldehydeRadexModel(pymodelfit.FunctionModel1DAuto):
+        def f(self,x,density0=4,column0=13,orthopara0=-1.0, temperature0=15.0, xoff_v0=0.0,width0=1.0):
+            return formaldehyde_radex_orthopara_temp(x,
+                density=density0, column=column0,
+                xoff_v=xoff_v0,width=width0,
+                orthopara=10**orthopara0,
+                temperature=temperature0,
+                texgrid=((4,5,texgrid1),(14,15,texgrid2)),
+                taugrid=((4,5,taugrid1),(14,15,taugrid2)),
+                hdr=hdr)
+
+    class pmfFormaldehydeModel(pymodelfit.FunctionModel1DAuto):
+        def f(self, x, amp0=1.0, xoff_v0=0.0,width0=1.0):
+            return formaldehyde(x,
+                    amp=amp0,
+                    xoff_v=xoff_v0,width=width0)
+
+    class pmfFormaldehydeModelVtau(pymodelfit.FunctionModel1DAuto):
+        def f(self, x, Tex0=1.0, tau0=0.01, xoff_v0=0.0, width0=1.0):
+            return formaldehyde_vtau(x,
+                    Tex=Tex0, tau=tau0,
+                    xoff_v=xoff_v0,width=width0)
+except ImportError:
+    pass

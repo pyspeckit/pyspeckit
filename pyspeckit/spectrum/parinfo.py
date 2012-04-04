@@ -128,13 +128,12 @@ class ParinfoList(list):
         """
 
         if len(lmpars) == len(self):
-            self.names = [p.name for p in lmpars.values()]
-            self.values = [p.value for p in lmpars.values()]
-            self.errors = [p.stderr for p in lmpars.values()]
-            for ii,P in enumerate(lmpars.values()):
-                self[ii].limits = (P.min,P.max)
-                self[ii].limited = (P.min is not None,P.max is not None)
-                self[ii].expr = '' if P.expr is None else P.expr
+            for P in lmpars.values():
+                self[P.name].value = P.value
+                self[P.name].error = P.stderr
+                self[P.name].limits = (P.min,P.max)
+                self[P.name].limited = (P.min is not None,P.max is not None)
+                self[P.name].expr = '' if P.expr is None else P.expr
         else:
             for par in lmpars.values():
                 self.append(Parinfo(par))

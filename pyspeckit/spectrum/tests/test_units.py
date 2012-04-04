@@ -26,6 +26,7 @@ def test_convert_back(unit_from, unit_to,convention):
     xarr.convert_to_unit(unit_to,convention=convention)
     xarr.convert_to_unit(unit_from,convention=convention)
     assert all(np.abs((xarr - xvals)/xvals) < threshold)
+    assert xarr.units == unit_from
 
 if __name__=="__main__":
     unit_from='GHz'

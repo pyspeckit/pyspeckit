@@ -378,6 +378,10 @@ class SpectralModel(fitter.SimpleFitter):
                 chi2 = ((data-self.model)**2).sum()
         if np.isnan(chi2):
             warn( "Warning: chi^2 is nan" )
+    
+        if self.mp.ier not in [1,2,3,4]:
+            print "Fitter failed: %s, %s" % (mp.message, mp.lmdif_message)
+
         return self.mpp,self.model,self.mpperr,chi2
 
 

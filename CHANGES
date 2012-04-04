@@ -1,6 +1,12 @@
 CHANGES
 *******
 
+Release 0.1.8
+~~~~~~~~~~~~~
+    * BUGFIX RELEASE
+    * Documentation updates
+    * Added support for lmfit-py as a fitter (instead of mpfit)
+
 Release 0.1.7
 ~~~~~~~~~~~~~
     

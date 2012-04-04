@@ -79,6 +79,12 @@ class hyperfinemodel(object):
         # Convert X-units to frequency in Hz
         xarr = xarr.as_unit('Hz')
 
+        # Ensure parameters are scalar
+        if not np.isscalar(Tex): Tex = Tex.squeeze()
+        if not np.isscalar(tau): tau = tau.squeeze()
+        if not np.isscalar(xoff_v): xoff_v = xoff_v.squeeze()
+        if not np.isscalar(width): width = width.squeeze()
+
         # Generate an optical depth spectrum as a function of the X-axis 
         tau_nu_cumul = np.zeros(len(xarr))
         # Error check: inputing NANs results in meaningless output - return without computing a model

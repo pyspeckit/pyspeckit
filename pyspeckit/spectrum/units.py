@@ -664,6 +664,7 @@ class SpectroscopicAxis(np.ndarray):
             conversion_factor = conversion_dict[newxtype][newunit] / conversion_dict[newxtype][unit] 
             if not quiet: print "Converting units from %s to %s" % (newunit,unit)
             newxarr = newxarr*conversion_factor
+            newunit = unit
 
         if change_frame and not quiet:
             if not quiet: print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
