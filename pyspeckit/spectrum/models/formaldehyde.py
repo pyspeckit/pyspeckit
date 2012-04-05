@@ -386,17 +386,6 @@ formaldehyde_vheight_fitter = formaldehyde_model(fitter.vheightmodel(formaldehyd
 try:
     import pymodelfit
 
-    class pmfFormaldehydeRadexModel(pymodelfit.FunctionModel1DAuto):
-        def f(self,x,density0=4,column0=13,orthopara0=-1.0, temperature0=15.0, xoff_v0=0.0,width0=1.0):
-            return formaldehyde_radex_orthopara_temp(x,
-                density=density0, column=column0,
-                xoff_v=xoff_v0,width=width0,
-                orthopara=10**orthopara0,
-                temperature=temperature0,
-                texgrid=((4,5,texgrid1),(14,15,texgrid2)),
-                taugrid=((4,5,taugrid1),(14,15,taugrid2)),
-                hdr=hdr)
-
     class pmfFormaldehydeModel(pymodelfit.FunctionModel1DAuto):
         def f(self, x, amp0=1.0, xoff_v0=0.0,width0=1.0):
             return formaldehyde(x,
