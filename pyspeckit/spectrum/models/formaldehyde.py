@@ -214,8 +214,9 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
         raise ValueError("Invalid column/density")
 
     if scipyOK:
-        tau = [scipy.ndimage.map_coordinates(tg[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1) for tg in taugrid]
-        tex = [scipy.ndimage.map_coordinates(tg[temperature_gridnumber,:,:],np.array([[gridval2],[gridval1]]),order=1) for tg in texgrid]
+        slices = [temperature_gridnumber] + [slice(np.floor(gv),np.floor(gv)+2) for gv in (gridval2,gridval1)]
+        tau = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval2%1],[gridval1%1]]),order=1) for tg in taugrid]
+        tex = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval2%1],[gridval1%1]]),order=1) for tg in texgrid]
     else:
         raise ImportError("Couldn't import scipy, therefore cannot interpolate")
     #tau = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,taugrid[temperature_gridnumber,:,:])
@@ -270,36 +271,32 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
             taugrid = [pyfits.getdata(path_to_taugrid)]
             texgrid = [pyfits.getdata(path_to_texgrid)]
             hdr = pyfits.getheader(path_to_taugrid)
-            winds,zinds,yinds,xinds = np.indices(taugrid[0].shape)
-            densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
-            columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
-            temparr  = (zinds+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # temperature
-            oprarr  = (winds+hdr['CRPIX4']-1)*hdr['CDELT4']+hdr['CRVAL4'] # log ortho/para ratio
             minfreq = (4.8,)
             maxfreq = (5.0,)
     elif len(taugrid)==len(texgrid) and hdr is not None:
         minfreq,maxfreq,texgrid = zip(*texgrid)
         minfreq,maxfreq,taugrid = zip(*taugrid)
-        winds,zinds,yinds,xinds = np.indices(taugrid[0].shape)
-        densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
-        columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
-        temparr  = (zinds+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # temperature
-        oprarr  = (winds+hdr['CRPIX4']-1)*hdr['CDELT4']+hdr['CRVAL4'] # log ortho/para ratio
     else:
         raise Exception
+
+    densityarr = (np.arange(taugrid[0].shape[3])+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
+    columnarr  = (np.arange(taugrid[0].shape[2])+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+    temparr  = (np.arange(taugrid[0].shape[1])+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # temperature
+    oprarr  = (np.arange(taugrid[0].shape[0])+hdr['CRPIX4']-1)*hdr['CDELT4']+hdr['CRVAL4'] # log ortho/para ratio
     
     tau_nu_cumul = np.zeros(len(xarr))
 
-    gridval1 = np.interp(density,     densityarr[0,0,0,:],  xinds[0,0,0,:])
-    gridval2 = np.interp(column,      columnarr[0,0,:,0],   yinds[0,0,:,0])
-    gridval3 = np.interp(temperature, temparr[0,:,0,0],     zinds[0,:,0,0])
-    gridval4 = np.interp(orthopara,   oprarr[:,0,0,0],      winds[:,0,0,0])
+    gridval1 = np.interp(density,     densityarr,  np.arange(len(densityarr)))
+    gridval2 = np.interp(column,      columnarr,   np.arange(len(columnarr)))
+    gridval3 = np.interp(temperature, temparr,     np.arange(len(temparr)))
+    gridval4 = np.interp(orthopara,   oprarr,      np.arange(len(oprarr)))
     if np.isnan(gridval1) or np.isnan(gridval2):
         raise ValueError("Invalid column/density")
 
     if scipyOK:
-        tau = [scipy.ndimage.map_coordinates(tg,np.array([[gridval4],[gridval3],[gridval2],[gridval1]]),order=1,prefilter=False) for tg in taugrid]
-        tex = [scipy.ndimage.map_coordinates(tg,np.array([[gridval4],[gridval3],[gridval2],[gridval1]]),order=1,prefilter=False) for tg in texgrid]
+        slices = [slice(np.floor(gv),np.floor(gv)+2) for gv in (gridval4,gridval3,gridval2,gridval1)]
+        tau = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval4%1],[gridval3%1],[gridval2%1],[gridval1%1]]),order=1,prefilter=False) for tg in taugrid]
+        tex = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval4%1],[gridval3%1],[gridval2%1],[gridval1%1]]),order=1,prefilter=False) for tg in texgrid]
     else:
         raise ImportError("Couldn't import scipy, therefore cannot interpolate")
     #tau = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,taugrid[temperature_gridnumber,:,:])
