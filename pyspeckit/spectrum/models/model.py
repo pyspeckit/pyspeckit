@@ -243,10 +243,20 @@ class SpectralModel(fitter.SimpleFitter):
 
         return self.parinfo, kwargs
 
-    def n_modelfunc(self, pars, **kwargs):
+    def n_modelfunc(self, pars, debug=False, **kwargs):
         """
         Simple wrapper to deal with N independent peaks for a given spectral model
         """
+        if not isinstance(pars, ParinfoList):
+            try:
+                partemp = copy.copy(self.parinfo)
+                partemp._from_Parameters(pars)
+                pars = partemp
+            except AttributeError:
+                if debug: 
+                    print "Reading pars as LMPar failed."
+                    import pdb; pdb.set_trace()
+                pass
         if hasattr(pars,'values'):
             # important to treat as Dictionary, since lmfit params & parinfo both have .items
             parnames,parvals = zip(*pars.items())
@@ -254,13 +264,16 @@ class SpectralModel(fitter.SimpleFitter):
             parvals = [p.value for p in parvals]
         else:
             parvals = list(pars)
+        if debug: print "pars to n_modelfunc: ",pars
         def L(x):
             v = np.zeros(len(x))
             if self.vheight: v += parvals[0]
             # use len(pars) instead of self.npeaks because we want this to work
             # independent of the current best fit
             for jj in xrange((len(parvals)-self.vheight)/self.npars):
-                v += self.modelfunc(x, *parvals[jj*self.npars+self.vheight:(jj+1)*self.npars+self.vheight], **kwargs)
+                lower_parind = jj*self.npars+self.vheight
+                upper_parind = (jj+1)*self.npars+self.vheight
+                v += self.modelfunc(x, *parvals[lower_parind:upper_parind], **kwargs)
             return v
         return L
 
@@ -294,16 +307,6 @@ class SpectralModel(fitter.SimpleFitter):
             #pars = [par.value for par in p.values()]
             kwargs = {}
             kwargs.update(self.modelfunc_kwargs)
-
-            if len(p) < self.npars and sum(self.parinfo.fixed) > 0:
-                # must fill in fixed values in the correct order
-                newpar = []
-                for par in self.parinfo:
-                    if par.fixed:
-                        newpar.append(par.value)
-                    else:
-                        newpar.append(p.pop(0))
-                p = newpar
 
             if debug: print p,kwargs.keys()
             if err is None:

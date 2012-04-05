@@ -219,7 +219,7 @@ class Parinfo(dict):
             reprint = "Param #%i %12s = %15g" % (self.n, self.parname, self.value)
             if self.fixed:
                 reprint += " (fixed)"
-            else:
+            elif self.error is not None:
                 reprint += " +/- %15g " % (self.error)
             if any(self.limited):
                 lolim = "[%g," % self.limits[0] if self.limited[0] else "(-inf,"

@@ -306,7 +306,7 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
     #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
 
     if verbose:
-        print "density %20.12g column %20.12g: temperature: %20.12g opr: %20.12g xoff_v: %20.12g  width: %20.12g" % (density, column, temperature, orthopara, xoff_v, width)
+        print "density %20.12g   column: %20.12g   temperature: %20.12g   opr: %20.12g   xoff_v: %20.12g   width: %20.12g" % (density, column, temperature, orthopara, xoff_v, width)
         print "tau: ",tau," tex: ",tex
         print "minfreq: ",minfreq," maxfreq: ",maxfreq
 
