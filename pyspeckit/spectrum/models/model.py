@@ -286,21 +286,29 @@ class SpectralModel(fitter.SimpleFitter):
         elif self.multisingle == 'multi':
             return self.fitter(*args,**kwargs)
 
-    def lmfitfun(self,x,y,err=None):
+    def lmfitfun(self,x,y,err=None,debug=False):
         """
         Wrapper function to compute the fit residuals in an lmfit-friendly format
         """
-        if err is None:
-            def f(p): 
-                #pars = [par.value for par in p.values()]
-                kwargs = {}
-                kwargs.update(self.modelfunc_kwargs)
+        def f(p): 
+            #pars = [par.value for par in p.values()]
+            kwargs = {}
+            kwargs.update(self.modelfunc_kwargs)
+
+            if len(p) < self.npars and sum(self.parinfo.fixed) > 0:
+                # must fill in fixed values in the correct order
+                newpar = []
+                for par in self.parinfo:
+                    if par.fixed:
+                        newpar.append(par.value)
+                    else:
+                        newpar.append(p.pop(0))
+                p = newpar
+
+            if debug: print p,kwargs.keys()
+            if err is None:
                 return (y-self.n_modelfunc(p,**kwargs)(x))
-        else:
-            def f(p): 
-                #pars = [par.value for par in p.values()]
-                kwargs = {}
-                kwargs.update(self.modelfunc_kwargs)
+            else:
                 return (y-self.n_modelfunc(p,**kwargs)(x))/err
         return f
 
@@ -350,7 +358,7 @@ class SpectralModel(fitter.SimpleFitter):
         if debug:
             print "LMParams: ","\n".join([repr(p) for p in LMParams.values()])
             print "parinfo:  ",parinfo
-        minimizer = lmfit.minimize(self.lmfitfun(xax,np.array(data),err),LMParams,**kwargs)
+        minimizer = lmfit.minimize(self.lmfitfun(xax,np.array(data),err,debug=debug),LMParams,**kwargs)
         if not quiet:
             print "There were %i function evaluations" % (minimizer.nfev)
         #modelpars = [p.value for p in parinfo.values()]
