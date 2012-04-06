@@ -44,9 +44,15 @@ three for JF1F = 011, and one for JF1F = 010. Thus, the sum over all 15
 transitions gives the total spin degeneracy
 """
 line_strength_dict = { # effectively the degeneracy per rotation state...
-'10-01':1,
-'11-01':3,
-'12-01':5,
+'10-01':1.0,
+'11-01':3.0,
+'12-01':5.0,
+}
+
+relative_strength_total_degeneracy = {
+'10-01':9.0,
+'11-01':9.0,
+'12-01':9.0,
 }
 
 line_names = freq_dict.keys()
@@ -54,7 +60,7 @@ line_names = freq_dict.keys()
 ckms = units.speedoflight_ms / 1e3 #2.99792458e5
 voff_lines_dict = dict([(k,(v-83.6318470e9)/83.6318470e9*ckms) for k,v in freq_dict.iteritems()])
 
-hcn_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict)
+hcn_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy)
 hcn_amp = hcn_vtau.ampfitter
 hcn_vtau_fitter = hcn_vtau.fitter
 hcn_vtau_vheight_fitter = hcn_vtau.vheight_fitter

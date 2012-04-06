@@ -255,7 +255,8 @@ class SpectralModel(fitter.SimpleFitter):
             except AttributeError:
                 if debug: 
                     print "Reading pars as LMPar failed."
-                    import pdb; pdb.set_trace()
+                    if debug > 1:
+                        import pdb; pdb.set_trace()
                 pass
         if hasattr(pars,'values'):
             # important to treat as Dictionary, since lmfit params & parinfo both have .items

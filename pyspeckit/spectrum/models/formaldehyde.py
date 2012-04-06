@@ -150,7 +150,7 @@ voff_lines_dict={ # opposite signs of freq offset
         }
 
 
-formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, normalize_tau=True)
+formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy)
 formaldehyde_vtau_fitter = formaldehyde_vtau.fitter
 formaldehyde_vtau_vheight_fitter = formaldehyde_vtau.vheight_fitter
 
@@ -307,7 +307,7 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
         print "tau: ",tau," tex: ",tex
         print "minfreq: ",minfreq," maxfreq: ",maxfreq
 
-    if debug:
+    if debug > 1:
         import pdb; pdb.set_trace()
 
     spec = np.sum([(formaldehyde_vtau(xarr.as_unit('Hz',quiet=True),Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)

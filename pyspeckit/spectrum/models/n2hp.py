@@ -80,6 +80,24 @@ line_strength_dict = { # effectively the degeneracy per rotation state...
 '101-011':0.333,
 '101-012':0.55,
 }
+relative_strength_total_degeneracy = {
+'110-011':9.0,
+'112-011':9.0,
+'112-012':9.0,
+'111-010':9.0,
+'111-011':9.0,
+'111-012':9.0,
+'122-011':9.0,
+'122-012':9.0,
+'123-012':9.0,
+'121-010':9.0,
+'121-011':9.0,
+'121-012':9.0,
+'101-010':9.0,
+'101-011':9.0,
+'101-012':9.0,
+}
+
 """
 Line strengths of the 15 hyperfine components in J=1-0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
@@ -94,7 +112,7 @@ line_names = freq_dict.keys()
 ckms = units.speedoflight_ms / 1e3 #2.99792458e5
 voff_lines_dict = dict([(k,(v-93.176261e9)/93.176261e9*ckms) for k,v in freq_dict.iteritems()])
 
-n2hp_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict)
+n2hp_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy)
 n2hp_vtau_fitter = n2hp_vtau.fitter
 n2hp_vtau_vheight_fitter = n2hp_vtau.vheight_fitter
 

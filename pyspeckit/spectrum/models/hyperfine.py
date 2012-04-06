@@ -15,7 +15,7 @@ class hyperfinemodel(object):
     strengths when initializing, then you've got yourself a hyperfine modeler.
     """
 
-    def __init__(self, line_names, voff_lines_dict, freq_dict, line_strength_dict, normalize_tau=False):
+    def __init__(self, line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy):
         """
         Initialize the various parameters defining the hyperfine transitions
 
@@ -27,18 +27,12 @@ class hyperfinemodel(object):
 
         line_strength_dict - Relative strengths of the hyperfine components, usually determined by their degeneracy and 
             Einstein A coefficients
-
-        normalize_tau : bool
-            If the line components are blended, 'tau' refers to the total
-            optical depth of the line, and therefore the peak optical depth
-            'tau' should be the same as the input.  tau(input) = tau(peak) is
-            not guaranteed for blended lines unless they are normalized.
         """
         self.line_names = line_names
         self.voff_lines_dict = voff_lines_dict
         self.freq_dict = freq_dict
         self.line_strength_dict = line_strength_dict
-        self.normalize_tau = normalize_tau
+        self.relative_strength_total_degeneracy = relative_strength_total_degeneracy
 
         self.fitter = model.SpectralModel(self,4,
             parnames=['Tex','tau','center','width'], 
@@ -78,18 +72,9 @@ class hyperfinemodel(object):
 
 
     def hyperfine(self, xarr, Tex=5.0, tau=0.1, xoff_v=0.0, width=1.0, 
-            return_hyperfine_components=False, Tbackground=2.73, amp=None,
-            normalize_tau=None):
+            return_hyperfine_components=False, Tbackground=2.73, amp=None ):
         """
         Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.
-
-        Parameters
-        ----------
-        normalize_tau : bool
-            If the line components are blended, 'tau' refers to the total
-            optical depth of the line, and therefore the peak optical depth
-            'tau' should be the same as the input.  tau(input) = tau(peak) is
-            not guaranteed for blended lines unless they are normalized.
         """
 
         # Convert X-units to frequency in Hz
@@ -121,7 +106,7 @@ class hyperfinemodel(object):
                 nuwidth = np.abs(width/ckms*lines)
                 nuoff = xoff_v/ckms*lines
                 # the total optical depth, which is being fitted, should be the sum of the components
-                tau_line = (tau * self.line_strength_dict[linename]/np.sum(self.line_strength_dict.values())) 
+                tau_line = (tau * self.line_strength_dict[linename]/self.relative_strength_total_degeneracy[linename]) 
           
                 tau_nu = np.array(tau_line * np.exp(-(xarr+nuoff-self.freq_dict[linename])**2/(2.0*nuwidth**2)))
                 tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
@@ -130,17 +115,14 @@ class hyperfinemodel(object):
 
         # add a list of the individual 'component' spectra to the total components...
 
-        if (normalize_tau is None and self.normalize_tau) or normalize_tau:
-            norm_factor = tau / tau_nu_cumul.max()
-
         if return_hyperfine_components:
             if amp is None:
-                return (1.0-np.exp(-np.array(components)*norm_factor))*(Tex-Tbackground)
+                return (1.0-np.exp(-np.array(components)))*(Tex-Tbackground)
             else:
-                comps = (1.0-np.exp(-np.array(components)*norm_factor))*(Tex-Tbackground)
+                comps = (1.0-np.exp(-np.array(components)))*(Tex-Tbackground)
                 return comps/comps.max() * amp
 
-        spec = (1.0-np.exp(-np.array(tau_nu_cumul*norm_factor)))*(Tex-Tbackground)
+        spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(Tex-Tbackground)
       
         if amp is None:
             return spec
