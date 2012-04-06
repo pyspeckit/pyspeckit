@@ -15,6 +15,13 @@ spec = pyspeckit.Spectrum('10074-190_HCOp.fits')
 spec.xarr.convert_to_unit('km/s')
 # plot it up!
 spec.plotter()
+
+# compute statistics
+stats = spec.stats()
+
+# set the errors
+spec.error[:] = stats['std']
+
 # Subtract a baseline (the data is only 'mostly' reduced)
 spec.baseline()
 # Fit a gaussian.  We know it will be an emission line, so we force a positive guess
