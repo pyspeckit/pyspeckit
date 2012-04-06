@@ -580,6 +580,13 @@ class Specfit(interactive.Interactive):
             return self.fitter.n_modelfunc(self.parinfo,**self.fitter.modelfunc_kwargs)(xarr)
         else:
             return self.fitter.n_modelfunc(self.parinfo,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
+
+    def get_model_frompars(self, xarr, pars, debug=False):
+        """ Compute the model over a given axis """
+        if self.Spectrum.baseline.subtracted or self.vheight:
+            return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr)
+        else:
+            return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
                 
     def plot_fit(self, annotate=None, show_components=None,
             composite_fit_color='red', component_fit_color='blue', lw=0.5,

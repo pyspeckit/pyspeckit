@@ -142,7 +142,7 @@ class FitterSliders(Widget):
         def update(value):
             mpp = [slider.val for slider in self.sliders]
             for line in self.specfit.modelplot:
-                line.set_ydata(self.specfit.get_model(line.get_xdata(),mpp))
+                line.set_ydata(self.specfit.get_model_frompars(line.get_xdata(),mpp))
 
             # update components too
             for ii,line in enumerate(self.specfit._plotted_components):

@@ -314,29 +314,24 @@ class Baseline(interactive.Interactive):
             for ii,p in enumerate(self.baselinepars):
                 self.Spectrum.header.update('BLCOEF%0.2i' % (ii),p,comment="Baseline power-law best-fit coefficient x^%i" % (self.order-ii-1))
 
-    def _baseline(self, spectrum, xarr=None, err=None, xmin='default', xmax='default',
+    def _baseline(self, spectrum, xarr=None, err=None, 
             order=1, quiet=True, mask=None, powerlaw=False,
             xarr_fit_units='pixels', LoudDebug=False, renormalize='auto',
             zeroerr_is_OK=True, spline=False, **kwargs):
         """
         Subtract a baseline from a spectrum
-        If xmin,xmax are not specified, defaults to ignoring first and last 10% of spectrum
-        *unless* order > 1, in which case ignoring the ends tends to cause strange effects
-
-        EDIT Nov 21, 2011: DO NOT exclude ends by chopping them!  This results
-        in bad fits when indexing by pixels
         """
 
-        if xmin == 'default':
-            if order <= 1 and mask is None: xmin = np.floor( spectrum.shape[-1]*0.1 )
-            else: xmin = 0
-        elif xmin is None:
-            xmin = 0
-        if xmax == 'default':
-            if order <= 1 and mask is None: xmax = np.ceil( spectrum.shape[-1]*0.9 )
-            else: xmax = spectrum.shape[-1]
-        elif xmax is None:
-            xmax = spectrum.shape[-1]
+        #if xmin == 'default':
+        #    if order <= 1 and mask is None: xmin = np.floor( spectrum.shape[-1]*0.1 )
+        #    else: xmin = 0
+        #elif xmin is None:
+        #    xmin = 0
+        #if xmax == 'default':
+        #    if order <= 1 and mask is None: xmax = np.ceil( spectrum.shape[-1]*0.9 )
+        #    else: xmax = spectrum.shape[-1]
+        #elif xmax is None:
+        #    xmax = spectrum.shape[-1]
         
         if xarr is None:
             xarr = np.indices(spectrum.shape).squeeze()
@@ -356,8 +351,8 @@ class Baseline(interactive.Interactive):
                 err[err == 0] = 1e10
 
 
-        err[:xmin] = 1e10
-        err[xmax:] = 1e10
+        #err[:xmin] = 1e10
+        #err[xmax:] = 1e10
         if mask is not None:
             if mask.dtype.name != 'bool': mask = mask.astype('bool')
             err[mask] = 1e10
@@ -368,8 +363,6 @@ class Baseline(interactive.Interactive):
 
         #xarrconv = xarr[xmin:xmax].as_unit(xarr_fit_units)
         OK = True-mask
-        OK[:xmin] = False
-        OK[xmax:] = False
         xarrconv = xarr.as_unit(xarr_fit_units)
         if powerlaw:
             pguess = [np.median(spectrum[OK]),2,xarrconv[OK][0]-1]
@@ -398,9 +391,6 @@ class Baseline(interactive.Interactive):
         #        print "BASELINE: Renormalizing data by factor %e to improve fitting procedure" % scalefactor
         #        spectrum /= scalefactor
         #        err /= scalefactor
-
-        if LoudDebug:
-            print "In _baseline, xmin: %i, xmax: %i, len(spectrum)=%i, len(err)=%i" % (xmin,xmax,len(spectrum),len(err))
 
         import pyspeckit.mpfit as mpfit
         mp = mpfit.mpfit(mpfitfun(spectrum[OK],err[OK]),xall=pguess,quiet=quiet) # mpfit doesn't need to take kwargs, I think ,**kwargs)

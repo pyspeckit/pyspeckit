@@ -150,7 +150,7 @@ voff_lines_dict={ # opposite signs of freq offset
         }
 
 
-formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict)
+formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, normalize_tau=True)
 formaldehyde_vtau_fitter = formaldehyde_vtau.fitter
 formaldehyde_vtau_vheight_fitter = formaldehyde_vtau.vheight_fitter
 
