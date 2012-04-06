@@ -78,6 +78,7 @@ class Interactive(object):
                 if debug: print "Button 2 action"
                 self.button2action(event,debug=debug)
             elif button in ('d','D','3',3): # d for done
+                if debug: print "Button 3 action"
                 self.button3action(event,debug=debug)
             elif button in ('?'):
                 print self.interactive_help_message
@@ -94,6 +95,8 @@ class Interactive(object):
                 else: 
                     print "ERROR: Did not find fitter %s" % fittername
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
+        elif debug:
+            print "Button press not acknowledged",event
 
 
     def selectregion_interactive(self, event, mark_include=True, debug=False, **kwargs):
@@ -243,12 +246,37 @@ class Interactive(object):
 
         """
         if print_message: print self.interactive_help_message
-        if clear_all_connections: self.clear_all_connections()
-        event_manager = lambda(x): self.event_manager(x, debug=debug, **kwargs)
-        event_manager.__name__ = "event_manager"
-        self.click = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',event_manager)
-        self.keyclick = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('key_press_event',event_manager)
+        if clear_all_connections: 
+            self.clear_all_connections()
+            self.Spectrum.plotter._disconnect_matplotlib_keys()
+        key_manager = lambda(x): self.event_manager(x, debug=debug, **kwargs)
+        click_manager = lambda(x): self.event_manager(x, debug=debug, **kwargs)
+        key_manager.__name__ = "event_manager"
+        click_manager.__name__ = "event_manager"
+        self.click    = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',click_manager)
+        self.keyclick = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('key_press_event',key_manager)
         self._callbacks = self.Spectrum.plotter.figure.canvas.callbacks.callbacks
+        self._check_connections()
+
+    def _check_connections(self):
+        """
+        Make sure the interactive session acepts user input
+        """
+        # check for connections
+        OKclick = False
+        OKkey   = False
+        for cb in self._callbacks.values():
+            if self.click in cb.keys():
+                OKclick = True
+            if self.keyclick in cb.keys():
+                OKkey = True
+        if self.keyclick == self.click:
+            OKkey = False
+        if not OKkey:
+            print "Interactive session failed to connect keyboard.  Key presses will not be accepted."
+        if not OKclick:
+            print "Interactive session failed to connect mouse.  Mouse clicks will not be accepted."
+
 
     def clear_highlights(self):
         for p in self.button1plot:
@@ -259,7 +287,7 @@ class Interactive(object):
 
     def selectregion(self, xmin=None, xmax=None, xtype='wcs', highlight=False,
             fit_plotted_area=True, reset=False, verbose=False, debug=False,
-            use_window_limits=None, **kwargs):
+            use_window_limits=None, exclude=None, **kwargs):
         """
         Pick a fitting region in either WCS units or pixel units
 
@@ -286,6 +314,13 @@ class Interactive(object):
             :attr:`pyspeckit.spectrum.interactive.use_window_limits`.
             Overwrites xmin,xmax set by plotter
             
+        exclude: {list of length 2n,'interactive', None}
+            * interactive: start an interactive session to select the
+              include/exclude regions
+            * list: parsed as a series of (startpoint, endpoint) in the
+              spectrum's X-axis units.  Will exclude the regions between
+              startpoint and endpoint
+            * None: No exclusion
         """
         if debug: print "selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset
         if xmin is not None and xmax is not None:
@@ -330,6 +365,13 @@ class Interactive(object):
 
         self.includemask[:self.xmin] = False
         self.includemask[self.xmax:] = False
+
+        # Exclude keyword-specified excludes.  Assumes exclusion in current X array units
+        if exclude is not None and len(exclude) % 2 == 0:
+            for x1,x2 in zip(exclude[::2],exclude[1::2]):
+                x1 = self.Spectrum.xarr.x_to_pix(x1)
+                x2 = self.Spectrum.xarr.x_to_pix(x2)
+                self.includemask[x1:x2] = False
 
         if highlight:
             self.highlight_fitregion()

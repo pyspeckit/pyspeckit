@@ -396,6 +396,10 @@ class Plotter(object):
                 print "\n\nBaseline initiated from the interactive plotter (with reset).  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
                 self._disconnect_matplotlib_keys()
                 self.Spectrum.baseline(interactive=True, reset_selection=True)
+                if not hasattr(self,'FitterTool'):
+                    self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
+                elif self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
+                    self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
             elif event.key == 'r':
                 print "\n\nReconnected matplotlib shortcut keys."
                 self._reconnect_matplotlib_keys()

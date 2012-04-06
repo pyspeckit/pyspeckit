@@ -89,13 +89,6 @@ class Baseline(interactive.Interactive):
         save: bool
             Write the baseline fit coefficients into the spectrum's header in the
             keywords BLCOEFnn
-        exclude: {list of length 2n,'interactive', None}
-            * interactive: start an interactive session to select the
-              include/exclude regions
-            * list: parsed as a series of (startpoint, endpoint) in the
-              spectrum's X-axis units.  Will exclude the regions between
-              startpoint and endpoint
-            * None: No exclusion
         interactive: bool
             Specify the include/exclude regions through the interactive plot
             window
@@ -147,8 +140,8 @@ class Baseline(interactive.Interactive):
                 self.includemask[:] = True
             # must select region (i.e., exclude edges) AFTER setting 'positive' include region
             # also, DON'T highlight here because it will be cleared
-            self.selectregion(fit_plotted_area=fit_plotted_area, debug=debug, **kwargs)
-            self.button2action(exclude=exclude, 
+            self.selectregion(fit_plotted_area=fit_plotted_area, exclude=exclude, debug=debug, **kwargs)
+            self.button2action(
                     fit_original=fit_original,
                     baseline_fit_color=baseline_fit_color, 
                     debug=debug, **kwargs)
@@ -157,11 +150,10 @@ class Baseline(interactive.Interactive):
 
     def button2action(self, event=None, debug=False, subtract=True,
             fit_original=False, powerlaw=False, baseline_fit_color='orange',
-            exclude=None, **kwargs):
+            **kwargs):
         """
         Do the baseline fitting and save and plot the results.
 
-        Can specify a region to exclude using velocity units or pixel units
         """
         if debug: print "Button 2/3 Baseline.  Subtract=",subtract
         if self.subtracted:
@@ -170,13 +162,6 @@ class Baseline(interactive.Interactive):
         self.clear_highlights()
 
         xarr_fit_units = self.Spectrum.xarr.units
-
-        # Exclude keyword-specified excludes.  Assumes exclusion in current X array units
-        if exclude is not None and len(exclude) % 2 == 0:
-            for x1,x2 in zip(exclude[::2],exclude[1::2]):
-                x1 = self.Spectrum.xarr.x_to_pix(x1)
-                x2 = self.Spectrum.xarr.x_to_pix(x2)
-                self.includemask[x1:x2] = False
 
         if debug: print "Fitting baseline"
         self.basespec, self.baselinepars = self._baseline(
