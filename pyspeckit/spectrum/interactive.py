@@ -291,8 +291,8 @@ class Interactive(object):
         if xmin is not None and xmax is not None:
             if verbose or debug: print "Setting xmin,xmax from keywords %g,%g" % (xmin,xmax)
             if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
-                self.xmin = np.floor(self.Spectrum.xarr.x_to_pix(xmin))
-                self.xmax = np.ceil(self.Spectrum.xarr.x_to_pix(xmax))
+                self.xmin = numpy.floor(self.Spectrum.xarr.x_to_pix(xmin))
+                self.xmax = numpy.ceil(self.Spectrum.xarr.x_to_pix(xmax))
             else:
                 self.xmin = xmin
                 self.xmax = xmax
@@ -306,8 +306,8 @@ class Interactive(object):
             if use_window_limits or (use_window_limits is None and self.use_window_limits):
                 if debug: print "Resetting plotter xmin,xmax and ymin,ymax to the currently visible region"
                 self.Spectrum.plotter.set_limits_from_visible_window(debug=debug)
-            self.xmin = np.floor(self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmin))
-            self.xmax = np.ceil(self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmax))
+            self.xmin = numpy.floor(self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmin))
+            self.xmax = numpy.ceil(self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmax))
             if self.xmin>self.xmax: 
                 self.xmin,self.xmax = self.xmax,self.xmin
             if debug: print "Including all plotted area (as defined by [plotter.xmin,plotter.xmax]) for fit"
