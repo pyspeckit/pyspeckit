@@ -243,11 +243,13 @@ class SpectralModel(fitter.SimpleFitter):
 
         return self.parinfo, kwargs
 
-    def n_modelfunc(self, pars, debug=False, **kwargs):
+    def n_modelfunc(self, pars=None, debug=False, **kwargs):
         """
         Simple wrapper to deal with N independent peaks for a given spectral model
         """
-        if not isinstance(pars, ParinfoList):
+        if pars is None:
+            pars = self.parinfo
+        elif not isinstance(pars, ParinfoList):
             try:
                 partemp = copy.copy(self.parinfo)
                 partemp._from_Parameters(pars)
@@ -623,14 +625,49 @@ class SpectralModel(fitter.SimpleFitter):
 
         return sampler
 
-    def get_pymc(self, data, error, use_fitted_values=False, **kwargs):
+    def get_pymc(self, xarr, data, error, use_fitted_values=False, inf=1e10, **kwargs):
         """
-        Create a pymc MCMC sampler
+        Create a pymc MCMC sampler.  Defaults to 'uninformative' priors
+
+        Parameters
+        ----------
+        data : np.ndarray
+        error : np.ndarray
+        use_fitted_values : bool
+            Each parameter with a measured error will have a prior defined by
+            the Normal distribution with sigma = par.error and mean = par.value
+
+        Examples
+        --------
+
+        >>> x = pyspeckit.units.SpectroscopicAxis(np.linspace(-10,10,50), unit='km/s')
+        >>> e = np.random.randn(50)
+        >>> d = np.exp(-np.asarray(x)**2/2.)*5 + e
+        >>> sp = pyspeckit.Spectrum(data=d, xarr=x, error=np.ones(50)*e.std())
+        >>> sp.specfit(fittype='gaussian')
+        >>> MCuninformed = sp.specfit.fitter.get_pymc(sp.xarr, sp.data, sp.error)
+        >>> MCwithpriors = sp.specfit.fitter.get_pymc(sp.xarr, sp.data, sp.error, use_fitted_values=True)
+        >>> MCuninformed.sample(1000)
+        >>> MCuninformed.stats()['AMPLITUDE0']
+        >>> # WARNING: This will fail because width cannot be set <0, but it may randomly reach that...
+        >>> # How do you define a likelihood distribution with a lower limit?!
+        >>> MCwithpriors.sample(1000)
+        >>> MCwithpriors.stats()['AMPLITUDE0']
+        
         """
         try:
             import pymc
         except ImportError:
             return
+
+        #def lowerlimit_like(x,lolim):
+        #    "lower limit (log likelihood - set very positive for unacceptable values)"
+        #    return (x>=lolim) / 1e10
+        #def upperlimit_like(x,uplim):
+        #    "upper limit"
+        #    return (x<=uplim) / 1e10
+        #LoLim = pymc.distributions.stochastic_from_dist('lolim', logp=lowerlimit_like, dtype=np.float, mv=False)
+        #UpLim = pymc.distributions.stochastic_from_dist('uplim', logp=upperlimit_like, dtype=np.float, mv=False)
 
         funcdict = {}
         for par in self.parinfo:
@@ -638,22 +675,30 @@ class SpectralModel(fitter.SimpleFitter):
                 funcdict[par.parname] = pymc.distributions.Uniform(par.parname, par.value, par.value, value=par.value)
             elif use_fitted_values:
                 if par.error > 0:
-                    funcdict[par.parname] = pymc.distributions.Normal(par.parname, par.value, par.error)
+                    funcdict[par.parname] = pymc.distributions.Normal(par.parname, par.value, 1./par.error**2)
                 else:
-                    funcdict[par.parname] = pymc.distributions.Uninformative(p.parname, value=p.value)
+                    funcdict[par.parname] = pymc.distributions.Uninformative(par.parname, value=par.value)
             elif any(par.limited):
-                lowlim = par.limits[0] if par.limited[0] else -np.inf
-                uplim  = par.limits[1] if par.limited[1] else  np.inf
-                funcdict[par.parname] = pymc.distributions.Uniform(par.parname, lowlim, uplim, value=par.value)
+                lolim = par.limits[0] if par.limited[0] else -inf
+                uplim = par.limits[1] if par.limited[1] else  inf
+                funcdict[par.parname] = pymc.distributions.Uniform(par.parname, lolim, uplim, value=par.value)
             else:
-                funcdict[par.parname] = pymc.distributions.Uninformative(p.parname, value=p.value)
+                funcdict[par.parname] = pymc.distributions.Uninformative(par.parname, value=par.value)
 
         d = dict(funcdict)
 
-        funcdet=pymc.Deterministic(name='f',eval=self.n_modelfunc,parents=funcdict,doc="The model function")
+        def modelfunc(xarr, pars=self.parinfo, **kwargs):
+            for k,v in kwargs.iteritems():
+                if k in pars.keys():
+                    pars[k].value = v
+
+            return self.n_modelfunc(pars)(xarr)
+
+        funcdict['xarr'] = xarr
+        funcdet=pymc.Deterministic(name='f',eval=modelfunc,parents=funcdict,doc="The model function")
         d['f'] = funcdet
 
-        datamodel = pymc.distributions.Normal('data',mu=funcdet,tau=1/error**2,observed=True,value=data)
+        datamodel = pymc.distributions.Normal('data',mu=funcdet,tau=1/np.asarray(error)**2,observed=True,value=np.asarray(data))
         d['data']=datamodel
         
         return pymc.MCMC(d)
