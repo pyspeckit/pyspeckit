@@ -572,3 +572,89 @@ class SpectralModel(fitter.SimpleFitter):
         """
 
         return self.model.sum()
+
+    def logp(self, data, error, pars=None):
+        """
+        Return the log probability of the model
+        """
+        if pars is None:
+            pars = self.parinfo
+        model = self.n_modelfunc(pars)
+
+        difference = np.abs(data-model)
+
+        # prob = 1/(2*np.pi)**0.5/error * exp(-difference**2/(2.*error**2))
+        
+        logprob = np.log(1/(2*np.pi)**0.5/error) * (-difference**2/(2.*error**2))
+
+        totallogprob = np.sum(logprob)
+
+        return totallogprob
+
+    def get_emcee_sampler(self, data, error, **kwargs):
+        """
+        Get an emcee walker for the data & model
+        """
+        try:
+            import emcee
+        except ImportError:
+            return
+
+        def probfunc(pars,data,error):
+            return self.logp(pars,data,error)
+
+        sampler = emcee.Sampler(self.npars*self.npeaks, probfunc, args=[data,error], **kwargs)
+
+        return sampler
+
+    def get_emcee_ensemblesampler(self, data, error, nwalkers, **kwargs):
+        """
+        Get an emcee walker for the data & model
+        """
+        try:
+            import emcee
+        except ImportError:
+            return
+
+        def probfunc(pars,data,error):
+            return self.logp(pars,data,error)
+
+        sampler = emcee.EnsembleSampler(nwalkers, self.npars*self.npeaks, probfunc, args=[data,error], **kwargs)
+
+        return sampler
+
+    def get_pymc(self, data, error, use_fitted_values=False, **kwargs):
+        """
+        Create a pymc MCMC sampler
+        """
+        try:
+            import pymc
+        except ImportError:
+            return
+
+        funcdict = {}
+        for par in self.parinfo:
+            if par.fixed:
+                funcdict[par.parname] = pymc.distributions.Uniform(par.parname, par.value, par.value, value=par.value)
+            elif use_fitted_values:
+                if par.error > 0:
+                    funcdict[par.parname] = pymc.distributions.Normal(par.parname, par.value, par.error)
+                else:
+                    funcdict[par.parname] = pymc.distributions.Uninformative(p.parname, value=p.value)
+            elif any(par.limited):
+                lowlim = par.limits[0] if par.limited[0] else -np.inf
+                uplim  = par.limits[1] if par.limited[1] else  np.inf
+                funcdict[par.parname] = pymc.distributions.Uniform(par.parname, lowlim, uplim, value=par.value)
+            else:
+                funcdict[par.parname] = pymc.distributions.Uninformative(p.parname, value=p.value)
+
+        d = dict(funcdict)
+
+        funcdet=pymc.Deterministic(name='f',eval=self.n_modelfunc,parents=funcdict,doc="The model function")
+        d['f'] = funcdet
+
+        datamodel = pymc.distributions.Normal('data',mu=funcdet,tau=1/error**2,observed=True,value=data)
+        d['data']=datamodel
+        
+        return pymc.MCMC(d)
+    

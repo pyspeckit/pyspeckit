@@ -294,7 +294,7 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
         raise ValueError("Invalid column/density")
 
     if scipyOK:
-        slices = [slice(np.floor(gv),np.floor(gv)+2) for gv in (gridval4,gridval3,gridval2,gridval1)]
+        slices = [slice(int(np.floor(gv)),int(np.floor(gv)+2)) for gv in (gridval4,gridval3,gridval2,gridval1)]
         tau = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval4%1],[gridval3%1],[gridval2%1],[gridval1%1]]),order=1,prefilter=False) for tg in taugrid]
         tex = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval4%1],[gridval3%1],[gridval2%1],[gridval1%1]]),order=1,prefilter=False) for tg in texgrid]
     else:
