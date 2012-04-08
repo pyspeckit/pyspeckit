@@ -587,7 +587,8 @@ class SpectralModel(fitter.SimpleFitter):
 
         # prob = 1/(2*np.pi)**0.5/error * exp(-difference**2/(2.*error**2))
         
-        logprob = np.log(1/(2*np.pi)**0.5/error) * (-difference**2/(2.*error**2))
+        #logprob = np.log(1./(2.*np.pi)**0.5/error) * (-difference**2/(2.*error**2))
+        logprob = (-difference**2/(2.*error**2))
 
         totallogprob = np.sum(logprob)
 
@@ -596,6 +597,25 @@ class SpectralModel(fitter.SimpleFitter):
     def get_emcee_sampler(self, xarr, data, error, **kwargs):
         """
         Get an emcee walker for the data & model
+
+        Parameters
+        ----------
+        xarr : pyspeckit.units.SpectroscopicAxis
+        data : np.ndarray
+        error : np.ndarray
+
+        Examples
+        --------
+
+        >>> import pyspeckit
+        >>> x = pyspeckit.units.SpectroscopicAxis(np.linspace(-10,10,50), unit='km/s')
+        >>> e = np.random.randn(50)
+        >>> d = np.exp(-np.asarray(x)**2/2.)*5 + e
+        >>> sp = pyspeckit.Spectrum(data=d, xarr=x, error=np.ones(50)*e.std())
+        >>> sp.specfit(fittype='gaussian')
+        >>> emcee_sampler = sp.specfit.fitter.get_emcee_sampler(sp.xarr, sp.data, sp.error)
+        >>> p0 = sp.specfit.parinfo
+        >>> emcee_sampler.run_mcmc(p0,100)
         """
         try:
             import emcee
@@ -605,7 +625,7 @@ class SpectralModel(fitter.SimpleFitter):
         def probfunc(pars):
             return self.logp(xarr, data, error, pars=pars)
 
-        sampler = emcee.Sampler(self.npars*self.npeaks, probfunc, **kwargs)
+        sampler = emcee.MHSampler(self.npars*self.npeaks+self.vheight, probfunc, **kwargs)
 
         return sampler
 
@@ -623,12 +643,16 @@ class SpectralModel(fitter.SimpleFitter):
         Examples
         --------
 
+        >>> import pyspeckit
         >>> x = pyspeckit.units.SpectroscopicAxis(np.linspace(-10,10,50), unit='km/s')
         >>> e = np.random.randn(50)
         >>> d = np.exp(-np.asarray(x)**2/2.)*5 + e
         >>> sp = pyspeckit.Spectrum(data=d, xarr=x, error=np.ones(50)*e.std())
         >>> sp.specfit(fittype='gaussian')
-        >>> emcee_ensemble = sp.specfit.fitter.get_emcee_ensemble(sp.xarr, sp.data, sp.error, 10)
+        >>> nwalkers = 8
+        >>> emcee_ensemble = sp.specfit.fitter.get_emcee_ensemblesampler(sp.xarr, sp.data, sp.error, nwalkers)
+        >>> p0 = np.array([np.random.randn(nwalkers),np.random.randn(nwalkers),np.random.randn(nwalkers),np.random.rand(nwalkers)]).swapaxes(0,1)
+        >>> pos,logprob,state = emcee_ensemble.run_mcmc(p0,100)
         """
         try:
             import emcee
@@ -638,7 +662,7 @@ class SpectralModel(fitter.SimpleFitter):
         def probfunc(pars):
             return self.logp(xarr, data, error, pars=pars)
 
-        sampler = emcee.EnsembleSampler(nwalkers, self.npars*self.npeaks, probfunc, **kwargs)
+        sampler = emcee.EnsembleSampler(nwalkers, self.npars*self.npeaks+self.vheight, probfunc, **kwargs)
 
         return sampler
 
