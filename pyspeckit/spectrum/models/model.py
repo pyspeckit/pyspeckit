@@ -625,6 +625,7 @@ class SpectralModel(fitter.SimpleFitter):
         def probfunc(pars):
             return self.logp(xarr, data, error, pars=pars)
 
+        raise NotImplementedError("emcee's metropolis-hastings sampler is not implemented; use pymc")
         sampler = emcee.MHSampler(self.npars*self.npeaks+self.vheight, probfunc, **kwargs)
 
         return sampler
