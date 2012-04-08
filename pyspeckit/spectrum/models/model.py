@@ -575,13 +575,13 @@ class SpectralModel(fitter.SimpleFitter):
 
         return self.model.sum()
 
-    def logp(self, data, error, pars=None):
+    def logp(self, xarr, data, error, pars=None):
         """
         Return the log probability of the model
         """
         if pars is None:
             pars = self.parinfo
-        model = self.n_modelfunc(pars)
+        model = self.n_modelfunc(pars)(xarr)
 
         difference = np.abs(data-model)
 
@@ -593,7 +593,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         return totallogprob
 
-    def get_emcee_sampler(self, data, error, **kwargs):
+    def get_emcee_sampler(self, xarr, data, error, **kwargs):
         """
         Get an emcee walker for the data & model
         """
@@ -602,26 +602,43 @@ class SpectralModel(fitter.SimpleFitter):
         except ImportError:
             return
 
-        def probfunc(pars,data,error):
-            return self.logp(pars,data,error)
+        def probfunc(pars):
+            return self.logp(xarr, data, error, pars=pars)
 
-        sampler = emcee.Sampler(self.npars*self.npeaks, probfunc, args=[data,error], **kwargs)
+        sampler = emcee.Sampler(self.npars*self.npeaks, probfunc, **kwargs)
 
         return sampler
 
-    def get_emcee_ensemblesampler(self, data, error, nwalkers, **kwargs):
+    def get_emcee_ensemblesampler(self, xarr, data, error, nwalkers, **kwargs):
         """
-        Get an emcee walker for the data & model
+        Get an emcee walker ensemble for the data & model
+
+        Parameters
+        ----------
+        data : np.ndarray
+        error : np.ndarray
+        nwalkers : int
+            Number of walkers to use
+
+        Examples
+        --------
+
+        >>> x = pyspeckit.units.SpectroscopicAxis(np.linspace(-10,10,50), unit='km/s')
+        >>> e = np.random.randn(50)
+        >>> d = np.exp(-np.asarray(x)**2/2.)*5 + e
+        >>> sp = pyspeckit.Spectrum(data=d, xarr=x, error=np.ones(50)*e.std())
+        >>> sp.specfit(fittype='gaussian')
+        >>> emcee_ensemble = sp.specfit.fitter.get_emcee_ensemble(sp.xarr, sp.data, sp.error, 10)
         """
         try:
             import emcee
         except ImportError:
             return
 
-        def probfunc(pars,data,error):
-            return self.logp(pars,data,error)
+        def probfunc(pars):
+            return self.logp(xarr, data, error, pars=pars)
 
-        sampler = emcee.EnsembleSampler(nwalkers, self.npars*self.npeaks, probfunc, args=[data,error], **kwargs)
+        sampler = emcee.EnsembleSampler(nwalkers, self.npars*self.npeaks, probfunc, **kwargs)
 
         return sampler
 
