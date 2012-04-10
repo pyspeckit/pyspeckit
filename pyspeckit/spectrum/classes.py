@@ -769,7 +769,7 @@ class ObsBlock(Spectra):
         self.parse_header(self.header)
 
         for spec in speclist:
-            if type(spec) is not Spectrum:
+            if not isinstance(spec,Spectrum):
                 raise TypeError("Must create an ObsBlock with a list of spectra.")
             if not np.array_equal(spec.xarr, self.xarr):
                 if not force:

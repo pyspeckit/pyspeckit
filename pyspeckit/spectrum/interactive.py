@@ -322,7 +322,7 @@ class Interactive(object):
               startpoint and endpoint
             * None: No exclusion
         """
-        if debug: print "selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset
+        if debug: print "selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset," xmin: ",xmin, " xmax: ",xmax
         if xmin is not None and xmax is not None:
             if verbose or debug: print "Setting xmin,xmax from keywords %g,%g" % (xmin,xmax)
             if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:

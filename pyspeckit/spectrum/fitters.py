@@ -686,11 +686,14 @@ class Specfit(interactive.Interactive):
         self.residualaxis.figure.canvas.draw()
 
     def annotate(self,loc='upper right',labelspacing=0.25, markerscale=0.01,
-            borderpad=0.1, handlelength=0.1, handletextpad=0.1, frameon=False, **kwargs):
+            borderpad=0.1, handlelength=0.1, handletextpad=0.1, frameon=False,
+            chi2=None, **kwargs):
         """
         Add a legend to the plot showing the fitted parameters
 
         clearlegend() will remove the legend
+
+        chi2 : {True or 'reduced' or 'optimal'}
         
         kwargs passed to legend
         """
@@ -705,6 +708,14 @@ class Specfit(interactive.Interactive):
         xcharconv = units.CaseInsensitiveDict({'frequency':'\\nu', 'wavelength':'\\lambda', 'velocity':'v', 'pixels':'x'})
         xchar = xcharconv[self.Spectrum.xarr.xtype]
         self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for L in self._annotation_labels]
+
+        if chi2 is not None:
+            if chi2 == 'reduced':
+                self._annotation_labels.append("$\\chi^2/\\nu = %0.2$" % (self.chi2/self.dof))
+            elif chi2 ==  'optimal':
+                self._annotation_labels.append("$\\chi^2/\\nu = %0.2$" % self.optimal_chi2())
+            else:
+                self._annotation_labels.append("$\\chi^2 = %0.2$" % self.chi2)
 
         self.fitleg = self.Spectrum.plotter.axis.legend(
                 tuple([pl]*len(self._annotation_labels)),
@@ -976,3 +987,94 @@ class Specfit(interactive.Interactive):
             self.SliderWidget = widgets.FitterSliders(self, self.Spectrum.plotter.figure, npars=self.fitter.npars, parlimitdict=parlimitdict, **kwargs)
         else:
             print "Must have a fitter instantiated before creating sliders"
+
+    def optimal_chi2(self, reduced=True):
+        """
+        Compute an "optimal" chi^2 statistic, i.e. one in which only pixels in
+        which the model is statistically significant are included
+
+        Parameters
+        ----------
+        reduced : bool
+            Return the reduced chi^2
+
+        Returns
+        -------
+        Chi^2 statistic or reduced chi^2 statistic
+        `\\chi^2 = \\sum( (d_i - m_i)^2 / e_i^2 )
+        """
+
+        modelmask = np.abs(self.fullmodel) > self.errspec
+
+        chi2 = np.sum( (self.fullresiduals[modelmask]/self.errspec[modelmask])**2 )
+
+        if reduced:
+            dof = modelmask.sum() - self.fitter.npars - self.vheight # vheight included here or not?
+            return chi2/dof
+        else:
+            return chi2
+
+    def get_pymc(self, **kwargs):
+        """
+        Create a pymc MCMC sampler from the current fitter.  Defaults to 'uninformative' priors
+
+        `kwargs` are passed to the fitter's get_pymc method, with parameters defined below.
+
+        Parameters
+        ----------
+        data : np.ndarray
+        error : np.ndarray
+        use_fitted_values : bool
+            Each parameter with a measured error will have a prior defined by
+            the Normal distribution with sigma = par.error and mean = par.value
+
+        Examples
+        --------
+
+        >>> x = pyspeckit.units.SpectroscopicAxis(np.linspace(-10,10,50), unit='km/s')
+        >>> e = np.random.randn(50)
+        >>> d = np.exp(-np.asarray(x)**2/2.)*5 + e
+        >>> sp = pyspeckit.Spectrum(data=d, xarr=x, error=np.ones(50)*e.std())
+        >>> sp.specfit(fittype='gaussian')
+        >>> MCuninformed = sp.specfit.get_pymc()
+        >>> MCwithpriors = sp.specfit.get_pymc(use_fitted_values=True)
+        >>> MCuninformed.sample(1000)
+        >>> MCuninformed.stats()['AMPLITUDE0']
+        >>> # WARNING: This will fail because width cannot be set <0, but it may randomly reach that...
+        >>> # How do you define a likelihood distribution with a lower limit?!
+        >>> MCwithpriors.sample(1000)
+        >>> MCwithpriors.stats()['AMPLITUDE0']
+        """
+        if hasattr(self.fitter,'get_pymc'):
+            return self.fitter.get_pymc(self.Spectrum.xarr, self.spectofit, self.errspec, **kwargs)
+
+    def get_emcee(self, nwalkers=None, **kwargs):
+        """
+        Get an emcee walker ensemble for the data & model using the current model type
+
+        Parameters
+        ----------
+        data : np.ndarray
+        error : np.ndarray
+        nwalkers : int
+            Number of walkers to use.  Defaults to 2 * self.fitters.npars
+
+        Examples
+        --------
+
+        >>> import pyspeckit
+        >>> x = pyspeckit.units.SpectroscopicAxis(np.linspace(-10,10,50), unit='km/s')
+        >>> e = np.random.randn(50)
+        >>> d = np.exp(-np.asarray(x)**2/2.)*5 + e
+        >>> sp = pyspeckit.Spectrum(data=d, xarr=x, error=np.ones(50)*e.std())
+        >>> sp.specfit(fittype='gaussian')
+        >>> emcee_ensemble = sp.specfit.get_emcee()
+        >>> p0 = emcee_ensemble.p0 + np.random.randn(*emc.p0.shape) / 10. + 1.0
+        >>> pos,logprob,state = emcee_ensemble.run_mcmc(p0,100)
+        """
+        if hasattr(self.fitter,'get_emcee_ensemblesampler'):
+            nwalkers = (self.fitter.npars * self.fitter.npeaks + self.fitter.vheight) * 2
+            emc = self.fitter.get_emcee_ensemblesampler(self.Spectrum.xarr, self.spectofit, self.errspec, nwalkers)
+            emc.nwalkers = nwalkers
+            emc.p0 = np.array([self.parinfo.values] * emc.nwalkers)
+            return emc

@@ -581,7 +581,7 @@ class SpectralModel(fitter.SimpleFitter):
         """
         if pars is None:
             pars = self.parinfo
-        model = self.n_modelfunc(pars)(xarr)
+        model = self.n_modelfunc(pars, **self.modelfunc_kwargs)(xarr)
 
         difference = np.abs(data-model)
 
@@ -650,9 +650,10 @@ class SpectralModel(fitter.SimpleFitter):
         >>> d = np.exp(-np.asarray(x)**2/2.)*5 + e
         >>> sp = pyspeckit.Spectrum(data=d, xarr=x, error=np.ones(50)*e.std())
         >>> sp.specfit(fittype='gaussian')
-        >>> nwalkers = 8
+        >>> nwalkers = sp.specfit.fitter.npars * 2
         >>> emcee_ensemble = sp.specfit.fitter.get_emcee_ensemblesampler(sp.xarr, sp.data, sp.error, nwalkers)
-        >>> p0 = np.array([np.random.randn(nwalkers),np.random.randn(nwalkers),np.random.randn(nwalkers),np.random.rand(nwalkers)]).swapaxes(0,1)
+        >>> p0 = np.array([sp.specfit.parinfo.values] * nwalkers)
+        >>> p0 *= np.random.randn(*p0.shape) / 10. + 1.0
         >>> pos,logprob,state = emcee_ensemble.run_mcmc(p0,100)
         """
         try:
@@ -667,7 +668,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         return sampler
 
-    def get_pymc(self, xarr, data, error, use_fitted_values=False, inf=1e10, **kwargs):
+    def get_pymc(self, xarr, data, error, use_fitted_values=False, inf=np.inf, **kwargs):
         """
         Create a pymc MCMC sampler.  Defaults to 'uninformative' priors
 
@@ -713,17 +714,22 @@ class SpectralModel(fitter.SimpleFitter):
 
         funcdict = {}
         for par in self.parinfo:
+            lolim = par.limits[0] if par.limited[0] else -inf
+            uplim = par.limits[1] if par.limited[1] else  inf
             if par.fixed:
                 funcdict[par.parname] = pymc.distributions.Uniform(par.parname, par.value, par.value, value=par.value)
             elif use_fitted_values:
                 if par.error > 0:
-                    funcdict[par.parname] = pymc.distributions.Normal(par.parname, par.value, 1./par.error**2)
+                    if any(par.limited):
+                        funcdict[par.parname] = pymc.distributions.Truncnorm(par.parname, par.value, 1./par.error**2, lolim, uplim)
+                    else:
+                        funcdict[par.parname] = pymc.distributions.Normal(par.parname, par.value, 1./par.error**2)
                 else:
                     funcdict[par.parname] = pymc.distributions.Uninformative(par.parname, value=par.value)
             elif any(par.limited):
-                lolim = par.limits[0] if par.limited[0] else -inf
-                uplim = par.limits[1] if par.limited[1] else  inf
-                funcdict[par.parname] = pymc.distributions.Uniform(par.parname, lolim, uplim, value=par.value)
+                lolim = par.limits[0] if par.limited[0] else -1e10
+                uplim = par.limits[1] if par.limited[1] else  1e10
+                funcdict[par.parname] = pymc.distributions.Uniform(par.parname, lower=lolim, upper=uplim, value=par.value)
             else:
                 funcdict[par.parname] = pymc.distributions.Uninformative(par.parname, value=par.value)
 
@@ -734,7 +740,7 @@ class SpectralModel(fitter.SimpleFitter):
                 if k in pars.keys():
                     pars[k].value = v
 
-            return self.n_modelfunc(pars)(xarr)
+            return self.n_modelfunc(pars, **self.modelfunc_kwargs)(xarr)
 
         funcdict['xarr'] = xarr
         funcdet=pymc.Deterministic(name='f',eval=modelfunc,parents=funcdict,doc="The model function")

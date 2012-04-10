@@ -32,6 +32,8 @@ def interp(spec1,spec2):
             # reduce errors by sqrt(binsize) if going from small to large bins
             # else increase errors by similar factor (WARNING!  THEY WILL BE CORRELATED!)
             newerror = _interp(spec2.xarr,xarr1,spec1.error) * binsizeratio**0.5
+        else:
+            newerror = _interp(spec2.xarr,xarr1,spec1.error)
     else:
         newerror = None
 
