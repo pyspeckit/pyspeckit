@@ -62,8 +62,8 @@ def moments(Xax, data, vheight=True, estimator=np.median, negamp=None,
     Hamplitude = data.max()-height
     Hwidth_x = Hpeakintegral / Hamplitude / np.sqrt(2*np.pi)
 
-    Lstddev = Xax[data<data.mean()].std()
-    Hstddev = Xax[data>data.mean()].std()
+    Lstddev = Xax[data<estimator(data)].std()
+    Hstddev = Xax[data>estimator(data)].std()
     #print "Lstddev: %10.3g  Hstddev: %10.3g" % (Lstddev,Hstddev)
     #print "Lwidth_x: %10.3g  Hwidth_x: %10.3g" % (Lwidth_x,Hwidth_x)
 
@@ -78,6 +78,7 @@ def moments(Xax, data, vheight=True, estimator=np.median, negamp=None,
         xcen,amplitude,width_x = Xax[np.argmax(data)],Hamplitude,Hwidth_x
 
     if veryverbose:
+        print "Hstddev: %g   Lstddev: %g" % (Hstddev,Lstddev)
         print "negamp: %s  amp,width,cen Lower: %g, %g   Upper: %g, %g  Center: %g" %\
                 (negamp,Lamplitude,Lwidth_x,Hamplitude,Hwidth_x,xcen)
     mylist = [amplitude,xcen,width_x]

@@ -155,6 +155,7 @@ class Specfit(interactive.Interactive):
             clear_all_connections=True, debug=False, 
             guesses=None, save=True, fittype='gaussian', annotate=None,
             show_components=None, use_lmfit=False, verbose=True, clear=True,
+            fit_plotted_area=True, use_window_limits=None,
             vheight=None, **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
@@ -180,6 +181,15 @@ class Specfit(interactive.Interactive):
         use_lmfit : boolean
             If lmfit-py (https://github.com/newville/lmfit-py) is installed, you
             can use it instead of the pure-python (but slow) mpfit.
+        fit_plotted_area : boolean
+            If no other limits are specified, the plotter's xmin/xmax will be
+            used to define the fit region.  Only respects the x-axis limits,
+            not the y-axis limits.
+        use_window_limits : boolean
+            If `fit_plotted_area==True` and no other limits are specified, will
+            use the displayed window area (as set by the zoom tools) as the
+            fitting range.  Only respects the x-axis limits, not the y-axis
+            limits.
 
 
         Plotter-related Parameters
@@ -221,7 +231,9 @@ class Specfit(interactive.Interactive):
         """
 
         if clear: self.clear()
-        self.selectregion(verbose=verbose, debug=debug, **kwargs)
+        self.selectregion(verbose=verbose, debug=debug,
+                fit_plotted_area=fit_plotted_area,
+                use_window_limits=use_window_limits, **kwargs)
         for arg in ['xmin','xmax','xtype','reset']: 
             if arg in kwargs: kwargs.pop(arg)
 
@@ -420,7 +432,7 @@ class Specfit(interactive.Interactive):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]
+        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]+np.sum(self.parinfo.fixed)
         self.model = model * scalefactor
 
         self.parinfo = self.fitter.parinfo
@@ -531,7 +543,7 @@ class Specfit(interactive.Interactive):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight
+        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight+np.sum(self.parinfo.fixed)
         self.vheight=vheight
         if vheight: 
             self.Spectrum.baseline.baselinepars = [mpp[0]*scalefactor] # first item in list form
@@ -711,11 +723,11 @@ class Specfit(interactive.Interactive):
 
         if chi2 is not None:
             if chi2 == 'reduced':
-                self._annotation_labels.append("$\\chi^2/\\nu = %0.2$" % (self.chi2/self.dof))
+                self._annotation_labels.append('$\\chi^2/\\nu = %0.2g$' % (self.chi2/self.dof))
             elif chi2 ==  'optimal':
-                self._annotation_labels.append("$\\chi^2/\\nu = %0.2$" % self.optimal_chi2())
+                self._annotation_labels.append('$\\chi^2/\\nu = %0.2g$' % self.optimal_chi2())
             else:
-                self._annotation_labels.append("$\\chi^2 = %0.2$" % self.chi2)
+                self._annotation_labels.append('$\\chi^2 = %0.2g$' % self.chi2)
 
         self.fitleg = self.Spectrum.plotter.axis.legend(
                 tuple([pl]*len(self._annotation_labels)),
@@ -1011,7 +1023,7 @@ class Specfit(interactive.Interactive):
         chi2 = np.sum( (self.fullresiduals[modelmask]/self.errspec[modelmask])**2 )
 
         if reduced:
-            dof = modelmask.sum() - self.fitter.npars - self.vheight # vheight included here or not?
+            dof = modelmask.sum() - self.fitter.npars - self.vheight + np.sum(self.parinfo.fixed)  # vheight included here or not?
             return chi2/dof
         else:
             return chi2

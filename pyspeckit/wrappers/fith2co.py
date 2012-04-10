@@ -63,6 +63,10 @@ def plot_h2co(spdict,spectra, fignum=1, show_components=False, residfignum=None,
         for linename,sp in spdict.iteritems():
             sp.specfit.plotresiduals(axis=axdict[linename])
 
+    spectra.axisdict = axdict
+    spectra.plotter.axis = axdict['oneone']
+    spectra.specfit.fitleg = spdict['oneone'].specfit.fitleg
+
 
 def BigSpectrum_to_H2COdict(sp, vrange=None):
     """
