@@ -195,6 +195,9 @@ class FitterSliders(Widget):
 
             self.sliders[-1].on_changed(update)
 
+    def get_values(self):
+        return [s.val for s in self.sliders]
+
 class FitterTools(Widget):
     """
     A tool to monitor and play with :class:`pyspeckit.spectrum.fitter` properties

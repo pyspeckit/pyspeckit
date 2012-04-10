@@ -10,9 +10,11 @@ from matplotlib import pyplot
 import copy
 import random
 
-title_dict = {'oneone':'H$_2$CO 1$_{11}$-1$_{10}$', 
-'twotwo':'H$_2$CO 2$_{12}$-2$_{11}$',
-'threethree':'H$_2$CO 3$_{23}$-3$_{22}$'}
+title_dict = {
+    'oneone':'H$_2$CO 1$_{11}$-1$_{10}$', 
+    'twotwo':'H$_2$CO 2$_{12}$-2$_{11}$',
+    'threethree':'H$_2$CO 3$_{23}$-3$_{22}$'
+    }
 
 def plot_h2co(spdict,spectra, fignum=1, show_components=False, residfignum=None, **plotkwargs):
     """
@@ -43,7 +45,7 @@ def plot_h2co(spdict,spectra, fignum=1, show_components=False, residfignum=None,
         sp.plotter.axis=axdict[linename] # permanent
         sp.plotter(axis=axdict[linename],title=title_dict[linename], **plotkwargs)
         sp.specfit.Spectrum.plotter = sp.plotter
-        sp.specfit.selectregion(reset=True)
+        #sp.specfit.selectregion(reset=True)
         if sp.specfit.modelpars is not None:
             sp.specfit.plot_fit(annotate=False, show_components=show_components)
     if spdict['oneone'].specfit.modelpars is not None:

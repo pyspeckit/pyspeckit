@@ -420,7 +420,7 @@ class Specfit(interactive.Interactive):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.xmax-self.xmin-self.npeaks*self.Registry.npars[self.fittype]
+        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]
         self.model = model * scalefactor
 
         self.parinfo = self.fitter.parinfo
@@ -531,7 +531,7 @@ class Specfit(interactive.Interactive):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.xmax-self.xmin-self.npeaks*self.Registry.npars[self.fittype]-vheight
+        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight
         self.vheight=vheight
         if vheight: 
             self.Spectrum.baseline.baselinepars = [mpp[0]*scalefactor] # first item in list form
@@ -965,7 +965,9 @@ class Specfit(interactive.Interactive):
         if parlimitdict is None:
             # try to create a reasonable parlimit dict
             parlimitdict = {}
-            for param in self.parinfo:
+
+        for param in self.parinfo:
+            if not param.parname in parlimitdict:
                 if any( (x in param['parname'].lower() for x in ('shift','xoff')) ):
                     lower,upper = (self.Spectrum.xarr[self.includemask].min(),self.Spectrum.xarr[self.includemask].max())
                 elif any( (x in param['parname'].lower() for x in ('width','fwhm')) ):
