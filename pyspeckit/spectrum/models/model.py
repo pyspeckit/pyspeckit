@@ -456,6 +456,8 @@ class SpectralModel(fitter.SimpleFitter):
         chi2 = mp.fnorm
 
         if mp.status == 0:
+            if "parameters are not within PARINFO limits" in mp.errmsg:
+                print parinfo
             raise mpfitException(mp.errmsg)
 
         for i,(p,e) in enumerate(zip(mpp,mpperr)):

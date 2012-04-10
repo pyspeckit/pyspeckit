@@ -432,10 +432,11 @@ class Specfit(interactive.Interactive):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]+np.sum(self.parinfo.fixed)
         self.model = model * scalefactor
 
         self.parinfo = self.fitter.parinfo
+
+        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]+np.sum(self.parinfo.fixed)
 
         # rescale any scaleable parameters
         for par in self.parinfo:
