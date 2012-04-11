@@ -29,6 +29,10 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    Optical INTERACTIVE <interactive>
 
 
-
+..
+    TO DO:
+    - add pymc / emcee examples
+    - add UV examples?
+    - add ALMA / EVLA cube examples
 
 

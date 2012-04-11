@@ -1084,7 +1084,7 @@ class Specfit(interactive.Interactive):
         >>> sp = pyspeckit.Spectrum(data=d, xarr=x, error=np.ones(50)*e.std())
         >>> sp.specfit(fittype='gaussian')
         >>> emcee_ensemble = sp.specfit.get_emcee()
-        >>> p0 = emcee_ensemble.p0 + np.random.randn(*emc.p0.shape) / 10. + 1.0
+        >>> p0 = emcee_ensemble.p0 * (np.random.randn(*emcee_ensemble.p0.shape) / 10. + 1.0)
         >>> pos,logprob,state = emcee_ensemble.run_mcmc(p0,100)
         """
         if hasattr(self.fitter,'get_emcee_ensemblesampler'):
