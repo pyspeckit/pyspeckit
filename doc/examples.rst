@@ -27,6 +27,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    Optical SDSS <example_sdss>
    Optical Vega Echelle <example_vega_echelle>
    Optical INTERACTIVE <interactive>
+   Monte Carlo <example_pymc>
 
 
 ..
