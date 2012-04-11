@@ -76,92 +76,99 @@ parameter space.  So far that is not possible with emcee.</p>
 <p>The examples below use a custom plotting package from <a class="reference external" href="http://code.google.com/p/agpy/">agpy</a>.  It is a relatively simple but convenient
 wrapper around numpy&#8217;s histogram2d.  <a class="reference external" href="http://code.google.com/p/agpy/source/browse/trunk/agpy/pymc_plotting.py">pymc_plotting</a>
 takes care of indexing, percentile determination, and coloring.</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd><p class="first">import pyspeckit</p>
-<p># Create our own gaussian cetered at 0 with width 1, amplitude 5, and
-# gaussian noise with amplitude 1
-x = pyspeckit.units.SpectroscopicAxis(np.linspace(-10,10,50), unit=&#8217;km/s&#8217;)
-e = np.random.randn(50)
-d = np.exp(-np.asarray(x)**2/2.)*5 + e</p>
-<p># create the spectrum object
-sp = pyspeckit.Spectrum(data=d, xarr=x, error=np.ones(50)*e.std())
-# fit it
-sp.specfit(fittype=&#8217;gaussian&#8217;)
-# then get the pymc values
-MCuninformed = sp.specfit.get_pymc()
-MCwithpriors = sp.specfit.get_pymc(use_fitted_values=True)
-MCuninformed.sample(5000,burn=1000,tune_interval=250)
-MCwithpriors.sample(5000,burn=1000,tune_interval=250)</p>
-<p># MC vs least squares:
-print sp.specfit.parinfo
-# Param #0       HEIGHT =       0.0109281 +/-        0.195809
-# Param #1   AMPLITUDE0 =         4.57169 +/-        0.651568
-# Param #2       SHIFT0 =     0.000182704 +/-        0.205333
-# Param #3       WIDTH0 =         1.23275 +/-        0.219416   Range:   [0,inf)</p>
-<p>print MCuninformed.stats()[&#8216;AMPLITUDE0&#8217;],MCuninformed.stats()[&#8216;WIDTH0&#8217;]
-# {&#8216;95% HPD interval&#8217;: array([ 2.80477894,  5.19230514]),
-#  &#8216;mc error&#8217;: 0.0096630856947778534,
-#  &#8216;mean&#8217;: 3.8550042004763823,
-#  &#8216;n&#8217;: 4000,
-#  &#8216;quantiles&#8217;: {2.5: 2.7001147437515614,
-#   25: 3.4136653207924721,
-#   50: 3.8216640136271343,
-#   75: 4.2658237064708775,
-#   97.5: 5.1241797879905224},
-#  &#8216;standard deviation&#8217;: 0.61114720041777293}
-# {&#8216;95% HPD interval&#8217;: array([ 0.72443531,  1.56684083]),
-#  &#8216;mc error&#8217;: 0.0035649461062602994,
-#  &#8216;mean&#8217;: 1.1868052003204772,
-#  &#8216;n&#8217;: 4000,
-#  &#8216;quantiles&#8217;: {2.5: 0.7886369815120019,
-#   25: 1.030731243691529,
-#   50: 1.1608275996051221,
-#   75: 1.3238167303614339,
-#   97.5: 1.6719731801069622},
-#  &#8216;standard deviation&#8217;: 0.22546698863062389}</p>
-<p>print MCwithpriors.stats()[&#8216;AMPLITUDE0&#8217;],MCwithpriors.stats()[&#8216;WIDTH0&#8217;]
-# {&#8216;95% HPD interval&#8217;: array([ 3.14723955,  4.75558755]),
-#  &#8216;mc error&#8217;: 0.0066693160876581236,
-#  &#8216;mean&#8217;: 4.0120510164373284,
-#  &#8216;n&#8217;: 4000,
-#  &#8216;quantiles&#8217;: {2.5: 3.1905811738800782,
-#   25: 3.7258959755336791,
-#   50: 4.0192907032241969,
-#   75: 4.2848569265514413,
-#   97.5: 4.8263499154520932},
-#  &#8216;standard deviation&#8217;: 0.42180458545205723},
-# {&#8216;95% HPD interval&#8217;: array([ 0.84659241,  1.37188539]),
-#  &#8216;mc error&#8217;: 0.0021143746687207888,
-#  &#8216;mean&#8217;: 1.132295044520145,
-#  &#8216;n&#8217;: 4000,
-#  &#8216;quantiles&#8217;: {2.5: 0.87023370176467096,
-#   25: 1.0471063188439775,
-#   50: 1.1319776513946447,
-#   75: 1.2149336329380425,
-#   97.5: 1.4028230972640638},
-#  &#8216;standard deviation&#8217;: 0.13372479560243336}</p>
-<p># optional
-import agpy.pymc_plotting
-import pylab
-agpy.pymc_plotting.hist2d(MCuninformed,&#8217;AMPLITUDE0&#8217;,&#8217;WIDTH0&#8217;,clear=True)
-agpy.pymc_plotting.hist2d(MCwithpriors,&#8217;AMPLITUDE0&#8217;,&#8217;WIDTH0&#8217;,contourcmd=pylab.contour,colors=[(0,1,0,1),(0,0.5,0.5,1),(0,0.75,0.75,1),(0,1,1,1),(0,0,1,1)],clear=False)</p>
-<p># Now do the same with emcee
-emcee_ensemble = sp.specfit.get_emcee()
-p0 = emcee_ensemble.p0 * (np.random.randn(<a href="#id1"><span class="problematic" id="id2">*</span></a>emcee_ensemble.p0.shape) / 10. + 1.0)
-pos,logprob,state = emcee_ensemble.run_mcmc(p0,4000)</p>
-<dl class="docutils">
-<dt>plotdict = {&#8216;AMPLITUDE0&#8217;:emcee_ensemble.chain[:,:,1].ravel(),</dt>
-<dd>&#8216;WIDTH0&#8217;:emcee_ensemble.chain[:,:,3].ravel()}</dd>
-</dl>
-<p class="last">agpy.pymc_plotting.hist2d(plotdict,&#8217;AMPLITUDE0&#8217;,&#8217;WIDTH0&#8217;,fignum=2)</p>
-</dd>
-</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pyspeckit</span>
+
+<span class="c"># Create our own gaussian cetered at 0 with width 1, amplitude 5, and</span>
+<span class="c"># gaussian noise with amplitude 1</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">SpectroscopicAxis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s">&#39;km/s&#39;</span><span class="p">)</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="mi">5</span> <span class="o">+</span> <span class="n">e</span>
+
+<span class="c"># create the spectrum object</span>
+<span class="n">sp</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">xarr</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="o">*</span><span class="n">e</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+<span class="c"># fit it</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="p">(</span><span class="n">fittype</span><span class="o">=</span><span class="s">&#39;gaussian&#39;</span><span class="p">)</span>
+<span class="c"># then get the pymc values</span>
+<span class="n">MCuninformed</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">get_pymc</span><span class="p">()</span>
+<span class="n">MCwithpriors</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">get_pymc</span><span class="p">(</span><span class="n">use_fitted_values</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">MCuninformed</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span><span class="n">burn</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">tune_interval</span><span class="o">=</span><span class="mi">250</span><span class="p">)</span>
+<span class="n">MCwithpriors</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span><span class="n">burn</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">tune_interval</span><span class="o">=</span><span class="mi">250</span><span class="p">)</span>
+
+<span class="c"># MC vs least squares:</span>
+<span class="k">print</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">parinfo</span>
+<span class="c"># Param #0       HEIGHT =       0.0109281 +/-        0.195809</span>
+<span class="c"># Param #1   AMPLITUDE0 =         4.57169 +/-        0.651568</span>
+<span class="c"># Param #2       SHIFT0 =     0.000182704 +/-        0.205333</span>
+<span class="c"># Param #3       WIDTH0 =         1.23275 +/-        0.219416   Range:   [0,inf)</span>
+
+
+<span class="k">print</span> <span class="n">MCuninformed</span><span class="o">.</span><span class="n">stats</span><span class="p">()[</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">],</span><span class="n">MCuninformed</span><span class="o">.</span><span class="n">stats</span><span class="p">()[</span><span class="s">&#39;WIDTH0&#39;</span><span class="p">]</span>
+<span class="c"># {&#39;95% HPD interval&#39;: array([ 2.80477894,  5.19230514]),</span>
+<span class="c">#  &#39;mc error&#39;: 0.0096630856947778534,</span>
+<span class="c">#  &#39;mean&#39;: 3.8550042004763823,</span>
+<span class="c">#  &#39;n&#39;: 4000,</span>
+<span class="c">#  &#39;quantiles&#39;: {2.5: 2.7001147437515614,</span>
+<span class="c">#   25: 3.4136653207924721,</span>
+<span class="c">#   50: 3.8216640136271343,</span>
+<span class="c">#   75: 4.2658237064708775,</span>
+<span class="c">#   97.5: 5.1241797879905224},</span>
+<span class="c">#  &#39;standard deviation&#39;: 0.61114720041777293}</span>
+<span class="c"># {&#39;95% HPD interval&#39;: array([ 0.72443531,  1.56684083]),</span>
+<span class="c">#  &#39;mc error&#39;: 0.0035649461062602994,</span>
+<span class="c">#  &#39;mean&#39;: 1.1868052003204772,</span>
+<span class="c">#  &#39;n&#39;: 4000,</span>
+<span class="c">#  &#39;quantiles&#39;: {2.5: 0.7886369815120019,</span>
+<span class="c">#   25: 1.030731243691529,</span>
+<span class="c">#   50: 1.1608275996051221,</span>
+<span class="c">#   75: 1.3238167303614339,</span>
+<span class="c">#   97.5: 1.6719731801069622},</span>
+<span class="c">#  &#39;standard deviation&#39;: 0.22546698863062389}</span>
+
+<span class="k">print</span> <span class="n">MCwithpriors</span><span class="o">.</span><span class="n">stats</span><span class="p">()[</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">],</span><span class="n">MCwithpriors</span><span class="o">.</span><span class="n">stats</span><span class="p">()[</span><span class="s">&#39;WIDTH0&#39;</span><span class="p">]</span>
+<span class="c"># {&#39;95% HPD interval&#39;: array([ 3.14723955,  4.75558755]),</span>
+<span class="c">#  &#39;mc error&#39;: 0.0066693160876581236,</span>
+<span class="c">#  &#39;mean&#39;: 4.0120510164373284,</span>
+<span class="c">#  &#39;n&#39;: 4000,</span>
+<span class="c">#  &#39;quantiles&#39;: {2.5: 3.1905811738800782,</span>
+<span class="c">#   25: 3.7258959755336791,</span>
+<span class="c">#   50: 4.0192907032241969,</span>
+<span class="c">#   75: 4.2848569265514413,</span>
+<span class="c">#   97.5: 4.8263499154520932},</span>
+<span class="c">#  &#39;standard deviation&#39;: 0.42180458545205723},</span>
+<span class="c"># {&#39;95% HPD interval&#39;: array([ 0.84659241,  1.37188539]),</span>
+<span class="c">#  &#39;mc error&#39;: 0.0021143746687207888,</span>
+<span class="c">#  &#39;mean&#39;: 1.132295044520145,</span>
+<span class="c">#  &#39;n&#39;: 4000,</span>
+<span class="c">#  &#39;quantiles&#39;: {2.5: 0.87023370176467096,</span>
+<span class="c">#   25: 1.0471063188439775,</span>
+<span class="c">#   50: 1.1319776513946447,</span>
+<span class="c">#   75: 1.2149336329380425,</span>
+<span class="c">#   97.5: 1.4028230972640638},</span>
+<span class="c">#  &#39;standard deviation&#39;: 0.13372479560243336}</span>
+
+
+<span class="c"># optional</span>
+<span class="kn">import</span> <span class="nn">agpy.pymc_plotting</span>
+<span class="kn">import</span> <span class="nn">pylab</span>
+<span class="n">agpy</span><span class="o">.</span><span class="n">pymc_plotting</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">MCuninformed</span><span class="p">,</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">,</span><span class="s">&#39;WIDTH0&#39;</span><span class="p">,</span><span class="n">clear</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">agpy</span><span class="o">.</span><span class="n">pymc_plotting</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">MCwithpriors</span><span class="p">,</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">,</span><span class="s">&#39;WIDTH0&#39;</span><span class="p">,</span><span class="n">contourcmd</span><span class="o">=</span><span class="n">pylab</span><span class="o">.</span><span class="n">contour</span><span class="p">,</span><span class="n">colors</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)],</span><span class="n">clear</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+
+<span class="c"># Now do the same with emcee</span>
+<span class="n">emcee_ensemble</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">get_emcee</span><span class="p">()</span>
+<span class="n">p0</span> <span class="o">=</span> <span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">p0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">p0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mf">10.</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">pos</span><span class="p">,</span><span class="n">logprob</span><span class="p">,</span><span class="n">state</span> <span class="o">=</span> <span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span><span class="mi">4000</span><span class="p">)</span>
+
+<span class="n">plotdict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">:</span><span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">chain</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+            <span class="s">&#39;WIDTH0&#39;</span><span class="p">:</span><span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">chain</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()}</span>
+<span class="n">agpy</span><span class="o">.</span><span class="n">pymc_plotting</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">plotdict</span><span class="p">,</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">,</span><span class="s">&#39;WIDTH0&#39;</span><span class="p">,</span><span class="n">fignum</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
 <div class="figure" style="width: 800">
 <img alt="Examples of the pymc Monte Carlo two-dimensional parameter histogram (marginalized over X-offset and Y-offset) with and without priors; with priors is shown in contour lines" src="../images/pymc_params_example.png" style="width: 800px;" />
 </div>
 <div class="figure" style="width: 800">
-<img alt="../images/emcee_params_example.png:alt:Sameasabove,butusingemcee" src="../images/emcee_params_example.png:alt:Sameasabove,butusingemcee" style="width: 800px;" />
+<img alt="Same as above, but using emcee" src="../images/emcee_params_example.png" style="width: 800px;" />
 </div>
 </div>
 

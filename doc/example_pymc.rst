@@ -16,6 +16,7 @@ wrapper around numpy's histogram2d.  `pymc_plotting
 takes care of indexing, percentile determination, and coloring.
 
 :: 
+
     import pyspeckit
 
     # Create our own gaussian cetered at 0 with width 1, amplitude 5, and
@@ -103,15 +104,15 @@ takes care of indexing, percentile determination, and coloring.
                 'WIDTH0':emcee_ensemble.chain[:,:,3].ravel()}
     agpy.pymc_plotting.hist2d(plotdict,'AMPLITUDE0','WIDTH0',fignum=2)
 
-.. figure:: ../images/pymc_params_example.png
+.. figure:: ../images/pymc_params_example.png 
     :alt: Examples of the pymc Monte Carlo two-dimensional parameter histogram
         (marginalized over X-offset and Y-offset) with and without priors; with
         priors is shown in contour lines
     :figwidth: 800
     :width: 800
 
-.. figure:: ../images/emcee_params_example.png
-	:alt: Same as above, but using emcee
+.. figure:: ../images/emcee_params_example.png 
+    :alt: Same as above, but using emcee
     :figwidth: 800
     :width: 800
 
