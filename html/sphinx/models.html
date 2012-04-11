@@ -103,27 +103,77 @@ individual variables, set limits on them, set the units the fit will be
 performed in, and set the annotations to be used.  Check out some
 of the hyperfine codes (hcn, n2hp) for examples.</p>
 <p class="rubric">Methods</p>
-<p>modelfunc: the model function to be fitted.  Should take an X-axis (spectroscopic axis)
-as an input, followed by input parameters.
-npars - number of parameters required by the model</p>
-<p>parnames - a list or tuple of the parameter names</p>
-<p>parvalues - the initial guesses for the input parameters (defaults to ZEROS)</p>
-<p>parlimits - the upper/lower limits for each variable     (defaults to ZEROS)</p>
-<p>parfixed  - Can declare any variables to be fixed        (defaults to ZEROS)</p>
-<p>parerror  - technically an output parameter... hmm       (defaults to ZEROS)</p>
-<dl class="docutils">
-<dt>partied   - not the past tense of party.  Can declare, via text, that</dt>
-<dd>some parameters are tied to each other.  Defaults to zeros like the
-others, but it&#8217;s not clear if that&#8217;s a sensible default</dd>
-</dl>
-<p>fitunits - convert X-axis to these units before passing to model</p>
-<p>parsteps - minimum step size for each paremeter          (defaults to ZEROS)</p>
-<p>npeaks   - default number of peaks to assume when fitting (can be overridden)</p>
-<p>shortvarnames - TeX names of the variables to use when annotating</p>
-<dl class="docutils">
-<dt>multisingle - Are there multiple peaks (no background will be fit) or</dt>
-<dd>just a single peak (a background may/will be fit)</dd>
-</dl>
+<p>Spectral Model Initialization</p>
+<p>Create a Spectral Model class for data fitting</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>modelfunc</strong> : function</p>
+<blockquote>
+<div><p>the model function to be fitted.  Should take an X-axis
+(spectroscopic axis) as an input followed by input parameters.
+Returns an array with the same shape as the input X-axis</p>
+</div></blockquote>
+<p><strong>npars</strong> : int</p>
+<blockquote>
+<div><p>number of parameters required by the model</p>
+</div></blockquote>
+<p><strong>parnames</strong> : list (optional)</p>
+<blockquote>
+<div><p>a list or tuple of the parameter names</p>
+</div></blockquote>
+<p><strong>parvalues</strong> : list (optional)</p>
+<blockquote>
+<div><p>the initial guesses for the input parameters (defaults to ZEROS)</p>
+</div></blockquote>
+<p><strong>parlimits</strong> :  list (optional)</p>
+<blockquote>
+<div><p>the upper/lower limits for each variable     (defaults to ZEROS)</p>
+</div></blockquote>
+<p><strong>parfixed</strong> : list (optional)</p>
+<blockquote>
+<div><p>Can declare any variables to be fixed        (defaults to ZEROS)</p>
+</div></blockquote>
+<p><strong>parerror</strong> : list (optional)</p>
+<blockquote>
+<div><p>technically an output parameter... hmm       (defaults to ZEROS)</p>
+</div></blockquote>
+<p><strong>partied</strong> : list (optional)</p>
+<blockquote>
+<div><p>not the past tense of party.  Can declare, via text, that
+some parameters are tied to each other.  Defaults to zeros like the
+others, but it&#8217;s not clear if that&#8217;s a sensible default</p>
+</div></blockquote>
+<p><strong>fitunits</strong> : list (optional)</p>
+<blockquote>
+<div><p>convert X-axis to these units before passing to model</p>
+</div></blockquote>
+<p><strong>parsteps</strong> : list (optional)</p>
+<blockquote>
+<div><p>minimum step size for each paremeter          (defaults to ZEROS)</p>
+</div></blockquote>
+<p><strong>npeaks</strong> : list (optional)</p>
+<blockquote>
+<div><p>default number of peaks to assume when fitting (can be overridden)</p>
+</div></blockquote>
+<p><strong>shortvarnames</strong> : list (optional)</p>
+<blockquote>
+<div><p>TeX names of the variables to use when annotating</p>
+</div></blockquote>
+<p><strong>multisingle</strong> : list (optional)</p>
+<blockquote>
+<div><p>Are there multiple peaks (no background will be fit) or
+just a single peak (a background may/will be fit)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>A tuple containing (model best-fit parameters, the model, parameter</strong> :</p>
+<p class="last"><strong>errors, chi^2 value)</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.annotations">
@@ -154,29 +204,153 @@ annotations.  Defaults to self.shortvarnames</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.components">
 <tt class="descname">components</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.components" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a numpy ndarray of the independent components of the fits</p>
+<dd><p>Return a numpy ndarray of shape [npeaks x modelshape] of the
+independent components of the fits</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.fitter">
 <tt class="descname">fitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>quiet=True</em>, <em>veryverbose=False</em>, <em>debug=False</em>, <em>parinfo=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.fitter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run the fitter.  Must pass the x-axis and data.  Can include
-error, parameter guesses, and a number of verbosity parameters.</p>
-<dl class="docutils">
-<dt>quiet - pass to mpfit.  If False, will print out the parameter values</dt>
-<dd>for each iteration of the fitter</dd>
-</dl>
-<p>veryverbose - print out a variety of mpfit output parameters</p>
-<p>debug - raise an exception (rather than a warning) if chi^2 is nan</p>
-<dl class="docutils">
-<dt>accepts <em>tied</em>, <em>limits</em>, <em>limited</em>, and <em>fixed</em> as keyword arguments.</dt>
-<dd>They must be lists of length len(params)</dd>
-<dt>parinfo - You can override the class parinfo dict with this, though</dt>
-<dd>that largely defeats the point of having the wrapper class.  This class
-does NO checking for whether the parinfo dict is valid.</dd>
-</dl>
-<p>kwargs are passed to mpfit after going through _make_parinfo to strip out things
-used by this class</p>
+<dd><p>Run the fitter using mpfit.</p>
+<p>kwargs will be passed to _make_parinfo and mpfit.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>xax</strong> : SpectroscopicAxis</p>
+<blockquote>
+<div><p>The X-axis of the spectrum</p>
+</div></blockquote>
+<p><strong>data</strong> : ndarray</p>
+<blockquote>
+<div><p>The data to fit</p>
+</div></blockquote>
+<p><strong>err</strong> : ndarray (optional)</p>
+<blockquote>
+<div><p>The error on the data.  If unspecified, will be uniform unity</p>
+</div></blockquote>
+<p><strong>parinfo</strong> : ParinfoList</p>
+<blockquote>
+<div><p>The guesses, parameter limits, etc.  See
+<cite>pyspeckit.spectrum.parinfo</cite> for details</p>
+</div></blockquote>
+<p><strong>quiet</strong> : bool</p>
+<blockquote>
+<div><p>pass to mpfit.  If False, will print out the parameter values for
+each iteration of the fitter</p>
+</div></blockquote>
+<p><strong>veryverbose</strong> : bool</p>
+<blockquote>
+<div><p>print out a variety of mpfit output parameters</p>
+</div></blockquote>
+<p><strong>debug</strong> : bool</p>
+<blockquote class="last">
+<div><p>raise an exception (rather than a warning) if chi^2 is nan</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.get_emcee_ensemblesampler">
+<tt class="descname">get_emcee_ensemblesampler</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>nwalkers</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_emcee_ensemblesampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an emcee walker ensemble for the data &amp; model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>data</strong> : np.ndarray</p>
+<p><strong>error</strong> : np.ndarray</p>
+<p><strong>nwalkers</strong> : int</p>
+<blockquote class="last">
+<div><p>Number of walkers to use</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyspeckit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">SpectroscopicAxis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s">&#39;km/s&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="mi">5</span> <span class="o">+</span> <span class="n">e</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">xarr</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="o">*</span><span class="n">e</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="p">(</span><span class="n">fittype</span><span class="o">=</span><span class="s">&#39;gaussian&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nwalkers</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">fitter</span><span class="o">.</span><span class="n">npars</span> <span class="o">*</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">emcee_ensemble</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">fitter</span><span class="o">.</span><span class="n">get_emcee_ensemblesampler</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">xarr</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">nwalkers</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">parinfo</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">*</span> <span class="n">nwalkers</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p0</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">p0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mf">10.</span> <span class="o">+</span> <span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pos</span><span class="p">,</span><span class="n">logprob</span><span class="p">,</span><span class="n">state</span> <span class="o">=</span> <span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.get_emcee_sampler">
+<tt class="descname">get_emcee_sampler</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_emcee_sampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an emcee walker for the data &amp; model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>xarr</strong> : pyspeckit.units.SpectroscopicAxis</p>
+<p><strong>data</strong> : np.ndarray</p>
+<p class="last"><strong>error</strong> : np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyspeckit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">SpectroscopicAxis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s">&#39;km/s&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="mi">5</span> <span class="o">+</span> <span class="n">e</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">xarr</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="o">*</span><span class="n">e</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="p">(</span><span class="n">fittype</span><span class="o">=</span><span class="s">&#39;gaussian&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">emcee_sampler</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">fitter</span><span class="o">.</span><span class="n">get_emcee_sampler</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">xarr</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p0</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">parinfo</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">emcee_sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.get_pymc">
+<tt class="descname">get_pymc</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>use_fitted_values=False</em>, <em>inf=inf</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_pymc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a pymc MCMC sampler.  Defaults to &#8216;uninformative&#8217; priors</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>data</strong> : np.ndarray</p>
+<p><strong>error</strong> : np.ndarray</p>
+<p><strong>use_fitted_values</strong> : bool</p>
+<blockquote class="last">
+<div><p>Each parameter with a measured error will have a prior defined by
+the Normal distribution with sigma = par.error and mean = par.value</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">SpectroscopicAxis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s">&#39;km/s&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="mi">5</span> <span class="o">+</span> <span class="n">e</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">xarr</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="o">*</span><span class="n">e</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="p">(</span><span class="n">fittype</span><span class="o">=</span><span class="s">&#39;gaussian&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCuninformed</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">fitter</span><span class="o">.</span><span class="n">get_pymc</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">xarr</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCwithpriors</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">fitter</span><span class="o">.</span><span class="n">get_pymc</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">xarr</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">use_fitted_values</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCuninformed</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCuninformed</span><span class="o">.</span><span class="n">stats</span><span class="p">()[</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># WARNING: This will fail because width cannot be set &lt;0, but it may randomly reach that...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># How do you define a likelihood distribution with a lower limit?!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCwithpriors</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCwithpriors</span><span class="o">.</span><span class="n">stats</span><span class="p">()[</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -189,7 +363,7 @@ just sums self.model</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.lmfitfun">
-<tt class="descname">lmfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitfun" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">lmfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitfun" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper function to compute the fit residuals in an lmfit-friendly format</p>
 </dd></dl>
 
@@ -197,6 +371,41 @@ just sums self.model</p>
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.lmfitter">
 <tt class="descname">lmfitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>parinfo=None</em>, <em>quiet=True</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use lmfit instead of mpfit to do the fitting</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>xax</strong> : SpectroscopicAxis</p>
+<blockquote>
+<div><p>The X-axis of the spectrum</p>
+</div></blockquote>
+<p><strong>data</strong> : ndarray</p>
+<blockquote>
+<div><p>The data to fit</p>
+</div></blockquote>
+<p><strong>err</strong> : ndarray (optional)</p>
+<blockquote>
+<div><p>The error on the data.  If unspecified, will be uniform unity</p>
+</div></blockquote>
+<p><strong>parinfo</strong> : ParinfoList</p>
+<blockquote>
+<div><p>The guesses, parameter limits, etc.  See
+<cite>pyspeckit.spectrum.parinfo</cite> for details</p>
+</div></blockquote>
+<p><strong>quiet</strong> : bool</p>
+<blockquote class="last">
+<div><p>If false, print out some messages about the fitting</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.logp">
+<tt class="descname">logp</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>pars=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.logp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the log probability of the model</p>
 </dd></dl>
 
 <dl class="method">
@@ -207,7 +416,7 @@ just sums self.model</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc">
-<tt class="descname">n_modelfunc</tt><big>(</big><em>pars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">n_modelfunc</tt><big>(</big><em>pars=None</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple wrapper to deal with N independent peaks for a given spectral model</p>
 </dd></dl>
 
@@ -318,7 +527,7 @@ H+A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
 ref for line params: <a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat">http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat</a></p>
 <dl class="data">
 <dt id="pyspeckit.spectrum.models.hcn.aval_dict">
-<tt class="descclassname">pyspeckit.spectrum.models.hcn.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'10-01': 2.4074999999999999e-05, '12-01': 2.4074999999999999e-05, '11-01': 2.4074999999999999e-05}</em><a class="headerlink" href="#pyspeckit.spectrum.models.hcn.aval_dict" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hcn.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'10-01': 2.4075e-05, '12-01': 2.4075e-05, '11-01': 2.4075e-05}</em><a class="headerlink" href="#pyspeckit.spectrum.models.hcn.aval_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Line strengths of the 15 hyperfine components in J = 1 -  0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
 Line strengths are normalized in such a way that summing over all initial J = 1
@@ -363,7 +572,7 @@ nu - Hz?</p>
 
 <span class="target" id="module-pyspeckit.spectrum.models.hyperfine"></span><dl class="class">
 <dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.hyperfine.</tt><tt class="descname">hyperfinemodel</tt><big>(</big><em>line_names</em>, <em>voff_lines_dict</em>, <em>freq_dict</em>, <em>line_strength_dict</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.hyperfine.</tt><tt class="descname">hyperfinemodel</tt><big>(</big><em>line_names</em>, <em>voff_lines_dict</em>, <em>freq_dict</em>, <em>line_strength_dict</em>, <em>relative_strength_total_degeneracy</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper for the hyperfine model class.  Specify the offsets and relative
 strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.</p>
 <p class="rubric">Methods</p>
@@ -381,13 +590,13 @@ strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine">
-<tt class="descname">hyperfine</tt><big>(</big><em>xarr</em>, <em>Tex=5.0</em>, <em>tau=0.10000000000000001</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>amp=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">hyperfine</tt><big>(</big><em>xarr</em>, <em>Tex=5.0</em>, <em>tau=0.1</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>amp=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp">
-<tt class="descname">hyperfine_amp</tt><big>(</big><em>xarr</em>, <em>amp=None</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>Tex=5.0</em>, <em>tau=0.10000000000000001</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">hyperfine_amp</tt><big>(</big><em>xarr</em>, <em>amp=None</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>Tex=5.0</em>, <em>tau=0.1</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp" title="Permalink to this definition">¶</a></dt>
 <dd><p>wrapper of self.hyperfine with order of arguments changed</p>
 </dd></dl>
 
@@ -421,7 +630,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x10d8718c0&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x106d6bde8&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -441,17 +650,6 @@ number of entries as gridpars</p>
 Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 363, 1083
 <a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/N2H+.html">http://www.strw.leidenuniv.nl/~moldata/N2H+.html</a>
 <a class="reference external" href="http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D">http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D</a></p>
-<dl class="data">
-<dt id="pyspeckit.spectrum.models.n2hp.line_strength_dict">
-<tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">line_strength_dict</tt><em class="property"> = {'121-011': 0.41699999999999998, '121-010': 0.55600000000000005, '121-012': 0.028000000000000001, '111-010': 0.33300000000000002, '111-011': 0.25, '111-012': 0.41699999999999998, '122-012': 0.41699999999999998, '122-011': 1.25, '112-012': 1.25, '112-011': 0.41699999999999998, '110-011': 0.33300000000000002, '101-012': 0.55000000000000004, '101-011': 0.33300000000000002, '101-010': 0.111, '123-012': 2.3300000000000001}</em><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.line_strength_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Line strengths of the 15 hyperfine components in J=1-0  transition. The
-thickness of the lines indicates their relative weight compared to the others.
-Line strengths are normalized in such a way that summing over all initial J = 1
-levels gives the degeneracy of the J = 0 levels, i.e.,  for JF1F  012,
-three for JF1F  011, and one for JF1F  010. Thus, the sum over all 15
-transitions gives the total spin degeneracy</p>
-</dd></dl>
-
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.n2hp.n2hp_radex">
 <tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">n2hp_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.n2hp_radex" title="Permalink to this definition">¶</a></dt>
@@ -467,6 +665,17 @@ xoff_v, width are both in km/s</p>
 Draine 2011 textbook pgs 219-230)</dd>
 </dl>
 <p>grid_vwidth_scale is True or False: False for LVG, True for Sphere</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="pyspeckit.spectrum.models.n2hp.relative_strength_total_degeneracy">
+<tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">relative_strength_total_degeneracy</tt><em class="property"> = {'121-011': 9.0, '121-010': 9.0, '121-012': 9.0, '111-010': 9.0, '111-011': 9.0, '111-012': 9.0, '122-012': 9.0, '122-011': 9.0, '112-012': 9.0, '112-011': 9.0, '110-011': 9.0, '101-012': 9.0, '101-011': 9.0, '101-010': 9.0, '123-012': 9.0}</em><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.relative_strength_total_degeneracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Line strengths of the 15 hyperfine components in J=1-0  transition. The
+thickness of the lines indicates their relative weight compared to the others.
+Line strengths are normalized in such a way that summing over all initial J = 1
+levels gives the degeneracy of the J = 0 levels, i.e.,  for JF1F  012,
+three for JF1F  011, and one for JF1F  010. Thus, the sum over all 15
+transitions gives the total spin degeneracy</p>
 </dd></dl>
 
 </div>
@@ -590,7 +799,7 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Mar 30, 2012.
+      Last updated on Apr 10, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

@@ -97,9 +97,10 @@ yet.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.annotate">
-<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.10000000000000001</em>, <em>handlelength=0.10000000000000001</em>, <em>handletextpad=0.10000000000000001</em>, <em>frameon=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.1</em>, <em>handlelength=0.1</em>, <em>handletextpad=0.1</em>, <em>frameon=False</em>, <em>chi2=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a legend to the plot showing the fitted parameters</p>
 <p>clearlegend() will remove the legend</p>
+<p>chi2 : {True or &#8216;reduced&#8217; or &#8216;optimal&#8217;}</p>
 <p>kwargs passed to legend</p>
 </dd></dl>
 
@@ -175,6 +176,38 @@ expand it (with zeros) to fill the spectrum.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.get_emcee">
+<tt class="descname">get_emcee</tt><big>(</big><em>nwalkers=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_emcee" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an emcee walker ensemble for the data &amp; model using the current model type</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>data</strong> : np.ndarray</p>
+<p><strong>error</strong> : np.ndarray</p>
+<p><strong>nwalkers</strong> : int</p>
+<blockquote class="last">
+<div><p>Number of walkers to use.  Defaults to 2 * self.fitters.npars</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyspeckit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">SpectroscopicAxis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s">&#39;km/s&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="mi">5</span> <span class="o">+</span> <span class="n">e</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">xarr</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="o">*</span><span class="n">e</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="p">(</span><span class="n">fittype</span><span class="o">=</span><span class="s">&#39;gaussian&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">emcee_ensemble</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">get_emcee</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p0</span> <span class="o">=</span> <span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">p0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">p0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mf">10.</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pos</span><span class="p">,</span><span class="n">logprob</span><span class="p">,</span><span class="n">state</span> <span class="o">=</span> <span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_full_model">
 <tt class="descname">get_full_model</tt><big>(</big><em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_full_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute the model over the full axis</p>
@@ -184,6 +217,50 @@ expand it (with zeros) to fill the spectrum.</p>
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_model">
 <tt class="descname">get_model</tt><big>(</big><em>xarr</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the model over a given axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.get_model_frompars">
+<tt class="descname">get_model_frompars</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model_frompars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the model over a given axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.get_pymc">
+<tt class="descname">get_pymc</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_pymc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a pymc MCMC sampler from the current fitter.  Defaults to &#8216;uninformative&#8217; priors</p>
+<p><cite>kwargs</cite> are passed to the fitter&#8217;s get_pymc method, with parameters defined below.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>data</strong> : np.ndarray</p>
+<p><strong>error</strong> : np.ndarray</p>
+<p><strong>use_fitted_values</strong> : bool</p>
+<blockquote class="last">
+<div><p>Each parameter with a measured error will have a prior defined by
+the Normal distribution with sigma = par.error and mean = par.value</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">SpectroscopicAxis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s">&#39;km/s&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="mi">5</span> <span class="o">+</span> <span class="n">e</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">xarr</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="o">*</span><span class="n">e</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="p">(</span><span class="n">fittype</span><span class="o">=</span><span class="s">&#39;gaussian&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCuninformed</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">get_pymc</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCwithpriors</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">get_pymc</span><span class="p">(</span><span class="n">use_fitted_values</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCuninformed</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCuninformed</span><span class="o">.</span><span class="n">stats</span><span class="p">()[</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># WARNING: This will fail because width cannot be set &lt;0, but it may randomly reach that...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># How do you define a likelihood distribution with a lower limit?!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCwithpriors</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MCwithpriors</span><span class="o">.</span><span class="n">stats</span><span class="p">()[</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -230,6 +307,29 @@ will be returned as well</p>
 <dt>renormalize - if &#8216;auto&#8217; or True, will attempt to rescale small data (&lt;1e-9) to be </dt>
 <dd>closer to 1 (scales by the median) so that the fit converges better</dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.optimal_chi2">
+<tt class="descname">optimal_chi2</tt><big>(</big><em>reduced=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.optimal_chi2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute an &#8220;optimal&#8221; chi^2 statistic, i.e. one in which only pixels in
+which the model is statistically significant are included</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>reduced</strong> : bool</p>
+<blockquote>
+<div><p>Return the reduced chi^2</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>Chi^2 statistic or reduced chi^2 statistic</strong> :</p>
+<p class="last"><strong>`chi^2 = sum( (d_i - m_i)^2 / e_i^2 )</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -321,7 +421,7 @@ does it allow N copies of the fitting function?</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.selectregion">
-<tt class="descname">selectregion</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em>, <em>xtype='wcs'</em>, <em>highlight=False</em>, <em>fit_plotted_area=True</em>, <em>reset=False</em>, <em>verbose=False</em>, <em>debug=False</em>, <em>use_window_limits=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">selectregion</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em>, <em>xtype='wcs'</em>, <em>highlight=False</em>, <em>fit_plotted_area=True</em>, <em>reset=False</em>, <em>verbose=False</em>, <em>debug=False</em>, <em>use_window_limits=None</em>, <em>exclude=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pick a fitting region in either WCS units or pixel units</p>
 <dl class="docutils">
 <dt><em>xmin / xmax</em> [ float ]</dt>
@@ -345,6 +445,16 @@ Note that this is not necessarily the same as the window plot limits!</div></blo
 <dd>Use the plot limits <em>as displayed</em>.  Defaults to
 <tt class="xref py py-attr docutils literal"><span class="pre">pyspeckit.spectrum.interactive.use_window_limits</span></tt>.
 Overwrites xmin,xmax set by plotter</dd>
+<dt>exclude: {list of length 2n,&#8217;interactive&#8217;, None}</dt>
+<dd><ul class="first last simple">
+<li>interactive: start an interactive session to select the
+include/exclude regions</li>
+<li>list: parsed as a series of (startpoint, endpoint) in the
+spectrum&#8217;s X-axis units.  Will exclude the regions between
+startpoint and endpoint</li>
+<li>None: No exclusion</li>
+</ul>
+</dd>
 </dl>
 </dd></dl>
 
@@ -413,6 +523,7 @@ It should be extended to do other things later</p>
 <li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactive.html">Interactive Use</a></li>
 </ul>
 
           <h3 style="margin-top: 1.5em;">Search</h3>
@@ -438,7 +549,7 @@ It should be extended to do other things later</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Mar 30, 2012.
+      Last updated on Apr 10, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

@@ -132,17 +132,6 @@ the baseline</p>
 <div><p>Write the baseline fit coefficients into the spectrum&#8217;s header in the
 keywords BLCOEFnn</p>
 </div></blockquote>
-<p><strong>exclude: {list of length 2n,&#8217;interactive&#8217;, None}</strong> :</p>
-<blockquote>
-<div><ul class="simple">
-<li>interactive: start an interactive session to select the
-include/exclude regions</li>
-<li>list: parsed as a series of (startpoint, endpoint) in the
-spectrum&#8217;s X-axis units.  Will exclude the regions between
-startpoint and endpoint</li>
-<li>None: No exclusion</li>
-</ul>
-</div></blockquote>
 <p><strong>interactive: bool</strong> :</p>
 <blockquote>
 <div><p>Specify the include/exclude regions through the interactive plot
@@ -188,9 +177,8 @@ unless xmin/xmax have been set manually</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.baseline.Baseline.button2action">
-<tt class="descname">button2action</tt><big>(</big><em>event=None</em>, <em>debug=False</em>, <em>subtract=True</em>, <em>fit_original=False</em>, <em>powerlaw=False</em>, <em>baseline_fit_color='orange'</em>, <em>exclude=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.button2action" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">button2action</tt><big>(</big><em>event=None</em>, <em>debug=False</em>, <em>subtract=True</em>, <em>fit_original=False</em>, <em>powerlaw=False</em>, <em>baseline_fit_color='orange'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.baseline.Baseline.button2action" title="Permalink to this definition">¶</a></dt>
 <dd><p>Do the baseline fitting and save and plot the results.</p>
-<p>Can specify a region to exclude using velocity units or pixel units</p>
 </dd></dl>
 
 <dl class="method">
@@ -286,6 +274,7 @@ i.e. if there was a baseline to unsubtract)</dd>
 <li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactive.html">Interactive Use</a></li>
 </ul>
 
           <h3 style="margin-top: 1.5em;">Search</h3>
@@ -311,7 +300,7 @@ i.e. if there was a baseline to unsubtract)</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Mar 30, 2012.
+      Last updated on Apr 10, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
