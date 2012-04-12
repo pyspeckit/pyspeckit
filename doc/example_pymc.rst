@@ -98,11 +98,11 @@ takes care of indexing, percentile determination, and coloring.
     # Now do the same with emcee
     emcee_ensemble = sp.specfit.get_emcee()
     p0 = emcee_ensemble.p0 * (np.random.randn(*emcee_ensemble.p0.shape) / 10. + 1.0)
-    pos,logprob,state = emcee_ensemble.run_mcmc(p0,4000)
+    pos,logprob,state = emcee_ensemble.run_mcmc(p0,40000)
 
     plotdict = {'AMPLITUDE0':emcee_ensemble.chain[:,:,1].ravel(),
                 'WIDTH0':emcee_ensemble.chain[:,:,3].ravel()}
-    agpy.pymc_plotting.hist2d(plotdict,'AMPLITUDE0','WIDTH0',fignum=2)
+    agpy.pymc_plotting.hist2d(plotdict,'AMPLITUDE0','WIDTH0',fignum=2,bins=[30,30],clear=True)
 
 .. figure:: ../images/pymc_params_example.png 
     :alt: Examples of the pymc Monte Carlo two-dimensional parameter histogram
@@ -111,9 +111,15 @@ takes care of indexing, percentile determination, and coloring.
     :figwidth: 800
     :width: 800
 
+The Amplitude-Width parameter space sampled by pymc with (lines) and without
+(solid) priors.  There is moderate anticorrelation between the line width and
+the peak amplitude.
+
 .. figure:: ../images/emcee_params_example.png 
-    :alt: Same as above, but using emcee
+    :alt: Same as above, but using emcee with 352000 samples
     :figwidth: 800
     :width: 800
+
+The parameter space sampled with `emcee` and binned onto a 30x30 grid.
 
 

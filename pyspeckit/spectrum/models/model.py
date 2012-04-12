@@ -723,7 +723,11 @@ class SpectralModel(fitter.SimpleFitter):
             elif use_fitted_values:
                 if par.error > 0:
                     if any(par.limited):
-                        funcdict[par.parname] = pymc.distributions.Truncnorm(par.parname, par.value, 1./par.error**2, lolim, uplim)
+                        try:
+                            funcdict[par.parname] = pymc.distributions.TruncatedNormal(par.parname, par.value, 1./par.error**2, lolim, uplim)
+                        except AttributeError:
+                            # old versions used this?
+                            funcdict[par.parname] = pymc.distributions.TruncNorm(par.parname, par.value, 1./par.error**2, lolim, uplim)
                     else:
                         funcdict[par.parname] = pymc.distributions.Normal(par.parname, par.value, 1./par.error**2)
                 else:
