@@ -24,7 +24,8 @@ decent (and expanding) units class for pretty printing of spectroscopic units,
 and different methods of fit plotting.
 
 We're also looking for more users to give us more use cases!  Contact us
-at pyspeckit@gmail.com
+at pyspeckit@gmail.com or post `issues
+<https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/issues>`_
 
 
 Requirements:
@@ -39,9 +40,7 @@ Preferably at least one of:
 Optional:
 `scipy <http://www.scipy.org/>`_
 `lmfit-py <https://github.com/newville/lmfit-py>`_
-
-A good model for our code is `atpy`_, from which we derived inspiration for the
-"register functions" capability.
+`lineid_plot <http://packages.python.org/lineid_plot/>`_
 
 Authors:
 `Adam Ginsburg <adam.g.ginsburg@gmail.com>`_
