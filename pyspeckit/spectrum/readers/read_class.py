@@ -393,7 +393,7 @@ def make_axis(header):
     
 import pyspeckit
 @print_timing
-def class_to_obsblocks(filename,telescope,line,DEBUG=False):
+def class_to_obsblocks(filename,telescope,line,source,DEBUG=False):
     """
     Load an entire CLASS observing session into a list of ObsBlocks based on
     matches to the 'telescope' and 'line' names
@@ -421,6 +421,8 @@ def class_to_obsblocks(filename,telescope,line,DEBUG=False):
         if hdr['XTEL'].strip() not in telescope:
             continue
         if hdr['LINE'].strip() not in line:
+            continue
+        if hdr['SOURC'].strip() not in source:
             continue
         hdr.update({'RESTFREQ':hdr.get('RESTF')})
         H.update('RESTFREQ',hdr.get('RESTF'))
