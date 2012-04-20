@@ -441,6 +441,108 @@ class Plotter(object):
 
         return newplotter
 
+    def line_ids(self, line_names, line_xvals, xval_units=None, auto_yloc=True,
+            auto_yloc_fraction=0.9,  **kwargs):
+        """
+        Add line ID labels to a plot using lineid_plot
+        http://oneau.wordpress.com/2011/10/01/line-id-plot/
+        https://github.com/phn/lineid_plot
+        http://packages.python.org/lineid_plot/
+
+        Parameters
+        ----------
+        line_names : list
+            A list of strings to label the specified x-axis values
+        line_xvals : list
+            List of x-axis values (e.g., wavelengths) at which to label the lines
+        xval_units : string
+            A valid unit to convert to.  If None, leaves units unchanged
+        auto_yloc : bool
+            If set, overrides box_loc and arrow_tip (the vertical position of
+            the lineid labels) in kwargs to be `auto_yloc_fraction` of the plot
+            range
+        auto_yloc_fraction: float in range [0,1]
+            The fraction of the plot (vertically) at which to place labels
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import pyspeckit
+        >>> sp = pyspeckit.Spectrum(
+                xarr=pyspeckit.units.SpectroscopicAxis(np.linspace(-50,50,101),
+                    units='km/s', refX=6562.8, refX_units='angstroms'),
+                data=np.random.randn(101), error=np.ones(101))
+        >>> sp.plotter()
+        >>> sp.plotter.line_ids(['H$\\alpha$'],[6562.8],xval_units='angstroms')
+        """
+        import lineid_plot
+
+        # convert line_xvals to current units
+        xvals = [self.Spectrum.xarr.x_to_coord(c, xval_units) for c in line_xvals]
+
+        if auto_yloc:
+            yr = self.axis.get_ylim()
+            kwargs['box_loc'] = (yr[1]-yr[0])*auto_yloc_fraction + yr[0]
+            kwargs['arrow_tip'] = (yr[1]-yr[0])*(auto_yloc_fraction*0.9) + yr[0]
+
+
+        lineid_plot.plot_line_ids(self.Spectrum.xarr,
+                self.Spectrum.data, 
+                xvals,
+                line_names,
+                ax=self.axis,
+                **kwargs)
+
+    def line_ids_from_measurements(self, auto_yloc=True,
+            auto_yloc_fraction=0.9, **kwargs):
+        """
+        Add line ID labels to a plot using lineid_plot
+        http://oneau.wordpress.com/2011/10/01/line-id-plot/
+        https://github.com/phn/lineid_plot
+        http://packages.python.org/lineid_plot/
+
+        Parameters
+        ----------
+        auto_yloc : bool
+            If set, overrides box_loc and arrow_tip (the vertical position of
+            the lineid labels) in kwargs to be `auto_yloc_fraction` of the plot
+            range
+        auto_yloc_fraction: float in range [0,1]
+            The fraction of the plot (vertically) at which to place labels
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import pyspeckit
+        >>> sp = pyspeckit.Spectrum(
+                xarr=pyspeckit.units.SpectroscopicAxis(np.linspace(-50,50,101),
+                    units='km/s', refX=6562.8, refX_units='angstroms'),
+                data=np.random.randn(101), error=np.ones(101))
+        >>> sp.plotter()
+        >>> sp.specfit(multifit=True, fittype='gaussian', guesses=[1,0,1]) # fitting noise....
+        >>> sp.measure()
+        >>> sp.plotter.line_ids_from_measurements()
+        """
+        import lineid_plot  
+
+        if hasattr(self.Spectrum,'measurements'):
+            measurements = self.Spectrum.measurements
+
+            if auto_yloc:
+                yr = self.axis.get_ylim()
+                kwargs['box_loc'] = (yr[1]-yr[0])*auto_yloc_fraction + yr[0]
+                kwargs['arrow_tip'] = (yr[1]-yr[0])*(auto_yloc_fraction*0.9) + yr[0]
+
+            lineid_plot.plot_line_ids(self.Spectrum.xarr,
+                    self.Spectrum.data, 
+                    [v['pos'] for v in measurements.lines.values()],
+                    measurements.lines.keys(),
+                    ax=self.axis,
+                    **kwargs)
+        else:
+            warn("Cannot add line IDs from measurements unless measurements have been made!")
+
+
 def parse_units(labelstring):
     import re
     labelstring = re.sub("um","$\mu$m",labelstring)
@@ -481,3 +583,4 @@ def steppify(arr,isX=False):
     else:
         newarr = np.array(zip(arr,arr)).ravel()
     return newarr
+

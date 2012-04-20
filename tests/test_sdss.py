@@ -68,4 +68,18 @@ spec.specfit.add_sliders()
 #raw_input("Done (again).")
 
 # Save the figure
-spec.plotter.figure.savefig(savedir+"sdss_fit_example.png")
+spec.plotter.savefig(savedir+"sdss_fit_example.png")
+
+# Do the same thing using lineid_plot
+try: 
+    import lineid_plot
+    import pylab
+
+    spec.plotter(figure=pylab.figure())
+    spec.specfit.plot_fit(annotate=False)
+    spec.plotter.line_ids_from_measurements()
+
+    spec.plotter.savefig(savedir+"sdss_fit_example_lineidplot.png")
+
+except ImportError:
+    pass

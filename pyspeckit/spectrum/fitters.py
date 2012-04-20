@@ -261,13 +261,17 @@ class Specfit(interactive.Interactive):
                 return
             else:
                 self.guesses = guesses
-                self.multifit(show_components=show_components, verbose=verbose, debug=debug, use_lmfit=use_lmfit, **kwargs)
+                self.multifit(show_components=show_components, verbose=verbose,
+                        debug=debug, use_lmfit=use_lmfit, annotate=annotate,
+                        **kwargs)
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
             if (self.Spectrum.baseline.order is None and vheight is None) or vheight:
                 self.Spectrum.baseline.order=0
-                self.peakbgfit(usemoments=usemoments, show_components=show_components, annotate=annotate, debug=debug, use_lmfit=use_lmfit, **kwargs)
+                self.peakbgfit(usemoments=usemoments,
+                        show_components=show_components, annotate=annotate,
+                        debug=debug, use_lmfit=use_lmfit, **kwargs)
             else:
                 self.peakbgfit(usemoments=usemoments, vheight=False,
                         height=0.0, annotate=annotate, use_lmfit=use_lmfit,

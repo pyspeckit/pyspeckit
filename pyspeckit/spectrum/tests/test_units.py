@@ -22,6 +22,8 @@ def test_convert_back(unit_from, unit_to,convention):
     else:
         xvals = np.linspace(1,10,10)
         threshold = 1e-15
+    # all conversions include a * or / by speedoflight_ms
+    threshold = np.spacing(units.speedoflight_ms) * 100
     xarr = units.SpectroscopicAxis(xvals,unit=unit_from,refX=5,refX_units='GHz',xtype=units.unit_type_dict[unit_from])
     xarr.convert_to_unit(unit_to,convention=convention)
     xarr.convert_to_unit(unit_from,convention=convention)

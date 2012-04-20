@@ -435,9 +435,9 @@ class SpectroscopicAxis(np.ndarray):
         xarr.refX_units = GHz
         xarr.x_to_coord(5.1,'GHz') == 6000 # km/s
         """
-        if xunit in wavelength_dict: # shortcut - convert wavelength to freq
-            xval = wavelength_to_frequency(xval, xunit, 'Hz')
-            xunit = 'Hz'
+        #if xunit in wavelength_dict: # shortcut - convert wavelength to freq
+        #    xval = wavelength_to_frequency(xval, xunit, 'Hz')
+        #    xunit = 'Hz'
 
         if unit_type_dict[self.units] == unit_type_dict[xunit]:
             if verbose: print "Input units of same type as output units."
@@ -469,6 +469,17 @@ class SpectroscopicAxis(np.ndarray):
             elif self.units in wavelength_dict:
                 return frequency_to_wavelength(xval, xunit,
                         wavelength_units=self.units)
+        elif xunit in wavelength_dict:
+            if verbose: print "Requested units are Frequency"
+            if self.units in velocity_dict:
+                return wavelength_to_velocity(xval, xunit,
+                        center_wavelength=self.refX,
+                        center_wavelength_units=self.refX_units,
+                        velocity_units=self.units,
+                        convention=self.velocity_convention)
+            elif self.units in frequency_dict:
+                return wavelength_to_frequency(xval, xunit,
+                        frequency_units=self.units)
         else:
             raise ValueError("Units not recognized.")
 
@@ -550,6 +561,7 @@ class SpectroscopicAxis(np.ndarray):
 
         *unit* [ string ] 
             What unit do you want to 'view' the array as?
+            None returns the x-axis unchanged (NOT a copy!)
 
         *frame* [ None ]
             NOT IMPLEMENTED.  When it is, it will allow you to convert between
@@ -632,12 +644,20 @@ class SpectroscopicAxis(np.ndarray):
                 if debug: print "Converting to wavelength"
                 if conversion_dict[self.xtype] is velocity_dict:
                     if debug: print "Converting velocity to wavelength"
-                    freqx = velocity_to_frequency(self, self.units,
-                            center_frequency=center_frequency,
-                            center_frequency_units=center_frequency_units,
-                            frequency_units='Hz', convention=self.velocity_convention)
-                    newxarr = frequency_to_wavelength(freqx, 'Hz',
-                            wavelength_units=unit)
+                    if center_frequency_units in frequency_dict:
+                        freqx = velocity_to_frequency(self, self.units,
+                                center_frequency=center_frequency,
+                                center_frequency_units=center_frequency_units,
+                                frequency_units='Hz',
+                                convention=self.velocity_convention)
+                        newxarr = frequency_to_wavelength(freqx, 'Hz',
+                                wavelength_units=unit)
+                    elif center_frequency_units in wavelength_dict:
+                        newxarr = velocity_to_wavelength(self, self.units,
+                                center_wavelength=center_frequency,
+                                center_wavelength_units=center_frequency_units,
+                                wavelength_units=unit,
+                                convention=self.velocity_convention)
                     newxtype = "Wavelength"
                     newunit = unit
                 elif conversion_dict[self.xtype] is frequency_dict:
@@ -975,6 +995,77 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
     frequencies = speedoflight_ms / ( wavelengths * length_dict[input_units] ) / frequency_dict[frequency_units]
 
     return frequencies
+
+def velocity_to_wavelength(velocities, input_units, center_wavelength=None,
+        center_wavelength_units=None, wavelength_units='meters',
+        convention='optical'):
+    """
+    Conventions defined here:
+    http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
+    * Radio 	V = c (c/l0 - c/l)/(c/l0) 	f(V) = (c/l0) ( 1 - V/c )
+    * Optical 	V = c ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + V/c )^-1
+    * Redshift 	z = ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + z )-1
+    * Relativistic 	V = c ((c/l0)^2 - (c/l)^2)/((c/l0)^2 + (c/l)^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c) 
+    """
+    if input_units in wavelength_dict:
+        print "Already in wavelength units (%s)" % input_units
+        return velocities
+    if center_wavelength is None:
+        raise ValueError("Cannot convert velocity to wavelength without specifying a central wavelength.")
+    if wavelength_units not in wavelength_dict:
+        raise ValueError("Bad wavelength units: %s" % (wavelength_units))
+
+    velocity_ms = velocities / velocity_dict['m/s'] * velocity_dict[input_units]
+    center_frequency = speedoflight_ms / center_wavelength
+    if convention == 'radio':
+        wav = (velocity_ms / speedoflight_ms - 1.0) * center_frequency * -1
+    elif convention == 'optical':
+        wav = (velocity_ms / speedoflight_ms + 1.0)**-1 * center_frequency
+    elif convention == 'relativistic':
+        wav = (-(velocity_ms / speedoflight_ms)**2 + 1.0)**0.5 / (1.0 + velocity_ms/speedoflight_ms) * center_frequency
+    else:
+        raise ValueError('Convention "%s" is not allowed.' % (convention))
+    wavelengths = wav / wavelength_dict[wavelength_units] * wavelength_dict[center_wavelength_units]
+    return wavelengths
+
+def wavelength_to_velocity(wavelengths, input_units, center_wavelength=None,
+        center_wavelength_units=None, velocity_units='m/s',
+        convention='optical'):
+    """
+    Conventions defined here:
+    http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
+    * Radio 	V = c (c/l0 - c/l)/(c/l0) 	f(V) = (c/l0) ( 1 - V/c )
+    * Optical 	V = c ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + V/c )^-1
+    * Redshift 	z = ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + z )-1
+    * Relativistic 	V = c ((c/l0)^2 - f^2)/((c/l0)^2 + f^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c) 
+    """
+    if input_units in velocity_dict:
+        print "Already in velocity units (%s)" % input_units
+        return wavelengths
+    if center_wavelength is None:
+        raise ValueError("Cannot convert wavelength to velocity without specifying a central wavelength.")
+    if center_wavelength_units not in wavelength_dict:
+        raise ValueError("Bad wavelength units: %s" % (center_wavelength_units))
+    if velocity_units not in velocity_dict:
+        raise ValueError("Bad velocity units: %s" % (velocity_units))
+
+    wavelength_m = wavelengths / wavelength_dict['meters'] * wavelength_dict[input_units]
+    center_wavelength_m = center_wavelength / wavelength_dict['meters'] * wavelength_dict[center_wavelength_units]
+    frequency_hz = speedoflight_ms / wavelength_m
+    center_frequency_hz = speedoflight_ms / center_wavelength_m
+
+    # the order is very ugly because otherwise, if scalar, the spectroscopic axis attributes won't be inherited
+    if convention == 'radio':
+        velocity = ( frequency_hz - center_frequency_hz ) / center_frequency_hz * speedoflight_ms * -1
+    elif convention == 'optical':
+        velocity = ( frequency_hz - center_frequency_hz ) / frequency_hz * speedoflight_ms * -1
+    elif convention == 'relativistic':
+        velocity = ( frequency_hz**2 - center_frequency_hz**2 ) / ( center_frequency_hz**2 + frequency_hz )**2 * speedoflight_ms * -1
+    else:
+        raise ValueError('Convention "%s" is not allowed.' % (convention))
+    velocities = velocity * velocity_dict['m/s'] / velocity_dict[velocity_units]
+
+    return velocities
 
 class InconsistentTypeError(Exception):
     pass
