@@ -371,7 +371,7 @@ def read_class(filename,  DEBUG=False):
     return spectra,header,indexes
 
 from .. import units
-def make_axis(header):
+def make_axis(header,imagfreq=False):
     """
     Create a :class:`pyspeckit.spectrum.units.SpectroscopicAxis` from the CLASS "header"
     """
@@ -386,8 +386,12 @@ def make_axis(header):
     refchan = header.get('RCHAN')
     imfreq = header.get('IMAGE')
 
-    xarr = (numpy.arange(nchan) - refchan + 1.0) * fres + rest_frequency
-    XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=rest_frequency)
+    if not imagfreq:
+        xarr =  rest_frequency + (numpy.arange(1, nchan+1) - refchan) * fres
+        XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=rest_frequency)
+    else:
+        xarr = imfreq - (numpy.arange(1, nchan+1) - refchan) * fres
+        XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=imfreq)
 
     return XAxis
     
