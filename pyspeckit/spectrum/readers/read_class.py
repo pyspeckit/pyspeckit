@@ -397,7 +397,7 @@ def make_axis(header,imagfreq=False):
     
 import pyspeckit
 @print_timing
-def class_to_obsblocks(filename,telescope,line,source=None,DEBUG=False):
+def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=False):
     """
     Load an entire CLASS observing session into a list of ObsBlocks based on
     matches to the 'telescope', 'line' and 'source' names
@@ -412,6 +412,8 @@ def class_to_obsblocks(filename,telescope,line,source=None,DEBUG=False):
         List of line names to be matched.
     source : list (optional)
         List of source names to be matched. Defaults to None.
+    imagfreq : bool
+        Create a SpectroscopicAxis with the image frequency.
     """
     spectra,header,indexes = read_class(filename,DEBUG=DEBUG)
 
@@ -448,7 +450,7 @@ def class_to_obsblocks(filename,telescope,line,source=None,DEBUG=False):
             lastscannum = scannum
             if spectrumlist is not None:
                 obslist.append(pyspeckit.ObsBlock(spectrumlist))
-            xarr = make_axis(hdr)
+            xarr = make_axis(hdr,imagfreq=imagfreq)
             spectrumlist = [(
                 pyspeckit.Spectrum(xarr=xarr,
                     header=H,
