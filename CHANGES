@@ -1,6 +1,10 @@
 CHANGES
 *******
 
+Release 0.1.9
+~~~~~~~~~~~~~
+    * Added `lineid_plot <http://packages.python.org/lineid_plot/>`_ tools
+
 Release 0.1.8
 ~~~~~~~~~~~~~
     * BUGFIX RELEASE
