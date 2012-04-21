@@ -396,7 +396,18 @@ import pyspeckit
 def class_to_obsblocks(filename,telescope,line,source=None,DEBUG=False):
     """
     Load an entire CLASS observing session into a list of ObsBlocks based on
-    matches to the 'telescope' and 'line' names
+    matches to the 'telescope', 'line' and 'source' names
+
+    Parameters
+    ----------
+    filename : string
+        The Gildas CLASS data file to read the spectra from.
+    telescope : list
+        List of telescope names to be matched.
+    line : list
+        List of line names to be matched.
+    source : list (optional)
+        List of source names to be matched. Defaults to None.
     """
     spectra,header,indexes = read_class(filename,DEBUG=DEBUG)
 
