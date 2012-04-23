@@ -371,7 +371,7 @@ def read_class(filename,  DEBUG=False):
     return spectra,header,indexes
 
 from .. import units
-def make_axis(header):
+def make_axis(header,imagfreq=False):
     """
     Create a :class:`pyspeckit.spectrum.units.SpectroscopicAxis` from the CLASS "header"
     """
@@ -386,17 +386,34 @@ def make_axis(header):
     refchan = header.get('RCHAN')
     imfreq = header.get('IMAGE')
 
-    xarr = (numpy.arange(nchan) - refchan + 1.0) * fres + rest_frequency
-    XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=rest_frequency)
+    if not imagfreq:
+        xarr =  rest_frequency + (numpy.arange(1, nchan+1) - refchan) * fres
+        XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=rest_frequency)
+    else:
+        xarr = imfreq - (numpy.arange(1, nchan+1) - refchan) * fres
+        XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=imfreq)
 
     return XAxis
     
 import pyspeckit
 @print_timing
-def class_to_obsblocks(filename,telescope,line,source=None,DEBUG=False):
+def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=False):
     """
     Load an entire CLASS observing session into a list of ObsBlocks based on
-    matches to the 'telescope' and 'line' names
+    matches to the 'telescope', 'line' and 'source' names
+
+    Parameters
+    ----------
+    filename : string
+        The Gildas CLASS data file to read the spectra from.
+    telescope : list
+        List of telescope names to be matched.
+    line : list
+        List of line names to be matched.
+    source : list (optional)
+        List of source names to be matched. Defaults to None.
+    imagfreq : bool
+        Create a SpectroscopicAxis with the image frequency.
     """
     spectra,header,indexes = read_class(filename,DEBUG=DEBUG)
 
@@ -433,7 +450,7 @@ def class_to_obsblocks(filename,telescope,line,source=None,DEBUG=False):
             lastscannum = scannum
             if spectrumlist is not None:
                 obslist.append(pyspeckit.ObsBlock(spectrumlist))
-            xarr = make_axis(hdr)
+            xarr = make_axis(hdr,imagfreq=imagfreq)
             spectrumlist = [(
                 pyspeckit.Spectrum(xarr=xarr,
                     header=H,
