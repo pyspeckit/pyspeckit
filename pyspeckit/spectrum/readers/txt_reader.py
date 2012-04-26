@@ -93,25 +93,31 @@ def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, skiplines=0, **kwargs)
     
     f = open(filename, 'r')
     
+    hdr = None
     colunits = []
     coldata = []
     for ii, line in enumerate(f):
         
         # Ignore blank lines
-        if not line.strip(): continue
+        if not line.strip(): 
+            continue
         
         # Possibly read in header
         if line.split()[0][0] == '#': 
-            if (ii) == (0+skiplines): hdr = line[1:].split()
-            if (ii) == (1+skiplines): colunits = line[1:].split()
+            if (ii) == (0+skiplines): 
+                hdr = line[1:].split()
+            if (ii) == (1+skiplines): 
+                colunits = line[1:].split()
             
             continue
         
         coldata.append(line.split())
         
         for j, element in enumerate(coldata[-1]):
-            try: coldata[-1][j] = float(element)
-            except ValueError: coldata[-1][j] = str(element)
+            try: 
+                coldata[-1][j] = float(element)
+            except ValueError: 
+                coldata[-1][j] = str(element)
                 
     f.close()
     
