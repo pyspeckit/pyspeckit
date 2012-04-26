@@ -404,6 +404,8 @@ class Specfit(interactive.Interactive):
 
         # add kwargs to fitkwargs
         self.fitkwargs.update(kwargs)
+        if 'renormalize' in self.fitkwargs:
+            del self.fitkwargs['renormalize']
         
         scalefactor = 1.0
         if renormalize in ('auto',True):
@@ -993,6 +995,9 @@ class Specfit(interactive.Interactive):
                 elif any( (x in param['parname'].lower() for x in ('amp','peak','height')) ):
                     datarange = self.spectofit.max() - self.spectofit.min()
                     lower,upper = (param['value']-datarange, param['value']+datarange)
+                else:
+                    lower = param['value'] * 0.1
+                    upper = param['value'] * 10
 
                 # override guesses with limits
                 if param.limited[0]:

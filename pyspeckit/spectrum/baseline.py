@@ -67,7 +67,7 @@ class Baseline(interactive.Interactive):
             exclusionlevel=0.01, interactive=False, debug=False,
             LoudDebug=False, fit_original=True, baseline_fit_color='orange',
             clear_all_connections=True, fit_plotted_area=True, highlight=False,
-            reset_selection=False,
+            reset_selection=False, subtract=True,
             **kwargs):
         """
         Fit and remove a polynomial from the spectrum.  
@@ -144,7 +144,9 @@ class Baseline(interactive.Interactive):
             self.button2action(
                     fit_original=fit_original,
                     baseline_fit_color=baseline_fit_color, 
-                    debug=debug, **kwargs)
+                    debug=debug,
+                    subtract=subtract, 
+                    **kwargs)
             if highlight: self.highlight_fitregion()
         if save: self.savefit()
 

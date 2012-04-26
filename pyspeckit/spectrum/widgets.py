@@ -69,7 +69,8 @@ class FitterSliders(Widget):
             tbar = matplotlib.rcParams['toolbar'] # turn off the navigation toolbar for the toolfig
             matplotlib.rcParams['toolbar'] = 'None'
             self.toolfig = pyplot.figure(figsize=(6,3))
-            self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.title())
+            if hasattr(targetfig.canvas.manager,'window'):
+                self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.title())
             self.toolfig.subplots_adjust(top=0.9,left=0.2,right=0.9)
             matplotlib.rcParams['toolbar'] = tbar
         else:

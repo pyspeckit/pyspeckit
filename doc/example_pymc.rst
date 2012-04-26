@@ -106,8 +106,8 @@ the correlation between width and amplitude.
     p0 = emcee_ensemble.p0 * (np.random.randn(*emcee_ensemble.p0.shape) / 10. + 1.0)
     pos,logprob,state = emcee_ensemble.run_mcmc(p0,100000)
 
-    plotdict = {'AMPLITUDE0':emcee_ensemble.chain[:,:,1].ravel(),
-                'WIDTH0':emcee_ensemble.chain[:,:,3].ravel()}
+    plotdict = {'AMPLITUDE0':emcee_ensemble.chain[:,:,0].ravel(),
+                'WIDTH0':emcee_ensemble.chain[:,:,2].ravel()}
     agpy.pymc_plotting.hist2d(plotdict,'AMPLITUDE0','WIDTH0',fignum=2,bins=[25,25],clear=True)
     pylab.plot([5],[1],'k+',markersize=25)
 
@@ -121,13 +121,17 @@ the correlation between width and amplitude.
 The Amplitude-Width parameter space sampled by pymc with (lines) and without
 (solid) priors.  There is moderate anticorrelation between the line width and
 the peak amplitude.  The + symbol indicates the input parameters; the model does
-a somewhat poor job of recovering the true values.
+a somewhat poor job of recovering the true values (in case you're curious, there is
+no intrinsic bias - if you repeat the above fitting procedure a few hundred times, the
+mean fitted amplitude is 5.0).
 
 .. figure:: ../images/emcee_params_example.png 
     :alt: Same as above, but using emcee with 352000 samples
     :figwidth: 800
     :width: 800
 
-The parameter space sampled with `emcee` and binned onto a 30x30 grid.
+The parameter space sampled with `emcee` and binned onto a 25x25 grid.  Note
+that `emcee` has 6x as many points (and takes about 6x as long to run) because
+there are 6 "walkers" for the 3 parameters being fit.
 
 

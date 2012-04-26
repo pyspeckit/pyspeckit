@@ -208,6 +208,7 @@ unitdict = {
             'mh':1.67262158e-24 * 1.00794, # proton mass
             'me':9.10938188e-28,           # electron mass
             'e':4.80320427e-10, # electron charge, esu
+            'speed':'cm/s',
             'length':'cm'},
         'mks':{ 'h':6.626068e-34,
             'k':1.3806503e-23,
@@ -215,6 +216,7 @@ unitdict = {
             'c':2.99792458e8,
             'mh':1.67262158e-27 * 1.00794,
             'me':9.10938188e-31,
+            'speed':'m/s',
             'length':'m'}
         }
 
