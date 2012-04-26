@@ -191,9 +191,33 @@ convention_suffix = {'radio':'RAD','optical':'OPT','relativistic':'REL','redshif
 
 speedoflight_ms  = np.float64(2.99792458e8) # m/s
 speedoflight_kms = np.float64(2.99792458e5) # km/s
-speedoflight_cms = np.float64(2.99792458e10) # cm/s
+c = speedoflight_cms = np.float64(2.99792458e10) # cm/s
 
 astronomical_unit_cm = np.float64(1.49597870e13)
+
+hplanck = h = 6.626068e-27    # Planck's Constant (erg s)
+k = kb = kB = 1.3806503e-16   # Boltzmann's Constant (erg / K)
+electronmass = me = 9.10938188e-28 # g
+electroncharge = 4.80320427e-10 # esu
+
+unitdict = {
+        'cgs':{ 'h':6.626068e-27,
+            'k':1.3806503e-16,
+            'kb':1.3806503e-16,
+            'c':2.99792458e10,
+            'mh':1.67262158e-24 * 1.00794, # proton mass
+            'me':9.10938188e-28,           # electron mass
+            'e':4.80320427e-10, # electron charge, esu
+            'length':'cm'},
+        'mks':{ 'h':6.626068e-34,
+            'k':1.3806503e-23,
+            'kb':1.3806503e-23,
+            'c':2.99792458e8,
+            'mh':1.67262158e-27 * 1.00794,
+            'me':9.10938188e-31,
+            'length':'m'}
+        }
+
 
 class SpectroscopicAxis(np.ndarray):
     """
