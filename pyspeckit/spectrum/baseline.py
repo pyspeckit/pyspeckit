@@ -175,7 +175,7 @@ class Baseline(interactive.Interactive):
                 xarr_fit_units=xarr_fit_units,
                 **kwargs)
 
-        self.basespec = self.get_model(xarr=self.Spectrum.xarr, powerlaw=powerlaw, fit_units=xarr_fit_units)
+        self.basespec = self.get_model(xarr=self.Spectrum.xarr, powerlaw=self.powerlaw, fit_units=xarr_fit_units)
 
         if subtract:
             if self.subtracted and fit_original: 
