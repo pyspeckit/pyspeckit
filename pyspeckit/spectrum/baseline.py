@@ -151,8 +151,7 @@ class Baseline(interactive.Interactive):
         if save: self.savefit()
 
     def button2action(self, event=None, debug=False, subtract=True,
-            fit_original=False, powerlaw=False, baseline_fit_color='orange',
-            **kwargs):
+            fit_original=False, baseline_fit_color='orange', **kwargs):
         """
         Do the baseline fitting and save and plot the results.
 
@@ -172,7 +171,7 @@ class Baseline(interactive.Interactive):
                 err=self.Spectrum.error,
                 order=self.order, 
                 mask=(True-self.includemask),
-                powerlaw=powerlaw,
+                powerlaw=self.powerlaw,
                 xarr_fit_units=xarr_fit_units,
                 **kwargs)
 
