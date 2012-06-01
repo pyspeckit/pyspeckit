@@ -28,7 +28,7 @@
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.8 documentation" href="index.html" />
     <link rel="up" title="Readers" href="readers.html" />
-    <link rel="next" title="GALEX FITS files" href="galexfiles.html" />
+    <link rel="next" title="Wrappers" href="wrappers.html" />
     <link rel="prev" title="hdf5" href="hdf5files.html" />
      
     <script type="text/javascript">
@@ -103,7 +103,35 @@ indexing the ObsBlock directly.</p>
 <dt id="pyspeckit.spectrum.readers.read_class.class_to_obsblocks">
 <tt class="descclassname">pyspeckit.spectrum.readers.read_class.</tt><tt class="descname">class_to_obsblocks</tt><big>(</big><em>*arg</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.read_class.class_to_obsblocks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load an entire CLASS observing session into a list of ObsBlocks based on
-matches to the &#8216;telescope&#8217; and &#8216;line&#8217; names</p>
+matches to the &#8216;telescope&#8217;, &#8216;line&#8217; and &#8216;source&#8217; names</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>filename</strong> : string</p>
+<blockquote>
+<div><p>The Gildas CLASS data file to read the spectra from.</p>
+</div></blockquote>
+<p><strong>telescope</strong> : list</p>
+<blockquote>
+<div><p>List of telescope names to be matched.</p>
+</div></blockquote>
+<p><strong>line</strong> : list</p>
+<blockquote>
+<div><p>List of line names to be matched.</p>
+</div></blockquote>
+<p><strong>source</strong> : list (optional)</p>
+<blockquote>
+<div><p>List of source names to be matched. Defaults to None.</p>
+</div></blockquote>
+<p><strong>imagfreq</strong> : bool</p>
+<blockquote class="last">
+<div><p>Create a SpectroscopicAxis with the image frequency.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -115,7 +143,7 @@ objects</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.readers.read_class.make_axis">
-<tt class="descclassname">pyspeckit.spectrum.readers.read_class.</tt><tt class="descname">make_axis</tt><big>(</big><em>header</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.read_class.make_axis" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.readers.read_class.</tt><tt class="descname">make_axis</tt><big>(</big><em>header</em>, <em>imagfreq=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.readers.read_class.make_axis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a <a class="reference internal" href="units.html#pyspeckit.spectrum.units.SpectroscopicAxis" title="pyspeckit.spectrum.units.SpectroscopicAxis"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.units.SpectroscopicAxis</span></tt></a> from the CLASS &#8220;header&#8221;</p>
 </dd></dl>
 
@@ -150,8 +178,6 @@ objects</p>
 <li class="toctree-l3"><a class="reference internal" href="#module-pyspeckit.spectrum.readers.read_class">An essentially undocumented API</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="galexfiles.html">GALEX FITS files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gbtfiles.html">GBTIDL FITS files</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
@@ -182,7 +208,7 @@ objects</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Apr 11, 2012.
+      Last updated on Jun 01, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

@@ -164,23 +164,27 @@ the correlation between width and amplitude.</p>
 <span class="n">p0</span> <span class="o">=</span> <span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">p0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">p0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mf">10.</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
 <span class="n">pos</span><span class="p">,</span><span class="n">logprob</span><span class="p">,</span><span class="n">state</span> <span class="o">=</span> <span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span><span class="mi">100000</span><span class="p">)</span>
 
-<span class="n">plotdict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">:</span><span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">chain</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
-            <span class="s">&#39;WIDTH0&#39;</span><span class="p">:</span><span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">chain</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()}</span>
+<span class="n">plotdict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">:</span><span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">chain</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+            <span class="s">&#39;WIDTH0&#39;</span><span class="p">:</span><span class="n">emcee_ensemble</span><span class="o">.</span><span class="n">chain</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()}</span>
 <span class="n">agpy</span><span class="o">.</span><span class="n">pymc_plotting</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">plotdict</span><span class="p">,</span><span class="s">&#39;AMPLITUDE0&#39;</span><span class="p">,</span><span class="s">&#39;WIDTH0&#39;</span><span class="p">,</span><span class="n">fignum</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="mi">25</span><span class="p">,</span><span class="mi">25</span><span class="p">],</span><span class="n">clear</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="n">pylab</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">5</span><span class="p">],[</span><span class="mi">1</span><span class="p">],</span><span class="s">&#39;k+&#39;</span><span class="p">,</span><span class="n">markersize</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="figure" style="width: 800">
-<img alt="Examples of the pymc Monte Carlo two-dimensional parameter histogram (marginalized over X-offset and Y-offset) with and without priors; with priors is shown in contour lines" src="_images/pymc_params_example.png" style="width: 800px;" />
+<img alt="Examples of the pymc Monte Carlo two-dimensional parameter histogram (marginalized over X-offset and Y-offset) with and without priors; with priors is shown in contour lines" src="../images/pymc_params_example.png" style="width: 800px;" />
 </div>
 <p>The Amplitude-Width parameter space sampled by pymc with (lines) and without
 (solid) priors.  There is moderate anticorrelation between the line width and
 the peak amplitude.  The + symbol indicates the input parameters; the model does
-a somewhat poor job of recovering the true values.</p>
+a somewhat poor job of recovering the true values (in case you&#8217;re curious, there is
+no intrinsic bias - if you repeat the above fitting procedure a few hundred times, the
+mean fitted amplitude is 5.0).</p>
 <div class="figure" style="width: 800">
-<img alt="Same as above, but using emcee with 352000 samples" src="_images/emcee_params_example.png" style="width: 800px;" />
+<img alt="Same as above, but using emcee with 352000 samples" src="../images/emcee_params_example.png" style="width: 800px;" />
 </div>
-<p>The parameter space sampled with <cite>emcee</cite> and binned onto a 30x30 grid.</p>
+<p>The parameter space sampled with <cite>emcee</cite> and binned onto a 25x25 grid.  Note
+that <cite>emcee</cite> has 6x as many points (and takes about 6x as long to run) because
+there are 6 &#8220;walkers&#8221; for the 3 parameters being fit.</p>
 </div>
 
 
@@ -233,7 +237,7 @@ a somewhat poor job of recovering the true values.</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Apr 12, 2012.
+      Last updated on Jun 01, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
