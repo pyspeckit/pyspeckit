@@ -48,3 +48,9 @@ then extract and install using the standard python method::
 
 
 You can also check out the `source code <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src>`_
+
+.. note ::
+    If you use `easy_install pyspeckit` with the Enthought Python Distribution, you will
+    most likely get a SandboxViolation error.  You can get around this by using `python
+    setup.py install` or `pip install pyspeckit`.
+
