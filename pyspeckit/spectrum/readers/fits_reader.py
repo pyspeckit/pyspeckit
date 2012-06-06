@@ -27,7 +27,7 @@ def open_1d_fits(filename,**kwargs):
 
 def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
         autofix=True, scale_keyword=None, scale_action=operator.div,
-        verbose=False, **kwargs):
+        verbose=False, apnum=0, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
@@ -89,11 +89,15 @@ will run into errors.""")
             errspec = spec*0 # set error spectrum to zero if it's not in the data
 
     elif hdr.get('NAXIS') > 2:
-        for ii in xrange(2,hdr.get('NAXIS')):
-            # only fail if extra axes have more than one row
-            if hdr.get('NAXIS%i' % ii) > 1:
-                raise ValueError("Too many axes for open_1d_fits")
-        spec = ma.array(data).squeeze()
+        if hdr.get('BANDID2'):
+            # this is an IRAF .ms.fits file with a 'background' in the 3rd dimension
+            spec = ma.array(data[specnum,apnum,:]).squeeze()
+        else:
+            for ii in xrange(3,hdr.get('NAXIS')+1):
+                # only fail if extra axes have more than one row
+                if hdr.get('NAXIS%i' % ii) > 1:
+                    raise ValueError("Too many axes for open_1d_fits")
+            spec = ma.array(data).squeeze()
         if errspecnum is None: 
             errspec = spec*0 # set error spectrum to zero if it's not in the data
     else:

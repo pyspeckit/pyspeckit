@@ -1,7 +1,7 @@
 """
-==================
+===================
 H2CO fitter wrapper
-==================
+===================
 
 Wrapper to fit formaldehyde spectra.  
 """

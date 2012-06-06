@@ -20,6 +20,7 @@ out by hand some of the coefficients.
 
 """
 import numpy as np
+import pyspeckit
 
 # log(temperature), alphaBalphaB = [[1.0,9.283],
 alphaB=[[1.2,8.823],
@@ -223,3 +224,70 @@ def hydrogen_fitter(sp, temperature=10000, tiedwidth=False):
     guesses = [g for sublist in subguesses for g in sublist]
 
     return tied, guesses
+
+def hydrogen_model(xarr, amplitude=1.0, width=0.0, velocity=0.0, a_k=0.0, temperature=10000):
+    """
+    Generate a set of parameters identifying the hydrogen lines in your
+    spectrum.  These come in groups of 3 assuming you're fitting a gaussian to
+    each.  You can tie the widths or choose not to.
+
+    Parameters
+    ----------
+    sp : pyspeckit.Spectrum
+        The spectrum to fit
+    temperature : [ 5000, 10000, 20000 ]
+        The case B coefficients are computed for 3 temperatures
+    a_k : float
+        The K-band extinction normalized to 2.2 microns.  Simple
+        exponential.
+    width : float
+        Line width in km/s
+    velocity : float
+        Line center in km/s
+    amplitude : float
+        arbitrary amplitude of the first line (all other lines
+        will be scaled to this value)
+
+    Returns
+    -------
+    np.ndarray with same shape as sp.xarr
+
+    """
+
+    tnum = temperatures[temperature]
+
+    lines = find_lines(xarr)
+    reference_line = lines[0]
+
+    model = np.array(xarr * 0)
+    xarr = xarr.as_unit('microns')
+
+    for line in lines[1:]:
+        relamp = (r_to_hbeta[line][tnum]/r_to_hbeta[reference_line][tnum]) 
+        lw = width / pyspeckit.units.speedoflight_kms * wavelength[line]
+        center = wavelength[line]
+    
+        model += amplitude * relamp * np.exp(-(xarr-center)**2 / (2.0*lw)**2)
+
+    if a_k > 0:
+        # alpha=1.8 comes from Martin & Whittet 1990.  alpha=1.75 from Rieke and Lebofsky 1985
+        Al = a_k * (xarr/2.2)**(-1.75)
+        model *= np.exp(-Al)
+
+    return model
+
+def add_to_registry(sp):
+    """
+    Add the Hydrogen model to the Spectrum's fitter registry
+    """
+    # can't have absorption in recombination case
+    extincted_hydrogen_emission = pyspeckit.models.model.SpectralModel(hydrogen_model, 4, 
+            shortvarnames=('A','\\sigma','\\Delta x','A_K'),
+            parnames=['amplitude','width','velocity','extinction'],
+            parlimited=[(True,False),(True,False),(False,False), (True,False)], 
+            parlimits=[(0,0), (0,0), (0,0), (0,0)],
+            fitunits='microns')
+
+    sp.Registry.add_fitter('hydrogen', extincted_hydrogen_emission,
+            extincted_hydrogen_emission.npars, multisingle='multi')
+

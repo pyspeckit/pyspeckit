@@ -293,6 +293,8 @@ class Spectrum(Spectrum1D):
             self.specname = specname
         elif hdr.get('OBJECT'):
             self.specname = hdr.get('OBJECT')
+        elif hdr.get('OBJNAME'):
+            self.specname = hdr.get('OBJNAME')
         else:
             self.specname = ''
             
@@ -795,12 +797,19 @@ class ObsBlock(Spectra):
     def average(self, weight=None, inverse_weight=False, error='erravgrtn', debug=False):
         """
         Average all scans in an ObsBlock.  Returns a single Spectrum object
-
-        weight - a header keyword to weight by
-        error - estimate the error spectrum.  Can be:
-            'scanrms'   - the standard deviation of each pixel across all scans
-            'erravg'    - the average of all input error spectra
-            'erravgrtn' - the average of all input error spectra divided by sqrt(n_obs)
+        
+        Parameters
+        ----------
+        weight : string
+            a header keyword to weight by.   If not specified, the spectra will be 
+            averaged without weighting
+        inverse_weight : bool
+            Is the header keyword an inverse-weight (e.g., a variance?)
+        error : ['scanrms','erravg','erravgrtn']
+            estimate the error spectrum by one of three methods.
+            'scanrms'   : the standard deviation of each pixel across all scans
+            'erravg'    : the average of all input error spectra
+            'erravgrtn' : the average of all input error spectra divided by sqrt(n_obs)
         """
 
         wtarr = np.isfinite(self.data)
