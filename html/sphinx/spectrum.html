@@ -351,12 +351,30 @@ of observations of the same object in the same setup for later averaging.</p>
 <dt id="pyspeckit.spectrum.ObsBlock.average">
 <tt class="descname">average</tt><big>(</big><em>weight=None</em>, <em>inverse_weight=False</em>, <em>error='erravgrtn'</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.average" title="Permalink to this definition">¶</a></dt>
 <dd><p>Average all scans in an ObsBlock.  Returns a single Spectrum object</p>
-<p>weight - a header keyword to weight by
-error - estimate the error spectrum.  Can be:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>weight</strong> : string</p>
 <blockquote>
-<div>&#8216;scanrms&#8217;   - the standard deviation of each pixel across all scans
-&#8216;erravg&#8217;    - the average of all input error spectra
-&#8216;erravgrtn&#8217; - the average of all input error spectra divided by sqrt(n_obs)</div></blockquote>
+<div><p>a header keyword to weight by.   If not specified, the spectra will be 
+averaged without weighting</p>
+</div></blockquote>
+<p><strong>inverse_weight</strong> : bool</p>
+<blockquote>
+<div><p>Is the header keyword an inverse-weight (e.g., a variance?)</p>
+</div></blockquote>
+<p><strong>error</strong> : [&#8216;scanrms&#8217;,&#8217;erravg&#8217;,&#8217;erravgrtn&#8217;]</p>
+<blockquote class="last">
+<div><p>estimate the error spectrum by one of three methods.
+&#8216;scanrms&#8217;   : the standard deviation of each pixel across all scans
+&#8216;erravg&#8217;    : the average of all input error spectra
+&#8216;erravgrtn&#8217; : the average of all input error spectra divided by sqrt(n_obs)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -451,7 +469,7 @@ for example.</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Apr 10, 2012.
+      Last updated on Jun 25, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
