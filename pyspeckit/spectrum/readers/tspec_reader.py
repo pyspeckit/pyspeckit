@@ -3,7 +3,7 @@ from .. import units
 import numpy as np
 import numpy.ma as ma
 
-def tspec_reader(filename):
+def tspec_reader(filename, merged=True, specnum=0):
     """ 
     Read TripleSpec reduced data
 
@@ -15,26 +15,37 @@ def tspec_reader(filename):
     header = fitsfile[0].header
     data = fitsfile[0].data
 
-    if header.get('INSTR') == 'APO Triplespec':
-        # read in SPEXTOOL spectrum
-        xarr = np.array(data[0,:],dtype='float64')
-        spec = ma.array(data[1,:],dtype='float64')
+    if merged:
+        if header.get('INSTR') == 'APO Triplespec':
+            # read in SPEXTOOL spectrum
+            xarr = np.array(data[0,:],dtype='float64')
+            spec = ma.array(data[1,:],dtype='float64')
+            spec.mask = spec!=spec
+            errspec = ma.array(data[2,:],dtype='float64')
+            errspec.mask = (spec!=spec)+(errspec!=errspec)
+            xunits = header.get('XUNITS')
+            unit = header.get('YUNITS')
+            header.update('BUNIT',unit)
+            xtype = 'wavelength'
+        elif header.get('INSTRUME') == 'tspec':
+            dv,v0,p3 = header['CD1_1'],header['CRVAL1'],header['CRPIX1']
+            header.update('CDELT1',dv)
+            xconv = lambda v: ((v-p3+1)*dv+v0)
+            xarr = xconv(np.arange(len(spec)))
+            wat = dict([s.split("=") for s in header.get('WAT1_001').split()])
+            xunits = wat['units']
+            xtype = wat['label']
+            #unit = header.get('BUNIT')
+    else:
+        xarr = np.array(data[specnum,0,:],dtype='float64')
+        spec = ma.array(data[specnum,1,:],dtype='float64')
         spec.mask = spec!=spec
-        errspec = ma.array(data[2,:],dtype='float64')
+        errspec = ma.array(data[specnum,2,:],dtype='float64')
         errspec.mask = (spec!=spec)+(errspec!=errspec)
         xunits = header.get('XUNITS')
         unit = header.get('YUNITS')
         header.update('BUNIT',unit)
         xtype = 'wavelength'
-    elif header.get('INSTRUME') == 'tspec':
-        dv,v0,p3 = header['CD1_1'],header['CRVAL1'],header['CRPIX1']
-        header.update('CDELT1',dv)
-        xconv = lambda v: ((v-p3+1)*dv+v0)
-        xarr = xconv(np.arange(len(spec)))
-        wat = dict([s.split("=") for s in header.get('WAT1_001').split()])
-        xunits = wat['units']
-        xtype = wat['label']
-        #unit = header.get('BUNIT')
         
     XAxis = units.SpectroscopicAxis(xarr,xunits,xtype=xtype)
 

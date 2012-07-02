@@ -603,7 +603,7 @@ class SpectroscopicAxis(np.ndarray):
             I think this can also accept wavelengths....
         """
 
-        if unit is None:
+        if unit in (None,'none'):
             return self
         elif unit in pixel_dict:
             return np.arange(self.shape[0])
