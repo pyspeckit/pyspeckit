@@ -262,6 +262,11 @@ def hydrogen_model(xarr, amplitude=1.0, width=0.0, velocity=0.0, a_k=0.0, temper
     model = np.array(xarr * 0)
     xarr = xarr.as_unit('microns')
 
+
+    lw = width / pyspeckit.units.speedoflight_kms * wavelength[reference_line]
+    center = wavelength[reference_line]
+    model += amplitude * np.exp(-(xarr-center)**2 / (2.0*lw)**2)
+
     for line in lines[1:]:
         relamp = (r_to_hbeta[line][tnum]/r_to_hbeta[reference_line][tnum]) 
         lw = width / pyspeckit.units.speedoflight_kms * wavelength[line]

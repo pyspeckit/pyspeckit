@@ -572,7 +572,8 @@ class Spectrum(Spectrum1D):
                 newspec = self.copy()
                 newspec.data = operation(newspec.data, other) 
                 return newspec
-            else: # purely for readability
+
+            elif hasattr(self,'xarr') and hasattr(other,'xarr'): # purely for readability
 
                 if self._arithmetic_threshold == 'exact':
                     xarrcheck = all(self.xarr == other.xarr)
@@ -591,6 +592,16 @@ class Spectrum(Spectrum1D):
                     raise ValueError("Shape mismatch in data")
                 elif not xarrcheck:
                     raise ValueError("X-axes do not match.")
+            elif hasattr(self,'shape') and hasattr(other,'shape'):
+                # allow array subtraction
+                if self.shape != other.shape:
+                    raise ValueError("Shape mismatch in data")
+                elif hasattr(self,'xarr'):
+                    newspec = self.copy()
+                    newspec.data = operation(newspec.data, other)
+                elif hasattr(other,'xarr'): # is this even possible?
+                    newspec = other.copy()
+                    newspec.data = operation(self, other.data)
 
         return ofunc
 

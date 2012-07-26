@@ -19,18 +19,17 @@ import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure
 import numpy as np
-import pyfits
 import copy
 import itertools
 from pyspeckit.specwarnings import warn
 try:
-    # pywcs is preferred over astropy.wcs because astropy.wcs failed on me
-    import pywcs
+    import astropy.wcs as pywcs
+    import astropy.io.fits as pyfits
     pywcsOK = True
 except ImportError:
     try:
-        import astropy.wcs as pywcs
-        import astropy.io.fits as pyfits
+        import pyfits
+        import pywcs
         pywcsOK = True
     except ImportError:
         pywcsOK = False

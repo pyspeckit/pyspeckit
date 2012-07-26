@@ -15,7 +15,6 @@ from math import acos,atan2,tan
 import numpy
 import copy
 import os
-import pyfits
 import tempfile
 import posang # agpy code
 import pyspeckit
@@ -31,10 +30,12 @@ try:
     coordsOK = True
 except ImportError:
     coordsOK = False
-try:
+try: # pywcs + pyfits OR astropy, no mixing!
+    import astropy.io.fits as pyfits
     import astropy.wcs as pywcs
     wcsOK = True
 except ImportError:
+    import pyfits
     try:
         import pywcs
         wcsOK = True
@@ -212,7 +213,7 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
         xhi = int( min([xcen+xwidth,cube.shape[2]])  )
         yhi = int( min([ycen+ywidth,cube.shape[1]])  )
     elif units=="wcs" and header:
-        newxcen,newycen = wcs.wcs_sky2pix(xcen,ycen,0)
+        newxcen,newycen = wcs.wcs_world2pix(xcen,ycen,0)
         try:
             newxwid,newywid = xwidth / abs(wcs.wcs.cd[0,0]), ywidth / abs(wcs.wcs.cd[1,1])
         except AttributeError:
@@ -238,7 +239,7 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
     if header is None:
         return subim
     else:
-        crv1,crv2 = wcs.wcs_pix2sky(xlo,ylo,0)
+        crv1,crv2 = wcs.wcs_pix2world(xlo,ylo,0)
 
         flathead['CRVAL1'] = crv1[0]
         flathead['CRVAL2'] = crv2[0]
@@ -285,7 +286,7 @@ def subcube(cube, xcen, xwidth, ycen, ywidth, header=None,
     if units=="pixels":
         newxcen,newycen = xcen,ycen
     elif units=="wcs" and header:
-        newxcen,newycen = wcs.wcs_sky2pix(xcen,ycen,0)
+        newxcen,newycen = wcs.wcs_world2pix(xcen,ycen,0)
     else:
         raise Exception("units must be either 'wcs' or 'pixels'")
 
@@ -303,7 +304,7 @@ def subcube(cube, xcen, xwidth, ycen, ywidth, header=None,
 
     if return_HDU:
 
-        xmid_sky,ymid_sky = wcs.wcs_pix2sky(xlo+xwidth,ylo+ywidth,0)
+        xmid_sky,ymid_sky = wcs.wcs_pix2world(xlo+xwidth,ylo+ywidth,0)
 
         newheader.update('CRVAL1',xmid_sky[0])
         newheader.update('CRVAL2',ymid_sky[0])
@@ -344,7 +345,7 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
     elif wcs.wcs.ctype[0][:4] == 'GLON':
         ra,dec = pos.galactic()
         corrfactor=1
-    # workaround for a broken wcs.wcs_sky2pix
+    # workaround for a broken wcs.wcs_world2pix
     try:
         radif = (wcs.wcs.crval[0]-ra)*dtor
         gamma = acos(cos(dec*dtor)*cos(wcs.wcs.crval[1]*dtor)*cos(radif)+sin(dec*dtor)*sin(wcs.wcs.crval[1]*dtor)) / dtor
@@ -359,7 +360,7 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
         y = gamma * cos(theta) / wcs.wcs.cdelt[1] + wcs.wcs.crpix[1]
     
     #print "DEBUG: x,y from math (vectors): ",x,y
-    #x,y = wcs.wcs_sky2pix(ra,dec,0)  # convert WCS coordinate to pixel coordinate (0 is origin, do not use fits convention)
+    #x,y = wcs.wcs_world2pix(ra,dec,0)  # convert WCS coordinate to pixel coordinate (0 is origin, do not use fits convention)
     #print "DEBUG: x,y from wcs: ",x,y
     try:
         x=x[0] - 1 # change from FITS to python convention
@@ -494,7 +495,7 @@ def coords_in_image(fitsfile,lon,lat,system='galactic'):
         pos = coords.Position((lon,lat),system=system)
         lon,lat = pos.galactic()
 
-    x,y = wcs.wcs_sky2pix(lon,lat,0)
+    x,y = wcs.wcs_world2pix(lon,lat,0)
     #DEBUG print x,y,wcs.naxis1,wcs.naxis2
     if (0 < x < wcs.naxis1) and (0 < y < wcs.naxis2):
         return True

@@ -647,7 +647,10 @@ class Cube(spectrum.Spectrum):
         Load a parameter + error cube into the .parcube and .errcube
         attributes.
         """
-        import pyfits
+        try:
+            import astropy.io.fits as pyfits
+        except ImportError:
+            import pyfits
 
         cubefile = pyfits.open(fitsfilename)
         cube = cubefile[0].data
@@ -776,7 +779,10 @@ class CubeStack(Cube):
             Overwrite file if it exists?
         """
 
-        import pyfits
+        try:
+            import astropy.io.fits as pyfits
+        except ImportError:
+            import pyfits
         
         try:
             fitcubefile = pyfits.PrimaryHDU(data=np.concatenate([self.parcube,self.errcube]), header=self.header)
