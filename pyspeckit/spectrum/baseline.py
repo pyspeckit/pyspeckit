@@ -196,7 +196,8 @@ class Baseline(interactive.Interactive):
                 kwargs.update({'use_window_limits':True})
             self.plot_baseline(baseline_fit_color=baseline_fit_color, **kwargs)
 
-        # disconnect interactive window
+        # disconnect interactive window (and more importantly, reconnect to
+        # original interactive cmds)
         self.clear_all_connections()
 
     def get_model(self, xarr=None, baselinepars=None, powerlaw=False, fit_units='pixels'):

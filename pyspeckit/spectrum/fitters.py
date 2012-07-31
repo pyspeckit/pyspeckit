@@ -927,6 +927,10 @@ class Specfit(interactive.Interactive):
             else: 
                 print "error, wrong # of pars"
 
+        # disconnect interactive window (and more importantly, reconnect to
+        # original interactive cmds)
+        self.clear_all_connections()
+
     def copy(self, parent=None):
         """
         Create a copy of the spectral fit - includes copies of the _full_model,
