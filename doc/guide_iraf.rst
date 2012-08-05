@@ -8,32 +8,33 @@ comfortable fitting lines and making publication-quality plots using PySpecKit.
 Loading a Spectrum
 ------------------
 If you have an IRAF spectrum, it is straightforward to load into PySpecKit::
+
     sp = pyspeckit.Spectrum('iraf_spectrum.ms.fits')
     sp.plotter()
 
 Fitting Line Profiles
 ---------------------
-[see <interactive> for a comprehensive graphical demonstration of these instructions]
+.. note:: See :doc:`interactive` for a comprehensive graphical demonstration of these instructions.
 
-In IRAF, a line profile is fitted using 'k' to start the fitter, then 'k','l', or 'v'
+In IRAF, a line profile is fitted using *k* to start the fitter, then *k*, *l*, or *v*
 to perform the fit.
 
-In PySpecKit, the continuum ('baseline') and line profile are determined separately.
+In PySpecKit, the continuum (*baseline*) and line profile are determined separately.
 
 Instead of using a key twice to specify the continuum level, a continuum must
-be fitted from the data.  This is done by pressing 'b' to turn on the baseline fitter.
-Click or press '1' to select baseline regions - they will be highlighted in green.
-Press '3' to fit the baseline and display it as an orange line.
+be fitted from the data.  This is done by pressing *b* to turn on the baseline fitter.
+Click or press *1* to select baseline regions - they will be highlighted in green.
+Press *3* to fit the baseline and display it as an orange line.
 
-In PySpecKit, the interactive fitter is started by pressing 'f' in the plot
-window.  After pressing 'f', instructions will be provided in the terminal
+In PySpecKit, the interactive fitter is started by pressing *f* in the plot
+window.  After pressing *f*, instructions will be provided in the terminal
 window telling you which line profiles are implemented.  Select one of these,
 or use a gaussian by default.
 
-Select the line fitting region by pressing '1' on either side of the line.
-Select the peak and full-width-half-maximum of the line by pressing '2' at each
+Select the line fitting region by pressing *1* on either side of the line.
+Select the peak and full-width-half-maximum of the line by pressing *2* at each
 of these locations in turn.  You may repeat this cycle indefinitely to fit
-multiple profiles (comparable to IRAF's 'deblend' capability).  Then, press '3'
+multiple profiles (comparable to IRAF*s *deblend* capability).  Then, press *3*
 to perform the fit.
 
 The fitted parameters can be accessed (as variables, or printed) through the

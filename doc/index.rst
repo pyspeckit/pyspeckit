@@ -29,8 +29,12 @@ Guides / Getting Started
 * :doc:`guide_iraf`
     Intended for users of IRAF's `splot` interactive fitting routine.
 
-Classes
+Classes and API
 =====================================
+At the core, PySpecKit runs on a 'Spectroscopic Object' class called
+:class:`Spectrum <pyspeckit.spectrum.Spectrum>`.  Therefore everything
+interesting about PySpecKit can be learned by digging into the properties of
+this class.
 
 * :doc:`spectrum` can read a variety of individual spectra types
 
