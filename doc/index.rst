@@ -21,9 +21,13 @@ Supported file types and their formats:
     * :doc:`txtfiles` 
     * :doc:`hdf5files` 
 
-Guides
-======
-* :doc:`guide_class` A simple getting started guide aimed at Gildas-CLASS users
+Guides / Getting Started
+========================
+* :doc:`guide_class`
+    A simple getting started guide aimed at Gildas-CLASS users
+
+* :doc:`guide_iraf`
+    Intended for users of IRAF's `splot` interactive fitting routine.
 
 Classes
 =====================================

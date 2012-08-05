@@ -1,5 +1,5 @@
-PySpecKit Guide for GILDAS-CLASS users
-======================================
+Guide for GILDAS-CLASS users
+============================
 
 Reading Files
 ~~~~~~~~~~~~~
