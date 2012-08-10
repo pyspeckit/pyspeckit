@@ -54,4 +54,4 @@ class write_fits(Writer):
             HDU = pyfits.PrimaryHDU(data=data, header=pyfits.Header([pyfits.card.Card(k,v)  for k,v in header.iteritems()]))
         
         HDU.verify('fix')
-        HDU.writeto(fn,clobber=clobber,**kwargs)
+        HDU.writeto(fn, clobber=clobber, output_verify='fix', **kwargs)
