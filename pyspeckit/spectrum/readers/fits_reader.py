@@ -109,9 +109,7 @@ will run into errors.""")
         scaleval = hdr[scale_keyword]
         spec = scale_action(spec,scaleval)
         errspec = scale_action(errspec,scaleval)
-    except ValueError:
-        pass
-    except KeyError:
+    except (ValueError, KeyError) as e:
         pass
 
     xarr = None
