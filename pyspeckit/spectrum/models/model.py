@@ -16,6 +16,8 @@ try:
     from collections import OrderedDict
 except ImportError:
     from ordereddict import OrderedDict
+except ImportError:
+    warn( "OrderedDict is required for modeling.  If you have python <2.7, install the ordereddict module." ) 
 
 class SpectralModel(fitter.SimpleFitter):
     """
