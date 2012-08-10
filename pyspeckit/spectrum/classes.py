@@ -661,7 +661,10 @@ class Spectra(Spectrum):
         self.header = pyfits.Header()
         for spec in speclist:
             for key,value in spec.header.items():
-                self.header.update(key,value)
+                try:
+                    self.header.update(key,value)
+                except ValueError, KeyError:
+                    warn( "Could not update header KEY=%s to VALUE=%s" % (key,value) )
 
         self.plotter = plotters.Plotter(self)
         self._register_fitters()
