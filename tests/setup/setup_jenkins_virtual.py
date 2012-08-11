@@ -34,7 +34,7 @@ package_dict = OrderedDict({
         'pyfits':PYFITS_VERSIONS,
         'boto':BOTO_VERSIONS,
         'Imaging':PIL_VERSIONS,
-        'lmfit':LMFIT_VERSIONS,
+        #'lmfit':LMFIT_VERSIONS,
         'ordereddict':ORDEREDDICT_VERSIONS,
         })
 
@@ -54,7 +54,7 @@ package_install_prefixes = {'numpy':'',
         'boto':'',
         'matplotlib':'',
         'Imaging':'',
-        'lmfit':'',
+        #'lmfit':'',
         'ordereddict':'',
         }
 
@@ -64,7 +64,7 @@ package_install_flags = {'numpy':' --fcompiler=g95',
         'boto':'',
         'matplotlib':'',
         'Imaging':'',
-        'lmfit':'',
+        #'lmfit':'',
         'ordereddict':'',
         }
 
@@ -74,7 +74,7 @@ package_import_names = {'numpy':'numpy',
         'boto':'boto',
         'matplotlib':'matplotlib',
         'Imaging':'PIL',
-        'lmfit':'lmfit',
+        #'lmfit':'lmfit',
         'ordereddict':'ordereddict',
         }
 
@@ -84,7 +84,7 @@ package_url = {'numpy':'http://sourceforge.net/projects/numpy/files/NumPy/{0}/nu
         'matplotlib':'http://pypi.python.org/packages/source/m/matplotlib/matplotlib-{0}.tar.gz',
         'boto':'http://boto.googlecode.com/files/boto-{0}.tar.gz',
         'Imaging':'http://effbot.org/downloads/Imaging-{0}.tar.gz',
-        'lmfit':'https://github.com/newville/lmfit-py/tarball/{0}',
+        #'lmfit':'https://github.com/newville/lmfit-py/tarball/{0}',
         'ordereddict':'http://pypi.python.org/packages/source/o/ordereddict/ordereddict-{0}.tar.gz'
         # 'matplotlib':'http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.0/matplotlib-{0}.tar.gz',
         }
