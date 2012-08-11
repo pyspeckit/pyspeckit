@@ -7,7 +7,7 @@ except ImportError:
     from ordereddict import OrderedDict
 
 # pyfits depends on numpy.  pywcs hard-depends on numpy (won't install without it)
-install_order = ('python','numpy','pyfits','pywcs','matplotlib','boto','Imaging']#,'lmfit')
+install_order = ('python','numpy','pyfits','pywcs','matplotlib','boto','Imaging'])#,'lmfit')
 print_order = ('python','pywcs','numpy','matplotlib','pyfits')
 
 NUMPY_VERSIONS = ['1.4.1', '1.5.1', '1.6.1']
