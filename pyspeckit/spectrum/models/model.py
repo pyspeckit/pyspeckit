@@ -341,9 +341,8 @@ class SpectralModel(fitter.SimpleFitter):
         """
         try:
             import lmfit
-        except ImportError:
-            print "Could not import lmfit, try using mpfit instead."
-            return
+        except ImportError as e:
+            raise ImportError( "Could not import lmfit, try using mpfit instead." )
 
         self.xax = xax # the 'stored' xax is just a link to the original
         if hasattr(xax,'convert_to_unit') and hasattr(self,'fitunits') and self.fitunits is not None:

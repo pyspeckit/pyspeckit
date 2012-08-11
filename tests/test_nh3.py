@@ -47,9 +47,14 @@ sp.specfit(fittype='ammonia',
         multifit=True,guesses=[5.9,4.45,14.919,0.84,96.2,0.5],fixed=[False,False,False,False,False,True],quiet=False)
 sp.plotter.figure.savefig(savedir+'nh3_ammonia_fit_fixedfortho.png')
 
-sp.specfit(fittype='ammonia',
-        multifit=True,guesses=[4,3.5,14.69,0.68,97.3,0.5]+[15,4.2,14.85,0.52,95.8,0.5]
-        ,fixed=[False,False,False,False,False,True]*2,quiet=False,use_lmfit=True,debug=True)
+try:
+    sp.specfit(fittype='ammonia',
+            multifit=True,guesses=[4,3.5,14.69,0.68,97.3,0.5]+[15,4.2,14.85,0.52,95.8,0.5]
+            ,fixed=[False,False,False,False,False,True]*2,quiet=False,use_lmfit=True,debug=True)
+except ImportError:
+    sp.specfit(fittype='ammonia',
+            multifit=True,guesses=[4,3.5,14.69,0.68,97.3,0.5]+[15,4.2,14.85,0.52,95.8,0.5]
+            ,fixed=[False,False,False,False,False,True]*2,quiet=False,use_lmfit=False,debug=True)
 print sp.specfit.parinfo
 sp.plotter.figure.savefig(savedir+'nh3_ammonia_multifit_fixedfortho_lmfit.png')
 
@@ -60,9 +65,14 @@ sp.plotter.figure.savefig(savedir+'nh3_ammonia_multifit_fixedfortho.png')
 
 anothertry=True
 if anothertry:
-    sp.specfit(fittype='ammonia',
-            multifit=True,guesses=[4,3.5,14.69,0.68,97.3,0.0]+[15,4.2,14.85,0.52,95.8,0.0]
-            ,fixed=[False,False,False,False,False,True]*2,quiet=False,use_lmfit=True)
+    try: 
+        sp.specfit(fittype='ammonia',
+                multifit=True,guesses=[4,3.5,14.69,0.68,97.3,0.0]+[15,4.2,14.85,0.52,95.8,0.0]
+                ,fixed=[False,False,False,False,False,True]*2,quiet=False,use_lmfit=True)
+    except ImportError:
+        sp.specfit(fittype='ammonia',
+                multifit=True,guesses=[4,3.5,14.69,0.68,97.3,0.0]+[15,4.2,14.85,0.52,95.8,0.0]
+                ,fixed=[False,False,False,False,False,True]*2,quiet=False,use_lmfit=False)
     print sp.specfit.parinfo
     sp.plotter.figure.savefig(savedir+'nh3_ammonia_multifit_fixedfortho0_lmfit.png')
 
