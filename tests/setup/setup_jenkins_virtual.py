@@ -7,7 +7,7 @@ except ImportError:
     from ordereddict import OrderedDict
 
 # pyfits depends on numpy.  pywcs hard-depends on numpy (won't install without it)
-install_order = ('python','numpy','pyfits','pywcs','matplotlib','boto','Imaging','lmfit')
+install_order = ('python','numpy','pyfits','pywcs','matplotlib','boto','Imaging']#,'lmfit')
 print_order = ('python','pywcs','numpy','matplotlib','pyfits')
 
 NUMPY_VERSIONS = ['1.4.1', '1.5.1', '1.6.1']
@@ -19,7 +19,7 @@ MATPLOTLIB_VERSIONS = ['1.1.0'] # matplotlib 1.0.0 doesn't exist @ pypi, follows
 BOTO_VERSIONS = ['2.2.2']
 PIL_VERSIONS = ['1.1.7']
 # http://effbot.org/downloads/Imaging-1.1.7.tar.gz
-LMFIT_VERSIONS = ['0.5']
+#LMFIT_VERSIONS = ['0.5']
 # https://github.com/newville/lmfit-py/tarball/0.5
 ORDEREDDICT_VERSIONS = ['1.1']
 
