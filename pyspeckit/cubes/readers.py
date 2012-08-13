@@ -54,10 +54,13 @@ def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
     else:
         dv,v0,p3 = hdr['CDELT3'+wcstype],hdr['CRVAL3'+wcstype],hdr['CRPIX3'+wcstype]
 
-    if scale_keyword is not None and hdr.get(scale_keyword):
+    #if scale_keyword is not None and hdr.get(scale_keyword):
+    try:
+        scaleval = hdr[scale_keyword]
         print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
-        scaleval = hdr.get(scale_keyword)
         cube = scale_action(cube,scaleval)
+    except (ValueError,KeyError):
+        pass
 
     xconv = lambda v: ((v-p3+1)*dv+v0)
     xarr = xconv(np.arange(cube.shape[0]))
