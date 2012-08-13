@@ -225,12 +225,14 @@ class MapPlotter(object):
                 self.circle(self._clickX,self._clickY,clickX,clickY,clear=clear,linestyle=linestyle,color=color)
             elif hasattr(event,'button') and event.button is not None:
                 if event.button==1:
+                    clickX,clickY = round(clickX),round(clickY)
                     print "Plotting spectrum from point %i,%i" % (clickX,clickY)
                     self._remove_circle()
                     self._add_click_mark(clickX,clickY,clear=True)
                     self.Cube.plot_spectrum(clickX,clickY,clear=True)
                     if plot_fit: self.Cube.plot_fit(clickX, clickY, silent=True)
                 elif event.button==2:
+                    clickX,clickY = round(clickX),round(clickY)
                     print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
                     color=self.overplot_colorcycle.next()
                     self._add_click_mark(clickX,clickY,clear=False, color=color)
