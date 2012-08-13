@@ -543,16 +543,27 @@ class ammonia_model(model.SpectralModel):
                 if mpp[txn] > mpp[tkn]: mpp[txn] = mpp[tkn]  # force Tex>Tkin to Tex=Tkin (already done in n_ammonia)
         self.mp = mp
 
-        #if parinfo_with_fixed is not None:
-        #    # self self.parinfo preserving the 'fixed' parameters 
-        #    self.parinfo = parinfo_with_fixed
-        #    # ORDER MATTERS!
-        #    for p in parinfo:
-        #        self.parinfo[p['n']] = p
-        #else:
-        #    self.parinfo = parinfo
-        self.parinfo = parinfo
-        self.parinfo = ParinfoList([Parinfo(p) for p in self.parinfo])
+        if parinfo_with_fixed is not None:
+            # self self.parinfo preserving the 'fixed' parameters 
+            # ORDER MATTERS!
+            for p in parinfo:
+                parinfo_with_fixed[p['n']] = p
+            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo_with_fixed])
+        else:
+            self.parinfo = parinfo
+            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo])
+
+        # I don't THINK these are necessary?
+        #self.parinfo = parinfo
+        #self.parinfo = ParinfoList([Parinfo(p) for p in self.parinfo])
+
+        # need to restore the fixed parameters....
+        # though the above commented out section indicates that I've done and undone this dozens of times now
+        # (a test has been added to test_nh3.py)
+        # this was NEVER included or tested because it breaks the order
+        #for par in parinfo_with_fixed:
+        #    if par.parname not in self.parinfo.keys():
+        #        self.parinfo.append(par)
 
         self.mpp = self.parinfo.values
         self.mpperr = self.parinfo.errors

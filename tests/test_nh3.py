@@ -45,6 +45,8 @@ sp.plotter.figure.savefig(savedir+'nh3_ammonia_multifit_zoom.png')
 
 sp.specfit(fittype='ammonia',
         multifit=True,guesses=[5.9,4.45,14.919,0.84,96.2,0.5],fixed=[False,False,False,False,False,True],quiet=False)
+if len(sp.specfit.parinfo) != 6:
+    raise ValueError("parinfo has wrong number of parameters")
 sp.plotter.figure.savefig(savedir+'nh3_ammonia_fit_fixedfortho.png')
 
 try:

@@ -553,7 +553,14 @@ class Cube(spectrum.Spectrum):
         else:
             gg = guesses
 
-        sp.specfit(guesses=gg, **fitkwargs)
+        try:
+            sp.specfit(guesses=gg, **fitkwargs)
+        except Exception as ex:
+            print "Fit number %i at %i,%i failed on error " % (ii,x,y), ex
+            print "Guesses were: ",gg
+            print "Fitkwargs were: ",fitkwargs
+            if isinstance(ex,KeyboardInterrupt):
+                raise ex
         # make sure the fitter / fittype are set for the cube
         # this has to be done within the loop because skipped-over spectra
         # don't ever get their fittypes set
