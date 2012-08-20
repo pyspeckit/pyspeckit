@@ -6,6 +6,11 @@ import os
 if not os.path.exists(savedir):
     os.mkdir(savedir)
 
+# This step became necessary on August 17th, 2012.  It was never necessary before then.
+# It doesn't make any sense.  I didn't make ANY changes!  WHY did the behavior change?!
+import numpy as np
+np.seterr(all='ignore')
+
 from matplotlib.pyplot import ion,ioff
 if interactive:
     ion()
