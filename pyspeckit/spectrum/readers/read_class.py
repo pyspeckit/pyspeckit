@@ -5,7 +5,10 @@ GILDAS CLASS file reader
 
 Read a CLASS file into an :class:`pyspeckit.spectrum.ObsBlock`
 """
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 import numpy
 import struct
 from numpy import pi

@@ -19,7 +19,10 @@ except ImportError:
 import numpy as np
 from .. import units
 
-try: 
+try:
+    import astropy.io.fits as pyfits
+    pyfitscheck=True
+except ImportError:
     import pyfits
     pyfitscheck=True
 except ImportError: 

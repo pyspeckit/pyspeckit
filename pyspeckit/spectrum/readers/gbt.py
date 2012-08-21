@@ -7,7 +7,10 @@ pyspeckit.  Additional documentation is needed.  Nodding reduction is
 supported, frequency switching is not.
 
 """
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 import pyspeckit
 import numpy as np
 try:

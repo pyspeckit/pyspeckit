@@ -16,7 +16,10 @@ The Spectra class is a container of multiple spectra of the *same* object at
 """
 import numpy as np
 import smooth as sm
-import pyfits
+try: 
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 import readers,plotters,writers,baseline,units,measurements,speclines,arithmetic
 import moments as moments_module
 import fitters

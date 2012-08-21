@@ -1,4 +1,7 @@
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 from .. import units
 import numpy as np
 import numpy.ma as ma
