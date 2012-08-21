@@ -11,7 +11,10 @@ and therefore has no independently defined functions.
 """
 import pyspeckit
 import numpy as np
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 from pyspeckit.spectrum import models
 from pyspeckit.spectrum.models import n2hp
 
