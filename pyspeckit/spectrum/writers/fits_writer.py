@@ -3,8 +3,12 @@ import numpy as np
 from . import Writer
 
 fitscheck = True
-try: import pyfits
-except ImportError: fitscheck = False
+try: 
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
+except ImportError:
+    fitscheck = False
 
 class write_fits(Writer):
     def write_data(self, filename = None, newsuffix = 'out', clobber = True, tolerance=1e-8,

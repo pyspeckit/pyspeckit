@@ -11,6 +11,7 @@ print "Does it have an axis? ",sp.plotter.axis
 sp.plotter()
 print "How about now? ",sp.plotter.axis
 
+import numpy as np; np.seterr(all='ignore'); print "HACK - np.seterr(all='ignore')"
 
 # set the baseline to zero to prevent variable-height fitting
 # (if you don't do this, the best fit to the spectrum is dominated by the
