@@ -702,7 +702,9 @@ class SpectralModel(fitter.SimpleFitter):
         
         """
         try:
-            import pymc
+            old_errsettings = np.geterr()
+            import pymc # pymc breaks error settings
+            np.seterr(**old_errsettings)
         except ImportError:
             return
 

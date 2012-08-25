@@ -273,7 +273,8 @@ class MapPlotter(object):
         else:
             for mark in self._click_marks:
                 self._click_marks.remove(mark)
-                self.axis.lines.remove(mark)
+                if mark in self.axis.lines:
+                    self.axis.lines.remove(mark)
             self.refresh()
 
     def _add_circle(self,x,y,x2,y2,**kwargs):
@@ -289,7 +290,8 @@ class MapPlotter(object):
             self._circles.append(layername)
         else:
             r = np.linalg.norm(np.array([x,y])-np.array([x2,y2]))
-            self._circles.append( matplotlib.patches.Circle([x,y],radius=r,**kwargs) )
+            circle = matplotlib.patches.Circle([x,y],radius=r,**kwargs)
+            self._circles.append( circle )
             self.axis.patches.append(circle)
             self.refresh()
 
@@ -302,7 +304,9 @@ class MapPlotter(object):
                     self.FITSFigure.remove_layer(layername)
         else:
             for circle in self._circles:
-                self.axis.patches.remove(circle)
+                if circle in self.axis.patches:
+                    self.axis.patches.remove(circle)
+                self._circles.remove(circle)
             self.refresh()
 
     def refresh(self):
