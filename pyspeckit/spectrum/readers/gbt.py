@@ -205,6 +205,8 @@ def reduce_blocks(blocks, verbose=False, average=True):
             nod = sigref(tp1,tp2,tsys2)
         elif feednumber == 2:
             nod = sigref(tp2,tp1,tsys1)
+        else:
+            raise ValueError("Feed number %i is not understood" % feednumber)
 
         reduced_nods[sampname] = nod
 
