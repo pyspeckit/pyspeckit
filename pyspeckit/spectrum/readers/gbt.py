@@ -159,7 +159,7 @@ def reduce_gbt_target(sdfitsfile, objectname, verbose=False):
 
     return reduced_nods
 
-def reduce_blocks(blocks, verbose=False, average=True):
+def reduce_blocks(blocks, verbose=False, average=True, fd0=1, fd1=2):
     """
     Do a nodded on/off observation given a dict of observation blocks as
     produced by read_gbt_target
@@ -201,12 +201,12 @@ def reduce_blocks(blocks, verbose=False, average=True):
             tp2 = totalpower(blocks[on2], blocks[off2], average=False)
 
         # then do the signal-reference bit
-        if feednumber == 1:
+        if feednumber == fd0:
             nod = sigref(tp1,tp2,tsys2)
-        elif feednumber == 2:
+        elif feednumber == fd1:
             nod = sigref(tp2,tp1,tsys1)
         else:
-            raise ValueError("Feed number %i is not understood" % feednumber)
+            raise ValueError("Feed number %i is not understood.  Try specifying fd0, fd1 keywords if this is a genuine nodded observation." % feednumber)
 
         reduced_nods[sampname] = nod
 
