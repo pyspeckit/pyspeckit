@@ -107,13 +107,14 @@ will run into errors.""")
         spec = ma.array(data).squeeze()
         if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data
 
-    try:
-        print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
-        scaleval = hdr[scale_keyword]
-        spec = scale_action(spec,scaleval)
-        errspec = scale_action(errspec,scaleval)
-    except (ValueError, KeyError) as e:
-        pass
+    if scale_keyword is not None:
+        try:
+            print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
+            scaleval = hdr[scale_keyword]
+            spec = scale_action(spec,scaleval)
+            errspec = scale_action(errspec,scaleval)
+        except (ValueError, KeyError) as e:
+            pass
 
     xarr = None
     if hdr.get('ORIGIN') == 'CLASS-Grenoble':
