@@ -30,16 +30,26 @@ class CaseInsensitiveDict(dict):
                 for k,v in inputdict.items():
                     if hasattr(k,'lower'):
                         dict.__setitem__(self, k.lower(), v)
+                    else:
+                        dict.__setitem__(self, k, v)
             else:
                 for k,v in inputdict:
                     if hasattr(k,'lower'):
                         dict.__setitem__(self, k.lower(), v)
+                    else:
+                        dict.__setitem__(self, k, v)
 
     def __getitem__(self, key):
-        return dict.__getitem__(self, key.lower())
+        if hasattr(key, 'lower'):
+            return dict.__getitem__(self, key.lower())
+        else:
+            return dict.__getitem__(self, key)
 
     def __setitem__(self, key, value):
-        dict.__setitem__(self, key.lower(), value)
+        if hasattr(key, 'lower'):
+            return dict.__setitem__(self, key.lower())
+        else:
+            return dict.__setitem__(self, key)
 
     def __contains__(self, key):
         if hasattr(key,'lower'):
@@ -49,26 +59,39 @@ class CaseInsensitiveDict(dict):
 
     def has_key(self, key):
         """ This is deprecated, but we're keeping it around """
-        return dict.has_key(self, key.lower())
+        if hasattr(key,'lower'):
+            return dict.has_key(self, key.lower())
+        else:
+            return dict.has_key(self, key)
 
     def get(self, key, def_val=None):
-        return dict.get(self, key.lower(), def_val)
+        if hasattr(key,'lower'):
+            return dict.get(self, key.lower(), def_val)
+        else:
+            return dict.get(self, key, def_val)
 
     def setdefault(self, key, def_val=None):
-        return dict.setdefault(self, key.lower(), def_val)
+        if hasattr(key,'lower'):
+            return dict.setdefault(self, key.lower(), def_val)
+        else:
+            return dict.setdefault(self, key, def_val)
 
     def update(self, inputdict):
         for k,v in inputdict.items():
-            dict.__setitem__(self, k.lower(), v)
+            # let self.__setitem__ hand the low/upperness
+            self.__setitem__(self, k, v)
 
     def fromkeys(self, iterable, value=None):
         d = CaseInsensitiveDict()
         for k in iterable:
-            dict.__setitem__(d, k.lower(), value)
+            self.__setitem__(d, k, value)
         return d
 
     def pop(self, key, def_val=None):
-        return dict.pop(self, key.lower(), def_val)
+        if hasattr(key,'lower'):
+            return dict.pop(self, key.lower(), def_val)
+        else:
+            return dict.pop(self, key, def_val)
     
 
 length_dict = {'meters':1.0,'m':1.0,
