@@ -1,4 +1,2 @@
-numpy
-numpydoc
-matplotlib
+numpydoc==0.4
 ordereddict
