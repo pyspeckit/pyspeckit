@@ -272,7 +272,7 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['matplotlib','pyfits','scipy']
+MOCK_MODULES = ['matplotlib','pyfits','scipy','astropy']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
 
