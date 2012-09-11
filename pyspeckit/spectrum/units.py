@@ -315,6 +315,9 @@ class SpectroscopicAxis(np.ndarray):
             subarr.units = 'none'
         subarr.frame = frame
 
+        # not currently used / placeholder
+        subarr.frame_offset = frame_offset
+
         if xtype in xtype_dict:
             subarr.xtype = xtype_dict[xtype]
             subarr.frame = frame_dict[xtype]
