@@ -30,6 +30,9 @@ Here are some examples of how to make your own fitters::
 
 Then you can `register <registration.html>`_ these fitters.
 
+.. TODO::
+    Implement the gaussian-hermite profile described here:
+    `<http://pipelinesandarchives.blogspot.com/2012/09/fit1d-new-smurf-command-for-acsis-data.html>`_
 
 
 .. automodule:: pyspeckit.spectrum.models.model
