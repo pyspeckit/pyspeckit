@@ -1,6 +1,6 @@
 import numpy as np
 
-def moments(Xax, data, vheight=True, estimator=np.median, negamp=None,
+def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
         veryverbose=False, nsigcut=None, noise_guess=None,  **kwargs):
     """Returns (height, amplitude, x, width_x)
     the gaussian parameters of a 1D distribution by calculating its
@@ -62,6 +62,8 @@ def moments(Xax, data, vheight=True, estimator=np.median, negamp=None,
     Hamplitude = data.max()-height
     Hwidth_x = Hpeakintegral / Hamplitude / np.sqrt(2*np.pi)
 
+    # in order to guess properly, needs to be mean by default
+    # rev 824 broke this for test_hr2421
     Lstddev = Xax[data<estimator(data)].std()
     Hstddev = Xax[data>estimator(data)].std()
     #print "Lstddev: %10.3g  Hstddev: %10.3g" % (Lstddev,Hstddev)
@@ -70,9 +72,9 @@ def moments(Xax, data, vheight=True, estimator=np.median, negamp=None,
     if negamp: # can force the guess to be negative
         xcen,amplitude,width_x = Xax[np.argmin(data)],Lamplitude,Lwidth_x
     elif negamp is None:
-        if Hstddev < Lstddev: 
+        if Hstddev < Lstddev:  # positive
             xcen,amplitude,width_x, = Xax[np.argmax(data)],Hamplitude,Hwidth_x
-        else:                                                                   
+        else: # negative
             xcen,amplitude,width_x, = Xax[np.argmin(data)],Lamplitude,Lwidth_x
     else:  # if negamp==False, make positive
         xcen,amplitude,width_x = Xax[np.argmax(data)],Hamplitude,Hwidth_x

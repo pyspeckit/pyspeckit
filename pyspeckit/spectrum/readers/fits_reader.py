@@ -1,4 +1,7 @@
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 from .. import units
 import numpy.ma as ma
 import numpy as np
@@ -27,7 +30,7 @@ def open_1d_fits(filename,**kwargs):
 
 def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
         autofix=True, scale_keyword=None, scale_action=operator.div,
-        verbose=False, **kwargs):
+        verbose=False, apnum=0, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
@@ -40,7 +43,7 @@ def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
 
     hdr = pyfits_hdu._header
     if autofix: 
-        for card in hdr.ascardlist():
+        for card in hdr.ascard:
             try:
                 if verbose: card.verify('fix')
                 else: card.verify('silentfix')
@@ -88,22 +91,29 @@ will run into errors.""")
                 errspec = spec*0 # set error spectrum to zero if it's not in the data
 
     elif hdr.get('NAXIS') > 2:
-        for ii in xrange(2,hdr.get('NAXIS')):
-            # only fail if extra axes have more than one row
-            if hdr.get('NAXIS%i' % ii) > 1:
-                raise ValueError("Too many axes for open_1d_fits")
-        spec = ma.array(data).squeeze()
+        if hdr.get('BANDID2'):
+            # this is an IRAF .ms.fits file with a 'background' in the 3rd dimension
+            spec = ma.array(data[specnum,apnum,:]).squeeze()
+        else:
+            for ii in xrange(3,hdr.get('NAXIS')+1):
+                # only fail if extra axes have more than one row
+                if hdr.get('NAXIS%i' % ii) > 1:
+                    raise ValueError("Too many axes for open_1d_fits")
+            spec = ma.array(data).squeeze()
         if errspecnum is None: 
             errspec = spec*0 # set error spectrum to zero if it's not in the data
     else:
         spec = ma.array(data).squeeze()
         if errspecnum is None: errspec = spec*0 # set error spectrum to zero if it's not in the data
 
-    if hdr.get(scale_keyword):
-        print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
-        scaleval = hdr.get(scale_keyword)
-        spec = scale_action(spec,scaleval)
-        errspec = scale_action(errspec,scaleval)
+    if scale_keyword is not None:
+        try:
+            print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
+            scaleval = hdr[scale_keyword]
+            spec = scale_action(spec,scaleval)
+            errspec = scale_action(errspec,scaleval)
+        except (ValueError, KeyError) as e:
+            pass
 
     xarr = None
     if hdr.get('ORIGIN') == 'CLASS-Grenoble':
@@ -123,7 +133,10 @@ will run into errors.""")
         dv = hdr['CD%s_%s%s' % (specaxis,specaxis,wcstype)]
         v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
         p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
-        hdr.update('CDELT%s' % specaxis,dv)
+        try: # astropy.io.fits is not backwards compatible
+            hdr.update('CDELT%s' % specaxis,dv)
+        except AttributeError:
+            hdr.set('CDELT%s' % specaxis,dv)
         if verbose: print "Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
     elif hdr.get(str('CDELT%s%s' % (specaxis,wcstype))):
         dv = hdr['CDELT%s%s' % (specaxis,wcstype)]

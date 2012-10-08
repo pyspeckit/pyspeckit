@@ -30,16 +30,26 @@ class CaseInsensitiveDict(dict):
                 for k,v in inputdict.items():
                     if hasattr(k,'lower'):
                         dict.__setitem__(self, k.lower(), v)
+                    else:
+                        dict.__setitem__(self, k, v)
             else:
                 for k,v in inputdict:
                     if hasattr(k,'lower'):
                         dict.__setitem__(self, k.lower(), v)
+                    else:
+                        dict.__setitem__(self, k, v)
 
     def __getitem__(self, key):
-        return dict.__getitem__(self, key.lower())
+        if hasattr(key, 'lower'):
+            return dict.__getitem__(self, key.lower())
+        else:
+            return dict.__getitem__(self, key)
 
     def __setitem__(self, key, value):
-        dict.__setitem__(self, key.lower(), value)
+        if hasattr(key, 'lower'):
+            return dict.__setitem__(self, key.lower())
+        else:
+            return dict.__setitem__(self, key)
 
     def __contains__(self, key):
         if hasattr(key,'lower'):
@@ -49,26 +59,39 @@ class CaseInsensitiveDict(dict):
 
     def has_key(self, key):
         """ This is deprecated, but we're keeping it around """
-        return dict.has_key(self, key.lower())
+        if hasattr(key,'lower'):
+            return dict.has_key(self, key.lower())
+        else:
+            return dict.has_key(self, key)
 
     def get(self, key, def_val=None):
-        return dict.get(self, key.lower(), def_val)
+        if hasattr(key,'lower'):
+            return dict.get(self, key.lower(), def_val)
+        else:
+            return dict.get(self, key, def_val)
 
     def setdefault(self, key, def_val=None):
-        return dict.setdefault(self, key.lower(), def_val)
+        if hasattr(key,'lower'):
+            return dict.setdefault(self, key.lower(), def_val)
+        else:
+            return dict.setdefault(self, key, def_val)
 
     def update(self, inputdict):
         for k,v in inputdict.items():
-            dict.__setitem__(self, k.lower(), v)
+            # let self.__setitem__ hand the low/upperness
+            self.__setitem__(self, k, v)
 
     def fromkeys(self, iterable, value=None):
         d = CaseInsensitiveDict()
         for k in iterable:
-            dict.__setitem__(d, k.lower(), value)
+            self.__setitem__(d, k, value)
         return d
 
     def pop(self, key, def_val=None):
-        return dict.pop(self, key.lower(), def_val)
+        if hasattr(key,'lower'):
+            return dict.pop(self, key.lower(), def_val)
+        else:
+            return dict.pop(self, key, def_val)
     
 
 length_dict = {'meters':1.0,'m':1.0,
@@ -208,6 +231,7 @@ unitdict = {
             'mh':1.67262158e-24 * 1.00794, # proton mass
             'me':9.10938188e-28,           # electron mass
             'e':4.80320427e-10, # electron charge, esu
+            'speed':'cm/s',
             'length':'cm'},
         'mks':{ 'h':6.626068e-34,
             'k':1.3806503e-23,
@@ -215,6 +239,7 @@ unitdict = {
             'c':2.99792458e8,
             'mh':1.67262158e-27 * 1.00794,
             'me':9.10938188e-31,
+            'speed':'m/s',
             'length':'m'}
         }
 
@@ -289,6 +314,9 @@ class SpectroscopicAxis(np.ndarray):
         if subarr.units is None:
             subarr.units = 'none'
         subarr.frame = frame
+
+        # not currently used / placeholder
+        subarr.frame_offset = frame_offset
 
         if xtype in xtype_dict:
             subarr.xtype = xtype_dict[xtype]
@@ -601,7 +629,7 @@ class SpectroscopicAxis(np.ndarray):
             I think this can also accept wavelengths....
         """
 
-        if unit is None:
+        if unit in (None,'none'):
             return self
         elif unit in pixel_dict:
             return np.arange(self.shape[0])

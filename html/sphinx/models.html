@@ -527,7 +527,7 @@ H+A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
 ref for line params: <a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat">http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat</a></p>
 <dl class="data">
 <dt id="pyspeckit.spectrum.models.hcn.aval_dict">
-<tt class="descclassname">pyspeckit.spectrum.models.hcn.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'10-01': 2.4074999999999999e-05, '12-01': 2.4074999999999999e-05, '11-01': 2.4074999999999999e-05}</em><a class="headerlink" href="#pyspeckit.spectrum.models.hcn.aval_dict" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hcn.</tt><tt class="descname">aval_dict</tt><em class="property"> = {'10-01': 2.4075e-05, '12-01': 2.4075e-05, '11-01': 2.4075e-05}</em><a class="headerlink" href="#pyspeckit.spectrum.models.hcn.aval_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Line strengths of the 15 hyperfine components in J = 1 -  0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
 Line strengths are normalized in such a way that summing over all initial J = 1
@@ -590,13 +590,13 @@ strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine">
-<tt class="descname">hyperfine</tt><big>(</big><em>xarr</em>, <em>Tex=5.0</em>, <em>tau=0.10000000000000001</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>amp=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">hyperfine</tt><big>(</big><em>xarr</em>, <em>Tex=5.0</em>, <em>tau=0.1</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>amp=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp">
-<tt class="descname">hyperfine_amp</tt><big>(</big><em>xarr</em>, <em>amp=None</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>Tex=5.0</em>, <em>tau=0.10000000000000001</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">hyperfine_amp</tt><big>(</big><em>xarr</em>, <em>amp=None</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>Tex=5.0</em>, <em>tau=0.1</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp" title="Permalink to this definition">¶</a></dt>
 <dd><p>wrapper of self.hyperfine with order of arguments changed</p>
 </dd></dl>
 
@@ -630,7 +630,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x10b418cf8&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x106ff55f0&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -647,9 +647,13 @@ number of entries as gridpars</p>
 <span class="target" id="module-pyspeckit.spectrum.models.n2hp"></span><div class="section" id="n2h-fitter">
 <h2>N2H+ fitter<a class="headerlink" href="#n2h-fitter" title="Permalink to this headline">¶</a></h2>
 <p>Reference for line params: 
-Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 363, 1083
-<a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/N2H+.html">http://www.strw.leidenuniv.nl/~moldata/N2H+.html</a>
-<a class="reference external" href="http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D">http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D</a></p>
+Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 363, 1083</p>
+<p><a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/N2H+.html">http://www.strw.leidenuniv.nl/~moldata/N2H+.html</a></p>
+<p><a class="reference external" href="http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D">http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D</a></p>
+<dl class="docutils">
+<dt>Does not yet implement:</dt>
+<dd><a class="reference external" href="http://adsabs.harvard.edu/abs/2010ApJ...716.1315K">http://adsabs.harvard.edu/abs/2010ApJ...716.1315K</a></dd>
+</dl>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.n2hp.n2hp_radex">
 <tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">n2hp_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.n2hp_radex" title="Permalink to this definition">¶</a></dt>
@@ -722,6 +726,12 @@ I - Case B calculations for H I and He II</a></td></tr>
 </tbody>
 </table>
 <dl class="function">
+<dt id="pyspeckit.spectrum.models.hydrogen.add_to_registry">
+<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">add_to_registry</tt><big>(</big><em>sp</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.add_to_registry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the Hydrogen model to the Spectrum&#8217;s fitter registry</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="pyspeckit.spectrum.models.hydrogen.find_lines">
 <tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">find_lines</tt><big>(</big><em>xarr</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.find_lines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.units.SpectrosopicAxis</span></tt> instance, finds all the
@@ -741,6 +751,51 @@ each.  You can tie the widths or choose not to.</p>
 <dd>Should the widths be tied?</dd>
 </dl>
 <p>Returns a list of <cite>tied</cite> and <cite>guesses</cite> in the xarr&#8217;s units</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.spectrum.models.hydrogen.hydrogen_model">
+<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">hydrogen_model</tt><big>(</big><em>xarr</em>, <em>amplitude=1.0</em>, <em>width=0.0</em>, <em>velocity=0.0</em>, <em>a_k=0.0</em>, <em>temperature=10000</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.hydrogen_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a set of parameters identifying the hydrogen lines in your
+spectrum.  These come in groups of 3 assuming you&#8217;re fitting a gaussian to
+each.  You can tie the widths or choose not to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>sp</strong> : pyspeckit.Spectrum</p>
+<blockquote>
+<div><p>The spectrum to fit</p>
+</div></blockquote>
+<p><strong>temperature</strong> : [ 5000, 10000, 20000 ]</p>
+<blockquote>
+<div><p>The case B coefficients are computed for 3 temperatures</p>
+</div></blockquote>
+<p><strong>a_k</strong> : float</p>
+<blockquote>
+<div><p>The K-band extinction normalized to 2.2 microns.  Simple
+exponential.</p>
+</div></blockquote>
+<p><strong>width</strong> : float</p>
+<blockquote>
+<div><p>Line width in km/s</p>
+</div></blockquote>
+<p><strong>velocity</strong> : float</p>
+<blockquote>
+<div><p>Line center in km/s</p>
+</div></blockquote>
+<p><strong>amplitude</strong> : float</p>
+<blockquote>
+<div><p>arbitrary amplitude of the first line (all other lines
+will be scaled to this value)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last"><strong>np.ndarray with same shape as sp.xarr</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -799,7 +854,7 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Apr 12, 2012.
+      Last updated on Aug 04, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

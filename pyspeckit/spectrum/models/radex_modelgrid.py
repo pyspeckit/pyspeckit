@@ -7,6 +7,10 @@ from .. import units
 from . import fitter,model
 import matplotlib.cbook as mpcb
 import copy
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 
 class radex_model(object):
     def __init__(self, xarr,  

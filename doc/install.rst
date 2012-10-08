@@ -37,6 +37,11 @@ You can acquire the code with this clone command::
     cd pyspeckit
     python setup.py install
 
+or if you use git::
+
+    git clone git://github.com/keflavich/pyspeckit.git pyspeckit
+    cd pyspeckit
+    python setup.py install
 
 Or you can `Download the latest tarball version <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz>`_, 
 then extract and install using the standard python method::
@@ -48,3 +53,9 @@ then extract and install using the standard python method::
 
 
 You can also check out the `source code <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src>`_
+
+.. note ::
+    If you use `easy_install pyspeckit` with the Enthought Python Distribution, you will
+    most likely get a SandboxViolation error.  You can get around this by using `python
+    setup.py install` or `pip install pyspeckit`.
+

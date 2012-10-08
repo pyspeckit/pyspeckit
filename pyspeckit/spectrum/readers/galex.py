@@ -1,5 +1,8 @@
 import pyspeckit
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 import numpy as np
 
 def read_galex(fitsfilename, orderselection='obj'):

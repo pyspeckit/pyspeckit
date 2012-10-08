@@ -16,6 +16,8 @@ try:
     from collections import OrderedDict
 except ImportError:
     from ordereddict import OrderedDict
+except ImportError:
+    warn( "OrderedDict is required for modeling.  If you have python <2.7, install the ordereddict module." ) 
 
 class SpectralModel(fitter.SimpleFitter):
     """
@@ -339,9 +341,8 @@ class SpectralModel(fitter.SimpleFitter):
         """
         try:
             import lmfit
-        except ImportError:
-            print "Could not import lmfit, try using mpfit instead."
-            return
+        except ImportError as e:
+            raise ImportError( "Could not import lmfit, try using mpfit instead." )
 
         self.xax = xax # the 'stored' xax is just a link to the original
         if hasattr(xax,'convert_to_unit') and hasattr(self,'fitunits') and self.fitunits is not None:
@@ -394,7 +395,7 @@ class SpectralModel(fitter.SimpleFitter):
             warn( "Warning: chi^2 is nan" )
     
         if hasattr(self.mp,'ier') and self.mp.ier not in [1,2,3,4]:
-            print "Fitter failed: %s, %s" % (mp.message, mp.lmdif_message)
+            print "Fitter failed: %s, %s" % (self.mp.message, self.mp.lmdif_message)
 
         return self.mpp,self.model,self.mpperr,chi2
 
@@ -701,7 +702,9 @@ class SpectralModel(fitter.SimpleFitter):
         
         """
         try:
-            import pymc
+            old_errsettings = np.geterr()
+            import pymc # pymc breaks error settings
+            np.seterr(**old_errsettings)
         except ImportError:
             return
 

@@ -4,8 +4,13 @@ N2H+ fitter
 ===========
 Reference for line params: 
 Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 363, 1083
+
 http://www.strw.leidenuniv.nl/~moldata/N2H+.html
+
 http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D
+
+Does not yet implement:
+    http://adsabs.harvard.edu/abs/2010ApJ...716.1315K
 
 """
 import numpy as np

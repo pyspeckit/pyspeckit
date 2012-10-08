@@ -3,8 +3,12 @@ import numpy as np
 from . import Writer
 
 fitscheck = True
-try: import pyfits
-except ImportError: fitscheck = False
+try: 
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
+except ImportError:
+    fitscheck = False
 
 class write_fits(Writer):
     def write_data(self, filename = None, newsuffix = 'out', clobber = True, tolerance=1e-8,
@@ -54,4 +58,4 @@ class write_fits(Writer):
             HDU = pyfits.PrimaryHDU(data=data, header=pyfits.Header([pyfits.card.Card(k,v)  for k,v in header.iteritems()]))
         
         HDU.verify('fix')
-        HDU.writeto(fn,clobber=clobber,**kwargs)
+        HDU.writeto(fn, clobber=clobber, output_verify='fix', **kwargs)

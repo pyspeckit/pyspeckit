@@ -1,4 +1,7 @@
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 
 def intersection(header1, header2, if_conflict=None):
     """

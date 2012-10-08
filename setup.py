@@ -11,6 +11,9 @@ with open('README.txt') as file:
 with open('CHANGES') as file:
     long_description += file.read()
 
+with open('REQUIREMENTS') as file:
+    requirements = file.readlines()
+
 try:  # Python 3.x
     from distutils.command.build_py import build_py_2to3 as build_py
 except ImportError:  # Python 2.x
@@ -78,7 +81,7 @@ setup(name='pyspeckit',
           'mpfit':'mpfit'}, 
       package_data={'pyspeckit.spectrum.speclines':[],
           '':['pyspeckit/config_default']},
-      requires=['matplotlib (>=1.1.0)','numpy (>=1.4.1)','ordereddict'],
+      requires=requirements,
       cmdclass={'build_py': build_py, 'test': PyTest},
       classifiers=[
                    "Development Status :: 3 - Alpha",

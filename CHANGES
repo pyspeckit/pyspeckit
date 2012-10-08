@@ -1,9 +1,13 @@
 CHANGES
 *******
 
-Release 0.1.9
+Release 0.1.9 [incremental]
 ~~~~~~~~~~~~~
     * Added `lineid_plot <http://packages.python.org/lineid_plot/>`_ tools
+    * Baseline can fit power laws
+    * New TSPEC unmerged, IRAF fits readers
+    * astropy.io.fits compatibility fixes
+    * General bugfixes
 
 Release 0.1.8
 ~~~~~~~~~~~~~

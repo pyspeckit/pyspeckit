@@ -1,4 +1,7 @@
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 import pyspeckit
 from pyspeckit.spectrum.readers.fits_reader import read_echelle
 

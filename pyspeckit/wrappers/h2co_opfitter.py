@@ -1,6 +1,9 @@
 import numpy as np
 import pyspeckit
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 from pyspeckit.spectrum import models
 from pyspeckit.wrappers import fith2co
 

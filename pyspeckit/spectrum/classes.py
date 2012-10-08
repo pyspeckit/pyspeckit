@@ -16,7 +16,10 @@ The Spectra class is a container of multiple spectra of the *same* object at
 """
 import numpy as np
 import smooth as sm
-import pyfits
+try: 
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 import readers,plotters,writers,baseline,units,measurements,speclines,arithmetic
 import moments as moments_module
 import fitters
@@ -293,6 +296,8 @@ class Spectrum(Spectrum1D):
             self.specname = specname
         elif hdr.get('OBJECT'):
             self.specname = hdr.get('OBJECT')
+        elif hdr.get('OBJNAME'):
+            self.specname = hdr.get('OBJNAME')
         else:
             self.specname = ''
             
@@ -570,7 +575,8 @@ class Spectrum(Spectrum1D):
                 newspec = self.copy()
                 newspec.data = operation(newspec.data, other) 
                 return newspec
-            else: # purely for readability
+
+            elif hasattr(self,'xarr') and hasattr(other,'xarr'): # purely for readability
 
                 if self._arithmetic_threshold == 'exact':
                     xarrcheck = all(self.xarr == other.xarr)
@@ -589,6 +595,16 @@ class Spectrum(Spectrum1D):
                     raise ValueError("Shape mismatch in data")
                 elif not xarrcheck:
                     raise ValueError("X-axes do not match.")
+            elif hasattr(self,'shape') and hasattr(other,'shape'):
+                # allow array subtraction
+                if self.shape != other.shape:
+                    raise ValueError("Shape mismatch in data")
+                elif hasattr(self,'xarr'):
+                    newspec = self.copy()
+                    newspec.data = operation(newspec.data, other)
+                elif hasattr(other,'xarr'): # is this even possible?
+                    newspec = other.copy()
+                    newspec.data = operation(self, other.data)
 
         return ofunc
 
@@ -648,7 +664,10 @@ class Spectra(Spectrum):
         self.header = pyfits.Header()
         for spec in speclist:
             for key,value in spec.header.items():
-                self.header.update(key,value)
+                try:
+                    self.header.update(key,value)
+                except ValueError, KeyError:
+                    warn( "Could not update header KEY=%s to VALUE=%s" % (key,value) )
 
         self.plotter = plotters.Plotter(self)
         self._register_fitters()
@@ -795,12 +814,19 @@ class ObsBlock(Spectra):
     def average(self, weight=None, inverse_weight=False, error='erravgrtn', debug=False):
         """
         Average all scans in an ObsBlock.  Returns a single Spectrum object
-
-        weight - a header keyword to weight by
-        error - estimate the error spectrum.  Can be:
-            'scanrms'   - the standard deviation of each pixel across all scans
-            'erravg'    - the average of all input error spectra
-            'erravgrtn' - the average of all input error spectra divided by sqrt(n_obs)
+        
+        Parameters
+        ----------
+        weight : string
+            a header keyword to weight by.   If not specified, the spectra will be 
+            averaged without weighting
+        inverse_weight : bool
+            Is the header keyword an inverse-weight (e.g., a variance?)
+        error : ['scanrms','erravg','erravgrtn']
+            estimate the error spectrum by one of three methods.
+            'scanrms'   : the standard deviation of each pixel across all scans
+            'erravg'    : the average of all input error spectra
+            'erravgrtn' : the average of all input error spectra divided by sqrt(n_obs)
         """
 
         wtarr = np.isfinite(self.data)

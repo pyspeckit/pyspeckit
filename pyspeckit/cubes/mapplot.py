@@ -19,18 +19,17 @@ import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure
 import numpy as np
-import pyfits
 import copy
 import itertools
 from pyspeckit.specwarnings import warn
 try:
-    # pywcs is preferred over astropy.wcs because astropy.wcs failed on me
-    import pywcs
+    import astropy.wcs as pywcs
+    import astropy.io.fits as pyfits
     pywcsOK = True
 except ImportError:
     try:
-        import astropy.wcs as pywcs
-        import astropy.io.fits as pyfits
+        import pyfits
+        import pywcs
         pywcsOK = True
     except ImportError:
         pywcsOK = False
@@ -226,12 +225,14 @@ class MapPlotter(object):
                 self.circle(self._clickX,self._clickY,clickX,clickY,clear=clear,linestyle=linestyle,color=color)
             elif hasattr(event,'button') and event.button is not None:
                 if event.button==1:
+                    clickX,clickY = round(clickX),round(clickY)
                     print "Plotting spectrum from point %i,%i" % (clickX,clickY)
                     self._remove_circle()
                     self._add_click_mark(clickX,clickY,clear=True)
                     self.Cube.plot_spectrum(clickX,clickY,clear=True)
                     if plot_fit: self.Cube.plot_fit(clickX, clickY, silent=True)
                 elif event.button==2:
+                    clickX,clickY = round(clickX),round(clickY)
                     print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
                     color=self.overplot_colorcycle.next()
                     self._add_click_mark(clickX,clickY,clear=False, color=color)
@@ -272,7 +273,8 @@ class MapPlotter(object):
         else:
             for mark in self._click_marks:
                 self._click_marks.remove(mark)
-                self.axis.lines.remove(mark)
+                if mark in self.axis.lines:
+                    self.axis.lines.remove(mark)
             self.refresh()
 
     def _add_circle(self,x,y,x2,y2,**kwargs):
@@ -288,7 +290,8 @@ class MapPlotter(object):
             self._circles.append(layername)
         else:
             r = np.linalg.norm(np.array([x,y])-np.array([x2,y2]))
-            self._circles.append( matplotlib.patches.Circle([x,y],radius=r,**kwargs) )
+            circle = matplotlib.patches.Circle([x,y],radius=r,**kwargs)
+            self._circles.append( circle )
             self.axis.patches.append(circle)
             self.refresh()
 
@@ -301,7 +304,9 @@ class MapPlotter(object):
                     self.FITSFigure.remove_layer(layername)
         else:
             for circle in self._circles:
-                self.axis.patches.remove(circle)
+                if circle in self.axis.patches:
+                    self.axis.patches.remove(circle)
+                self._circles.remove(circle)
             self.refresh()
 
     def refresh(self):

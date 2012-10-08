@@ -46,6 +46,36 @@ class dictlist(list):
     def keys(self):
         return [self._dict_index[ii] for ii in xrange(len(self))]
 
+class ModifiableSlider(Slider):
+
+    def set_valmin(self, valmin):
+        """
+        Change the minimum value of the slider
+        """
+        self.valmin = valmin
+        self.ax.set_xlim((self.valmin,self.valmax))
+        if self.val < self.valmin:
+            self.set_val(self.valmin)
+        if self.valinit < self.valmin:
+            self.valinit = (self.valmax-self.valmin)/2. + self.valmin
+            if self.vline in self.ax.lines:
+                self.ax.lines.remove(self.vline)
+            self.vline = self.ax.axvline(self.valinit,0,1, color='r', lw=1)
+
+    def set_valmax(self, valmax):
+        """
+        Change the maximum value of the slider
+        """
+        self.valmax = valmax
+        self.ax.set_xlim((self.valmin,self.valmax))
+        if self.val > self.valmax:
+            self.set_val(self.valmax)
+        if self.valinit > self.valmax:
+            self.valinit = (self.valmax-self.valmin)/2. + self.valmin
+            if self.vline in self.ax.lines:
+                self.ax.lines.remove(self.vline)
+            self.vline = self.ax.axvline(self.valinit,0,1, color='r', lw=1)
+
 class FitterSliders(Widget):
     """
     A tool to adjust to subplot params of a :class:`matplotlib.figure.Figure`
@@ -69,7 +99,8 @@ class FitterSliders(Widget):
             tbar = matplotlib.rcParams['toolbar'] # turn off the navigation toolbar for the toolfig
             matplotlib.rcParams['toolbar'] = 'None'
             self.toolfig = pyplot.figure(figsize=(6,3))
-            self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.title())
+            if hasattr(targetfig.canvas.manager,'window'):
+                self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.title())
             self.toolfig.subplots_adjust(top=0.9,left=0.2,right=0.9)
             matplotlib.rcParams['toolbar'] = tbar
         else:
@@ -160,7 +191,7 @@ class FitterSliders(Widget):
             self.specfit.Spectrum.plotter.refresh()
 
 
-        self.sliders = []
+        self.sliders = dictlist()
         npars = len(self.specfit.parinfo)
         for param in self.specfit.parinfo:
             name = param['parname']
@@ -190,10 +221,12 @@ class FitterSliders(Widget):
             else:
                 vmax = 1
 
-            self.sliders += [Slider(ax, 
-                name, vmin, vmax, valinit=value)]
+            self.sliders[name] = ModifiableSlider(ax, 
+                name, vmin, vmax, valinit=value)
 
             self.sliders[-1].on_changed(update)
+
+        
 
     def get_values(self):
         return [s.val for s in self.sliders]
@@ -307,6 +340,18 @@ class FitterTools(Widget):
         # self.buttonresetfit.on_clicked(reset_fit)
         # self.buttonresetbl.on_clicked(reset_baseline)
         # self.buttonreset.on_clicked(reset)
+
+
+        #menuitems = []
+        #for label in ('polynomial','blackbody','log-poly'):
+        #    def on_select(item):
+        #        print 'you selected', item.labelstr
+        #    item = MenuItem(fig, label, props=props, hoverprops=hoverprops,
+        #                    on_select=on_select)
+        #    menuitems.append(item)
+
+        #menu = Menu(fig, menuitems)
+
 
         self.axes = [self.toolfig.add_subplot(nsubplots,1,spnum, frame_on=False, navigate=False, xticks=[], yticks=[]) 
                 for spnum in xrange(1,nsubplots+1)]

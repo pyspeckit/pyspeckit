@@ -2,7 +2,10 @@ import numpy as np
 import arithmetic
 import units as units_module
 import classes
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 import headers
 
 def correlate(spectrum1, spectrum2, range=None, units=None, errorweight=False):

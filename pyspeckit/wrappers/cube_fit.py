@@ -4,7 +4,10 @@ Cube Fitting
 ============
 """
 import pyspeckit
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 import numpy as np
 import os
 

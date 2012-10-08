@@ -1,5 +1,8 @@
+import numpy; print numpy.geterr()
 import pyspeckit
+print numpy.geterr()
 import matplotlib
+print numpy.geterr()
 
 if not 'interactive' in globals():
     interactive=False
@@ -17,6 +20,8 @@ sp.plotter(xmin=4700,xmax=5000)
 print "Plotter min/max: ",sp.plotter.xmin,sp.plotter.xmax," Fitter min/max: ",sp.specfit.xmin,sp.specfit.xmax," Fitregion= ",sp.baseline.button1plot," bfit target sum: ",sp.baseline.includemask.sum()
 
 if interactive: raw_input("Wait here a moment")
+import numpy as np;
+print np.geterr()
 sp.baseline(subtract=False,exclude=[4830,4890],order=2,highlight=True)
 print "Plotter min/max: ",sp.plotter.xmin,sp.plotter.xmax," Fitter min/max: ",sp.specfit.xmin,sp.specfit.xmax," Fitregion= ",sp.baseline.button1plot," bfit target sum: ",sp.baseline.includemask.sum()
 # obsolete 1/16/2012 print "Baseline exclude: ",sp.baseline.excludevelo,sp.baseline.excludepix

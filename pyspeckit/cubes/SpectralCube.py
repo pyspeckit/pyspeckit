@@ -459,13 +459,13 @@ class Cube(spectrum.Spectrum):
             sp.specfit.Registry = self.Registry # copy over fitter registry
             
             if use_nearest_as_guess and self.has_fit.sum() > 0:
-                if verbose_level > 1 and ii == 0: print "Using nearest fit as guess"
+                if verbose_level > 1 and ii == 0 or verbose_level > 4: print "Using nearest fit as guess"
                 d = np.roll( np.roll( distance, x, 0), y, 1)
                 # If there's no fit, set its distance to be unreasonably large
                 nearest_ind = np.argmin(d+1e10*(True-self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
                 gg = self.parcube[:,nearest_y,nearest_x]
-            if usemomentcube:
+            elif usemomentcube:
                 if verbose_level > 1 and ii == 0: print "Using moment cube"
                 gg = self.momentcube[:,y,x]
             elif hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
@@ -553,7 +553,14 @@ class Cube(spectrum.Spectrum):
         else:
             gg = guesses
 
-        sp.specfit(guesses=gg, **fitkwargs)
+        try:
+            sp.specfit(guesses=gg, **fitkwargs)
+        except Exception as ex:
+            print "Fit number %i at %i,%i failed on error " % (ii,x,y), ex
+            print "Guesses were: ",gg
+            print "Fitkwargs were: ",fitkwargs
+            if isinstance(ex,KeyboardInterrupt):
+                raise ex
         # make sure the fitter / fittype are set for the cube
         # this has to be done within the loop because skipped-over spectra
         # don't ever get their fittypes set
@@ -647,7 +654,10 @@ class Cube(spectrum.Spectrum):
         Load a parameter + error cube into the .parcube and .errcube
         attributes.
         """
-        import pyfits
+        try:
+            import astropy.io.fits as pyfits
+        except ImportError:
+            import pyfits
 
         cubefile = pyfits.open(fitsfilename)
         cube = cubefile[0].data
@@ -776,7 +786,10 @@ class CubeStack(Cube):
             Overwrite file if it exists?
         """
 
-        import pyfits
+        try:
+            import astropy.io.fits as pyfits
+        except ImportError:
+            import pyfits
         
         try:
             fitcubefile = pyfits.PrimaryHDU(data=np.concatenate([self.parcube,self.errcube]), header=self.header)

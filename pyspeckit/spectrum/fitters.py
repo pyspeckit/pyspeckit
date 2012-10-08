@@ -255,7 +255,8 @@ class Specfit(interactive.Interactive):
             self.guesses = []
 
             self.start_interactive(clear_all_connections=clear_all_connections, debug=debug, **kwargs)
-        elif ((multifit or multifit is None) and self.fittype in self.Registry.multifitters) or guesses is not None:
+        elif (((multifit or multifit is None) and self.fittype in
+            self.Registry.multifitters) or guesses is not None):
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
                 return
@@ -404,6 +405,8 @@ class Specfit(interactive.Interactive):
 
         # add kwargs to fitkwargs
         self.fitkwargs.update(kwargs)
+        if 'renormalize' in self.fitkwargs:
+            del self.fitkwargs['renormalize']
         
         scalefactor = 1.0
         if renormalize in ('auto',True):
@@ -925,6 +928,10 @@ class Specfit(interactive.Interactive):
             else: 
                 print "error, wrong # of pars"
 
+        # disconnect interactive window (and more importantly, reconnect to
+        # original interactive cmds)
+        self.clear_all_connections()
+
     def copy(self, parent=None):
         """
         Create a copy of the spectral fit - includes copies of the _full_model,
@@ -993,6 +1000,9 @@ class Specfit(interactive.Interactive):
                 elif any( (x in param['parname'].lower() for x in ('amp','peak','height')) ):
                     datarange = self.spectofit.max() - self.spectofit.min()
                     lower,upper = (param['value']-datarange, param['value']+datarange)
+                else:
+                    lower = param['value'] * 0.1
+                    upper = param['value'] * 10
 
                 # override guesses with limits
                 if param.limited[0]:

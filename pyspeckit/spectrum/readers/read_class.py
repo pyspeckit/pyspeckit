@@ -5,7 +5,10 @@ GILDAS CLASS file reader
 
 Read a CLASS file into an :class:`pyspeckit.spectrum.ObsBlock`
 """
-import pyfits
+try:
+    import astropy.io.fits as pyfits
+except ImportError:
+    import pyfits
 import numpy
 import struct
 from numpy import pi
@@ -13,6 +16,11 @@ from numpy import pi
 import time
 
 def print_timing(func):
+    """
+    Prints execution time of decorated function.
+    Included here because CLASS files can take a little while to read;
+    this should probably be replaced with a progressbar
+    """
     def wrapper(*arg,**kwargs):
         t1 = time.time()
         res = func(*arg,**kwargs)
@@ -175,7 +183,7 @@ def _align_32(f):
         f.seek(pos + 4 - pos % 4)
     return
 
-def read_word(f,length):
+def _read_word(f,length):
     if length > 0:
         chars = _read_bytes(f, length)
         _align_32(f)
@@ -183,23 +191,23 @@ def read_word(f,length):
         chars = None
     return chars
 
-def read_int(f):
+def _read_int(f):
     return struct.unpack('i',f.read(4))
 
-def read_index(f, DEBUG=False):
+def _read_index(f, DEBUG=False):
     x0 = f.tell()
     index = {
                 "XBLOC":_read_byte(f),
                 "XNUM":_read_byte(f),
                 "XVER":_read_byte(f),
-                "XSOURC":read_word(f,12),
-                "XLINE":read_word(f,12),
-                "XTEL":read_word(f,12),
+                "XSOURC":_read_word(f,12),
+                "XLINE":_read_word(f,12),
+                "XTEL":_read_word(f,12),
                 "XDOBS":_read_byte(f),
                 "XDRED":_read_byte(f),
                 "XOFF1":_read_float32(f),# 		 first offset (real, radians) 
                 "XOFF2":_read_float32(f),# 		 second offset (real, radians) 
-                "XTYPE":read_word(f,2),# 		 coordinate system ('EQ'', 'GA', 'HO') 
+                "XTYPE":_read_word(f,2),# 		 coordinate system ('EQ'', 'GA', 'HO') 
                 "XKIND":_read_byte(f),# 		 Kind of observation (0: spectral, 1: continuum, ) 
                 "XQUAL":_read_byte(f),# 		 Quality (0-9)  
                 "XSCAN":_read_byte(f),# 		 Scan number 
@@ -217,7 +225,11 @@ def read_index(f, DEBUG=False):
         #raise IndexError("read_index did not successfully read 128 bytes at %i.  Read %i bytes." % (x0,f.tell()-x0))
     return index
 
-def read_header(f,type=0):
+def _read_header(f,type=0):
+    """
+    Read a header entry from a CLASS file
+    (helper function)
+    """
     if type in keys_lengths:
         hdrsec = [(x[0],numpy.fromfile(f,count=1,dtype=x[2])[0])
                 for x in keys_lengths[type]]
@@ -225,7 +237,11 @@ def read_header(f,type=0):
     pass
 
 
-def read_obshead(f,verbose=False):
+def _read_obshead(f,verbose=False):
+    """
+    Read the observation header of a CLASS file
+    (helper function for read_class; should not be used independently)
+    """
     #IDcode = f.read(4)
     #if verbose: print "IDcode: ",IDcode
     #if IDcode.strip() != '2':
@@ -273,7 +289,7 @@ def read_class(filename,  DEBUG=False):
     indexes = []
     #for ii in xrange(nindex):
     #    f.seek(128*(ii)+(firstblock[0]-1)*512)
-    #    index = read_index(f)
+    #    index = _read_index(f)
     #    # OLD DEBUG if index['XLINE'] not in ('HCOP(3-2)   ','N2HP(3-2)   '):
     #    # OLD DEBUG     raise Exception("Stopped at %i" % ii)
     #    indexes.append(index)
@@ -305,7 +321,7 @@ def read_class(filename,  DEBUG=False):
             continue
         elif IDcode.strip() != '2':
             f.seek(startpos)
-            index = read_index(f)
+            index = _read_index(f)
             if index['XLINE']: #numpy.any([L in index['XLINE'] for L in line]):
                 if DEBUG: print "Found an index at %i: " % startpos,index
                 indexes.append(index)
@@ -315,7 +331,7 @@ def read_class(filename,  DEBUG=False):
                 raise Exception("Failure at %i: %i" % (jj,f.tell()))
         else:
             if DEBUG: print "Reading HEADER and OBSERVATION at %i" % f.tell()
-            obsnum,obshead = read_obshead(f,verbose=DEBUG)
+            obsnum,obshead = _read_obshead(f,verbose=DEBUG)
         pos = f.tell()
         if DEBUG:
             print " UNCLEAR INFO AT %i PAST %i:" % (f.tell()-startpos,startpos),f.read(168) 
@@ -327,14 +343,14 @@ def read_class(filename,  DEBUG=False):
             #f.seek(startpos)
             #print numpy.fromfile(f,count=168+40,dtype='int8') 
         f.seek(pos+84+12*4)
-        Header2 = read_header(f,type=-2)
+        Header2 = _read_header(f,type=-2)
         if f.tell() != pos + 168:
             #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
             f.seek(pos+168)
-        Header3 = read_header(f,type='POSITION')
-        Header4 = read_header(f,type='SPECTRO')
+        Header3 = _read_header(f,type='POSITION')
+        Header4 = _read_header(f,type='SPECTRO')
         if DEBUG: print "Line %i (byte %i) - OBSERVATION %i (%i): %s, %s" % (f.tell(),(f.tell()-startpos)/4,obsnum,spcount,Header3['SOURC'],Header4['LINE']),
-        Header14 = read_header(f,type='CALIBRATION')
+        Header14 = _read_header(f,type='CALIBRATION')
 
         hdr = Header3
         hdr.update(Header2)
@@ -464,12 +480,12 @@ def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=
     return obslist
 
 @print_timing
-def class_to_spectra(filename,line):
+def class_to_spectra(filename):
     """
     Load each individual spectrum within a CLASS file into a list of Spectrum
     objects
     """
-    spectra,header,indexes = read_class(filename,line)
+    spectra,header,indexes = read_class(filename)
 
     spectrumlist = []
     for sp,hdr,ind in zip(spectra,header,indexes):
@@ -480,7 +496,7 @@ def class_to_spectra(filename,line):
                 header=hdr,
                 data=sp))
 
-    return spectrumlist
+    return pyspeckit.Spectra(spectrumlist)
 
 if __name__ == "__main__":
     """
