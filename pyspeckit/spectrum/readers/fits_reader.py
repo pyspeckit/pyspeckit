@@ -79,14 +79,13 @@ will run into errors.""")
                 "Specnum is of wrong type (not a list of integers or an integer)." +
                 "  Type: %s" %
                 str(type(specnum)))
-        if errspecnum is not None:
-            # SDSS supplies weights, not errors.    
-            if hdr.get('TELESCOP') == 'SDSS 2.5-M':
-                errspec = 1. / np.sqrt(ma.array(data[errspecnum,:]).squeeze())
-            else:       
-                errspec = ma.array(data[errspecnum,:]).squeeze()
+        if errspecnum is not None:       
+            errspec = ma.array(data[errspecnum,:]).squeeze()
         else:
-            errspec = spec*0 # set error spectrum to zero if it's not in the data
+            if hdr.get('TELESCOP') == 'SDSS 2.5-M':
+                errspec = ma.array(data[2,:])
+            else:    
+                errspec = spec*0 # set error spectrum to zero if it's not in the data
 
     elif hdr.get('NAXIS') > 2:
         for ii in xrange(2,hdr.get('NAXIS')):

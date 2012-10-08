@@ -15,6 +15,7 @@ Notes:
 """
 
 import numpy as np
+
 try:
     from scipy.integrate import romberg
     scipyOK=True
@@ -22,10 +23,9 @@ except:
     scipyOK=False
 
 c = 29979245800.0
-G = 6.673*10**-8
-km_per_mpc = 3.08568 * 10**13 * 10**6
-cm_per_mpc = 3.08568 * 10**13 * 10**5 * 10**6
-sqdeg_per_std = (180.0**2) / (np.pi**2)
+G = 6.673e-8
+km_per_mpc = 3.08568e19
+cm_per_mpc = 3.08568e24
 
 class Cosmology:
     def __init__(self, OmegaMatterNow = 0.272, OmegaLambdaNow = 0.728, OmegaBaryonNow = 0.044,
@@ -74,7 +74,8 @@ class Cosmology:
         
         if scipyOK:
             return (romberg(Integrand, z_i, z_f) / self.HubbleParameterNow)    
-        else: return 0
+        else: 
+            return 0
         
     def TimeToRedshiftConverter(self, z_i, dt):
         """
@@ -92,7 +93,8 @@ class Cosmology:
         integrand = lambda z: 1. / self.EvolutionFunction(z)
         if scipyOK:
             return romberg(integrand, z_i, z_f) * c / self.HubbleParameterNow / cm_per_mpc
-        else: return 0
+        else: 
+            return 0
         
     def LuminosityDistance(self, z_f):
         """
