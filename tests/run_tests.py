@@ -16,8 +16,8 @@ print "*****test_fits.py*****"
 execfile('test_fits.py',{'interactive':interactive,'savedir':savedir})
 print "*****test_hr2421.py*****"
 execfile('test_hr2421.py',{'interactive':interactive,'savedir':savedir})
-print "*****test_nh3.py*****"
-execfile('test_nh3.py',{'interactive':interactive,'savedir':savedir})
+#print "*****test_nh3.py*****"
+#execfile('test_nh3.py',{'interactive':interactive,'savedir':savedir})
 print "*****test_sdss.py*****"
 execfile('test_sdss.py',{'interactive':interactive,'savedir':savedir})
 print "*****test_txt.py*****"

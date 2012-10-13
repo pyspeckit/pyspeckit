@@ -16,10 +16,10 @@ import pyspeckit
 sp = pyspeckit.Spectrum('./sample_sdss.fits', specnum = 1, errspecnum = 2)
 
 sp.plotter()
-raw_input('Optical spectrum of SDSS J095751.40+105834.6.')
+print 'Optical spectrum of SDSS J095751.40+105834.6.'
 
 sp.plotter(xmin = 5000, xmax = 5300)
-raw_input('Zoom-in on the OIII-Hbeta complex.')
+print 'Zoom-in on the OIII-Hbeta complex.'
 
 # Let's look at the OIII-H-beta complex
 sp.specfit.selectregion(5000, 5300)
@@ -27,7 +27,7 @@ sp.specfit.selectregion(5000, 5300)
 guesses = [100, 5050, 5, 40, 5150, 5, 120, 5200, 5]
 sp.specfit(guesses = guesses, negamp = False)
 
-raw_input('Fit 3 Gaussians.\nCall the measurements class for automatic line identification and such.')
+print 'Fit 3 Gaussians.\nCall the measurements class for automatic line identification and such.'
 sp.measure(z = sp.header['Z'], restframe = True)
 
 print 'Line      Wavelength     FWHM        Flux         Luminosity (erg/s)'
