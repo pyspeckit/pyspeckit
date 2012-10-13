@@ -154,7 +154,7 @@ class Measurements(object):
                 for subcombo in subcombos:
                     result = (np.sum(np.abs(subcombo - rdiff)), combo)
                     self.IDresults.append(result)
-                        
+                                      
         # Pick best solution
         best = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
         ALLloc = []                                # x-values of best fit lines in reference dictionary
