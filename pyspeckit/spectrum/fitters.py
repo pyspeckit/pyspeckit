@@ -418,7 +418,7 @@ class Specfit(interactive.Interactive):
                             (self.fitter.npeaks * self.fitter.npars))
                 for jj,par in enumerate(self.fitter.parinfo):
                     if par.scaleable:
-                        self.guesses[self.fitter.npars+jj] /= scalefactor
+                        self.guesses[jj] /= scalefactor
 
         mpp,model,mpperr,chi2 = self.fitter(
                 self.Spectrum.xarr[self.xmin:self.xmax], 
