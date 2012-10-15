@@ -413,10 +413,12 @@ class Specfit(interactive.Interactive):
                 if verbose: print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor
-                for ii in xrange(self.npeaks): # assume first parameter is amplitude
-                    for jj,par in enumerate(self.fitter.parinfo):
-                        if par.scaleable:
-                            self.guesses[self.fitter.npars*ii+jj] /= scalefactor
+                if self.fitter.npeaks * self.fitter.npars != len(self.fitter.parinfo):
+                    raise ValueError("Length of parinfo doesn't agree with npeaks * npars = %i" %
+                            (self.fitter.npeaks * self.fitter.npars))
+                for jj,par in enumerate(self.fitter.parinfo):
+                    if par.scaleable:
+                        self.guesses[self.fitter.npars+jj] /= scalefactor
 
         mpp,model,mpperr,chi2 = self.fitter(
                 self.Spectrum.xarr[self.xmin:self.xmax], 
