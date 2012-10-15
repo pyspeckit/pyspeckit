@@ -301,7 +301,7 @@ class Spectrum(Spectrum1D):
         else:
             self.specname = ''
             
-    def measure(self, z=None, d=None, fluxnorm=None, miscline=None, misctol=None, ignore=None, derive=True, **kwargs):
+    def measure(self, z=None, d=None, fluxnorm=None, miscline=None, misctol=10.0, ignore=None, derive=True, **kwargs):
         """
         Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!
         """

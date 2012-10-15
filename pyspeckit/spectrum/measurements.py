@@ -15,7 +15,7 @@ cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
     def __init__(self, Spectrum, z=None, d=None, xunits=None, fluxnorm=None,
-            miscline=None, misctol=10, ignore=None, derive=True, debug=False,
+            miscline=None, misctol=10., ignore=None, derive=True, debug=False,
             restframe=False):
         """
         This can be called after a fit is run.  It will inherit the specfit
@@ -135,7 +135,7 @@ class Measurements(object):
         
         if len(refpos) == 0:
             print 'WARNING: No reference lines in this wavelength regime.'
-        if len(refpos) < self.Nlines:
+        elif len(refpos) < self.Nlines:
             print 'WARNING: More observed lines than reference lines in this band.'
                 
         # Construct all possible (N-element) combos of reference lines                
@@ -193,8 +193,9 @@ class Measurements(object):
                 
             # If we've know a-priori which lines the unmatched lines are likely to be, use that information        
             else:
+                print self.miscline
                 for i, miscline in enumerate(self.miscline):
-                    for j, x in enumerate(zip(*mpars)[1]):    
+                    for j, x in enumerate(zip(*mpars)[1]): 
                         if abs(x - miscline['wavelength']) < self.misctol:
                             name = miscline['name']
                         else:
