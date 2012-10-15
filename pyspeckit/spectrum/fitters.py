@@ -413,10 +413,16 @@ class Specfit(interactive.Interactive):
                 if verbose: print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor
+
+                # this error should be unreachable, but is included as a sanity check
                 if self.fitter.npeaks * self.fitter.npars != len(self.fitter.parinfo):
                     raise ValueError("Length of parinfo doesn't agree with npeaks * npars = %i" %
                             (self.fitter.npeaks * self.fitter.npars))
-                for jj,par in enumerate(self.fitter.parinfo):
+
+                # zip guesses with parinfo: truncates parinfo if len(parinfo) > len(guesses)
+                # actually not sure how/when/if this should happen; this might be a bad hack
+                # revisit with tests!!
+                for jj,(guess,par) in enumerate(zip(self.guesses,self.fitter.parinfo)):
                     if par.scaleable:
                         self.guesses[jj] /= scalefactor
 
