@@ -15,7 +15,8 @@ cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
     def __init__(self, Spectrum, z=None, d=None, xunits=None, fluxnorm=None,
-            miscline=None, misctol=10, ignore=None, derive=True, debug=False):
+            miscline=None, misctol=10, ignore=None, derive=True, debug=False,
+            restframe=False):
         """
         This can be called after a fit is run.  It will inherit the specfit
         object and derive as much as it can from modelpars.  Just do:
@@ -29,11 +30,16 @@ class Measurements(object):
             1. make sure we manipulate modelpars correctly, i.e. read in
             entries corresponding to wavelength/frequency/whatever correctly.
             
-        misclines = dictionary
-            miscline = {{'name': H_alpha', 'wavelength': 6565, 'etc': 0}, {}}
+        miscline = dictionary
+            miscline = [{'name': H_alpha', 'wavelength': 6565}]
+            
+        misctol = tolerance (in Angstroms) for identifying an unmatched line
+            to the line(s) we specify in miscline dictionary.
             
         """
         self.debug = debug
+        
+        self.restframe = restframe
                     
         # Inherit specfit object    
         self.specfit = Spectrum.specfit
@@ -44,8 +50,10 @@ class Measurements(object):
         self.misctol = misctol
                 
         # Flux units in case we are interested in line luminosities or just having real flux units
-        if fluxnorm is not None: self.fluxnorm = fluxnorm
-        else: self.fluxnorm= 1
+        if fluxnorm is not None: 
+            self.fluxnorm = fluxnorm
+        else: 
+            self.fluxnorm= 1
                 
         # This is where we'll keep our results                        
         self.lines = {}
@@ -75,8 +83,10 @@ class Measurements(object):
         self.refname = self.reflines['name']
                         
         # If distance or redshift has been provided, we can compute luminosities from fluxes
-        if d is not None: self.d = d
-        else: self.d = None
+        if d is not None: 
+            self.d = d
+        else: 
+            self.d = None
         if z is not None: 
             self.cosmology = cosmology.Cosmology()
             self.d = self.cosmology.LuminosityDistance(z) * cm_per_mpc
@@ -85,7 +95,8 @@ class Measurements(object):
             self.redshift = 0.0
             
         self.identify()
-        if derive: self.derive()
+        if derive: 
+            self.derive()
         
     def identify(self):
         """
@@ -94,15 +105,15 @@ class Measurements(object):
         Note: This method will be infinitely slow for more than 10 or so lines.
         """    
         
-        # List to keep track of line identification.  Each entry is (cost, (line1, line2, lin3,...))
-        self.IDresults = []
-        
         # Spacing between observed lines (odiff) and reference lines (rdiff)
         self.odiff = np.abs(np.diff(self.obspos))
         self.rdiff = np.abs(np.diff(self.refpos))
-        self.rdmin = 0.5 * min(self.rdiff)
         
-        # If lines have multiple components...
+        # Don't try to identify lines with separations smaller than the smallest
+        # separation in our reference library
+        self.rdmin = 0.99 * min(self.rdiff)
+        
+        # If lines have multiple components...then...what?
         if np.any(self.odiff) < self.rdmin:
             where = np.ravel(np.argwhere(self.odiff < self.rdmin))
             odiff = np.delete(self.odiff, where)
@@ -112,29 +123,46 @@ class Measurements(object):
             odiff = self.odiff
             multi = False
 
-        # need to account for redshift if self.redshift is set
-        # WRONG! Assume REST frame, do shifting elsewhere...
-        refpos = self.refpos #* (1.0+self.redshift)
-        refname = self.refname     
+        refpos = self.refpos 
+        refname = self.refname        
+        if self.restframe:
+            refpos *= (1.0 + self.redshift)
                             
         # Don't include elements of reference array that are far away from the observed lines (speeds things up)
         condition = (refpos >= 0.9 * min(self.obspos)) & (refpos <= 1.1 * max(self.obspos)) 
         refpos = refpos[condition]
         refname = refname[condition]
-                        
-        combos = itertools.combinations(refpos, self.Nlines - len(where))        
+        
+        if len(refpos) == 0:
+            print 'WARNING: No reference lines in this wavelength regime.'
+        if len(refpos) < self.Nlines:
+            print 'WARNING: More observed lines than reference lines in this band.'
+                
+        # Construct all possible (N-element) combos of reference lines                
+        combos = itertools.combinations(refpos, min(self.Nlines, len(refpos))) 
+                
+        # List to keep track of line identification.  Each entry is (cost, (line1, line2, line3,...))
+        self.IDresults = []
         for i, combo in enumerate(combos):
             rdiff = np.diff(combo)
-            self.IDresults.append((np.sum(np.abs(odiff - rdiff)), combo))
-                        
+            
+            if len(odiff) == len(rdiff):
+                result = (np.sum(np.abs(odiff - rdiff)), combo)
+                self.IDresults.append(result)
+            else: # If more observed lines than reference lines, try excluding observed lines one at a time
+                subcombos = itertools.combinations(odiff, len(rdiff))
+                for subcombo in subcombos:
+                    result = (np.sum(np.abs(subcombo - rdiff)), combo)
+                    self.IDresults.append(result)
+                                      
         # Pick best solution
-        MINloc = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
-        ALLloc = []                                  # x-values of best fit lines in reference dictionary
+        best = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
+        ALLloc = []                                # x-values of best fit lines in reference dictionary
                                 
         # Determine indices of matched reference lines       
-        for element in self.IDresults[MINloc][1]: 
+        for element in self.IDresults[best][1]: 
             ALLloc.append(np.argmin(np.abs(refpos - element)))                    
-        
+                                           
         # Fill lines dictionary            
         for i, element in enumerate(ALLloc): 
             line = refname[element]
@@ -142,51 +170,40 @@ class Measurements(object):
             loc = np.argmin(np.abs(self.obspos - refpos[element]))                
             self.lines[line]['modelpars'] = list(self.modelpars[loc])            
             self.lines[line]['modelerrs'] = list(self.modelerrs[loc])            
-                                                               
+                                                                                                         
         # Track down odd lines (i.e. broad components of lines already identified)
         # This won't yet work for lines that are truly unidentified
         if len(ALLloc) < self.Nlines:
                                                 
-            # Eliminate all modelpars/errs that belong to lines that were identified
-            tmp1 = list(np.ravel(self.modelpars))
-            tmp2 = list(np.ravel(self.modelerrs))
-            for key in self.lines.keys():
-                for element in self.lines[key]['modelpars']: 
-                    loc = np.argmin(np.abs(element - tmp1))
-                    tmp1 = np.delete(tmp1, loc)
-                    tmp2 = np.delete(tmp2, loc)
+            # Figure out which modelpars/errs that belong to lines that were already identified
+            mpars = self.modelpars.copy()
+            merrs = self.modelerrs.copy()
+            for line in self.lines:
+                wavelengths = zip(*mpars)[1]
+                i = np.argmin(np.abs(zip(*mpars)[1] - self.lines[line]['modelpars'][1]))
+                mpars = np.delete(mpars, i, 0)
+                merrs = np.delete(merrs, i, 0) 
              
             # Loop over unmatched modelpars/errs, find name of unmatched line, extend corresponding dict entry
             if self.miscline is None:                                          
-                try:  
-                    for i, x in enumerate(zip(*tmp1)[1]):    
-                        loc = np.argmin(np.abs(ALLloc - x))
-                        line = refname[loc]
-                        self.lines[line]['modelpars'].extend(tmp1[i:i+3])
-                        self.lines[line]['modelerrs'].extend(tmp2[i:i+3])
-                except TypeError:
-                    loc = np.argmin(np.abs(tmp1[1] - refpos))                       
-                    line = refname[loc]
-                    self.lines[line]['modelpars'].extend(tmp1)
-                    self.lines[line]['modelerrs'].extend(tmp2)
-            
+                for i, x in enumerate(zip(*mpars)[1]):    
+                    self.lines['unknown%i' % i] = {}
+                    self.lines['unknown%i' % i]['modelpars'] = mpars[i]
+                    self.lines['unknown%i' % i]['modelerrs'] = merrs[i]
+                
             # If we've know a-priori which lines the unmatched lines are likely to be, use that information        
             else:
-                
                 for i, miscline in enumerate(self.miscline):
-                    try:  
-                        for j, x in enumerate(zip(*tmp1)[1]):    
-                            if abs(x - self.lines[miscline['name']]['modelpars'][1]) < self.misctol[i]:
-                                self.lines[line]['modelpars'].extend(tmp1[j:j+3])
-                                self.lines[line]['modelerrs'].extend(tmp2[j:j+3])
-                    except TypeError:
-                        if abs(tmp1[1] - self.lines[self.miscline[0]]['modelpars'][1]) < self.misctol:
-                            self.lines[self.miscline[0]]['modelpars'].extend(tmp1)
-                            self.lines[self.miscline[0]]['modelerrs'].extend(tmp2)
-                            break #?
-        
-        
-                                              
+                    for j, x in enumerate(zip(*mpars)[1]):    
+                        if abs(x - miscline['wavelength']) < self.misctol:
+                            name = miscline['name']
+                        else:
+                            name = 'unknown%i' % j
+                        
+                        self.lines[name] = {}
+                        self.lines[name]['modelpars'] = mpars[j]
+                        self.lines[name]['modelerrs'] = merrs[j]
+
         self.separate() 
                             
     def derive(self):
@@ -220,7 +237,8 @@ class Measurements(object):
                 sigma = zip(*modpars2d)[2]
                 minsigma = min(np.abs(sigma))
                 i_narrow = list(np.abs(sigma)).index(minsigma)
-            else: continue
+            else: 
+                continue
                         
             self.lines["{0}_N".format(key)] = {}         
             self.lines["{0}_N".format(key)]['modelpars'] = []   

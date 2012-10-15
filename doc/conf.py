@@ -66,7 +66,31 @@ copyright = u'2011, Adam Ginsburg and Jordan Mirocha'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-#
+
+# read the docs mocks
+import sys
+
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            return type(name, (), {})
+        else:
+            return Mock()
+
+MOCK_MODULES = ['matplotlib', 'matplotlib.pyplot', 'matplotlib.figure',
+    'matplotlib.widgets', 'matplotlib.cbook', 'pyfits', 'scipy', 'astropy']
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
+
 # The short X.Y version.
 import pyspeckit
 version = pyspeckit.__version__
@@ -251,28 +275,3 @@ man_pages = [
     ('index', 'pyspeckit', u'pyspeckit Documentation',
      [u'Adam Ginsburg and Jordan Mirocha'], 1)
 ]
-
-
-# read the docs mocks
-import sys
-
-class Mock(object):
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        return Mock()
-
-    @classmethod
-    def __getattr__(cls, name):
-        if name in ('__file__', '__path__'):
-            return '/dev/null'
-        elif name[0] == name[0].upper():
-            return type(name, (), {})
-        else:
-            return Mock()
-
-MOCK_MODULES = ['numpy','matplotlib']
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock()
-

@@ -83,6 +83,11 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
 def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, **plotkwargs):
     """
     Plot the results from a multi-nh3 fit
+
+    spdict needs to be dictionary with form:
+        'oneone': spectrum,
+        'twotwo': spectrum,
+        etc.
     """ 
     spectra.plotter.figure = pyplot.figure(fignum)
     spectra.plotter.axis = spectra.plotter.figure.gca()

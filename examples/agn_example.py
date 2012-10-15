@@ -26,7 +26,7 @@ narrow = 5.
 broad = 30.
 
 # Initialize spectrum object
-spec = pyspeckit.Spectrum('sample_sdss.txt')
+spec = pyspeckit.Spectrum('../tests/sample_sdss.txt')
 spec.units = 'erg s^{-1} cm^{-2} \\AA^{-1}'
 spec.xarr.units='angstroms'
 
