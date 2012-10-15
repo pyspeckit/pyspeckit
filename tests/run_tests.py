@@ -22,8 +22,6 @@ print "*****test_sdss.py*****"
 execfile('test_sdss.py',{'interactive':interactive,'savedir':savedir})
 print "*****test_txt.py*****"
 execfile('test_txt.py',{'interactive':interactive,'savedir':savedir})
-print "*****test_measurements.py*****"
-execfile('test_measurements.py',{'interactive':interactive,'savedir':savedir})
 print "*****simple_fit_example.py*****"
 execfile('simple_fit_example.py',{'interactive':interactive,'savedir':savedir})
 print "*****simple_fit_interactive.py*****"
