@@ -210,9 +210,10 @@ def read_echelle(pyfits_hdu):
         num,beam,dtype,crval,cdelt,naxis,z,aplow,aphigh = axsplit[:9]
         
         # this is a hack for cropped spectra...
-        if hdr['NAXIS1'] != naxis:
+        if hdr['NAXIS1'] != int(naxis):
             naxis = hdr['NAXIS1']
-            crpix = hdr['CRPIX1']
+            crpix = hdr.get('CRPIX1')
+            warn("Treating as cropped echelle spectrum.")
         else:
             crpix = 0
 
