@@ -3,6 +3,7 @@ tests/ipython*
 ipython_log.py*
 
 syntax:glob
+.git
 *.png
 tests/*png
 *.py.orig
