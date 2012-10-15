@@ -38,6 +38,7 @@ def tspec_reader(filename, merged=True, specnum=0, **kwargs):
             dv,v0,p3 = header['CD1_1'],header['CRVAL1'],header['CRPIX1']
             header.update('CDELT1',dv)
             xconv = lambda v: ((v-p3+1)*dv+v0)
+            spec = ma.array(data[1,:],dtype='float64')
             xarr = xconv(np.arange(len(spec)))
             wat = dict([s.split("=") for s in header.get('WAT1_001').split()])
             xunits = wat['units']

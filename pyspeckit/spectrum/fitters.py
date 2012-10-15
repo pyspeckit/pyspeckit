@@ -1,6 +1,4 @@
 import matplotlib
-import matplotlib.cbook as mpcb
-import matplotlib.pyplot as pyplot
 import numpy as np
 from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
@@ -8,7 +6,6 @@ import units
 import models
 from pyspeckit.specwarnings import warn
 import interactive
-import inspect
 import copy
 
 class Registry(object):

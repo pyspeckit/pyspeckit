@@ -208,11 +208,19 @@ def read_echelle(pyfits_hdu):
         if specnum != int(axsplit[0]):
             raise ValueError("Mismatch in IRAF Echelle specification")
         num,beam,dtype,crval,cdelt,naxis,z,aplow,aphigh = axsplit[:9]
+        
+        # this is a hack for cropped spectra...
+        if hdr['NAXIS1'] != naxis:
+            naxis = hdr['NAXIS1']
+            crpix = hdr['CRPIX1']
+        else:
+            crpix = 0
+
         if len(axsplit) > 9:
             functions = axsplit[9:]
 
         if int(dtype) == 0:
-            xax = ( float(crval) + float(cdelt) * (np.arange(int(naxis)) + 1) ) / (1.+float(z))
+            xax = ( float(crval) + float(cdelt) * (np.arange(int(naxis)) + 1 + crpix) ) / (1.+float(z))
 
         headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt,
                 'NAXIS1':naxis, 'NAXIS':1, 'REDSHIFT':z,

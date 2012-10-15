@@ -4,7 +4,6 @@ Spectrum Arithmetic
 e.g., interpolate one spectrum onto anothers' axes
 """
 
-import classes
 import numpy as np
 
 def _interp(x, xp, fp, left=None, right=None):
@@ -17,14 +16,14 @@ def _interp(x, xp, fp, left=None, right=None):
     else:
         return np.interp(x, xp, fp, left=left, right=right)
 
-def interp(spec1,spec2):
+def interp(spec1,spec2, left=0, right=0):
     """
     Interpolate spec1 onto spec2's axes
     """
 
     xarr1 = spec1.xarr.as_unit(spec2.xarr.units)
 
-    newdata = _interp(spec2.xarr,xarr1,spec1.data)
+    newdata = _interp(spec2.xarr,xarr1,spec1.data, left=left, right=right)
 
     if spec1.error is not None:
         if xarr1.cdelt() and spec2.xarr.cdelt():

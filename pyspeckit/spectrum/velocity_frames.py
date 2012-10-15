@@ -1,4 +1,5 @@
 import numpy as np
+import units
 
 def header_to_vlsr(header,**kwargs):
     """
@@ -70,7 +71,7 @@ def topo_to_geo(ra,dec,latitude,lst,height=None):
         vearth_6d = pyslalib.slalib.sla_pvobs(latitude_rad, height, lst_rad)
         vradec_3d = pyslalib.slalib.sla_dcs2c(ra_rad, dec_rad)
         projected_vearth = -1*pyslalib.slalib.sla_dvdv(vearth_6d[3:],vradec_3d)
-        return projected_vearth * astronomical_unit_cm*length_dict['cm']/length_dict['km']
+        return projected_vearth * units.astronomical_unit_cm*units.length_dict['cm']/units.length_dict['km']
 
 
 def geo_to_bary(ra,dec,jd,epoch):
@@ -146,7 +147,7 @@ def topo_to_lsr(ra, dec, latitude, lst, jd, epoch, height=None):
     print "topo->geo: ",topo_to_geo(ra,dec,latitude,lst,height=height)
     return helio_to_lsr(ra,dec) + geo_to_helio(ra,dec,jd,epoch) + topo_to_geo(ra,dec,latitude,lst,height=height)
 
-def frame_grid(ra=0.0,dec=0.0,jd=51544,lst=0,vtopo=0.0,epoch=2000,):
+def frame_grid(ra=0.0,dec=0.0,latitude=0.0,jd=51544,lst=0,vtopo=0.0,epoch=2000,):
     frame_names = ['TOPO','GEO','BARY','HELI','LSRK']
     frame1_to_frame2 = dict([(n1,None) for n1 in frame_names])
     for frame1 in frame_names:
