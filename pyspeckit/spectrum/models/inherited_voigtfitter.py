@@ -32,12 +32,17 @@ def voigt(xarr,amp,xcen,sigma,gamma,normalized=False):
         Determines whether "amp" refers to the area or the peak
         of the voigt profile
 
-    V(x,sig,gam) = Re(w(z))/(sig*sqrt(2*pi))
     z = (x+i*gam)/(sig*sqrt(2))
+    V(x,sig,gam) = Re(w(z))/(sig*sqrt(2*pi))
+
+    The area of V in this definition is 1.
+    If normalized=False, then you can divide the integral of V by
+    sigma*sqrt(2*pi) to get the area.
 
     Original implementation converted from 
     http://mail.scipy.org/pipermail/scipy-user/2011-January/028327.html
-    (had an incorrect normalization, I think)
+    (had an incorrect normalization and strange treatment of the input
+    parameters)
 
     Modified implementation taken from wikipedia, using the definition.
     http://en.wikipedia.org/wiki/Voigt_profile
