@@ -37,6 +37,9 @@ execfile('test_formaldehyde.py',{'interactive':interactive,'savedir':savedir})
 print "*****vega_echelle.py*****"
 execfile('vega_echelle_example.py',{'interactive':interactive,'savedir':savedir})
 
+print "*****test_voigt.py*****"
+execfile('test_voigt.py')
+
 print "Success!  Or at least, no exceptions..."
 
 print "Running comparison"
