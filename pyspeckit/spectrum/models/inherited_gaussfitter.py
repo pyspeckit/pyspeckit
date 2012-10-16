@@ -14,18 +14,37 @@ class.
 import model
 import numpy 
 
-def gaussian(x,A,dx,w, return_components=False):
+def gaussian(x,A,dx,w, return_components=False, normalized=False):
     """
     Returns a 1-dimensional gaussian of form
-    H+A*numpy.exp(-(x-dx)**2/(2*w**2))
-    
-    [height,amplitude,center,width]
+    A*numpy.exp(-(x-dx)**2/(2*w**2))
 
-    return_components does nothing but is required by all fitters
+    Area is sqrt(2*pi)*sigma^2*amplitude - i.e., this is NOT a normalized
+    gaussian, unless normalized=True in which case A = Area
     
+    Parameters
+    ----------
+    x : np.ndarray
+        array of x values
+    A : float
+        Amplitude of the Gaussian, i.e. its peak value, unless
+        normalized=True then A is the area of the gaussian
+    dx : float
+        Center or "shift" of the gaussian
+    w : float
+        Width of the gaussian (sigma)
+    return_components : bool
+        dummy variable; return_components does nothing but is required by all
+        fitters
+    normalized : bool
+        Return a normalized Gaussian?
     """
     x = numpy.array(x) # make sure xarr is no longer a spectroscopic axis
-    return A*numpy.exp(-(x-dx)**2/(2.0*w**2))
+    G = A*numpy.exp(-(x-dx)**2/(2.0*w**2))
+    if normalized:
+        return G / (sqrt(2*pi) * w**2)
+    else:
+        return G
 
 def gaussian_fitter(multisingle='multi'):
     """

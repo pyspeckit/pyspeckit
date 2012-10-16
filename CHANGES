@@ -8,6 +8,7 @@ Release 0.1.9 [incremental]
     * New TSPEC unmerged, IRAF fits readers
     * astropy.io.fits compatibility fixes
     * General bugfixes
+    * Voigt Profile Fitter - bugfix, previously abused notation / misused widths
 
 Release 0.1.8
 ~~~~~~~~~~~~~

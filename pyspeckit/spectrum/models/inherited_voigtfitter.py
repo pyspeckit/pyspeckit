@@ -11,23 +11,26 @@ try:
 except ImportError:
     scipyOK = False
 
-def voigt(xarr,amp,xcen,sigma,gamma):
+def voigt(xarr,amp,xcen,sigma,gamma,normalized=False):
     """
-    voigt profile
+    Normalized Voigt profile
 
     Parameters
     ----------
-        xarr : np.ndarray
-            The X values over which to compute the Voigt profile
-        amp : float
-            Amplitude of the voigt profile
-        xcen : float
-            The X-offset of the profile
-        sigma : float
-            The width / sigma parameter of the Gaussian distribution
-        gamma : float
-            The width / shape parameter of the Lorentzian distribution
-
+    xarr : np.ndarray
+        The X values over which to compute the Voigt profile
+    amp : float
+        Amplitude of the voigt profile
+        if normalized = True, amp is the AREA
+    xcen : float
+        The X-offset of the profile
+    sigma : float
+        The width / sigma parameter of the Gaussian distribution
+    gamma : float
+        The width / shape parameter of the Lorentzian distribution
+    normalized : bool
+        Determines whether "amp" refers to the area or the peak
+        of the voigt profile
 
     V(x,sig,gam) = Re(w(z))/(sig*sqrt(2*pi))
     z = (x+i*gam)/(sig*sqrt(2))
@@ -44,8 +47,11 @@ def voigt(xarr,amp,xcen,sigma,gamma):
 
     if scipyOK:
         z = ((xarr-xcen) + 1j*gamma) / (sigma * np.sqrt(2))
-        V = amp * np.real(scipy.special.wofz(z)) / (sigma*np.sqrt(2*np.pi))
-        return V
+        V = amp * np.real(scipy.special.wofz(z)) 
+        if normalized:
+            return V / (sigma*np.sqrt(2*np.pi))
+        else:
+            return V
         #tmp = 1.0/scipy.special.wofz(numpy.zeros((len(xarr))) \
         #      +1j*numpy.sqrt(numpy.log(2.0))*Lfwhm).real
         #tmp = tmp*amp* \
