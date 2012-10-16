@@ -110,6 +110,9 @@ def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, skiplines=0, **kwargs)
                 colunits = line[1:].split()
             
             continue
+
+        if ii < skiplines:
+            continue
         
         coldata.append(line.split())
         
