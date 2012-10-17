@@ -291,10 +291,12 @@ class Specfit(interactive.Interactive):
                 history.write_history(self.Spectrum.header,
                         str(par))
 
-    def EQW(self, plot=False, plotcolor='g', annotate=False, alpha=0.5, loc='lower left'):
+    def EQW(self, plot=False, plotcolor='g',
+            annotate=False, alpha=0.5, loc='lower left'):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
+        (the selected range is self.xmin:self.xmax, so it may include multiple lines!)
 
         Plots a box indicating the EQW if plot==True (i.e., it will have a
         width equal to the equivalent width, and a height equal to the measured
@@ -305,6 +307,12 @@ class Specfit(interactive.Interactive):
             raise ValueError("Baseline / continuum is zero: equivalent width is undefined.")
         elif np.median(self.Spectrum.baseline.basespec) < 0:
             if mycfg.WARN: warn( "WARNING: Baseline / continuum is negative: equivalent width is poorly defined." )
+        # work in progress
+        # fitted=True, continuum=None, 
+        #if fitted:
+        #    if continuum is None:
+        #        continuum = self.Spectrum.baseline.basespec[self.Spectrum.xarr.
+        #else:
         diffspec = (self.Spectrum.baseline.basespec - self.Spectrum.data)
         dx = np.abs((self.Spectrum.xarr[self.xmax-1]-self.Spectrum.xarr[self.xmin]) / (self.xmax-self.xmin))
         sumofspec = diffspec[self.xmin:self.xmax].sum() * dx

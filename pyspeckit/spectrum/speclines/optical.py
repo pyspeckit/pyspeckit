@@ -53,10 +53,11 @@ def hydrogen(nu,nl, vacuum=True):
     rydberg = 10973731.6 # m^-1
     protontoelectron = 1836.15266 # ratio
 
+    # vacuum wavelength in angstroms (1e10 A/m)
     lvac = 1.0/rydberg * 1./(1/float(nl)**2 - 1/float(nu)**2) * 1e10 * (1.0+1.0/protontoelectron)
 
     if not vacuum:
         import ref_index
-        return ref_index.vac2air(lvac/10)*10
+        return ref_index.vac2air(lvac/10)*10 # convert to nm
     else:
         return lvac
