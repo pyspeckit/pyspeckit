@@ -28,9 +28,9 @@ guesses = [100, 5050, 5, 40, 5150, 5, 120, 5200, 5]
 sp.specfit(guesses = guesses, negamp = False)
 
 print 'Fit 3 Gaussians.\nCall the measurements class for automatic line identification and such.'
-sp.measure(z = sp.header['Z'], restframe = True)
+sp.measure(z = sp.header.get('Z'), fluxnorm = 1e-17, restframe = True)
 
-print 'Line      Wavelength     FWHM        Flux         Luminosity (erg/s)'
+print 'Line   Wavelength (A)  FWHM (A)  Flux (erg/s/cm^2/Ang)  Luminosity (erg/s)'
 for line in sp.measurements.lines:
     print line, sp.measurements.lines[line]['pos'], sp.measurements.lines[line]['fwhm'], \
         sp.measurements.lines[line]['flux'], sp.measurements.lines[line]['lum']

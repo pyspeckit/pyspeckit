@@ -16,7 +16,7 @@ cm_per_mpc = 3.08568e+24
 class Measurements(object):
     def __init__(self, Spectrum, z=None, d=None, xunits=None, fluxnorm=None,
             miscline=None, misctol=10., ignore=None, derive=True, debug=False,
-            restframe=False):
+            restframe=False, ptol = 2):
         """
         This can be called after a fit is run.  It will inherit the specfit
         object and derive as much as it can from modelpars.  Just do:
@@ -53,7 +53,7 @@ class Measurements(object):
         if fluxnorm is not None: 
             self.fluxnorm = fluxnorm
         else: 
-            self.fluxnorm= 1
+            self.fluxnorm = 1
                 
         # This is where we'll keep our results                        
         self.lines = {}
@@ -81,6 +81,10 @@ class Measurements(object):
         self.reflines = self.speclines.optical.optical_lines
         self.refpos = self.reflines['xarr']
         self.refname = self.reflines['name']
+        
+        # Redshift reference lines if restframe = True
+        if self.restframe and z is not None:
+            self.refpos *= (1.0 + z)    
                         
         # If distance or redshift has been provided, we can compute luminosities from fluxes
         if d is not None: 
@@ -90,33 +94,100 @@ class Measurements(object):
         if z is not None: 
             self.cosmology = cosmology.Cosmology()
             self.d = self.cosmology.LuminosityDistance(z) * cm_per_mpc
-            self.redshift = z
-        else:
-            self.redshift = 0.0
-            
-        self.identify()
+             
+        self.unmatched = self.identify_by_position(ptol = ptol)   
+        
+        #if np.sum(unmatched) >= 2: 
+        #    self.identify_by_spacing(unmatched)
         if derive: 
             self.derive()
+            
+    def identify_by_position(self, ptol):
+        """
+        Match observed lines to nearest reference line.  Don't use spacing at all.
         
-    def identify(self):
+        ptol = tolerance (in angstroms) to accept positional match
+        """
+        
+        if not hasattr(self, 'lines'):    
+            self.lines = {}    
+            
+        # Fill lines dictionary
+        unmatched = np.zeros_like(self.obspos)
+        for i, pos in enumerate(self.obspos):
+            
+            # Check miscline directory for match
+            matched = False
+            if self.miscline is not None:
+                
+                for line in self.miscline:
+                    if abs(pos - line['wavelength']) > ptol:
+                        continue
+                    
+                    matched = True    
+                    name = line['name'] 
+                    break          
+                                                
+            if not matched:
+                diff = np.abs(pos - self.refpos) 
+                loc = np.argmin(diff)
+
+                if diff[loc] <= ptol:
+                    matched = True
+                                      
+                    name = self.refname[loc]
+                    if name in self.lines.keys():
+                        name += '_1'
+                        
+                        num = int(name[-1])    
+                        while name in self.lines.keys():
+                            num += 1
+                            name = '%s_%i' % (self.refname[loc], num)
+                        
+            if matched:
+                self.lines[name] = {}
+                self.lines[name]['modelpars'] = list(self.modelpars[i])            
+                self.lines[name]['modelerrs'] = list(self.modelerrs[i])
+            else: 
+                name = 'unknown_1'
+                num = 1
+                while name in self.lines.keys():
+                    num += 1
+                    name = 'unknown_%i' % num
+                    
+                self.lines[name] = {}
+                self.lines[name]['modelpars'] = list(self.modelpars[i])            
+                self.lines[name]['modelerrs'] = list(self.modelerrs[i])
+                unmatched[i] = 1
+                
+        return unmatched
+        
+    def identify_by_spacing(self):
         """
         Determine identity of lines in self.modelpars.  Fill entries of self.lines dictionary.
         
         Note: This method will be infinitely slow for more than 10 or so lines.
         """    
         
+        if self.unmatched is None:
+            self.unmatched = np.ones_like(self.obspos)
+        
+        # Remove lines that were already identified
+        obspos = self.obspos[self.unmatched == 1]
+        
         # Spacing between observed lines (odiff) and reference lines (rdiff)
-        self.odiff = np.abs(np.diff(self.obspos))
+        self.odiff = np.abs(np.diff(obspos))
         self.rdiff = np.abs(np.diff(self.refpos))
         
         # Don't try to identify lines with separations smaller than the smallest
         # separation in our reference library
         self.rdmin = 0.99 * min(self.rdiff)
-        
-        # If lines have multiple components...then...what?
+                                
+        # If lines have multiple components (i.e. spacing much closer than ref lines),
+        # delete them from ID list. 
         if np.any(self.odiff) < self.rdmin:
             where = np.ravel(np.argwhere(self.odiff < self.rdmin))
-            odiff = np.delete(self.odiff, where)
+            odiff = np.delete(self.odiff, where)            
             multi = True
         else: 
             where = 0
@@ -125,14 +196,12 @@ class Measurements(object):
 
         refpos = self.refpos 
         refname = self.refname        
-        if self.restframe:
-            refpos *= (1.0 + self.redshift)
                             
         # Don't include elements of reference array that are far away from the observed lines (speeds things up)
-        condition = (refpos >= 0.9 * min(self.obspos)) & (refpos <= 1.1 * max(self.obspos)) 
+        condition = (refpos >= 0.99 * min(self.obspos)) & (refpos <= 1.01 * max(self.obspos)) 
         refpos = refpos[condition]
         refname = refname[condition]
-        
+                
         if len(refpos) == 0:
             print 'WARNING: No reference lines in this wavelength regime.'
         elif len(refpos) < self.Nlines:
@@ -149,11 +218,17 @@ class Measurements(object):
             if len(odiff) == len(rdiff):
                 result = (np.sum(np.abs(odiff - rdiff)), combo)
                 self.IDresults.append(result)
-            else: # If more observed lines than reference lines, try excluding observed lines one at a time
-                subcombos = itertools.combinations(odiff, len(rdiff))
-                for subcombo in subcombos:
-                    result = (np.sum(np.abs(subcombo - rdiff)), combo)
-                    self.IDresults.append(result)
+            else: # If more/less observed lines than reference lines, try excluding observed lines one at a time
+                if len(odiff) > len(rdiff):
+                    subcombos = itertools.combinations(odiff, len(rdiff))
+                    for subcombo in subcombos:
+                        result = (np.sum(np.abs(subcombo - rdiff)), combo)
+                        self.IDresults.append(result)
+                else:
+                    subcombos = itertools.combinations(rdiff, len(odiff))
+                    for subcombo in subcombos:
+                        result = (np.sum(np.abs(odiff - subcombo)), combo)
+                        self.IDresults.append(result)
                                       
         # Pick best solution
         best = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
@@ -262,7 +337,8 @@ class Measurements(object):
         """                                                                                                
                                                                                                            
         flux = 0                                                                                           
-        for i in xrange(len(pars) / 3): flux += np.sqrt(2. * np.pi) * pars[3 * i] * abs(pars[2 + 3 * i])
+        for i in xrange(len(pars) / 3): 
+            flux += np.sqrt(2. * np.pi) * pars[3 * i] * abs(pars[2 + 3 * i])
                                                                                                            
         return flux * self.fluxnorm
         
@@ -273,7 +349,8 @@ class Measurements(object):
         """
         
         amp = 0
-        for i in xrange(len(pars) / 3): amp += pars[3 * i]
+        for i in xrange(len(pars) / 3): 
+            amp += pars[3 * i]
         return amp * self.fluxnorm
                                                                                                            
     def compute_luminosity(self, pars):                                                                 
@@ -282,7 +359,8 @@ class Measurements(object):
         """                                                                                                
                                                                                                            
         lum = 0                                                                                            
-        for i in xrange(len(pars) / 3): lum += self.compute_flux(pars) * 4. * np.pi * self.d**2                   
+        for i in xrange(len(pars) / 3): 
+            lum += self.compute_flux(pars) * 4. * np.pi * self.d**2                   
         return lum                                                                                         
         
     def compute_fwhm(self, pars):
