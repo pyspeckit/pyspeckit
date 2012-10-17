@@ -614,8 +614,8 @@ class Specfit(interactive.Interactive):
             return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
                 
     def plot_fit(self, annotate=None, show_components=None,
-            composite_fit_color='red', component_fit_color='blue', lw=0.5,
-            composite_lw=0.75, component_lw=0.75, component_kwargs={},
+            composite_fit_color='red',  lw=0.5,
+            composite_lw=0.75, 
             use_window_limits=None, show_hyperfine_components=None, **kwargs):
         """
         Plot the fit.  Must have fitted something before calling this!  
@@ -639,22 +639,7 @@ class Specfit(interactive.Interactive):
         
         # Plot components
         if show_components or show_hyperfine_components:
-            if show_hyperfine_components is not None:
-                component_kwargs['return_hyperfine_components'] = show_hyperfine_components
-            self._component_kwargs = component_kwargs
-            self.modelcomponents = self.fitter.components(self.Spectrum.xarr, self.modelpars, **component_kwargs)
-            for data in self.modelcomponents:
-                # can have multidimensional components
-                if len(data.shape) > 1:
-                    for d in data:
-                        self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
-                            d + plot_offset,
-                            color=component_fit_color, linewidth=component_lw)
-                else:
-                    self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
-                        data + plot_offset,
-                        color=component_fit_color, linewidth=component_lw)
-                
+            self.plot_components(show_hyperfine_components=show_hyperfine_components)
 
         uwl = use_window_limits if use_window_limits is not None else self.use_window_limits
         plotkwargs = {}
@@ -667,6 +652,55 @@ class Specfit(interactive.Interactive):
         if annotate or ((annotate is None) and self.autoannotate):
             self.annotate()
             if self.vheight: self.Spectrum.baseline.annotate()
+
+    def plot_components(self, show_hyperfine_components=None,
+            component_yoffset=0.0, component_lw=0.75,
+            component_fit_color='blue', component_kwargs={},
+            add_baseline=False): 
+        """
+        Overplot the individual components of a fit
+
+        Parameters
+        ----------
+            show_hyperfine_components : None | bool
+                Keyword argument to pass to component codes; determines whether to return
+                individual (e.g., hyperfine) components of a composite model
+            component_yoffset : float
+                Vertical (y-direction) offset to add to the components when plotting
+            component_lw : float
+                Line width of component lines
+            component_fitcolor : color
+                Color of component lines
+            component_kwargs : dict
+                Keyword arguments to pass to the fitter.components method
+            add_baseline : bool
+                Add the fit to the components before plotting.  Makes sense to use
+                if self.Spectrum.baseline.subtracted == False
+        """
+
+        plot_offset = self.Spectrum.plotter.offset
+
+        if show_hyperfine_components is not None:
+            component_kwargs['return_hyperfine_components'] = show_hyperfine_components
+        self._component_kwargs = component_kwargs
+        self.modelcomponents = self.fitter.components(self.Spectrum.xarr, self.modelpars, **component_kwargs)
+
+        yoffset = plot_offset + component_yoffset
+        if add_baseline:
+            yoffset += self.Spectrum.baseline.basespec
+
+        for data in self.modelcomponents:
+            # can have multidimensional components
+            if len(data.shape) > 1:
+                for d in data:
+                    self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
+                        d + yoffset,
+                        color=component_fit_color, linewidth=component_lw)
+            else:
+                self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
+                    data + yoffset,
+                    color=component_fit_color, linewidth=component_lw)
+                
 
     def fullsizemodel(self):
         """
@@ -682,7 +716,8 @@ class Specfit(interactive.Interactive):
             self.selectregion(reset=True)
 
     def plotresiduals(self, fig=2, axis=None, clear=True, color='k',
-            linewidth=0.5, drawstyle='steps-mid', **kwargs):
+            linewidth=0.5, drawstyle='steps-mid', yoffset=0.0, label=True,
+            **kwargs):
         """
         Plot residuals of the fit.  Specify a figure or
         axis; defaults to figure(2).
@@ -699,15 +734,16 @@ class Specfit(interactive.Interactive):
             self.residualaxis = axis
             if clear: self.residualaxis.clear()
         self.residualplot = self.residualaxis.plot(self.Spectrum.xarr,
-                self.fullresiduals,drawstyle=drawstyle,
+                self.fullresiduals+yoffset,drawstyle=drawstyle,
                 linewidth=linewidth, color=color, **kwargs)
         if self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None:
             self.residualaxis.set_xlim(self.Spectrum.plotter.xmin,self.Spectrum.plotter.xmax)
         if self.Spectrum.plotter.ymin is not None and self.Spectrum.plotter.ymax is not None:
             self.residualaxis.set_ylim(self.Spectrum.plotter.ymin,self.Spectrum.plotter.ymax)
-        self.residualaxis.set_xlabel(self.Spectrum.plotter.xlabel)
-        self.residualaxis.set_ylabel(self.Spectrum.plotter.ylabel)
-        self.residualaxis.set_title("Residuals")
+        if label:
+            self.residualaxis.set_xlabel(self.Spectrum.plotter.xlabel)
+            self.residualaxis.set_ylabel(self.Spectrum.plotter.ylabel)
+            self.residualaxis.set_title("Residuals")
         self.residualaxis.figure.canvas.draw()
 
     def annotate(self,loc='upper right',labelspacing=0.25, markerscale=0.01,
