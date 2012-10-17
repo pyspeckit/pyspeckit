@@ -90,6 +90,9 @@ def voigt_fitter(multisingle='multi'):
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma_G',r'\sigma_L'),
             multisingle=multisingle,
+            centroid_par='shift',
+            fwhm_func=voigt_fwhm,
+            fwhm_pars=['gwidth','lwidth'],
             )
     myclass.__name__ = "voigt"
     

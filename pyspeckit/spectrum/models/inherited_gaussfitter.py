@@ -1,4 +1,4 @@
-"""
+"""np.
 ===============
 Gaussian Fitter
 ===============
@@ -42,9 +42,12 @@ def gaussian(x,A,dx,w, return_components=False, normalized=False):
     x = numpy.array(x) # make sure xarr is no longer a spectroscopic axis
     G = A*numpy.exp(-(x-dx)**2/(2.0*w**2))
     if normalized:
-        return G / (sqrt(2*pi) * w**2)
+        return G / (numpy.sqrt(2*numpy.pi) * w**2)
     else:
         return G
+
+def gaussian_fwhm(sigma):
+    return numpy.sqrt(8*numpy.log(2)) * sigma
 
 def gaussian_fitter(multisingle='multi'):
     """
@@ -57,6 +60,9 @@ def gaussian_fitter(multisingle='multi'):
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma'),
             multisingle=multisingle,
+            centroid_par='shift',
+            fwhm_func=gaussian_fwhm,
+            fwhm_pars=['width'],
             )
     myclass.__name__ = "gaussian"
     

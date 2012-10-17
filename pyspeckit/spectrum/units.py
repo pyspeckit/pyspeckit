@@ -804,13 +804,21 @@ class SpectroscopicAxis(np.ndarray):
         """
         return self.in_frame(frame)[self.x_to_pix(xx)]
 
-    def cdelt(self, tolerance=1e-8):
+    def cdelt(self, tolerance=1e-8, approx=False):
         """
         Return the channel spacing if channels are linear
+
+        Parameters
+        ----------
+        tolerance : float
+            Tolerance in the difference between pixels that determines
+            how near to linear the xarr must be
+        approx : bool
+            Return the mean DX even if it is inaccurate
         """
         if not hasattr(self,'dxarr'): # if cropping happens...
             self.dxarr = np.diff(self)
-        if abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
+        if approx or abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
             return self.dxarr.mean().flat[0]
 
     def _make_header(self, tolerance=1e-8):
@@ -1039,7 +1047,7 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
         print "Already in frequency units (%s)" % input_units
         return wavelengths
     if frequency_units not in frequency_dict:
-        raise ValueError("Frequency units %s not valid" % wavelength_units)
+        raise ValueError("Frequency units %s not valid" % frequency_units)
 
     if input_units not in length_dict:
         raise AttributeError("Cannot convert from wavelength unless units are already wavelength.")
