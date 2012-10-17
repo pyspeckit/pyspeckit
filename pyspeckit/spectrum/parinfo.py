@@ -7,7 +7,7 @@ class ParinfoList(list):
     def __init__(self, *args):
 
         try:
-            from lmfit import Parameters,Parameter
+            from lmfit import Parameters
             list.__init__(self,[])
             if len(args) == 1 and isinstance(args[0],Parameters):
                 self._from_Parameters(args[0])
@@ -108,7 +108,7 @@ class ParinfoList(list):
         Convert a ParinfoList to an lmfit Parameters class
         """
         try:
-            from lmfit import Parameters,Parameter
+            from lmfit import Parameters
         except ImportError:
             print "Cannot import lmfit."
             return
@@ -216,7 +216,7 @@ class Parinfo(dict):
 
     def __repr__(self):
         try:
-            reprint = "Param #%i %12s = %15g" % (self.n, self.parname, self.value)
+            reprint = "Param #%i %12s = %12g" % (self.n, self.parname, self.value)
             if self.fixed:
                 reprint += " (fixed)"
             elif self.error is not None:

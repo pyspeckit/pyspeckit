@@ -48,8 +48,6 @@ def voigt(xarr,amp,xcen,sigma,gamma,normalized=False):
     http://en.wikipedia.org/wiki/Voigt_profile
     """
 
-
-
     if scipyOK:
         z = ((xarr-xcen) + 1j*gamma) / (sigma * np.sqrt(2))
         V = amp * np.real(scipy.special.wofz(z)) 

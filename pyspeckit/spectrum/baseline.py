@@ -4,6 +4,7 @@ from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
 import interactive
 import copy
+import history
 
 interactive_help_message = """
 (1) Left-click or press 1 (one) at two positions to select or add to the baseline fitting range - it will be 
@@ -116,7 +117,6 @@ class Baseline(interactive.Interactive):
         """
         specfit = self.Spectrum.specfit
         self.order = order
-        fitp = np.zeros(self.order+1)
         if self.subtracted and fit_original: # add back in the old baseline
             self.spectofit = self.Spectrum.data+self.basespec
         else:
@@ -149,6 +149,11 @@ class Baseline(interactive.Interactive):
                     **kwargs)
             if highlight: self.highlight_fitregion()
         if save: self.savefit()
+        if hasattr(self.Spectrum,'header'):
+            history.write_history(self.Spectrum.header,
+                    "BASELINE order=%i pars=%s" % (self.order, 
+                        ",".join(self.baselinepars)) +
+                        "(powerlaw)" if self.powerlaw else "")
 
     def button2action(self, event=None, debug=False, subtract=True, powerlaw=None,
             fit_original=False, baseline_fit_color='orange', **kwargs):

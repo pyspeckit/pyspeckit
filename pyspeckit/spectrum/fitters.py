@@ -7,6 +7,7 @@ import models
 from pyspeckit.specwarnings import warn
 import interactive
 import copy
+import history
 
 class Registry(object):
     """
@@ -283,11 +284,22 @@ class Specfit(interactive.Interactive):
             return
         if save: self.savefit()
 
+        if hasattr(self.Spectrum,'header'):
+            history.write_history(self.Spectrum.header,
+                    "SPECFIT: Fitted profile of type %s" % (self.fittype))
+            for par in self.parinfo:
+                history.write_history(self.Spectrum.header,
+                        str(par))
 
     def EQW(self, plot=False, plotcolor='g', annotate=False, alpha=0.5, loc='lower left'):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
+
+        Plots a box indicating the EQW if plot==True (i.e., it will have a
+        width equal to the equivalent width, and a height equal to the measured
+        continuum)
+
         """
         if np.median(self.Spectrum.baseline.basespec) == 0:
             raise ValueError("Baseline / continuum is zero: equivalent width is undefined.")
@@ -317,6 +329,9 @@ class Specfit(interactive.Interactive):
                         handletextpad=0.1, loc=loc)
             if self.Spectrum.plotter.autorefresh:
                 self.Spectrum.plotter.refresh()
+        if hasattr(self.Spectrum,'header'):
+            history.write_history(self.Spectrum.header,
+                    "EQW for %s: %f" % (self.fittype,eqw))
         return eqw
 
     def register_fitter(self,*args,**kwargs):
