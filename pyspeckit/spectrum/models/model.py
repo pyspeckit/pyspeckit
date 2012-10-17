@@ -32,6 +32,9 @@ class SpectralModel(fitter.SimpleFitter):
     def __init__(self, modelfunc, npars, 
             shortvarnames=("A","\\Delta x","\\sigma"), multisingle='multi',
             fitunits=None,
+            centroid_par=None,
+            fwhm_func=None,
+            fwhm_pars=None,
             use_lmfit=False, **kwargs):
         """Spectral Model Initialization
 
@@ -97,6 +100,9 @@ class SpectralModel(fitter.SimpleFitter):
         self.modelfunc_kwargs = kwargs
 
         self.use_lmfit = use_lmfit
+
+        # default name of parameter that represents the profile centroid
+        self.centroid_par = centroid_par
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
@@ -299,7 +305,7 @@ class SpectralModel(fitter.SimpleFitter):
             return self.lmfitter(*args,**kwargs)
         if self.multisingle == 'single':
             # Generate a variable-height version of the model
-            func = fitter.vheightmodel(self.modelfunc)
+            # not used func = fitter.vheightmodel(self.modelfunc)
             return self.fitter(*args, **kwargs)
         elif self.multisingle == 'multi':
             return self.fitter(*args,**kwargs)
@@ -569,14 +575,70 @@ class SpectralModel(fitter.SimpleFitter):
 
         return modelcomponents
 
-    def integral(self, modelpars, **kwargs):
+    def integral(self, modelpars, dx=None, **kwargs):
         """
         Extremely simple integrator:
         IGNORES modelpars;
         just sums self.model
         """
+        if dx is not None:
+            return self.model.sum()*dx
+        else:
+            return self.model.sum()
 
-        return self.model.sum()
+    def analytic_fwhm(self):
+        """
+        Return the FWHMa of the model components *if* a fwhm_func has been
+        defined
+
+        Done with incomprehensible list comprehensions instead of nested for
+        loops... readability sacrificed for speed and simplicity.  This is
+        unpythonic.
+        """
+        fwhm = [self.fwhm_func(
+                *[self.parinfo[p+'%i' % n] for p in self.fwhm_pars]
+                )
+                for n in xrange(self.npeaks)]
+        return fwhm
+
+    def analytic_centroid(self, centroidpar=None):
+        """
+        Return the *analytic* centroids of the model components
+
+        Parameters
+        ----------
+        centroidpar : None or string
+            The name of the parameter in the fit that represents the centroid
+            *some models have default centroid parameters - these will be used
+            if centroidpar is unspecified*
+
+        Returns
+        -------
+        List of the centroid values (even if there's only 1)
+        """
+        if centroidpar is None:
+            centroidpar = self.centroid_par
+
+        centr = [par.value for par in self.parinfo if centroidpar in par.name]
+
+        return centr
+
+
+    def computed_centroid(self, xarr=None):
+        """
+        Return the *computed* centroid of the model
+
+        Parameters
+        ----------
+        xarr : None or np.ndarray
+            The X coordinates of the model over which the centroid should be
+            computed.  If unspecified, the centroid will be in pixel units
+        """
+        if xarr is None:
+            xarr = np.arange(self.model.size)
+
+        centr = (self.model*xarr).sum() / self.model.sum()
+        return centr
 
     def logp(self, xarr, data, error, pars=None):
         """
