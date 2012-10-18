@@ -337,7 +337,7 @@ class Specfit(interactive.Interactive):
         elif fitted:
             if continuum is None:
                 # centroid in data units
-                center = (self.model*self.Spectrum.xarr[self.xmin:self.xmax])/self.model.sum()
+                center = (self.model*self.Spectrum.xarr[self.xmin:self.xmax]).sum()/self.model.sum()
                 center_pix = self.Spectrum.xarr.x_to_pix(center)
                 continuum = self.Spectrum.baseline.basespec[center_pix]
             # EQW is positive for absorption lines
