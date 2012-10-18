@@ -21,8 +21,8 @@ def hydrogen(nu,nl, vacuum=True):
 
 # Format: name, units, vacuum?, display name
 lines = {
-         #"H_alpha": [6564.614, 'Angstrom', True, r'$\mathrm{H}\alpha$'],
-         #"H_beta":  [4862.721, 'Angstrom', True, r'$\mathrm{H}\beta$'],
+         "H_alpha": [6564.614, 'Angstrom', True, r'$\mathrm{H}\alpha$'],
+         "H_beta":  [4862.721, 'Angstrom', True, r'$\mathrm{H}\beta$'],
          "OIIIa":   [4960.295, 'Angstrom', True, r'$[\mathrm{OIII}]\lambda 4959\AA$'],
          "OIIIb":   [5008.239, 'Angstrom', True, r'$[\mathrm{OIII}]\lambda 5007\AA$'],
          "NIIa":    [6549.860, 'Angstrom', True, r'$[\mathrm{NII}]\lambda 6549\AA$'],
