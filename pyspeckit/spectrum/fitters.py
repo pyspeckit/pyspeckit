@@ -291,17 +291,31 @@ class Specfit(interactive.Interactive):
                 history.write_history(self.Spectrum.header,
                         str(par))
 
-    def EQW(self, plot=False, plotcolor='g',
-            fitted=True, continuum=None, 
-            annotate=False, alpha=0.5, loc='lower left'):
+    def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
+            components=False, annotate=False, alpha=0.5, loc='lower left'):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
         (the selected range is self.xmin:self.xmax, so it may include multiple lines!)
 
-        Plots a box indicating the EQW if plot==True (i.e., it will have a
-        width equal to the equivalent width, and a height equal to the measured
-        continuum)
+        Parameters
+        ----------
+        plot : bool
+            Plots a box indicating the EQW if plot==True (i.e., it will have a
+            width equal to the equivalent width, and a height equal to the
+            measured continuum)
+        fitted : bool
+            Use the fitted model?  If false, uses the data
+        continuum : None or float
+            Can specify a fixed continuum with this keyword, otherwise will use
+            the fitted baseline
+        components : bool
+            If your fit is multi-component, will attempt to acquire centroids
+            for each component and print out individual EQWs
+
+        Returns
+        -------
+        Equivalent Width, or widths if components=True
 
         """
         if np.median(self.Spectrum.baseline.basespec) == 0:
@@ -309,10 +323,21 @@ class Specfit(interactive.Interactive):
         elif np.median(self.Spectrum.baseline.basespec) < 0:
             if mycfg.WARN: warn( "WARNING: Baseline / continuum is negative: equivalent width is poorly defined." )
         dx = np.abs( self.Spectrum.xarr[self.xmin:self.xmax].cdelt(approx=True) )
-        if fitted:
+        if components:
+            centroids = self.fitter.analytic_centroids()
+            integrals = self.fitter.component_integrals(self.Spectrum.xarr[self.xmin:self.xmax],dx=dx)
+            eqw = []
+            for cen,integ in zip(centroids,integrals):
+                center_pix = self.Spectrum.xarr.x_to_pix(cen)
+                continuum = self.Spectrum.baseline.basespec[center_pix]
+                eqw.append( -integ / continuum)
+            if plot:
+                plot = False
+                if mycfg.WARN: warn( "Cannot plot multiple Equivalent Widths" )
+        elif fitted:
             if continuum is None:
                 # centroid in data units
-                center = self.fitter.centroid(self.Spectrum.xarr[self.xmin:self.xmax])
+                center = (self.model*self.Spectrum.xarr[self.xmin:self.xmax])/self.model.sum()
                 center_pix = self.Spectrum.xarr.x_to_pix(center)
                 continuum = self.Spectrum.baseline.basespec[center_pix]
             # EQW is positive for absorption lines
@@ -347,7 +372,7 @@ class Specfit(interactive.Interactive):
                 self.Spectrum.plotter.refresh()
         if hasattr(self.Spectrum,'header'):
             history.write_history(self.Spectrum.header,
-                    "EQW for %s: %f" % (self.fittype,eqw))
+                    "EQW for %s: %s" % (self.fittype,eqw))
         return eqw
 
     def register_fitter(self,*args,**kwargs):

@@ -84,15 +84,15 @@ class ParinfoList(list):
         (but strip #'s first)
         """
         name_counter = {}
-        names_stripped = [name.strip('[0-9]') for name in self.names]
+        names_stripped = [name.strip('0123456789') for name in self.names]
         for ii,name in enumerate(names_stripped):
             if names_stripped.count(name) > 1:
                 if name in name_counter:
                     name_counter[name] += 1
-                    self[ii]['parname'] = self[ii]['parname'].strip('[0-9]')+ "{0}".format(name_counter[name])
+                    self[ii]['parname'] = self[ii]['parname'].strip('0123456789')+ "{0}".format(name_counter[name])
                 else:
                     name_counter[name] = 0
-                    self[ii]['parname'] = self[ii]['parname'].strip('[0-9]')+ "{0}".format(name_counter[name])
+                    self[ii]['parname'] = self[ii]['parname'].strip('0123456789')+ "{0}".format(name_counter[name])
 
                     # remove un-numbered versions if numbered versions are now being used
                     if name in self.__dict__:
@@ -138,8 +138,26 @@ class ParinfoList(list):
             for par in lmpars.values():
                 self.append(Parinfo(par))
 
+    def tableprint(self, item_length=15):
+        """
+        Print data in table-friendly format
 
+        Parameters
+        ----------
+        item_length : int
+            Number of characters per item printed
+        """
+        stripped_names = list(set([par.parname.strip("0123456789") for par in self]))
 
+        nlines = len(self.n) / len(stripped_names)
+
+        strformat = "%" + str(item_length) + "s"
+        fltformat = "%" + str(item_length) + "g"
+
+        print " ".join([strformat % name for name in stripped_names])
+        for ii in xrange(nlines):
+            print " ".join([fltformat % (self[name+"%i" % ii].value)
+                for name in stripped_names])
 
 class Parinfo(dict):
     """

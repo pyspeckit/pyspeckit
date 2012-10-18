@@ -342,6 +342,7 @@ class Spectrum(Spectrum1D):
 
     def slice(self, start=None, stop=None, units='pixel', copy=True, preserve_fits=False):
         """Slicing the spectrum
+        *WARNING: this is the same as cropping right now, but it returns a copy*
         
         Parameters:
         -----------

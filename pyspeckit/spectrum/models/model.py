@@ -103,6 +103,10 @@ class SpectralModel(fitter.SimpleFitter):
 
         # default name of parameter that represents the profile centroid
         self.centroid_par = centroid_par
+
+        # FWHM function and parameters
+        self.fwhm_func = fwhm_func
+        self.fwhm_pars = fwhm_pars 
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
@@ -586,7 +590,19 @@ class SpectralModel(fitter.SimpleFitter):
         else:
             return self.model.sum()
 
-    def analytic_fwhm(self):
+    def component_integrals(self, xarr, dx=None):
+        """
+        Compute the integrals of each component
+        """
+        components = self.components(xarr, self.parinfo.values)
+
+        if dx is None:
+            dx = 1
+
+        integrals = [com.sum()*dx for com in components]
+        return integrals
+
+    def analytic_fwhm(self, parinfo=None):
         """
         Return the FWHMa of the model components *if* a fwhm_func has been
         defined
@@ -595,13 +611,19 @@ class SpectralModel(fitter.SimpleFitter):
         loops... readability sacrificed for speed and simplicity.  This is
         unpythonic.
         """
+        if self.fwhm_func is None and self.fwhm_pars is None:
+            raise TypeError("fwhm_func not implemented for model %s" % self.__name__)
+
+        if parinfo is None:
+            parinfo = self.parinfo
+
         fwhm = [self.fwhm_func(
-                *[self.parinfo[p+'%i' % n] for p in self.fwhm_pars]
+                *[self.parinfo[str.upper(p+'%i' % n)] for p in self.fwhm_pars]
                 )
                 for n in xrange(self.npeaks)]
         return fwhm
 
-    def analytic_centroid(self, centroidpar=None):
+    def analytic_centroids(self, centroidpar=None):
         """
         Return the *analytic* centroids of the model components
 
@@ -619,7 +641,9 @@ class SpectralModel(fitter.SimpleFitter):
         if centroidpar is None:
             centroidpar = self.centroid_par
 
-        centr = [par.value for par in self.parinfo if centroidpar in par.name]
+        centr = [par.value 
+                for par in self.parinfo 
+                if str.upper(centroidpar) in par.parname]
 
         return centr
 
