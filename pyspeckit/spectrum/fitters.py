@@ -284,13 +284,6 @@ class Specfit(interactive.Interactive):
             return
         if save: self.savefit()
 
-        if hasattr(self.Spectrum,'header'):
-            history.write_history(self.Spectrum.header,
-                    "SPECFIT: Fitted profile of type %s" % (self.fittype))
-            for par in self.parinfo:
-                history.write_history(self.Spectrum.header,
-                        str(par))
-
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
             components=False, annotate=False, alpha=0.5, loc='lower left'):
         """
@@ -535,6 +528,16 @@ class Specfit(interactive.Interactive):
 
         # make sure the full model is populated
         self._full_model()
+
+        self.history_fitpars()
+
+    def history_fitpars(self):
+        if hasattr(self.Spectrum,'header'):
+            history.write_history(self.Spectrum.header,
+                    "SPECFIT: Fitted profile of type %s" % (self.fittype))
+            for par in self.parinfo:
+                history.write_history(self.Spectrum.header,
+                        str(par))
                 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
             negamp=None, fittype=None, renormalize='auto', color=None, use_lmfit=False,
@@ -643,6 +646,7 @@ class Specfit(interactive.Interactive):
         self._full_model(debug=debug)
 
         if debug: print "Guesses, fits after vheight removal: ",self.guesses, mpp
+        self.history_fitpars()
 
     def _full_model(self, debug=False, **kwargs):
         """
