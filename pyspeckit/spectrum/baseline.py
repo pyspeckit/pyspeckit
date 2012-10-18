@@ -149,11 +149,6 @@ class Baseline(interactive.Interactive):
                     **kwargs)
             if highlight: self.highlight_fitregion()
         if save: self.savefit()
-        if hasattr(self.Spectrum,'header'):
-            history.write_history(self.Spectrum.header,
-                    "BASELINE order=%i pars=%s" % (self.order, 
-                        ",".join(self.baselinepars)) +
-                        "(powerlaw)" if self.powerlaw else "")
 
     def button2action(self, event=None, debug=False, subtract=True, powerlaw=None,
             fit_original=False, baseline_fit_color='orange', **kwargs):
@@ -208,10 +203,16 @@ class Baseline(interactive.Interactive):
         # original interactive cmds)
         self.clear_all_connections()
 
+        if hasattr(self.Spectrum,'header'):
+            history.write_history(self.Spectrum.header,
+                    "BASELINE order=%i pars=%s" % (self.order, 
+                        ",".join(self.baselinepars)) +
+                        "(powerlaw)" if self.powerlaw else "")
+
     def get_model(self, xarr=None, baselinepars=None, powerlaw=False, fit_units='pixels'):
         # create the full baseline spectrum...
         if xarr is None:
-            xarr = self.Spectrum.xarr.as_unit(xarr_fit_units)
+            xarr = self.Spectrum.xarr.as_unit(fit_units)
         if baselinepars is None:
             baselinepars = self.baselinepars
         if baselinepars is None: # still...
@@ -230,7 +231,7 @@ class Baseline(interactive.Interactive):
         Wrapper - same as button2action, but with subtract=False
         """
         if 'subtract' in kwargs:
-            kwargs.pop(subtract)
+            kwargs.pop('subtract')
 
         return self.button2action(*args, subtract=False, **kwargs)
 
