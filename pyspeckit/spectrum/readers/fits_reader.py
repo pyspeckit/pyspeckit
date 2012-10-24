@@ -166,22 +166,19 @@ will run into errors.""")
             xconv = lambda v: ((v-p3+1)*dv+v0)
             xarr = xconv(np.arange(len(spec)))
     
+    # need to do something with this...
     restfreq = hdr.get('RESTFREQ')
-    if restfreq is None: restfrq= hdr.get('RESTFRQ')
+    if restfreq is None: restfreq= hdr.get('RESTFRQ')
 
     XAxis = make_axis(xarr,hdr,wcstype=wcstype,specaxis=specaxis,**kwargs)
 
     return spec,errspec,XAxis,hdr
 
-def read_echelle(pyfits_hdu):
-    """
-    Read an IRAF Echelle spectrum
-    
-    http://iraf.noao.edu/iraf/ftp/iraf/docs/specwcs.ps.Z
-    """
 
-    hdr = pyfits_hdu.header
-
+def _get_WATS(hdr):
+    """
+    Get the WATS from an IRAF Echelle header
+    """
     WAT1_dict = dict( [s.split('=') for s in hdr.get("WAT1_001").split()] )
     # hdr.get does not preserve whitespace, but whitespace is ESSENTIAL here!
     WAT_string = ""
@@ -200,9 +197,23 @@ def read_echelle(pyfits_hdu):
     if '' in WAT_list:
         WAT_list.remove('')
 
+    specaxdict = dict( [ (int(s.split("=")[0]),s.split("=")[1]) for s in WAT_list ] )
+
+    return WAT1_dict,specaxdict
+
+def read_echelle(pyfits_hdu):
+    """
+    Read an IRAF Echelle spectrum
+    
+    http://iraf.noao.edu/iraf/ftp/iraf/docs/specwcs.ps.Z
+    """
+
+    hdr = pyfits_hdu.header
+
+    WAT1_dict, specaxdict = _get_WATS(hdr)
+
     x_axes = []
 
-    specaxdict = dict( [ (int(s.split("=")[0]),s.split("=")[1]) for s in WAT_list ] )
     for specnum, axstring in specaxdict.iteritems():
         axsplit = axstring.replace('"','').split()
         if specnum != int(axsplit[0]):
@@ -210,6 +221,7 @@ def read_echelle(pyfits_hdu):
         num,beam,dtype,crval,cdelt,naxis,z,aplow,aphigh = axsplit[:9]
         
         # this is a hack for cropped spectra...
+        #print "header naxis: %i, WAT naxis: %i" % (hdr['NAXIS1'], int(naxis))
         if hdr['NAXIS1'] != int(naxis):
             naxis = hdr['NAXIS1']
             crpix = hdr.get('CRPIX1')
@@ -219,9 +231,10 @@ def read_echelle(pyfits_hdu):
 
         if len(axsplit) > 9:
             functions = axsplit[9:]
+            warn("Found but did not use functions %s" % str(functions))
 
         if int(dtype) == 0:
-            xax = ( float(crval) + float(cdelt) * (np.arange(int(naxis)) + 1 + crpix) ) / (1.+float(z))
+            xax = ( float(crval) + float(cdelt) * (np.arange(int(naxis)) + 1 - crpix) ) / (1.+float(z))
 
         headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt,
                 'NAXIS1':naxis, 'NAXIS':1, 'REDSHIFT':z,

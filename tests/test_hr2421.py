@@ -62,6 +62,7 @@ except ImportError:
 
 
 sp.specfit(interactive=True)
+print "INTERACTIVE #1: fittype=",sp.specfit.fittype," npars: ",sp.specfit.fitter.npars
 if interactive:
     raw_input('Press enter to print guesses and best fit and end code')
 else:
@@ -79,6 +80,32 @@ else:
     sp.specfit.event_manager(event5)
 
 sp.plotter.figure.savefig(savedir+'hr2421_interactive_fit.png')
+print "Guesses: ", sp.specfit.guesses
+print "Best fit: ", sp.specfit.modelpars
+
+print "EQW: ",sp.specfit.EQW()
+
+sp.plotter(xmin=4700,xmax=5000)
+eventF = matplotlib.backend_bases.KeyEvent('key_press_event', sp.plotter.axis.figure.canvas,key='f',x=257,y=316)
+eventV = matplotlib.backend_bases.KeyEvent('key_press_event', sp.plotter.axis.figure.canvas,key='v',x=257,y=316)
+sp.specfit.event_manager(eventF)
+sp.specfit.event_manager(eventV)
+print "INTERACTIVE #2: fittype=",sp.specfit.fittype," npars: ",sp.specfit.fitter.npars
+
+event1 = matplotlib.backend_bases.MouseEvent('button_press_event', sp.plotter.axis.figure.canvas,257,316,button=1)
+event2 = matplotlib.backend_bases.MouseEvent('button_press_event', sp.plotter.axis.figure.canvas,732,280,button=1)
+event3 = matplotlib.backend_bases.MouseEvent('button_press_event', sp.plotter.axis.figure.canvas,523,194,button=2)
+event4 = matplotlib.backend_bases.MouseEvent('button_press_event', sp.plotter.axis.figure.canvas,485,264,button=2)
+event5 = matplotlib.backend_bases.MouseEvent('button_press_event', sp.plotter.axis.figure.canvas,483,262,button=2)
+event6 = matplotlib.backend_bases.MouseEvent('button_press_event', sp.plotter.axis.figure.canvas,611,247,button=3)
+sp.specfit.event_manager(event1,debug=True)
+sp.specfit.event_manager(event2,debug=True)
+sp.specfit.event_manager(event3,debug=True)
+sp.specfit.event_manager(event4,debug=True)
+sp.specfit.event_manager(event5,debug=True)
+sp.plotter.figure.savefig(savedir+'hr2421_interactive_guesses_oneextra.png')
+sp.specfit.event_manager(event6,debug=True)
+
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 

@@ -56,6 +56,11 @@ class Interactive(object):
         toolbar = self.Spectrum.plotter.figure.canvas.manager.toolbar
         self.event_history.append(event)
 
+        if hasattr(self,'fitter') and self.fitter.npars > 3:
+            nwidths = self.fitter.npars-2
+        else:
+            nwidths = 1
+
         if toolbar.mode == '' and self.Spectrum.plotter.axis in event.canvas.figure.axes:
             if hasattr(event,'button'):
                 button = event.button
@@ -66,7 +71,7 @@ class Interactive(object):
                 return
 
             if debug:
-                print "button: ",button," x,y: ",event.xdata,event.ydata
+                print "button: ",button," x,y: ",event.xdata,event.ydata," nclicks 1: %i  2: %i" % (self.nclicks_b1,self.nclicks_b2)
 
             if button in ('p','P','1',1,'i','a'): # p for... parea?  a for area.  i for include
                 # button one is always region selection
@@ -76,10 +81,10 @@ class Interactive(object):
                 self.selectregion_interactive(event, mark_include=False, debug=debug)
             elif button in ('m','M','2',2): # m for mark
                 if debug: print "Button 2 action"
-                self.button2action(event,debug=debug)
+                self.button2action(event,debug=debug,nwidths=nwidths)
             elif button in ('d','D','3',3): # d for done
                 if debug: print "Button 3 action"
-                self.button3action(event,debug=debug)
+                self.button3action(event,debug=debug,nwidths=nwidths)
             elif button in ('?'):
                 print self.interactive_help_message
             elif hasattr(self,'Registry') and button in self.Registry.fitkeys:
@@ -178,36 +183,45 @@ class Interactive(object):
             # default to including nothing
             self.includemask = numpy.array(self.Spectrum.data, dtype='bool') * False
 
-    def guesspeakwidth(self,event,debug=False):
+    def guesspeakwidth(self,event,debug=False,nwidths=1,**kwargs):
         """
         Interactively guess the peak height and width from user input
 
         Width is assumed to be half-width-half-max
         """
+        modnum = 1+nwidths
+        if debug: print "nclicks: %i nwidths: %i modnum: %i" % (self.nclicks_b2,nwidths,modnum)
         if self.nclicks_b2 == 0:
             self.firstclick_guess()
-        if self.nclicks_b2 % 2 == 0:
+        if self.nclicks_b2 % modnum == 0:
+            # even clicks are peaks
             if self.Spectrum.baseline.subtracted:
                 peakguess = event.ydata
             else:
                 peakguess = event.ydata - self.Spectrum.baseline.basespec[self.Spectrum.xarr.x_to_pix(event.xdata)]
-            self.guesses += [peakguess,event.xdata,1]
+            self.guesses += [peakguess,event.xdata] + [1]*nwidths
             self.npeaks += 1
             self.nclicks_b2 += 1
             if debug: print "Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)
             self.button2plot += [self.Spectrum.plotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
             #self.Spectrum.plotter.refresh() #plot(**self.Spectrum.plotter.plotkwargs)
-        elif self.nclicks_b2 % 2 == 1:
-            self.guesses[-1] = abs(event.xdata-self.guesses[-2]) / numpy.sqrt(2*numpy.log(2))
-            self.nclicks_b2 += 1
-            if debug: print "Width %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)
+        elif self.nclicks_b2 % modnum >= 1:
+            # odd clicks are widths
+            whichwidth = self.nclicks_b2 % modnum
+            self.guesses[-whichwidth] = (abs(event.xdata-self.guesses[-1-nwidths]) /
+                    numpy.sqrt(2*numpy.log(2)))
+            if debug: print "Width %i whichwidth %i click %i at x,y %g,%g width: %g" % (self.npeaks,whichwidth,self.nclicks_b2,event.xdata,event.ydata,self.guesses[-whichwidth])
             self.button2plot += self.Spectrum.plotter.axis.plot([event.xdata,
-                2*self.guesses[-2]-event.xdata],[event.ydata]*2,
+                2*self.guesses[-1-nwidths]-event.xdata],[event.ydata]*2,
                 color='r')
             #self.Spectrum.plotter.refresh() #plot(**self.Spectrum.plotter.plotkwargs)
-            if self.nclicks_b2 / 2 > self.npeaks:
-                print "There have been %i middle-clicks but there are only %i gaussians" % (self.nclicks_b2,self.npeaks)
+            if self.nclicks_b2 / (1+nwidths) > self.npeaks:
+                print "There have been %i middle-clicks but there are only %i features" % (self.nclicks_b2,self.npeaks)
                 self.npeaks += 1
+            self.nclicks_b2 += 1
+        else:
+            raise ValueError("Bug in guesspeakwidth: somehow, the number of clicks doesn't make sense.")
+        if debug: print "Guesses: ",self.guesses
 
     def firstclick_guess(self):
         """
@@ -217,7 +231,7 @@ class Interactive(object):
         if self.guesses is None:
             self.guesses = []
         elif len(self.guesses) > 0:
-            for ii in xrange(len(guesses)): 
+            for ii in xrange(len(self.guesses)): 
                 self.guesses.pop()
 
     def clear_all_connections(self, debug=False):
@@ -240,8 +254,13 @@ class Interactive(object):
 
         self.Spectrum.plotter._reconnect_matplotlib_keys()
 
+        # Click counters - should always be reset!
+        self.nclicks_b1 = 0 # button 1
+        self.nclicks_b2 = 0 # button 2
 
-    def start_interactive(self, debug=False, LoudDebug=False, print_message=True, clear_all_connections=True, **kwargs):
+
+    def start_interactive(self, debug=False, LoudDebug=False,
+            print_message=True, clear_all_connections=True, **kwargs):
         """
 
         """
@@ -253,10 +272,12 @@ class Interactive(object):
         click_manager = lambda(x): self.event_manager(x, debug=debug, **kwargs)
         key_manager.__name__ = "event_manager"
         click_manager.__name__ = "event_manager"
+
         self.click    = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',click_manager)
         self.keyclick = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('key_press_event',key_manager)
         self._callbacks = self.Spectrum.plotter.figure.canvas.callbacks.callbacks
         self._check_connections()
+
 
     def _check_connections(self):
         """

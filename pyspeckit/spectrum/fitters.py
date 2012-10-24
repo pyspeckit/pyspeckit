@@ -151,7 +151,7 @@ class Specfit(interactive.Interactive):
     @cfgdec
     def __call__(self, interactive=False, multifit=False, usemoments=True,
             clear_all_connections=True, debug=False, 
-            guesses=None, save=True, fittype='gaussian', annotate=None,
+            guesses=None, save=True, annotate=None,
             show_components=None, use_lmfit=False, verbose=True, clear=True,
             fit_plotted_area=True, use_window_limits=None,
             vheight=None, **kwargs):
@@ -168,6 +168,7 @@ class Specfit(interactive.Interactive):
             If false, only a single peak is allower, but a "height" (0'th-order
             baseline) will be fit simultaneously with that peak.
         fittype : str
+            [passed to fitting codes; defaults to gaussian]
             The model to use.  Model must be registered in self.Registry.  
             gaussian, lorentzian, and voigt profiles are registered by default
         guesses : list
@@ -235,8 +236,6 @@ class Specfit(interactive.Interactive):
         for arg in ['xmin','xmax','xtype','reset']: 
             if arg in kwargs: kwargs.pop(arg)
 
-        if self.fittype != fittype: self.fittype = fittype
-
         # multifit = True if the right number of guesses are passed
         if guesses is not None:
             if len(guesses) > 5:
@@ -252,7 +251,8 @@ class Specfit(interactive.Interactive):
             self.nclicks_b2 = 0
             self.guesses = []
 
-            self.start_interactive(clear_all_connections=clear_all_connections, debug=debug, **kwargs)
+            self.start_interactive(clear_all_connections=clear_all_connections,
+                    debug=debug, **kwargs)
         elif (((multifit or multifit is None) and self.fittype in
             self.Registry.multifitters) or guesses is not None):
             if guesses is None:
@@ -328,14 +328,15 @@ class Specfit(interactive.Interactive):
                 plot = False
                 if mycfg.WARN: warn( "Cannot plot multiple Equivalent Widths" )
         elif fitted:
+            model = self.get_model(self.Spectrum.xarr[self.xmin:self.xmax])
             if continuum is None:
                 # centroid in data units
-                center = (self.model*self.Spectrum.xarr[self.xmin:self.xmax]).sum()/self.model.sum()
+                center = (model*self.Spectrum.xarr[self.xmin:self.xmax]).sum()/model.sum()
                 center_pix = self.Spectrum.xarr.x_to_pix(center)
                 continuum = self.Spectrum.baseline.basespec[center_pix]
             # EQW is positive for absorption lines
             # fitted components are assume to be continuum-subtracted
-            integral = (-self.model).sum() * dx
+            integral = (-model).sum() * dx
             eqw = integral / continuum
         else:
             diffspec = (self.Spectrum.baseline.basespec - self.Spectrum.data)
@@ -812,7 +813,7 @@ class Specfit(interactive.Interactive):
         """
         Add a legend to the plot showing the fitted parameters
 
-        clearlegend() will remove the legend
+        _clearlegend() will remove the legend
 
         chi2 : {True or 'reduced' or 'optimal'}
         
@@ -883,6 +884,8 @@ class Specfit(interactive.Interactive):
         """
         Remove the legend from the plot window
         """
+        if self.Spectrum.plotter.axis.legend_ == self.fitleg:
+            self.Spectrum.plotter.axis.legend_ = None
         if self.fitleg is not None: 
             # don't remove fitleg unless it's in the current axis self.fitleg.set_visible(False)
             if self.fitleg in self.Spectrum.plotter.axis.artists:
@@ -1012,7 +1015,7 @@ class Specfit(interactive.Interactive):
                 self.Spectrum.xarr[self.xmin:self.xmax],
                 self.spectofit[self.xmin:self.xmax],  **kwargs)
 
-    def button3action(self, event, debug=False):
+    def button3action(self, event, debug=False, nwidths=1):
         """
         Disconnect the interactiveness
         Perform the fit (or die trying)
@@ -1020,9 +1023,10 @@ class Specfit(interactive.Interactive):
         """
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.click)
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.keyclick)
+        npars = 2+nwidths
         if self.npeaks > 0:
-            print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.xmin,self.xmax
-            if len(self.guesses) % 3 == 0:
+            print len(self.guesses)/npars," Guesses: ",self.guesses," X channel range: ",self.xmin,self.xmax
+            if len(self.guesses) % npars == 0:
                 self.multifit(use_window_limits=True)
                 for p in self.button2plot + self.button1plot:
                     p.set_visible(False)
@@ -1208,3 +1212,17 @@ class Specfit(interactive.Interactive):
             emc.nwalkers = nwalkers
             emc.p0 = np.array([self.parinfo.values] * emc.nwalkers)
             return emc
+
+    def get_components(self, **kwargs):
+        """
+        If a model has been fitted, return the components of the model
+
+        Parameters
+        ----------
+        kwargs are passed to self.fitter.components
+        """
+        if self.modelpars is not None:
+            self.modelcomponents = self.fitter.components(self.Spectrum.xarr,
+                    self.modelpars, **kwargs)
+
+            return self.modelcomponents

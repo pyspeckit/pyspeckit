@@ -134,7 +134,8 @@ class Plotter(object):
             else:
                 self.figure = matplotlib.pyplot.figure()
 
-        self._mpl_connect()
+        # always re-connect the interactive keys to avoid frustration...
+        self._mpl_reconnect()
 
         if axis is not None:
             self._mpl_disconnect()

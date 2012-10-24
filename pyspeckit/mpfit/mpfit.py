@@ -1383,7 +1383,7 @@ class mpfit:
                 # Compute errors in parameters
                 catch_msg = 'computing parameter errors'
                 self.perror = numpy.zeros(nn, dtype=float)
-                d = numpy.diagonal(self.covar)
+                d = numpy.diagonal(self.covar).copy()
                 wh = (numpy.nonzero(d >= 0))[0]
                 if len(wh) > 0:
                     self.perror[wh] = numpy.sqrt(d[wh])
@@ -1906,7 +1906,7 @@ class mpfit:
         if self.debug:
             print 'Entering qrsolv...'
         sz = r.shape
-        m = sz[0]
+        # not used m = sz[0]
         n = sz[1]
 
         # copy r and (q transpose)*b to preserve input and initialize s.
@@ -1914,7 +1914,7 @@ class mpfit:
 
         for j in range(n):
             r[j:n,j] = r[j,j:n]
-        x = numpy.diagonal(r)
+        x = numpy.diagonal(r).copy()
         wa = qtb.copy()
 
         # Eliminate the diagonal matrix d using a givens rotation
