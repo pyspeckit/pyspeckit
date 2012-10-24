@@ -83,7 +83,8 @@ sp.plotter.figure.savefig(savedir+'hr2421_interactive_fit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
-print "EQW: ",sp.specfit.EQW()
+print "EQW: ",sp.specfit.EQW(fitted=False)
+print "EQW (fitted): ",sp.specfit.EQW(fitted=True)
 
 sp.plotter(xmin=4700,xmax=5000)
 eventF = matplotlib.backend_bases.KeyEvent('key_press_event', sp.plotter.axis.figure.canvas,key='f',x=257,y=316)
@@ -109,7 +110,8 @@ sp.specfit.event_manager(event6,debug=True)
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
-print "EQW: ",sp.specfit.EQW()
+print "EQW: ",sp.specfit.EQW(fitted=False)
+print "EQW (fitted): ",sp.specfit.EQW(fitted=True)
 
 
 #from matplotlib import pyplot

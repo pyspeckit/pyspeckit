@@ -328,7 +328,8 @@ class Specfit(interactive.Interactive):
                 plot = False
                 if mycfg.WARN: warn( "Cannot plot multiple Equivalent Widths" )
         elif fitted:
-            model = self.get_model(self.Spectrum.xarr[self.xmin:self.xmax])
+            model = self.get_model(self.Spectrum.xarr[self.xmin:self.xmax], 
+                    add_baseline=False)
             if continuum is None:
                 # centroid in data units
                 center = (model*self.Spectrum.xarr[self.xmin:self.xmax]).sum()/model.sum()
@@ -660,9 +661,10 @@ class Specfit(interactive.Interactive):
         """ compute the model over the full axis """ 
         return self.get_model(self.Spectrum.xarr, debug=debug)
 
-    def get_model(self, xarr, debug=False):
+    def get_model(self, xarr, debug=False, add_baseline=None):
         """ Compute the model over a given axis """
-        if self.Spectrum.baseline.subtracted or self.vheight:
+        if ((add_baseline is None and (self.Spectrum.baseline.subtracted or self.vheight)) 
+                or add_baseline is False):
             return self.fitter.n_modelfunc(self.parinfo,**self.fitter.modelfunc_kwargs)(xarr)
         else:
             return self.fitter.n_modelfunc(self.parinfo,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
