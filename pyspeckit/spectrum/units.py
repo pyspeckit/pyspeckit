@@ -650,6 +650,15 @@ class SpectroscopicAxis(np.ndarray):
         if center_frequency_units is None:
             center_frequency_units = self.refX_units
 
+        # make sure "center frequency" is actually a frequency (required by later code!)
+        if center_frequency_units not in frequency_dict:
+            if center_frequency_units in wavelength_dict:
+                center_frequency = wavelength_to_frequency(center_frequency, 
+                        center_frequency_units, frequency_units='GHz')
+                center_frequency_units='GHz'
+            else:
+                raise ValueError("ERROR: %s is not a valid reference unit." % center_frequency_units)
+
         if change_xtype:
             if unit in velocity_dict:
                 if debug: print "Converting to velocity"
