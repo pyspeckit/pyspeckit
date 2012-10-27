@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Model Fitting &mdash; pyspeckit 0.1.8 documentation</title>
+    <title>Model Fitting &mdash; pyspeckit 0.1.9 documentation</title>
     
     <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1.8',
+        VERSION:     '0.1.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit 0.1.8 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1.9 documentation" href="index.html" />
     <link rel="up" title="Features" href="features.html" />
     <link rel="next" title="Measurements" href="measurements.html" />
     <link rel="prev" title="Baseline Fitting" href="baseline.html" />
@@ -48,7 +48,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit 0.1.8 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1.9 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -76,9 +76,41 @@
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.EQW">
-<tt class="descname">EQW</tt><big>(</big><em>plot=False</em>, <em>plotcolor='g'</em>, <em>annotate=False</em>, <em>alpha=0.5</em>, <em>loc='lower left'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.EQW" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">EQW</tt><big>(</big><em>plot=False</em>, <em>plotcolor='g'</em>, <em>fitted=True</em>, <em>continuum=None</em>, <em>components=False</em>, <em>annotate=False</em>, <em>alpha=0.5</em>, <em>loc='lower left'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.EQW" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the equivalent width (integral of &#8220;baseline&#8221; or &#8220;continuum&#8221;
-minus the spectrum) over the selected range</p>
+minus the spectrum) over the selected range
+(the selected range is self.xmin:self.xmax, so it may include multiple lines!)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>plot</strong> : bool</p>
+<blockquote>
+<div><p>Plots a box indicating the EQW if plot==True (i.e., it will have a
+width equal to the equivalent width, and a height equal to the
+measured continuum)</p>
+</div></blockquote>
+<p><strong>fitted</strong> : bool</p>
+<blockquote>
+<div><p>Use the fitted model?  If false, uses the data</p>
+</div></blockquote>
+<p><strong>continuum</strong> : None or float</p>
+<blockquote>
+<div><p>Can specify a fixed continuum with this keyword, otherwise will use
+the fitted baseline</p>
+</div></blockquote>
+<p><strong>components</strong> : bool</p>
+<blockquote>
+<div><p>If your fit is multi-component, will attempt to acquire centroids
+for each component and print out individual EQWs</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last"><strong>Equivalent Width, or widths if components=True</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -99,14 +131,14 @@ yet.</dd>
 <dt id="pyspeckit.spectrum.fitters.Specfit.annotate">
 <tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.1</em>, <em>handlelength=0.1</em>, <em>handletextpad=0.1</em>, <em>frameon=False</em>, <em>chi2=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a legend to the plot showing the fitted parameters</p>
-<p>clearlegend() will remove the legend</p>
+<p>_clearlegend() will remove the legend</p>
 <p>chi2 : {True or &#8216;reduced&#8217; or &#8216;optimal&#8217;}</p>
 <p>kwargs passed to legend</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.button3action">
-<tt class="descname">button3action</tt><big>(</big><em>event</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.button3action" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">button3action</tt><big>(</big><em>event</em>, <em>debug=False</em>, <em>nwidths=1</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.button3action" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disconnect the interactiveness
 Perform the fit (or die trying)
 Hide the guesses</p>
@@ -176,6 +208,20 @@ expand it (with zeros) to fill the spectrum.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.get_components">
+<tt class="descname">get_components</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>If a model has been fitted, return the components of the model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><strong>kwargs are passed to self.fitter.components</strong> :</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_emcee">
 <tt class="descname">get_emcee</tt><big>(</big><em>nwalkers=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_emcee" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an emcee walker ensemble for the data &amp; model using the current model type</p>
@@ -215,7 +261,7 @@ expand it (with zeros) to fill the spectrum.</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_model">
-<tt class="descname">get_model</tt><big>(</big><em>xarr</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_model</tt><big>(</big><em>xarr</em>, <em>debug=False</em>, <em>add_baseline=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the model over a given axis</p>
 </dd></dl>
 
@@ -265,7 +311,7 @@ the Normal distribution with sigma = par.error and mean = par.value</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.guesspeakwidth">
-<tt class="descname">guesspeakwidth</tt><big>(</big><em>event</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.guesspeakwidth" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">guesspeakwidth</tt><big>(</big><em>event</em>, <em>debug=False</em>, <em>nwidths=1</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.guesspeakwidth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interactively guess the peak height and width from user input</p>
 <p>Width is assumed to be half-width-half-max</p>
 </dd></dl>
@@ -276,6 +322,11 @@ the Normal distribution with sigma = par.error and mean = par.value</p>
 <dd><p>Re-highlight the fitted region</p>
 <p>kwargs are passed to <cite>matplotlib.plot</cite></p>
 </dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.history_fitpars">
+<tt class="descname">history_fitpars</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.history_fitpars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.integral">
@@ -356,8 +407,47 @@ negamp - If True, assumes amplitude is negative.  If False, assumes positive.  I
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.plot_components">
+<tt class="descname">plot_components</tt><big>(</big><em>show_hyperfine_components=None</em>, <em>component_yoffset=0.0</em>, <em>component_lw=0.75</em>, <em>component_fit_color='blue'</em>, <em>component_kwargs={}</em>, <em>add_baseline=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overplot the individual components of a fit</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>show_hyperfine_components</strong> : None | bool</p>
+<blockquote class="last">
+<div><blockquote>
+<div><p>Keyword argument to pass to component codes; determines whether to return
+individual (e.g., hyperfine) components of a composite model</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>component_yoffset <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Vertical (y-direction) offset to add to the components when plotting</p>
+</dd>
+<dt>component_lw <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Line width of component lines</p>
+</dd>
+<dt>component_fitcolor <span class="classifier-delimiter">:</span> <span class="classifier">color</span></dt>
+<dd><p class="first last">Color of component lines</p>
+</dd>
+<dt>component_kwargs <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd><p class="first last">Keyword arguments to pass to the fitter.components method</p>
+</dd>
+<dt>add_baseline <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd><p class="first last">Add the fit to the components before plotting.  Makes sense to use
+if self.Spectrum.baseline.subtracted == False</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.plot_fit">
-<tt class="descname">plot_fit</tt><big>(</big><em>annotate=None</em>, <em>show_components=None</em>, <em>composite_fit_color='red'</em>, <em>component_fit_color='blue'</em>, <em>lw=0.5</em>, <em>composite_lw=0.75</em>, <em>component_lw=0.75</em>, <em>component_kwargs={}</em>, <em>use_window_limits=None</em>, <em>show_hyperfine_components=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_fit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_fit</tt><big>(</big><em>annotate=None</em>, <em>show_components=None</em>, <em>composite_fit_color='red'</em>, <em>lw=0.5</em>, <em>composite_lw=0.75</em>, <em>use_window_limits=None</em>, <em>show_hyperfine_components=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the fit.  Must have fitted something before calling this!</p>
 <p>It will be automatically called whenever a spectrum is fit (assuming an
 axis for plotting exists)</p>
@@ -366,7 +456,7 @@ axis for plotting exists)</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.plotresiduals">
-<tt class="descname">plotresiduals</tt><big>(</big><em>fig=2</em>, <em>axis=None</em>, <em>clear=True</em>, <em>color='k'</em>, <em>linewidth=0.5</em>, <em>drawstyle='steps-mid'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plotresiduals" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plotresiduals</tt><big>(</big><em>fig=2</em>, <em>axis=None</em>, <em>clear=True</em>, <em>color='k'</em>, <em>linewidth=0.5</em>, <em>drawstyle='steps-mid'</em>, <em>yoffset=0.0</em>, <em>label=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plotresiduals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot residuals of the fit.  Specify a figure or
 axis; defaults to figure(2).</p>
 <p>kwargs are passed to matplotlib plot</p>
@@ -549,7 +639,7 @@ It should be extended to do other things later</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Aug 04, 2012.
+      Last updated on Oct 27, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

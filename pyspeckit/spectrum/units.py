@@ -965,12 +965,27 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
         center_frequency_units=None, frequency_units='Hz',
         convention='radio'):
     """
-    Conventions defined here:
-    http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
-    * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
-    * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )^-1
-    * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
-    * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
+
+    Parameters
+    ----------
+    velocities : np.ndarray
+        An array of velocity values
+    inpput_units : str
+        A string representing the units of the velocities array
+    center_frequency : float
+        The reference frequency (i.e., the 0-m/s freq)
+    center_frequency_units : str
+        A string representing the units of the reference frequency
+    frequency_units : str
+        A string representing the desired output units
+    convention : ['radio','optical','relativistic':
+        Conventions defined here:
+        http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
+        * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
+        * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )^-1
+        * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
+        * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
+
     """
     if input_units in frequency_dict:
         print "Already in frequency units (%s)" % input_units
