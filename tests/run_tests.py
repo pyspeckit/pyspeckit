@@ -12,9 +12,12 @@ if interactive:
 else:
     ioff()
 
-import pytest
+#import pytest
 import pyspeckit.spectrum.tests.test_units
-pytest.main()
+for p in pyspeckit.spectrum.tests.test_units.params:
+    pyspeckit.spectrum.tests.test_units.test_convert_units(*p)
+    pyspeckit.spectrum.tests.test_units.test_convert_back(*p)
+#pytest.main()
 
 
 print "*****test_fits.py*****"
