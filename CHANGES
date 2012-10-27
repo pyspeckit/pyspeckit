@@ -1,7 +1,13 @@
 CHANGES
 *******
 
-Release 0.1.9 [incremental]
+Release 0.1.10
+~~~~~~~~~~~~~~
+    * bugfix: unit conversion with reference wavelength
+    * bugfix: interactive buttons "reconnected" each time 
+    * new feature: voigt profile interactive guess now has 2 widths 
+
+Release 0.1.9 
 ~~~~~~~~~~~~~
     * Added `lineid_plot <http://packages.python.org/lineid_plot/>`_ tools
     * Baseline can fit power laws
