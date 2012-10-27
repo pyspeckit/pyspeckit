@@ -12,6 +12,11 @@ if interactive:
 else:
     ioff()
 
+import pytest
+import pyspeckit.spectrum.tests.test_units
+pytest.main()
+
+
 print "*****test_fits.py*****"
 execfile('test_fits.py',{'interactive':interactive,'savedir':savedir})
 print "*****test_hr2421.py*****"
