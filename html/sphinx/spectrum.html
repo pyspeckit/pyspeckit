@@ -170,7 +170,9 @@ units</p>
 <dl class="attribute">
 <dt id="pyspeckit.spectrum.Spectrum.flux">
 <tt class="descname">flux</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.flux" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The data in the spectrum (flux = data, for compatibility with astropy&#8217;s
+Spectrum1D object).</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.getlines">
@@ -184,13 +186,15 @@ the lines)</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.interpnans">
 <tt class="descname">interpnans</tt><big>(</big><em>spec</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.interpnans" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interpolate over NAN values, replacing them with their neighbors...</p>
+<dd><p>Interpolate over NAN values, replacing them with values interpolated from
+their neighbors using linear interpolation.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.measure">
 <tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=10.0</em>, <em>ignore=None</em>, <em>derive=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.measure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
+<dd><p>Initialize the measurements class - only do this after you have run a
+fitter otherwise pyspeckit will be angry!</p>
 </dd></dl>
 
 <dl class="method">
@@ -198,9 +202,10 @@ the lines)</p>
 <tt class="descname">moments</tt><big>(</big><em>unit='km/s'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.moments" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Return the moments of the spectrum.  In order to assure that the 1st</dt>
-<dd><p class="first">and 2nd moments are meaningful, a &#8216;default&#8217; unit is set.  If unit is not
-set, will use current unit.</p>
-<p class="last">Returns (height, amplitude, x, width_x)</p>
+<dd><p class="first">and 2nd moments are meaningful, a &#8216;default&#8217; unit is set.  If unit is
+not set, will use current unit.</p>
+<p class="last"><em>Documentation imported from the moments module:</em>
+Returns (height, amplitude, x, width_x)</p>
 </dd>
 </dl>
 <p>the gaussian parameters of a 1D distribution by calculating its
@@ -229,9 +234,9 @@ sigma = integral / amp / sqrt(2*pi)</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.parse_hdf5_header">
 <tt class="descname">parse_hdf5_header</tt><big>(</big><em>hdr</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.parse_hdf5_header" title="Permalink to this definition">¶</a></dt>
-<dd><p>HDF5 reader will create a hdr dictionary from HDF5 dataset
-attributes if they exist.  This routine will convert that dict
-to a pyfits header instance.</p>
+<dd><p>HDF5 reader will create a hdr dictionary from HDF5 dataset attributes
+if they exist.  This routine will convert that dict to a pyfits header
+instance.</p>
 </dd></dl>
 
 <dl class="method">
@@ -239,7 +244,6 @@ to a pyfits header instance.</p>
 <tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.parse_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse parameters from a .fits header into required spectrum structure
 parameters</p>
-<p>This should be moved to the FITSSpectrum subclass when that is available</p>
 </dd></dl>
 
 <dl class="method">
@@ -253,45 +257,108 @@ parameters</p>
 <dl class="attribute">
 <dt id="pyspeckit.spectrum.Spectrum.shape">
 <tt class="descname">shape</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the data shape</p>
+<dd><p>Return the data shape (a property of the Spectrum)</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.slice">
 <tt class="descname">slice</tt><big>(</big><em>start=None</em>, <em>stop=None</em>, <em>units='pixel'</em>, <em>copy=True</em>, <em>preserve_fits=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.slice" title="Permalink to this definition">¶</a></dt>
-<dd><p>Slicing the spectrum
-<em>WARNING: this is the same as cropping right now, but it returns a copy</em></p>
+<dd><p>Slicing the spectrum</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">this is the same as cropping right now, but it returns a
+copy instead of cropping inplace</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>start</strong> : numpy.float or int</p>
+<blockquote>
+<div><p>start of slice</p>
+</div></blockquote>
+<p><strong>stop</strong> :  numpy.float or int</p>
+<blockquote>
+<div><p>stop of slice</p>
+</div></blockquote>
+<p><strong>units</strong> : str</p>
+<blockquote>
+<div><p>allowed values are any supported physical unit, &#8216;pixel&#8217;</p>
+</div></blockquote>
+<p><strong>copy</strong> : bool</p>
+<blockquote>
+<div><p>Return a &#8216;view&#8217; of the data or a copy?</p>
+</div></blockquote>
+<p><strong>preserve_fits</strong> : bool</p>
+<blockquote class="last">
+<div><p>Save the fitted parameters from self.fitter?</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.smooth">
 <tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.smooth" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Smooth the spectrum by factor <cite>smooth</cite>.  </dt>
-<dd>sm.smooth doc:</dd>
-</dl>
+<dd><p>Smooth the spectrum by factor <cite>smooth</cite>.</p>
+<blockquote>
+<div><p>Documentation from the <tt class="xref py py-mod docutils literal"><span class="pre">smooth</span></tt> module:</p>
+<p>sm.smooth doc:</p>
+</div></blockquote>
 <p>Smooth and downsample the data array</p>
-<dl class="docutils">
-<dt><em>smooth</em> [ float ] </dt>
-<dd>Number of pixels to smooth by</dd>
-<dt><em>smoothtype</em> [ &#8216;gaussian&#8217;,&#8217;hanning&#8217;, or &#8216;boxcar&#8217; ]</dt>
-<dd>type of smoothing kernel to use</dd>
-<dt><em>downsample</em> [ bool ]</dt>
-<dd>Downsample the data?</dd>
-<dt><em>downsample_factor</em> [ int ]</dt>
-<dd>Downsample by the smoothing factor, or something else?</dd>
-<dt><em>convmode</em> [ &#8216;full&#8217;,&#8217;valid&#8217;,&#8217;same&#8217; ]</dt>
-<dd>see <cite>numpy.convolve</cite>.  &#8216;same&#8217; returns an array of the same length as
-&#8216;data&#8217; (assuming data is larger than the kernel)</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>smooth</strong> :  float</p>
+<blockquote>
+<div><p>Number of pixels to smooth by</p>
+</div></blockquote>
+<p><strong>smoothtype</strong> : [ &#8216;gaussian&#8217;,&#8217;hanning&#8217;, or &#8216;boxcar&#8217; ]</p>
+<blockquote>
+<div><p>type of smoothing kernel to use</p>
+</div></blockquote>
+<p><strong>downsample</strong> :  bool</p>
+<blockquote>
+<div><p>Downsample the data?</p>
+</div></blockquote>
+<p><strong>downsample_factor</strong> :  int</p>
+<blockquote>
+<div><p>Downsample by the smoothing factor, or something else?</p>
+</div></blockquote>
+<p><strong>convmode</strong> : [ &#8216;full&#8217;,&#8217;valid&#8217;,&#8217;same&#8217; ]</p>
+<blockquote class="last">
+<div><p>see <tt class="xref py py-mod docutils literal"><span class="pre">numpy.convolve</span></tt>.  &#8216;same&#8217; returns an array of the same length as
+&#8216;data&#8217; (assuming data is larger than the kernel)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.stats">
 <tt class="descname">stats</tt><big>(</big><em>statrange=()</em>, <em>interactive=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return some statistical measures in a dictionary (somewhat self-explanatory)</p>
-<p>range - X-range over which to perform measures
-interactive - specify range interactively in plotter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>statrange</strong> : 2-element tuple</p>
+<blockquote>
+<div><p>X-range over which to perform measures</p>
+</div></blockquote>
+<p><strong>interactive</strong> : bool</p>
+<blockquote class="last">
+<div><p>specify range interactively in plotter</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -390,41 +457,56 @@ averaged without weighting</p>
 <dt id="pyspeckit.spectrum.register_reader">
 <tt class="descclassname">pyspeckit.spectrum.</tt><tt class="descname">register_reader</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.register_reader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a reader function.</p>
-<p>Required Arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>filetype: str</strong> :</p>
 <blockquote>
-<div><dl class="docutils">
-<dt><em>filetype</em>: [ string ]</dt>
-<dd>The file type name</dd>
-<dt><em>function</em>: [ function ]</dt>
-<dd>The reader function.  Should take a filename as input
-and return an X-axis object (see units.py), a spectrum,
-an error spectrum (initialize it to 0&#8217;s if empty), and a
-pyfits header instance</dd>
-<dt><em>suffix</em>: [ int ]</dt>
-<dd>What suffix should the file have?</dd>
-</dl>
+<div><p>The file type name</p>
 </div></blockquote>
-<p>Optional Keyword Arguments:</p>
+<p><strong>function: function</strong> :</p>
+<blockquote>
+<div><p>The reader function.  Should take a filename as input and return an
+X-axis object (see units.py), a spectrum, an error spectrum (initialize
+it to 0&#8217;s if empty), and a pyfits header instance</p>
+</div></blockquote>
+<p><strong>suffix: int</strong> :</p>
+<blockquote class="last">
+<div><p>What suffix should the file have?</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.register_writer">
 <tt class="descclassname">pyspeckit.spectrum.</tt><tt class="descname">register_writer</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.register_writer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a writer function.</p>
-<p>Required Arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>filetype:  string</strong> :</p>
 <blockquote>
-<div><dl class="docutils">
-<dt><em>filetype</em>: [ string ]</dt>
-<dd>The file type name</dd>
-<dt><em>function</em>: [ function ]</dt>
-<dd>The writer function.  Will be an attribute of Spectrum
-object, and called as spectrum.Spectrum.write_hdf5(), 
-for example.</dd>
-<dt><em>suffix</em>: [ int ]</dt>
-<dd>What suffix should the file have?</dd>
-</dl>
+<div><p>The file type name</p>
 </div></blockquote>
-<p>Optional Keyword Arguments:</p>
+<p><strong>function:  function</strong> :</p>
+<blockquote>
+<div><p>The writer function.  Will be an attribute of Spectrum
+object, and called as spectrum.Spectrum.write_hdf5(), 
+for example.</p>
+</div></blockquote>
+<p><strong>suffix:  int</strong> :</p>
+<blockquote class="last">
+<div><p>What suffix should the file have?</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

@@ -259,9 +259,11 @@ class Spectrum(Spectrum1D):
         
     def parse_hdf5_header(self, hdr):
         """
-        HDF5 reader will create a hdr dictionary from HDF5 dataset
-        attributes if they exist.  This routine will convert that dict
-        to a pyfits header instance.
+        HDF5 reader will create a hdr dictionary from HDF5 dataset attributes
+        if they exist.  This routine will convert that dict to a pyfits header
+        instance.
+
+        .. TODO:: Move this to the hdf5 reader?
         """    
         
         self.xarr.xtype = hdr['xtype']
@@ -279,7 +281,7 @@ class Spectrum(Spectrum1D):
         Parse parameters from a .fits header into required spectrum structure
         parameters
 
-        This should be moved to the FITSSpectrum subclass when that is available
+        .. TODO:: This should be moved to the FITSSpectrum subclass when that is available
         """
 
         if hdr.get('BUNIT'):
@@ -301,9 +303,11 @@ class Spectrum(Spectrum1D):
         else:
             self.specname = ''
             
-    def measure(self, z=None, d=None, fluxnorm=None, miscline=None, misctol=10.0, ignore=None, derive=True, **kwargs):
+    def measure(self, z=None, d=None, fluxnorm=None, miscline=None,
+            misctol=10.0, ignore=None, derive=True, **kwargs):
         """
-        Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!
+        Initialize the measurements class - only do this after you have run a
+        fitter otherwise pyspeckit will be angry!
         """
         self.measurements=measurements.Measurements(self, z=z, d=d,
                 fluxnorm=fluxnorm, miscline=miscline, misctol=misctol,
@@ -342,10 +346,12 @@ class Spectrum(Spectrum1D):
 
     def slice(self, start=None, stop=None, units='pixel', copy=True, preserve_fits=False):
         """Slicing the spectrum
-        *WARNING: this is the same as cropping right now, but it returns a copy*
+
+        .. WARNING:: this is the same as cropping right now, but it returns a
+            copy instead of cropping inplace
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         start : numpy.float or int
             start of slice
         stop :  numpy.float or int
@@ -399,6 +405,10 @@ class Spectrum(Spectrum1D):
     # For Spectrum1D compatibility, flux = data
     @property
     def flux(self):
+        """
+        The data in the spectrum (flux = data, for compatibility with astropy's
+        Spectrum1D object).
+        """
         return self.data
 
     @flux.setter
@@ -433,6 +443,9 @@ class Spectrum(Spectrum1D):
     def smooth(self,smooth,**kwargs):
         """
         Smooth the spectrum by factor `smooth`.  
+
+        Documentation from the :mod:`smooth` module:
+
         """
         smooth = round(smooth)
         self.data = sm.smooth(self.data,smooth,**kwargs)
@@ -461,7 +474,7 @@ class Spectrum(Spectrum1D):
 
     def _shape(self):
         """
-        Return the data shape
+        Return the data shape (a property of the Spectrum)
         """
         return self.data.shape
 
@@ -508,9 +521,12 @@ class Spectrum(Spectrum1D):
         """
         Return some statistical measures in a dictionary (somewhat self-explanatory)
 
-        range - X-range over which to perform measures
-        interactive - specify range interactively in plotter
-
+        Parameters
+        ----------
+        statrange : 2-element tuple
+            X-range over which to perform measures
+        interactive : bool
+            specify range interactively in plotter
         """
 
         if len(statrange) == 2:
@@ -553,9 +569,10 @@ class Spectrum(Spectrum1D):
     def moments(self, unit='km/s', **kwargs):
         """
         Return the moments of the spectrum.  In order to assure that the 1st
-        and 2nd moments are meaningful, a 'default' unit is set.  If unit is not
-        set, will use current unit.
+        and 2nd moments are meaningful, a 'default' unit is set.  If unit is
+        not set, will use current unit.
 
+        *Documentation imported from the moments module:*
         """
 
         if unit is False or unit is None:
