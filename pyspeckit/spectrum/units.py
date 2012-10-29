@@ -869,6 +869,17 @@ class SpectroscopicAxis(np.ndarray):
             self.wcshead['CRPIX1'] = 1.0
             return True
 
+    def _update_from(self, obj):
+        """Copies some attributes of obj to self.
+        (this code copied partly from numpy.ma.core:
+        https://github.com/numpy/numpy/blob/master/numpy/ma/core.py)
+        """
+
+        for attr in ('frame', 'redshift', 'refX', 'refX_units', 'units',
+                'velocity_convention', 'wcshead', 'xtype'):
+            self.__dict__[attr] = obj.__dict__[attr]
+
+
 class SpectroscopicAxes(SpectroscopicAxis):
     """
     Counterpart to Spectra: takes a list of SpectroscopicAxis's and

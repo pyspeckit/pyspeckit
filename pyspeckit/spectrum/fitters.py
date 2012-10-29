@@ -1282,11 +1282,14 @@ class Specfit(interactive.Interactive):
         else:
             data = self.Spectrum.data * 1
 
+        model = self.get_full_model(add_baseline=False)
+
         # can modify inplace because data is a copy of self.Spectrum.data
         if not emission:
             data *= -1
+            model *= -1
 
-        line_region = self.get_full_model(add_baseline=False) > threshold
+        line_region = model > threshold
 
         # determine peak (because data is neg if absorption, always use max)
         peak = data[line_region].max()
@@ -1297,8 +1300,9 @@ class Specfit(interactive.Interactive):
         
         if interpolate_factor > 1:
             newxarr = units.SpectroscopicAxis(
-                    np.arange(xarr.min()-cd,xarr.max()+cd,cd / float(interpolate_factor)),
-                    units=xarr.units)
+                    np.arange(xarr.min()-cd,xarr.max()+cd,cd / float(interpolate_factor)))
+            # load the metadata from xarr
+            newxarr._update_from(xarr)
             data = np.interp(newxarr,xarr,data[line_region])
             xarr = newxarr
         else:
