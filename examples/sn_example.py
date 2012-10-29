@@ -43,6 +43,12 @@ sp.plotter.savefig("SN2009ip_UT121002_Halpha_voigt_zoom.png")
 print " ".join(["%15s %15s" % (s,s+"err") for s in sp.specfit.parinfo.parnames])," ".join(["%15s" % ("EQW"+str(i)) for i,w in enumerate(sp.specfit.EQW(components=True))])
 print " ".join(["%15g %15g" % (par.value,par.error) for par in sp.specfit.parinfo])," ".join(["%15g" % w for w in sp.specfit.EQW(components=True)])
 
+# here are some other fitted parameters that can be printed:
+print "Fitted EQW:", sp.specfit.EQW()
+print "Direct EQW:", sp.specfit.EQW(fitted=False)
+print "Approximate FWHM:", sp.specfit.measure_approximate_fwhm()
+print "Approximate FWHM (with interpolation):", sp.specfit.measure_approximate_fwhm(interpolate_factor=10)
+
 # zoom in further for a detailed view of the profile fit
 sp.plotter.axis.set_xlim(6562-150,6562+150)
 sp.plotter.savefig("SN2009ip_UT121002_Halpha_voigt_zoomzoom.png")

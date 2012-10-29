@@ -23,6 +23,11 @@ print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 fitted_fwhm = sp.specfit.parinfo.WIDTH0*np.sqrt(np.log(2)*8)
 print "Fitted FWHM: ", fitted_fwhm
+
+measured_fwhm2 = sp.specfit.measure_approximate_fwhm(interpolate_factor=10)
+print "Measured FWHM (x10 accuracy): ", measured_fwhm2
+assert np.abs(measured_fwhm2-fitted_fwhm) < 200 # interpolating makes smaller fwhm in this case
+
 measured_fwhm = sp.specfit.measure_approximate_fwhm()
 print "Measured FWHM: ", measured_fwhm
 assert np.abs(measured_fwhm-fitted_fwhm) < 50 # i.e., close enough...
