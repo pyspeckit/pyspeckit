@@ -790,7 +790,9 @@ class SpectroscopicAxis(np.ndarray):
 
         """
         dxarr = np.diff(self)
-        if coordinate_location in ['left','center']:
+        if self.size <= 2:
+            self.dxarr = np.ones(self.size)*dxarr
+        elif coordinate_location in ['left','center']:
             self.dxarr = np.concatenate([dxarr,dxarr[-1:]])
         elif coordinate_location in ['right']:
             self.dxarr = np.concatenate([dxarr[:1],dxarr])

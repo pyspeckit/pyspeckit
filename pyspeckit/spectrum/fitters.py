@@ -957,6 +957,9 @@ class Specfit(interactive.Interactive):
         if return_error is set, the error computed by
         sigma = sqrt(sum(sigma_i^2)) * dx
         will be returned as well
+
+        .. TODO: Merge this with EQW.  Both are equivalent, only difference is
+            units (and reference to baseline level)
         """
 
         dx = self.Spectrum.xarr.cdelt()
@@ -967,8 +970,11 @@ class Specfit(interactive.Interactive):
             # shouldn't shape be a 'propery'
             dx = np.repeat(np.abs(dx), self.Spectrum.shape)
 
+        # the model considered here must NOT include the baseline!
+        # if it does, you'll get the integral of the continuum
+        fullmodel = self.get_full_model(add_baseline=False)
+
         if direct:
-            self._full_model()
             if len(integration_limits) == 2:
                 x1 = np.argmin(np.abs(integration_limits[0]-self.Spectrum.xarr))
                 x2 = np.argmin(np.abs(integration_limits[1]-self.Spectrum.xarr))
@@ -982,9 +988,9 @@ class Specfit(interactive.Interactive):
                 else:
                     return integ
             elif threshold=='auto':
-                threshold = 0.01 * np.abs( self.fullmodel ).max()
+                threshold = 0.01 * np.abs( fullmodel ).max()
 
-            OK = np.abs( self.fullmodel ) > threshold
+            OK = np.abs( fullmodel ) > threshold
             integ = (self.spectofit[OK] * dx[OK]).sum()
             error = np.sqrt((self.errspec[OK]**2 * dx[OK]).sum()/dx[OK].sum())
         else:
@@ -996,8 +1002,7 @@ class Specfit(interactive.Interactive):
                 integ = self.fitter.integral(self.modelpars, **kwargs) * dx
                 if return_error:
                     if mycfg.WARN: print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."
-                    self._full_model()
-                    OK = np.abs( self.fullmodel ) > threshold
+                    OK = np.abs( fullmodel ) > threshold
                     error = np.sqrt((self.errspec[OK]**2).sum()) * dx
                     #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
             else:
@@ -1008,6 +1013,45 @@ class Specfit(interactive.Interactive):
             return integ,error
         else:
             return integ
+
+    def get_model_xlimits(self, threshold='auto', peak_fraction=0.01,
+            add_baseline=False, units='pixels'):
+        """
+        Return the x positions of the first and last points at which the model
+        is above some threshold
+
+        Parameters
+        ----------
+        threshold : 'auto' or float
+            If 'auto', the threshold will be set to peak_fraction * the peak
+            model value.  
+        peak_fraction : float
+            ignored unless threshold == 'auto'
+        add_baseline : bool
+            Include the baseline when computing whether the model is above the
+            threshold?  default FALSE.  Passed to get_full_model.
+        units : str
+            A valid unit type, e.g. 'pixels' or 'angstroms'
+        """
+
+        model = self.get_full_model(add_baseline=add_baseline)
+
+        # auto-set threshold from some fraction of the model peak
+        if threshold=='auto':
+            threshold = peak_fraction * np.abs( model ).max()
+
+        OK = np.abs( model ) > threshold
+
+        # find the first & last "True" values
+        xpixmin = OK.argmax()
+        xpixmax = len(OK) - OK[::-1].argmax() - 1
+
+        if units == 'pixels':
+            return [xpixmin,xpixmax]
+        else:
+            return self.Spectrum.xarr[[xpixmin,xpixmax]].as_unit(units)
+
+
 
     def shift_pars(self, frame=None):
         """
@@ -1246,7 +1290,7 @@ class Specfit(interactive.Interactive):
             return self.modelcomponents
 
     def measure_approximate_fwhm(self, threshold='error', emission=True,
-            interpolate_factor=1, plot=False, **kwargs):
+            interpolate_factor=1, plot=False, grow_threshold=2, **kwargs):
         """
         Measure the FWHM of a fitted line
 
@@ -1270,6 +1314,14 @@ class Specfit(interactive.Interactive):
         plot : bool
             Overplot a line at the FWHM indicating the FWHM.  kwargs
             are passed to matplotlib.plot
+        grow_threshold : int
+            Minimum number of valid points.  If the total # of points above the
+            threshold is <= to this number, it will be grown by 1 pixel on each side
+
+        Returns
+        -------
+        The approximated FWHM, if it can be computed
+        If there are <= 2 valid pixels, a fwhm cannot be computed
         """
 
         if threshold == 'error':
@@ -1290,6 +1342,12 @@ class Specfit(interactive.Interactive):
             model *= -1
 
         line_region = model > threshold
+        if line_region.sum() == 0:
+            raise ValueError("No valid data included in FWHM computation")
+        if line_region.sum() <= 2:
+            line_region[line_region.argmax()-1:line_region.argmax()+1] = True
+            reverse_argmax = len(line_region) - line_region.argmax() - 1
+            line_region[reverse_argmax-1:reverse_argmax+1] = True
 
         # determine peak (because data is neg if absorption, always use max)
         peak = data[line_region].max()
