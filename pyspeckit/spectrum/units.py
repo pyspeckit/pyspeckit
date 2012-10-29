@@ -377,6 +377,7 @@ class SpectroscopicAxis(np.ndarray):
         # moved from __init__ - needs to be done whenever viewed
         # (this is slow, though - may be better not to do this)
         if self.shape: # check to make sure non-scalar
+            # can't use make_dxarr here! infinite recursion =(
             self.dxarr = np.diff(np.array(self))
 
     def __array_wrap__(self,out_arr,context=None):
@@ -602,7 +603,7 @@ class SpectroscopicAxis(np.ndarray):
 
         if unit in unit_type_dict and unit not in (None, 'unknown'):
             self.units = unit
-        self.dxarr = np.diff(self)
+        self.make_dxarr()
 
     def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
             center_frequency_units=None, debug=False, **kwargs):
@@ -774,7 +775,7 @@ class SpectroscopicAxis(np.ndarray):
         
         if frame in frame_type_dict:
             self[:] = self.in_frame(frame)
-            self.dxarr = np.diff(self)
+            self.make_dxarr()
             self.frame = frame
 
     def make_dxarr(self, coordinate_location='center'):
@@ -788,6 +789,13 @@ class SpectroscopicAxis(np.ndarray):
             have the same dx as the second pixel.
 
         """
+        dxarr = np.diff(self)
+        if coordinate_location in ['left','center']:
+            self.dxarr = np.concatenate([dxarr,dxarr[-1:]])
+        elif coordinate_location in ['right']:
+            self.dxarr = np.concatenate([dxarr[:1],dxarr])
+        else:
+            raise ValueError("Invalid coordinate location.")
 
     def in_frame(self, frame):
         """
@@ -826,7 +834,7 @@ class SpectroscopicAxis(np.ndarray):
             Return the mean DX even if it is inaccurate
         """
         if not hasattr(self,'dxarr'): # if cropping happens...
-            self.dxarr = np.diff(self)
+            self.make_dxarr()
         if approx or abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
             return self.dxarr.mean().flat[0]
 
@@ -834,7 +842,7 @@ class SpectroscopicAxis(np.ndarray):
         """
         Generate a set of WCS parameters for the X-array
         """
-        self.dxarr = np.diff(self)
+        self.make_dxarr()
 
         if self.wcshead is None:
             self.wcshead = {}

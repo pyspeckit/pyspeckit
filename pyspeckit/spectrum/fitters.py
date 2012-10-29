@@ -1228,3 +1228,75 @@ class Specfit(interactive.Interactive):
                     self.modelpars, **kwargs)
 
             return self.modelcomponents
+
+    def measure_approximate_fwhm(self, threshold='error', emission=True,
+            interpolate_factor=1):
+        """
+        Measure the FWHM of a fitted line
+
+        This procedure is designed for multi-component lines; if the true FWHM
+        is known (i.e., the line is well-represented by a single
+        gauss/voigt/lorentz profile), use that instead!
+
+        This MUST be run AFTER a fit has been performed!
+
+        Parameters
+        ----------
+        threshold : 'error' | float
+            The threshold above which the spectrum will be interpreted as part
+            of the line.  This threshold is applied to the *model*.  If it is
+            'noise', self.error will be used.
+        emission : bool
+            Is the line absorption or emission?  
+        interpolate_factor : integer
+            Magnification factor for determining sub-pixel FWHM.  If used,
+            "zooms-in" by using linear interpolation within the line region
+        """
+
+        if threshold == 'error':
+            threshold = self.Spectrum.error
+
+        if emission:
+            data = self.Spectrum.data
+        else:
+            data = -1*self.Spectrum.data
+
+        line_region = self.fullmodel > threshold
+
+        # determine peak (because data is neg if absorption, always use max)
+        peak = data[line_region].max()
+
+        xarr = self.Spectrum.xarr[line_region]
+        xarr.make_dxarr()
+        cd = xarr.dxarr.min()
+        
+        if interpolate_factor > 1:
+            xarr = units.SpectroscopicAxis(
+                    np.arange(xarr.min()-cd,xarr.max()+cd,cd / float(interpolate_factor)),
+                    units=xarr.units)
+            data = np.interp(newxarr,xarr,data)
+        else:
+            data = data[line_region]
+
+        # need the peak location so we can find left/right half-max locations
+        peakloc = data.argmax()
+
+        hm_left  = np.argmin( np.abs( data[:peakloc]-peak/2. ))
+        hm_right = np.argmin( np.abs( data[peakloc:]-peak/2. )) + peakloc
+        
+        deltax = xarr[hm_right]-xarr[hm_left]
+
+        # DEBUG print hm_left,hm_right,"FWHM: ",deltax
+        # DEBUG raise TheDead
+
+        return deltax
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,5 @@
 import pyspeckit
+import numpy as np
 
 if not 'interactive' in globals():
     interactive=False
@@ -20,6 +21,11 @@ sp.specfit()
 sp.plotter.figure.savefig(savedir+'fits_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
+fitted_fwhm = sp.specfit.parinfo.WIDTH0*np.sqrt(np.log(2)*8)
+print "Fitted FWHM: ", fitted_fwhm
+measured_fwhm = sp.specfit.measure_approximate_fwhm()
+print "Measured FWHM: ", measured_fwhm
+assert np.abs(measured_fwhm-fitted_fwhm) < 50 # i.e., close enough...
 
 # # Fit a baseline, excluding the velocities with data, and don't subtract it
 # sp.baseline(exclude=[12000,98000],subtract=False)
