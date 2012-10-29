@@ -669,12 +669,12 @@ class Specfit(interactive.Interactive):
         """
         Compute the model for the whole spectrum
         """
-        self.fullmodel = self.get_full_model(debug=debug)
+        self.fullmodel = self.get_full_model(debug=debug,**kwargs)
         self.fullresiduals = self.Spectrum.data - self.fullmodel
 
-    def get_full_model(self, debug=False):
+    def get_full_model(self, debug=False,**kwargs):
         """ compute the model over the full axis """ 
-        return self.get_model(self.Spectrum.xarr, debug=debug)
+        return self.get_model(self.Spectrum.xarr, debug=debug,**kwargs)
 
     def get_model(self, xarr, debug=False, add_baseline=None):
         """ Compute the model over a given axis """
@@ -1245,7 +1245,7 @@ class Specfit(interactive.Interactive):
             return self.modelcomponents
 
     def measure_approximate_fwhm(self, threshold='error', emission=True,
-            interpolate_factor=1):
+            interpolate_factor=1, plot=False, **kwargs):
         """
         Measure the FWHM of a fitted line
 
@@ -1266,6 +1266,9 @@ class Specfit(interactive.Interactive):
         interpolate_factor : integer
             Magnification factor for determining sub-pixel FWHM.  If used,
             "zooms-in" by using linear interpolation within the line region
+        plot : bool
+            Overplot a line at the FWHM indicating the FWHM.  kwargs
+            are passed to matplotlib.plot
         """
 
         if threshold == 'error':
@@ -1273,12 +1276,16 @@ class Specfit(interactive.Interactive):
             if np.all(self.Spectrum.error==0):
                 threshold = 1e-3*self.Spectrum.data.max()
 
-        if emission:
-            data = self.Spectrum.data
+        if self.Spectrum.baseline.subtracted is False:
+            data = self.Spectrum.data - self.Spectrum.baseline.basespec
         else:
-            data = -1*self.Spectrum.data
+            data = self.Spectrum.data * 1
 
-        line_region = self.fullmodel > threshold
+        # can modify inplace because data is a copy of self.Spectrum.data
+        if not emission:
+            data *= -1
+
+        line_region = self.get_full_model(add_baseline=False) > threshold
 
         # determine peak (because data is neg if absorption, always use max)
         peak = data[line_region].max()
@@ -1303,6 +1310,11 @@ class Specfit(interactive.Interactive):
         hm_right = np.argmin( np.abs( data[peakloc:]-peak/2. )) + peakloc
         
         deltax = xarr[hm_right]-xarr[hm_left]
+
+        if plot:
+            self.Spectrum.plotter.axis.plot([xarr[hm_right],xarr[hm_left]],
+                    [peak/2.,peak/2.],**kwargs)
+            self.Spectrum.plotter.refresh()
 
         # debug print hm_left,hm_right,"FWHM: ",deltax
         # debug self.Spectrum.plotter.axis.plot(xarr,data,color='magenta')

@@ -996,7 +996,7 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
 
     """
     if input_units in frequency_dict:
-        print "Already in frequency units (%s)" % input_units
+        #print "Already in frequency units (%s)" % input_units
         return velocities
     if center_frequency is None:
         raise ValueError("Cannot convert velocity to frequency without specifying a central frequency.")
@@ -1076,7 +1076,7 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
     nu = c / lambda
     """
     if input_units in frequency_dict:
-        print "Already in frequency units (%s)" % input_units
+        #print "Already in frequency units (%s)" % input_units
         return wavelengths
     if frequency_units not in frequency_dict:
         raise ValueError("Frequency units %s not valid" % frequency_units)
