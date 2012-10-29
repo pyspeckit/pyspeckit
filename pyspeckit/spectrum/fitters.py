@@ -344,6 +344,7 @@ class Specfit(interactive.Interactive):
                     add_baseline=False)
             if continuum is None:
                 # centroid in data units
+                # (may fail if model has pos + neg values)
                 center = (model*self.Spectrum.xarr[xmin:xmax]).sum()/model.sum()
                 center_pix = self.Spectrum.xarr.x_to_pix(center)
                 continuum = self.Spectrum.baseline.basespec[center_pix]
