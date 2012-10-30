@@ -945,10 +945,12 @@ class Specfit(interactive.Interactive):
 
         dx = self.Spectrum.xarr.cdelt()
         if dx is None:
-            dx = np.abs(np.concatenate([np.diff(self.Spectrum.xarr),[0]]))
-            warn("Irregular X-axis.  The last pixel is ignored.")
+            #dx = np.abs(np.concatenate([np.diff(self.Spectrum.xarr),[0]]))
+            #warn("Irregular X-axis.  The last pixel is ignored.")
+            self.Spectrum.xarr.make_dxarr()
+            dx = self.Spectrum.xarr.dxarr
         else:
-            # shouldn't shape be a 'propery'
+            # shouldn't shape be a 'property'?
             dx = np.repeat(np.abs(dx), self.Spectrum.shape)
 
         if direct:
