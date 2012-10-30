@@ -76,10 +76,11 @@
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.EQW">
-<tt class="descname">EQW</tt><big>(</big><em>plot=False</em>, <em>plotcolor='g'</em>, <em>fitted=True</em>, <em>continuum=None</em>, <em>components=False</em>, <em>annotate=False</em>, <em>alpha=0.5</em>, <em>loc='lower left'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.EQW" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">EQW</tt><big>(</big><em>plot=False</em>, <em>plotcolor='g'</em>, <em>fitted=True</em>, <em>continuum=None</em>, <em>components=False</em>, <em>annotate=False</em>, <em>alpha=0.5</em>, <em>loc='lower left'</em>, <em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.EQW" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the equivalent width (integral of &#8220;baseline&#8221; or &#8220;continuum&#8221;
 minus the spectrum) over the selected range
-(the selected range is self.xmin:self.xmax, so it may include multiple lines!)</p>
+(the selected range defaults to self.xmin:self.xmax, so it may include
+multiple lines!)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -103,6 +104,11 @@ the fitted baseline</p>
 <blockquote>
 <div><p>If your fit is multi-component, will attempt to acquire centroids
 for each component and print out individual EQWs</p>
+</div></blockquote>
+<p><strong>xmin</strong> : float</p>
+<p><strong>xmax</strong> : float</p>
+<blockquote>
+<div><p>The range over which to compute the EQW</p>
 </div></blockquote>
 </td>
 </tr>
@@ -129,7 +135,7 @@ yet.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.annotate">
-<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.1</em>, <em>handlelength=0.1</em>, <em>handletextpad=0.1</em>, <em>frameon=False</em>, <em>chi2=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.10000000000000001</em>, <em>handlelength=0.10000000000000001</em>, <em>handletextpad=0.10000000000000001</em>, <em>frameon=False</em>, <em>chi2=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a legend to the plot showing the fitted parameters</p>
 <p>_clearlegend() will remove the legend</p>
 <p>chi2 : {True or &#8216;reduced&#8217; or &#8216;optimal&#8217;}</p>
@@ -255,7 +261,7 @@ expand it (with zeros) to fill the spectrum.</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_full_model">
-<tt class="descname">get_full_model</tt><big>(</big><em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_full_model" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_full_model</tt><big>(</big><em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_full_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute the model over the full axis</p>
 </dd></dl>
 
@@ -269,6 +275,39 @@ expand it (with zeros) to fill the spectrum.</p>
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_model_frompars">
 <tt class="descname">get_model_frompars</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model_frompars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the model over a given axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.get_model_xlimits">
+<tt class="descname">get_model_xlimits</tt><big>(</big><em>threshold='auto'</em>, <em>peak_fraction=0.01</em>, <em>add_baseline=False</em>, <em>units='pixels'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model_xlimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the x positions of the first and last points at which the model
+is above some threshold</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>threshold</strong> : &#8216;auto&#8217; or float</p>
+<blockquote>
+<div><p>If &#8216;auto&#8217;, the threshold will be set to peak_fraction * the peak
+model value.</p>
+</div></blockquote>
+<p><strong>peak_fraction</strong> : float</p>
+<blockquote>
+<div><p>ignored unless threshold == &#8216;auto&#8217;</p>
+</div></blockquote>
+<p><strong>add_baseline</strong> : bool</p>
+<blockquote>
+<div><p>Include the baseline when computing whether the model is above the
+threshold?  default FALSE.  Passed to get_full_model.</p>
+</div></blockquote>
+<p><strong>units</strong> : str</p>
+<blockquote class="last">
+<div><p>A valid unit type, e.g. &#8216;pixels&#8217; or &#8216;angstroms&#8217;</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -339,6 +378,53 @@ if you&#8217;ve baselined without subtract=True, the baseline will be included i
 <p>if return_error is set, the error computed by
 sigma = sqrt(sum(sigma_i^2)) * dx
 will be returned as well</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.fitters.Specfit.measure_approximate_fwhm">
+<tt class="descname">measure_approximate_fwhm</tt><big>(</big><em>threshold='error'</em>, <em>emission=True</em>, <em>interpolate_factor=1</em>, <em>plot=False</em>, <em>grow_threshold=2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.measure_approximate_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure the FWHM of a fitted line</p>
+<p>This procedure is designed for multi-component lines; if the true FWHM
+is known (i.e., the line is well-represented by a single
+gauss/voigt/lorentz profile), use that instead!</p>
+<p>This MUST be run AFTER a fit has been performed!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>threshold</strong> : &#8216;error&#8217; | float</p>
+<blockquote>
+<div><p>The threshold above which the spectrum will be interpreted as part
+of the line.  This threshold is applied to the <em>model</em>.  If it is
+&#8216;noise&#8217;, self.error will be used.</p>
+</div></blockquote>
+<p><strong>emission</strong> : bool</p>
+<blockquote>
+<div><p>Is the line absorption or emission?</p>
+</div></blockquote>
+<p><strong>interpolate_factor</strong> : integer</p>
+<blockquote>
+<div><p>Magnification factor for determining sub-pixel FWHM.  If used,
+&#8220;zooms-in&#8221; by using linear interpolation within the line region</p>
+</div></blockquote>
+<p><strong>plot</strong> : bool</p>
+<blockquote>
+<div><p>Overplot a line at the FWHM indicating the FWHM.  kwargs
+are passed to matplotlib.plot</p>
+</div></blockquote>
+<p><strong>grow_threshold</strong> : int</p>
+<blockquote>
+<div><p>Minimum number of valid points.  If the total # of points above the
+threshold is &lt;= to this number, it will be grown by 1 pixel on each side</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>The approximated FWHM, if it can be computed</strong> :</p>
+<p class="last"><strong>If there are &lt;= 2 valid pixels, a fwhm cannot be computed</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -639,7 +725,7 @@ It should be extended to do other things later</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Oct 27, 2012.
+      Last updated on Oct 29, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

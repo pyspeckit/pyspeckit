@@ -149,7 +149,9 @@ numpy.nan</dd>
 <dl class="attribute">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.flux">
 <tt class="descname">flux</tt><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.flux" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The data in the spectrum (flux = data, for compatibility with astropy&#8217;s
+Spectrum1D object).</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.get_apspec">
@@ -185,7 +187,8 @@ the lines)</p>
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.interpnans">
 <tt class="descname">interpnans</tt><big>(</big><em>spec</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.interpnans" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interpolate over NAN values, replacing them with their neighbors...</p>
+<dd><p>Interpolate over NAN values, replacing them with values interpolated from
+their neighbors using linear interpolation.</p>
 </dd></dl>
 
 <dl class="method">
@@ -198,7 +201,8 @@ attributes.</p>
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.measure">
 <tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=10.0</em>, <em>ignore=None</em>, <em>derive=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.measure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the measurements class - only do this after you have run a fitter otherwise pyspeckit will be angry!</p>
+<dd><p>Initialize the measurements class - only do this after you have run a
+fitter otherwise pyspeckit will be angry!</p>
 </dd></dl>
 
 <dl class="method">
@@ -216,9 +220,10 @@ attributes.</p>
 <tt class="descname">moments</tt><big>(</big><em>unit='km/s'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.moments" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Return the moments of the spectrum.  In order to assure that the 1st</dt>
-<dd><p class="first">and 2nd moments are meaningful, a &#8216;default&#8217; unit is set.  If unit is not
-set, will use current unit.</p>
-<p class="last">Returns (height, amplitude, x, width_x)</p>
+<dd><p class="first">and 2nd moments are meaningful, a &#8216;default&#8217; unit is set.  If unit is
+not set, will use current unit.</p>
+<p class="last"><em>Documentation imported from the moments module:</em>
+Returns (height, amplitude, x, width_x)</p>
 </dd>
 </dl>
 <p>the gaussian parameters of a 1D distribution by calculating its
@@ -247,9 +252,9 @@ sigma = integral / amp / sqrt(2*pi)</p>
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.parse_hdf5_header">
 <tt class="descname">parse_hdf5_header</tt><big>(</big><em>hdr</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.parse_hdf5_header" title="Permalink to this definition">¶</a></dt>
-<dd><p>HDF5 reader will create a hdr dictionary from HDF5 dataset
-attributes if they exist.  This routine will convert that dict
-to a pyfits header instance.</p>
+<dd><p>HDF5 reader will create a hdr dictionary from HDF5 dataset attributes
+if they exist.  This routine will convert that dict to a pyfits header
+instance.</p>
 </dd></dl>
 
 <dl class="method">
@@ -257,7 +262,6 @@ to a pyfits header instance.</p>
 <tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.parse_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse parameters from a .fits header into required spectrum structure
 parameters</p>
-<p>This should be moved to the FITSSpectrum subclass when that is available</p>
 </dd></dl>
 
 <dl class="method">
@@ -297,7 +301,7 @@ parameters</p>
 <dl class="attribute">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.shape">
 <tt class="descname">shape</tt><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the data shape</p>
+<dd><p>Return the data shape (a property of the Spectrum)</p>
 </dd></dl>
 
 <dl class="method">
@@ -321,32 +325,63 @@ parameters</p>
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.smooth">
 <tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.smooth" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Smooth the spectrum by factor <cite>smooth</cite>.  </dt>
-<dd>sm.smooth doc:</dd>
-</dl>
+<dd><p>Smooth the spectrum by factor <cite>smooth</cite>.</p>
+<blockquote>
+<div><p>Documentation from the <tt class="xref py py-mod docutils literal"><span class="pre">smooth</span></tt> module:</p>
+<p>sm.smooth doc:</p>
+</div></blockquote>
 <p>Smooth and downsample the data array</p>
-<dl class="docutils">
-<dt><em>smooth</em> [ float ] </dt>
-<dd>Number of pixels to smooth by</dd>
-<dt><em>smoothtype</em> [ &#8216;gaussian&#8217;,&#8217;hanning&#8217;, or &#8216;boxcar&#8217; ]</dt>
-<dd>type of smoothing kernel to use</dd>
-<dt><em>downsample</em> [ bool ]</dt>
-<dd>Downsample the data?</dd>
-<dt><em>downsample_factor</em> [ int ]</dt>
-<dd>Downsample by the smoothing factor, or something else?</dd>
-<dt><em>convmode</em> [ &#8216;full&#8217;,&#8217;valid&#8217;,&#8217;same&#8217; ]</dt>
-<dd>see <cite>numpy.convolve</cite>.  &#8216;same&#8217; returns an array of the same length as
-&#8216;data&#8217; (assuming data is larger than the kernel)</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>smooth</strong> :  float</p>
+<blockquote>
+<div><p>Number of pixels to smooth by</p>
+</div></blockquote>
+<p><strong>smoothtype</strong> : [ &#8216;gaussian&#8217;,&#8217;hanning&#8217;, or &#8216;boxcar&#8217; ]</p>
+<blockquote>
+<div><p>type of smoothing kernel to use</p>
+</div></blockquote>
+<p><strong>downsample</strong> :  bool</p>
+<blockquote>
+<div><p>Downsample the data?</p>
+</div></blockquote>
+<p><strong>downsample_factor</strong> :  int</p>
+<blockquote>
+<div><p>Downsample by the smoothing factor, or something else?</p>
+</div></blockquote>
+<p><strong>convmode</strong> : [ &#8216;full&#8217;,&#8217;valid&#8217;,&#8217;same&#8217; ]</p>
+<blockquote class="last">
+<div><p>see <tt class="xref py py-mod docutils literal"><span class="pre">numpy.convolve</span></tt>.  &#8216;same&#8217; returns an array of the same length as
+&#8216;data&#8217; (assuming data is larger than the kernel)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.stats">
 <tt class="descname">stats</tt><big>(</big><em>statrange=()</em>, <em>interactive=False</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return some statistical measures in a dictionary (somewhat self-explanatory)</p>
-<p>range - X-range over which to perform measures
-interactive - specify range interactively in plotter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>statrange</strong> : 2-element tuple</p>
+<blockquote>
+<div><p>X-range over which to perform measures</p>
+</div></blockquote>
+<p><strong>interactive</strong> : bool</p>
+<blockquote class="last">
+<div><p>specify range interactively in plotter</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -442,7 +477,7 @@ to None to prevent overwriting a previous plot.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.mapplot.MapPlotter.makeplane">
-<tt class="descname">makeplane</tt><big>(</big><em>estimator=&lt;function mean at 0x101c26050&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.mapplot.MapPlotter.makeplane" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">makeplane</tt><big>(</big><em>estimator=&lt;function mean at 0x1041b5cf8&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.mapplot.MapPlotter.makeplane" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt><em>estimator</em> [ function | &#8216;max&#8217; | &#8216;int&#8217; | FITS filename | integer ]</dt>
 <dd>A non-pythonic, non-duck-typed variable.  If it&#8217;s a function, apply that function
@@ -607,7 +642,7 @@ average=sum and dvmul=True to get an integrated value)</p>
 
 <dl class="function">
 <dt id="pyspeckit.cubes.cubes.subimage_integ">
-<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">subimage_integ</tt><big>(</big><em>cube</em>, <em>xcen</em>, <em>xwidth</em>, <em>ycen</em>, <em>ywidth</em>, <em>vrange</em>, <em>header=None</em>, <em>average=&lt;function mean at 0x101c26050&gt;</em>, <em>dvmult=False</em>, <em>return_HDU=False</em>, <em>units='pixels'</em>, <em>zunits=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.subimage_integ" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">subimage_integ</tt><big>(</big><em>cube</em>, <em>xcen</em>, <em>xwidth</em>, <em>ycen</em>, <em>ywidth</em>, <em>vrange</em>, <em>header=None</em>, <em>average=&lt;function mean at 0x1041b5cf8&gt;</em>, <em>dvmult=False</em>, <em>return_HDU=False</em>, <em>units='pixels'</em>, <em>zunits=None</em><big>)</big><a class="headerlink" href="#pyspeckit.cubes.cubes.subimage_integ" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a sub-image from a data cube integrated over the specified velocity range</p>
 <p>All units assumed to be pixel units</p>
 <p>cube has dimensions (velocity, y, x)</p>
@@ -660,7 +695,7 @@ average=sum and dvmul=True to get an integrated value)</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Oct 27, 2012.
+      Last updated on Oct 29, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
