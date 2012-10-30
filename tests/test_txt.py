@@ -1,4 +1,5 @@
 from pyspeckit import spectrum
+import numpy as np
 
 if not 'interactive' in globals():
     interactive=False
