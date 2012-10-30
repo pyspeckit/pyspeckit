@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Models &mdash; pyspeckit 0.1.8 documentation</title>
+    <title>Models &mdash; pyspeckit 0.1.10 documentation</title>
     
     <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1.8',
+        VERSION:     '0.1.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit 0.1.8 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
     <link rel="next" title="Features" href="features.html" />
     <link rel="prev" title="Installation and Requirements" href="install.html" />
      
@@ -47,7 +47,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit 0.1.8 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1.10 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -95,7 +95,7 @@ your fitting code must deal with units internally.</p>
 <p>Then you can <a class="reference external" href="registration.html">register</a> these fitters.</p>
 <span class="target" id="module-pyspeckit.spectrum.models.model"></span><dl class="class">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>shortvarnames=('A'</em>, <em>'\Delta x'</em>, <em>'\sigma')</em>, <em>multisingle='multi'</em>, <em>fitunits=None</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>shortvarnames=('A'</em>, <em>'\Delta x'</em>, <em>'\sigma')</em>, <em>multisingle='multi'</em>, <em>fitunits=None</em>, <em>centroid_par=None</em>, <em>fwhm_func=None</em>, <em>fwhm_pars=None</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper class for a spectra model.  Includes internal functions to
 generate multi-component models, annotations, integrals, and individual
 components.  The declaration can be complex, since you should name
@@ -176,6 +176,39 @@ just a single peak (a background may/will be fit)</p>
 </table>
 <p class="rubric">Methods</p>
 <dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.analytic_centroids">
+<tt class="descname">analytic_centroids</tt><big>(</big><em>centroidpar=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_centroids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the <em>analytic</em> centroids of the model components</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>centroidpar</strong> : None or string</p>
+<blockquote>
+<div><p>The name of the parameter in the fit that represents the centroid
+<em>some models have default centroid parameters - these will be used
+if centroidpar is unspecified</em></p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last"><strong>List of the centroid values (even if there&#8217;s only 1)</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.analytic_fwhm">
+<tt class="descname">analytic_fwhm</tt><big>(</big><em>parinfo=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the FWHMa of the model components <em>if</em> a fwhm_func has been
+defined</p>
+<p>Done with incomprehensible list comprehensions instead of nested for
+loops... readability sacrificed for speed and simplicity.  This is
+unpythonic.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.annotations">
 <tt class="descname">annotations</tt><big>(</big><em>shortvarnames=None</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.annotations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of TeX-formatted labels</p>
@@ -202,10 +235,35 @@ annotations.  Defaults to self.shortvarnames</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.component_integrals">
+<tt class="descname">component_integrals</tt><big>(</big><em>xarr</em>, <em>dx=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.component_integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the integrals of each component</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.components">
 <tt class="descname">components</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.components" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a numpy ndarray of shape [npeaks x modelshape] of the
 independent components of the fits</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.computed_centroid">
+<tt class="descname">computed_centroid</tt><big>(</big><em>xarr=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.computed_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the <em>computed</em> centroid of the model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>xarr</strong> : None or np.ndarray</p>
+<blockquote class="last">
+<div><p>The X coordinates of the model over which the centroid should be
+computed.  If unspecified, the centroid will be in pixel units</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -355,7 +413,7 @@ the Normal distribution with sigma = par.error and mean = par.value</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.integral">
-<tt class="descname">integral</tt><big>(</big><em>modelpars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.integral" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">integral</tt><big>(</big><em>modelpars</em>, <em>dx=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.integral" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extremely simple integrator:
 IGNORES modelpars;
 just sums self.model</p>
@@ -503,18 +561,57 @@ Draine 2011 textbook pgs 219-230)</dd>
 <p>grid_vwidth_scale is True or False: False for LVG, True for Sphere</p>
 </dd></dl>
 
-<span class="target" id="module-pyspeckit.spectrum.models.inherited_gaussfitter"></span><p>The simplest and most useful model.</p>
+<span class="target" id="module-pyspeckit.spectrum.models.inherited_gaussfitter"></span><div class="section" id="np">
+<h2>np.<a class="headerlink" href="#np" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="gaussian-fitter">
+<h2>Gaussian Fitter<a class="headerlink" href="#gaussian-fitter" title="Permalink to this headline">¶</a></h2>
+<p>The simplest and most useful model.</p>
 <p>Until 12/23/2011, gaussian fitting used the complicated and somewhat bloated
 gaussfitter.py code.  Now, this is a great example of how to make your own
 model!  Just make a function like gaussian and plug it into the SpectralModel
 class.</p>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian</tt><big>(</big><em>x</em>, <em>A</em>, <em>dx</em>, <em>w</em>, <em>return_components=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian</tt><big>(</big><em>x</em>, <em>A</em>, <em>dx</em>, <em>w</em>, <em>return_components=False</em>, <em>normalized=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a 1-dimensional gaussian of form
-H+A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
-<p>[height,amplitude,center,width]</p>
-<p>return_components does nothing but is required by all fitters</p>
+A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
+<p>Area is sqrt(2*pi)*sigma^2*amplitude - i.e., this is NOT a normalized
+gaussian, unless normalized=True in which case A = Area</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>x</strong> : np.ndarray</p>
+<blockquote>
+<div><p>array of x values</p>
+</div></blockquote>
+<p><strong>A</strong> : float</p>
+<blockquote>
+<div><p>Amplitude of the Gaussian, i.e. its peak value, unless
+normalized=True then A is the area of the gaussian</p>
+</div></blockquote>
+<p><strong>dx</strong> : float</p>
+<blockquote>
+<div><p>Center or &#8220;shift&#8221; of the gaussian</p>
+</div></blockquote>
+<p><strong>w</strong> : float</p>
+<blockquote>
+<div><p>Width of the gaussian (sigma)</p>
+</div></blockquote>
+<p><strong>return_components</strong> : bool</p>
+<blockquote>
+<div><p>dummy variable; return_components does nothing but is required by all
+fitters</p>
+</div></blockquote>
+<p><strong>normalized</strong> : bool</p>
+<blockquote class="last">
+<div><p>Return a normalized Gaussian?</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -523,6 +620,7 @@ H+A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
 <dd><p>Generator for Gaussian fitter class</p>
 </dd></dl>
 
+</div>
 <span class="target" id="module-pyspeckit.spectrum.models.hcn"></span><p>This is an HCN fitter...
 ref for line params: <a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat">http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn&#64;hfs.dat</a></p>
 <dl class="data">
@@ -630,7 +728,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x106ff55f0&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x102f10500&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -685,18 +783,85 @@ transitions gives the total spin degeneracy</p>
 </div>
 <span class="target" id="module-pyspeckit.spectrum.models.inherited_voigtfitter"></span><dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_voigtfitter.voigt">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt</tt><big>(</big><em>xarr</em>, <em>amp</em>, <em>xcen</em>, <em>Gfwhm</em>, <em>Lfwhm</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt" title="Permalink to this definition">¶</a></dt>
-<dd><p>voigt profile</p>
-<p>V(x,sig,gam) = Re(w(z))/(sig*sqrt(2*pi))
-z = (x+i*gam)/(sig*sqrt(2))</p>
-<p>Converted from 
-<a class="reference external" href="http://mail.scipy.org/pipermail/scipy-user/2011-January/028327.html">http://mail.scipy.org/pipermail/scipy-user/2011-January/028327.html</a></p>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt</tt><big>(</big><em>xarr</em>, <em>amp</em>, <em>xcen</em>, <em>sigma</em>, <em>gamma</em>, <em>normalized=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalized Voigt profile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>xarr</strong> : np.ndarray</p>
+<blockquote>
+<div><p>The X values over which to compute the Voigt profile</p>
+</div></blockquote>
+<p><strong>amp</strong> : float</p>
+<blockquote>
+<div><p>Amplitude of the voigt profile
+if normalized = True, amp is the AREA</p>
+</div></blockquote>
+<p><strong>xcen</strong> : float</p>
+<blockquote>
+<div><p>The X-offset of the profile</p>
+</div></blockquote>
+<p><strong>sigma</strong> : float</p>
+<blockquote>
+<div><p>The width / sigma parameter of the Gaussian distribution</p>
+</div></blockquote>
+<p><strong>gamma</strong> : float</p>
+<blockquote>
+<div><p>The width / shape parameter of the Lorentzian distribution</p>
+</div></blockquote>
+<p><strong>normalized</strong> : bool</p>
+<blockquote>
+<div><p>Determines whether &#8220;amp&#8221; refers to the area or the peak
+of the voigt profile</p>
+</div></blockquote>
+<p><strong>z = (x+i*gam)/(sig*sqrt(2))</strong> :</p>
+<p><strong>V(x,sig,gam) = Re(w(z))/(sig*sqrt(2*pi))</strong> :</p>
+<p><strong>The area of V in this definition is 1.</strong> :</p>
+<p><strong>If normalized=False, then you can divide the integral of V by</strong> :</p>
+<p><strong>sigma*sqrt(2*pi) to get the area.</strong> :</p>
+<p><strong>Original implementation converted from</strong> :</p>
+<p><strong>http://mail.scipy.org/pipermail/scipy-user/2011-January/028327.html</strong> :</p>
+<p><strong>(had an incorrect normalization and strange treatment of the input</strong> :</p>
+<p><strong>parameters)</strong> :</p>
+<p><strong>Modified implementation taken from wikipedia, using the definition.</strong> :</p>
+<p class="last"><strong>http://en.wikipedia.org/wiki/Voigt_profile</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fitter">
 <tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator for voigt fitter class</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fwhm">
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt_fwhm</tt><big>(</big><em>sigma</em>, <em>gamma</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Approximation to the Voigt FWHM from wikipedia</p>
+<p><a class="reference external" href="http://en.wikipedia.org/wiki/Voigt_profile">http://en.wikipedia.org/wiki/Voigt_profile</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>sigma</strong> : float</p>
+<blockquote class="last">
+<div><blockquote>
+<div><p>The width / sigma parameter of the Gaussian distribution</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>gamma <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">The width / shape parameter of the Lorentzian distribution</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <span class="target" id="module-pyspeckit.spectrum.models.hydrogen"></span><div class="section" id="hydrogen-models">
@@ -820,6 +985,8 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Models &amp; Fitting</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-api">Module API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#np">np.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gaussian-fitter">Gaussian Fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#n2h-fitter">N2H+ fitter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hydrogen-models">Hydrogen Models</a></li>
 </ul>
@@ -854,7 +1021,7 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Aug 04, 2012.
+      Last updated on Oct 27, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

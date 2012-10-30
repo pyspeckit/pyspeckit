@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Registration &mdash; pyspeckit 0.1.8 documentation</title>
+    <title>Registration &mdash; pyspeckit 0.1.10 documentation</title>
     
     <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1.8',
+        VERSION:     '0.1.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit 0.1.8 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
     <link rel="up" title="Features" href="features.html" />
     <link rel="next" title="Readers" href="readers.html" />
     <link rel="prev" title="Units" href="units.html" />
@@ -48,7 +48,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit 0.1.8 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1.10 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -101,41 +101,56 @@ the semi-private method</p>
 <dt id="pyspeckit.spectrum.__init__.register_reader">
 <tt class="descclassname">pyspeckit.spectrum.__init__.</tt><tt class="descname">register_reader</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.__init__.register_reader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a reader function.</p>
-<p>Required Arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>filetype: str</strong> :</p>
 <blockquote>
-<div><dl class="docutils">
-<dt><em>filetype</em>: [ string ]</dt>
-<dd>The file type name</dd>
-<dt><em>function</em>: [ function ]</dt>
-<dd>The reader function.  Should take a filename as input
-and return an X-axis object (see units.py), a spectrum,
-an error spectrum (initialize it to 0&#8217;s if empty), and a
-pyfits header instance</dd>
-<dt><em>suffix</em>: [ int ]</dt>
-<dd>What suffix should the file have?</dd>
-</dl>
+<div><p>The file type name</p>
 </div></blockquote>
-<p>Optional Keyword Arguments:</p>
+<p><strong>function: function</strong> :</p>
+<blockquote>
+<div><p>The reader function.  Should take a filename as input and return an
+X-axis object (see units.py), a spectrum, an error spectrum (initialize
+it to 0&#8217;s if empty), and a pyfits header instance</p>
+</div></blockquote>
+<p><strong>suffix: int</strong> :</p>
+<blockquote class="last">
+<div><p>What suffix should the file have?</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.__init__.register_writer">
 <tt class="descclassname">pyspeckit.spectrum.__init__.</tt><tt class="descname">register_writer</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.__init__.register_writer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a writer function.</p>
-<p>Required Arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>filetype:  string</strong> :</p>
 <blockquote>
-<div><dl class="docutils">
-<dt><em>filetype</em>: [ string ]</dt>
-<dd>The file type name</dd>
-<dt><em>function</em>: [ function ]</dt>
-<dd>The writer function.  Will be an attribute of Spectrum
-object, and called as spectrum.Spectrum.write_hdf5(), 
-for example.</dd>
-<dt><em>suffix</em>: [ int ]</dt>
-<dd>What suffix should the file have?</dd>
-</dl>
+<div><p>The file type name</p>
 </div></blockquote>
-<p>Optional Keyword Arguments:</p>
+<p><strong>function:  function</strong> :</p>
+<blockquote>
+<div><p>The writer function.  Will be an attribute of Spectrum
+object, and called as spectrum.Spectrum.write_hdf5(), 
+for example.</p>
+</div></blockquote>
+<p><strong>suffix:  int</strong> :</p>
+<blockquote class="last">
+<div><p>What suffix should the file have?</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <span class="target" id="module-pyspeckit.spectrum.fitters"></span><dl class="class">
@@ -232,7 +247,7 @@ does it allow N copies of the fitting function?</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Aug 04, 2012.
+      Last updated on Oct 27, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

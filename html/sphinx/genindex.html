@@ -10,7 +10,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &mdash; pyspeckit 0.1.8 documentation</title>
+    <title>Index &mdash; pyspeckit 0.1.10 documentation</title>
     
     <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -18,7 +18,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1.8',
+        VERSION:     '0.1.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -28,7 +28,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit 0.1.8 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
      
     <script type="text/javascript">
 
@@ -47,7 +47,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit 0.1.8 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1.10 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -134,6 +134,16 @@
   </dt>
 
       
+  <dt><a href="models.html#pyspeckit.spectrum.models.model.SpectralModel.analytic_centroids">analytic_centroids() (pyspeckit.spectrum.models.model.SpectralModel method)</a>
+  </dt>
+
+      
+  <dt><a href="models.html#pyspeckit.spectrum.models.model.SpectralModel.analytic_fwhm">analytic_fwhm() (pyspeckit.spectrum.models.model.SpectralModel method)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
   <dt><a href="baseline.html#pyspeckit.spectrum.baseline.Baseline.annotate">annotate() (pyspeckit.spectrum.baseline.Baseline method)</a>
   </dt>
 
@@ -143,8 +153,6 @@
   </dt>
 
       </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="models.html#pyspeckit.spectrum.models.model.SpectralModel.annotations">annotations() (pyspeckit.spectrum.models.model.SpectralModel method)</a>
   </dt>
@@ -179,16 +187,6 @@
   <dt><a href="wrappers.html#pyspeckit.wrappers.fitnh3.BigSpectrum_to_NH3dict">BigSpectrum_to_NH3dict() (in module pyspeckit.wrappers.fitnh3)</a>
   </dt>
 
-      
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.boolmask">boolmask (pyspeckit.cubes.SpectralCube.Cube attribute)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.boolmask">(pyspeckit.spectrum.Spectrum attribute)</a>
-  </dt>
-
-      </dl></dd>
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
@@ -251,10 +249,18 @@
   <dt><a href="cubes.html#pyspeckit.cubes.mapplot.MapPlotter.click">click() (pyspeckit.cubes.mapplot.MapPlotter method)</a>
   </dt>
 
+      
+  <dt><a href="models.html#pyspeckit.spectrum.models.model.SpectralModel.component_integrals">component_integrals() (pyspeckit.spectrum.models.model.SpectralModel method)</a>
+  </dt>
+
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="models.html#pyspeckit.spectrum.models.model.SpectralModel.components">components() (pyspeckit.spectrum.models.model.SpectralModel method)</a>
+  </dt>
+
+      
+  <dt><a href="models.html#pyspeckit.spectrum.models.model.SpectralModel.computed_centroid">computed_centroid() (pyspeckit.spectrum.models.model.SpectralModel method)</a>
   </dt>
 
       
@@ -334,18 +340,6 @@
       <dd><dl>
         
   <dt><a href="fitting.html#pyspeckit.spectrum.fitters.Specfit.downsample">(pyspeckit.spectrum.fitters.Specfit method)</a>
-  </dt>
-
-      </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.dtype">dtype (pyspeckit.cubes.SpectralCube.Cube attribute)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.dtype">(pyspeckit.spectrum.Spectrum attribute)</a>
   </dt>
 
       </dl></dd>
@@ -460,6 +454,10 @@
   </dt>
 
       
+  <dt><a href="fitting.html#pyspeckit.spectrum.fitters.Specfit.get_components">get_components() (pyspeckit.spectrum.fitters.Specfit method)</a>
+  </dt>
+
+      
   <dt><a href="fitting.html#pyspeckit.spectrum.fitters.Specfit.get_emcee">get_emcee() (pyspeckit.spectrum.fitters.Specfit method)</a>
   </dt>
 
@@ -546,6 +544,10 @@
   </dt>
 
       
+  <dt><a href="fitting.html#pyspeckit.spectrum.fitters.Specfit.history_fitpars">history_fitpars() (pyspeckit.spectrum.fitters.Specfit method)</a>
+  </dt>
+
+      
   <dt><a href="models.html#pyspeckit.spectrum.models.hydrogen.hydrogen_fitter">hydrogen_fitter() (in module pyspeckit.spectrum.models.hydrogen)</a>
   </dt>
 
@@ -585,6 +587,8 @@
   <dt><a href="cubes.html#pyspeckit.cubes.cubes.integ">integ() (in module pyspeckit.cubes.cubes)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="fitting.html#pyspeckit.spectrum.fitters.Specfit.integral">integral() (pyspeckit.spectrum.fitters.Specfit method)</a>
   </dt>
@@ -595,8 +599,6 @@
   </dt>
 
       </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.interpnans">interpnans() (pyspeckit.cubes.SpectralCube.Cube method)</a>
   </dt>
@@ -604,26 +606,6 @@
       <dd><dl>
         
   <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.interpnans">(pyspeckit.spectrum.Spectrum method)</a>
-  </dt>
-
-      </dl></dd>
-      
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.interpolate_bspline">interpolate_bspline() (pyspeckit.cubes.SpectralCube.Cube method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.interpolate_bspline">(pyspeckit.spectrum.Spectrum method)</a>
-  </dt>
-
-      </dl></dd>
-      
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.interpolate_linear">interpolate_linear() (pyspeckit.cubes.SpectralCube.Cube method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.interpolate_linear">(pyspeckit.spectrum.Spectrum method)</a>
   </dt>
 
       </dl></dd>
@@ -757,22 +739,12 @@
   </dt>
 
       </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="models.html#pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc">n_modelfunc() (pyspeckit.spectrum.models.model.SpectralModel method)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.ndim">ndim (pyspeckit.cubes.SpectralCube.Cube attribute)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.ndim">(pyspeckit.spectrum.Spectrum attribute)</a>
-  </dt>
-
-      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -850,21 +822,15 @@
   </dt>
 
       
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.plot">plot() (pyspeckit.cubes.SpectralCube.Cube method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.plot">(pyspeckit.spectrum.Spectrum method)</a>
-  </dt>
-
-      </dl></dd>
-      
   <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.plot_apspec">plot_apspec() (pyspeckit.cubes.SpectralCube.Cube method)</a>
   </dt>
 
       
   <dt><a href="baseline.html#pyspeckit.spectrum.baseline.Baseline.plot_baseline">plot_baseline() (pyspeckit.spectrum.baseline.Baseline method)</a>
+  </dt>
+
+      
+  <dt><a href="fitting.html#pyspeckit.spectrum.fitters.Specfit.plot_components">plot_components() (pyspeckit.spectrum.fitters.Specfit method)</a>
   </dt>
 
       
@@ -1164,42 +1130,12 @@
   </dt>
 
       
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.size">size (pyspeckit.cubes.SpectralCube.Cube attribute)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.size">(pyspeckit.spectrum.Spectrum attribute)</a>
-  </dt>
-
-      </dl></dd>
-      
   <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.slice">slice() (pyspeckit.cubes.SpectralCube.Cube method)</a>
   </dt>
 
       <dd><dl>
         
   <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.slice">(pyspeckit.spectrum.Spectrum method)</a>
-  </dt>
-
-      </dl></dd>
-      
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.slice_dispersion">slice_dispersion() (pyspeckit.cubes.SpectralCube.Cube method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.slice_dispersion">(pyspeckit.spectrum.Spectrum method)</a>
-  </dt>
-
-      </dl></dd>
-      
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.slice_pixel">slice_pixel() (pyspeckit.cubes.SpectralCube.Cube method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.slice_pixel">(pyspeckit.spectrum.Spectrum method)</a>
   </dt>
 
       </dl></dd>
@@ -1227,26 +1163,6 @@
       </dl></dd>
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.smooth_boxcar">smooth_boxcar() (pyspeckit.cubes.SpectralCube.Cube method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.smooth_boxcar">(pyspeckit.spectrum.Spectrum method)</a>
-  </dt>
-
-      </dl></dd>
-      
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.smooth_custom">smooth_custom() (pyspeckit.cubes.SpectralCube.Cube method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.smooth_custom">(pyspeckit.spectrum.Spectrum method)</a>
-  </dt>
-
-      </dl></dd>
       
   <dt><a href="cubes.html#pyspeckit.cubes.cubes.speccen_header">speccen_header() (in module pyspeckit.cubes.cubes)</a>
   </dt>
@@ -1283,16 +1199,6 @@
   <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum">Spectrum (class in pyspeckit.spectrum)</a>
   </dt>
 
-      
-  <dt><a href="cubes.html#pyspeckit.cubes.SpectralCube.Cube.spectrum1DBase">spectrum1DBase (pyspeckit.cubes.SpectralCube.Cube attribute)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="spectrum.html#pyspeckit.spectrum.Spectrum.spectrum1DBase">(pyspeckit.spectrum.Spectrum attribute)</a>
-  </dt>
-
-      </dl></dd>
       
   <dt><a href="fitting.html#pyspeckit.spectrum.fitters.Specfit.start_interactive">start_interactive() (pyspeckit.spectrum.fitters.Specfit method)</a>
   </dt>
@@ -1345,10 +1251,14 @@
   <dt><a href="models.html#pyspeckit.spectrum.models.inherited_voigtfitter.voigt">voigt() (in module pyspeckit.spectrum.models.inherited_voigtfitter)</a>
   </dt>
 
+      
+  <dt><a href="models.html#pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fitter">voigt_fitter() (in module pyspeckit.spectrum.models.inherited_voigtfitter)</a>
+  </dt>
+
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="models.html#pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fitter">voigt_fitter() (in module pyspeckit.spectrum.models.inherited_voigtfitter)</a>
+  <dt><a href="models.html#pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fwhm">voigt_fwhm() (in module pyspeckit.spectrum.models.inherited_voigtfitter)</a>
   </dt>
 
   </dl></td>
@@ -1438,7 +1348,7 @@
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Aug 05, 2012.
+      Last updated on Oct 27, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

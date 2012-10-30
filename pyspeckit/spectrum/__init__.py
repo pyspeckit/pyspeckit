@@ -15,21 +15,17 @@ def register_reader(filetype, function, suffix, default=False):
     ''' 
     Register a reader function.
 
-    Required Arguments:
+    Parameters
+    ----------
+    filetype: str
+        The file type name
+    function: function
+        The reader function.  Should take a filename as input and return an
+        X-axis object (see units.py), a spectrum, an error spectrum (initialize
+        it to 0's if empty), and a pyfits header instance
+    suffix: int
+        What suffix should the file have?
 
-        *filetype*: [ string ]
-            The file type name
-
-        *function*: [ function ]
-            The reader function.  Should take a filename as input
-            and return an X-axis object (see units.py), a spectrum,
-            an error spectrum (initialize it to 0's if empty), and a
-            pyfits header instance
-
-        *suffix*: [ int ]
-            What suffix should the file have?
-
-    Optional Keyword Arguments:
 
     '''
 
@@ -55,20 +51,16 @@ def register_writer(filetype, function, suffix, default=False):
     ''' 
     Register a writer function.
 
-    Required Arguments:
-
-        *filetype*: [ string ]
-            The file type name
-
-        *function*: [ function ]
-            The writer function.  Will be an attribute of Spectrum
-            object, and called as spectrum.Spectrum.write_hdf5(), 
-            for example. 
-
-        *suffix*: [ int ]
-            What suffix should the file have?
-
-    Optional Keyword Arguments:
+    Parameters
+    ----------
+    filetype:  string 
+        The file type name
+    function:  function 
+        The writer function.  Will be an attribute of Spectrum
+        object, and called as spectrum.Spectrum.write_hdf5(), 
+        for example. 
+    suffix:  int 
+        What suffix should the file have?
 
     '''
 

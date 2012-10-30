@@ -6,20 +6,18 @@ def smooth(data,smooth,smoothtype='gaussian',downsample=True,downsample_factor=N
     """
     Smooth and downsample the data array
 
-    *smooth* [ float ] 
+    Parameters
+    ----------
+    smooth  :  float 
         Number of pixels to smooth by
-
-    *smoothtype* [ 'gaussian','hanning', or 'boxcar' ]
+    smoothtype : [ 'gaussian','hanning', or 'boxcar' ]
         type of smoothing kernel to use
-
-    *downsample* [ bool ]
+    downsample :  bool 
         Downsample the data?
-
-    *downsample_factor* [ int ]
+    downsample_factor  :  int 
         Downsample by the smoothing factor, or something else?
-
-    *convmode* [ 'full','valid','same' ]
-        see `numpy.convolve`.  'same' returns an array of the same length as
+    convmode : [ 'full','valid','same' ]
+        see :mod:`numpy.convolve`.  'same' returns an array of the same length as
         'data' (assuming data is larger than the kernel)
     """
     

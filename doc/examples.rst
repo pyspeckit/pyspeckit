@@ -28,6 +28,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    Optical SDSS <example_sdss>
    Optical Vega Echelle <example_vega_echelle>
    Optical INTERACTIVE <interactive>
+   Optical Supernova (?) H-alpha multi-component voigt <example_sn>
    Monte Carlo <example_pymc>
 
 

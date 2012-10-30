@@ -285,11 +285,13 @@ class Specfit(interactive.Interactive):
         if save: self.savefit()
 
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
-            components=False, annotate=False, alpha=0.5, loc='lower left'):
+            components=False, annotate=False, alpha=0.5, loc='lower left',
+            xmin=None, xmax=None):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
-        (the selected range is self.xmin:self.xmax, so it may include multiple lines!)
+        (the selected range defaults to self.xmin:self.xmax, so it may include
+        multiple lines!)
 
         Parameters
         ----------
@@ -305,6 +307,9 @@ class Specfit(interactive.Interactive):
         components : bool
             If your fit is multi-component, will attempt to acquire centroids
             for each component and print out individual EQWs
+        xmin : float
+        xmax : float
+            The range over which to compute the EQW
 
         Returns
         -------
@@ -315,10 +320,17 @@ class Specfit(interactive.Interactive):
             raise ValueError("Baseline / continuum is zero: equivalent width is undefined.")
         elif np.median(self.Spectrum.baseline.basespec) < 0:
             if mycfg.WARN: warn( "WARNING: Baseline / continuum is negative: equivalent width is poorly defined." )
-        dx = np.abs( self.Spectrum.xarr[self.xmin:self.xmax].cdelt(approx=True) )
+
+        # determine range to use
+        if xmin is None:
+            xmin = self.xmin
+        if xmax is None:
+            xmax = self.xmax
+
+        dx = np.abs( self.Spectrum.xarr[xmin:xmax].cdelt(approx=True) )
         if components:
             centroids = self.fitter.analytic_centroids()
-            integrals = self.fitter.component_integrals(self.Spectrum.xarr[self.xmin:self.xmax],dx=dx)
+            integrals = self.fitter.component_integrals(self.Spectrum.xarr[xmin:xmax],dx=dx)
             eqw = []
             for cen,integ in zip(centroids,integrals):
                 center_pix = self.Spectrum.xarr.x_to_pix(cen)
@@ -328,11 +340,12 @@ class Specfit(interactive.Interactive):
                 plot = False
                 if mycfg.WARN: warn( "Cannot plot multiple Equivalent Widths" )
         elif fitted:
-            model = self.get_model(self.Spectrum.xarr[self.xmin:self.xmax], 
+            model = self.get_model(self.Spectrum.xarr[xmin:xmax], 
                     add_baseline=False)
             if continuum is None:
                 # centroid in data units
-                center = (model*self.Spectrum.xarr[self.xmin:self.xmax]).sum()/model.sum()
+                # (may fail if model has pos + neg values)
+                center = (model*self.Spectrum.xarr[xmin:xmax]).sum()/model.sum()
                 center_pix = self.Spectrum.xarr.x_to_pix(center)
                 continuum = self.Spectrum.baseline.basespec[center_pix]
             # EQW is positive for absorption lines
@@ -340,13 +353,16 @@ class Specfit(interactive.Interactive):
             integral = (-model).sum() * dx
             eqw = integral / continuum
         else:
-            diffspec = (self.Spectrum.baseline.basespec - self.Spectrum.data)
-            sumofspec = diffspec[self.xmin:self.xmax].sum() * dx
+            if self.Spectrum.baseline.subtracted is False:
+                diffspec = (self.Spectrum.baseline.basespec - self.Spectrum.data)
+            else:
+                diffspec = -self.Spectrum.data
+            sumofspec = diffspec[xmin:xmax].sum() * dx
             if continuum is None:
                 continuum = np.median(self.Spectrum.baseline.basespec)
             eqw = sumofspec / continuum
         if plot:
-            midpt_pixel = np.round((self.xmin+self.xmax)/2.0)
+            midpt_pixel = np.round((xmin+xmax)/2.0)
             midpt       = self.Spectrum.xarr[midpt_pixel]
             midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
             print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
@@ -654,12 +670,12 @@ class Specfit(interactive.Interactive):
         """
         Compute the model for the whole spectrum
         """
-        self.fullmodel = self.get_full_model(debug=debug)
+        self.fullmodel = self.get_full_model(debug=debug,**kwargs)
         self.fullresiduals = self.Spectrum.data - self.fullmodel
 
-    def get_full_model(self, debug=False):
+    def get_full_model(self, debug=False,**kwargs):
         """ compute the model over the full axis """ 
-        return self.get_model(self.Spectrum.xarr, debug=debug)
+        return self.get_model(self.Spectrum.xarr, debug=debug,**kwargs)
 
     def get_model(self, xarr, debug=False, add_baseline=None):
         """ Compute the model over a given axis """
@@ -1230,3 +1246,87 @@ class Specfit(interactive.Interactive):
                     self.modelpars, **kwargs)
 
             return self.modelcomponents
+
+    def measure_approximate_fwhm(self, threshold='error', emission=True,
+            interpolate_factor=1, plot=False, **kwargs):
+        """
+        Measure the FWHM of a fitted line
+
+        This procedure is designed for multi-component lines; if the true FWHM
+        is known (i.e., the line is well-represented by a single
+        gauss/voigt/lorentz profile), use that instead!
+
+        This MUST be run AFTER a fit has been performed!
+
+        Parameters
+        ----------
+        threshold : 'error' | float
+            The threshold above which the spectrum will be interpreted as part
+            of the line.  This threshold is applied to the *model*.  If it is
+            'noise', self.error will be used.
+        emission : bool
+            Is the line absorption or emission?  
+        interpolate_factor : integer
+            Magnification factor for determining sub-pixel FWHM.  If used,
+            "zooms-in" by using linear interpolation within the line region
+        plot : bool
+            Overplot a line at the FWHM indicating the FWHM.  kwargs
+            are passed to matplotlib.plot
+        """
+
+        if threshold == 'error':
+            threshold = self.Spectrum.error
+            if np.all(self.Spectrum.error==0):
+                threshold = 1e-3*self.Spectrum.data.max()
+
+        if self.Spectrum.baseline.subtracted is False:
+            data = self.Spectrum.data - self.Spectrum.baseline.basespec
+        else:
+            data = self.Spectrum.data * 1
+
+        model = self.get_full_model(add_baseline=False)
+
+        # can modify inplace because data is a copy of self.Spectrum.data
+        if not emission:
+            data *= -1
+            model *= -1
+
+        line_region = model > threshold
+
+        # determine peak (because data is neg if absorption, always use max)
+        peak = data[line_region].max()
+
+        xarr = self.Spectrum.xarr[line_region]
+        xarr.make_dxarr()
+        cd = xarr.dxarr.min()
+        
+        if interpolate_factor > 1:
+            newxarr = units.SpectroscopicAxis(
+                    np.arange(xarr.min()-cd,xarr.max()+cd,cd / float(interpolate_factor)))
+            # load the metadata from xarr
+            newxarr._update_from(xarr)
+            data = np.interp(newxarr,xarr,data[line_region])
+            xarr = newxarr
+        else:
+            data = data[line_region]
+
+        # need the peak location so we can find left/right half-max locations
+        peakloc = data.argmax()
+
+        hm_left  = np.argmin( np.abs( data[:peakloc]-peak/2. ))
+        hm_right = np.argmin( np.abs( data[peakloc:]-peak/2. )) + peakloc
+        
+        deltax = xarr[hm_right]-xarr[hm_left]
+
+        if plot:
+            self.Spectrum.plotter.axis.plot([xarr[hm_right],xarr[hm_left]],
+                    [peak/2.,peak/2.],**kwargs)
+            self.Spectrum.plotter.refresh()
+
+        # debug print hm_left,hm_right,"FWHM: ",deltax
+        # debug self.Spectrum.plotter.axis.plot(xarr,data,color='magenta')
+        # debug self.Spectrum.plotter.refresh()
+        # debug raise TheDead
+
+        return deltax
+

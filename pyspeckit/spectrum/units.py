@@ -377,6 +377,7 @@ class SpectroscopicAxis(np.ndarray):
         # moved from __init__ - needs to be done whenever viewed
         # (this is slow, though - may be better not to do this)
         if self.shape: # check to make sure non-scalar
+            # can't use make_dxarr here! infinite recursion =(
             self.dxarr = np.diff(np.array(self))
 
     def __array_wrap__(self,out_arr,context=None):
@@ -602,7 +603,7 @@ class SpectroscopicAxis(np.ndarray):
 
         if unit in unit_type_dict and unit not in (None, 'unknown'):
             self.units = unit
-        self.dxarr = np.diff(self)
+        self.make_dxarr()
 
     def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
             center_frequency_units=None, debug=False, **kwargs):
@@ -649,6 +650,15 @@ class SpectroscopicAxis(np.ndarray):
             center_frequency = self.refX
         if center_frequency_units is None:
             center_frequency_units = self.refX_units
+
+        # make sure "center frequency" is actually a frequency (required by later code!)
+        if center_frequency_units not in frequency_dict:
+            if center_frequency_units in wavelength_dict:
+                center_frequency = wavelength_to_frequency(center_frequency, 
+                        center_frequency_units, frequency_units='GHz')
+                center_frequency_units='GHz'
+            else:
+                raise ValueError("ERROR: %s is not a valid reference unit." % center_frequency_units)
 
         if change_xtype:
             if unit in velocity_dict:
@@ -765,7 +775,7 @@ class SpectroscopicAxis(np.ndarray):
         
         if frame in frame_type_dict:
             self[:] = self.in_frame(frame)
-            self.dxarr = np.diff(self)
+            self.make_dxarr()
             self.frame = frame
 
     def make_dxarr(self, coordinate_location='center'):
@@ -779,6 +789,13 @@ class SpectroscopicAxis(np.ndarray):
             have the same dx as the second pixel.
 
         """
+        dxarr = np.diff(self)
+        if coordinate_location in ['left','center']:
+            self.dxarr = np.concatenate([dxarr,dxarr[-1:]])
+        elif coordinate_location in ['right']:
+            self.dxarr = np.concatenate([dxarr[:1],dxarr])
+        else:
+            raise ValueError("Invalid coordinate location.")
 
     def in_frame(self, frame):
         """
@@ -817,7 +834,7 @@ class SpectroscopicAxis(np.ndarray):
             Return the mean DX even if it is inaccurate
         """
         if not hasattr(self,'dxarr'): # if cropping happens...
-            self.dxarr = np.diff(self)
+            self.make_dxarr()
         if approx or abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
             return self.dxarr.mean().flat[0]
 
@@ -825,7 +842,7 @@ class SpectroscopicAxis(np.ndarray):
         """
         Generate a set of WCS parameters for the X-array
         """
-        self.dxarr = np.diff(self)
+        self.make_dxarr()
 
         if self.wcshead is None:
             self.wcshead = {}
@@ -851,6 +868,17 @@ class SpectroscopicAxis(np.ndarray):
             self.wcshead['CRVAL1'] = self[0]
             self.wcshead['CRPIX1'] = 1.0
             return True
+
+    def _update_from(self, obj):
+        """Copies some attributes of obj to self.
+        (this code copied partly from numpy.ma.core:
+        https://github.com/numpy/numpy/blob/master/numpy/ma/core.py)
+        """
+
+        for attr in ('frame', 'redshift', 'refX', 'refX_units', 'units',
+                'velocity_convention', 'wcshead', 'xtype'):
+            self.__dict__[attr] = obj.__dict__[attr]
+
 
 class SpectroscopicAxes(SpectroscopicAxis):
     """
@@ -956,15 +984,30 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
         center_frequency_units=None, frequency_units='Hz',
         convention='radio'):
     """
-    Conventions defined here:
-    http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
-    * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
-    * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )^-1
-    * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
-    * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
+
+    Parameters
+    ----------
+    velocities : np.ndarray
+        An array of velocity values
+    inpput_units : str
+        A string representing the units of the velocities array
+    center_frequency : float
+        The reference frequency (i.e., the 0-m/s freq)
+    center_frequency_units : str
+        A string representing the units of the reference frequency
+    frequency_units : str
+        A string representing the desired output units
+    convention : ['radio','optical','relativistic':
+        Conventions defined here:
+        http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
+        * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
+        * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )^-1
+        * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
+        * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
+
     """
     if input_units in frequency_dict:
-        print "Already in frequency units (%s)" % input_units
+        #print "Already in frequency units (%s)" % input_units
         return velocities
     if center_frequency is None:
         raise ValueError("Cannot convert velocity to frequency without specifying a central frequency.")
@@ -1044,7 +1087,7 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
     nu = c / lambda
     """
     if input_units in frequency_dict:
-        print "Already in frequency units (%s)" % input_units
+        #print "Already in frequency units (%s)" % input_units
         return wavelengths
     if frequency_units not in frequency_dict:
         raise ValueError("Frequency units %s not valid" % frequency_units)

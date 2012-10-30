@@ -31,6 +31,7 @@ print "Baseline: ",sp.baseline.baselinepars
 #print "Excludepix: ",sp.baseline.excludepix
 #print "Excludevelo: ",sp.baseline.excludevelo
 print "EQW: ",sp.specfit.EQW()
+print "EQW (empirical): ",sp.specfit.EQW(fitted=False)
 print "Datamax: ",sp.data.max()
 print "NOK: ",sp.baseline.OKmask.sum()
 print sp.data[sp.baseline.includemask]
@@ -47,6 +48,10 @@ sp.plotter.figure.savefig(savedir+'txt_baseline_gaussfit.png')
 if interactive: raw_input("Wait here a moment")
 
 print "EQW: ",sp.specfit.EQW(plot=True,annotate=True)
+print "FWHM: ",sp.specfit.measure_approximate_fwhm(emission=False)
+fwhm10 = sp.specfit.measure_approximate_fwhm(interpolate_factor=10,emission=False)
+assert np.abs(fwhm10-2.35*sp.specfit.parinfo.WIDTH0.value) < 0.001
+print "FWHM 10x accuracy: ",fwhm10
 sp.plotter.refresh()
 sp.plotter.figure.savefig(savedir+'txt_EQW.png')
 

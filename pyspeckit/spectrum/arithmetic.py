@@ -45,7 +45,8 @@ def interp(spec1,spec2, left=0, right=0):
 
 def interpnans(spec):
     """
-    Interpolate over NAN values, replacing them with their neighbors...
+    Interpolate over NAN values, replacing them with values interpolated from
+    their neighbors using linear interpolation.
     """
 
     if hasattr(spec.data,'mask'):
