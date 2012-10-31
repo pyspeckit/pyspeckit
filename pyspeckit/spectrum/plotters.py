@@ -14,6 +14,7 @@ import numpy as np
 from pyspeckit.specwarnings import warn
 import copy
 import widgets
+import inspect
 
 interactive_help_message = """
 Interactive key commands for plotter.  An additional help message may appear if
@@ -74,7 +75,9 @@ class Plotter(object):
 
     def _set_prop(xy, minmax):
         def setprop(self, value):
-            if self.debug: print "Setting %s%s to %s" % (xy,minmax,value)
+            if self.debug: 
+                frm = inspect.stack()
+                print frm[1],"Setting %s%s to %s" % (xy,minmax,value)
             if xy == 'x':
                 if minmax == 'min':
                     self._xlim[0] = value
@@ -262,6 +265,10 @@ class Plotter(object):
         """
         Automatically or manually reset the plot limits
         """
+        if self.debug:
+            frame = inspect.currentframe()
+            args, _, _, values = inspect.getargvalues(frame)
+            print zip(args,values)
 
         if use_window_limits:
             # this means DO NOT reset!

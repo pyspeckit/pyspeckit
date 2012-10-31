@@ -366,7 +366,7 @@ class Interactive(object):
             self.xmax = numpy.ceil(self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmax))
             if self.xmin>self.xmax: 
                 self.xmin,self.xmax = self.xmax,self.xmin
-            if debug: print "Including all plotted area (as defined by [plotter.xmin,plotter.xmax]) for fit"
+            if debug: print "Including all plotted area (as defined by [plotter.xmin=%f,plotter.xmax=%f]) for fit" % (self.xmin,self.xmax)
             if debug: print "Including self.xmin:self.xmax = %f:%f (and excluding the rest)" % (self.xmin,self.xmax)
             self.includemask[:self.xmin] = False
             self.includemask[self.xmax:] = False

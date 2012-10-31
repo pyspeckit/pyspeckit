@@ -1186,7 +1186,7 @@ class Specfit(interactive.Interactive):
         else:
             print "Must have a fitter instantiated before creating sliders"
 
-    def optimal_chi2(self, reduced=True):
+    def optimal_chi2(self, reduced=True, **kwargs):
         """
         Compute an "optimal" chi^2 statistic, i.e. one in which only pixels in
         which the model is statistically significant are included
@@ -1195,6 +1195,7 @@ class Specfit(interactive.Interactive):
         ----------
         reduced : bool
             Return the reduced chi^2
+        kwargs are passed to :meth:`get_model_xlimits`
 
         Returns
         -------
@@ -1202,12 +1203,13 @@ class Specfit(interactive.Interactive):
         `\\chi^2 = \\sum( (d_i - m_i)^2 / e_i^2 )
         """
 
-        modelmask = np.abs(self.fullmodel) > self.errspec
+        # old version modelmask = np.abs(self.fullmodel) > self.errspec
+        xmin,xmax = self.get_model_xlimits(units='pixels', **kwargs)
 
-        chi2 = np.sum( (self.fullresiduals[modelmask]/self.errspec[modelmask])**2 )
+        chi2 = np.sum( (self.fullresiduals[xmin:xmax]/self.errspec[xmin:xmax])**2 )
 
         if reduced:
-            dof = modelmask.sum() - self.fitter.npars - self.vheight + np.sum(self.parinfo.fixed)  # vheight included here or not?
+            dof = (xmax-xmin) - self.fitter.npars - self.vheight + np.sum(self.parinfo.fixed)  # vheight included here or not?
             return chi2/dof
         else:
             return chi2
