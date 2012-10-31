@@ -1024,9 +1024,10 @@ class Specfit(interactive.Interactive):
 
         Parameters
         ----------
-        threshold : 'auto' or float
+        threshold : 'auto' or 'error' or float
             If 'auto', the threshold will be set to peak_fraction * the peak
             model value.  
+            If 'error', uses the error spectrum as the threshold
         peak_fraction : float
             ignored unless threshold == 'auto'
         add_baseline : bool
@@ -1041,6 +1042,8 @@ class Specfit(interactive.Interactive):
         # auto-set threshold from some fraction of the model peak
         if threshold=='auto':
             threshold = peak_fraction * np.abs( model ).max()
+        elif threshold=='error':
+            threshold = self.errspec
 
         OK = np.abs( model ) > threshold
 
@@ -1186,7 +1189,8 @@ class Specfit(interactive.Interactive):
         else:
             print "Must have a fitter instantiated before creating sliders"
 
-    def optimal_chi2(self, reduced=True, **kwargs):
+    def optimal_chi2(self, reduced=True, threshold='error',
+            **kwargs):
         """
         Compute an "optimal" chi^2 statistic, i.e. one in which only pixels in
         which the model is statistically significant are included
@@ -1195,6 +1199,12 @@ class Specfit(interactive.Interactive):
         ----------
         reduced : bool
             Return the reduced chi^2
+        threshold : 'auto' or 'error' or float
+            If 'auto', the threshold will be set to peak_fraction * the peak
+            model value, where peak_fraction is a kwarg passed to
+            get_model_xlimits reflecting the fraction of the model peak
+            to consider significant
+            If 'error', uses the error spectrum as the threshold
         kwargs are passed to :meth:`get_model_xlimits`
 
         Returns
@@ -1204,7 +1214,7 @@ class Specfit(interactive.Interactive):
         """
 
         # old version modelmask = np.abs(self.fullmodel) > self.errspec
-        xmin,xmax = self.get_model_xlimits(units='pixels', **kwargs)
+        xmin,xmax = self.get_model_xlimits(units='pixels', threshold=threshold, **kwargs)
 
         chi2 = np.sum( (self.fullresiduals[xmin:xmax]/self.errspec[xmin:xmax])**2 )
 

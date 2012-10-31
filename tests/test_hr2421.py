@@ -40,6 +40,7 @@ print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 print "EQW: ",sp.specfit.EQW()
 print "Chi2: ",sp.specfit.chi2
+print "Optimal Chi2/n:",sp.specfit.optimal_chi2()
 gauss_model = sp.specfit.model+sp.baseline.basespec[sp.specfit.xmin:sp.specfit.xmax]
 print "A Gaussian has been fit.  There should be a red line overlaid on the spectrum with green highlighting the baseline fit region and yellow showing the baseline fit"
 if interactive: raw_input("Wait here a moment")

@@ -12,9 +12,11 @@ sp.error[:] = stats['std']
 sp.specfit(fittype='gaussian')
 sp.specfit.plotresiduals(drawstyle='line')
 print "Gaussian chi^2: %g  chi^2/n: %g" % (sp.specfit.chi2, sp.specfit.chi2/sp.specfit.dof)
+print "Optimal chi^2: %g  chi^2/n: %g" % (sp.specfit.optimal_chi2(reduced=False),sp.specfit.optimal_chi2())
 sp.specfit(fittype='voigt', clear=False, composite_fit_color='blue')
 sp.specfit.plotresiduals(clear=False, color='blue', drawstyle='line')
 print "Voigt   chi^2: %g  chi^2/n: %g" % (sp.specfit.chi2, sp.specfit.chi2/sp.specfit.dof)
+print "Optimal chi^2: %g  chi^2/n: %g" % (sp.specfit.optimal_chi2(reduced=False),sp.specfit.optimal_chi2())
 sp.specfit.residualaxis.set_ylim(-0.2,0.2)
 
 # this is usually unnecessary, but it's platform-dependent
