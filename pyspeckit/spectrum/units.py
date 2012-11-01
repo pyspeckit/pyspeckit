@@ -100,6 +100,7 @@ length_dict = {'meters':1.0,'m':1.0,
         'nanometers':1e-9,'nm':1e-9,
         'micrometers':1e-6,'micron':1e-6,'microns':1e-6,'um':1e-6,
         'kilometers':1e3,'km':1e3,
+        'megameters':1e6,'Mm':1e6,
         'angstroms':1e-10,'A':1e-10,
         }
 length_dict = CaseInsensitiveDict(length_dict)
@@ -118,6 +119,7 @@ frequency_dict = CaseInsensitiveDict(frequency_dict)
 velocity_dict = {'meters/second':1.0,'m/s':1.0,
         'kilometers/s':1e3,'km/s':1e3,'kms':1e3,
         'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
+        'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
         }
 velocity_dict = CaseInsensitiveDict(velocity_dict)
 
