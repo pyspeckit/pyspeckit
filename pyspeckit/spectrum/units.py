@@ -141,6 +141,7 @@ unit_type_dict = {
     'hz' :'frequency', 'khz':'frequency', 'mhz':'frequency', 'ghz':'frequency',
     'THz':'frequency', 
     'meters/second':'velocity', 'm/s':'velocity', 'kilometers/s':'velocity',
+    'megameters/second':'velocity','Mm/s':'velocity',
     'km/s':'velocity', 'kms':'velocity', 'centimeters/s':'velocity',
     'cm/s':'velocity', 'cms':'velocity', 
     'meters':'wavelength','m':'wavelength',
@@ -149,6 +150,7 @@ unit_type_dict = {
     'nanometers':'wavelength','nm':'wavelength',
     'micrometers':'wavelength','micron':'wavelength','microns':'wavelength','um':'wavelength',
     'kilometers':'wavelength','km':'wavelength',
+    'megameters':'wavelength','Mm':'wavelength',
     'angstroms':'wavelength','A':'wavelength',
     'unknown':'pixels',
     None: 'pixels',
@@ -594,6 +596,9 @@ class SpectroscopicAxis(np.ndarray):
         Uses as_unit for the conversion, but changes internal values rather
         than returning them.
         """
+        if unit not in unit_type_dict:
+            raise ValueError("Invalid unit; not in units.unit_type_dict.")
+
         self[:] = self.as_unit(unit, **kwargs)
         
         if unit in velocity_dict:
