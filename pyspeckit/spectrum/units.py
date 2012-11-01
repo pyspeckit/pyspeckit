@@ -21,60 +21,73 @@ import warnings
 # declare a case-insensitive dict class to return case-insensitive versions of each dictionary...
 # this is just a shortcut so that units can be specified as, e.g., Hz, hz, HZ, hZ, etc.  3 of those 4 are "legitimate".  
 # the templates for this code were grabbed from a few StackOverflow.com threads
-class CaseInsensitiveDict(dict):
+# I changed this to a "SmartCase" dict, by analogy with VIM's smartcase, where anything with caps will
+# be case sensitive, BUT if there is no unit matching the exact case, will search for the lower version too
+# e.g., if you search for Mm, it will return Megameters.  If you search for mm or mM, it will get millimeters
+class SmartCaseDict(dict):
     def __init__(self, inputdict=None):
         if inputdict:
             # Doesn't do keyword args
             if isinstance(inputdict, dict):
                 self.CaseDict = inputdict
                 for k,v in inputdict.items():
-                    if hasattr(k,'lower'):
-                        dict.__setitem__(self, k.lower(), v)
-                    else:
-                        dict.__setitem__(self, k, v)
+                    self[k] = v
+                    #dict.__setitem__(self, k, v)
+                    #if hasattr(k,'lower'):
+                    #    dict.__setitem__(self, k.lower(), v)
             else:
                 for k,v in inputdict:
-                    if hasattr(k,'lower'):
-                        dict.__setitem__(self, k.lower(), v)
-                    else:
-                        dict.__setitem__(self, k, v)
+                    self[k] = v
+                    #dict.__setitem__(self, k, v)
+                    #if hasattr(k,'lower'):
+                    #    dict.__setitem__(self, k.lower(), v)
 
     def __getitem__(self, key):
-        if hasattr(key, 'lower'):
+        try: 
+            return dict.__getitem__(self,key)
+        except KeyError:
             return dict.__getitem__(self, key.lower())
-        else:
-            return dict.__getitem__(self, key)
 
     def __setitem__(self, key, value):
-        if hasattr(key, 'lower'):
-            return dict.__setitem__(self, key.lower())
-        else:
-            return dict.__setitem__(self, key)
+        dict.__setitem__(self,key,value)
+        # only set lower-case version if there isn't one there already
+        # prevents overwriting mm with Mm.lower()
+        if hasattr(key,'lower'):
+            if key.lower() not in self:
+                self.__setitem__(key.lower(), value)
 
     def __contains__(self, key):
-        if hasattr(key,'lower'):
+        cased = dict.__contains__(self,key)
+        if hasattr(key,'lower') and cased is False:
             return dict.__contains__(self, key.lower())
-        else: # e.g., None will go here
-            return dict.__contains__(self, key)
+        else:
+            return cased
 
     def has_key(self, key):
         """ This is deprecated, but we're keeping it around """
-        if hasattr(key,'lower'):
-            return dict.has_key(self, key.lower())
+        cased = dict.has_key__(self,key)
+        if hasattr(key,'lower') and cased is False:
+            return dict.has_key__(self, key.lower())
         else:
-            return dict.has_key(self, key)
+            return cased
 
     def get(self, key, def_val=None):
-        if hasattr(key,'lower'):
-            return dict.get(self, key.lower(), def_val)
+        cased = dict.get(self,key)
+        if hasattr(key,'lower') and cased is None:
+            return dict.get(self, key.lower(),def_val)
         else:
-            return dict.get(self, key, def_val)
+            return cased
 
     def setdefault(self, key, def_val=None):
-        if hasattr(key,'lower'):
-            return dict.setdefault(self, key.lower(), def_val)
+        """
+        If key is in the dictionary, return its value. If not, insert key with
+        a value of default and return default. default defaults to None.
+        """
+        cased = dict.setdefault(self,key)
+        if hasattr(key,'lower') and cased is None:
+            return dict.setdefault(self, key.lower(),def_val)
         else:
-            return dict.setdefault(self, key, def_val)
+            return cased
 
     def update(self, inputdict):
         for k,v in inputdict.items():
@@ -82,16 +95,17 @@ class CaseInsensitiveDict(dict):
             self.__setitem__(self, k, v)
 
     def fromkeys(self, iterable, value=None):
-        d = CaseInsensitiveDict()
+        d = SmartCaseDict()
         for k in iterable:
             self.__setitem__(d, k, value)
         return d
 
     def pop(self, key, def_val=None):
-        if hasattr(key,'lower'):
-            return dict.pop(self, key.lower(), def_val)
+        cased = dict.pop(self,key)
+        if hasattr(key,'lower') and cased is None:
+            return dict.pop(self, key.lower(),def_val)
         else:
-            return dict.pop(self, key, def_val)
+            return cased
     
 
 length_dict = {'meters':1.0,'m':1.0,
@@ -103,7 +117,7 @@ length_dict = {'meters':1.0,'m':1.0,
         'megameters':1e6,'Mm':1e6,
         'angstroms':1e-10,'A':1e-10,
         }
-length_dict = CaseInsensitiveDict(length_dict)
+length_dict = SmartCaseDict(length_dict)
 
 wavelength_dict = length_dict # synonym
 
@@ -114,17 +128,17 @@ frequency_dict = {
         'GHz':1e9,
         'THz':1e12,
         }
-frequency_dict = CaseInsensitiveDict(frequency_dict)
+frequency_dict = SmartCaseDict(frequency_dict)
 
 velocity_dict = {'meters/second':1.0,'m/s':1.0,
-        'kilometers/s':1e3,'km/s':1e3,'kms':1e3,
-        'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
-        'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
+        'kilometers/second':1e3,'kilometers/s':1e3,'km/s':1e3,'kms':1e3,
+        'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
+        'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
         }
-velocity_dict = CaseInsensitiveDict(velocity_dict)
+velocity_dict = SmartCaseDict(velocity_dict)
 
 pixel_dict = {'pixel':1,'pixels':1}
-pixel_dict = CaseInsensitiveDict(pixel_dict)
+pixel_dict = SmartCaseDict(pixel_dict)
 
 conversion_dict = {
         'VELOCITY':velocity_dict,  'Velocity':velocity_dict,  'velocity':velocity_dict,  'velo': velocity_dict, 'VELO': velocity_dict,
@@ -133,7 +147,7 @@ conversion_dict = {
         'FREQUENCY':frequency_dict,'Frequency':frequency_dict,'frequency':frequency_dict, 'freq': frequency_dict, 'FREQ': frequency_dict,
         'pixels':pixel_dict,'PIXELS':pixel_dict,
         }
-conversion_dict = CaseInsensitiveDict(conversion_dict)
+conversion_dict = SmartCaseDict(conversion_dict)
 
 unit_type_dict = {
     'Hz' :'frequency', 'kHz':'frequency', 'MHz':'frequency', 'GHz':'frequency',
@@ -141,6 +155,9 @@ unit_type_dict = {
     'hz' :'frequency', 'khz':'frequency', 'mhz':'frequency', 'ghz':'frequency',
     'THz':'frequency', 
     'meters/second':'velocity', 'm/s':'velocity', 'kilometers/s':'velocity',
+    'kilometers/second':'velocity',
+    'centimeters/second':'velocity',
+    'megameters/s':'velocity',
     'megameters/second':'velocity','Mm/s':'velocity',
     'km/s':'velocity', 'kms':'velocity', 'centimeters/s':'velocity',
     'cm/s':'velocity', 'cms':'velocity', 
@@ -156,7 +173,7 @@ unit_type_dict = {
     None: 'pixels',
     }
 
-unit_type_dict = CaseInsensitiveDict(unit_type_dict)
+unit_type_dict = SmartCaseDict(unit_type_dict)
 
 # to-do
 # unit_prettyprint = dict([(a,a.replace('angstroms','\\AA')) for a in unit_type_dict.keys() if a is not None])
@@ -179,7 +196,7 @@ xtype_dict = {
         # cm^-1 ? 'wavenumber':'wavenumber',
         }
 
-frame_dict = CaseInsensitiveDict({
+frame_dict = SmartCaseDict({
         'VLSR':'LSRK','VRAD':'LSRK','VELO':'LSRK',
         'VOPT':'LSRK',
         'VELO-LSR':'LSRK',

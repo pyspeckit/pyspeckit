@@ -25,6 +25,8 @@ def test_convert_back(unit_from, unit_to,convention,ref_unit):
         threshold = 1e-15
     # all conversions include a * or / by speedoflight_ms
     threshold = np.spacing(units.speedoflight_ms) * 100
+    if 'megameter' in unit_from or 'Mm' in unit_from:
+        threshold *= 10
     xarr = units.SpectroscopicAxis(xvals,unit=unit_from,refX=5,refX_units=ref_unit,xtype=units.unit_type_dict[unit_from])
     xarr.convert_to_unit(unit_to,convention=convention)
     xarr.convert_to_unit(unit_from,convention=convention)
