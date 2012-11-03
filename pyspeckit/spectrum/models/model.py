@@ -586,7 +586,7 @@ class SpectralModel(fitter.SimpleFitter):
         just sums self.model
         """
         if dx is not None:
-            return self.model.sum()*dx
+            return (self.model*dx).sum()
         else:
             return self.model.sum()
 

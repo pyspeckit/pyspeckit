@@ -38,7 +38,7 @@ try:
 except ImportError:
     Spectrum1D = object
 
-class Spectrum(Spectrum1D):
+class Spectrum(object):
     """
     The core class for the spectroscopic toolkit.  Contains the data and error
     arrays along with wavelength / frequency / velocity information in various
@@ -247,7 +247,11 @@ class Spectrum(Spectrum1D):
             self.xarr.units = 'none'
             #raise ValueError("Invalid xtype in text header")
         self.ytype = Table.data.dtype.names[Table.datacol]
-        self.units = Table.columns[self.ytype].unit
+        try:
+            self.units = Table.columns[self.ytype].unit
+        except ValueError:
+            self.units = None
+            pass # astropy 0.2.dev11 introduces an incompatibility here
         self.header = pyfits.Header()
         self._update_header()
 

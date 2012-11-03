@@ -943,7 +943,7 @@ class Specfit(interactive.Interactive):
             self.fullmodel = self.fullmodel[x1pix:x2pix]
         self.includemask = self.includemask[x1pix:x2pix]
 
-    def integral(self, direct=False, threshold='auto', integration_limits=[],
+    def integral(self, direct=False, threshold='auto', integration_limits=None,
             return_error=False, **kwargs):
         """
         Return the integral of the fitted spectrum
@@ -962,7 +962,10 @@ class Specfit(interactive.Interactive):
             units (and reference to baseline level)
         """
 
-        dx = self.Spectrum.xarr.cdelt()
+        xmin,xmax = self.get_model_xlimits(units='pixels', threshold=threshold, **kwargs)
+        if integration_limits is None:
+            integration_limits=[xmin,xmax]
+        dx = self.Spectrum.xarr[xmin:xmax].cdelt()
         if dx is None:
             #dx = np.abs(np.concatenate([np.diff(self.Spectrum.xarr),[0]]))
             #warn("Irregular X-axis.  The last pixel is ignored.")
@@ -977,31 +980,25 @@ class Specfit(interactive.Interactive):
         fullmodel = self.get_full_model(add_baseline=False)
 
         if direct:
-            if len(integration_limits) == 2:
-                x1 = np.argmin(np.abs(integration_limits[0]-self.Spectrum.xarr))
-                x2 = np.argmin(np.abs(integration_limits[1]-self.Spectrum.xarr))
-                if x1>x2: x1,x2 = x2,x1
-                integ = (self.Spectrum.data[x1:x2] * dx[x1:x2]).sum()
-                if return_error:
-                    # compute error assuming a "known mean" (not a sample mean).  If sample mean, multiply
-                    # by sqrt(len(dx)/(len(dx)-1))  (which should be very near 1)
-                    error = np.sqrt((dx[x1:x2] * self.Spectrum.error[x1:x2]**2).sum() / dx[x1:x2].sum())
-                    return integ,error
-                else:
-                    return integ
-            elif threshold=='auto':
-                threshold = 0.01 * np.abs( fullmodel ).max()
+            integ = ((self.Spectrum.data[xmin:xmax]-self.Spectrum.baseline.basespec[xmin:xmax]) * dx[xmin:xmax]).sum()
+            if return_error:
+                # compute error assuming a "known mean" (not a sample mean).  If sample mean, multiply
+                # by sqrt(len(dx)/(len(dx)-1))  (which should be very near 1)
+                error = np.sqrt((dx[xmin:xmax] * self.Spectrum.error[xmin:xmax]**2).sum() / dx[xmin:xmax].sum())
+                return integ,error
+            else:
+                return integ
 
-            OK = np.abs( fullmodel ) > threshold
-            integ = (self.spectofit[OK] * dx[OK]).sum()
-            error = np.sqrt((self.errspec[OK]**2 * dx[OK]).sum()/dx[OK].sum())
+            #OK = np.abs( fullmodel ) > threshold
+            #integ = (self.spectofit[OK] * dx[OK]).sum()
+            #error = np.sqrt((self.errspec[OK]**2 * dx[OK]).sum()/dx[OK].sum())
         else:
             if not hasattr(self.fitter,'integral'):
                 raise AttributeError("The fitter %s does not have an integral implemented" % self.fittype)
 
             if self.Spectrum.xarr.cdelt() is not None:
                 dx = np.median(dx)
-                integ = self.fitter.integral(self.modelpars, **kwargs) * dx
+                integ = self.fitter.integral(self.modelpars, dx=dx, **kwargs)
                 if return_error:
                     if mycfg.WARN: print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."
                     OK = np.abs( fullmodel ) > threshold
@@ -1010,7 +1007,7 @@ class Specfit(interactive.Interactive):
             else:
                 integ = 0
                 error = 0
-                warn("An analytic integal could not be computed.  Try direct=True when integrating, or find a way to linearize the X-axis")
+                warn("An analytic integal could not be computed because the X-axis is irregular.  Try direct=True when integrating, or find a way to linearize the X-axis")
         if return_error:
             return integ,error
         else:
