@@ -951,6 +951,7 @@ class Specfit(interactive.Interactive):
         if direct=True, return the integral of the spectrum over a range
         defined by the threshold or integration limits if defined
 
+        # not true any more
         note that integration_limits will operate directly on the DATA, which means that
         if you've baselined without subtract=True, the baseline will be included in the integral
 
@@ -958,11 +959,14 @@ class Specfit(interactive.Interactive):
         sigma = sqrt(sum(sigma_i^2)) * dx
         will be returned as well
 
+        kwargs are passed to self.fitter.integral if not(direct)
+
         .. TODO: Merge this with EQW.  Both are equivalent, only difference is
             units (and reference to baseline level)
+            DONE!!
         """
 
-        xmin,xmax = self.get_model_xlimits(units='pixels', threshold=threshold, **kwargs)
+        xmin,xmax = self.get_model_xlimits(units='pixels', threshold=threshold)
         if integration_limits is None:
             integration_limits=[xmin,xmax]
         dx = self.Spectrum.xarr[xmin:xmax].cdelt()
