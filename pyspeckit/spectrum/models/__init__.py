@@ -36,3 +36,5 @@ import hyperfine,fitter,model,redshiftedgroup
 import hill5infall
 import radex_modelgrid
 import hydrogen
+from polynomial_continuum import poly_fitter
+from powerlaw_continuum import powerlaw_fitter

@@ -11,25 +11,27 @@ continuum is what you're really trying to measure.
 import model
 import numpy 
 
-def polymodel(x, pars,  return_components=False):
+def polymodel(x, *pars, **kwargs):
     """
     Wrapper of :meth:`numpy.polyval`.  Extra parameter - return_components - is
     ignored, but required.
+    *args = polynomial parameters
+    **kwargs = just to catch extra junk; not passed
     """
-    __doc__ += numpy.polyval.__doc__
-    return numpy.polyval(x, pars)
+    return numpy.polyval(pars,x)
 
+polymodel.__doc__ += numpy.polyval.__doc__
 
 def poly_fitter(order=1, multisingle='multi'):
     """
     Generator for polynomial fitter class
     """
 
-    myclass =  model.SpectralModel(polymodel, order,
+    myclass =  model.SpectralModel(polymodel, order+1,
             parnames=['coeff%i' % ii for ii in xrange(order+1)], 
             parlimited=[(False,False) for ii in xrange(order+1)], 
             parlimits=[(0,0) for ii in xrange(order+1)], 
-            shortvarnames=('C' for ii in xrange(order+1)),
+            shortvarnames=['C%i' % ii for ii in xrange(order+1)],
             multisingle=multisingle,
             )
     myclass.__name__ = "polymodel"

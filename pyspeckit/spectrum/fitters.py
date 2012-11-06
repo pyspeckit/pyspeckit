@@ -154,7 +154,7 @@ class Specfit(interactive.Interactive):
             guesses=None, save=True, annotate=None,
             show_components=None, use_lmfit=False, verbose=True, clear=True,
             fit_plotted_area=True, use_window_limits=None,
-            vheight=None, **kwargs):
+            vheight=None, exclude=None, **kwargs):
         """
         Fit gaussians (or other model functions) to a spectrum
 
@@ -189,6 +189,8 @@ class Specfit(interactive.Interactive):
             use the displayed window area (as set by the zoom tools) as the
             fitting range.  Only respects the x-axis limits, not the y-axis
             limits.
+        exclude : None or list
+            Passed to selectregion; specifies regions to exclude in xarr units
 
 
         Plotter-related Parameters
@@ -232,6 +234,7 @@ class Specfit(interactive.Interactive):
         if clear: self.clear()
         self.selectregion(verbose=verbose, debug=debug,
                 fit_plotted_area=fit_plotted_area,
+                exclude=exclude,
                 use_window_limits=use_window_limits, **kwargs)
         for arg in ['xmin','xmax','xtype','reset']: 
             if arg in kwargs: kwargs.pop(arg)
