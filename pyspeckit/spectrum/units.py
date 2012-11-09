@@ -861,6 +861,8 @@ class SpectroscopicAxis(np.ndarray):
         """
         if not hasattr(self,'dxarr'): # if cropping happens...
             self.make_dxarr()
+        if len(self) <= 1:
+            raise ValueError("Cannot have cdelt of length-%i array" % len(self))
         if approx or abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
             return self.dxarr.mean().flat[0]
 

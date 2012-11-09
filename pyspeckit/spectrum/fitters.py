@@ -974,7 +974,10 @@ class Specfit(interactive.Interactive):
         xmin,xmax = self.get_model_xlimits(units='pixels', threshold=threshold)
         if integration_limits is None:
             integration_limits=[xmin,xmax]
-        dx = self.Spectrum.xarr[xmin:xmax].cdelt()
+        if xmax - xmin > 1: # can only get cdelt if there's more than 1 pixel
+            dx = self.Spectrum.xarr[xmin:xmax].cdelt()
+        else:
+            dx = None
         if dx is None:
             #dx = np.abs(np.concatenate([np.diff(self.Spectrum.xarr),[0]]))
             #warn("Irregular X-axis.  The last pixel is ignored.")

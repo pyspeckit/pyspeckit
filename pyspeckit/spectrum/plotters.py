@@ -207,7 +207,9 @@ class Plotter(object):
         if self.axis is None:
             raise Exception("You must call the Plotter class to initiate the canvas before plotting.")
 
-        self.offset += offset
+        # this was += 
+        # WHY?
+        self.offset = offset
 
         self.label(**kwargs)
         for arg in ['title','xlabel','ylabel']:
