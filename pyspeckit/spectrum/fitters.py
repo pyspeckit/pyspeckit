@@ -450,7 +450,8 @@ class Specfit(interactive.Interactive):
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
             show_components=None, verbose=True, color=None, 
-            use_window_limits=None, use_lmfit=False, **kwargs):
+            use_window_limits=None, use_lmfit=False,
+            plot=True, **kwargs):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -531,7 +532,7 @@ class Specfit(interactive.Interactive):
         self.modelpars = self.parinfo.values
         self.modelerrs = self.parinfo.errors
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
-        if self.Spectrum.plotter.axis is not None:
+        if self.Spectrum.plotter.axis is not None and plot:
             if color is not None:
                 kwargs.update({'composite_fit_color':color})
             self.plot_fit(annotate=annotate, 
@@ -563,8 +564,9 @@ class Specfit(interactive.Interactive):
                         str(par))
                 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
-            negamp=None, fittype=None, renormalize='auto', color=None, use_lmfit=False,
-            show_components=None, debug=False, nsigcut_moments=None, **kwargs):
+            negamp=None, fittype=None, renormalize='auto', color=None,
+            use_lmfit=False, show_components=None, debug=False,
+            nsigcut_moments=None, plot=True, **kwargs):
         """
         Fit a single peak (plus a background)
 
@@ -659,7 +661,7 @@ class Specfit(interactive.Interactive):
                 par.value = par.value * scalefactor
                 par.error = par.error * scalefactor
 
-        if self.Spectrum.plotter.axis is not None:
+        if self.Spectrum.plotter.axis is not None and plot:
             if color is not None:
                 kwargs.update({'composite_fit_color':color})
             self.plot_fit(annotate=annotate,
@@ -1399,7 +1401,8 @@ class Specfit(interactive.Interactive):
 
         if plot:
             self.Spectrum.plotter.axis.plot([xarr[hm_right],xarr[hm_left]],
-                    [peak/2.,peak/2.],**kwargs)
+                    np.array([peak/2.,peak/2.])+self.Spectrum.plotter.offset,
+                    **kwargs)
             self.Spectrum.plotter.refresh()
 
         # debug print hm_left,hm_right,"FWHM: ",deltax
