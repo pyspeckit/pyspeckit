@@ -43,6 +43,7 @@ print "rootpath: ",rootpath
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.doctest', 'sphinx.ext.autodoc',
+        'sphinx.ext.pngmath', 'sphinx.ext.mathjax',
         'sphinx.ext.intersphinx', 'numpydoc', 'flickr']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -112,7 +113,7 @@ release = pyspeckit.__version__
 exclude_patterns = ['_build','_static','_template']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
-#default_role = None
+default_role = 'obj'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True

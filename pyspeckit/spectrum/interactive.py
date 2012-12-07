@@ -312,27 +312,28 @@ class Interactive(object):
         """
         Pick a fitting region in either WCS units or pixel units
 
-        *xmin / xmax* [ float ]
+        Parameters
+        ----------
+        *xmin / xmax* : [ float ]
             The min/max X values to use in X-axis units (or pixel units if xtype is set).
             TAKES PRECEDENCE ALL OTHER BOOLEAN OPTIONS
 
-        *xtype* [ string ]
+        *xtype* : [ string ]
             A string specifying the xtype that xmin/xmax are specified in.  It can be either
             'wcs' or any valid xtype from :class:`pyspeckit.spectrum.units`
 
-        *reset* [ bool ]
+        *reset* : [ bool ]
             Reset the selected region to the full spectrum?  Only takes effect
             if xmin and xmax are not (both) specified.   
             TAKES PRECEDENCE ALL SUBSEQUENT BOOLEAN OPTIONS
 
-        Now things get a little complicated...
-        *fit_plotted_area* [ bool ]
+        *fit_plotted_area* : [ bool ]
             Use the plot limits *as specified in :class:`pyspeckit.spectrum.plotters`*?
             Note that this is not necessarily the same as the window plot limits!
 
-        *use_window_limits* [ bool ] 
-            Use the plot limits *as displayed*.  Defaults to
-            :attr:`pyspeckit.spectrum.interactive.use_window_limits`.
+        *use_window_limits* : [ bool ] 
+            Use the plot limits *as displayed*.  Defaults to self.use_window_limits 
+            (:attr:`pyspeckit.spectrum.interactive.use_window_limits`).
             Overwrites xmin,xmax set by plotter
             
         exclude: {list of length 2n,'interactive', None}

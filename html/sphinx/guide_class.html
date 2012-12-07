@@ -25,6 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
      
@@ -79,7 +80,7 @@ for many spectra; in most regards it behaves the same way as a <tt class="xref p
 but it has a few extra attributes built-in (e.g., spectral averaging).</p>
 <p>A file can be loaded as a named object.
 The data is filtered as it is read in.  The following line will ensure that the spectra in the
-<cite>n2hp</cite> ObsBlock contain only data from the F1M spectrometer with lines labeled &#8216;N2HP(3-2)&#8217;
+<tt class="xref py py-obj docutils literal"><span class="pre">n2hp</span></tt> ObsBlock contain only data from the F1M spectrometer with lines labeled &#8216;N2HP(3-2)&#8217;
 or &#8216;N2H+(3-2)&#8217;:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">n2hp</span> <span class="o">=</span> <span class="n">class_to_obsblocks</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span>
     <span class="n">telescope</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;SMT-F1M-HU&#39;</span><span class="p">,</span><span class="s">&#39;SMT-F1M-VU&#39;</span><span class="p">],</span>
@@ -89,14 +90,14 @@ or &#8216;N2H+(3-2)&#8217;:</p>
 </div>
 <div class="section" id="working-with-the-data">
 <h2>Working with the data<a class="headerlink" href="#working-with-the-data" title="Permalink to this headline">¶</a></h2>
-<p>You can treat an ObsBlock like any other <cite>pyspeckit.Spectrum</cite> object, but there
+<p>You can treat an ObsBlock like any other <tt class="xref py py-obj docutils literal"><span class="pre">pyspeckit.Spectrum</span></tt> object, but there
 are a few unique features.</p>
 <p>The &#8216;smooth&#8217; function will smooth each individual spectrum in the ObsBlock, which
 can be useful if you want to smooth before averaging.</p>
 <p>The &#8216;average&#8217; function averages spectra.  Weights for the averaging can be specified.
 The error is also computed either by taking the RMS of the averaged spectra or by
 averaging the error spectra.</p>
-<p>You can plot each spectrum in an individual window with the <cite>ploteach</cite> function, or all
+<p>You can plot each spectrum in an individual window with the <tt class="xref py py-obj docutils literal"><span class="pre">ploteach</span></tt> function, or all
 overlaid simultaneously with the &#8216;plotter&#8217; function.  If you want to loop through each
 spectrum, waiting for user input after displaying, you can do something like:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">ax</span> <span class="o">=</span> <span class="n">pylab</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
@@ -111,7 +112,7 @@ command.</p>
 <div class="section" id="selecting-spectra">
 <h2>Selecting Spectra<a class="headerlink" href="#selecting-spectra" title="Permalink to this headline">¶</a></h2>
 <p>There are 3 keywords that can be used to select spectra when reading in a file.  The
-<cite>line</cite> and <cite>telescope</cite> keywords are required in order to make an observation block, otherwise
+<tt class="xref py py-obj docutils literal"><span class="pre">line</span></tt> and <tt class="xref py py-obj docutils literal"><span class="pre">telescope</span></tt> keywords are required in order to make an observation block, otherwise
 the spectral axes will not be common to all spectra.:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">n2hp</span> <span class="o">=</span> <span class="n">class_to_obsblocks</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span>
     <span class="n">telescope</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;SMT-F1M-HU&#39;</span><span class="p">,</span><span class="s">&#39;SMT-F1M-VU&#39;</span><span class="p">],</span>
@@ -194,7 +195,7 @@ are possible:</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Oct 29, 2012.
+      Last updated on Dec 07, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

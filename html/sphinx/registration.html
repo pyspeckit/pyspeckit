@@ -25,6 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
     <link rel="up" title="Features" href="features.html" />
@@ -89,7 +90,7 @@ must be accessed via a specfit instance</p>
 </pre></div>
 </div>
 <p>If you&#8217;ve already loaded a Spectrum instance, but then you want to reload fitters
-from the default_Registry, or if you want to make your own <cite>Registry</cite>, you can use
+from the default_Registry, or if you want to make your own <tt class="xref py py-obj docutils literal"><span class="pre">Registry</span></tt>, you can use
 the semi-private method</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">MyRegistry</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">fitters</span><span class="o">.</span><span class="n">Registry</span><span class="p">()</span>
 <span class="n">sp</span><span class="o">.</span><span class="n">_register_fitters</span><span class="p">(</span><span class="n">registry</span><span class="o">=</span><span class="n">MyRegistry</span><span class="p">)</span>
@@ -162,33 +163,30 @@ for example.</p>
 <dt id="pyspeckit.spectrum.fitters.Registry.add_fitter">
 <tt class="descname">add_fitter</tt><big>(</big><em>name</em>, <em>function</em>, <em>npars</em>, <em>multisingle='single'</em>, <em>override=False</em>, <em>key=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Registry.add_fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a fitter function.</p>
-<p>Required Arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>*name*: [ string ]</strong> :</p>
 <blockquote>
-<div><dl class="docutils">
-<dt><em>name</em>: [ string ]</dt>
-<dd>The fit function name.</dd>
-<dt><em>function</em>: [ function ]</dt>
-<dd>The fitter function.  Single-fitters should take npars + 1 input
+<div><p>The fit function name.</p>
+</div></blockquote>
+<p><strong>*function*: [ function ]</strong> :</p>
+<blockquote>
+<div><p>The fitter function.  Single-fitters should take npars + 1 input
 parameters, where the +1 is for a 0th order baseline fit.  They
 should accept an X-axis and data and standard fitting-function
 inputs (see, e.g., gaussfitter).  Multi-fitters should take N *
-npars, but should also operate on X-axis and data arguments.</dd>
-<dt><em>npars</em>: [ int ]</dt>
-<dd>How many parameters does the function being fit accept?</dd>
-</dl>
+npars, but should also operate on X-axis and data arguments.</p>
 </div></blockquote>
-<p>Optional Keyword Arguments:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt><em>multisingle</em>: [ &#8216;multi&#8217; | &#8216;single&#8217; ] </dt>
-<dd>Is the function a single-function fitter (with a background), or
-does it allow N copies of the fitting function?</dd>
-<dt><em>override</em>: [ True | False ]</dt>
-<dd>Whether to override any existing type if already present.</dd>
-<dt><em>key</em>: [ char ]</dt>
-<dd>Key to select the fitter in interactive mode</dd>
-</dl>
+<p><strong>*npars*: [ int ]</strong> :</p>
+<blockquote class="last">
+<div><p>How many parameters does the function being fit accept?</p>
 </div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -247,7 +245,7 @@ does it allow N copies of the fitting function?</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Oct 29, 2012.
+      Last updated on Dec 07, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

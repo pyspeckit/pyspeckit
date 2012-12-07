@@ -25,6 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
     <link rel="up" title="Features" href="features.html" />
@@ -98,7 +99,9 @@ measured continuum)</p>
 <p><strong>continuum</strong> : None or float</p>
 <blockquote>
 <div><p>Can specify a fixed continuum with this keyword, otherwise will use
-the fitted baseline</p>
+the fitted baseline.  WARNING: continuum=0 will still &#8220;work&#8221;, but
+will give numerically invalid results.  Similarly, a negative continuum
+will work, but will yield results with questionable physical meaning.</p>
 </div></blockquote>
 <p><strong>components</strong> : bool</p>
 <blockquote>
@@ -135,7 +138,7 @@ yet.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.annotate">
-<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.10000000000000001</em>, <em>handlelength=0.10000000000000001</em>, <em>handletextpad=0.10000000000000001</em>, <em>frameon=False</em>, <em>chi2=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.1</em>, <em>handlelength=0.1</em>, <em>handletextpad=0.1</em>, <em>frameon=False</em>, <em>chi2=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a legend to the plot showing the fitted parameters</p>
 <p>_clearlegend() will remove the legend</p>
 <p>chi2 : {True or &#8216;reduced&#8217; or &#8216;optimal&#8217;}</p>
@@ -286,10 +289,11 @@ is above some threshold</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>threshold</strong> : &#8216;auto&#8217; or float</p>
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>threshold</strong> : &#8216;auto&#8217; or &#8216;error&#8217; or float</p>
 <blockquote>
 <div><p>If &#8216;auto&#8217;, the threshold will be set to peak_fraction * the peak
-model value.</p>
+model value.  
+If &#8216;error&#8217;, uses the error spectrum as the threshold</p>
 </div></blockquote>
 <p><strong>peak_fraction</strong> : float</p>
 <blockquote>
@@ -314,7 +318,7 @@ threshold?  default FALSE.  Passed to get_full_model.</p>
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_pymc">
 <tt class="descname">get_pymc</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_pymc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a pymc MCMC sampler from the current fitter.  Defaults to &#8216;uninformative&#8217; priors</p>
-<p><cite>kwargs</cite> are passed to the fitter&#8217;s get_pymc method, with parameters defined below.</p>
+<p><tt class="xref py py-obj docutils literal"><span class="pre">kwargs</span></tt> are passed to the fitter&#8217;s get_pymc method, with parameters defined below.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -359,7 +363,7 @@ the Normal distribution with sigma = par.error and mean = par.value</p>
 <dt id="pyspeckit.spectrum.fitters.Specfit.highlight_fitregion">
 <tt class="descname">highlight_fitregion</tt><big>(</big><em>drawstyle='steps-mid'</em>, <em>color='g'</em>, <em>clear_highlights=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.highlight_fitregion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Re-highlight the fitted region</p>
-<p>kwargs are passed to <cite>matplotlib.plot</cite></p>
+<p>kwargs are passed to <tt class="xref py py-obj docutils literal"><span class="pre">matplotlib.plot</span></tt></p>
 </dd></dl>
 
 <dl class="method">
@@ -369,15 +373,17 @@ the Normal distribution with sigma = par.error and mean = par.value</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.integral">
-<tt class="descname">integral</tt><big>(</big><em>direct=False</em>, <em>threshold='auto'</em>, <em>integration_limits=</em><span class="optional">[</span><span class="optional">]</span>, <em>return_error=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.integral" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">integral</tt><big>(</big><em>direct=False</em>, <em>threshold='auto'</em>, <em>integration_limits=None</em>, <em>return_error=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.integral" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the integral of the fitted spectrum</p>
 <p>if direct=True, return the integral of the spectrum over a range
 defined by the threshold or integration limits if defined</p>
-<p>note that integration_limits will operate directly on the DATA, which means that
+<p># not true any more
+note that integration_limits will operate directly on the DATA, which means that
 if you&#8217;ve baselined without subtract=True, the baseline will be included in the integral</p>
 <p>if return_error is set, the error computed by
 sigma = sqrt(sum(sigma_i^2)) * dx
 will be returned as well</p>
+<p>kwargs are passed to self.fitter.integral if not(direct)</p>
 </dd></dl>
 
 <dl class="method">
@@ -431,12 +437,12 @@ threshold is &lt;= to this number, it will be grown by 1 pixel on each side</p>
 <dt id="pyspeckit.spectrum.fitters.Specfit.moments">
 <tt class="descname">moments</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.moments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the moments</p>
-<p>see <tt class="xref py py-mod docutils literal"><span class="pre">moments</span></tt></p>
+<p>see the <tt class="xref py py-mod docutils literal"><span class="pre">moments</span></tt> module</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.multifit">
-<tt class="descname">multifit</tt><big>(</big><em>fittype=None</em>, <em>renormalize='auto'</em>, <em>annotate=None</em>, <em>show_components=None</em>, <em>verbose=True</em>, <em>color=None</em>, <em>use_window_limits=None</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.multifit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">multifit</tt><big>(</big><em>fittype=None</em>, <em>renormalize='auto'</em>, <em>annotate=None</em>, <em>show_components=None</em>, <em>verbose=True</em>, <em>color=None</em>, <em>use_window_limits=None</em>, <em>use_lmfit=False</em>, <em>plot=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.multifit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit multiple gaussians (or other profiles)</p>
 <dl class="docutils">
 <dt>fittype - What function will be fit?  fittype must have been Registryed in the</dt>
@@ -448,8 +454,8 @@ threshold is &lt;= to this number, it will be grown by 1 pixel on each side</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.optimal_chi2">
-<tt class="descname">optimal_chi2</tt><big>(</big><em>reduced=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.optimal_chi2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute an &#8220;optimal&#8221; chi^2 statistic, i.e. one in which only pixels in
+<tt class="descname">optimal_chi2</tt><big>(</big><em>reduced=True</em>, <em>threshold='error'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.optimal_chi2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute an &#8220;optimal&#8221; <span class="math">\(\chi^2\)</span> statistic, i.e. one in which only pixels in
 which the model is statistically significant are included</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -457,12 +463,28 @@ which the model is statistically significant are included</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>reduced</strong> : bool</p>
 <blockquote>
-<div><p>Return the reduced chi^2</p>
+<div><p>Return the reduced <span class="math">\(\chi^2\)</span></p>
+</div></blockquote>
+<p><strong>threshold</strong> : &#8216;auto&#8217; or &#8216;error&#8217; or float</p>
+<blockquote>
+<div><p>If &#8216;auto&#8217;, the threshold will be set to peak_fraction * the peak
+model value, where peak_fraction is a kwarg passed to
+get_model_xlimits reflecting the fraction of the model peak
+to consider significant
+If &#8216;error&#8217;, uses the error spectrum as the threshold</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : dict</p>
+<blockquote>
+<div><p>passed to <a class="reference internal" href="#pyspeckit.spectrum.fitters.Specfit.get_model_xlimits" title="pyspeckit.spectrum.fitters.Specfit.get_model_xlimits"><tt class="xref py py-meth docutils literal"><span class="pre">get_model_xlimits()</span></tt></a></p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>Chi^2 statistic or reduced chi^2 statistic</strong> :</p>
-<p class="last"><strong>`chi^2 = sum( (d_i - m_i)^2 / e_i^2 )</strong> :</p>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first"><strong>chi2</strong> : float</p>
+<blockquote class="last">
+<div><p><span class="math">\(\chi^2\)</span> statistic or reduced <span class="math">\(\chi^2\)</span> statistic (<span class="math">\(\chi^2/n\)</span>)</p>
+<div class="math">
+\[\chi^2 = \sum( (d_i - m_i)^2 / e_i^2 )\]</div>
+</div></blockquote>
 </td>
 </tr>
 </tbody>
@@ -471,25 +493,52 @@ which the model is statistically significant are included</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.peakbgfit">
-<tt class="descname">peakbgfit</tt><big>(</big><em>usemoments=True</em>, <em>annotate=None</em>, <em>vheight=True</em>, <em>height=0</em>, <em>negamp=None</em>, <em>fittype=None</em>, <em>renormalize='auto'</em>, <em>color=None</em>, <em>use_lmfit=False</em>, <em>show_components=None</em>, <em>debug=False</em>, <em>nsigcut_moments=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.peakbgfit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">peakbgfit</tt><big>(</big><em>usemoments=True</em>, <em>annotate=None</em>, <em>vheight=True</em>, <em>height=0</em>, <em>negamp=None</em>, <em>fittype=None</em>, <em>renormalize='auto'</em>, <em>color=None</em>, <em>use_lmfit=False</em>, <em>show_components=None</em>, <em>debug=False</em>, <em>nsigcut_moments=None</em>, <em>plot=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.peakbgfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit a single peak (plus a background)</p>
-<dl class="docutils">
-<dt>usemoments - The initial guess will be set by the fitter&#8217;s &#8216;moments&#8217; function</dt>
-<dd>(this overrides &#8216;guesses&#8217;)</dd>
-</dl>
-<p>annotate - Make a legend?
-vheight - Fit a (constant) background as well as a peak?
-height - initial guess for background
-negamp - If True, assumes amplitude is negative.  If False, assumes positive.  If</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>usemoments</strong> : bool</p>
 <blockquote>
-<div>None, can be either.</div></blockquote>
-<dl class="docutils">
-<dt>fittype - What function will be fit?  fittype must have been Registryed in the</dt>
-<dd>singlefitters dict</dd>
-<dt>renormalize - if &#8216;auto&#8217; or True, will attempt to rescale small data (&lt;1e-9) to be </dt>
-<dd>closer to 1 (scales by the median) so that the fit converges better</dd>
-</dl>
-<p>nsigcut_moments - pass to moment guesser; can do a sigma cut for moment guessing</p>
+<div><p>The initial guess will be set by the fitter&#8217;s &#8216;moments&#8217; function
+(this overrides &#8216;guesses&#8217;)</p>
+</div></blockquote>
+<p><strong>annotate</strong> : bool</p>
+<blockquote>
+<div><p>Make a legend?</p>
+</div></blockquote>
+<p><strong>vheight</strong> : bool</p>
+<blockquote>
+<div><p>Fit a (constant) background as well as a peak?</p>
+</div></blockquote>
+<p><strong>height</strong> : float</p>
+<blockquote>
+<div><p>initial guess for background</p>
+</div></blockquote>
+<p><strong>negamp</strong> : bool</p>
+<blockquote>
+<div><p>If True, assumes amplitude is negative.  If False, assumes positive.  If 
+None, can be either.</p>
+</div></blockquote>
+<p><strong>fittype</strong> : bool</p>
+<blockquote>
+<div><p>What function will be fit?  fittype must have been Registryed in the
+singlefitters dict</p>
+</div></blockquote>
+<p><strong>renormalize</strong> : &#8216;auto&#8217; or bool</p>
+<blockquote>
+<div><p>if &#8216;auto&#8217; or True, will attempt to rescale small data (&lt;1e-9) to be 
+closer to 1 (scales by the median) so that the fit converges better</p>
+</div></blockquote>
+<p><strong>nsigcut_moments</strong> : bool</p>
+<blockquote class="last">
+<div><p>pass to moment guesser; can do a sigma cut for moment guessing</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -559,70 +608,76 @@ axis; defaults to figure(2).</p>
 <tt class="descname">register_fitter</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.register_fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a model fitter</p>
 <p>Register a fitter function.</p>
-<p>Required Arguments:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>*name*: [ string ]</strong> :</p>
 <blockquote>
-<div><dl class="docutils">
-<dt><em>name</em>: [ string ]</dt>
-<dd>The fit function name.</dd>
-<dt><em>function</em>: [ function ]</dt>
-<dd>The fitter function.  Single-fitters should take npars + 1 input
+<div><p>The fit function name.</p>
+</div></blockquote>
+<p><strong>*function*: [ function ]</strong> :</p>
+<blockquote>
+<div><p>The fitter function.  Single-fitters should take npars + 1 input
 parameters, where the +1 is for a 0th order baseline fit.  They
 should accept an X-axis and data and standard fitting-function
 inputs (see, e.g., gaussfitter).  Multi-fitters should take N *
-npars, but should also operate on X-axis and data arguments.</dd>
-<dt><em>npars</em>: [ int ]</dt>
-<dd>How many parameters does the function being fit accept?</dd>
-</dl>
+npars, but should also operate on X-axis and data arguments.</p>
 </div></blockquote>
-<p>Optional Keyword Arguments:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt><em>multisingle</em>: [ &#8216;multi&#8217; | &#8216;single&#8217; ] </dt>
-<dd>Is the function a single-function fitter (with a background), or
-does it allow N copies of the fitting function?</dd>
-<dt><em>override</em>: [ True | False ]</dt>
-<dd>Whether to override any existing type if already present.</dd>
-<dt><em>key</em>: [ char ]</dt>
-<dd>Key to select the fitter in interactive mode</dd>
-</dl>
+<p><strong>*npars*: [ int ]</strong> :</p>
+<blockquote class="last">
+<div><p>How many parameters does the function being fit accept?</p>
 </div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.savefit">
 <tt class="descname">savefit</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.savefit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save the fit parameters from a Gaussian fit to the FITS header
-<strong>*THESE SHOULD BE WRITTEN FOR EACH TYPE OF MODEL TO BE FIT*</strong></p>
+<dd><p>Save the fit parameters from a Gaussian fit to the FITS header</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.selectregion">
 <tt class="descname">selectregion</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em>, <em>xtype='wcs'</em>, <em>highlight=False</em>, <em>fit_plotted_area=True</em>, <em>reset=False</em>, <em>verbose=False</em>, <em>debug=False</em>, <em>use_window_limits=None</em>, <em>exclude=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pick a fitting region in either WCS units or pixel units</p>
-<dl class="docutils">
-<dt><em>xmin / xmax</em> [ float ]</dt>
-<dd>The min/max X values to use in X-axis units (or pixel units if xtype is set).
-TAKES PRECEDENCE ALL OTHER BOOLEAN OPTIONS</dd>
-<dt><em>xtype</em> [ string ]</dt>
-<dd>A string specifying the xtype that xmin/xmax are specified in.  It can be either
-&#8216;wcs&#8217; or any valid xtype from <a class="reference internal" href="units.html#module-pyspeckit.spectrum.units" title="pyspeckit.spectrum.units"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.units</span></tt></a></dd>
-<dt><em>reset</em> [ bool ]</dt>
-<dd>Reset the selected region to the full spectrum?  Only takes effect
-if xmin and xmax are not (both) specified.   
-TAKES PRECEDENCE ALL SUBSEQUENT BOOLEAN OPTIONS</dd>
-</dl>
-<p>Now things get a little complicated...
-<em>fit_plotted_area</em> [ bool ]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>*xmin / xmax*</strong> : [ float ]</p>
 <blockquote>
-<div>Use the plot limits <em>as specified in :class:`pyspeckit.spectrum.plotters`</em>?
-Note that this is not necessarily the same as the window plot limits!</div></blockquote>
-<dl class="docutils">
-<dt><em>use_window_limits</em> [ bool ] </dt>
-<dd>Use the plot limits <em>as displayed</em>.  Defaults to
-<tt class="xref py py-attr docutils literal"><span class="pre">pyspeckit.spectrum.interactive.use_window_limits</span></tt>.
-Overwrites xmin,xmax set by plotter</dd>
-<dt>exclude: {list of length 2n,&#8217;interactive&#8217;, None}</dt>
-<dd><ul class="first last simple">
+<div><p>The min/max X values to use in X-axis units (or pixel units if xtype is set).
+TAKES PRECEDENCE ALL OTHER BOOLEAN OPTIONS</p>
+</div></blockquote>
+<p><strong>*xtype*</strong> : [ string ]</p>
+<blockquote>
+<div><p>A string specifying the xtype that xmin/xmax are specified in.  It can be either
+&#8216;wcs&#8217; or any valid xtype from <a class="reference internal" href="units.html#module-pyspeckit.spectrum.units" title="pyspeckit.spectrum.units"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.units</span></tt></a></p>
+</div></blockquote>
+<p><strong>*reset*</strong> : [ bool ]</p>
+<blockquote>
+<div><p>Reset the selected region to the full spectrum?  Only takes effect
+if xmin and xmax are not (both) specified.   
+TAKES PRECEDENCE ALL SUBSEQUENT BOOLEAN OPTIONS</p>
+</div></blockquote>
+<p><strong>*fit_plotted_area*</strong> : [ bool ]</p>
+<blockquote>
+<div><p>Use the plot limits <em>as specified in :class:`pyspeckit.spectrum.plotters`</em>?
+Note that this is not necessarily the same as the window plot limits!</p>
+</div></blockquote>
+<p><strong>*use_window_limits*</strong> : [ bool ]</p>
+<blockquote>
+<div><p>Use the plot limits <em>as displayed</em>.  Defaults to self.use_window_limits 
+(<tt class="xref py py-attr docutils literal"><span class="pre">pyspeckit.spectrum.interactive.use_window_limits</span></tt>).
+Overwrites xmin,xmax set by plotter</p>
+</div></blockquote>
+<p><strong>exclude: {list of length 2n,&#8217;interactive&#8217;, None}</strong> :</p>
+<blockquote class="last">
+<div><ul class="simple">
 <li>interactive: start an interactive session to select the
 include/exclude regions</li>
 <li>list: parsed as a series of (startpoint, endpoint) in the
@@ -630,8 +685,11 @@ spectrum&#8217;s X-axis units.  Will exclude the regions between
 startpoint and endpoint</li>
 <li>None: No exclusion</li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -725,7 +783,7 @@ It should be extended to do other things later</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Oct 29, 2012.
+      Last updated on Dec 07, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

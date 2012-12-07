@@ -25,6 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
     <link rel="up" title="Features" href="features.html" />
@@ -118,7 +119,7 @@ and the fit parameters will be saved in &#8220;self.order&#8221;</p>
 <p><strong>excludefit: bool</strong> :</p>
 <blockquote>
 <div><p>If there is a spectroscopic line fit, you can automatically exclude
-the region with signal above some tolerance set by <cite>exclusionlevel</cite>
+the region with signal above some tolerance set by <tt class="xref py py-obj docutils literal"><span class="pre">exclusionlevel</span></tt>
 (it works for absorption lines by using the absolute value of the
 signal)</p>
 </div></blockquote>
@@ -141,8 +142,11 @@ window</p>
 <blockquote>
 <div><p>Fit the original spectrum instead of the baseline-subtracted spectrum.
 If disabled, will overwrite the original data with the
-baseline-subtracted version.
-.. warning:: If this is set False, behavior of <cite>unsubtract</cite> may be unexpected</p>
+baseline-subtracted version.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If this is set False, behavior of <a class="reference internal" href="#pyspeckit.spectrum.baseline.Baseline.unsubtract" title="pyspeckit.spectrum.baseline.Baseline.unsubtract"><tt class="xref py py-obj docutils literal"><span class="pre">unsubtract</span></tt></a> may be unexpected</p>
+</div>
 </div></blockquote>
 <p><strong>fit_plotted_area: bool</strong> :</p>
 <blockquote>
@@ -300,7 +304,7 @@ i.e. if there was a baseline to unsubtract)</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Oct 29, 2012.
+      Last updated on Dec 07, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

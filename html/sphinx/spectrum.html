@@ -25,6 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
      
@@ -92,24 +93,24 @@ specified, leave filename blank.</p>
 <div><p>Specify the file type (only needed if it cannot be automatically
 determined from the filename)</p>
 </div></blockquote>
-<p><strong>xarr</strong> : <cite>units.SpectroscopicAxis</cite> or <cite>np.ndarray</cite></p>
+<p><strong>xarr</strong> : <a class="reference internal" href="units.html#pyspeckit.spectrum.units.SpectroscopicAxis" title="pyspeckit.spectrum.units.SpectroscopicAxis"><tt class="xref py py-obj docutils literal"><span class="pre">units.SpectroscopicAxis</span></tt></a> or <tt class="xref py py-obj docutils literal"><span class="pre">np.ndarray</span></tt></p>
 <blockquote>
 <div><p>The X-axis of the data.  If it is an np.ndarray, you must pass
-<cite>xarrkwargs</cite> or a valid header if you want to use any of the unit
+<tt class="xref py py-obj docutils literal"><span class="pre">xarrkwargs</span></tt> or a valid header if you want to use any of the unit
 functionality.</p>
 </div></blockquote>
-<p><strong>data</strong> : <cite>np.ndarray</cite></p>
+<p><strong>data</strong> : <tt class="xref py py-obj docutils literal"><span class="pre">np.ndarray</span></tt></p>
 <blockquote>
 <div><p>The data array (must have same length as xarr)</p>
 </div></blockquote>
-<p><strong>error</strong> : <cite>np.ndarray</cite></p>
+<p><strong>error</strong> : <tt class="xref py py-obj docutils literal"><span class="pre">np.ndarray</span></tt></p>
 <blockquote>
 <div><p>The error array (must have same length as the data and xarr arrays)</p>
 </div></blockquote>
-<p><strong>header</strong> : <cite>pyfits.Header</cite> or dict</p>
+<p><strong>header</strong> : <tt class="xref py py-obj docutils literal"><span class="pre">pyfits.Header</span></tt> or dict</p>
 <blockquote>
 <div><p>The header from which to read unit information.  Needs to be a
-<cite>pyfits.Header</cite> instance or another dictionary-like object with the
+<tt class="xref py py-obj docutils literal"><span class="pre">pyfits.Header</span></tt> instance or another dictionary-like object with the
 appropriate information</p>
 </div></blockquote>
 <p><strong>maskdata</strong> : boolean</p>
@@ -302,7 +303,7 @@ copy instead of cropping inplace</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.Spectrum.smooth">
 <tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.smooth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Smooth the spectrum by factor <cite>smooth</cite>.</p>
+<dd><p>Smooth the spectrum by factor <a class="reference internal" href="#pyspeckit.spectrum.Spectrum.smooth" title="pyspeckit.spectrum.Spectrum.smooth"><tt class="xref py py-obj docutils literal"><span class="pre">smooth</span></tt></a>.</p>
 <blockquote>
 <div><p>Documentation from the <tt class="xref py py-mod docutils literal"><span class="pre">smooth</span></tt> module:</p>
 <p>sm.smooth doc:</p>
@@ -552,7 +553,7 @@ for example.</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Oct 29, 2012.
+      Last updated on Dec 07, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

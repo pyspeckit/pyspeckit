@@ -25,6 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
     <link rel="up" title="Examples" href="examples.html" />
@@ -70,14 +71,14 @@
   <div class="section" id="monte-carlo-examples">
 <h1>Monte Carlo examples<a class="headerlink" href="#monte-carlo-examples" title="Permalink to this headline">¶</a></h1>
 <p>There are (at least) two packages implementing Monte Carlo sampling available
-in python: <a class="reference external" href="http://code.google.com/p/pymc/">pymc</a> and <a class="reference external" href="http://danfm.ca/emcee/">emcee</a>.  <cite>pyspeckit</cite> includes interfaces to both.  With
+in python: <a class="reference external" href="http://code.google.com/p/pymc/">pymc</a> and <a class="reference external" href="http://danfm.ca/emcee/">emcee</a>.  <tt class="xref py py-obj docutils literal"><span class="pre">pyspeckit</span></tt> includes interfaces to both.  With
 the pymc interface, it is possible to define priors that strictly limit the
 parameter space.  So far that is not possible with emcee.</p>
 <p>The examples below use a custom plotting package from <a class="reference external" href="http://code.google.com/p/agpy/">agpy</a>.  It is a relatively simple but convenient
 wrapper around numpy&#8217;s histogram2d.  <a class="reference external" href="http://code.google.com/p/agpy/source/browse/trunk/agpy/pymc_plotting.py">pymc_plotting</a>
 takes care of indexing, percentile determination, and coloring.</p>
 <p>The example below shows the results of a gaussian fit to noisy data (S/N ~ 6).
-The parameter space is then explored with <cite>pymc</cite> and <cite>emcee</cite> in order to examine
+The parameter space is then explored with <tt class="xref py py-obj docutils literal"><span class="pre">pymc</span></tt> and <tt class="xref py py-obj docutils literal"><span class="pre">emcee</span></tt> in order to examine
 the correlation between width and amplitude.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pyspeckit</span>
 
@@ -182,8 +183,8 @@ mean fitted amplitude is 5.0).</p>
 <div class="figure" style="width: 800">
 <img alt="Same as above, but using emcee with 352000 samples" src="_images/emcee_params_example.png" style="width: 800px;" />
 </div>
-<p>The parameter space sampled with <cite>emcee</cite> and binned onto a 25x25 grid.  Note
-that <cite>emcee</cite> has 6x as many points (and takes about 6x as long to run) because
+<p>The parameter space sampled with <tt class="xref py py-obj docutils literal"><span class="pre">emcee</span></tt> and binned onto a 25x25 grid.  Note
+that <tt class="xref py py-obj docutils literal"><span class="pre">emcee</span></tt> has 6x as many points (and takes about 6x as long to run) because
 there are 6 &#8220;walkers&#8221; for the 3 parameters being fit.</p>
 </div>
 
@@ -239,7 +240,7 @@ there are 6 &#8220;walkers&#8221; for the 3 parameters being fit.</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Oct 29, 2012.
+      Last updated on Dec 07, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

@@ -44,32 +44,32 @@ The default is gaussian ('g'), all options are listed below:
         ''' 
         Register a fitter function.
 
-        Required Arguments:
+        Parameters
+        ----------
+        *name*: [ string ]
+            The fit function name. 
 
-            *name*: [ string ]
-                The fit function name. 
+        *function*: [ function ]
+            The fitter function.  Single-fitters should take npars + 1 input
+            parameters, where the +1 is for a 0th order baseline fit.  They
+            should accept an X-axis and data and standard fitting-function
+            inputs (see, e.g., gaussfitter).  Multi-fitters should take N *
+            npars, but should also operate on X-axis and data arguments.
 
-            *function*: [ function ]
-                The fitter function.  Single-fitters should take npars + 1 input
-                parameters, where the +1 is for a 0th order baseline fit.  They
-                should accept an X-axis and data and standard fitting-function
-                inputs (see, e.g., gaussfitter).  Multi-fitters should take N *
-                npars, but should also operate on X-axis and data arguments.
+        *npars*: [ int ]
+            How many parameters does the function being fit accept?
 
-            *npars*: [ int ]
-                How many parameters does the function being fit accept?
+        Optional Parameters
+        -------------------
+        *multisingle*: [ 'multi' | 'single' ] 
+            Is the function a single-function fitter (with a background), or
+            does it allow N copies of the fitting function?
 
-        Optional Keyword Arguments:
+        *override*: [ True | False ]
+            Whether to override any existing type if already present.
 
-            *multisingle*: [ 'multi' | 'single' ] 
-                Is the function a single-function fitter (with a background), or
-                does it allow N copies of the fitting function?
-
-            *override*: [ True | False ]
-                Whether to override any existing type if already present.
-
-            *key*: [ char ]
-                Key to select the fitter in interactive mode
+        *key*: [ char ]
+            Key to select the fitter in interactive mode
         '''
 
 
@@ -575,18 +575,30 @@ class Specfit(interactive.Interactive):
         """
         Fit a single peak (plus a background)
 
-        usemoments - The initial guess will be set by the fitter's 'moments' function
+        Parameters
+        ----------
+        usemoments : bool
+            The initial guess will be set by the fitter's 'moments' function
             (this overrides 'guesses')
-        annotate - Make a legend?
-        vheight - Fit a (constant) background as well as a peak?
-        height - initial guess for background
-        negamp - If True, assumes amplitude is negative.  If False, assumes positive.  If 
+        annotate : bool
+            Make a legend?
+        vheight : bool
+            Fit a (constant) background as well as a peak?
+        height : float
+            initial guess for background
+        negamp : bool
+            If True, assumes amplitude is negative.  If False, assumes positive.  If 
             None, can be either.
-        fittype - What function will be fit?  fittype must have been Registryed in the
+        fittype : bool
+            What function will be fit?  fittype must have been Registryed in the
             singlefitters dict
-        renormalize - if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
+        renormalize : 'auto' or bool
+            if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
             closer to 1 (scales by the median) so that the fit converges better
-        nsigcut_moments - pass to moment guesser; can do a sigma cut for moment guessing
+        nsigcut_moments : bool
+            pass to moment guesser; can do a sigma cut for moment guessing
+
+
         """
         self.npeaks = 1
         self.auto = True
@@ -926,7 +938,9 @@ class Specfit(interactive.Interactive):
     def savefit(self):
         """
         Save the fit parameters from a Gaussian fit to the FITS header
-        ***THESE SHOULD BE WRITTEN FOR EACH TYPE OF MODEL TO BE FIT***
+
+        .. todo::
+            THESE SHOULD BE WRITTEN FOR EACH TYPE OF MODEL TO BE FIT
         """
         if self.modelpars is not None and hasattr(self.Spectrum,'header'):
             for ii,p in enumerate(self.modelpars):
@@ -1092,7 +1106,7 @@ class Specfit(interactive.Interactive):
         """
         Return the moments 
 
-        see :mod:`moments`
+        see the :mod:`~pyspeckit.spectrum.moments` module
         """
         return self.Registry.singlefitters[self.fittype].moments(
                 self.Spectrum.xarr[self.xmin:self.xmax],
@@ -1208,25 +1222,29 @@ class Specfit(interactive.Interactive):
     def optimal_chi2(self, reduced=True, threshold='error',
             **kwargs):
         """
-        Compute an "optimal" chi^2 statistic, i.e. one in which only pixels in
+        Compute an "optimal" :math:`\chi^2` statistic, i.e. one in which only pixels in
         which the model is statistically significant are included
 
         Parameters
         ----------
         reduced : bool
-            Return the reduced chi^2
+            Return the reduced :math:`\chi^2`
         threshold : 'auto' or 'error' or float
             If 'auto', the threshold will be set to peak_fraction * the peak
             model value, where peak_fraction is a kwarg passed to
             get_model_xlimits reflecting the fraction of the model peak
             to consider significant
             If 'error', uses the error spectrum as the threshold
-        kwargs are passed to :meth:`get_model_xlimits`
+        kwargs : dict
+            passed to :meth:`get_model_xlimits`
 
         Returns
         -------
-        Chi^2 statistic or reduced chi^2 statistic
-        `\\chi^2 = \\sum( (d_i - m_i)^2 / e_i^2 )
+        chi2 : float
+            :math:`\chi^2` statistic or reduced :math:`\chi^2` statistic (:math:`\chi^2/n`)
+
+            .. math::
+                   \chi^2 = \sum( (d_i - m_i)^2 / e_i^2 )
         """
 
         # old version modelmask = np.abs(self.fullmodel) > self.errspec

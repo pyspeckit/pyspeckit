@@ -97,6 +97,7 @@ class Baseline(interactive.Interactive):
             Fit the original spectrum instead of the baseline-subtracted spectrum.
             If disabled, will overwrite the original data with the
             baseline-subtracted version.
+
             .. warning:: If this is set False, behavior of `unsubtract` may be unexpected
         fit_plotted_area: bool
             Will respect user-specified zoom (using the pan/zoom buttons)
