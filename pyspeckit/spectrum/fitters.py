@@ -306,7 +306,9 @@ class Specfit(interactive.Interactive):
             Use the fitted model?  If false, uses the data
         continuum : None or float
             Can specify a fixed continuum with this keyword, otherwise will use
-            the fitted baseline
+            the fitted baseline.  WARNING: continuum=0 will still "work", but
+            will give numerically invalid results.  Similarly, a negative continuum
+            will work, but will yield results with questionable physical meaning.
         components : bool
             If your fit is multi-component, will attempt to acquire centroids
             for each component and print out individual EQWs
@@ -319,10 +321,12 @@ class Specfit(interactive.Interactive):
         Equivalent Width, or widths if components=True
 
         """
-        if np.median(self.Spectrum.baseline.basespec) == 0:
-            raise ValueError("Baseline / continuum is zero: equivalent width is undefined.")
-        elif np.median(self.Spectrum.baseline.basespec) < 0:
-            if mycfg.WARN: warn( "WARNING: Baseline / continuum is negative: equivalent width is poorly defined." )
+        if continuum is not None:
+            # if continuum is specified, don't bother with checks
+            if np.median(self.Spectrum.baseline.basespec) == 0:
+                raise ValueError("Baseline / continuum is zero: equivalent width is undefined.")
+            elif np.median(self.Spectrum.baseline.basespec) < 0:
+                if mycfg.WARN: warn( "WARNING: Baseline / continuum is negative: equivalent width is poorly defined." )
 
         # determine range to use
         if xmin is None:
@@ -337,7 +341,8 @@ class Specfit(interactive.Interactive):
             eqw = []
             for cen,integ in zip(centroids,integrals):
                 center_pix = self.Spectrum.xarr.x_to_pix(cen)
-                continuum = self.Spectrum.baseline.basespec[center_pix]
+                if continuum is None:
+                    continuum = self.Spectrum.baseline.basespec[center_pix]
                 eqw.append( -integ / continuum)
             if plot:
                 plot = False
