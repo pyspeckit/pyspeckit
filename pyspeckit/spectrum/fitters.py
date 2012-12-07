@@ -59,8 +59,8 @@ The default is gaussian ('g'), all options are listed below:
         *npars*: [ int ]
             How many parameters does the function being fit accept?
 
-        Optional Parameters
-        -------------------
+        Other Parameters
+        ----------------
         *multisingle*: [ 'multi' | 'single' ] 
             Is the function a single-function fitter (with a background), or
             does it allow N copies of the fitting function?
