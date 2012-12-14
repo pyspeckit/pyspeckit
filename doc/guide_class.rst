@@ -20,6 +20,7 @@ The data is filtered as it is read in.  The following line will ensure that the 
 `n2hp` ObsBlock contain only data from the F1M spectrometer with lines labeled 'N2HP(3-2)'
 or 'N2H+(3-2)'::
     
+    from pyspeckit.spectrum.readers.read_class import class_to_obsblocks
     n2hp = class_to_obsblocks(filename, 
         telescope=['SMT-F1M-HU','SMT-F1M-VU'],
         line=['N2HP(3-2)','N2H+(3-2)'])
