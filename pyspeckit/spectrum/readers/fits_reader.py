@@ -9,7 +9,7 @@ from . import make_axis
 import operator
 from pyspeckit.specwarnings import warn
 
-def open_1d_fits(filename,**kwargs):
+def open_1d_fits(filename, hdu=0, **kwargs):
     """
     Grabs all the relevant pieces of a simple FITS-compliant 1d spectrum
 
@@ -25,12 +25,12 @@ def open_1d_fits(filename,**kwargs):
 
     f = pyfits.open(filename)
 
-    return open_1d_pyfits(f[0],**kwargs)
+    return open_1d_pyfits(f[hdu],**kwargs)
 
 
-def open_1d_pyfits(pyfits_hdu,specnum=0,wcstype='',specaxis="1",errspecnum=None,
-        autofix=True, scale_keyword=None, scale_action=operator.div,
-        verbose=False, apnum=0, **kwargs):
+def open_1d_pyfits(pyfits_hdu, specnum=0, wcstype='', specaxis="1",
+        errspecnum=None, autofix=True, scale_keyword=None,
+        scale_action=operator.div, verbose=False, apnum=0, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file

@@ -115,7 +115,7 @@ length_dict = {'meters':1.0,'m':1.0,
         'micrometers':1e-6,'micron':1e-6,'microns':1e-6,'um':1e-6,
         'kilometers':1e3,'km':1e3,
         'megameters':1e6,'Mm':1e6,
-        'angstroms':1e-10,'A':1e-10,
+        'angstrom':1e-10,'angstroms':1e-10,'A':1e-10,
         }
 length_dict = SmartCaseDict(length_dict)
 
@@ -168,7 +168,7 @@ unit_type_dict = {
     'micrometers':'wavelength','micron':'wavelength','microns':'wavelength','um':'wavelength',
     'kilometers':'wavelength','km':'wavelength',
     'megameters':'wavelength','Mm':'wavelength',
-    'angstroms':'wavelength','A':'wavelength',
+    'angstrom':'wavelength','angstroms':'wavelength','A':'wavelength',
     'unknown':'pixels',
     None: 'pixels',
     }
