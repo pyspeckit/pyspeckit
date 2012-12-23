@@ -82,7 +82,8 @@ but it has a few extra attributes built-in (e.g., spectral averaging).</p>
 The data is filtered as it is read in.  The following line will ensure that the spectra in the
 <tt class="xref py py-obj docutils literal"><span class="pre">n2hp</span></tt> ObsBlock contain only data from the F1M spectrometer with lines labeled &#8216;N2HP(3-2)&#8217;
 or &#8216;N2H+(3-2)&#8217;:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">n2hp</span> <span class="o">=</span> <span class="n">class_to_obsblocks</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pyspeckit.spectrum.readers.read_class</span> <span class="kn">import</span> <span class="n">class_to_obsblocks</span>
+<span class="n">n2hp</span> <span class="o">=</span> <span class="n">class_to_obsblocks</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span>
     <span class="n">telescope</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;SMT-F1M-HU&#39;</span><span class="p">,</span><span class="s">&#39;SMT-F1M-VU&#39;</span><span class="p">],</span>
     <span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;N2HP(3-2)&#39;</span><span class="p">,</span><span class="s">&#39;N2H+(3-2)&#39;</span><span class="p">])</span>
 </pre></div>
@@ -153,6 +154,8 @@ are possible:</p>
 </div>
 </div>
 </div>
+<div class="section">
+<a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/guide_class.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></div>
 
 
           </div>
@@ -195,7 +198,7 @@ are possible:</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Dec 07, 2012.
+      Last updated on Dec 23, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

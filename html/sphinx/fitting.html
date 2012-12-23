@@ -72,12 +72,12 @@
 <span id="model-fitting"></span><h1>Model Fitting<a class="headerlink" href="#module-pyspeckit.spectrum.fitters" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pyspeckit.spectrum.fitters.Specfit">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.fitters.</tt><tt class="descname">Specfit</tt><big>(</big><em>Spectrum</em>, <em>Registry=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.fitters.</tt><tt class="descname">Specfit</tt><big>(</big><em>Spectrum</em>, <em>Registry=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L119" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.interactive.Interactive</span></tt></p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.EQW">
-<tt class="descname">EQW</tt><big>(</big><em>plot=False</em>, <em>plotcolor='g'</em>, <em>fitted=True</em>, <em>continuum=None</em>, <em>components=False</em>, <em>annotate=False</em>, <em>alpha=0.5</em>, <em>loc='lower left'</em>, <em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.EQW" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">EQW</tt><big>(</big><em>plot=False</em>, <em>plotcolor='g'</em>, <em>fitted=True</em>, <em>continuum=None</em>, <em>components=False</em>, <em>annotate=False</em>, <em>alpha=0.5</em>, <em>loc='lower left'</em>, <em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L290" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.EQW" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the equivalent width (integral of &#8220;baseline&#8221; or &#8220;continuum&#8221;
 minus the spectrum) over the selected range
 (the selected range defaults to self.xmin:self.xmax, so it may include
@@ -124,7 +124,7 @@ for each component and print out individual EQWs</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.add_sliders">
-<tt class="descname">add_sliders</tt><big>(</big><em>parlimitdict=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.add_sliders" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_sliders</tt><big>(</big><em>parlimitdict=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1176" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.add_sliders" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a Sliders window in a new figure appropriately titled</p>
 <dl class="docutils">
 <dt><em>parlimitdict</em> [ dict ]</dt>
@@ -138,7 +138,7 @@ yet.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.annotate">
-<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.1</em>, <em>handlelength=0.1</em>, <em>handletextpad=0.1</em>, <em>frameon=False</em>, <em>chi2=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">annotate</tt><big>(</big><em>loc='upper right'</em>, <em>labelspacing=0.25</em>, <em>markerscale=0.01</em>, <em>borderpad=0.1</em>, <em>handlelength=0.1</em>, <em>handletextpad=0.1</em>, <em>frameon=False</em>, <em>chi2=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L852" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.annotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a legend to the plot showing the fitted parameters</p>
 <p>_clearlegend() will remove the legend</p>
 <p>chi2 : {True or &#8216;reduced&#8217; or &#8216;optimal&#8217;}</p>
@@ -147,7 +147,7 @@ yet.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.button3action">
-<tt class="descname">button3action</tt><big>(</big><em>event</em>, <em>debug=False</em>, <em>nwidths=1</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.button3action" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">button3action</tt><big>(</big><em>event</em>, <em>debug=False</em>, <em>nwidths=1</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1115" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.button3action" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disconnect the interactiveness
 Perform the fit (or die trying)
 Hide the guesses</p>
@@ -155,25 +155,25 @@ Hide the guesses</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.clear">
-<tt class="descname">clear</tt><big>(</big><em>legend=True</em>, <em>components=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.clear" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">clear</tt><big>(</big><em>legend=True</em>, <em>components=True</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L905" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove the fitted model from the plot</p>
 <p>Also removes the legend by default</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.clear_all_connections">
-<tt class="descname">clear_all_connections</tt><big>(</big><em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.clear_all_connections" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">clear_all_connections</tt><big>(</big><em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L237" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.clear_all_connections" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prevent overlapping interactive sessions</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.clear_highlights">
-<tt class="descname">clear_highlights</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.clear_highlights" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">clear_highlights</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L302" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.clear_highlights" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.copy">
-<tt class="descname">copy</tt><big>(</big><em>parent=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.copy" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">copy</tt><big>(</big><em>parent=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1137" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a copy of the spectral fit - includes copies of the _full_model,
 the registry, the fitter, parinfo, modelpars, modelerrs, model, npeaks</p>
 <dl class="docutils">
@@ -186,39 +186,39 @@ to None to prevent overwriting a previous plot.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.crop">
-<tt class="descname">crop</tt><big>(</big><em>x1pix</em>, <em>x2pix</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.crop" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">crop</tt><big>(</big><em>x1pix</em>, <em>x2pix</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L962" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>When spectrum.crop is called, this must be too</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.downsample">
-<tt class="descname">downsample</tt><big>(</big><em>factor</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.downsample" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">downsample</tt><big>(</big><em>factor</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L951" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.downsample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downsample the model spectrum (and the spectofit spectra)
 This should only be done when Spectrum.smooth is called</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.event_manager">
-<tt class="descname">event_manager</tt><big>(</big><em>event</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.event_manager" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">event_manager</tt><big>(</big><em>event</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L52" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.event_manager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decide what to do given input (click, keypress, etc.)</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.firstclick_guess">
-<tt class="descname">firstclick_guess</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.firstclick_guess" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">firstclick_guess</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L226" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.firstclick_guess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.guesses</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.fullsizemodel">
-<tt class="descname">fullsizemodel</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.fullsizemodel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">fullsizemodel</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L808" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.fullsizemodel" title="Permalink to this definition">¶</a></dt>
 <dd><p>If the gaussian was fit to a sub-region of the spectrum,
 expand it (with zeros) to fill the spectrum.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_components">
-<tt class="descname">get_components</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_components" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_components</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1326" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_components" title="Permalink to this definition">¶</a></dt>
 <dd><p>If a model has been fitted, return the components of the model</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -232,7 +232,7 @@ expand it (with zeros) to fill the spectrum.</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_emcee">
-<tt class="descname">get_emcee</tt><big>(</big><em>nwalkers=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_emcee" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_emcee</tt><big>(</big><em>nwalkers=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1295" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_emcee" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an emcee walker ensemble for the data &amp; model using the current model type</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -264,25 +264,25 @@ expand it (with zeros) to fill the spectrum.</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_full_model">
-<tt class="descname">get_full_model</tt><big>(</big><em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_full_model" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_full_model</tt><big>(</big><em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L700" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_full_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute the model over the full axis</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_model">
-<tt class="descname">get_model</tt><big>(</big><em>xarr</em>, <em>debug=False</em>, <em>add_baseline=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_model</tt><big>(</big><em>xarr</em>, <em>debug=False</em>, <em>add_baseline=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L704" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the model over a given axis</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_model_frompars">
-<tt class="descname">get_model_frompars</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model_frompars" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_model_frompars</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L712" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model_frompars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the model over a given axis</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_model_xlimits">
-<tt class="descname">get_model_xlimits</tt><big>(</big><em>threshold='auto'</em>, <em>peak_fraction=0.01</em>, <em>add_baseline=False</em>, <em>units='pixels'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model_xlimits" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_model_xlimits</tt><big>(</big><em>threshold='auto'</em>, <em>peak_fraction=0.01</em>, <em>add_baseline=False</em>, <em>units='pixels'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1049" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_model_xlimits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the x positions of the first and last points at which the model
 is above some threshold</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -316,7 +316,7 @@ threshold?  default FALSE.  Passed to get_full_model.</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.get_pymc">
-<tt class="descname">get_pymc</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_pymc" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_pymc</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1261" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.get_pymc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a pymc MCMC sampler from the current fitter.  Defaults to &#8216;uninformative&#8217; priors</p>
 <p><tt class="xref py py-obj docutils literal"><span class="pre">kwargs</span></tt> are passed to the fitter&#8217;s get_pymc method, with parameters defined below.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -354,26 +354,26 @@ the Normal distribution with sigma = par.error and mean = par.value</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.guesspeakwidth">
-<tt class="descname">guesspeakwidth</tt><big>(</big><em>event</em>, <em>debug=False</em>, <em>nwidths=1</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.guesspeakwidth" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">guesspeakwidth</tt><big>(</big><em>event</em>, <em>debug=False</em>, <em>nwidths=1</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L186" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.guesspeakwidth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interactively guess the peak height and width from user input</p>
 <p>Width is assumed to be half-width-half-max</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.highlight_fitregion">
-<tt class="descname">highlight_fitregion</tt><big>(</big><em>drawstyle='steps-mid'</em>, <em>color='g'</em>, <em>clear_highlights=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.highlight_fitregion" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">highlight_fitregion</tt><big>(</big><em>drawstyle='steps-mid'</em>, <em>color='g'</em>, <em>clear_highlights=True</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L156" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.highlight_fitregion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Re-highlight the fitted region</p>
 <p>kwargs are passed to <tt class="xref py py-obj docutils literal"><span class="pre">matplotlib.plot</span></tt></p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.history_fitpars">
-<tt class="descname">history_fitpars</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.history_fitpars" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">history_fitpars</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L563" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.history_fitpars" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.integral">
-<tt class="descname">integral</tt><big>(</big><em>direct=False</em>, <em>threshold='auto'</em>, <em>integration_limits=None</em>, <em>return_error=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.integral" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">integral</tt><big>(</big><em>direct=False</em>, <em>threshold='auto'</em>, <em>integration_limits=None</em>, <em>return_error=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L972" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.integral" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the integral of the fitted spectrum</p>
 <p>if direct=True, return the integral of the spectrum over a range
 defined by the threshold or integration limits if defined</p>
@@ -388,7 +388,7 @@ will be returned as well</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.measure_approximate_fwhm">
-<tt class="descname">measure_approximate_fwhm</tt><big>(</big><em>threshold='error'</em>, <em>emission=True</em>, <em>interpolate_factor=1</em>, <em>plot=False</em>, <em>grow_threshold=2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.measure_approximate_fwhm" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">measure_approximate_fwhm</tt><big>(</big><em>threshold='error'</em>, <em>emission=True</em>, <em>interpolate_factor=1</em>, <em>plot=False</em>, <em>grow_threshold=2</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1340" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.measure_approximate_fwhm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Measure the FWHM of a fitted line</p>
 <p>This procedure is designed for multi-component lines; if the true FWHM
 is known (i.e., the line is well-represented by a single
@@ -435,14 +435,14 @@ threshold is &lt;= to this number, it will be grown by 1 pixel on each side</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.moments">
-<tt class="descname">moments</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.moments" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">moments</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1105" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.moments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the moments</p>
 <p>see the <tt class="xref py py-mod docutils literal"><span class="pre">moments</span></tt> module</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.multifit">
-<tt class="descname">multifit</tt><big>(</big><em>fittype=None</em>, <em>renormalize='auto'</em>, <em>annotate=None</em>, <em>show_components=None</em>, <em>verbose=True</em>, <em>color=None</em>, <em>use_window_limits=None</em>, <em>use_lmfit=False</em>, <em>plot=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.multifit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">multifit</tt><big>(</big><em>fittype=None</em>, <em>renormalize='auto'</em>, <em>annotate=None</em>, <em>show_components=None</em>, <em>verbose=True</em>, <em>color=None</em>, <em>use_window_limits=None</em>, <em>use_lmfit=False</em>, <em>plot=True</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L456" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.multifit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit multiple gaussians (or other profiles)</p>
 <dl class="docutils">
 <dt>fittype - What function will be fit?  fittype must have been Registryed in the</dt>
@@ -454,7 +454,7 @@ threshold is &lt;= to this number, it will be grown by 1 pixel on each side</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.optimal_chi2">
-<tt class="descname">optimal_chi2</tt><big>(</big><em>reduced=True</em>, <em>threshold='error'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.optimal_chi2" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">optimal_chi2</tt><big>(</big><em>reduced=True</em>, <em>threshold='error'</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1222" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.optimal_chi2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute an &#8220;optimal&#8221; <span class="math">\(\chi^2\)</span> statistic, i.e. one in which only pixels in
 which the model is statistically significant are included</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -493,7 +493,7 @@ If &#8216;error&#8217;, uses the error spectrum as the threshold</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.peakbgfit">
-<tt class="descname">peakbgfit</tt><big>(</big><em>usemoments=True</em>, <em>annotate=None</em>, <em>vheight=True</em>, <em>height=0</em>, <em>negamp=None</em>, <em>fittype=None</em>, <em>renormalize='auto'</em>, <em>color=None</em>, <em>use_lmfit=False</em>, <em>show_components=None</em>, <em>debug=False</em>, <em>nsigcut_moments=None</em>, <em>plot=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.peakbgfit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">peakbgfit</tt><big>(</big><em>usemoments=True</em>, <em>annotate=None</em>, <em>vheight=True</em>, <em>height=0</em>, <em>negamp=None</em>, <em>fittype=None</em>, <em>renormalize='auto'</em>, <em>color=None</em>, <em>use_lmfit=False</em>, <em>show_components=None</em>, <em>debug=False</em>, <em>nsigcut_moments=None</em>, <em>plot=True</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L571" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.peakbgfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit a single peak (plus a background)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -543,7 +543,7 @@ closer to 1 (scales by the median) so that the fit converges better</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.plot_components">
-<tt class="descname">plot_components</tt><big>(</big><em>show_hyperfine_components=None</em>, <em>component_yoffset=0.0</em>, <em>component_lw=0.75</em>, <em>component_fit_color='blue'</em>, <em>component_kwargs={}</em>, <em>add_baseline=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_components" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_components</tt><big>(</big><em>show_hyperfine_components=None</em>, <em>component_yoffset=0.0</em>, <em>component_lw=0.75</em>, <em>component_fit_color='blue'</em>, <em>component_kwargs={}</em>, <em>add_baseline=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L759" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_components" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overplot the individual components of a fit</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -582,7 +582,7 @@ if self.Spectrum.baseline.subtracted == False</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.plot_fit">
-<tt class="descname">plot_fit</tt><big>(</big><em>annotate=None</em>, <em>show_components=None</em>, <em>composite_fit_color='red'</em>, <em>lw=0.5</em>, <em>composite_lw=0.75</em>, <em>use_window_limits=None</em>, <em>show_hyperfine_components=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_fit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_fit</tt><big>(</big><em>annotate=None</em>, <em>show_components=None</em>, <em>composite_fit_color='red'</em>, <em>lw=0.5</em>, <em>composite_lw=0.75</em>, <em>use_window_limits=None</em>, <em>show_hyperfine_components=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L719" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plot_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the fit.  Must have fitted something before calling this!</p>
 <p>It will be automatically called whenever a spectrum is fit (assuming an
 axis for plotting exists)</p>
@@ -591,7 +591,7 @@ axis for plotting exists)</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.plotresiduals">
-<tt class="descname">plotresiduals</tt><big>(</big><em>fig=2</em>, <em>axis=None</em>, <em>clear=True</em>, <em>color='k'</em>, <em>linewidth=0.5</em>, <em>drawstyle='steps-mid'</em>, <em>yoffset=0.0</em>, <em>label=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plotresiduals" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plotresiduals</tt><big>(</big><em>fig=2</em>, <em>axis=None</em>, <em>clear=True</em>, <em>color='k'</em>, <em>linewidth=0.5</em>, <em>drawstyle='steps-mid'</em>, <em>yoffset=0.0</em>, <em>label=True</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L821" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.plotresiduals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot residuals of the fit.  Specify a figure or
 axis; defaults to figure(2).</p>
 <p>kwargs are passed to matplotlib plot</p>
@@ -599,13 +599,13 @@ axis; defaults to figure(2).</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.print_fit">
-<tt class="descname">print_fit</tt><big>(</big><em>print_baseline=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.print_fit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">print_fit</tt><big>(</big><em>print_baseline=True</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L894" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.print_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print the best-fit parameters to the command line</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.register_fitter">
-<tt class="descname">register_fitter</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.register_fitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">register_fitter</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L397" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.register_fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a model fitter</p>
 <p>Register a fitter function.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -652,13 +652,13 @@ does it allow N copies of the fitting function?</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.savefit">
-<tt class="descname">savefit</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.savefit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">savefit</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L938" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.savefit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the fit parameters from a Gaussian fit to the FITS header</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.selectregion">
-<tt class="descname">selectregion</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em>, <em>xtype='wcs'</em>, <em>highlight=False</em>, <em>fit_plotted_area=True</em>, <em>reset=False</em>, <em>verbose=False</em>, <em>debug=False</em>, <em>use_window_limits=None</em>, <em>exclude=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">selectregion</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em>, <em>xtype='wcs'</em>, <em>highlight=False</em>, <em>fit_plotted_area=True</em>, <em>reset=False</em>, <em>verbose=False</em>, <em>debug=False</em>, <em>use_window_limits=None</em>, <em>exclude=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L309" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pick a fitting region in either WCS units or pixel units</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -710,13 +710,13 @@ startpoint and endpoint</li>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.selectregion_interactive">
-<tt class="descname">selectregion_interactive</tt><big>(</big><em>event</em>, <em>mark_include=True</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion_interactive" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">selectregion_interactive</tt><big>(</big><em>event</em>, <em>mark_include=True</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L107" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.selectregion_interactive" title="Permalink to this definition">¶</a></dt>
 <dd><p>select regions for baseline fitting</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.seterrspec">
-<tt class="descname">seterrspec</tt><big>(</big><em>usestd=None</em>, <em>useresiduals=True</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.seterrspec" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">seterrspec</tt><big>(</big><em>usestd=None</em>, <em>useresiduals=True</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L405" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.seterrspec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple wrapper function to set the error spectrum; will either use the
 input spectrum or determine the error using the RMS of the residuals,
 depending on whether the residuals exist.</p>
@@ -724,7 +724,7 @@ depending on whether the residuals exist.</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.setfitspec">
-<tt class="descname">setfitspec</tt><big>(</big><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.setfitspec" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setfitspec</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L427" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.setfitspec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the spectrum that will be fit.  This is primarily to remove NANs
 from consideration: if you simply remove the data from both the X-axis
 and the Y-axis, it will not be considered for the fit, and a linear
@@ -735,7 +735,7 @@ setting errors to be 1e10....</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.shift_pars">
-<tt class="descname">shift_pars</tt><big>(</big><em>frame=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.shift_pars" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">shift_pars</tt><big>(</big><em>frame=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L1091" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.shift_pars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shift the velocity / wavelength / frequency of the fitted parameters
 into a different frame</p>
 <p>Right now this only takes care of redshift and only if redshift is defined.
@@ -744,12 +744,14 @@ It should be extended to do other things later</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.fitters.Specfit.start_interactive">
-<tt class="descname">start_interactive</tt><big>(</big><em>debug=False</em>, <em>LoudDebug=False</em>, <em>print_message=True</em>, <em>clear_all_connections=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.start_interactive" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">start_interactive</tt><big>(</big><em>debug=False</em>, <em>LoudDebug=False</em>, <em>print_message=True</em>, <em>clear_all_connections=True</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/fitters.py#L262" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.fitters.Specfit.start_interactive" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </div>
+<div class="section">
+<a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/fitting.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></div>
 
 
           </div>
@@ -799,7 +801,7 @@ It should be extended to do other things later</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Dec 07, 2012.
+      Last updated on Dec 23, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

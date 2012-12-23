@@ -96,7 +96,7 @@ your fitting code must deal with units internally.</p>
 <p>Then you can <a class="reference external" href="registration.html">register</a> these fitters.</p>
 <span class="target" id="module-pyspeckit.spectrum.models.model"></span><dl class="class">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>shortvarnames=('A'</em>, <em>'\Delta x'</em>, <em>'\sigma')</em>, <em>multisingle='multi'</em>, <em>fitunits=None</em>, <em>centroid_par=None</em>, <em>fwhm_func=None</em>, <em>fwhm_pars=None</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>shortvarnames=('A'</em>, <em>'\Delta x'</em>, <em>'\sigma')</em>, <em>multisingle='multi'</em>, <em>fitunits=None</em>, <em>centroid_par=None</em>, <em>fwhm_func=None</em>, <em>fwhm_pars=None</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L22" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper class for a spectra model.  Includes internal functions to
 generate multi-component models, annotations, integrals, and individual
 components.  The declaration can be complex, since you should name
@@ -178,7 +178,7 @@ just a single peak (a background may/will be fit)</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.analytic_centroids">
-<tt class="descname">analytic_centroids</tt><big>(</big><em>centroidpar=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_centroids" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">analytic_centroids</tt><big>(</big><em>centroidpar=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L626" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_centroids" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the <em>analytic</em> centroids of the model components</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -201,7 +201,7 @@ if centroidpar is unspecified</em></p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.analytic_fwhm">
-<tt class="descname">analytic_fwhm</tt><big>(</big><em>parinfo=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_fwhm" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">analytic_fwhm</tt><big>(</big><em>parinfo=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L605" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_fwhm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the FWHMa of the model components <em>if</em> a fwhm_func has been
 defined</p>
 <p>Done with incomprehensible list comprehensions instead of nested for
@@ -211,7 +211,7 @@ unpythonic.</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.annotations">
-<tt class="descname">annotations</tt><big>(</big><em>shortvarnames=None</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.annotations" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">annotations</tt><big>(</big><em>shortvarnames=None</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L515" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.annotations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of TeX-formatted labels</p>
 <p>The values and errors are formatted so that only the significant digits
 are displayed.  Rounding is performed using the decimal package.</p>
@@ -237,20 +237,20 @@ annotations.  Defaults to self.shortvarnames</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.component_integrals">
-<tt class="descname">component_integrals</tt><big>(</big><em>xarr</em>, <em>dx=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.component_integrals" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">component_integrals</tt><big>(</big><em>xarr</em>, <em>dx=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L593" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.component_integrals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the integrals of each component</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.components">
-<tt class="descname">components</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.components" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">components</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L564" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.components" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a numpy ndarray of shape [npeaks x modelshape] of the
 independent components of the fits</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.computed_centroid">
-<tt class="descname">computed_centroid</tt><big>(</big><em>xarr=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.computed_centroid" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">computed_centroid</tt><big>(</big><em>xarr=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L651" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.computed_centroid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the <em>computed</em> centroid of the model</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -269,7 +269,7 @@ computed.  If unspecified, the centroid will be in pixel units</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.fitter">
-<tt class="descname">fitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>quiet=True</em>, <em>veryverbose=False</em>, <em>debug=False</em>, <em>parinfo=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.fitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">fitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>quiet=True</em>, <em>veryverbose=False</em>, <em>debug=False</em>, <em>parinfo=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L413" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the fitter using mpfit.</p>
 <p>kwargs will be passed to _make_parinfo and mpfit.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -314,7 +314,7 @@ each iteration of the fitter</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.get_emcee_ensemblesampler">
-<tt class="descname">get_emcee_ensemblesampler</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>nwalkers</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_emcee_ensemblesampler" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_emcee_ensemblesampler</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>nwalkers</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L722" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_emcee_ensemblesampler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an emcee walker ensemble for the data &amp; model</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -348,7 +348,7 @@ each iteration of the fitter</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.get_emcee_sampler">
-<tt class="descname">get_emcee_sampler</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_emcee_sampler" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_emcee_sampler</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L686" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_emcee_sampler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an emcee walker for the data &amp; model</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -377,7 +377,7 @@ each iteration of the fitter</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.get_pymc">
-<tt class="descname">get_pymc</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>use_fitted_values=False</em>, <em>inf=inf</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_pymc" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_pymc</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>use_fitted_values=False</em>, <em>inf=inf</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L760" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_pymc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a pymc MCMC sampler.  Defaults to &#8216;uninformative&#8217; priors</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -414,7 +414,7 @@ the Normal distribution with sigma = par.error and mean = par.value</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.integral">
-<tt class="descname">integral</tt><big>(</big><em>modelpars</em>, <em>dx=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.integral" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">integral</tt><big>(</big><em>modelpars</em>, <em>dx=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L582" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.integral" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extremely simple integrator:
 IGNORES modelpars;
 just sums self.model</p>
@@ -422,13 +422,13 @@ just sums self.model</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.lmfitfun">
-<tt class="descname">lmfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitfun" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">lmfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L317" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitfun" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper function to compute the fit residuals in an lmfit-friendly format</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.lmfitter">
-<tt class="descname">lmfitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>parinfo=None</em>, <em>quiet=True</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">lmfitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>parinfo=None</em>, <em>quiet=True</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L333" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use lmfit instead of mpfit to do the fitting</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -463,25 +463,25 @@ just sums self.model</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.logp">
-<tt class="descname">logp</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>pars=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.logp" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">logp</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>pars=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L667" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.logp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the log probability of the model</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.mpfitfun">
-<tt class="descname">mpfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.mpfitfun" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">mpfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L295" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.mpfitfun" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper function to compute the fit residuals in an mpfit-friendly format</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc">
-<tt class="descname">n_modelfunc</tt><big>(</big><em>pars=None</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">n_modelfunc</tt><big>(</big><em>pars=None</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L258" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple wrapper to deal with N independent peaks for a given spectral model</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.slope">
-<tt class="descname">slope</tt><big>(</big><em>xinp</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.slope" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">slope</tt><big>(</big><em>xinp</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L500" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.slope" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the local slope of the model at location x
 (x must be in xax&#8217;s units)</p>
 </dd></dl>
@@ -494,7 +494,7 @@ just sums self.model</p>
 <h2>Module API<a class="headerlink" href="#module-api" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.ammonia.ammonia">
-<tt class="descclassname">pyspeckit.spectrum.models.ammonia.</tt><tt class="descname">ammonia</tt><big>(</big><em>xarr</em>, <em>tkin=20</em>, <em>tex=None</em>, <em>ntot=100000000000000.0</em>, <em>width=1</em>, <em>xoff_v=0.0</em>, <em>fortho=0.0</em>, <em>tau=None</em>, <em>fillingfraction=None</em>, <em>return_tau=False</em>, <em>thin=False</em>, <em>verbose=False</em>, <em>return_components=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.ammonia.ammonia" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.ammonia.</tt><tt class="descname">ammonia</tt><big>(</big><em>xarr</em>, <em>tkin=20</em>, <em>tex=None</em>, <em>ntot=100000000000000.0</em>, <em>width=1</em>, <em>xoff_v=0.0</em>, <em>fortho=0.0</em>, <em>tau=None</em>, <em>fillingfraction=None</em>, <em>return_tau=False</em>, <em>thin=False</em>, <em>verbose=False</em>, <em>return_components=False</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/ammonia.py#L78" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.ammonia.ammonia" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a model Ammonia spectrum based on input temperatures, column, and
 gaussian parameters</p>
 <p>ntot can be specified as a column density (e.g., 10^15) or a log-column-density (e.g., 15)</p>
@@ -521,7 +521,7 @@ components of the formaldehyde lines and has both LTE and RADEX LVG based
 models</p>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.formaldehyde.formaldehyde">
-<tt class="descclassname">pyspeckit.spectrum.models.formaldehyde.</tt><tt class="descname">formaldehyde</tt><big>(</big><em>xarr</em>, <em>amp=1.0</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.formaldehyde.formaldehyde" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.formaldehyde.</tt><tt class="descname">formaldehyde</tt><big>(</big><em>xarr</em>, <em>amp=1.0</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/formaldehyde.py#L322" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.formaldehyde.formaldehyde" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a model Formaldehyde spectrum based on simple gaussian parameters</p>
 <p>the &#8220;amplitude&#8221; is an essentially arbitrary parameter; we therefore define it to be Tex given tau=0.01 when
 passing to the fitter
@@ -530,7 +530,7 @@ The final spectrum is then rescaled to that value</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.formaldehyde.formaldehyde_radex">
-<tt class="descclassname">pyspeckit.spectrum.models.formaldehyde.</tt><tt class="descname">formaldehyde_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.formaldehyde.formaldehyde_radex" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.formaldehyde.</tt><tt class="descname">formaldehyde_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/formaldehyde.py#L159" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.formaldehyde.formaldehyde_radex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a grid of RADEX-computed models to make a model line spectrum</p>
 <p>The RADEX models have to be available somewhere.
 OR they can be passed as arrays.  If as arrays, the form should be:
@@ -547,7 +547,7 @@ Draine 2011 textbook pgs 219-230)</dd>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.formaldehyde.formaldehyde_radex_orthopara_temp">
-<tt class="descclassname">pyspeckit.spectrum.models.formaldehyde.</tt><tt class="descname">formaldehyde_radex_orthopara_temp</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>orthopara=1.0</em>, <em>temperature=15.0</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.formaldehyde.formaldehyde_radex_orthopara_temp" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.formaldehyde.</tt><tt class="descname">formaldehyde_radex_orthopara_temp</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>orthopara=1.0</em>, <em>temperature=15.0</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/formaldehyde.py#L239" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.formaldehyde.formaldehyde_radex_orthopara_temp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a grid of RADEX-computed models to make a model line spectrum</p>
 <p>The RADEX models have to be available somewhere.
 OR they can be passed as arrays.  If as arrays, the form should be:
@@ -569,7 +569,7 @@ model!  Just make a function like gaussian and plug it into the SpectralModel
 class.</p>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian</tt><big>(</big><em>x</em>, <em>A</em>, <em>dx</em>, <em>w</em>, <em>return_components=False</em>, <em>normalized=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian</tt><big>(</big><em>x</em>, <em>A</em>, <em>dx</em>, <em>w</em>, <em>return_components=False</em>, <em>normalized=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_gaussfitter.py#L17" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a 1-dimensional gaussian of form
 A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
 <p>Area is sqrt(2*pi)*sigma^2*amplitude - i.e., this is NOT a normalized
@@ -612,7 +612,7 @@ fitters</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_fitter">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_fitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_gaussfitter.py#L52" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator for Gaussian fitter class</p>
 </dd></dl>
 
@@ -631,7 +631,7 @@ transitions gives the total spin degeneracy</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.hcn.hcn_radex">
-<tt class="descclassname">pyspeckit.spectrum.models.hcn.</tt><tt class="descname">hcn_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hcn.hcn_radex" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hcn.</tt><tt class="descname">hcn_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hcn.py#L68" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hcn.hcn_radex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a grid of RADEX-computed models to make a model line spectrum</p>
 <p>The RADEX models have to be available somewhere.
 OR they can be passed as arrays.  If as arrays, the form should be:
@@ -652,20 +652,20 @@ Draine 2011 textbook pgs 219-230)</dd>
 <a class="reference external" href="http://adsabs.harvard.edu/abs/2005ApJ...620..800D">http://adsabs.harvard.edu/abs/2005ApJ...620..800D</a></p>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.hill5infall.hill5_model">
-<tt class="descclassname">pyspeckit.spectrum.models.hill5infall.</tt><tt class="descname">hill5_model</tt><big>(</big><em>xarr</em>, <em>tau</em>, <em>v_lsr</em>, <em>v_infall</em>, <em>sigma</em>, <em>tpeak</em>, <em>TBG=2.73</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hill5infall.hill5_model" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hill5infall.</tt><tt class="descname">hill5_model</tt><big>(</big><em>xarr</em>, <em>tau</em>, <em>v_lsr</em>, <em>v_infall</em>, <em>sigma</em>, <em>tpeak</em>, <em>TBG=2.73</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hill5infall.py#L16" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hill5infall.hill5_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>The rest of this needs to be translated from C</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.hill5infall.jfunc">
-<tt class="descclassname">pyspeckit.spectrum.models.hill5infall.</tt><tt class="descname">jfunc</tt><big>(</big><em>t</em>, <em>nu</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hill5infall.jfunc" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hill5infall.</tt><tt class="descname">jfunc</tt><big>(</big><em>t</em>, <em>nu</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hill5infall.py#L41" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hill5infall.jfunc" title="Permalink to this definition">¶</a></dt>
 <dd><p>t- kelvin
 nu - Hz?</p>
 </dd></dl>
 
 <span class="target" id="module-pyspeckit.spectrum.models.hyperfine"></span><dl class="class">
 <dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.hyperfine.</tt><tt class="descname">hyperfinemodel</tt><big>(</big><em>line_names</em>, <em>voff_lines_dict</em>, <em>freq_dict</em>, <em>line_strength_dict</em>, <em>relative_strength_total_degeneracy</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.hyperfine.</tt><tt class="descname">hyperfinemodel</tt><big>(</big><em>line_names</em>, <em>voff_lines_dict</em>, <em>freq_dict</em>, <em>line_strength_dict</em>, <em>relative_strength_total_degeneracy</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hyperfine.py#L12" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper for the hyperfine model class.  Specify the offsets and relative
 strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.</p>
 <p class="rubric">Methods</p>
@@ -683,13 +683,13 @@ strengths when initializing, then you&#8217;ve got yourself a hyperfine modeler.
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine">
-<tt class="descname">hyperfine</tt><big>(</big><em>xarr</em>, <em>Tex=5.0</em>, <em>tau=0.1</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>amp=None</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">hyperfine</tt><big>(</big><em>xarr</em>, <em>Tex=5.0</em>, <em>tau=0.1</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>amp=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hyperfine.py#L74" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp">
-<tt class="descname">hyperfine_amp</tt><big>(</big><em>xarr</em>, <em>amp=None</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>Tex=5.0</em>, <em>tau=0.1</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">hyperfine_amp</tt><big>(</big><em>xarr</em>, <em>amp=None</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>return_hyperfine_components=False</em>, <em>Tbackground=2.73</em>, <em>Tex=5.0</em>, <em>tau=0.1</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hyperfine.py#L64" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hyperfine.hyperfinemodel.hyperfine_amp" title="Permalink to this definition">¶</a></dt>
 <dd><p>wrapper of self.hyperfine with order of arguments changed</p>
 </dd></dl>
 
@@ -701,7 +701,7 @@ gaussfitter.py code.  Now, this is a great example of how to make your own
 model!</p>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_lorentzian.lorentzian">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_lorentzian.</tt><tt class="descname">lorentzian</tt><big>(</big><em>x</em>, <em>A</em>, <em>dx</em>, <em>w</em>, <em>return_components=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_lorentzian.lorentzian" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_lorentzian.</tt><tt class="descname">lorentzian</tt><big>(</big><em>x</em>, <em>A</em>, <em>dx</em>, <em>w</em>, <em>return_components=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_lorentzian.py#L16" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_lorentzian.lorentzian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a 1-dimensional lorentzian of form
 A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 <p>[amplitude,center,width]</p>
@@ -710,27 +710,27 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_lorentzian.lorentzian_fitter">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_lorentzian.</tt><tt class="descname">lorentzian_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_lorentzian.lorentzian_fitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_lorentzian.</tt><tt class="descname">lorentzian_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_lorentzian.py#L29" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_lorentzian.lorentzian_fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator for lorentzian fitter class</p>
 </dd></dl>
 
 <span class="target" id="module-pyspeckit.spectrum.models.modelgrid"></span><p>Fit a line based on parameters output from a grid of models</p>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.gaussian_line">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">gaussian_line</tt><big>(</big><em>xax</em>, <em>maxamp</em>, <em>tau</em>, <em>offset</em>, <em>width</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.gaussian_line" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">gaussian_line</tt><big>(</big><em>xax</em>, <em>maxamp</em>, <em>tau</em>, <em>offset</em>, <em>width</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/modelgrid.py#L18" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.gaussian_line" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Gaussian line function in which the</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x1021d09b0&gt;</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x102f7db18&gt;</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/modelgrid.py#L48" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_params_2D">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_params_2D</tt><big>(</big><em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>valuegrid</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_params_2D" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_params_2D</tt><big>(</big><em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>valuegrid</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/modelgrid.py#L24" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_params_2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a 2D grid of modeled line values - the amplitude, e.g. excitation temperature,
 and the optical depth, tau - return the model spectrum</p>
 <p>griddims contains the names of the axes and their values... it should have the same 
@@ -749,7 +749,7 @@ Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 
 </dl>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.n2hp.n2hp_radex">
-<tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">n2hp_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.n2hp_radex" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.n2hp.</tt><tt class="descname">n2hp_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/n2hp.py#L124" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.n2hp_radex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a grid of RADEX-computed models to make a model line spectrum</p>
 <p>The RADEX models have to be available somewhere.
 OR they can be passed as arrays.  If as arrays, the form should be:
@@ -778,7 +778,7 @@ transitions gives the total spin degeneracy</p>
 </div>
 <span class="target" id="module-pyspeckit.spectrum.models.inherited_voigtfitter"></span><dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_voigtfitter.voigt">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt</tt><big>(</big><em>xarr</em>, <em>amp</em>, <em>xcen</em>, <em>sigma</em>, <em>gamma</em>, <em>normalized=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt</tt><big>(</big><em>xarr</em>, <em>amp</em>, <em>xcen</em>, <em>sigma</em>, <em>gamma</em>, <em>normalized=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_voigtfitter.py#L14" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalized Voigt profile</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -829,13 +829,13 @@ of the voigt profile</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fitter">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_voigtfitter.py#L82" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator for voigt fitter class</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fwhm">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt_fwhm</tt><big>(</big><em>sigma</em>, <em>gamma</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fwhm" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_voigtfitter.</tt><tt class="descname">voigt_fwhm</tt><big>(</big><em>sigma</em>, <em>gamma</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_voigtfitter.py#L67" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_voigtfitter.voigt_fwhm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Approximation to the Voigt FWHM from wikipedia</p>
 <p><a class="reference external" href="http://en.wikipedia.org/wiki/Voigt_profile">http://en.wikipedia.org/wiki/Voigt_profile</a></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -887,20 +887,20 @@ I - Case B calculations for H I and He II</a></td></tr>
 </table>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.hydrogen.add_to_registry">
-<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">add_to_registry</tt><big>(</big><em>sp</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.add_to_registry" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">add_to_registry</tt><big>(</big><em>sp</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hydrogen.py#L284" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.add_to_registry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add the Hydrogen model to the Spectrum&#8217;s fitter registry</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.hydrogen.find_lines">
-<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">find_lines</tt><big>(</big><em>xarr</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.find_lines" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">find_lines</tt><big>(</big><em>xarr</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hydrogen.py#L186" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.find_lines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.units.SpectrosopicAxis</span></tt> instance, finds all the
 lines that are in bounds.  Returns a list of line names.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.hydrogen.hydrogen_fitter">
-<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">hydrogen_fitter</tt><big>(</big><em>sp</em>, <em>temperature=10000</em>, <em>tiedwidth=False</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.hydrogen_fitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">hydrogen_fitter</tt><big>(</big><em>sp</em>, <em>temperature=10000</em>, <em>tiedwidth=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hydrogen.py#L193" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.hydrogen_fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a set of parameters identifying the hydrogen lines in your
 spectrum.  These come in groups of 3 assuming you&#8217;re fitting a gaussian to
 each.  You can tie the widths or choose not to.</p>
@@ -915,7 +915,7 @@ each.  You can tie the widths or choose not to.</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.hydrogen.hydrogen_model">
-<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">hydrogen_model</tt><big>(</big><em>xarr</em>, <em>amplitude=1.0</em>, <em>width=0.0</em>, <em>velocity=0.0</em>, <em>a_k=0.0</em>, <em>temperature=10000</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.hydrogen_model" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">hydrogen_model</tt><big>(</big><em>xarr</em>, <em>amplitude=1.0</em>, <em>width=0.0</em>, <em>velocity=0.0</em>, <em>a_k=0.0</em>, <em>temperature=10000</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hydrogen.py#L228" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.hydrogen_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a set of parameters identifying the hydrogen lines in your
 spectrum.  These come in groups of 3 assuming you&#8217;re fitting a gaussian to
 each.  You can tie the widths or choose not to.</p>
@@ -960,13 +960,15 @@ will be scaled to this value)</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.hydrogen.rrl">
-<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">rrl</tt><big>(</big><em>n</em>, <em>dn=1</em>, <em>amu=1.007825</em><big>)</big><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.rrl" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.hydrogen.</tt><tt class="descname">rrl</tt><big>(</big><em>n</em>, <em>dn=1</em>, <em>amu=1.007825</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/hydrogen.py#L178" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.hydrogen.rrl" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute Radio Recomb Line freqs in GHz
 from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
 </dd></dl>
 
 </div>
 </div>
+<div class="section">
+<a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/models.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></div>
 
 
           </div>
@@ -1014,7 +1016,7 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Dec 07, 2012.
+      Last updated on Dec 23, 2012.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

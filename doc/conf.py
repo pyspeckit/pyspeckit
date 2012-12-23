@@ -280,7 +280,7 @@ man_pages = [
 
 # Don't import the module as "version" or it will override the
 # # "version" configuration parameter
-edit_on_github_project = "keflavich/image_registration"
+edit_on_github_project = "keflavich/pyspeckit"
 edit_on_github_branch = "master"
 edit_on_github_source_root = ""
 edit_on_github_doc_root = "doc"
