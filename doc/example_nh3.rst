@@ -22,14 +22,14 @@ Radio Fitting: NH\ :sub:`3` example
     spdict1,spectra1 = pyspeckit.wrappers.fitnh3.fitnh3tkin(filenames,crop=[0,80],tkin=18.65,tex=4.49,column=15.5,fortho=0.9,verbose=False,smooth=6)
 
 
-.. figure:: ../images/nh3_22_velocityguess.png
+.. figure:: images/nh3_22_velocityguess.png
     :alt: The 2-2 transition is used to guess the central velocity and width via gaussian fitting because its hyperfine lines are weaker
     :figwidth: 800
     :width: 800
 
     The 2-2 transition is used to guess the central velocity and width via gaussian fitting because its hyperfine lines are weaker
 
-.. figure:: ../images/nh3_multiline_fit.png
+.. figure:: images/nh3_multiline_fit.png
     :alt: Then all 4 lines are simultaneously fit.  Even upper limits on the 4-4 line can provide helpful contraints on the model
     :figwidth: 800
     :width: 800

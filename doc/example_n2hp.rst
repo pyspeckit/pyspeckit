@@ -34,7 +34,7 @@ Example hyperfine line fitting for the N\ :sub:`2`\ H+ 1-0 line.
     # Save the figure (this step is just so that an image can be included on the web page)
     sp.plotter.savefig('n2hp_ophA_fit.png')
 
-.. figure:: ../images/n2hp_ophA_fit.png
+.. figure:: images/n2hp_ophA_fit.png
 	:alt: Fit to the 15 hyperfine components of N2H+ simultaneously.  The (0)'s indicate that this is the 0'th velocity component being fit
         :figwidth: 650
         :width: 650

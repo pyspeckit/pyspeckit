@@ -15,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.1.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -115,7 +115,7 @@ It can be registered using <a class="reference internal" href="registration.html
 <span id="api"></span><h2>API<a class="headerlink" href="#module-pyspeckit.spectrum.readers.fits_reader" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyspeckit.spectrum.readers.fits_reader.open_1d_fits">
-<tt class="descclassname">pyspeckit.spectrum.readers.fits_reader.</tt><tt class="descname">open_1d_fits</tt><big>(</big><em>filename</em>, <em>hdu=0</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/readers/fits_reader.py#L12" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/readers/fits_reader.py#L12" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.readers.fits_reader.open_1d_fits" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.readers.fits_reader.</tt><tt class="descname">open_1d_fits</tt><big>(</big><em>filename</em>, <em>hdu=0</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/readers/fits_reader.py#L12" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/readers/fits_reader.py#cl-12" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.readers.fits_reader.open_1d_fits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Grabs all the relevant pieces of a simple FITS-compliant 1d spectrum</p>
 <dl class="docutils">
 <dt>Inputs:</dt>
@@ -133,14 +133,14 @@ It can be registered using <a class="reference internal" href="registration.html
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.readers.fits_reader.open_1d_pyfits">
-<tt class="descclassname">pyspeckit.spectrum.readers.fits_reader.</tt><tt class="descname">open_1d_pyfits</tt><big>(</big><em>pyfits_hdu</em>, <em>specnum=0</em>, <em>wcstype=''</em>, <em>specaxis='1'</em>, <em>errspecnum=None</em>, <em>autofix=True</em>, <em>scale_keyword=None</em>, <em>scale_action=&lt;built-in function div&gt;</em>, <em>verbose=False</em>, <em>apnum=0</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/readers/fits_reader.py#L31" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/readers/fits_reader.py#L31" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.readers.fits_reader.open_1d_pyfits" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.readers.fits_reader.</tt><tt class="descname">open_1d_pyfits</tt><big>(</big><em>pyfits_hdu</em>, <em>specnum=0</em>, <em>wcstype=''</em>, <em>specaxis='1'</em>, <em>errspecnum=None</em>, <em>autofix=True</em>, <em>scale_keyword=None</em>, <em>scale_action=&lt;built-in function div&gt;</em>, <em>verbose=False</em>, <em>apnum=0</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/readers/fits_reader.py#L31" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/readers/fits_reader.py#cl-31" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.readers.fits_reader.open_1d_pyfits" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is open_1d_fits but for a pyfits_hdu so you don&#8217;t necessarily have to
 open a fits file</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.readers.fits_reader.read_echelle">
-<tt class="descclassname">pyspeckit.spectrum.readers.fits_reader.</tt><tt class="descname">read_echelle</tt><big>(</big><em>pyfits_hdu</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/readers/fits_reader.py#L204" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/readers/fits_reader.py#L204" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.readers.fits_reader.read_echelle" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.readers.fits_reader.</tt><tt class="descname">read_echelle</tt><big>(</big><em>pyfits_hdu</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/readers/fits_reader.py#L204" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/readers/fits_reader.py#cl-204" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.readers.fits_reader.read_echelle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read an IRAF Echelle spectrum</p>
 <p><a class="reference external" href="http://iraf.noao.edu/iraf/ftp/iraf/docs/specwcs.ps.Z">http://iraf.noao.edu/iraf/ftp/iraf/docs/specwcs.ps.Z</a></p>
 </dd></dl>

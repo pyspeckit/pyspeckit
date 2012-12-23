@@ -111,7 +111,7 @@ the correlation between width and amplitude.
     agpy.pymc_plotting.hist2d(plotdict,'AMPLITUDE0','WIDTH0',fignum=2,bins=[25,25],clear=True)
     pylab.plot([5],[1],'k+',markersize=25)
 
-.. figure:: ../images/pymc_params_example.png 
+.. figure:: images/pymc_params_example.png 
     :alt: Examples of the pymc Monte Carlo two-dimensional parameter histogram
         (marginalized over X-offset and Y-offset) with and without priors; with
         priors is shown in contour lines
@@ -125,7 +125,7 @@ a somewhat poor job of recovering the true values (in case you're curious, there
 no intrinsic bias - if you repeat the above fitting procedure a few hundred times, the
 mean fitted amplitude is 5.0).
 
-.. figure:: ../images/emcee_params_example.png 
+.. figure:: images/emcee_params_example.png 
     :alt: Same as above, but using emcee with 352000 samples
     :figwidth: 800
     :width: 800

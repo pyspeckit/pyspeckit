@@ -48,7 +48,7 @@ Complicated H-alpha Line Fitting
     # save the figure
     sp.plotter.savefig("SN2009ip_UT121002_Halpha_voigt_zoom.png")
 
-.. figure:: ../images/SN2009ip_UT121002_Halpha_voigt_zoom.png
+.. figure:: images/SN2009ip_UT121002_Halpha_voigt_zoom.png
     :alt:
     :width: 800
     :figwidth: 800
@@ -65,7 +65,7 @@ Complicated H-alpha Line Fitting
     sp.plotter.axis.set_xlim(6562-150,6562+150)
     sp.plotter.savefig("SN2009ip_UT121002_Halpha_voigt_zoomzoom.png")
 
-.. figure:: ../images/SN2009ip_UT121002_Halpha_voigt_zoomzoom.png
+.. figure:: images/SN2009ip_UT121002_Halpha_voigt_zoomzoom.png
     :alt:
     :width: 800
     :figwidth: 800
@@ -114,7 +114,7 @@ Complicated H-alpha Line Fitting
     # save the figure
     just_halpha.plotter.savefig("SN2009ip_UT121002_Halpha_voigt_threecomp.png")
 
-.. figure:: ../images/SN2009ip_UT121002_Halpha_voigt_threecomp.png
+.. figure:: images/SN2009ip_UT121002_Halpha_voigt_threecomp.png
     :alt:
     :width: 800
     :figwidth: 800
@@ -135,7 +135,7 @@ Complicated H-alpha Line Fitting
     pylab.draw()
     just_halpha.plotter.savefig("SN2009ip_UT121002_Halpha_voigt_threecomp_zoom.png")
 
-.. figure:: ../images/SN2009ip_UT121002_Halpha_voigt_threecomp_zoom.png
+.. figure:: images/SN2009ip_UT121002_Halpha_voigt_threecomp_zoom.png
     :alt:
     :width: 800
     :figwidth: 800
@@ -158,7 +158,7 @@ Complicated H-alpha Line Fitting
     just_halpha.specfit.annotate(chi2='optimal')
     just_halpha.plotter.savefig("SN2009ip_UT121002_Halpha_voigt_twocomp.png")
 
-.. figure:: ../images/SN2009ip_UT121002_Halpha_voigt_twocomp.png
+.. figure:: images/SN2009ip_UT121002_Halpha_voigt_twocomp.png
     :alt:
     :width: 800
     :figwidth: 800
@@ -171,7 +171,7 @@ Complicated H-alpha Line Fitting
     pylab.draw()
     just_halpha.plotter.savefig("SN2009ip_UT121002_Halpha_voigt_twocomp_zoom.png")
 
-.. figure:: ../images/SN2009ip_UT121002_Halpha_voigt_twocomp_zoom.png
+.. figure:: images/SN2009ip_UT121002_Halpha_voigt_twocomp_zoom.png
     :alt:
     :width: 800
     :figwidth: 800

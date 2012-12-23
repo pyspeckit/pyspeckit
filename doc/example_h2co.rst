@@ -127,11 +127,11 @@ are available on the `pyspeckit bitbucket download page <https://bitbucket.org/p
     sp2.plotter(xmin=-5,xmax=15,errstyle='fill',figure=7)
     sp2.specfit.plot_fit(show_components=True)
 
-.. figure:: ../images/h2co_11_radexlvgfit.png
+.. figure:: images/h2co_11_radexlvgfit.png
 	:alt: Both transitions are fit simultaneously using a RADEX model.  The input (fitted) parameters are therefore density, column density, width, and velocity.
         :figwidth: 800
         :width: 800
-.. figure:: ../images/h2co_22_radexlvgfit.png
+.. figure:: images/h2co_22_radexlvgfit.png
 	:alt: Both transitions are fit simultaneously using a RADEX model.  The input (fitted) parameters are therefore density, column density, width, and velocity.
         :figwidth: 800
         :width: 800

@@ -15,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.1.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -72,7 +72,7 @@
 <span id="measurements"></span><h1>Measurements<a class="headerlink" href="#module-pyspeckit.spectrum.measurements" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt>
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.measurements.</tt><tt class="descname">Measurements</tt><big>(</big><em>Spectrum</em>, <em>z=None</em>, <em>d=None</em>, <em>xunits=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=10.0</em>, <em>ignore=None</em>, <em>derive=True</em>, <em>debug=False</em>, <em>restframe=False</em>, <em>ptol=2</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L16" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L16" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.measurements.</tt><tt class="descname">Measurements</tt><big>(</big><em>Spectrum</em>, <em>z=None</em>, <em>d=None</em>, <em>xunits=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=10.0</em>, <em>ignore=None</em>, <em>derive=True</em>, <em>debug=False</em>, <em>restframe=False</em>, <em>ptol=2</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L16" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-16" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>This can be called after a fit is run.  It will inherit the specfit
 object and derive as much as it can from modelpars.  Just do:
@@ -92,71 +92,71 @@ entries corresponding to wavelength/frequency/whatever correctly.</dd>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">bisection</tt><big>(</big><em>f</em>, <em>x_guess</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L398" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L398" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">bisection</tt><big>(</big><em>f</em>, <em>x_guess</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L398" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-398" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Find root of function using bisection method.  Absolute tolerance of 1e-4 is being used.</p>
 </dd></dl>
 
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">bracket_root</tt><big>(</big><em>f</em>, <em>x_guess</em>, <em>atol=0.0001</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L417" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L417" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">bracket_root</tt><big>(</big><em>f</em>, <em>x_guess</em>, <em>atol=0.0001</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L417" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-417" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Bracket root by finding points where function goes from positive to negative.</p>
 </dd></dl>
 
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">compute_amplitude</tt><big>(</big><em>pars</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L345" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L345" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">compute_amplitude</tt><big>(</big><em>pars</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L345" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-345" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Calculate amplitude of emission line.  Should be easy - add multiple components if they exist.
 Currently assumes multiple components have the same centroid.</p>
 </dd></dl>
 
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">compute_flux</tt><big>(</big><em>pars</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L334" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L334" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">compute_flux</tt><big>(</big><em>pars</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L334" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-334" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Calculate integrated flux of emission line.  Works for multi-component fits too.  Unnormalized.</p>
 </dd></dl>
 
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">compute_fwhm</tt><big>(</big><em>pars</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L366" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L366" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">compute_fwhm</tt><big>(</big><em>pars</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L366" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-366" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Determine full-width at half maximum for multi-component fit numerically, or analytically if line
 has only a single component.  Uses bisection technique for the former with absolute tolerance of 1e-4.</p>
 </dd></dl>
 
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">compute_luminosity</tt><big>(</big><em>pars</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L356" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L356" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">compute_luminosity</tt><big>(</big><em>pars</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L356" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-356" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Determine luminosity of line (need distance and flux units).</p>
 </dd></dl>
 
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">derive</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L285" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L285" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">derive</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L285" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-285" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Calculate luminosity and FWHM for all spectral lines.</p>
 </dd></dl>
 
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">identify_by_position</tt><big>(</big><em>ptol</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L105" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L105" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">identify_by_position</tt><big>(</big><em>ptol</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L105" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-105" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Match observed lines to nearest reference line.  Don&#8217;t use spacing at all.</p>
 <p>ptol = tolerance (in angstroms) to accept positional match</p>
 </dd></dl>
 
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">identify_by_spacing</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L165" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L165" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">identify_by_spacing</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L165" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-165" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Determine identity of lines in self.modelpars.  Fill entries of self.lines dictionary.</p>
 <p>Note: This method will be infinitely slow for more than 10 or so lines.</p>
 </dd></dl>
 
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">separate</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L302" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L302" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">separate</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L302" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-302" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>For multicomponent lines, separate into broad and narrow components (assume only one of components is narrow).</p>
 </dd></dl>
 
 <dl class="method">
 <dt>
-<tt class="descclassname">Measurements.</tt><tt class="descname">to_tex</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L450" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#L450" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
+<tt class="descclassname">Measurements.</tt><tt class="descname">to_tex</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/measurements.py#L450" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/measurements.py#cl-450" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a></dt>
 <dd><p>Write out fit results to tex format.</p>
 </dd></dl>
 

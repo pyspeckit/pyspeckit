@@ -15,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.1.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -79,7 +79,7 @@ What about for other fields (e.g., wavenumber?)</dd>
 </dl>
 <dl class="class">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.units.</tt><tt class="descname">SpectroscopicAxis</tt><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L268" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L268" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.units.</tt><tt class="descname">SpectroscopicAxis</tt><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L268" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-268" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></p>
 <p>A Spectroscopic Axis object to store the current units of the spectrum and
 allow conversion to other units and frames.  Typically, units are velocity,
@@ -91,7 +91,7 @@ a workaround is being sought but subclassing numpy arrays is harder than I thoug
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.as_unit">
-<tt class="descname">as_unit</tt><big>(</big><em>unit</em>, <em>frame=None</em>, <em>quiet=True</em>, <em>center_frequency=None</em>, <em>center_frequency_units=None</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L632" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L632" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.as_unit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">as_unit</tt><big>(</big><em>unit</em>, <em>frame=None</em>, <em>quiet=True</em>, <em>center_frequency=None</em>, <em>center_frequency_units=None</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L632" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-632" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.as_unit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert the spectrum to the specified units.  This is a wrapper function
 to convert between frequency/velocity/wavelength and simply change the 
 units of the X axis.  Frame conversion is... not necessarily implemented.</p>
@@ -116,7 +116,7 @@ I think this can also accept wavelengths....</div></blockquote>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.cdelt">
-<tt class="descname">cdelt</tt><big>(</big><em>tolerance=1e-08</em>, <em>approx=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L850" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L850" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.cdelt" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">cdelt</tt><big>(</big><em>tolerance=1e-08</em>, <em>approx=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L850" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-850" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.cdelt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the channel spacing if channels are linear</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -139,13 +139,13 @@ how near to linear the xarr must be</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.change_frame">
-<tt class="descname">change_frame</tt><big>(</big><em>frame</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L793" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L793" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.change_frame" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">change_frame</tt><big>(</big><em>frame</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L793" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-793" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.change_frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change velocity frame</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.convert_to_unit">
-<tt class="descname">convert_to_unit</tt><big>(</big><em>unit</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L610" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L610" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.convert_to_unit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">convert_to_unit</tt><big>(</big><em>unit</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L610" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-610" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.convert_to_unit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the X-array in the specified units without changing it
 Uses as_unit for the conversion, but changes internal values rather
 than returning them.</p>
@@ -153,7 +153,7 @@ than returning them.</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.coord_to_x">
-<tt class="descname">coord_to_x</tt><big>(</big><em>xval</em>, <em>xunit</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L560" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L560" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.coord_to_x" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">coord_to_x</tt><big>(</big><em>xval</em>, <em>xunit</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L560" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-560" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.coord_to_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given an X-value assumed to be in the coordinate axes, return that
 value converted to xunit
 e.g.:
@@ -165,19 +165,19 @@ xarr.coord_to_x(6000,&#8217;GHz&#8217;) == 5.1 # GHz</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.in_frame">
-<tt class="descname">in_frame</tt><big>(</big><em>frame</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L826" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L826" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.in_frame" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">in_frame</tt><big>(</big><em>frame</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L826" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-826" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.in_frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a shifted xaxis</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.in_range">
-<tt class="descname">in_range</tt><big>(</big><em>xval</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L497" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L497" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.in_range" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">in_range</tt><big>(</big><em>xval</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L497" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-497" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.in_range" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given an X coordinate in SpectroscopicAxis&#8217; units, return whether the pixel is in range</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.make_dxarr">
-<tt class="descname">make_dxarr</tt><big>(</big><em>coordinate_location='center'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L805" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L805" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.make_dxarr" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">make_dxarr</tt><big>(</big><em>coordinate_location='center'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L805" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-805" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.make_dxarr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a &#8220;delta-x&#8221; array corresponding to the X array.</p>
 <dl class="docutils">
 <dt><em>coordinate_location</em> [ &#8216;left&#8217;, &#8216;center&#8217;, &#8216;right&#8217; ]</dt>
@@ -190,27 +190,27 @@ have the same dx as the second pixel.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.umax">
-<tt class="descname">umax</tt><big>(</big><em>units=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L466" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L466" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.umax" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">umax</tt><big>(</big><em>units=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L466" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-466" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.umax" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the maximum value of the SpectroscopicAxis.  If units specified,
 convert to those units first</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.umin">
-<tt class="descname">umin</tt><big>(</big><em>units=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L478" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L478" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.umin" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">umin</tt><big>(</big><em>units=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L478" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-478" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.umin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the minimum value of the SpectroscopicAxis.  If units specified,
 convert to those units first</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.x_in_frame">
-<tt class="descname">x_in_frame</tt><big>(</big><em>xx</em>, <em>frame</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L844" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L844" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.x_in_frame" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">x_in_frame</tt><big>(</big><em>xx</em>, <em>frame</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L844" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-844" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.x_in_frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the value &#8216;x&#8217; shifted to the target frame</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.x_to_coord">
-<tt class="descname">x_to_coord</tt><big>(</big><em>xval</em>, <em>xunit</em>, <em>verbose=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L503" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L503" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.x_to_coord" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">x_to_coord</tt><big>(</big><em>xval</em>, <em>xunit</em>, <em>verbose=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L503" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-503" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.x_to_coord" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a wavelength/frequency/velocity, return the value in the SpectroscopicAxis&#8217;s units
 e.g.:
 xarr.units = &#8216;km/s&#8217;
@@ -221,7 +221,7 @@ xarr.x_to_coord(5.1,&#8217;GHz&#8217;) == 6000 # km/s</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxis.x_to_pix">
-<tt class="descname">x_to_pix</tt><big>(</big><em>xval</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L490" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L490" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.x_to_pix" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">x_to_pix</tt><big>(</big><em>xval</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L490" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-490" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxis.x_to_pix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given an X coordinate in SpectroscopicAxis&#8217; units, return the corresponding pixel number</p>
 </dd></dl>
 
@@ -229,7 +229,7 @@ xarr.x_to_coord(5.1,&#8217;GHz&#8217;) == 6000 # km/s</p>
 
 <dl class="class">
 <dt id="pyspeckit.spectrum.units.SpectroscopicAxes">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.units.</tt><tt class="descname">SpectroscopicAxes</tt><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L911" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#L911" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxes" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.units.</tt><tt class="descname">SpectroscopicAxes</tt><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/units.py#L911" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/units.py#cl-911" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.units.SpectroscopicAxes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyspeckit.spectrum.units.SpectroscopicAxis" title="pyspeckit.spectrum.units.SpectroscopicAxis"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.units.SpectroscopicAxis</span></tt></a></p>
 <p>Counterpart to Spectra: takes a list of SpectroscopicAxis&#8217;s and
 concatenates them while checking for consistency and maintaining
