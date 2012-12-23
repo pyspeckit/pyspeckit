@@ -34,35 +34,37 @@ lines = {
          "NeIII":   [3868.760, 'Angstrom', True, r'$[\mathrm{OII}]\lambda 3869\AA$']
 }
 
-for i in np.arange(3, 7):
-    name = 'H_%i-2' % i
-    wavelength = hydrogen(i, 2)
-    lines[name] = [wavelength, 'Angstrom', True, name]
+def get_optical_lines():
+    for i in range(3, 7):
+        name = 'H_%i-2' % i
+        wavelength = hydrogen(i, 2)
+        lines[name] = [wavelength, 'Angstrom', True, name]
 
-xarr = []
-for key in lines.keys(): 
-    xarr.append(lines[key][0])
-xarr = np.array(xarr)
+    xarr = []
+    for key in lines.keys(): 
+        xarr.append(lines[key][0])
+    xarr = np.array(xarr)
 
-indx = np.argsort(xarr)
-xarr = np.sort(xarr)
+    indx = np.argsort(xarr)
+    xarr = np.sort(xarr)
 
-name = []
-for i, key in enumerate(lines.keys()): 
-    name.append(lines.keys()[indx[i]])
-name = np.array(name)
+    name = []
+    for i, key in enumerate(lines.keys()): 
+        name.append(lines.keys()[indx[i]])
+    name = np.array(name)
 
-xunits = []
-xvac = []
-dname = []
-for i, nombre in enumerate(name): 
-    xunits.append(lines[nombre][1])
-    xvac.append(lines[nombre][2])
-    dname.append(lines[nombre][3])
+    xunits = []
+    xvac = []
+    dname = []
+    for i, nombre in enumerate(name): 
+        xunits.append(lines[nombre][1])
+        xvac.append(lines[nombre][2])
+        dname.append(lines[nombre][3])
 
-xunits = np.array(xunits)
-xvac = np.array(xvac)
-dname = np.array(dname)
+    xunits = np.array(xunits)
+    xvac = np.array(xvac)
+    dname = np.array(dname)
 
-optical_lines = {'name': name, 'xarr': xarr, 'xunits': xunits, 'xvac': xvac, 'dname': dname}
+    optical_lines = {'name': name, 'xarr': xarr, 'xunits': xunits, 'xvac': xvac, 'dname': dname}
 
+    return optical_lines
