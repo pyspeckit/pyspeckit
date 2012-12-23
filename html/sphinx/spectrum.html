@@ -65,11 +65,18 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-pyspeckit.spectrum">
-<span id="spectrum"></span><h1>spectrum<a class="headerlink" href="#module-pyspeckit.spectrum" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-pyspeckit.spectrum.classes">
+<span id="spectrum"></span><h1>spectrum<a class="headerlink" href="#module-pyspeckit.spectrum.classes" title="Permalink to this headline">¶</a></h1>
+<p>The spectrum module consists of the Spectrum class, with child classes ObsBlock
+and Spectra for multi-spectrum analysis of different types.</p>
+<p>The Spectrum class is the main functional code.
+ObsBlocks are containers of multiple spectra of different objects
+The Spectra class is a container of multiple spectra of the <em>same</em> object at</p>
+<blockquote>
+<div>different wavelengths/frequencies</div></blockquote>
 <dl class="class">
-<dt id="pyspeckit.spectrum.Spectrum">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.</tt><tt class="descname">Spectrum</tt><big>(</big><em>filename=None</em>, <em>filetype=None</em>, <em>xarr=None</em>, <em>data=None</em>, <em>error=None</em>, <em>header=None</em>, <em>doplot=False</em>, <em>maskdata=True</em>, <em>plotkwargs={}</em>, <em>xarrkwargs={}</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L41" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L41" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum">
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.classes.</tt><tt class="descname">Spectrum</tt><big>(</big><em>filename=None</em>, <em>filetype=None</em>, <em>xarr=None</em>, <em>data=None</em>, <em>error=None</em>, <em>header=None</em>, <em>doplot=False</em>, <em>maskdata=True</em>, <em>plotkwargs={}</em>, <em>xarrkwargs={}</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L41" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-41" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>The core class for the spectroscopic toolkit.  Contains the data and error
 arrays along with wavelength / frequency / velocity information in various
@@ -93,7 +100,7 @@ specified, leave filename blank.</p>
 <div><p>Specify the file type (only needed if it cannot be automatically
 determined from the filename)</p>
 </div></blockquote>
-<p><strong>xarr</strong> : <a class="reference internal" href="units.html#pyspeckit.spectrum.units.SpectroscopicAxis" title="pyspeckit.spectrum.units.SpectroscopicAxis"><tt class="xref py py-obj docutils literal"><span class="pre">units.SpectroscopicAxis</span></tt></a> or <tt class="xref py py-obj docutils literal"><span class="pre">np.ndarray</span></tt></p>
+<p><strong>xarr</strong> : <tt class="xref py py-obj docutils literal"><span class="pre">units.SpectroscopicAxis</span></tt> or <tt class="xref py py-obj docutils literal"><span class="pre">np.ndarray</span></tt></p>
 <blockquote>
 <div><p>The X-axis of the data.  If it is an np.ndarray, you must pass
 <tt class="xref py py-obj docutils literal"><span class="pre">xarrkwargs</span></tt> or a valid header if you want to use any of the unit
@@ -154,30 +161,30 @@ appropriate information</p>
 </div>
 <p class="rubric">Methods</p>
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.copy">
-<tt class="descname">copy</tt><big>(</big><em>deep=True</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L501" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L501" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.copy" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.copy">
+<tt class="descname">copy</tt><big>(</big><em>deep=True</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L501" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-501" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a copy of the spectrum with its own plotter, fitter, etc.
 Useful for, e.g., comparing smoothed to unsmoothed data</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.crop">
-<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L320" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L320" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.crop" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.crop">
+<tt class="descname">crop</tt><big>(</big><em>x1</em>, <em>x2</em>, <em>units=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L320" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-320" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace the current spectrum with a subset from x1 to x2 in current
 units</p>
 <p>Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="pyspeckit.spectrum.Spectrum.flux">
-<tt class="descname">flux</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.flux" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.flux">
+<tt class="descname">flux</tt><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.flux" title="Permalink to this definition">¶</a></dt>
 <dd><p>The data in the spectrum (flux = data, for compatibility with astropy&#8217;s
 Spectrum1D object).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.getlines">
-<tt class="descname">getlines</tt><big>(</big><em>linetype='radio'</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L556" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L556" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.getlines" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.getlines">
+<tt class="descname">getlines</tt><big>(</big><em>linetype='radio'</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L556" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-556" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.getlines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Access a registered database of spectral lines.  Will add an attribute
 with the name linetype, which then has properties defined by the
 speclines module (most likely, a table and a &#8220;show&#8221; function to display
@@ -185,22 +192,22 @@ the lines)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.interpnans">
-<tt class="descname">interpnans</tt><big>(</big><em>spec</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L46" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L46" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.interpnans" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.interpnans">
+<tt class="descname">interpnans</tt><big>(</big><em>spec</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L46" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-46" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.interpnans" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate over NAN values, replacing them with values interpolated from
 their neighbors using linear interpolation.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.measure">
-<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=10.0</em>, <em>ignore=None</em>, <em>derive=True</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L310" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L310" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.measure" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.measure">
+<tt class="descname">measure</tt><big>(</big><em>z=None</em>, <em>d=None</em>, <em>fluxnorm=None</em>, <em>miscline=None</em>, <em>misctol=10.0</em>, <em>ignore=None</em>, <em>derive=True</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L310" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-310" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.measure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the measurements class - only do this after you have run a
 fitter otherwise pyspeckit will be angry!</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.moments">
-<tt class="descname">moments</tt><big>(</big><em>unit='km/s'</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L573" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L573" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.moments" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.moments">
+<tt class="descname">moments</tt><big>(</big><em>unit='km/s'</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L573" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-573" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.moments" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Return the moments of the spectrum.  In order to assure that the 1st</dt>
 <dd><p class="first">and 2nd moments are meaningful, a &#8216;default&#8217; unit is set.  If unit is
@@ -233,37 +240,37 @@ sigma = integral / amp / sqrt(2*pi)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.parse_hdf5_header">
-<tt class="descname">parse_hdf5_header</tt><big>(</big><em>hdr</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L264" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L264" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.parse_hdf5_header" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.parse_hdf5_header">
+<tt class="descname">parse_hdf5_header</tt><big>(</big><em>hdr</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L264" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-264" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.parse_hdf5_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>HDF5 reader will create a hdr dictionary from HDF5 dataset attributes
 if they exist.  This routine will convert that dict to a pyfits header
 instance.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.parse_header">
-<tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L283" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L283" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.parse_header" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.parse_header">
+<tt class="descname">parse_header</tt><big>(</big><em>hdr</em>, <em>specname=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L283" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-283" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.parse_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse parameters from a .fits header into required spectrum structure
 parameters</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.parse_text_header">
-<tt class="descname">parse_text_header</tt><big>(</big><em>Table</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L229" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L229" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.parse_text_header" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.parse_text_header">
+<tt class="descname">parse_text_header</tt><big>(</big><em>Table</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L229" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-229" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.parse_text_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Grab relevant parameters from a table header (xaxis type, etc)</p>
 <p>This function should only exist for Spectrum objects created from
 .txt or other atpy table type objects</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="pyspeckit.spectrum.Spectrum.shape">
-<tt class="descname">shape</tt><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.shape" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.shape">
+<tt class="descname">shape</tt><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the data shape (a property of the Spectrum)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.slice">
-<tt class="descname">slice</tt><big>(</big><em>start=None</em>, <em>stop=None</em>, <em>units='pixel'</em>, <em>copy=True</em>, <em>preserve_fits=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L351" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L351" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.slice" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.slice">
+<tt class="descname">slice</tt><big>(</big><em>start=None</em>, <em>stop=None</em>, <em>units='pixel'</em>, <em>copy=True</em>, <em>preserve_fits=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L351" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-351" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.slice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Slicing the spectrum</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -301,9 +308,9 @@ copy instead of cropping inplace</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.smooth">
-<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L447" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L447" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.smooth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Smooth the spectrum by factor <a class="reference internal" href="#pyspeckit.spectrum.Spectrum.smooth" title="pyspeckit.spectrum.Spectrum.smooth"><tt class="xref py py-obj docutils literal"><span class="pre">smooth</span></tt></a>.</p>
+<dt id="pyspeckit.spectrum.classes.Spectrum.smooth">
+<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L447" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-447" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth the spectrum by factor <a class="reference internal" href="#pyspeckit.spectrum.classes.Spectrum.smooth" title="pyspeckit.spectrum.classes.Spectrum.smooth"><tt class="xref py py-obj docutils literal"><span class="pre">smooth</span></tt></a>.</p>
 <blockquote>
 <div><p>Documentation from the <tt class="xref py py-mod docutils literal"><span class="pre">smooth</span></tt> module:</p>
 <p>sm.smooth doc:</p>
@@ -341,8 +348,8 @@ copy instead of cropping inplace</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.stats">
-<tt class="descname">stats</tt><big>(</big><em>statrange=()</em>, <em>interactive=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L524" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L524" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.stats" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.stats">
+<tt class="descname">stats</tt><big>(</big><em>statrange=()</em>, <em>interactive=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L524" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-524" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return some statistical measures in a dictionary (somewhat self-explanatory)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -363,8 +370,8 @@ copy instead of cropping inplace</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectrum.write">
-<tt class="descname">write</tt><big>(</big><em>filename</em>, <em>type=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L209" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L209" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectrum.write" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectrum.write">
+<tt class="descname">write</tt><big>(</big><em>filename</em>, <em>type=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L209" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-209" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectrum.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the spectrum to a file.  The available file types are listed
 in spectrum.writers.writers</p>
 <p>type - what type of file to write to?  If not specified, will attempt
@@ -374,9 +381,9 @@ to determine type from suffix</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="pyspeckit.spectrum.Spectra">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.</tt><tt class="descname">Spectra</tt><big>(</big><em>speclist</em>, <em>xunits='GHz'</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L655" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L655" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectra" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.classes.Spectrum</span></tt></p>
+<dt id="pyspeckit.spectrum.classes.Spectra">
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.classes.</tt><tt class="descname">Spectra</tt><big>(</big><em>speclist</em>, <em>xunits='GHz'</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L655" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-655" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyspeckit.spectrum.classes.Spectrum" title="pyspeckit.spectrum.classes.Spectrum"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.classes.Spectrum</span></tt></a></p>
 <p>A list of individual Spectrum objects.  Intended to be used for
 concatenating different wavelength observations of the SAME OBJECT.  Can be
 operated on just like any Spectrum object, incuding fitting.  Useful for
@@ -386,21 +393,21 @@ plotting these though...</p>
 <p>X array is forcibly sorted in increasing order</p>
 <p class="rubric">Methods</p>
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectra.fiteach">
-<tt class="descname">fiteach</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L755" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L755" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectra.fiteach" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectra.fiteach">
+<tt class="descname">fiteach</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L755" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-755" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectra.fiteach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit each spectrum within the Spectra object</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectra.ploteach">
-<tt class="descname">ploteach</tt><big>(</big><em>xunits=None</em>, <em>inherit_fit=False</em>, <em>plot_fit=True</em>, <em>plotfitkwargs={}</em>, <em>**plotkwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L772" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L772" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectra.ploteach" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectra.ploteach">
+<tt class="descname">ploteach</tt><big>(</big><em>xunits=None</em>, <em>inherit_fit=False</em>, <em>plot_fit=True</em>, <em>plotfitkwargs={}</em>, <em>**plotkwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L772" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-772" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectra.ploteach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot each spectrum in its own window
 inherit_fit - if specified, will grab the fitter &amp; fitter properties from Spectra</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.Spectra.smooth">
-<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L740" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L740" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.Spectra.smooth" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.Spectra.smooth">
+<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L740" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-740" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.Spectra.smooth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooth the spectrum by factor &#8220;smooth&#8221;.  Options are defined in sm.smooth</p>
 <p>because &#8216;Spectra&#8217; does not have a header attribute, don&#8217;t do anything to it...</p>
 </dd></dl>
@@ -408,17 +415,17 @@ inherit_fit - if specified, will grab the fitter &amp; fitter properties from Sp
 </dd></dl>
 
 <dl class="class">
-<dt id="pyspeckit.spectrum.ObsBlock">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.</tt><tt class="descname">ObsBlock</tt><big>(</big><em>speclist</em>, <em>xtype='frequency'</em>, <em>xarr=None</em>, <em>force=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L791" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L791" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.classes.Spectra</span></tt></p>
+<dt id="pyspeckit.spectrum.classes.ObsBlock">
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.classes.</tt><tt class="descname">ObsBlock</tt><big>(</big><em>speclist</em>, <em>xtype='frequency'</em>, <em>xarr=None</em>, <em>force=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L791" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-791" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.ObsBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyspeckit.spectrum.classes.Spectra" title="pyspeckit.spectrum.classes.Spectra"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.classes.Spectra</span></tt></a></p>
 <p>An Observation Block</p>
 <p>Consists of multiple spectra with a shared X-axis.  Intended to hold groups
 of observations of the same object in the same setup for later averaging.</p>
 <p>ObsBlocks can be indexed like python lists.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
-<dt id="pyspeckit.spectrum.ObsBlock.average">
-<tt class="descname">average</tt><big>(</big><em>weight=None</em>, <em>inverse_weight=False</em>, <em>error='erravgrtn'</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L836" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L836" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.average" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.ObsBlock.average">
+<tt class="descname">average</tt><big>(</big><em>weight=None</em>, <em>inverse_weight=False</em>, <em>error='erravgrtn'</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L836" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-836" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.ObsBlock.average" title="Permalink to this definition">¶</a></dt>
 <dd><p>Average all scans in an ObsBlock.  Returns a single Spectrum object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -447,8 +454,8 @@ averaged without weighting</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyspeckit.spectrum.ObsBlock.smooth">
-<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L905" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L905" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.ObsBlock.smooth" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspeckit.spectrum.classes.ObsBlock.smooth">
+<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/classes.py#L905" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/classes.py#cl-905" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.classes.ObsBlock.smooth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooth the spectrum by factor &#8220;smooth&#8221;.  Options are defined in sm.smooth</p>
 </dd></dl>
 
@@ -456,7 +463,7 @@ averaged without weighting</p>
 
 <span class="target" id="module-pyspeckit.spectrum"></span><dl class="function">
 <dt id="pyspeckit.spectrum.register_reader">
-<tt class="descclassname">pyspeckit.spectrum.</tt><tt class="descname">register_reader</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L14" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L14" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.register_reader" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.</tt><tt class="descname">register_reader</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L14" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#cl-14" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.register_reader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a reader function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -484,7 +491,7 @@ it to 0&#8217;s if empty), and a pyfits header instance</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.register_writer">
-<tt class="descclassname">pyspeckit.spectrum.</tt><tt class="descname">register_writer</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L50" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#L50" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.register_writer" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.</tt><tt class="descname">register_writer</tt><big>(</big><em>filetype</em>, <em>function</em>, <em>suffix</em>, <em>default=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum.py#L50" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum.py#cl-50" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.register_writer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a writer function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

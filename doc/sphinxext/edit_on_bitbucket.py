@@ -123,7 +123,7 @@ def doctree_read(app, doctree):
                 except:
                     pass
                 else:
-                    anchor = '#L%d' % lineno
+                    anchor = '#cl-%d' % lineno
             if anchor:
                 path = '%s%s%s.py%s' % (
                     url, source_root, modname.replace('.', '/'), anchor)

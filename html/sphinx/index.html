@@ -102,18 +102,18 @@ our <a class="reference external" href="http://pypi.python.org/pypi/pyspeckit">p
 <div class="section" id="classes-and-api">
 <h1>Classes and API<a class="headerlink" href="#classes-and-api" title="Permalink to this headline">¶</a></h1>
 <p>At the core, PySpecKit runs on a &#8216;Spectroscopic Object&#8217; class called
-<a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectrum" title="pyspeckit.spectrum.Spectrum"><tt class="xref py py-class docutils literal"><span class="pre">Spectrum</span></tt></a>.  Therefore everything
+<tt class="xref py py-class docutils literal"><span class="pre">Spectrum</span></tt>.  Therefore everything
 interesting about PySpecKit can be learned by digging into the properties of
 this class.</p>
 <ul class="simple">
 <li><a class="reference internal" href="spectrum.html"><em>spectrum</em></a> can read a variety of individual spectra types<ul>
-<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectrum" title="pyspeckit.spectrum.Spectrum"><tt class="xref py py-class docutils literal"><span class="pre">Spectrum</span></tt></a> The Spectrum class, which is the core
+<li><tt class="xref py py-class docutils literal"><span class="pre">Spectrum</span></tt> The Spectrum class, which is the core
 of pyspeckit.  The __init__ procedure opens a spectrum file.</li>
-<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.Spectra" title="pyspeckit.spectrum.Spectra"><tt class="xref py py-class docutils literal"><span class="pre">Spectra</span></tt></a> A group of Spectrums.  Generally for
+<li><tt class="xref py py-class docutils literal"><span class="pre">Spectra</span></tt> A group of Spectrums.  Generally for
 when you have multiple wavelength observations you want to stitch together
 (e.g., two filterbanks on a heterodyne system, or the red/blue spectra from
 a multi-band spectrometer like the Double Imaging Spectrograph)</li>
-<li><a class="reference internal" href="spectrum.html#pyspeckit.spectrum.ObsBlock" title="pyspeckit.spectrum.ObsBlock"><tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt></a> An Observation Block - multiple
+<li><tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt> An Observation Block - multiple
 spectra of different objects or different times covering the same
 wavelength range</li>
 </ul>
