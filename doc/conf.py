@@ -44,7 +44,7 @@ print "rootpath: ",rootpath
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.doctest', 'sphinx.ext.autodoc',
         'sphinx.ext.pngmath', 'sphinx.ext.mathjax',
-        'sphinx.ext.intersphinx', 'numpydoc', 'flickr']
+        'sphinx.ext.intersphinx', 'numpydoc', 'flickr','edit_on_github']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -276,3 +276,11 @@ man_pages = [
     ('index', 'pyspeckit', u'pyspeckit Documentation',
      [u'Adam Ginsburg and Jordan Mirocha'], 1)
 ]
+
+
+# Don't import the module as "version" or it will override the
+# # "version" configuration parameter
+edit_on_github_project = "keflavich/image_registration"
+edit_on_github_branch = "master"
+edit_on_github_source_root = ""
+edit_on_github_doc_root = "doc"
