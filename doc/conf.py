@@ -43,9 +43,10 @@ class Mock(object):
 
 MOCK_MODULES = ['numpy', 'scipy', 'pyfits', 'astropy', 'pytest', 'astropy.wcs',
     'astropy.io', 'astropy.io.fits', 'astropy.nddata', 'scipy.ndimage', 'pywcs',
-    'matplotlib', 'matplotlib.pyplot', 'numpy.ma']
+    'matplotlib', 'matplotlib.pyplot', 'numpy.ma', 'h5py', 'atpy']
 for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock()
+    if mod_name not in sys.modules:
+        sys.modules[mod_name] = Mock()
 try:
     import numpy
     print "Succeeded in mocking"

@@ -15,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.1.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -85,7 +85,7 @@ they are just specified as such for clarity</p>
     <span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;N2HP(3-2)&#39;</span><span class="p">,</span><span class="s">&#39;N2H+(3-2)&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>This will generate a <a class="reference internal" href="spectrum.html#pyspeckit.spectrum.ObsBlock" title="pyspeckit.spectrum.ObsBlock"><tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt></a> from all data tagged with the &#8216;telescope&#8217;
+<p>This will generate a <tt class="xref py py-class docutils literal"><span class="pre">ObsBlock</span></tt> from all data tagged with the &#8216;telescope&#8217;
 flags listed and lines matching either of those above.  The data selection is equivalent to a combination of</p>
 <div class="highlight-python"><pre>find /telescope SMT-F1M-HU
 find /telescope SMT-F1M-VU
@@ -99,7 +99,7 @@ indexing the ObsBlock directly.</p>
 <span id="an-essentially-undocumented-api"></span><h2>An essentially undocumented API<a class="headerlink" href="#module-pyspeckit.spectrum.readers.read_class" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="gildas-class-file-reader">
 <h3>GILDAS CLASS file reader<a class="headerlink" href="#gildas-class-file-reader" title="Permalink to this headline">¶</a></h3>
-<p>Read a CLASS file into an <a class="reference internal" href="spectrum.html#pyspeckit.spectrum.ObsBlock" title="pyspeckit.spectrum.ObsBlock"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.ObsBlock</span></tt></a></p>
+<p>Read a CLASS file into an <tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.ObsBlock</span></tt></p>
 <dl class="function">
 <dt id="pyspeckit.spectrum.readers.read_class.class_to_obsblocks">
 <tt class="descclassname">pyspeckit.spectrum.readers.read_class.</tt><tt class="descname">class_to_obsblocks</tt><big>(</big><em>*arg</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/readers/read_class.py#L24" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/readers/read_class.py#L24" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.readers.read_class.class_to_obsblocks" title="Permalink to this definition">¶</a></dt>

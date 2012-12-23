@@ -32,8 +32,6 @@ except ImportError:
 line_names = ['oneone','twotwo','threethree']
 line_names = ['oneone_f10','oneone_f01','oneone_f22','oneone_f21','oneone_f12','oneone_f11','twotwo_f11','twotwo_f12','twotwo_f21','twotwo_f32','twotwo_f33','twotwo_f22','twotwo_f23']
 
-ckms = units.speedoflight_ms / 1e3 #2.99792458e5
-
 # http://adsabs.harvard.edu/abs/1971ApJ...169..429T has the most accurate freqs
 # http://adsabs.harvard.edu/abs/1972ApJ...174..463T [twotwo]
 central_freq_dict = { 
