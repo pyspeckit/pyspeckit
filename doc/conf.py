@@ -288,3 +288,28 @@ edit_on_github_doc_root = "doc"
 edit_on_bitbucket_project = "pyspeckit/pyspeckit.bitbucket.org"
 edit_on_bitbucket_source_root = ""
 edit_on_bitbucket_doc_root = "doc"
+
+# read the docs mocks
+import sys
+
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            return type(name, (), {})
+        else:
+            return Mock()
+
+MOCK_MODULES = ['numpy', 'scipy', 'pyfits', 'astropy', 'pytest', 'astropy.wcs',
+    'astropy.io', 'astropy.io.fits', 'astropy.nddata', 'scipy.ndimage', 'pywcs',
+    'matplotlib', 'matplotlib.pyplot']
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
