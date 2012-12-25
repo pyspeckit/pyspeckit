@@ -4,6 +4,7 @@ import os
 import shutil
 import sys
 from distutils.core import setup, Command
+import subprocess
 
 with open('README.txt') as file:
     long_description = file.read()
@@ -26,7 +27,6 @@ tagname = "pyspeckit_%s" % (version_base)
 if os.path.exists(".hg"):
     # if the installed version is from a mercurial clone, get the "tip", else get the latest release
     try:
-        import subprocess
         currentversion = subprocess.Popen(["hg","id","--num"],stdout=subprocess.PIPE).communicate()[0].strip().strip("+")
         tags = subprocess.Popen(["hg","tags"],stdout=subprocess.PIPE).communicate()[0].split()
         tagdict = dict((tags[i],tags[i+1].split(':')[0]) for i in range(0, len(tags), 2))
