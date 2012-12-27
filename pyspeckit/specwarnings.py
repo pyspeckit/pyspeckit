@@ -10,7 +10,8 @@ def showwarning(message, category, filename, lineno, file=None, line=None):
     if file is None:
         file = sys.stderr
     try:
-        file.write(message.message+"\n")
+        msg = str(message) # tried using message.message before, but led to infinite recursion for deprecation warning
+        file.write(msg+"\n")
         #file.write(formatwarning(message, category, filename, lineno, line))
     except IOError:
         pass # the file (probably stderr) is invalid - this warning gets lost.

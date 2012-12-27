@@ -280,7 +280,7 @@ class SpectroscopicAxis(np.ndarray):
     def __new__(self, xarr, unit="Hz", frame='rest', frame_offset=0.0,
             frame_offset_units='Hz', xtype=None, refX=None, redshift=None,
             refX_units=None, velocity_convention=None, use128bits=False,
-            units=None):
+            units=None, bad_unit_response='raise'):
         """
         Make a new spectroscopic axis instance
         Default units Hz
@@ -316,6 +316,10 @@ class SpectroscopicAxis(np.ndarray):
                 * Redshifted
             SOME tools for frame shifting are now incorporated into 
             velocity_frames.py
+
+        *bad_unit_response* [ 'raise', 'pixel' ]
+            What should pyspeckit do if the units are not recognized?  Default
+            is to raise an exception.  Can make pixel units instead
         """
         if use128bits:
             dtype='float128'
@@ -331,7 +335,12 @@ class SpectroscopicAxis(np.ndarray):
         if unit in unit_type_dict:
             subarr.units = unit
         else:
-            raise ValueError('Unit %s not recognized.' % unit)
+            if bad_unit_response=='raise':
+                raise ValueError('Unit %s not recognized.' % unit)
+            elif bad_unit_response=="pixel":
+                subarr.units="unknown"
+            else:
+                raise ValueError("Invalied bad unit response.  Valid options are 'raise','pixel'")
         if subarr.units is None:
             subarr.units = 'none'
         subarr.frame = frame
