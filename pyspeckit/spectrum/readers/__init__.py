@@ -7,7 +7,8 @@ from pyspeckit.specwarnings import warn
 readers = {}
 suffix_types = {}
 
-def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True):
+def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True,
+        **kwargs):
     """
     Parse parameters from a .fits header into required SpectroscopicAxis
     parameters
@@ -55,7 +56,7 @@ def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True):
         vframe = 0.0
 
     XAxis = units.SpectroscopicAxis(xarr, xunits, xtype=xtype, refX=refX,
-            velocity_convention=convention, frame=frame, frame_offset=vframe)
+            velocity_convention=convention, frame=frame, frame_offset=vframe, **kwargs)
 
     return XAxis
 
