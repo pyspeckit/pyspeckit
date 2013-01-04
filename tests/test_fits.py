@@ -18,7 +18,8 @@ print "How about now? ",sp.plotter.axis
 # background level)
 sp.baseline.order = 0
 sp.specfit()
-sp.plotter.figure.savefig(savedir+'fits_gaussfit.png')
+if savedir != "":
+    sp.plotter.figure.savefig(savedir+'fits_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 fitted_fwhm = sp.specfit.parinfo.WIDTH0*np.sqrt(np.log(2)*8)
@@ -40,7 +41,8 @@ assert np.abs(measured_fwhm-fitted_fwhm) < 50 # i.e., close enough...
 
 sp.specfit(interactive=True)
 if interactive: raw_input('Press enter to print guesses and best fit and end code')
-sp.plotter.figure.savefig(savedir+'fits_interactive_fit.png')
+if savedir != "":
+    sp.plotter.figure.savefig(savedir+'fits_interactive_fit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 

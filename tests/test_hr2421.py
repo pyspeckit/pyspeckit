@@ -35,7 +35,8 @@ print "FITTING GAUSSIAN"
 sp.specfit(debug=True,verbose=True)
 sp.specfit(debug=True,verbose=True) # Do this twice to get a better estimate of the noise
 print "Plotter min/max: ",sp.plotter.xmin,sp.plotter.xmax," Fitter min/max: ",sp.specfit.xmin,sp.specfit.xmax," Fitregion= ",sp.baseline.button1plot," bfit target sum: ",sp.baseline.includemask.sum()
-sp.plotter.figure.savefig(savedir+'hr2421_gaussfit.png')
+if savedir != "":
+    sp.plotter.figure.savefig(savedir+'hr2421_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 print "EQW: ",sp.specfit.EQW()
@@ -54,7 +55,8 @@ try:
     print "Chi2: ",sp.specfit.chi2
     sp.plotter.axis.plot(sp.xarr[sp.specfit.xmin:sp.specfit.xmax],gauss_model,color='b',linewidth=0.5)
     sp.plotter(clear=False,reset=False)
-    sp.plotter.figure.savefig(savedir+'hr2421_voigtfit.png')
+    if savedir != "":
+        sp.plotter.figure.savefig(savedir+'hr2421_voigtfit.png')
     voigt_model = sp.specfit.model+sp.baseline.basespec[sp.specfit.xmin:sp.specfit.xmax]
     print "A voigt model has been fit.  The red line from before should have a blue line overlaid.  They should be only moderately different."
     if interactive: raw_input("Wait here a moment")
@@ -74,13 +76,16 @@ else:
     event5 = matplotlib.backend_bases.MouseEvent('button_press_event', sp.plotter.axis.figure.canvas,611,247,button=3)
     sp.specfit.event_manager(event1)
     sp.specfit.event_manager(event2)
-    sp.plotter.figure.savefig(savedir+'hr2421_interactive_selectregion.png')
+    if savedir != "":
+        sp.plotter.figure.savefig(savedir+'hr2421_interactive_selectregion.png')
     sp.specfit.event_manager(event3)
     sp.specfit.event_manager(event4)
-    sp.plotter.figure.savefig(savedir+'hr2421_interactive_guesses.png')
+    if savedir != "":
+        sp.plotter.figure.savefig(savedir+'hr2421_interactive_guesses.png')
     sp.specfit.event_manager(event5)
 
-sp.plotter.figure.savefig(savedir+'hr2421_interactive_fit.png')
+if savedir != "":
+    sp.plotter.figure.savefig(savedir+'hr2421_interactive_fit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
@@ -105,7 +110,8 @@ sp.specfit.event_manager(event2,debug=True)
 sp.specfit.event_manager(event3,debug=True)
 sp.specfit.event_manager(event4,debug=True)
 sp.specfit.event_manager(event5,debug=True)
-sp.plotter.figure.savefig(savedir+'hr2421_interactive_guesses_oneextra.png')
+if savedir != "":
+    sp.plotter.figure.savefig(savedir+'hr2421_interactive_guesses_oneextra.png')
 sp.specfit.event_manager(event6,debug=True)
 
 print "Guesses: ", sp.specfit.guesses

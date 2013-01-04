@@ -24,7 +24,7 @@ if versnum != "":
     if not os.path.exists(savedir):
         os.mkdir(savedir)
 else:
-    savedir = None
+    savedir = ""
 
 
 print "*****test_fits.py*****"

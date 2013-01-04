@@ -74,13 +74,15 @@ if False:
     pyspeckit.wrappers.fitnh3.plot_nh3(spdict1,spectra1,fignum=5,residfignum=8)
     pyspeckit.wrappers.fitnh3.plot_nh3(spdict1,spectra1,fignum=7,show_components=True)
 
-    figure(5)
-    savefig(savedir+"example_G032_multi-temperature_four-line_fit.png")
-    figure(7)
-    savefig(savedir+"example_G032_multi-temperature_four-line_fit_components.png")
-    figure(8)
-    savefig(savedir+"example_G032_multi-temperature_four-line_fit_residuals.png")
+    if savedir != "":
+        figure(5)
+        savefig(savedir+"example_G032_multi-temperature_four-line_fit.png")
+        figure(7)
+        savefig(savedir+"example_G032_multi-temperature_four-line_fit_components.png")
+        figure(8)
+        savefig(savedir+"example_G032_multi-temperature_four-line_fit_residuals.png")
 
     figure(9,figsize=[16,12])
     pyspeckit.wrappers.fitnh3.plot_nh3(spdict1,spectra1,fignum=9,errstyle='fill')
-    savefig(savedir+"example_G032_multi-temperature_four-line_fit_errbars.png")
+    if savedir != "":
+        savefig(savedir+"example_G032_multi-temperature_four-line_fit_errbars.png")
