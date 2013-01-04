@@ -114,11 +114,13 @@ class ParinfoList(list):
             return
 
         P = Parameters()
-        P.add_many(*[(par.parname, par.value, not(par.fixed),
-            par.limits[0] if par.limited[0] else None,
-            par.limits[1] if par.limited[1] else None,
-            par.tied if par.tied is not '' else None)
-            for par in self])
+        for par in self:
+            P.add(name=par.parname,
+                    value=par.value,
+                    vary=not(par.fixed),
+                    expr=par.tied if par.tied is not '' else None,
+                    min=par.limits[0] if par.limited[0] else None,
+                    max=par.limits[1] if par.limited[1] else None)
 
         return P
 
@@ -138,7 +140,7 @@ class ParinfoList(list):
             for par in lmpars.values():
                 self.append(Parinfo(par))
 
-    def tableprint(self, item_length=15):
+    def tableprint(self, item_length=15, numbered=True):
         """
         Print data in table-friendly format
 
@@ -146,6 +148,9 @@ class ParinfoList(list):
         ----------
         item_length : int
             Number of characters per item printed
+        numbered : bool
+            Are the parameters numbered?  In pyspeckit, they will always be,
+            but this was included for compatibility with generic fitters
         """
         stripped_names = list(set([par.parname.strip("0123456789") for par in self]))
 
@@ -155,8 +160,12 @@ class ParinfoList(list):
         fltformat = "%" + str(item_length) + "g"
 
         print " ".join([strformat % name for name in stripped_names])
-        for ii in xrange(nlines):
-            print " ".join([fltformat % (self[name+"%i" % ii].value)
+        if numbered:
+            for ii in xrange(nlines):
+                print " ".join([fltformat % (self[name+"%i" % ii].value)
+                    for name in stripped_names])
+        else:
+            print " ".join([fltformat % (self[name].value)
                 for name in stripped_names])
 
 class Parinfo(dict):
