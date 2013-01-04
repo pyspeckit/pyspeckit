@@ -61,7 +61,7 @@ class PyTest(Command):
         pass
 
     def run(self):
-        errno = subprocess.call([sys.executable, 'tests/runtests.py', '-q'])
+        errno = subprocess.call([sys.executable, 'tests/run_tests.py', '-q'])
         raise SystemExit(errno)
 
 setup(name='pyspeckit',
