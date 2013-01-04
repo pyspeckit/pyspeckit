@@ -78,7 +78,7 @@ class Measurements(object):
             self.modelerrs[i] = tmp2[element]
                                                                       
         # Read in appropriate list of reference wavelengths/frequencies/whatever
-        self.reflines = self.speclines.optical.optical_lines
+        self.reflines = self.speclines.optical.get_optical_lines()
         self.refpos = self.reflines['xarr']
         self.refname = self.reflines['name']
         

@@ -1,11 +1,6 @@
 interactive=False
 import subprocess
-versnum = subprocess.Popen(["hg","id","--num"],stdout=subprocess.PIPE).communicate()[0].strip().strip("+")
-savedir = "tests_%s/" % versnum
 import os
-if not os.path.exists(savedir):
-    os.mkdir(savedir)
-
 from matplotlib.pyplot import ion,ioff
 if interactive:
     ion()
@@ -18,6 +13,18 @@ for p in pyspeckit.spectrum.tests.test_units.params:
     pyspeckit.spectrum.tests.test_units.test_convert_units(*p)
     pyspeckit.spectrum.tests.test_units.test_convert_back(*p)
 #pytest.main()
+
+dir_prefix = os.path.split(__file__)[0]
+if os.path.exists(dir_prefix):
+    os.chdir(dir_prefix)
+
+versnum = subprocess.Popen(["hg","id","--num"],stdout=subprocess.PIPE).communicate()[0].strip().strip("+")
+if versnum != "":
+    savedir = "tests_%s/" % versnum
+    if not os.path.exists(savedir):
+        os.mkdir(savedir)
+else:
+    savedir = None
 
 
 print "*****test_fits.py*****"
