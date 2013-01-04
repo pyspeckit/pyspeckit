@@ -18,4 +18,6 @@ install:
    - pip install matplotlib --use-mirrors
    - pip install pyfits --use-mirrors
    - pip install ordereddict --use-mirrors
-script: python setup.py test
+script: 
+    python setup.py install
+    python setup.py test
