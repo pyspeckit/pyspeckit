@@ -10,6 +10,7 @@ collect_ignore = ["setup.py", "debug_test.py",
         "tests/setup/run_tests.sh",
         "tests/setup/setup_jenkins_virtual.py", # downloads - don't do it.
         "tests/setup/test_imports.py",
+        "tests/*ipython*",
         ".hg",
         ".git"
         ]

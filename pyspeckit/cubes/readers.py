@@ -28,7 +28,7 @@ def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
     elif isinstance(filename, pyfits.hdu.hdulist.HDUList):
         f=filename
     else:
-        f = pyfits.open(filename)
+        f = pyfits.open(filename,ignore_missing_end=True)
     hdr = f[0].header
     cube = ma.array(f[0].data.squeeze())  # remove extra dimensions such as polarization
     cube.mask = np.isnan(cube) + np.isinf(cube)

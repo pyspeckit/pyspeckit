@@ -5,6 +5,9 @@ import shutil
 import sys
 from distutils.core import setup, Command
 import subprocess
+if 'develop' in sys.argv:
+    # use setuptools for develop, but nothing else
+    from setuptools import setup
 
 with open('README.txt') as file:
     long_description = file.read()

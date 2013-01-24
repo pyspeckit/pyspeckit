@@ -66,7 +66,7 @@ class Cube(spectrum.Spectrum):
             if self.cube is not None:
                 self.data = self.cube[:,y0,x0]
 
-        if header is not None:
+        if self.header is not None:
             self.parse_header(self.header)
         else:
             self.units = 'undefined'
@@ -659,7 +659,7 @@ class Cube(spectrum.Spectrum):
         except ImportError:
             import pyfits
 
-        cubefile = pyfits.open(fitsfilename)
+        cubefile = pyfits.open(fitsfilename,ignore_missing_end=True)
         cube = cubefile[0].data
 
         # grab a spectrum and fit it however badly you want
