@@ -27,6 +27,7 @@ except ImportError:  # Python 2.x
 from pyspeckit import __version__ as version_base
 tagname = "pyspeckit_%s" % (version_base)
 
+# this is all for determining the download URL
 if os.path.exists(".hg"):
     # if the installed version is from a mercurial clone, get the "tip", else get the latest release
     try:

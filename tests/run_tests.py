@@ -1,6 +1,8 @@
 interactive=False
 import subprocess
 import os
+import matplotlib
+matplotlib.use('TkAgg')
 from matplotlib.pyplot import ion,ioff
 if interactive:
     ion()
