@@ -2,7 +2,19 @@
 Fit NH3 Cube
 ============
 
-Example script to fit all pixels in an NH3 data cube
+Example script to fit all pixels in an NH3 data cube.
+
+This is a bit of a mess, and fairly complicated (intrinsically),
+but if you have matched 1-1 + 2-2 + ... NH3 cubes, you should be
+able to modify this example and get something useful out.
+
+.. WARNING:: Cube fitting, particularly with a complicated line profile
+ammonia, can take a long time.  Test this on a small cube first!
+
+.. TODO:: Turn this example script into a function.  But customizing 
+    the fit parameters will still require digging into the data manually
+    (e.g., excluding bad velocities, or excluding the hyperfine lines from
+    the initial guess)
 """
 import pyspeckit
 try:
@@ -17,6 +29,8 @@ import agpy
 F=False; T=True
 
 # Some optional parameters for the script
+# (if False, it will try to load an already-stored version 
+# of the file)
 fitcube = True
 
 # Mask out low S/N pixels (to speed things up)
@@ -27,19 +41,29 @@ mask = np.isfinite(mask) * (mask > 0)
 # Then calibrate the data (the data we're loading in this case are in Janskys,
 # but we want surface brightness in Kelvin for the fitting process)
 cube11 = pyspeckit.Cube('hotclump_11.cube_r0.5_rerun.image.fits', maskmap=mask)
-cube11.cube *= 13.6 * (300.0 / (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2 * 1./cube11.header.get('BMAJ')/3600. * 1./cube11.header.get('BMIN')/3600. 
+cube11.cube *= (13.6 * (300.0 /
+    (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2 *
+    1./cube11.header.get('BMAJ')/3600. * 1./cube11.header.get('BMIN')/3600. )
 cube11.units = "K"
 cube22 = pyspeckit.Cube('hotclump_22.cube_r0.5_contsub.image.fits', maskmap=mask)
-cube22.cube *= 13.6 * (300.0 / (pyspeckit.spectrum.models.ammonia.freq_dict['twotwo']/1e9))**2 * 1./cube22.header.get('BMAJ')/3600. * 1./cube22.header.get('BMIN')/3600. 
+cube22.cube *= (13.6 * (300.0 /
+        (pyspeckit.spectrum.models.ammonia.freq_dict['twotwo']/1e9))**2 *
+        1./cube22.header.get('BMAJ')/3600. * 1./cube22.header.get('BMIN')/3600. )
 cube22.units = "K"
 cube44 = pyspeckit.Cube('hotclump_44.cube_r0.5_contsub.image.fits', maskmap=mask)
-cube44.cube *= 13.6 * (300.0 / (pyspeckit.spectrum.models.ammonia.freq_dict['fourfour']/1e9))**2 * 1./cube44.header.get('BMAJ')/3600. * 1./cube44.header.get('BMIN')/3600. 
+cube44.cube *= (13.6 * (300.0 /
+        (pyspeckit.spectrum.models.ammonia.freq_dict['fourfour']/1e9))**2 *
+        1./cube44.header.get('BMAJ')/3600. * 1./cube44.header.get('BMIN')/3600. )
 cube44.units = "K"
 
 # Compute an error map.  We use the 1-1 errors for all 3 because they're
 # essentially the same, but you could use a different error map for each
 # frequency
-errmap11 = pyfits.getdata('hotclump_11.cube_r0.5_rerun.image.moment_linefree.fits').squeeze() * 13.6 * (300.0 / (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2 * 1./cube11.header.get('BMAJ')/3600. * 1./cube11.header.get('BMIN')/3600. 
+errmap11 = (pyfits.getdata('hotclump_11.cube_r0.5_rerun.image.moment_linefree.fits').squeeze()
+        * 13.6 * (300.0 /
+            (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2 *
+        1./cube11.header.get('BMAJ')/3600. * 1./cube11.header.get('BMIN')/3600.
+        )
 errmap11[errmap11 != errmap11] = agpy.smooth(errmap11, interp_nan=True)[errmap11 != errmap11]
 
 # Stack the cubes into one big cube.  The X-axis is no longer linear: there
