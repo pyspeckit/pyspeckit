@@ -143,7 +143,7 @@ def setup(app):
     app.add_config_value('edit_on_bitbucket_source_root', 'lib', True)
     app.add_config_value('edit_on_bitbucket_doc_root', 'doc', True)
     app.add_config_value('edit_on_bitbucket_docstring_message',
-                         '[edit on bitbucket]', True)
+                         '[bitbucket]', True)
     app.add_config_value('edit_on_bitbucket_page_message',
                          '[edit this page on bitbucket]', True)
     app.add_config_value('edit_on_bitbucket_help_message',

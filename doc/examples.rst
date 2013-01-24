@@ -23,6 +23,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
 
    Radio H2CO <example_h2co>
    Radio NH3 <example_nh3>
+   Radio NH3 cube <example_nh3_cube>
    Radio N2H+ <example_n2hp>
    Radio HCO+ <example_hcop>
    Optical SDSS <example_sdss>

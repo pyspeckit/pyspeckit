@@ -151,7 +151,7 @@ def setup(app):
     app.add_config_value('edit_on_github_source_root', 'lib', True)
     app.add_config_value('edit_on_github_doc_root', 'doc', True)
     app.add_config_value('edit_on_github_docstring_message',
-                         '[edit on github]', True)
+                         '[github]', True)
     app.add_config_value('edit_on_github_page_message',
                          '[edit this page on github]', True)
     app.add_config_value('edit_on_github_help_message',
