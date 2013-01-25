@@ -74,7 +74,7 @@ class MapPlotter(object):
 
         self.Cube = Cube
         if self.Cube is not None:
-            self.header = cubes.flatten_header(self.Cube.header)
+            self.header = cubes.flatten_header(self.Cube.header, delete=True)
         if pywcsOK:
             self.wcs = pywcs.WCS(self.header)
 
@@ -121,6 +121,13 @@ class MapPlotter(object):
         else:
             if self.axis is None:
                 self.axis = self.figure.add_subplot(111)
+            else:
+                self._disconnect()
+                self.axis.figure.clf()
+                self.axis = self.figure.add_subplot(111)
+            if hasattr(self,'colorbar') and self.colorbar is not None:
+                if self.colorbar.ax in self.axis.figure.axes:
+                    self.axis.figure.delaxes(self.colorbar.ax)
             self.axis.imshow(self.plane, vmin=vmin, vmax=vmax, **kwargs)
             if colorbar: 
                 try:

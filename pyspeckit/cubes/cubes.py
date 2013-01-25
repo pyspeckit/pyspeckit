@@ -44,7 +44,7 @@ except ImportError:
 
 dtor = pi/180.0
 
-def flatten_header(header):
+def flatten_header(header,delete=False):
     """
     Attempt to turn an N-dimensional fits header into a 2-dimensional header
     Turns all CRPIX[>2] etc. into new keywords with suffix 'A'
@@ -59,7 +59,9 @@ def flatten_header(header):
 
     for key in newheader.keys():
         try:
-            if int(key[-1]) >= 3 and key[:2] in ['CD','CR','CT','CU','NA']:
+            if delete:
+                newheader.remove(key)
+            elif int(key[-1]) >= 3 and key[:2] in ['CD','CR','CT','CU','NA']:
                 newheader.rename_key(key,'A'+key,force=True)
         except ValueError:
             # if key[-1] is not an int
