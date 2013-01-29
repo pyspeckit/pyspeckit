@@ -1,10 +1,25 @@
 """
-==================
 NH3 fitter wrapper
 ==================
 
 Wrapper to fit ammonia spectra.  Generates a reasonable guess at the position
 and velocity using a gaussian fit
+
+Example use:
+
+.. code:: python
+
+    import pyspeckit
+    sp11 = pyspeckit.Spectrum('spec.nh3_11.dat', errorcol=999)
+    sp22 = pyspeckit.Spectrum('spec.nh3_22.dat', errorcol=999)
+    sp33 = pyspeckit.Spectrum('spec.nh3_33.dat', errorcol=999)
+    sp11.xarr.refX = pyspeckit.spectrum.models.ammonia.freq_dict['oneone']
+    sp22.xarr.refX = pyspeckit.spectrum.models.ammonia.freq_dict['twotwo']
+    sp33.xarr.refX = pyspeckit.spectrum.models.ammonia.freq_dict['threethree']
+    input_dict={'oneone':sp11,'twotwo':sp22,'threethree':sp33}
+    spf = pyspeckit.wrappers.fitnh3.fitnh3tkin(input_dict)
+     
+
 """
 import pyspeckit
 from matplotlib import pyplot 

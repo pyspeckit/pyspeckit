@@ -1,9 +1,8 @@
 """
-====================
 N2H+ fitter wrapper
-====================
+===================
 
-Wrapper to fit N2H+ using RADEX models.  This is meant to be used from the command line, e.g.:
+Wrapper to fit N2H+ using RADEX models.  This is meant to be used from the command line, e.g. ::
 
     python n2hp_wrapper.py file.fits
 

@@ -1,7 +1,8 @@
 """
-============
 Cube Fitting
 ============
+
+Complicated code for fitting of a whole data cube, pixel-by-pixel
 """
 import pyspeckit
 try:
@@ -35,31 +36,26 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
         CRVAL3  = 0
         CRPIX3  = 1
 
-    Parameters:
-
-    *errfilename* [ None | string name of .fits file ]
+    Parameters
+    ----------
+    errfilename: [ None | string name of .fits file ]
         A two-dimensional error map to use for computing signal-to-noise cuts
-
-    *scale_keyword* [ None | Char ]
+    scale_keyword: [ None | Char ]
         Keyword to pass to the data cube loader - multiplies cube by the number
         indexed by this header kwarg if it exists.  e.g., if your cube is in
         T_A units and you want T_A*
-
-    *vheight* [ bool ]
+    vheight: [ bool ]
         Is there a background to be fit?  Used in moment computation
-
-    *verbose* [ bool ] 
-    *verbose_level* [ int ]
+    verbose: [ bool ] 
+    verbose_level: [ int ]
         How loud will the fitting procedure be?  Passed to momenteach and fiteach
-    
-    *signal_cut* [ float ] 
+    signal_cut: [ float ] 
         Signal-to-Noise ratio minimum.  Spectra with a peak below this S/N ratio
         will not be fit and will be left blank in the output fit parameter cube
-
-    *clobber* [ bool ] 
+    clobber: [ bool ] 
         Overwrite parameter .fits cube if it exists?
 
-    `kwargs` are passed to pyspeckit.Spectrum.specfit
+    `kwargs` are passed to :class:`pyspeckit.Spectrum.specfit`
     """
 
     # Load the spectrum
