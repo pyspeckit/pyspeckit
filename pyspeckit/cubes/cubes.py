@@ -506,16 +506,19 @@ def coords_in_image(fitsfile,lon,lat,system='galactic'):
     else:
         return False
 
-def spectral_smooth(cube, smooth_factor, **kwargs):
+def spectral_smooth(cube, smooth_factor, downsample=True, **kwargs):
     """
     Smooth the cube along the spectral direction
     """
 
-    newcube = numpy.zeros(cube.shape)
+    newcube = numpy.empty(cube.shape)
+    if downsample:
+        newcube = newcube[::smooth_factor,:,:]
     yy,xx = numpy.indices(cube.shape[1:])
 
     for (x,y) in zip(xx.flat,yy.flat):
-        newcube[:,y,x] = pyspeckit.smooth.smooth(cube[:,y,x], smooth_factor, **kwargs)
+        newcube[:,y,x] = pyspeckit.smooth.smooth(cube[:,y,x], smooth_factor,
+                downsample=downsample, **kwargs)
 
     return newcube
 
