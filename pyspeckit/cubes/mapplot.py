@@ -120,7 +120,8 @@ class MapPlotter(object):
                     self.FITSFigure.add_colorbar()
                 except Exception as ex:
                     print "ERROR: Could not create colorbar!  Error was %s" % str(ex)
-            self._origin = 1 # FITS convention
+            self._origin = 0 # FITS convention
+            # TODO: set _origin to 1 if using PIXEL units, not real wcs
         else:
             if self.axis is None:
                 self.axis = self.figure.add_subplot(111)
