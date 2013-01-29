@@ -97,6 +97,8 @@ class MapPlotter(object):
 
         TODO: Allow mapplot in subfigure
         """
+        self._disconnect() 
+
         if self.figure is None:
             self.figure = matplotlib.pyplot.figure()
 
@@ -118,6 +120,7 @@ class MapPlotter(object):
                     self.FITSFigure.add_colorbar()
                 except Exception as ex:
                     print "ERROR: Could not create colorbar!  Error was %s" % str(ex)
+            self._origin = 1 # FITS convention
         else:
             if self.axis is None:
                 self.axis = self.figure.add_subplot(111)
@@ -134,6 +137,7 @@ class MapPlotter(object):
                     self.colorbar = matplotlib.pyplot.colorbar(self.axis.images[0])
                 except Exception as ex:
                     print "ERROR: Could not create colorbar!  Error was %s" % str(ex)
+            self._origin = 0 # normal convention 
 
         self.canvas = self.axis.figure.canvas
 
@@ -147,9 +151,10 @@ class MapPlotter(object):
 
     def _disconnect(self):
         """ Disconnect click, click up (release click), and key press from events """
-        self.canvas.mpl_disconnect(self.clickid)
-        self.canvas.mpl_disconnect(self.clickupid)
-        self.canvas.mpl_disconnect(self.keyid)
+        if hasattr(self,'canvas'):
+            self.canvas.mpl_disconnect(self.clickid)
+            self.canvas.mpl_disconnect(self.clickupid)
+            self.canvas.mpl_disconnect(self.keyid)
 
     def makeplane(self, estimator=np.mean):
         """
@@ -190,8 +195,8 @@ class MapPlotter(object):
         Record location of downclick
         """
         if event.inaxes:
-            self._clickX = event.xdata
-            self._clickY = event.ydata
+            self._clickX = event.xdata - self._origin
+            self._clickY = event.ydata - self._origin
 
     def plot_spectrum(self, event, plot_fit=True):
         """
@@ -199,8 +204,8 @@ class MapPlotter(object):
         """
         self.event = event
         if event.inaxes:
-            clickX = event.xdata
-            clickY = event.ydata
+            clickX = event.xdata - self._origin
+            clickY = event.ydata - self._origin
         
             # grab toolbar info so that we don't do anything if a tool is selected
             tb = self.canvas.toolbar
