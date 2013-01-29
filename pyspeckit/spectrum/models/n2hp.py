@@ -117,7 +117,8 @@ line_names = freq_dict.keys()
 ckms = units.speedoflight_ms / 1e3 #2.99792458e5
 voff_lines_dict = dict([(k,(v-93.176261e9)/93.176261e9*ckms) for k,v in freq_dict.iteritems()])
 
-n2hp_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy)
+n2hp_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict,
+        line_strength_dict, relative_strength_total_degeneracy)
 n2hp_vtau_fitter = n2hp_vtau.fitter
 n2hp_vtau_vheight_fitter = n2hp_vtau.vheight_fitter
 

@@ -213,6 +213,19 @@ etc.</dd>
 <div class="highlight-python"><pre>python n2hp_wrapper.py file.fits</pre>
 </div>
 <p>and therefore has no independently defined functions.</p>
+<dl class="function">
+<dt id="pyspeckit.wrappers.n2hp_wrapper.make_n2hp_fitter">
+<tt class="descclassname">pyspeckit.wrappers.n2hp_wrapper.</tt><tt class="descname">make_n2hp_fitter</tt><big>(</big><em>path_to_radex='/Users/adam/work/n2hp/'</em>, <em>fileprefix='1-2_T=5to55_lvg'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/n2hp_wrapper.py#L20" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/n2hp_wrapper.py#cl-20" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.n2hp_wrapper.make_n2hp_fitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a n2hp fitter using RADEX data cubes.  The following files must exist:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">path_to_radex</span><span class="o">+</span><span class="n">fileprefix</span><span class="o">+</span><span class="s">&#39;_tex1.fits&#39;</span>
+<span class="n">path_to_radex</span><span class="o">+</span><span class="n">fileprefix</span><span class="o">+</span><span class="s">&#39;_tau1.fits&#39;</span>
+<span class="n">path_to_radex</span><span class="o">+</span><span class="n">fileprefix</span><span class="o">+</span><span class="s">&#39;_tex2.fits&#39;</span>
+<span class="n">path_to_radex</span><span class="o">+</span><span class="n">fileprefix</span><span class="o">+</span><span class="s">&#39;_tau2.fits&#39;</span>
+</pre></div>
+</div>
+<p>e.g. <tt class="xref py py-obj docutils literal"><span class="pre">/Users/adam/work/n2hp/1-2_T=5to55_lvg_tau1.fits</span></tt></p>
+</dd></dl>
+
 </div>
 <div class="section" id="n2h-extras">
 <h2>N2H+ extras<a class="headerlink" href="#n2h-extras" title="Permalink to this headline">¶</a></h2>
@@ -230,7 +243,7 @@ of the hyperfine codes (hcn, n2hp) for examples.</p>
 
 <dl class="staticmethod">
 <dt id="pyspeckit.spectrum.models.n2hp.n2hp_radex">
-<em class="property">static </em><tt class="descclassname">n2hp.</tt><tt class="descname">n2hp_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models.py#L124" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models.py#cl-124" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.n2hp_radex" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><tt class="descclassname">n2hp.</tt><tt class="descname">n2hp_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models.py#L125" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models.py#cl-125" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.n2hp_radex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a grid of RADEX-computed models to make a model line spectrum</p>
 <p>The RADEX models have to be available somewhere.
 OR they can be passed as arrays.  If as arrays, the form should be:

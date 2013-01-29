@@ -1,10 +1,5 @@
 import pyspeckit
 
-# Load up the n2hp model
-import pyspeckit.wrappers.n2hp_wrapper
-# replace this with the path to your RADEX model
-pyspeckit.wrappers.n2hp_wrapper.path_to_radex = '/Users/adam/work/n2hp/'
-
 # Load the spectral cube
 spc = pyspeckit.Cube('n2hp_cube.fits')
 
