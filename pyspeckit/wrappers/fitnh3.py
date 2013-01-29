@@ -3,7 +3,8 @@
 NH3 fitter wrapper
 ==================
 
-Wrapper to fit ammonia spectra.  Generates a reasonable guess at the position and velocity using a gaussian fit
+Wrapper to fit ammonia spectra.  Generates a reasonable guess at the position
+and velocity using a gaussian fit
 """
 import pyspeckit
 from matplotlib import pyplot 
@@ -98,6 +99,7 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, *
         sp.xarr.convert_to_unit('km/s',quiet=True)
         sp.specfit.fitter = copy.copy(spectra.specfit.fitter)
         sp.specfit.modelpars = spectra.specfit.modelpars
+        sp.specfit.parinfo = spectra.specfit.parinfo
         sp.specfit.npeaks = spectra.specfit.npeaks
         sp.specfit.fitter.npeaks = spectra.specfit.npeaks
         if spectra.specfit.modelpars is not None:
