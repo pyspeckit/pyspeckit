@@ -97,10 +97,10 @@ class MapPlotter(object):
 
         TODO: Allow mapplot in subfigure
         """
-        self._disconnect() 
-
         if self.figure is None:
             self.figure = matplotlib.pyplot.figure()
+        else:
+            self._disconnect()
 
         self.makeplane(**kwargs)
         if 'estimator' in kwargs:
@@ -228,7 +228,7 @@ class MapPlotter(object):
                     color = 'k'
                     linestyle = 'steps-mid'
                 else:
-                    color = self.overplot.colorcycle.next()
+                    color = self.overplot_colorcycle.next()
                     linestyle = self.overplot_linestyle
                     clear=False
                 rad = ( (self._clickX-clickX)**2 + (self._clickY-clickY)**2 )**0.5
