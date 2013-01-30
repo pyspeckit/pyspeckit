@@ -30,7 +30,7 @@ from pyspeckit.parallel_map import parallel_map
 import types
 import copy
 import itertools
-from pyspeckit import history
+from pyspeckit.spectrum import history
 
 class Cube(spectrum.Spectrum):
 
