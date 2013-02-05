@@ -29,7 +29,7 @@
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
     <link rel="next" title="Examples" href="examples.html" />
-    <link rel="prev" title="Gildas CLASS files" href="classfiles.html" />
+    <link rel="prev" title="GBTIDL FITS files" href="gbtfiles.html" />
      
     <script type="text/javascript">
 
@@ -71,9 +71,12 @@
 <h1>Wrappers<a class="headerlink" href="#wrappers" title="Permalink to this headline">¶</a></h1>
 <p>These are wrappers to simplify some of the more complicated (and even some of
 the simpler) functions in PySpecKit</p>
-<span class="target" id="module-pyspeckit.wrappers"></span><span class="target" id="module-pyspeckit.wrappers.cube_fit"></span><dl class="function">
+<span class="target" id="module-pyspeckit.wrappers"></span><span class="target" id="module-pyspeckit.wrappers.cube_fit"></span><div class="section" id="cube-fitting">
+<h2>Cube Fitting<a class="headerlink" href="#cube-fitting" title="Permalink to this headline">¶</a></h2>
+<p>Complicated code for fitting of a whole data cube, pixel-by-pixel</p>
+<dl class="function">
 <dt id="pyspeckit.wrappers.cube_fit.cube_fit">
-<tt class="descclassname">pyspeckit.wrappers.cube_fit.</tt><tt class="descname">cube_fit</tt><big>(</big><em>cubefilename</em>, <em>outfilename</em>, <em>errfilename=None</em>, <em>scale_keyword=None</em>, <em>vheight=False</em>, <em>verbose=False</em>, <em>signal_cut=3</em>, <em>verbose_level=2</em>, <em>clobber=True</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/cube_fit.py#L14" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/cube_fit.py#cl-14" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.cube_fit.cube_fit" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.wrappers.cube_fit.</tt><tt class="descname">cube_fit</tt><big>(</big><em>cubefilename</em>, <em>outfilename</em>, <em>errfilename=None</em>, <em>scale_keyword=None</em>, <em>vheight=False</em>, <em>verbose=False</em>, <em>signal_cut=3</em>, <em>verbose_level=2</em>, <em>clobber=True</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/cube_fit.py#L15" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/cube_fit.py#cl-15" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.cube_fit.cube_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Light-weight wrapper for cube fitting</p>
 <p>Takes a cube and error map (error will be computed naively if not given)
 and computes moments then fits for each spectrum in the cube.  It then
@@ -93,34 +96,49 @@ header will look like</p>
 <span class="n">CRPIX3</span>  <span class="o">=</span> <span class="mi">1</span>
 </pre></div>
 </div>
-<p>Parameters:</p>
-<dl class="docutils">
-<dt><em>errfilename</em> [ None | string name of .fits file ]</dt>
-<dd>A two-dimensional error map to use for computing signal-to-noise cuts</dd>
-<dt><em>scale_keyword</em> [ None | Char ]</dt>
-<dd>Keyword to pass to the data cube loader - multiplies cube by the number
-indexed by this header kwarg if it exists.  e.g., if your cube is in
-T_A units and you want T_A*</dd>
-<dt><em>vheight</em> [ bool ]</dt>
-<dd>Is there a background to be fit?  Used in moment computation</dd>
-</dl>
-<p><em>verbose</em> [ bool ] 
-<em>verbose_level</em> [ int ]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>errfilename: [ None | string name of .fits file ]</strong> :</p>
 <blockquote>
-<div>How loud will the fitting procedure be?  Passed to momenteach and fiteach</div></blockquote>
-<dl class="docutils">
-<dt><em>signal_cut</em> [ float ] </dt>
-<dd>Signal-to-Noise ratio minimum.  Spectra with a peak below this S/N ratio
-will not be fit and will be left blank in the output fit parameter cube</dd>
-<dt><em>clobber</em> [ bool ] </dt>
-<dd>Overwrite parameter .fits cube if it exists?</dd>
-</dl>
-<p><tt class="xref py py-obj docutils literal"><span class="pre">kwargs</span></tt> are passed to pyspeckit.Spectrum.specfit</p>
+<div><p>A two-dimensional error map to use for computing signal-to-noise cuts</p>
+</div></blockquote>
+<p><strong>scale_keyword: [ None | Char ]</strong> :</p>
+<blockquote>
+<div><p>Keyword to pass to the data cube loader - multiplies cube by the number
+indexed by this header kwarg if it exists.  e.g., if your cube is in
+T_A units and you want T_A*</p>
+</div></blockquote>
+<p><strong>vheight: [ bool ]</strong> :</p>
+<blockquote>
+<div><p>Is there a background to be fit?  Used in moment computation</p>
+</div></blockquote>
+<p><strong>verbose: [ bool ]</strong> :</p>
+<p><strong>verbose_level: [ int ]</strong> :</p>
+<blockquote>
+<div><p>How loud will the fitting procedure be?  Passed to momenteach and fiteach</p>
+</div></blockquote>
+<p><strong>signal_cut: [ float ]</strong> :</p>
+<blockquote>
+<div><p>Signal-to-Noise ratio minimum.  Spectra with a peak below this S/N ratio
+will not be fit and will be left blank in the output fit parameter cube</p>
+</div></blockquote>
+<p><strong>clobber: [ bool ]</strong> :</p>
+<blockquote>
+<div><p>Overwrite parameter .fits cube if it exists?</p>
+</div></blockquote>
+<p class="last"><strong>`kwargs` are passed to :class:`pyspeckit.Spectrum.specfit`</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
+</div>
 <span class="target" id="module-pyspeckit.wrappers.fit_gaussians_to_simple_spectra"></span><dl class="function">
 <dt id="pyspeckit.wrappers.fit_gaussians_to_simple_spectra.fit_gaussians_to_simple_spectra">
-<tt class="descclassname">pyspeckit.wrappers.fit_gaussians_to_simple_spectra.</tt><tt class="descname">fit_gaussians_to_simple_spectra</tt><big>(</big><em>filename</em>, <em>units='km/s'</em>, <em>doplot=True</em>, <em>baseline=True</em>, <em>plotresiduals=False</em>, <em>figuresavename=None</em>, <em>croprange=None</em>, <em>savename=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fit_gaussians_to_simple_spectra.py#L8" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fit_gaussians_to_simple_spectra.py#cl-8" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fit_gaussians_to_simple_spectra.fit_gaussians_to_simple_spectra" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.wrappers.fit_gaussians_to_simple_spectra.</tt><tt class="descname">fit_gaussians_to_simple_spectra</tt><big>(</big><em>filename</em>, <em>units='km/s'</em>, <em>doplot=True</em>, <em>baseline=True</em>, <em>plotresiduals=False</em>, <em>figuresavename=None</em>, <em>croprange=None</em>, <em>savename=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fit_gaussians_to_simple_spectra.py#L8" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fit_gaussians_to_simple_spectra.py#cl-8" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fit_gaussians_to_simple_spectra.fit_gaussians_to_simple_spectra" title="Permalink to this definition">¶</a></dt>
 <dd><p>As stated in the name title, will fit Gaussians to simple spectra!</p>
 <p>kwargs will be passed to specfit</p>
 <dl class="docutils">
@@ -136,23 +154,43 @@ will not be fit and will be left blank in the output fit parameter cube</dd>
 <div>python fit_gaussians_to_simple_spectra.py spectrum.fits</div></blockquote>
 </dd></dl>
 
-<span class="target" id="module-pyspeckit.wrappers.fitnh3"></span><p>Wrapper to fit ammonia spectra.  Generates a reasonable guess at the position and velocity using a gaussian fit</p>
+<span class="target" id="module-pyspeckit.wrappers.fitnh3"></span><div class="section" id="nh3-fitter-wrapper">
+<h2>NH3 fitter wrapper<a class="headerlink" href="#nh3-fitter-wrapper" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper to fit ammonia spectra.  Generates a reasonable guess at the position
+and velocity using a gaussian fit</p>
+<p>Example use:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pyspeckit</span>
+<span class="n">sp11</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;spec.nh3_11.dat&#39;</span><span class="p">,</span> <span class="n">errorcol</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
+<span class="n">sp22</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;spec.nh3_22.dat&#39;</span><span class="p">,</span> <span class="n">errorcol</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
+<span class="n">sp33</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;spec.nh3_33.dat&#39;</span><span class="p">,</span> <span class="n">errorcol</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
+<span class="n">sp11</span><span class="o">.</span><span class="n">xarr</span><span class="o">.</span><span class="n">refX</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ammonia</span><span class="o">.</span><span class="n">freq_dict</span><span class="p">[</span><span class="s">&#39;oneone&#39;</span><span class="p">]</span>
+<span class="n">sp22</span><span class="o">.</span><span class="n">xarr</span><span class="o">.</span><span class="n">refX</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ammonia</span><span class="o">.</span><span class="n">freq_dict</span><span class="p">[</span><span class="s">&#39;twotwo&#39;</span><span class="p">]</span>
+<span class="n">sp33</span><span class="o">.</span><span class="n">xarr</span><span class="o">.</span><span class="n">refX</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ammonia</span><span class="o">.</span><span class="n">freq_dict</span><span class="p">[</span><span class="s">&#39;threethree&#39;</span><span class="p">]</span>
+<span class="n">input_dict</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;oneone&#39;</span><span class="p">:</span><span class="n">sp11</span><span class="p">,</span><span class="s">&#39;twotwo&#39;</span><span class="p">:</span><span class="n">sp22</span><span class="p">,</span><span class="s">&#39;threethree&#39;</span><span class="p">:</span><span class="n">sp33</span><span class="p">}</span>
+<span class="n">spf</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">wrappers</span><span class="o">.</span><span class="n">fitnh3</span><span class="o">.</span><span class="n">fitnh3tkin</span><span class="p">(</span><span class="n">input_dict</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="function">
 <dt id="pyspeckit.wrappers.fitnh3.BigSpectrum_to_NH3dict">
-<tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">BigSpectrum_to_NH3dict</tt><big>(</big><em>sp</em>, <em>vrange=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L154" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-154" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.BigSpectrum_to_NH3dict" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">BigSpectrum_to_NH3dict</tt><big>(</big><em>sp</em>, <em>vrange=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L171" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-171" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.BigSpectrum_to_NH3dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>A rather complicated way to make the spdicts above given a spectrum...</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="pyspeckit.wrappers.fitnh3.fitnh3">
+<tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">fitnh3</tt><big>(</big><em>spectrum, vrange=[-100, 100], vrangeunits='km/s', quiet=False, Tex=20, Tkin=15, column=1000000000000000.0, fortho=1.0, tau=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L153" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-153" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.fitnh3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="pyspeckit.wrappers.fitnh3.fitnh3tkin">
-<tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">fitnh3tkin</tt><big>(</big><em>input_dict</em>, <em>dobaseline=True</em>, <em>baselinekwargs={}</em>, <em>crop=False</em>, <em>guessline='twotwo'</em>, <em>tex=15</em>, <em>tkin=20</em>, <em>column=15.0</em>, <em>fortho=0.66</em>, <em>tau=None</em>, <em>thin=False</em>, <em>quiet=False</em>, <em>doplot=True</em>, <em>fignum=1</em>, <em>guessfignum=2</em>, <em>smooth=False</em>, <em>scale_keyword=None</em>, <em>rebase=False</em>, <em>npeaks=1</em>, <em>guesses=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L18" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-18" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.fitnh3tkin" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">fitnh3tkin</tt><big>(</big><em>input_dict</em>, <em>dobaseline=True</em>, <em>baselinekwargs={}</em>, <em>crop=False</em>, <em>guessline='twotwo'</em>, <em>tex=15</em>, <em>tkin=20</em>, <em>column=15.0</em>, <em>fortho=0.66</em>, <em>tau=None</em>, <em>thin=False</em>, <em>quiet=False</em>, <em>doplot=True</em>, <em>fignum=1</em>, <em>guessfignum=2</em>, <em>smooth=False</em>, <em>scale_keyword=None</em>, <em>rebase=False</em>, <em>npeaks=1</em>, <em>guesses=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L34" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-34" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.fitnh3tkin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a dictionary of filenames and lines, fit them together
 e.g. {&#8216;oneone&#8217;:&#8217;G000.000+00.000_nh3_11.fits&#8217;}</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspeckit.wrappers.fitnh3.plot_nh3">
-<tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">plot_nh3</tt><big>(</big><em>spdict</em>, <em>spectra</em>, <em>fignum=1</em>, <em>show_components=False</em>, <em>residfignum=None</em>, <em>**plotkwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L83" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-83" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.plot_nh3" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">plot_nh3</tt><big>(</big><em>spdict</em>, <em>spectra</em>, <em>fignum=1</em>, <em>show_components=False</em>, <em>residfignum=None</em>, <em>**plotkwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L99" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-99" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.plot_nh3" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the results from a multi-nh3 fit</p>
 <dl class="docutils">
 <dt>spdict needs to be dictionary with form:</dt>
@@ -164,21 +202,37 @@ etc.</dd>
 
 <dl class="function">
 <dt id="pyspeckit.wrappers.fitnh3.plotter_override">
-<tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">plotter_override</tt><big>(</big><em>sp</em>, <em>vrange=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L189" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-189" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.plotter_override" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">plotter_override</tt><big>(</big><em>sp</em>, <em>vrange=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L206" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-206" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.plotter_override" title="Permalink to this definition">¶</a></dt>
 <dd><p>Do plot_nh3 with syntax similar to plotter()</p>
 </dd></dl>
 
+</div>
 <span class="target" id="module-pyspeckit.wrappers.n2hp_wrapper"></span><div class="section" id="n2h-fitter-wrapper">
 <h2>N2H+ fitter wrapper<a class="headerlink" href="#n2h-fitter-wrapper" title="Permalink to this headline">¶</a></h2>
-<p>Wrapper to fit N2H+ using RADEX models.  This is meant to be used from the command line, e.g.:</p>
-<blockquote>
-<div>python n2hp_wrapper.py file.fits</div></blockquote>
-<p>and therefore has no independently defined functions.</p>
+<p>Wrapper to fit N2H+ using RADEX models.  This is meant to be used from the command line, e.g.</p>
+<div class="highlight-python"><pre>python n2hp_wrapper.py file.fits</pre>
 </div>
+<p>and therefore has no independently defined functions.</p>
+<dl class="function">
+<dt id="pyspeckit.wrappers.n2hp_wrapper.make_n2hp_fitter">
+<tt class="descclassname">pyspeckit.wrappers.n2hp_wrapper.</tt><tt class="descname">make_n2hp_fitter</tt><big>(</big><em>path_to_radex='/Users/adam/work/n2hp/'</em>, <em>fileprefix='1-2_T=5to55_lvg'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/n2hp_wrapper.py#L20" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/n2hp_wrapper.py#cl-20" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.n2hp_wrapper.make_n2hp_fitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a n2hp fitter using RADEX data cubes.  The following files must exist:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">path_to_radex</span><span class="o">+</span><span class="n">fileprefix</span><span class="o">+</span><span class="s">&#39;_tex1.fits&#39;</span>
+<span class="n">path_to_radex</span><span class="o">+</span><span class="n">fileprefix</span><span class="o">+</span><span class="s">&#39;_tau1.fits&#39;</span>
+<span class="n">path_to_radex</span><span class="o">+</span><span class="n">fileprefix</span><span class="o">+</span><span class="s">&#39;_tex2.fits&#39;</span>
+<span class="n">path_to_radex</span><span class="o">+</span><span class="n">fileprefix</span><span class="o">+</span><span class="s">&#39;_tau2.fits&#39;</span>
+</pre></div>
+</div>
+<p>e.g. <tt class="xref py py-obj docutils literal"><span class="pre">/Users/adam/work/n2hp/1-2_T=5to55_lvg_tau1.fits</span></tt></p>
+</dd></dl>
+
+</div>
+<div class="section" id="n2h-extras">
+<h2>N2H+ extras<a class="headerlink" href="#n2h-extras" title="Permalink to this headline">¶</a></h2>
 <p>In place of the actual contents of N2H+ fitter, here are the modules used to make the wrapper</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel">
-<tt class="descclassname">model.</tt><tt class="descname">SpectralModel</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models.py#L22" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models.py#cl-22" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">model.</tt><tt class="descname">SpectralModel</tt><big>(</big><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models.py#L22" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models.py#cl-22" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper class for a spectra model.  Includes internal functions to
 generate multi-component models, annotations, integrals, and individual
 components.  The declaration can be complex, since you should name
@@ -189,7 +243,7 @@ of the hyperfine codes (hcn, n2hp) for examples.</p>
 
 <dl class="staticmethod">
 <dt id="pyspeckit.spectrum.models.n2hp.n2hp_radex">
-<em class="property">static </em><tt class="descclassname">n2hp.</tt><tt class="descname">n2hp_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models.py#L124" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[edit on github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models.py#cl-124" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[edit on bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.n2hp_radex" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><tt class="descclassname">n2hp.</tt><tt class="descname">n2hp_radex</tt><big>(</big><em>xarr</em>, <em>density=4</em>, <em>column=13</em>, <em>xoff_v=0.0</em>, <em>width=1.0</em>, <em>grid_vwidth=1.0</em>, <em>grid_vwidth_scale=False</em>, <em>texgrid=None</em>, <em>taugrid=None</em>, <em>hdr=None</em>, <em>path_to_texgrid=''</em>, <em>path_to_taugrid=''</em>, <em>temperature_gridnumber=3</em>, <em>debug=False</em>, <em>verbose=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models.py#L125" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models.py#cl-125" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.n2hp.n2hp_radex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a grid of RADEX-computed models to make a model line spectrum</p>
 <p>The RADEX models have to be available somewhere.
 OR they can be passed as arrays.  If as arrays, the form should be:
@@ -204,6 +258,7 @@ Draine 2011 textbook pgs 219-230)</dd>
 <p>grid_vwidth_scale is True or False: False for LVG, True for Sphere</p>
 </dd></dl>
 
+</div>
 </div>
 <div class="section">
 <a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/wrappers.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></div>
@@ -224,7 +279,10 @@ Draine 2011 textbook pgs 219-230)</dd>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">High-Level Wrappers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#cube-fitting">Cube Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nh3-fitter-wrapper">NH3 fitter wrapper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#n2h-fitter-wrapper">N2H+ fitter wrapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#n2h-extras">N2H+ extras</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
@@ -254,7 +312,7 @@ Draine 2011 textbook pgs 219-230)</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Dec 23, 2012.
+      Last updated on Jan 29, 2013.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

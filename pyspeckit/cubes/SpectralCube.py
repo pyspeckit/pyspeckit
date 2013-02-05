@@ -27,10 +27,10 @@ import readers
 import time
 import numpy as np
 from pyspeckit.parallel_map import parallel_map
-import multiprocessing
 import types
 import copy
 import itertools
+from pyspeckit.spectrum import history
 
 class Cube(spectrum.Spectrum):
 
@@ -690,6 +690,44 @@ class Cube(spectrum.Spectrum):
         self.specfit.fittype = sp.specfit.fittype
         self.specfit.parinfo = sp.specfit.parinfo
 
+    try:
+        import cubes
+        def smooth(self,smooth,**kwargs):
+            """
+            Smooth the spectrum by factor `smooth`.  
+
+            Documentation from the :mod:`cubes.spectral_smooth` module:
+
+            """
+            import cubes
+
+            smooth = round(smooth)
+            self.cube = cubes.spectral_smooth(self.cube,smooth,**kwargs)
+            self.xarr = self.xarr[::smooth]
+            if hasattr(self,'data'):
+                self.data = pyspeckit.smooth.smooth(self.data,smooth,**kwargs)
+            if len(self.xarr) != self.cube.shape[0]:
+                raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
+            if self.errorcube is not None:
+                self.errorcube = cubes.spectral_smooth(self.errorcube,smooth,**kwargs)
+        
+            self._smooth_header(smooth)
+        __doc__ += "cubes.spectral_smooth doc: \n" + cubes.spectral_smooth.__doc__
+    except ImportError:
+        def smooth(self):
+            raise ImportError("Can't import cubes: required for cube spectral smoothing")
+
+    def _smooth_header(self,smooth):
+        """
+        Internal - correct the FITS header parameters when smoothing
+        """
+        if self.header.get('CDELT3') is not None and self.header.get('CRPIX3') is not None:
+            self.header.update('CDELT3',self.header.get('CDELT3') * float(smooth))
+            self.header.update('CRPIX3',self.header.get('CRPIX3') / float(smooth))
+
+            history.write_history(self.header,"SMOOTH: Smoothed and downsampled spectrum by factor %i" % (smooth))
+            history.write_history(self.header,"SMOOTH: Changed CRPIX3 from %f to %f" % (self.header.get('CRPIX3')*float(smooth),self.header.get('CRPIX3')))
+            history.write_history(self.header,"SMOOTH: Changed CDELT3 from %f to %f" % (self.header.get('CRPIX3')/float(smooth),self.header.get('CRPIX3')))
 
 class CubeStack(Cube):
     """

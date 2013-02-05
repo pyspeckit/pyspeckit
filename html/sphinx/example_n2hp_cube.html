@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Radio Fitting: NH3 example &mdash; pyspeckit 0.1.10 documentation</title>
+    <title>Radio Fitting: N2H+ cube example &mdash; pyspeckit 0.1.10 documentation</title>
     
     <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -29,8 +29,8 @@
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
     <link rel="up" title="Examples" href="examples.html" />
-    <link rel="next" title="Radio Fitting: NH3 CUBE example" href="example_nh3_cube.html" />
-    <link rel="prev" title="Radio Fitting: H2CO RADEX example" href="example_h2co.html" />
+    <link rel="next" title="Simple Radio Fitting: HCO+ example" href="example_hcop.html" />
+    <link rel="prev" title="Radio Fitting: N2H+ example" href="example_n2hp.html" />
      
     <script type="text/javascript">
 
@@ -68,37 +68,55 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="radio-fitting-nh3-example">
-<h1>Radio Fitting: NH<sub>3</sub> example<a class="headerlink" href="#radio-fitting-nh3-example" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="radio-fitting-n2h-cube-example">
+<h1>Radio Fitting: N<sub>2</sub>H+ cube example<a class="headerlink" href="#radio-fitting-n2h-cube-example" title="Permalink to this headline">¶</a></h1>
+<p>Example hyperfine line fitting of a data cube for the N<sub>2</sub>H+ 1-0 line.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pyspeckit</span>
 
-<span class="c"># The ammonia fitting wrapper requires a dictionary specifying the transition name</span>
-<span class="c"># (one of the four specified below) and the filename.  Alternately, you can have the</span>
-<span class="c"># dictionary values be pre-loaded Spectrum instances</span>
-<span class="n">filenames</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;oneone&#39;</span><span class="p">:</span><span class="s">&#39;G032.751-00.071_nh3_11_Tastar.fits&#39;</span><span class="p">,</span>
-    <span class="s">&#39;twotwo&#39;</span><span class="p">:</span><span class="s">&#39;G032.751-00.071_nh3_22_Tastar.fits&#39;</span><span class="p">,</span>
-    <span class="s">&#39;threethree&#39;</span><span class="p">:</span><span class="s">&#39;G032.751-00.071_nh3_33_Tastar.fits&#39;</span><span class="p">,</span>
-    <span class="s">&#39;fourfour&#39;</span><span class="p">:</span><span class="s">&#39;G032.751-00.071_nh3_44_Tastar.fits&#39;</span><span class="p">}</span>
+<span class="c"># Load the spectral cube</span>
+<span class="n">spc</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Cube</span><span class="p">(</span><span class="s">&#39;n2hp_cube.fits&#39;</span><span class="p">)</span>
 
-<span class="c"># Fit the ammonia spectrum with some reasonable initial guesses.  It is</span>
-<span class="c"># important to crop out extraneous junk and to smooth the data to make the</span>
-<span class="c"># fit proceed at a reasonable pace.</span>
-<span class="n">spdict1</span><span class="p">,</span><span class="n">spectra1</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">wrappers</span><span class="o">.</span><span class="n">fitnh3</span><span class="o">.</span><span class="n">fitnh3tkin</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span><span class="n">crop</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">80</span><span class="p">],</span><span class="n">tkin</span><span class="o">=</span><span class="mf">18.65</span><span class="p">,</span><span class="n">tex</span><span class="o">=</span><span class="mf">4.49</span><span class="p">,</span><span class="n">column</span><span class="o">=</span><span class="mf">15.5</span><span class="p">,</span><span class="n">fortho</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">smooth</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="c"># Register the fitter</span>
+<span class="c"># The N2H+ fitter is &#39;built-in&#39; but is not registered by default; this example</span>
+<span class="c"># shows how to register a fitting procedure</span>
+<span class="c"># &#39;multi&#39; indicates that it is possible to fit multiple components and a</span>
+<span class="c"># background will not automatically be fit 4 is the number of parameters in the</span>
+<span class="c"># model (excitation temperature, optical depth, line center, and line width)</span>
+<span class="n">spc</span><span class="o">.</span><span class="n">Registry</span><span class="o">.</span><span class="n">add_fitter</span><span class="p">(</span><span class="s">&#39;n2hp_vtau&#39;</span><span class="p">,</span><span class="n">pyspeckit</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">n2hp</span><span class="o">.</span><span class="n">n2hp_vtau_fitter</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">multisingle</span><span class="o">=</span><span class="s">&#39;multi&#39;</span><span class="p">)</span>
+
+<span class="c"># Run the fitter</span>
+<span class="n">spc</span><span class="o">.</span><span class="n">fiteach</span><span class="p">(</span><span class="n">fittype</span><span class="o">=</span><span class="s">&#39;n2hp_vtau&#39;</span><span class="p">,</span> <span class="n">multifit</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">guesses</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="c"># Tex=5K, tau=0.5, v_center=12, width=1 km/s</span>
+        <span class="p">)</span>
+<span class="c"># There are a huge number of parameters for the fiteach procedure.  See:</span>
+<span class="c"># http://pyspeckit.readthedocs.org/en/latest/example_nh3_cube.html</span>
+<span class="c"># http://pyspeckit.readthedocs.org/en/latest/cubes.html?highlight=fiteach#pyspeckit.cubes.SpectralCube.Cube.fiteach</span>
+<span class="c">#</span>
+<span class="c"># Unfortunately, a complete tutorial on this stuff is on the to-do list;</span>
+<span class="c"># right now the use of many of these parameters is at a research level.</span>
+<span class="c"># However, pyspeckit@gmail.com will support them!  They are being used</span>
+<span class="c"># in current and pending publications</span>
+
+<span class="c"># Show an integrated image</span>
+<span class="n">spc</span><span class="o">.</span><span class="n">mapplot</span><span class="p">()</span>
+
+<span class="c"># plot one of the fitted spectra</span>
+<span class="n">spc</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">plot_fit</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c"># Show an image of the best-fit velocity</span>
+<span class="n">spc</span><span class="o">.</span><span class="n">mapplot</span><span class="o">.</span><span class="n">plane</span> <span class="o">=</span> <span class="n">spc</span><span class="o">.</span><span class="n">parcube</span><span class="p">[</span><span class="mi">2</span><span class="p">,:,:]</span>
+<span class="n">spc</span><span class="o">.</span><span class="n">mapplot</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+<span class="c"># running in script mode, the figures won&#39;t show by default on some systems</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="figure" style="width: 800">
-<img alt="The 2-2 transition is used to guess the central velocity and width via gaussian fitting because its hyperfine lines are weaker" src="_images/nh3_22_velocityguess.png" style="width: 800px;" />
-<p class="caption">The 2-2 transition is used to guess the central velocity and width via gaussian fitting because its hyperfine lines are weaker</p>
-</div>
-<div class="figure" style="width: 800">
-<img alt="Then all 4 lines are simultaneously fit.  Even upper limits on the 4-4 line can provide helpful contraints on the model" src="_images/nh3_multiline_fit.png" style="width: 800px;" />
-<p class="caption">Then all 4 lines are simultaneously fit.  Even upper limits on the 4-4 line can provide helpful contraints on the model</p>
-</div>
 </div>
 <div class="section">
-<a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/example_nh3.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></div>
+<a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/example_n2hp_cube.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></div>
 <div class="section">
-<a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/doc/example_nh3.rst" title="Push the Edit button on the next page"><span class="edit-on-bitbucket">[edit this page on bitbucket]</span></a></div>
+<a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/doc/example_n2hp_cube.rst" title="Push the Edit button on the next page"><span class="edit-on-bitbucket">[edit this page on bitbucket]</span></a></div>
 
 
           </div>
@@ -116,10 +134,10 @@
 <li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="examples.html">Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="example_h2co.html">Radio H2CO</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">Radio NH3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_nh3.html">Radio NH3</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_nh3_cube.html">Radio NH3 cube</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_n2hp.html">Radio N2H+</a></li>
-<li class="toctree-l2"><a class="reference internal" href="example_n2hp_cube.html">Radio N2H+ cube</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Radio N2H+ cube</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_hcop.html">Radio HCO+</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_sdss.html">Optical SDSS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_vega_echelle.html">Optical Vega Echelle</a></li>

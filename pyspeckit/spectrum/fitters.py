@@ -956,6 +956,7 @@ class Specfit(interactive.Interactive):
         """
         if self.model is not None:
             self.model = self.model[::factor]
+        if self.residuals is not None:
             self.residuals = self.residuals[::factor]
         self.spectofit = self.spectofit[::factor]
         self.errspec = self.errspec[::factor]
