@@ -99,6 +99,10 @@ class MapPlotter(object):
         """
         if self.figure is None:
             self.figure = matplotlib.pyplot.figure()
+        else:
+            self._disconnect()
+            self.figure.clf()
+
 
         self.makeplane(**kwargs)
         if 'estimator' in kwargs:
@@ -108,7 +112,6 @@ class MapPlotter(object):
         if vmax is None: vmax = self.plane[self.plane==self.plane].max()
 
         if icanhasaplpy and useaplpy:
-            self.figure.clf()
             self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=self.header)
             self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure,convention=convention)
             self.FITSFigure.show_colorscale(vmin=vmin, vmax=vmax, **kwargs)
@@ -119,12 +122,7 @@ class MapPlotter(object):
                 except Exception as ex:
                     print "ERROR: Could not create colorbar!  Error was %s" % str(ex)
         else:
-            if self.axis is None:
-                self.axis = self.figure.add_subplot(111)
-            else:
-                self._disconnect()
-                self.axis.figure.clf()
-                self.axis = self.figure.add_subplot(111)
+            self.axis = self.figure.add_subplot(111)
             if hasattr(self,'colorbar') and self.colorbar is not None:
                 if self.colorbar.ax in self.axis.figure.axes:
                     self.axis.figure.delaxes(self.colorbar.ax)

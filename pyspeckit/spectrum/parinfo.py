@@ -4,7 +4,17 @@ class ParinfoList(list):
     Store a list of model parameter values and their associated metadata (name,
     error, order, limits, etc.) in a class-friendly manner
     """
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
+        """
+        Create a parinfolist from either a list of parameters
+        or a list or a tuple
+
+        Parameters
+        ----------
+        preserve_order : bool
+            Keep the p['n'] values for each parameter?
+            Default to false, so par #'s will go from 0 to n(pars)-1
+        """
 
         try:
             from lmfit import Parameters
@@ -18,9 +28,12 @@ class ParinfoList(list):
 
         list.__init__(self, *args)
 
-        for ii,pp in enumerate(self):
-            if pp.n != ii:
-                pp.n = ii
+        preserve_order = kwargs.pop('preserve_order',False)
+        # re-order the parameters from 0 to n-1 unless told otherwise
+        if not preserve_order:
+            for ii,pp in enumerate(self):
+                if pp.n != ii:
+                    pp.n = ii
 
         self._check_names()
         self._set_attributes()

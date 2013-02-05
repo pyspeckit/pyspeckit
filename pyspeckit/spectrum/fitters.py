@@ -100,6 +100,7 @@ The default is gaussian ('g'), all options are listed below:
                 )
 
 
+# Declare default registry built in for all spectra
 default_Registry = Registry()
 default_Registry.add_fitter('ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
 default_Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(multisingle='multi'),6,multisingle='multi')

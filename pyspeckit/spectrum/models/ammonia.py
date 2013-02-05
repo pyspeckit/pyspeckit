@@ -264,6 +264,7 @@ class ammonia_model(model.SpectralModel):
         self.modelfunc = ammonia
         self.n_modelfunc = self.n_ammonia
 
+        # for fitting ammonia simultaneously with a flat background
         self.onepeakammonia = fitter.vheightmodel(ammonia)
         #self.onepeakammoniafit = self._fourparfitter(self.onepeakammonia)
 
@@ -393,7 +394,7 @@ class ammonia_model(model.SpectralModel):
             parinfo=None,
             maxpars=(0,0,0,0,0,1), quiet=True, shh=True, veryverbose=False, **kwargs):
         """
-        Fit multiple nh3 profiles
+        Fit multiple nh3 profiles (multiple can be 1)
 
         Inputs:
            xax - x axis
@@ -487,9 +488,10 @@ class ammonia_model(model.SpectralModel):
             # this is OK - not a permanent change
             parnames = [p['parname'] for p in parinfo]
             # not OK self.npars = len(parinfo)/self.npeaks
-            parinfo = ParinfoList([Parinfo(p) for p in parinfo])
+            parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True)
+            #import pdb; pdb.set_trace()
         else: 
-            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo])
+            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True) 
             parinfo_with_fixed = None
             fixed_kwargs = {}
 
@@ -548,10 +550,10 @@ class ammonia_model(model.SpectralModel):
             # ORDER MATTERS!
             for p in parinfo:
                 parinfo_with_fixed[p['n']] = p
-            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo_with_fixed])
+            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo_with_fixed], preserve_order=True)
         else:
             self.parinfo = parinfo
-            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo])
+            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True)
 
         # I don't THINK these are necessary?
         #self.parinfo = parinfo
