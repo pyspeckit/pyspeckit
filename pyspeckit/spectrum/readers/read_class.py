@@ -81,17 +81,21 @@ So...  I guess I have to assume simple fk5, tangent?
 filetype_dict = {'1A  ':'Multiple_IEEE','1   ':'Multiple_Vax','1B  ':'Multiple_EEEI',
     '9A  ':'Single_IEEE','9   ':'Single_Vax','9B  ':'Single_EEEI'}
 
-keys_lengths = { -2: [
-     #( 'NUM'     ,1,'int32'), # Observation number
-     #( 'VER'     ,1,'int32'), # Version number
-     #( 'TELES'   ,3,'|S12') , # Telescope name
-     #( 'DOBS'    ,1,'int32'), # Date of observation
-     #( 'DRED'    ,1,'int32'), # Date of reduction
-     #( 'TYPEC'   ,1,'int32'), # Type of coordinates
-     #( 'KIND'    ,1,'int32'), # Type of data
-     #( 'QUAL'    ,1,'int32'), # Quality of data
-     #( 'SCAN'    ,1,'int32'), # Scan number
-     #( 'SUBSCAN' ,1,'int32'), # Subscan number
+keys_lengths = {
+        'unknown': [
+     ( 'NUM'     ,1,'int32'), # Observation number
+     ( 'VER'     ,1,'int32'), # Version number
+     ( 'TELES'   ,3,'|S12') , # Telescope name
+     ( 'DOBS'    ,1,'int32'), # Date of observation
+     ( 'DRED'    ,1,'int32'), # Date of reduction
+     ( 'TYPEC'   ,1,'int32'), # Type of coordinates
+     ( 'KIND'    ,1,'int32'), # Type of data
+     ( 'QUAL'    ,1,'int32'), # Quality of data
+     ( 'SCAN'    ,1,'int32'), # Scan number
+     ( 'SUBSCAN' ,1,'int32'), # Subscan number
+     ],
+        
+        -2: [ # 10 4-bytes?
      ( 'UT'      ,2,'float64'), #  rad UT of observation
      ( 'ST'      ,2,'float64'), #  rad LST of observation
      ( 'AZ'      ,1,'float32'), #  rad Azimuth
@@ -101,7 +105,7 @@ keys_lengths = { -2: [
      ( 'TIME'    ,1,'float32'), #    s Integration time
      ( 'XUNIT'   ,1,'int32'),   # code X unit (if xcoord_sec is present)
      ] ,
-     'POSITION': [
+     'POSITION': [ # 11 4-bytes
     ('SOURC',3,'|S12')  , #  [ ] Source name
     ('EPOCH',1,'float32'), #  [ ] Epoch of coordinates
     ('LAM'  ,2,'float64'), #[rad] Lambda
@@ -263,7 +267,7 @@ def _read_obshead(f,verbose=False):
 
 
 @print_timing
-def read_class(filename,  DEBUG=False):
+def read_class(filename,  DEBUG=False, apex=False):
     """
     A hacked-together method to read a binary CLASS file.  It is strongly dependent on the incomplete
     `GILDAS CLASS file type Specification <http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html>`_
@@ -310,17 +314,18 @@ def read_class(filename,  DEBUG=False):
             f.seek(startpos)
             x = numpy.fromfile(f,count=128/4,dtype='int32')
             skipcount = 0
-            while (x==0).all():
+            while (x==0).all() and len(x)!=0:
                 skipcount += 1
                 pos = f.tell()
                 x = numpy.fromfile(f,count=128/4,dtype='int32')
             f.seek(pos)
-            if DEBUG: print "Loop %i: Skipped %i entries starting at %i" % (jj, skipcount, startpos)
+            if DEBUG: print "Loop %i: Skipped %i entries starting at %i.  pos=%i" % (jj, skipcount, startpos, pos)
             if jj >= filelen/128:
                 raise Exception("Infinite Loop")
             continue
         elif IDcode.strip() != '2':
             f.seek(startpos)
+            if DEBUG: print "IDCODE = ",IDcode," at pos ",startpos
             index = _read_index(f)
             if index['XLINE']: #numpy.any([L in index['XLINE'] for L in line]):
                 if DEBUG: print "Found an index at %i: " % startpos,index
@@ -334,7 +339,9 @@ def read_class(filename,  DEBUG=False):
             obsnum,obshead = _read_obshead(f,verbose=DEBUG)
         pos = f.tell()
         if DEBUG:
-            print " UNCLEAR INFO AT %i PAST %i:" % (f.tell()-startpos,startpos),f.read(168) 
+            print " UNCLEAR INFO AT %i PAST %i:" % (f.tell()-startpos,startpos)
+            junk =  f.read(168) 
+            print junk
             f.seek(pos)
             #f.seek(startpos)
             #print numpy.fromfile(f,count=168/4+10,dtype='int32') 
@@ -344,13 +351,23 @@ def read_class(filename,  DEBUG=False):
             #print numpy.fromfile(f,count=168+40,dtype='int8') 
         f.seek(pos+84+12*4)
         Header2 = _read_header(f,type=-2)
-        if f.tell() != pos + 168:
-            #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
-            f.seek(pos+168)
+        if filetype.strip() == '9A':
+            if f.tell() != pos + 156:
+                #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
+                f.seek(pos+156)
+        else:
+            if f.tell() != pos + 168:
+                #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
+                f.seek(pos+168)
         Header3 = _read_header(f,type='POSITION')
         Header4 = _read_header(f,type='SPECTRO')
         if DEBUG: print "Line %i (byte %i) - OBSERVATION %i (%i): %s, %s" % (f.tell(),(f.tell()-startpos)/4,obsnum,spcount,Header3['SOURC'],Header4['LINE']),
         Header14 = _read_header(f,type='CALIBRATION')
+        if DEBUG: print "\nLine %i (byte %i) - CALIBRATION:" % (f.tell(),(f.tell()-startpos)/4)
+
+        # purely empirical; NO idea why 
+        if apex:
+            f.seek(238*4+f.tell())
 
         hdr = Header3
         hdr.update(Header2)
@@ -380,8 +397,11 @@ def read_class(filename,  DEBUG=False):
         header.append( hdr )
         if f.tell() % 128 != 0:
             discard = f.read(128-f.tell()%128)
+            if DEBUG > 3: 
+                print "DISCARD: ",discard," POSITION: ",f.tell()
             #raise ValueError("Bad position : %i "%f.tell())
         #f.seek((f.tell()/nchan + 1)*nchan)
+        if DEBUG: print "Continuing to sp# ",spcount+1," starting at ",f.tell()," out of ",filelen
 
     f.close()
     return spectra,header,indexes
@@ -413,7 +433,7 @@ def make_axis(header,imagfreq=False):
     
 import pyspeckit
 @print_timing
-def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=False):
+def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=False, **kwargs):
     """
     Load an entire CLASS observing session into a list of ObsBlocks based on
     matches to the 'telescope', 'line' and 'source' names
@@ -431,7 +451,7 @@ def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=
     imagfreq : bool
         Create a SpectroscopicAxis with the image frequency.
     """
-    spectra,header,indexes = read_class(filename,DEBUG=DEBUG)
+    spectra,header,indexes = read_class(filename,DEBUG=DEBUG, **kwargs)
 
 
     obslist = []
@@ -480,12 +500,12 @@ def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=
     return obslist
 
 @print_timing
-def class_to_spectra(filename):
+def class_to_spectra(filename, **kwargs):
     """
     Load each individual spectrum within a CLASS file into a list of Spectrum
     objects
     """
-    spectra,header,indexes = read_class(filename)
+    spectra,header,indexes = read_class(filename, **kwargs)
 
     spectrumlist = []
     for sp,hdr,ind in zip(spectra,header,indexes):
