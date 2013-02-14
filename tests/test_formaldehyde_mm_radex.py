@@ -26,7 +26,7 @@ hdrb = pyfits.getheader('/Users/adam/work/h2co/radex/thermom/303-202_322-221_tem
 # and annotations
 # all of the parameters after the first are passed to the model function 
 formaldehyde_radex_fitter_b = models.model.SpectralModel(
-        models.formaldehyde_mm.formaldehyde_mm_radex, 4,
+        models.formaldehyde_mm.formaldehyde_mm_radex, 5,
         parnames=['temperature','column','density','center','width'], 
         parvalues=[50,12,4.5,0,1],
         parlimited=[(True,True), (True,True), (True,True), (False,False), (True,False)], 
@@ -41,7 +41,7 @@ formaldehyde_radex_fitter_b = models.model.SpectralModel(
         )
 
 formaldehyde_radex_fitter = models.model.SpectralModel(
-        models.formaldehyde_mm.formaldehyde_mm_radex, 4,
+        models.formaldehyde_mm.formaldehyde_mm_radex, 5,
         parnames=['temperature','column','density','center','width'], 
         parvalues=[50,12,4.5,0,1],
         parlimited=[(True,True), (True,True), (True,True), (False,False), (True,False)], 
@@ -76,10 +76,9 @@ if __name__ == "__main__":
     import optparse
     parser=optparse.OptionParser()
     parser.add_option("--scalekeyword",help="Scale the data before fitting?",default='ETAMB')
-    parser.add_option("--vmin",help="Mininum velocity to include",default=-50)
-    parser.add_option("--vmax",help="Maximum velocity to include",default=50)
-    parser.add_option("--vguess",help="Velocity guess",default=3.75)
+    parser.add_option("--vguess",help="Velocity guess",default=0.0)
     parser.add_option("--smooth6cm",help="Smooth the 6cm spectrum",default=3)
+    parser.add_option("--pymc",help="pymc?",default=False)
 
     options,args = parser.parse_args()
 
@@ -96,10 +95,30 @@ if __name__ == "__main__":
     sp.Registry.add_fitter('formaldehyde_mm_radex_both',
             formaldehyde_radex_fitter_both,5,multisingle='multi',            )
 
-    sp.plotter(figure=1)
-    sp.specfit(fittype='formaldehyde_mm_radex',multifit=True,guesses=[50,12,4.5,0,3.0],quiet=False,)
-    sp.plotter(figure=2)
-    sp.specfit(fittype='formaldehyde_mm_radex_b',multifit=True,guesses=[50,12,4.5,0,3.0],quiet=False,)
-    sp.plotter(figure=3)
-    sp.specfit(fittype='formaldehyde_mm_radex_both',multifit=True,guesses=[50,12,4.5,0,3.0],quiet=False,)
+    sp1 = sp.copy()
+    sp2 = sp.copy()
+    sp3 = sp.copy()
+    sp1.plotter(figure=1)
+    sp1.specfit(fittype='formaldehyde_mm_radex',multifit=True,guesses=[100,13.2,4.5,options.vguess,7.0],
+            limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)], limited=[(True,True)]*5, 
+            fixed=[False,False,True,False,False], quiet=False,)
+    sp2.plotter(figure=2)
+    sp2.specfit(fittype='formaldehyde_mm_radex_b',multifit=True,guesses=[100,13.2,4.5,options.vguess,7.0],
+            limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)], limited=[(True,True)]*5, 
+            fixed=[False,False,True,False,False], quiet=False,)
+    sp3.plotter(figure=3)
+    sp3.specfit(fittype='formaldehyde_mm_radex_both',multifit=True,guesses=[100,13.2,4.5,options.vguess,7.0],
+            limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)], limited=[(True,True)]*5, 
+            fixed=[False,False,False,False,False], quiet=False,)
+    sp3.specfit.parinfo.TEMPERATURE0.error=50
+    sp3.specfit.parinfo.COLUMN0.error=2
+    sp3.specfit.parinfo.DENSITY0.error=2
+    sp3.specfit.parinfo.WIDTH0.fixed=True
+    sp3.specfit.parinfo.CENTER0.fixed=True
+
+    if options.pymc:
+        spmc = sp3.specfit.get_pymc(use_fitted_values=True)
+        spmc.sample(10000)
+        import agpy
+        agpy.pymc_plotting.hist2d(spmc, 'TEMPERATURE0', 'DENSITY0', doerrellipse=False, clear=True, fignum=4)
 
