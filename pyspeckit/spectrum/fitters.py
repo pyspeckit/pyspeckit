@@ -716,10 +716,27 @@ class Specfit(interactive.Interactive):
             return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr)
         else:
             return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
+
+    def plot_model(self, pars, offset=0.0, annotate=False, clear=False, **kwargs):
+        """
+        Plot a model from specified input parameters
+        (see plot_fit for kwarg specification)
+
+        annotate is set to "false" because arbitrary annotations are not yet implemented
+        """
+
+        # really, plot_fit should be thin on top of plot_model, but that's
+        # not how I wrote it, so it will have to wait for a refactor
+
+        if clear: self.clear()
+        
+        return self.plot_fit(pars=pars, offset=offset, annotate=False, **kwargs)
+        
+
                 
     def plot_fit(self, annotate=None, show_components=None,
             composite_fit_color='red',  lw=0.5,
-            composite_lw=0.75, 
+            composite_lw=0.75, pars=None, offset=None,
             use_window_limits=None, show_hyperfine_components=None, **kwargs):
         """
         Plot the fit.  Must have fitted something before calling this!  
@@ -728,22 +745,54 @@ class Specfit(interactive.Interactive):
         axis for plotting exists)
 
         kwargs are passed to the fitter's components attribute
+
+        Parameters
+        ----------
+        annotate : None or bool
+            Annotate the plot?  If not specified, defaults to self.autoannotate
+        show_components : None or bool
+        show_hyperfine_components : None or bool
+            Show the individual gaussian components overlaid on the composite fit
+        use_window_limits : None or bool
+            If False, will reset the window to include the whole spectrum.  If
+            True, leaves the window as is.  Defaults to self.use_window_limits
+            if None.
+        pars : parinfo 
+            A parinfo structure or list of model parameters.  If none, uses
+            best-fit
+        offset : None or float
+            Y-offset. If none, uses the default self.Spectrum.plotter offset, otherwise,
+            uses the specified float.
         """
         #if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
         #    # don't display baseline if it's included in the fit
         #    plot_offset = self.Spectrum.plotter.offset+(self.Spectrum.baseline.basespec * (True-self.vheight))
         #else:
-        plot_offset = self.Spectrum.plotter.offset
+        if offset is None:
+            plot_offset = self.Spectrum.plotter.offset
+        else:
+            plot_offset = offset
 
-        self._full_model()
+        if pars is not None:
+            model = self.get_model_frompars(self.Spectrum.xarr, pars)
+        else:
+            self._full_model()
+            model = self.fullmodel
+
+        if 'color' in kwargs:
+            kwargs.pop('color')
+            warn("Instead of color, use composite_fit_color or component_color")
+
         self.modelplot += self.Spectrum.plotter.axis.plot(
                 self.Spectrum.xarr,
-                self.fullmodel + plot_offset,
-                color=composite_fit_color, linewidth=lw)
+                model + plot_offset,
+                color=composite_fit_color, linewidth=lw, 
+                **kwargs)
         
         # Plot components
         if show_components or show_hyperfine_components:
-            self.plot_components(show_hyperfine_components=show_hyperfine_components)
+            self.plot_components(show_hyperfine_components=show_hyperfine_components,
+                    pars=pars, **kwargs)
 
         uwl = use_window_limits if use_window_limits is not None else self.use_window_limits
         plotkwargs = {}
@@ -758,28 +807,31 @@ class Specfit(interactive.Interactive):
             if self.vheight: self.Spectrum.baseline.annotate()
 
     def plot_components(self, show_hyperfine_components=None,
-            component_yoffset=0.0, component_lw=0.75,
+            component_yoffset=0.0, component_lw=0.75, pars=None,
             component_fit_color='blue', component_kwargs={},
-            add_baseline=False): 
+            add_baseline=False, **kwargs): 
         """
         Overplot the individual components of a fit
 
         Parameters
         ----------
-            show_hyperfine_components : None | bool
-                Keyword argument to pass to component codes; determines whether to return
-                individual (e.g., hyperfine) components of a composite model
-            component_yoffset : float
-                Vertical (y-direction) offset to add to the components when plotting
-            component_lw : float
-                Line width of component lines
-            component_fitcolor : color
-                Color of component lines
-            component_kwargs : dict
-                Keyword arguments to pass to the fitter.components method
-            add_baseline : bool
-                Add the fit to the components before plotting.  Makes sense to use
-                if self.Spectrum.baseline.subtracted == False
+        show_hyperfine_components : None | bool
+            Keyword argument to pass to component codes; determines whether to return
+            individual (e.g., hyperfine) components of a composite model
+        component_yoffset : float
+            Vertical (y-direction) offset to add to the components when plotting
+        component_lw : float
+            Line width of component lines
+        component_fitcolor : color
+            Color of component lines
+        component_kwargs : dict
+            Keyword arguments to pass to the fitter.components method
+        add_baseline : bool
+            Add the fit to the components before plotting.  Makes sense to use
+            if self.Spectrum.baseline.subtracted == False
+        pars : parinfo 
+            A parinfo structure or list of model parameters.  If none, uses
+            best-fit
         """
 
         plot_offset = self.Spectrum.plotter.offset
@@ -787,7 +839,11 @@ class Specfit(interactive.Interactive):
         if show_hyperfine_components is not None:
             component_kwargs['return_hyperfine_components'] = show_hyperfine_components
         self._component_kwargs = component_kwargs
-        self.modelcomponents = self.fitter.components(self.Spectrum.xarr, self.modelpars, **component_kwargs)
+
+        if pars is None:
+            pars = self.modelpars
+
+        self.modelcomponents = self.fitter.components(self.Spectrum.xarr, pars, **component_kwargs)
 
         yoffset = plot_offset + component_yoffset
         if add_baseline:
@@ -799,11 +855,11 @@ class Specfit(interactive.Interactive):
                 for d in data:
                     self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
                         d + yoffset,
-                        color=component_fit_color, linewidth=component_lw)
+                        color=component_fit_color, linewidth=component_lw, **kwargs)
             else:
                 self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
                     data + yoffset,
-                    color=component_fit_color, linewidth=component_lw)
+                    color=component_fit_color, linewidth=component_lw, **kwargs)
                 
 
     def fullsizemodel(self):

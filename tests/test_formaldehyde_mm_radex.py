@@ -27,47 +27,47 @@ hdrb = pyfits.getheader('/Users/adam/work/h2co/radex/thermom/303-202_322-221_tem
 # all of the parameters after the first are passed to the model function 
 formaldehyde_radex_fitter_b = models.model.SpectralModel(
         models.formaldehyde_mm.formaldehyde_mm_radex, 4,
-        parnames=['temperature','column','center','width'], 
-        parvalues=[50,12,0,1],
-        parlimited=[(True,True), (True,True), (False,False), (True,False)], 
-        parlimits=[(5,200), (11,16), (0,0), (0,0)],
-        parsteps=[0.01,0.01,0,0],
+        parnames=['temperature','column','density','center','width'], 
+        parvalues=[50,12,4.5,0,1],
+        parlimited=[(True,True), (True,True), (True,True), (False,False), (True,False)], 
+        parlimits=[(5,205), (10,17), (2,7), (0,0), (0,0)],
+        parsteps=[0.01,0.01,0.1,0,0],
         fitunits='Hz',
         texgrid=((218.2,218.3,texgrid1b),(218.4,218.55,texgrid2b)), # specify the frequency range over which the grid is valid (in GHz)
         taugrid=((218.2,218.3,taugrid1b),(218.4,218.55,taugrid2b)),
         hdr=hdrb,
-        shortvarnames=("T","N","v","\\sigma"), # specify the parameter names (TeX is OK)
-        grid_vwidth_scale=False,
+        shortvarnames=("T","N","n","v","\\sigma"), # specify the parameter names (TeX is OK)
+        grid_vwidth=5.0,
         )
 
 formaldehyde_radex_fitter = models.model.SpectralModel(
         models.formaldehyde_mm.formaldehyde_mm_radex, 4,
-        parnames=['temperature','column','center','width'], 
-        parvalues=[50,12,0,1],
-        parlimited=[(True,True), (True,True), (False,False), (True,False)], 
-        parlimits=[(5,200), (11,16), (0,0), (0,0)],
-        parsteps=[0.01,0.01,0,0],
+        parnames=['temperature','column','density','center','width'], 
+        parvalues=[50,12,4.5,0,1],
+        parlimited=[(True,True), (True,True), (True,True), (False,False), (True,False)], 
+        parlimits=[(5,205), (10,17), (2,7), (0,0), (0,0)],
+        parsteps=[0.01,0.01,0.1,0,0],
         fitunits='Hz',
         texgrid=((218.2,218.3,texgrid1),(218.7,218.8,texgrid2)), # specify the frequency range over which the grid is valid (in GHz)
         taugrid=((218.2,218.3,taugrid1),(218.7,218.8,taugrid2)),
         hdr=hdr,
-        shortvarnames=("T","N","v","\\sigma"), # specify the parameter names (TeX is OK)
-        grid_vwidth_scale=False,
+        shortvarnames=("T","N","n","v","\\sigma"), # specify the parameter names (TeX is OK)
+        grid_vwidth=5.0,
         )
 
 formaldehyde_radex_fitter_both = models.model.SpectralModel(
-        models.formaldehyde_mm.formaldehyde_mm_radex, 4,
-        parnames=['temperature','column','center','width'], 
-        parvalues=[50,12,0,1],
-        parlimited=[(True,True), (True,True), (False,False), (True,False)], 
-        parlimits=[(5,200), (11,16), (0,0), (0,0)],
-        parsteps=[0.01,0.01,0,0],
+        models.formaldehyde_mm.formaldehyde_mm_radex, 5,
+        parnames=['temperature','column','density','center','width'], 
+        parvalues=[50,12,4.5,0,1],
+        parlimited=[(True,True), (True,True), (True,True), (False,False), (True,False)], 
+        parlimits=[(5,205), (10,17), (2,7), (0,0), (0,0)],
+        parsteps=[0.01,0.01,0.1,0,0],
         fitunits='Hz',
         texgrid=((218.2,218.3,texgrid1b),(218.4,218.55,texgrid2b),(218.7,218.8,texgrid2)), # specify the frequency range over which the grid is valid (in GHz)
         taugrid=((218.2,218.3,taugrid1b),(218.4,218.55,taugrid2b),(218.7,218.8,taugrid2)),
         hdr=hdrb,
-        shortvarnames=("T","N","v","\\sigma"), # specify the parameter names (TeX is OK)
-        grid_vwidth_scale=False,
+        shortvarnames=("T","N","n","v","\\sigma"), # specify the parameter names (TeX is OK)
+        grid_vwidth=5.0,
         )
 
 
@@ -90,16 +90,16 @@ if __name__ == "__main__":
         sp.error[:] = sp.stats((2.183e2,2.184e2))['std']
 
     sp.Registry.add_fitter('formaldehyde_mm_radex',
-            formaldehyde_radex_fitter,4,multisingle='multi',            )
+            formaldehyde_radex_fitter,5,multisingle='multi',            )
     sp.Registry.add_fitter('formaldehyde_mm_radex_b',
-            formaldehyde_radex_fitter_b,4,multisingle='multi',            )
+            formaldehyde_radex_fitter_b,5,multisingle='multi',            )
     sp.Registry.add_fitter('formaldehyde_mm_radex_both',
-            formaldehyde_radex_fitter_both,4,multisingle='multi',            )
+            formaldehyde_radex_fitter_both,5,multisingle='multi',            )
 
     sp.plotter(figure=1)
-    sp.specfit(fittype='formaldehyde_mm_radex',multifit=True,guesses=[50,12,0,3.0],quiet=False,)
+    sp.specfit(fittype='formaldehyde_mm_radex',multifit=True,guesses=[50,12,4.5,0,3.0],quiet=False,)
     sp.plotter(figure=2)
-    sp.specfit(fittype='formaldehyde_mm_radex_b',multifit=True,guesses=[50,12,0,3.0],quiet=False,)
+    sp.specfit(fittype='formaldehyde_mm_radex_b',multifit=True,guesses=[50,12,4.5,0,3.0],quiet=False,)
     sp.plotter(figure=3)
-    sp.specfit(fittype='formaldehyde_mm_radex_both',multifit=True,guesses=[50,12,0,3.0],quiet=False,)
+    sp.specfit(fittype='formaldehyde_mm_radex_both',multifit=True,guesses=[50,12,4.5,0,3.0],quiet=False,)
 

@@ -61,15 +61,18 @@ formaldehyde_mm_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
 formaldehyde_mm_vtau_fitter = formaldehyde_mm_vtau.fitter
 formaldehyde_mm_vtau_vheight_fitter = formaldehyde_mm_vtau.vheight_fitter
 
-def formaldehyde_mm_radex(xarr, temperature=25, column=13, xoff_v=0.0, width=1.0, 
+def formaldehyde_mm_radex(xarr, 
+        temperature=25,
+        column=13,
+        density=4,
+        xoff_v=0.0,
+        width=1.0, 
         grid_vwidth=1.0,
-        grid_vwidth_scale=False,
         texgrid=None,
         taugrid=None,
         hdr=None,
         path_to_texgrid='',
         path_to_taugrid='',
-        density=4,
         debug=False,
         verbose=False,
         **kwargs):
@@ -90,8 +93,6 @@ def formaldehyde_mm_radex(xarr, temperature=25, column=13, xoff_v=0.0, width=1.0
         the velocity assumed when computing the grid in km/s
         this is important because tau = modeltau / width (see, e.g., 
         Draine 2011 textbook pgs 219-230)
-    grid_vwidth_scale : bool
-        False for LVG, True for Sphere
     density : float
         Density!
     """
