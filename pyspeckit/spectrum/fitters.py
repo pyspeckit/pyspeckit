@@ -737,7 +737,8 @@ class Specfit(interactive.Interactive):
     def plot_fit(self, annotate=None, show_components=None,
             composite_fit_color='red',  lw=0.5,
             composite_lw=0.75, pars=None, offset=None,
-            use_window_limits=None, show_hyperfine_components=None, **kwargs):
+            use_window_limits=None, show_hyperfine_components=None,
+            plotkwargs={}, **kwargs):
         """
         Plot the fit.  Must have fitted something before calling this!  
         
@@ -779,26 +780,24 @@ class Specfit(interactive.Interactive):
             self._full_model()
             model = self.fullmodel
 
-        if 'color' in kwargs:
-            kwargs.pop('color')
-            warn("Instead of color, use composite_fit_color or component_color")
-
         self.modelplot += self.Spectrum.plotter.axis.plot(
                 self.Spectrum.xarr,
                 model + plot_offset,
                 color=composite_fit_color, linewidth=lw, 
-                **kwargs)
+                **plotkwargs)
         
         # Plot components
         if show_components or show_hyperfine_components:
             self.plot_components(show_hyperfine_components=show_hyperfine_components,
-                    pars=pars, **kwargs)
+                    pars=pars, plotkwargs=plotkwargs)
 
         uwl = use_window_limits if use_window_limits is not None else self.use_window_limits
-        plotkwargs = {}
-        plotkwargs.update(self.Spectrum.plotter.plotkwargs)
-        plotkwargs['use_window_limits'] = uwl
-        self.Spectrum.plotter.reset_limits(**plotkwargs)
+        # plotter kwargs are kwargs for the Spectrum.plotter,
+        # whereas plotkwargs are for the matplotlib plot command
+        plotterkwargs = {}
+        plotterkwargs.update(self.Spectrum.plotter.plotterkwargs)
+        plotterkwargs['use_window_limits'] = uwl
+        self.Spectrum.plotter.reset_limits(**plotterkwargs)
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
 
@@ -809,7 +808,7 @@ class Specfit(interactive.Interactive):
     def plot_components(self, show_hyperfine_components=None,
             component_yoffset=0.0, component_lw=0.75, pars=None,
             component_fit_color='blue', component_kwargs={},
-            add_baseline=False, **kwargs): 
+            add_baseline=False, plotkwargs={}, **kwargs): 
         """
         Overplot the individual components of a fit
 
@@ -855,11 +854,11 @@ class Specfit(interactive.Interactive):
                 for d in data:
                     self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
                         d + yoffset,
-                        color=component_fit_color, linewidth=component_lw, **kwargs)
+                        color=component_fit_color, linewidth=component_lw, **plotkwargs)
             else:
                 self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
                     data + yoffset,
-                    color=component_fit_color, linewidth=component_lw, **kwargs)
+                    color=component_fit_color, linewidth=component_lw, **plotkwargs)
                 
 
     def fullsizemodel(self):
