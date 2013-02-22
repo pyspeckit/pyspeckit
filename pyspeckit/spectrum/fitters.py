@@ -795,7 +795,7 @@ class Specfit(interactive.Interactive):
         # plotter kwargs are kwargs for the Spectrum.plotter,
         # whereas plotkwargs are for the matplotlib plot command
         plotterkwargs = {}
-        plotterkwargs.update(self.Spectrum.plotter.plotterkwargs)
+        plotterkwargs.update(self.Spectrum.plotter.plotkwargs)
         plotterkwargs['use_window_limits'] = uwl
         self.Spectrum.plotter.reset_limits(**plotterkwargs)
         if self.Spectrum.plotter.autorefresh:
