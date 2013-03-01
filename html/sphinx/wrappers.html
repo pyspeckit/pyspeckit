@@ -29,7 +29,7 @@
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
     <link rel="next" title="Examples" href="examples.html" />
-    <link rel="prev" title="GBTIDL FITS files" href="gbtfiles.html" />
+    <link rel="prev" title="Gildas CLASS files" href="classfiles.html" />
      
     <script type="text/javascript">
 
@@ -159,17 +159,6 @@ will not be fit and will be left blank in the output fit parameter cube</p>
 <p>Wrapper to fit ammonia spectra.  Generates a reasonable guess at the position
 and velocity using a gaussian fit</p>
 <p>Example use:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pyspeckit</span>
-<span class="n">sp11</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;spec.nh3_11.dat&#39;</span><span class="p">,</span> <span class="n">errorcol</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
-<span class="n">sp22</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;spec.nh3_22.dat&#39;</span><span class="p">,</span> <span class="n">errorcol</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
-<span class="n">sp33</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;spec.nh3_33.dat&#39;</span><span class="p">,</span> <span class="n">errorcol</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
-<span class="n">sp11</span><span class="o">.</span><span class="n">xarr</span><span class="o">.</span><span class="n">refX</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ammonia</span><span class="o">.</span><span class="n">freq_dict</span><span class="p">[</span><span class="s">&#39;oneone&#39;</span><span class="p">]</span>
-<span class="n">sp22</span><span class="o">.</span><span class="n">xarr</span><span class="o">.</span><span class="n">refX</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ammonia</span><span class="o">.</span><span class="n">freq_dict</span><span class="p">[</span><span class="s">&#39;twotwo&#39;</span><span class="p">]</span>
-<span class="n">sp33</span><span class="o">.</span><span class="n">xarr</span><span class="o">.</span><span class="n">refX</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ammonia</span><span class="o">.</span><span class="n">freq_dict</span><span class="p">[</span><span class="s">&#39;threethree&#39;</span><span class="p">]</span>
-<span class="n">input_dict</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;oneone&#39;</span><span class="p">:</span><span class="n">sp11</span><span class="p">,</span><span class="s">&#39;twotwo&#39;</span><span class="p">:</span><span class="n">sp22</span><span class="p">,</span><span class="s">&#39;threethree&#39;</span><span class="p">:</span><span class="n">sp33</span><span class="p">}</span>
-<span class="n">spf</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">wrappers</span><span class="o">.</span><span class="n">fitnh3</span><span class="o">.</span><span class="n">fitnh3tkin</span><span class="p">(</span><span class="n">input_dict</span><span class="p">)</span>
-</pre></div>
-</div>
 <dl class="function">
 <dt id="pyspeckit.wrappers.fitnh3.BigSpectrum_to_NH3dict">
 <tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">BigSpectrum_to_NH3dict</tt><big>(</big><em>sp</em>, <em>vrange=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L171" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-171" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.BigSpectrum_to_NH3dict" title="Permalink to this definition">¶</a></dt>
@@ -312,7 +301,7 @@ Draine 2011 textbook pgs 219-230)</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Jan 29, 2013.
+      Last updated on Feb 22, 2013.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

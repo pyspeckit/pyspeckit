@@ -31,13 +31,17 @@ class ParinfoList(list):
         preserve_order = kwargs.pop('preserve_order',False)
         # re-order the parameters from 0 to n-1 unless told otherwise
         if not preserve_order:
-            for ii,pp in enumerate(self):
-                if pp.n != ii:
-                    pp.n = ii
+            self._set_numbers()
 
         self._check_names()
         self._set_attributes()
         self._dict = dict([(pp['parname'],pp) for pp in self])
+
+    def _set_numbers(self):
+        """ Set the parameters in order by their current order in the list """
+        for ii,pp in enumerate(self):
+            if pp.n != ii:
+                pp.n = ii
 
     def __str__(self):
         return "\n".join([repr(p) for p in self])
@@ -111,7 +115,14 @@ class ParinfoList(list):
                     if name in self.__dict__:
                         self.__dict__.pop(name)
 
-    def append(self, value):
+    def append(self, value, renumber=None):
+        """
+        Append to the list.  Will renumber the parameter if its number already
+        exists in the list unless renumber == False
+        """
+        if hasattr(value,'n') and value.n in self.n and renumber is not False:
+            # indexed from 0, so len(self) = max(self.n)+1
+            value.n = len(self) 
         super(ParinfoList, self).append(value)
         self._check_names()
         self._set_attributes()
@@ -228,7 +239,7 @@ class Parinfo(dict):
         A shortened version of the parameter name for plotting display
 
     """
-    def __init__(self, values=None):
+    def __init__(self, values=None, **kwargs):
 
         dict.__init__(self, {'value':0.0, 'error':0.0,
                 'n':0, 'fixed':False,
@@ -238,7 +249,7 @@ class Parinfo(dict):
                 'scaleable':False,
                 'tied':'',
                 'parname':'',
-                'shortparname':''})
+                'shortparname':''}, **kwargs)
 
         try:
             from lmfit import Parameter

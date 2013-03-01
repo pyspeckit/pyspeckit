@@ -1,6 +1,11 @@
 CHANGES
 *******
 
+Release 0.1.12
+~~~~~~~~~~~~~~
+    * New formaldehyde 218 GHz fitter
+    * Allow parinfo to be input as "guess=" or "parinfo="
+
 Release 0.1.11
 ~~~~~~~~~~~~~~
     * bugfix to EQW non-fitted ("empirical")
