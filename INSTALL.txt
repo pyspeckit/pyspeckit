@@ -5,3 +5,5 @@ tar -xzf pyspeckit-pyspeckit.bitbucket.org-tip.tar.gz
 cd pyspeckit-pyspeckit.bitbucket.org-tip
 python setup.py install
 
+or if you have pip:
+pip install https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz
