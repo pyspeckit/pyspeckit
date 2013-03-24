@@ -1,6 +1,7 @@
 """
 """
 from classes import Spectrum,Spectra,ObsBlock
+from OpticalSpectrum import OpticalSpectrum
 import fitters,plotters,baseline,units
 import smooth
 import correlate

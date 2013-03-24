@@ -65,7 +65,7 @@ def ccm_reddening(wave, ebv=None, a_v=None, r_v=3.1, model='ccm89'):
         ebv = a_v / r_v
         
     if model == 'gcc09':
-        raise ValueError('TEMPORARY: gcc09 currently does 2175A bump 
+        raise ValueError('TEMPORARY: gcc09 currently does 2175A bump \
             incorrectly')
     
     x = 1e4 / wave      # inverse microns

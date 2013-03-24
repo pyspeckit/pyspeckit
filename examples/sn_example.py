@@ -4,7 +4,7 @@ Example demonstrating how to fit a complex H-alpha profile after subtracting off
 """
 import pyspeckit
 
-sp = pyspeckit.Spectrum('sn2009ip_halpha.fits')
+sp = pyspeckit.OpticalSpectrum('sn2009ip_halpha.fits')
 
 # start by plotting a small region around the H-alpha line
 sp.plotter(xmin=6100,xmax=7000,ymax=2.23,ymin=0)
