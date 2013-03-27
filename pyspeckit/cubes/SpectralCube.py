@@ -231,6 +231,8 @@ class Cube(spectrum.Spectrum):
             return
 
         self.data = self.cube[:,y,x]
+        if self.errorcube is not None:
+            self.error = self.errorcube[:,y,x]
 
         self.specfit.modelpars = self.parcube[:,y,x]
         self.specfit.npeaks = self.specfit.fitter.npeaks
@@ -272,8 +274,9 @@ class Cube(spectrum.Spectrum):
 
         Returns a SpectroscopicAxis instance
         """
-        sp = pyspeckit.Spectrum( xarr=self.xarr.copy(), data = self.cube[:,y,x],
-                header=self.header)
+        sp = pyspeckit.Spectrum( xarr=self.xarr.copy(), data=self.cube[:,y,x],
+                header=self.header,
+                error=self.errorcube[:,y,x] if self.errorcube is not None else None)
 
         sp.specfit = copy.copy(self.specfit)
         # explicitly re-do this (test)
