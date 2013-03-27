@@ -18,6 +18,7 @@ install:
    - export PYTHONIOENCODING=UTF8 # just in case
    - pip install --upgrade "numpy==$NUMPY_VERSION" --use-mirrors
    - pip install matplotlib --use-mirrors
+   - pip install scipy --use-mirrors
    - pip install pyfits --use-mirrors
    - pip install ordereddict --use-mirrors
    - python setup.py install # I guess?
