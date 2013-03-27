@@ -763,8 +763,8 @@ class CubeStack(Cube):
         self.xarr = spectrum.units.SpectroscopicAxes([sp.xarr for sp in cubelist])
         self.cube = np.ma.concatenate([cube.cube for cube in cubelist])
 
-        if any([cube.errorcube for cube in cubelist]):
-            if all([cube.errorcube for cube in cubelist]):
+        if any([cube.errorcube is not None for cube in cubelist]):
+            if all([cube.errorcube is not None  for cube in cubelist]):
                 self.errorcube = np.ma.concatenate([cube.errorcube for cube in cubelist])
             else:
                 raise ValueError("Mismatched error cubes.")
