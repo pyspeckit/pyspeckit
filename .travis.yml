@@ -16,6 +16,7 @@ before_install:
    - sudo apt-get install -qq tk8.5
    - sudo apt-get install -qq python-tk
    - if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then sudo apt-get install -qq python2.6-tk; fi
+   - if [[ $TRAVIS_PYTHON_VERSION == "2.7" ]]; then sudo apt-get install -qq python2.7-tk; fi
    - sudo apt-get build-dep python-matplotlib
    - sudo apt-get install -qq python-matplotlib
 install: 
