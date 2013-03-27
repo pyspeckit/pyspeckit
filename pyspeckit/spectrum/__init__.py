@@ -10,6 +10,7 @@ import logger
 from .. import config
 import moments
 import units
+import utils
 
 import readers
 def register_reader(filetype, function, suffix, default=False):
