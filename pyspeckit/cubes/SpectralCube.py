@@ -762,6 +762,15 @@ class CubeStack(Cube):
         print "Concatenating data"
         self.xarr = spectrum.units.SpectroscopicAxes([sp.xarr for sp in cubelist])
         self.cube = np.ma.concatenate([cube.cube for cube in cubelist])
+
+        if any([cube.errorcube for cube in cubelist]):
+            if all([cube.errorcube for cube in cubelist]):
+                self.errorcube = np.ma.concatenate([cube.errorcube for cube in cubelist])
+            else:
+                raise ValueError("Mismatched error cubes.")
+        else:
+            self.errorcube = None
+
         if hasattr(self.cube,'mask'):
             try:
                 if self.cube.mask in (False,np.bool_(False)):
@@ -773,7 +782,7 @@ class CubeStack(Cube):
                 pass
         self._sort()
         self.data = self.cube[:,y0,x0]
-        self.error = None
+        self.error = self.errorcube[:,y0,x0] if self.errorcube is not None else None
 
         self.header = cubelist[0].header
         for cube in cubelist:
@@ -815,6 +824,8 @@ class CubeStack(Cube):
         indices = self.xarr.argsort()
         self.xarr = self.xarr[indices]
         self.cube = self.cube[indices,:,:]
+        if self.errorcube is not None:
+            self.errorcube = self.errorcube[indices,:,:]
 
 
     def write_fit(self, fitcubefilename, clobber=False):
