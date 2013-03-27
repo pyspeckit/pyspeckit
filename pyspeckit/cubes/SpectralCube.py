@@ -53,6 +53,7 @@ class Cube(spectrum.Spectrum):
                 self.errorcube = errorcube
                 self.data = self.cube[:,y0,x0]
                 self.error = None
+                self.cubeheader = self.header
             except TypeError as inst:
                 print "Failed to read fits file: wrong TYPE."
                 print inst
