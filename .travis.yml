@@ -11,11 +11,11 @@ env:
 before_install:
    # We do this to make sure we get the dependencies so pip works below
    - sudo apt-get update -qq 
-   - sudo apt-get install -qq python-numpy
    - sudo apt-get install -qq python-numpy cython libatlas-dev liblapack-dev gfortran
    - sudo apt-get install -qq python-scipy 
    - sudo apt-get install -qq tk8.5
    - sudo apt-get install -qq python-tk
+   - if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then sudo apt-get install -qq python2.6-tk; fi
    - sudo apt-get build-dep python-matplotlib
    - sudo apt-get install -qq python-matplotlib
 install: 
