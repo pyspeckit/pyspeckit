@@ -1,5 +1,5 @@
 import classes
-import utils.reddening as reddening
+from .utils import reddening
 
 class OpticalSpectrum(classes.Spectrum):
     def deredden(self,**kwargs):
