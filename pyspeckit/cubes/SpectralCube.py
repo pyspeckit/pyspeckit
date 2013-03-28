@@ -208,6 +208,8 @@ class Cube(spectrum.Spectrum):
         """
 
         self.data = self.cube[:,y,x]
+        if self.errorcube is not None:
+            self.error = self.cube[:,y,x]
         if self.plot_special is None:
             self.plotter(**kwargs)
             if plot_fit: self.plot_fit(x,y)
