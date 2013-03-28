@@ -324,6 +324,8 @@ class Cube(spectrum.Spectrum):
             sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=cubes.extract_aperture( self.cube, aperture , coordsys=None), header=self.header)
 
         sp.specfit = copy.copy(self.specfit)
+        sp.specfit.includemask = self.specfit.includemask.copy()
+        sp.specfit.Spectrum = sp
 
         return sp
 
@@ -653,7 +655,7 @@ class Cube(spectrum.Spectrum):
         self.mapplot(estimator=None, **kwargs)
 
 
-    def load_model_fit(self, fitsfilename, npars, fittype=None, _temp_fit_loc=(0,0)):
+    def load_model_fit(self, fitsfilename, npars, npeaks=1, fittype=None, _temp_fit_loc=(0,0)):
         """
         Load a parameter + error cube into the .parcube and .errcube
         attributes.
@@ -676,11 +678,11 @@ class Cube(spectrum.Spectrum):
             else:
                 raise KeyError("Must specify FITTYPE or include it in cube header.")
 
-        self.parcube = cube[:npars,:,:]
-        self.errcube = cube[npars:npars*2,:,:]
+        self.parcube = cube[:npars*npeaks,:,:]
+        self.errcube = cube[npars*npeaks:npars*npeaks*2,:,:]
 
         # make sure params are within limits
-        guesses,throwaway = self.specfit.Registry.multifitters[fittype]._make_parinfo()
+        guesses,throwaway = self.specfit.Registry.multifitters[fittype]._make_parinfo(npeaks=npeaks)
         try:
             guesses.values = self.parcube[:,y,x]
         except ValueError:
