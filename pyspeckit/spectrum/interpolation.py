@@ -19,6 +19,14 @@ def _interp(x, xp, fp, left=None, right=None):
 def interp(spec1, spec2, left=0, right=0):
     """
     Interpolate spec1 onto spec2's axes
+
+    Parameters
+    ----------
+    spec1: pyspeckit.Spectrum
+    spec2: pyspeckit.Spectrum
+    left: float or None
+    right: float or None
+        See np.interp: values to replace out-of-range X items with
     """
 
     xarr1 = spec1.xarr.as_unit(spec2.xarr.units)
