@@ -16,7 +16,7 @@ def _interp(x, xp, fp, left=None, right=None):
     else:
         return np.interp(x, xp, fp, left=left, right=right)
 
-def interp(spec1,spec2, left=0, right=0):
+def interp(spec1, spec2, left=0, right=0):
     """
     Interpolate spec1 onto spec2's axes
     """
