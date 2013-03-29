@@ -1,5 +1,5 @@
 import numpy as np
-import arithmetic
+import interpolation
 
 def smooth(data,smooth,smoothtype='gaussian',downsample=True,downsample_factor=None,
         convmode='same'):
@@ -51,13 +51,13 @@ def smooth(data,smooth,smoothtype='gaussian',downsample=True,downsample_factor=N
         if type(data.mask) is np.ndarray:
             OK = True - data.mask
             if OK.sum() > 0:
-                data = arithmetic._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
+                data = interpolation._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
             else:
                 data = OK
     if np.any(True - np.isfinite(data)):
         OK = np.isfinite(data)
         if OK.sum() > 0:
-            data = arithmetic._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
+            data = interpolation._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
         else:
             data = OK
 

@@ -1,5 +1,5 @@
 import numpy as np
-import arithmetic
+import interpolation
 import units as units_module
 import classes
 try:
@@ -19,7 +19,7 @@ def correlate(spectrum1, spectrum2, range=None, units=None, errorweight=False):
         spectrum2 = spectrum2.slice(*range, units=units)
 
     if not (spectrum1.xarr.shape == spectrum2.xarr.shape) or not all(spectrum1.xarr == spectrum2.xarr):
-        spectrum2 = arithmetic.interp(spectrum2, spectrum1)
+        spectrum2 = interpolation.interp(spectrum2, spectrum1)
 
     data1 = spectrum1.data
     data2 = spectrum2.data

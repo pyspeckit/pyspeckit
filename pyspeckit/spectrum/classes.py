@@ -20,7 +20,7 @@ try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-import readers,plotters,writers,baseline,units,measurements,speclines,arithmetic
+import readers,plotters,writers,baseline,units,measurements,speclines,interpolation
 import moments as moments_module
 import fitters
 import models
@@ -45,7 +45,7 @@ class Spectrum(object):
     formats.
     """
 
-    from arithmetic import interpnans
+    from interpolation import interpnans
 
     def __init__(self, filename=None, filetype=None, xarr=None, data=None,
             error=None, header=None, doplot=False, maskdata=True,
@@ -819,7 +819,7 @@ class ObsBlock(Spectra):
                 raise ValueError("Mismatched units")
 
         if force:
-            self.speclist = [arithmetic.interp(spec,self) for spec in speclist]
+            self.speclist = [interpolation.interp(spec,self) for spec in speclist]
         else:
             self.speclist = speclist
         self.nobs = len(self.speclist)
