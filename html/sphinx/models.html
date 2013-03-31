@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Models &mdash; pyspeckit 0.1.10 documentation</title>
+    <title>Models &mdash; pyspeckit 0.1.12 documentation</title>
     
     <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1.10',
+        VERSION:     '0.1.12',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -27,8 +27,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit 0.1.10 documentation" href="index.html" />
-    <link rel="next" title="Features" href="features.html" />
+    <link rel="top" title="pyspeckit 0.1.12 documentation" href="index.html" />
+    <link rel="next" title="Parameters" href="parameters.html" />
     <link rel="prev" title="Installation and Requirements" href="install.html" />
      
     <script type="text/javascript">
@@ -48,7 +48,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit 0.1.10 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1.12 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -67,9 +67,10 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-pyspeckit.spectrum.models">
-<span id="models"></span><h1>Models<a class="headerlink" href="#module-pyspeckit.spectrum.models" title="Permalink to this headline">¶</a></h1>
-<p>The generic SpectralModel class is a wrapper for model functions.  A model
+  <div class="section" id="models">
+<h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
+<p>See <a class="reference internal" href="parameters.html"><em>Parameters</em></a> for information on how to restrict/modify model parameters.</p>
+<span class="target" id="module-pyspeckit.spectrum.models"></span><p>The generic SpectralModel class is a wrapper for model functions.  A model
 should take in an X-axis and some number of parameters.  In order to declare a
 SpectralModel, you give SpectralModel the function name and the number of
 parameters it requires.  The rest of the options are optional, though parnames
@@ -94,7 +95,9 @@ your fitting code must deal with units internally.</p>
 </pre></div>
 </div>
 <p>Then you can <a class="reference external" href="registration.html">register</a> these fitters.</p>
-<span class="target" id="module-pyspeckit.spectrum.models.model"></span><dl class="class">
+<div class="section" id="module-pyspeckit.spectrum.models.model">
+<span id="api-documentation-for-models"></span><h2>API Documentation for Models<a class="headerlink" href="#module-pyspeckit.spectrum.models.model" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel">
 <em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>shortvarnames=('A'</em>, <em>'\Delta x'</em>, <em>'\sigma')</em>, <em>multisingle='multi'</em>, <em>fitunits=None</em>, <em>centroid_par=None</em>, <em>fwhm_func=None</em>, <em>fwhm_pars=None</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L22" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-22" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper class for a spectra model.  Includes internal functions to
@@ -491,7 +494,7 @@ just sums self.model</p>
 <span class="target" id="module-pyspeckit.spectrum.models.ammonia"></span><p>Ammonia inversion transition TKIN fitter translated from Erik Rosolowsky&#8217;s
 <a class="reference external" href="http://svn.ok.ubc.ca/svn/signals/nh3fit/">http://svn.ok.ubc.ca/svn/signals/nh3fit/</a></p>
 <div class="section" id="module-api">
-<h2>Module API<a class="headerlink" href="#module-api" title="Permalink to this headline">¶</a></h2>
+<h3>Module API<a class="headerlink" href="#module-api" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.ammonia.ammonia">
 <tt class="descclassname">pyspeckit.spectrum.models.ammonia.</tt><tt class="descname">ammonia</tt><big>(</big><em>xarr</em>, <em>tkin=20</em>, <em>tex=None</em>, <em>ntot=100000000000000.0</em>, <em>width=1</em>, <em>xoff_v=0.0</em>, <em>fortho=0.0</em>, <em>tau=None</em>, <em>fillingfraction=None</em>, <em>return_tau=False</em>, <em>thin=False</em>, <em>verbose=False</em>, <em>return_components=False</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/ammonia.py#L78" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/ammonia.py#cl-78" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.ammonia.ammonia" title="Permalink to this definition">¶</a></dt>
@@ -723,7 +726,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x10219eed8&gt;</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/modelgrid.py#L48" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/modelgrid.py#cl-48" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x102160938&gt;</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/modelgrid.py#L48" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/modelgrid.py#cl-48" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -738,7 +741,7 @@ number of entries as gridpars</p>
 </dd></dl>
 
 <span class="target" id="module-pyspeckit.spectrum.models.n2hp"></span><div class="section" id="n2h-fitter">
-<h2>N2H+ fitter<a class="headerlink" href="#n2h-fitter" title="Permalink to this headline">¶</a></h2>
+<h3>N2H+ fitter<a class="headerlink" href="#n2h-fitter" title="Permalink to this headline">¶</a></h3>
 <p>Reference for line params: 
 Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 363, 1083</p>
 <p><a class="reference external" href="http://www.strw.leidenuniv.nl/~moldata/N2H+.html">http://www.strw.leidenuniv.nl/~moldata/N2H+.html</a></p>
@@ -860,7 +863,7 @@ of the voigt profile</p>
 </dd></dl>
 
 <span class="target" id="module-pyspeckit.spectrum.models.hydrogen"></span><div class="section" id="hydrogen-models">
-<h2>Hydrogen Models<a class="headerlink" href="#hydrogen-models" title="Permalink to this headline">¶</a></h2>
+<h3>Hydrogen Models<a class="headerlink" href="#hydrogen-models" title="Permalink to this headline">¶</a></h3>
 <p>Hydrogen in HII regions is typically assumed to follow Case B recombination
 theory.</p>
 <p>The values for the Case B recombination coefficients are given by <a class="reference internal" href="#hummerstorey1987">[HummerStorey1987]</a>.  
@@ -967,10 +970,23 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
 
 </div>
 </div>
-<div class="section">
-<a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/models.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></div>
-<div class="section">
-<a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/doc/models.rst" title="Push the Edit button on the next page"><span class="edit-on-bitbucket">[edit this page on bitbucket]</span></a></div>
+<div class="section" id="model-documentation-table-of-contents">
+<h2>Model Documentation Table of Contents<a class="headerlink" href="#model-documentation-table-of-contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="parameters.html#simple-example">Simple Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameters.html#tying-parameters">Tying Parameters</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="edit-section section">
+<p class="edit-on-github-para"><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/models.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></p>
+<p class="edit-on-bitbucket-para"><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/doc/models.rst" title="Push the Edit button on the next page"><span class="edit-on-bitbucket">[edit this page on bitbucket]</span></a></p>
+</div>
 
 
           </div>
@@ -983,9 +999,16 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Index</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Models &amp; Fitting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-api">Module API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#n2h-fitter">N2H+ fitter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#hydrogen-models">Hydrogen Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pyspeckit.spectrum.models.model">API Documentation for Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-api">Module API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#n2h-fitter">N2H+ fitter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hydrogen-models">Hydrogen Models</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#model-documentation-table-of-contents">Model Documentation Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="parameters.html">Parameters</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
@@ -1018,7 +1041,7 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Feb 22, 2013.
+      Last updated on Mar 31, 2013.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

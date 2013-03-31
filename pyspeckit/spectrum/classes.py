@@ -605,9 +605,9 @@ class Spectrum(object):
                 else:
                     if self._arithmetic_threshold_units is None:
                         # not sure this should ever be allowed
-                        xarrcheck = all((self.xarr-other.xarr) < self._arithmetic_threshold)
+                        xarrcheck = all(np.abs(self.xarr-other.xarr) < self._arithmetic_threshold)
                     else:
-                        xarrcheck = all((self.xarr.as_unit(self._arithmetic_threshold_units)-other.xarr.as_unit(self._arithmetic_threshold_units)) < self._arithmetic_threshold)
+                        xarrcheck = all(np.abs(self.xarr.as_unit(self._arithmetic_threshold_units)-other.xarr.as_unit(self._arithmetic_threshold_units)) < self._arithmetic_threshold)
 
                 if self.shape == other.shape and xarrcheck:
                     newspec = self.copy()

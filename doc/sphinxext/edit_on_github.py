@@ -95,16 +95,21 @@ def doctree_read(app, doctree):
     doc_path = os.path.relpath(doctree.get('source'), app.builder.srcdir)
     if not re.match(app.config.edit_on_github_skip_regex, doc_path):
         path = url + doc_root + doc_path
-        section = nodes.section()
-        para = nodes.paragraph()
-        section += para
         onlynode = addnodes.only(expr='html')
-        para += onlynode
         onlynode += nodes.reference(
-            reftitle=app.config.edit_on_github_help_message, refuri=path)
+            reftitle=app.config.edit_on_bitbucket_help_message, refuri=path)
         onlynode[0] += nodes.inline(
             '', page_message, classes=['edit-on-github'])
-        doctree += section
+        para = nodes.paragraph()
+        para.update_basic_atts({'classes':['edit-on-github-para']})
+        para += onlynode
+        if 'edit-section' in doctree[-1].attributes['classes']:
+            doctree[-1] += para
+        else:
+            section = nodes.section()
+            section.update_basic_atts({'classes':['edit-section']})
+            section += para
+            doctree += section
 
     # Handle the docstring-editing links
     for objnode in doctree.traverse(addnodes.desc):

@@ -1,5 +1,6 @@
 Models
 ==================
+See :doc:`parameters` for information on how to restrict/modify model parameters.
 
 .. module:: pyspeckit.spectrum.models
 
@@ -34,6 +35,8 @@ Then you can `register <registration.html>`_ these fitters.
     Implement the gaussian-hermite profile described here:
     `<http://pipelinesandarchives.blogspot.com/2012/09/fit1d-new-smurf-command-for-acsis-data.html>`_
 
+API Documentation for Models
+----------------------------
 
 .. automodule:: pyspeckit.spectrum.models.model
     :members:
@@ -61,4 +64,11 @@ Then you can `register <registration.html>`_ these fitters.
     :members:
 .. automodule:: pyspeckit.spectrum.models.hydrogen
     :members:
+
+Model Documentation Table of Contents
+-------------------------------------
+.. toctree::
+   :maxdepth: 3
+
+   Parameters <parameters>
 

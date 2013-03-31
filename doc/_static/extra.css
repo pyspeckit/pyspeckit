@@ -2,7 +2,6 @@
 @import "scipy.css";
 @import "astropy.css";
 @import "agogo.css";
-@import "agogo.css";
 
 div.bodywrapper {
     margin: 0 0 0 0;
@@ -19,4 +18,12 @@ div.bodywrapper {
 
 a:visited {
   color: #4a8f43;
+}
+
+.edit-on-bitbucket, .edit-on-github {
+    font-size: 50%;
+}
+
+p.edit-on-github-para, p.edit-on-bitbucket-para {
+    display: inline;
 }
