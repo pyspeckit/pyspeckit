@@ -1,0 +1,222 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Parameters &mdash; pyspeckit 0.1.12 documentation</title>
+    
+    <link rel="stylesheet" href="_static/extra.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.12',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="_static/logo.ico"/>
+    <link rel="top" title="pyspeckit 0.1.12 documentation" href="index.html" />
+    <link rel="up" title="Models" href="models.html" />
+    <link rel="next" title="Features" href="features.html" />
+    <link rel="prev" title="Models" href="models.html" />
+     
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setDomainName', 'pyspeckit.bitbucket.org']);
+      _gaq.push(['_setAllowHash', false]);
+      _gaq.push(['_trackPageview']);
+
+
+    </script>
+    <link rel="stylesheet" type="text/css" href="_static/extra.css" />
+  </head>
+  <body>
+    <div class="header-wrapper">
+      <div class="header">
+          <p class="logo"><a href="http://pyspeckit.bitbucket.org">
+            <img class="logo" src="_static/logo.png" alt="Logo"/>
+          </a></p>
+        <h1><a href="index.html">pyspeckit 0.1.12 documentation</a></h1>
+        <div class="rel">
+          <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
+          <a href=index.html>Docs Home </a>  |
+          <a href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/overview">Bitbucket Home </a>  |
+          <a href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/wiki/Home">Wiki</a>  |
+          <a href=search.html>Search </a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="parameters">
+<h1>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h1>
+<p>Model parameters are very flexible, and can be accessed and modified in many
+parallel ways.</p>
+<p>The <tt class="xref py py-obj docutils literal"><span class="pre">parinfo</span></tt> class is built on top of <a class="reference external" href="https://github.com/newville/lmfit-py/blob/master/doc/parameters.rst">lmfit-py&#8217;s parameters</a> for compatibility
+with lmfit-py, but it builds on that.  The code for the parameter overloading is in
+<a class="reference external" href="https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/parinfo.py">parinfo.py</a>.</p>
+<div class="section" id="simple-example">
+<h2>Simple Example<a class="headerlink" href="#simple-example" title="Permalink to this headline">¶</a></h2>
+<p>Start with a simple example: if you want to limit parameters to be within some range, use
+the <tt class="xref py py-obj docutils literal"><span class="pre">limits</span></tt> and <tt class="xref py py-obj docutils literal"><span class="pre">limited</span></tt> parameters.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># define shorthand first:</span>
+<span class="n">T</span><span class="p">,</span><span class="n">F</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span><span class="bp">False</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="p">(</span><span class="n">fittype</span><span class="o">=</span><span class="s">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">multisingle</span><span class="o">=</span><span class="s">&#39;multi&#39;</span><span class="p">,</span> <span class="n">guesses</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">limits</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)],</span>
+    <span class="n">limited</span><span class="o">=</span><span class="p">[(</span><span class="n">F</span><span class="p">,</span><span class="n">T</span><span class="p">),</span> <span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">F</span><span class="p">),</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">F</span><span class="p">),</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">F</span><span class="p">),</span>  <span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">F</span><span class="p">),</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">F</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>In this example, there are two gaussian components being fitted because a
+Gaussian takes 3 parameters, an amplitude, a center, anda  width, and there are
+6 parameters in the input guesses.</p>
+<p>The first line is forced to be an absorption line: its limits are <tt class="xref py py-obj docutils literal"><span class="pre">(0,0)</span></tt> but
+<tt class="xref py py-obj docutils literal"><span class="pre">limited=(F,T)</span></tt> so only the 2nd parameter, the upper limit, is respected: the amplitude
+is forced to be <span class="math">\(A\leq 0\)</span>.</p>
+<p>The second line has its amplitude (the 4th parameter in <tt class="xref py py-obj docutils literal"><span class="pre">guesses</span></tt>) forced
+<em>positive</em> since its limits are also <tt class="xref py py-obj docutils literal"><span class="pre">(0,0)</span></tt> but its <tt class="xref py py-obj docutils literal"><span class="pre">limited=(T,F)</span></tt>.</p>
+<p>Both lines have their <em>widths</em> forced to be positive, which is true by default:
+there is no meaning to a negative width, since the width enters into the
+equation for a gaussian as <span class="math">\(\sigma^2\)</span>.</p>
+<p>Note that the need to limit parameters is the main reason for the existence of <a class="reference external" href="https://github.com/newville/lmfit-py">lmfit-py</a>
+and <a class="reference external" href="http://astrolibpy.googlecode.com/git-history/4993aa4e7c1001efe7c00048ec2b9d5ccac83ff7/mpfit/mpfit.py">mpfit</a>.</p>
+</div>
+<div class="section" id="tying-parameters">
+<h2>Tying Parameters<a class="headerlink" href="#tying-parameters" title="Permalink to this headline">¶</a></h2>
+<p>It is also possible to explicitly state that one parameter depends on another.
+If, for example, you want to fit two gaussians, but they must be at a fixed
+wavelength separation from one another (e.g., for fitting the [S II] doublet),
+use <tt class="xref py py-obj docutils literal"><span class="pre">tied</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="p">(</span><span class="n">fittype</span><span class="o">=</span><span class="s">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">multisingle</span><span class="o">=</span><span class="s">&#39;multi&#39;</span><span class="p">,</span> <span class="n">guesses</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">6716</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">6731</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">tied</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;p[1]&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>If you use <tt class="xref py py-obj docutils literal"><span class="pre">lmfit-py</span></tt> by specifying <tt class="xref py py-obj docutils literal"><span class="pre">use_lmfit=True</span></tt>, you can use the more advanced <a class="reference external" href="http://newville.github.com/lmfit-py/constraints.html">mathematical constraints</a> permitted by lmfit-py.</p>
+<p><a class="reference internal" href="example_sdss.html"><em>Optical fitting: The Hα-[NII] complex of a type-I Seyfert galaxy</em></a> shows a more complete example using <tt class="xref py py-obj docutils literal"><span class="pre">tied</span></tt>.</p>
+</div>
+<div class="section" id="making-your-own-parinfo">
+<h2>Making your own <tt class="xref py py-obj docutils literal"><span class="pre">parinfo</span></tt><a class="headerlink" href="#making-your-own-parinfo" title="Permalink to this headline">¶</a></h2>
+<p>You can also build a <tt class="xref py py-obj docutils literal"><span class="pre">parinfo</span></tt> class directly.
+Currently, the best example of this is in <tt class="xref py py-obj docutils literal"><span class="pre">tests/test_formaldehyde_mm_radex.py</span></tt>.</p>
+<p>Here&#8217;s an example of how you would set up a fit using <tt class="xref py py-obj docutils literal"><span class="pre">parinfo</span></tt> directly.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">There is a bug in the use_lmfit section of this code that keeps it from working properly.  =(</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">amplitude0</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">parinfo</span><span class="o">.</span><span class="n">Parinfo</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parname</span><span class="o">=</span><span class="s">&#39;Amplitude0&#39;</span><span class="p">,</span>
+    <span class="n">shortparname</span><span class="o">=</span><span class="s">&#39;$A_0$&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">limited</span><span class="o">=</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span><span class="bp">True</span><span class="p">))</span>
+<span class="n">width0</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">parinfo</span><span class="o">.</span><span class="n">Parinfo</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">parname</span><span class="o">=</span><span class="s">&#39;Width0&#39;</span><span class="p">,</span>
+    <span class="n">shortparname</span><span class="o">=</span><span class="s">&#39;$\sigma_0$&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">limited</span><span class="o">=</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">))</span>
+<span class="n">center0</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">parinfo</span><span class="o">.</span><span class="n">Parinfo</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">parname</span><span class="o">=</span><span class="s">&#39;Center0&#39;</span><span class="p">,</span>
+    <span class="n">shortparname</span><span class="o">=</span><span class="s">&#39;$\Delta x_0$&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">6716</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">limited</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">))</span>
+<span class="n">amplitude1</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">parinfo</span><span class="o">.</span><span class="n">Parinfo</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">parname</span><span class="o">=</span><span class="s">&#39;Amplitude1&#39;</span><span class="p">,</span>
+    <span class="n">shortparname</span><span class="o">=</span><span class="s">&#39;$A_1$&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">limited</span><span class="o">=</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span><span class="bp">True</span><span class="p">))</span>
+<span class="n">width1</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">parinfo</span><span class="o">.</span><span class="n">Parinfo</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">parname</span><span class="o">=</span><span class="s">&#39;Width1&#39;</span><span class="p">,</span>
+    <span class="n">shortparname</span><span class="o">=</span><span class="s">&#39;$\sigma_1$&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">limited</span><span class="o">=</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">))</span>
+<span class="n">center1</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">parinfo</span><span class="o">.</span><span class="n">Parinfo</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">parname</span><span class="o">=</span><span class="s">&#39;Center1&#39;</span><span class="p">,</span>
+    <span class="n">shortparname</span><span class="o">=</span><span class="s">&#39;$\Delta x_1$&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">6731</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="n">limited</span><span class="o">=</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">),</span> <span class="n">tied</span><span class="o">=</span><span class="n">center0</span><span class="p">)</span>
+
+<span class="n">parinfo</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">parinfo</span><span class="o">.</span><span class="n">ParinfoList</span><span class="p">([</span><span class="n">amplitude0</span><span class="p">,</span><span class="n">center0</span><span class="p">,</span><span class="n">width0</span><span class="p">,</span><span class="n">amplitude1</span><span class="p">,</span><span class="n">center1</span><span class="p">,</span><span class="n">width1</span><span class="p">])</span>
+
+<span class="n">sp</span><span class="o">.</span><span class="n">specfit</span><span class="p">(</span><span class="n">parinfo</span><span class="o">=</span><span class="n">parinfo</span><span class="p">,</span> <span class="n">use_lmfit</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="edit-section section">
+<p class="edit-on-github-para"><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/parameters.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></p>
+<p class="edit-on-bitbucket-para"><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/doc/parameters.rst" title="Push the Edit button on the next page"><span class="edit-on-bitbucket">[edit this page on bitbucket]</span></a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="models.html">Models &amp; Fitting</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-pyspeckit.spectrum.models.model">API Documentation for Models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="models.html#model-documentation-table-of-contents">Model Documentation Table of Contents</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="">Parameters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactive.html">Interactive Use</a></li>
+</ul>
+
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="search.html" method="get">
+            <input type="text" name="q" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+    <table width=800><tr>
+            <td align=left>
+      &copy; Copyright 2011, Adam Ginsburg and Jordan Mirocha.
+    </td>
+    <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
+    </tr>
+    <tr><td>
+      Last updated on Mar 31, 2013.
+    </td><td align=right>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+    </td>
+    <tr>
+            <td align=left><a href="pyspeckit.pdf">PDF version of this document</a></td>
+    </tr></table>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-6253200-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+        
+    </div>
+  </body>
+</html>
