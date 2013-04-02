@@ -8,7 +8,7 @@ import numpy.ma as ma
 
 def tspec_reader(filename, merged=True, specnum=0, **kwargs):
     """ 
-    Read TripleSpec reduced data
+    Read TripleSpec or SPEXTOOL reduced data
 
     It may be reduced by either SPEXTOOL or IRAF.
 
@@ -23,7 +23,7 @@ def tspec_reader(filename, merged=True, specnum=0, **kwargs):
     data = fitsfile[0].data
 
     if merged:
-        if header.get('INSTR') == 'APO Triplespec':
+        if header.get('INSTR') == 'APO Triplespec' or header.get('INSTR') == 'SpeX':
             # read in SPEXTOOL spectrum
             xarr = np.array(data[0,:],dtype='float64')
             spec = ma.array(data[1,:],dtype='float64')
