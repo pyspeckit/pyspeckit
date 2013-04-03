@@ -88,3 +88,4 @@ import hdf5_reader
 open_hdf5 = check_reader(hdf5_reader.open_hdf5)
 from galex import read_galex
 from gbt import GBTSession
+from sdss_reader import read_sdss

@@ -42,6 +42,7 @@ def register_reader(filetype, function, suffix, default=False):
 
 register_reader('fits',readers.open_1d_fits,'fits',default=True)
 register_reader('fits',readers.open_1d_fits,'fit')
+register_reader('sdss',readers.read_sdss,'fits')
 register_reader('pyfits',readers.open_1d_pyfits,'')
 register_reader('txt',readers.open_1d_txt,'txt')
 register_reader('txt',readers.open_1d_txt,'dat')
