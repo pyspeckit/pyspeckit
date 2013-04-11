@@ -353,6 +353,7 @@ class Interactive(object):
             else:
                 self.xmin = xmin
                 self.xmax = xmax
+            self.includemask[self.xmin:self.xmax] = True
         elif reset:
             if verbose or debug: print "Resetting xmin/xmax to full limits of data"
             self.xmin = 0
