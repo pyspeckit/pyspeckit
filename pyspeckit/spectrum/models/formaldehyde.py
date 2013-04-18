@@ -317,7 +317,7 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
     return spec
 
 
-def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0, 
+def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
         return_hyperfine_components=False ):
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters
@@ -327,7 +327,9 @@ def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
     The final spectrum is then rescaled to that value
     """
 
-    mdl = formaldehyde_vtau(xarr, Tex=amp*0.01, tau=0.01, xoff_v=xoff_v, width=width, return_hyperfine_components=return_hyperfine_components)
+    mdl = formaldehyde_vtau(xarr, Tex=amp*0.01, tau=0.01, xoff_v=xoff_v,
+            width=width,
+            return_hyperfine_components=return_hyperfine_components)
     if return_hyperfine_components:
         mdlpeak = np.abs(mdl).squeeze().sum(axis=0).max()
     else:
@@ -378,6 +380,86 @@ formaldehyde_vheight_fitter = formaldehyde_model(fitter.vheightmodel(formaldehyd
         parlimits=[(0,0), (0,0), (0,0), (0,0)],
         shortvarnames=("H","A","v","\\sigma"), # specify the parameter names (TeX is OK)
         fitunits='Hz' )
+
+# Create a tau-only fit:
+def formaldehyde_radex_tau(xarr, density=4, column=13, xoff_v=0.0, width=1.0, 
+        grid_vwidth=1.0,
+        grid_vwidth_scale=False,
+        taugrid=None,
+        hdr=None,
+        path_to_taugrid='',
+        temperature_gridnumber=3,
+        debug=False,
+        verbose=False,
+        return_hyperfine_components=False,
+        **kwargs):
+    """
+    Use a grid of RADEX-computed models to make a model line spectrum
+    -uses hyperfine components
+    -assumes *tau* varies but *tex* does not!
+
+    The RADEX models have to be available somewhere.
+    OR they can be passed as arrays.  If as arrays, the form should be:
+    texgrid = ((minfreq1,maxfreq1,texgrid1),(minfreq2,maxfreq2,texgrid2))
+
+    xarr must be a SpectroscopicAxis instance
+    xoff_v, width are both in km/s
+
+    grid_vwidth is the velocity assumed when computing the grid in km/s
+        this is important because tau = modeltau / width (see, e.g., 
+        Draine 2011 textbook pgs 219-230)
+    grid_vwidth_scale is True or False: False for LVG, True for Sphere
+    """
+
+    if verbose:
+        print "Parameters: dens=%f, column=%f, xoff=%f, width=%f" % (density, column, xoff_v, width)
+
+    if taugrid is None:
+        if path_to_taugrid=='':
+            raise IOError("Must specify model grids to use.")
+        else:
+            taugrid = [pyfits.getdata(path_to_taugrid)]
+            hdr = pyfits.getheader(path_to_taugrid)
+            yinds,xinds = np.indices(taugrid[0].shape[1:])
+            densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
+            columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+            minfreq = (4.8,)
+            maxfreq = (5.0,)
+    elif hdr is not None:
+        minfreq,maxfreq,taugrid = zip(*taugrid)
+        yinds,xinds = np.indices(taugrid[0].shape[1:])
+        densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
+        columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+    else:
+        raise Exception
+    
+    # Convert X-units to frequency in GHz
+    xarr = xarr.as_unit('Hz', quiet=True)
+
+    gridval1 = np.interp(density, densityarr[0,:], xinds[0,:])
+    gridval2 = np.interp(column, columnarr[:,0], yinds[:,0])
+    if np.isnan(gridval1) or np.isnan(gridval2):
+        raise ValueError("Invalid column/density")
+
+    if scipyOK:
+        slices = [temperature_gridnumber] + [slice(np.floor(gv),np.floor(gv)+2) for gv in (gridval2,gridval1)]
+        tau = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval2%1],[gridval1%1]]),order=1) for tg in taugrid]
+    else:
+        raise ImportError("Couldn't import scipy, therefore cannot interpolate")
+
+    # let the hyperfine module determine the hyperfine components, and pass all of them here
+    spec_components = [(formaldehyde_vtau(xarr.as_unit('Hz', quiet=True),
+        tau=float(tau[ii]), xoff_v=xoff_v, width=width,
+        return_tau=True, return_hyperfine_components=True, **kwargs) *
+            (xarr.as_unit('GHz')>minfreq[ii]) *
+            (xarr.as_unit('GHz')<maxfreq[ii])) 
+                for ii in  xrange(len(tau))]
+
+    # get an array of [n_lines, n_hyperfine, len(xarr)]
+    if return_hyperfine_components:
+        return np.array(spec_components).sum(axis=0)
+    else:
+        return np.sum(spec_components, axis=0).sum(axis=0)
 
 
 try:

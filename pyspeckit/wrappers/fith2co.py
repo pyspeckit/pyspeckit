@@ -16,7 +16,8 @@ title_dict = {
     'threethree':'H$_2$CO 3$_{23}$-3$_{22}$'
     }
 
-def plot_h2co(spdict,spectra, fignum=1, show_components=False, residfignum=None, **plotkwargs):
+def plot_h2co(spdict,spectra, fignum=1, show_components=False,
+        show_hyperfine_components=False, residfignum=None, **plotkwargs):
     """
     Plot the results from a multi-h2co fit
     """ 
@@ -47,7 +48,9 @@ def plot_h2co(spdict,spectra, fignum=1, show_components=False, residfignum=None,
         sp.specfit.Spectrum.plotter = sp.plotter
         #sp.specfit.selectregion(reset=True)
         if sp.specfit.modelpars is not None:
-            sp.specfit.plot_fit(annotate=False, show_components=show_components)
+            sp.specfit.plot_fit(annotate=False,
+                    show_components=show_components,
+                    show_hyperfine_components=show_hyperfine_components)
     if spdict['oneone'].specfit.modelpars is not None:
         spdict['oneone'].specfit.annotate(labelspacing=0.05,prop={'size':'small','stretch':'extra-condensed'},frameon=False)
 

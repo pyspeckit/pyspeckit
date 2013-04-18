@@ -72,9 +72,13 @@ class hyperfinemodel(object):
 
 
     def hyperfine(self, xarr, Tex=5.0, tau=0.1, xoff_v=0.0, width=1.0, 
-            return_hyperfine_components=False, Tbackground=2.73, amp=None ):
+            return_hyperfine_components=False, Tbackground=2.73, amp=None,
+            return_tau=False ):
         """
         Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.
+
+        return_tau : bool
+            If specified, return just the tau spectrum, ignoring Tex
         """
 
         # Convert X-units to frequency in Hz
@@ -116,18 +120,24 @@ class hyperfinemodel(object):
         # add a list of the individual 'component' spectra to the total components...
 
         if return_hyperfine_components:
-            if amp is None:
+            if return_tau:
+                return components
+            elif amp is None:
                 return (1.0-np.exp(-np.array(components)))*(Tex-Tbackground)
             else:
                 comps = (1.0-np.exp(-np.array(components)))*(Tex-Tbackground)
                 return comps/comps.max() * amp
 
-        spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(Tex-Tbackground)
-      
-        if amp is None:
-            return spec
+        if return_tau:
+            return tau_nu_cumul
         else:
-            return spec/spec.max() * amp
+
+            spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(Tex-Tbackground)
+          
+            if amp is None:
+                return spec
+            else:
+                return spec/spec.max() * amp
 
 
 
