@@ -57,6 +57,9 @@ execfile('vega_echelle_example.py',{'interactive':interactive,'savedir':savedir}
 print "*****test_voigt.py*****"
 execfile('test_voigt.py')
 
+print "*****test_julian.py*****"
+execfile('test_julian.py')
+
 print "Success!  Or at least, no exceptions..."
 
 print "Running comparison"
