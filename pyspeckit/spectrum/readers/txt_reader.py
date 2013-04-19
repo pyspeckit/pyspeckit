@@ -123,19 +123,20 @@ def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, skiplines=0, **kwargs)
                 coldata[-1][j] = str(element)
                 
     f.close()
+
+    coldata = zip(*coldata)     
     
     if not colunits:
-        colunits = ['unknown', 'unknown', 'unknown']
+        colunits = ['unknown'] * len(coldata)
     if not hdr:
-        hdr = ['unknown', 'unknown', 'unknown']    
+        hdr = ['unknown'] * len(coldata)
         
     N = len(hdr)
-    coldata = zip(*coldata)     
             
     # Prepare to return data
     data = coldata[datacol]
     xarr = coldata[xaxcol]
-    if errorcol > N - 1:
+    if errorcol > len(coldata) - 1:
         error = np.array(data)*0
     else:
         error = coldata[errorcol]
