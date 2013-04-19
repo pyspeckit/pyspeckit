@@ -31,6 +31,10 @@ If you have pip (see http://pypi.python.org/pypi/pyspeckit), you can install wit
 
     pip install pyspeckit
 
+Or the most recent version::
+
+    pip install https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz
+
 You can acquire the code with this clone command::
 
     hg clone https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org pyspeckit
