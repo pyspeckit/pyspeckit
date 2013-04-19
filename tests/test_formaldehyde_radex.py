@@ -5,6 +5,7 @@ try:
 except ImportError:
     import pyfits
 from pyspeckit.spectrum import models
+import os
 
 if os.path.exists('/Users/adam/work/h2co/radex/grid_greenscaled/1-1_2-2_T5to55_lvg_greenscaled_tex1.fits'):
 
