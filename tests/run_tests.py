@@ -62,6 +62,9 @@ execfile('test_juliantxt.py')
 
 print "Success!  Or at least, no exceptions..."
 
-print "Running comparison"
-execfile('compare_images.py')
+try:
+    print "Running comparison"
+    execfile('compare_images.py')
+except ImportError:
+    print "Not comparing images because PIL was not installed."
 
