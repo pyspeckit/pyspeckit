@@ -1,5 +1,5 @@
 import pyspeckit
-sp = pyspeckit.Spectrum('julia_infrared.txt')
+sp = pyspeckit.Spectrum('julian_infrared.txt')
 
 # set up units properly
 sp.xarr.units='angstroms'
