@@ -37,6 +37,10 @@ pylab.show()
 # crop for faster fitting
 small_sp = sp.copy()
 small_sp.crop(1000,3520)
-
 small_sp.plotter(xmin=1000,xmax=3520,ymax=1)
+small_sp.baseline.powerlaw=True
+small_sp.baseline(xmin=1200, xmax=3500,exclude=[1200,1440,1490,1700,1830,1995,2700,2850],subtract=False,
+        reset_selection=True, highlight_fitregion=True,
+        powerlaw=True,quiet=False,LoudDebug=True)
+
 small_sp.specfit(guesses=guesses, annotate=False, fittype='gaussian', quiet=False)
