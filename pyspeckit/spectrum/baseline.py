@@ -207,7 +207,7 @@ class Baseline(interactive.Interactive):
         if hasattr(self.Spectrum,'header'):
             history.write_history(self.Spectrum.header,
                     "BASELINE order=%i pars=%s" % (self.order, 
-                        ",".join(self.baselinepars)) +
+                        ",".join([str(s) for s in self.baselinepars])) +
                         "(powerlaw)" if self.powerlaw else "")
 
     def get_model(self, xarr=None, baselinepars=None, powerlaw=False, fit_units='pixels'):
