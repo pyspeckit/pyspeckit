@@ -118,10 +118,7 @@ class Baseline(interactive.Interactive):
         """
         specfit = self.Spectrum.specfit
         self.order = order
-        if self.subtracted and fit_original: # add back in the old baseline
-            self.spectofit = self.Spectrum.data+self.basespec
-        else:
-            self.spectofit = self.Spectrum.data.copy()
+        self.set_spectofit(fit_original=fit_original)
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:
             self.start_interactive(clear_all_connections=clear_all_connections,
@@ -147,9 +144,19 @@ class Baseline(interactive.Interactive):
                     baseline_fit_color=baseline_fit_color, 
                     debug=debug,
                     subtract=subtract, 
+                    LoudDebug=LoudDebug,
                     **kwargs)
             if highlight_fitregion: self.highlight_fitregion()
         if save: self.savefit()
+
+    def set_spectofit(self, fit_original=True):
+        """
+        Reset the spectrum-to-fit from the data
+        """
+        if self.subtracted and fit_original: # add back in the old baseline
+            self.spectofit = self.Spectrum.data+self.basespec
+        else:
+            self.spectofit = self.Spectrum.data.copy()
 
     def button2action(self, event=None, debug=False, subtract=True, powerlaw=None,
             fit_original=False, baseline_fit_color='orange', **kwargs):
@@ -179,7 +186,7 @@ class Baseline(interactive.Interactive):
                 xarr_fit_units=xarr_fit_units,
                 **kwargs)
 
-        self.basespec = self.get_model(xarr=self.Spectrum.xarr, powerlaw=self.powerlaw, fit_units=xarr_fit_units)
+        self.set_basespec_frompars()
 
         if subtract:
             if self.subtracted and fit_original: 
@@ -209,6 +216,15 @@ class Baseline(interactive.Interactive):
                     "BASELINE order=%i pars=%s" % (self.order, 
                         ",".join([str(s) for s in self.baselinepars])) +
                         "(powerlaw)" if self.powerlaw else "")
+
+    def set_basespec_frompars(self):
+        """
+        Set the baseline spectrum based on the fitted parameters
+        """
+
+        xarr_fit_units = self.Spectrum.xarr.units
+        self.basespec = self.get_model(xarr=self.Spectrum.xarr,
+                powerlaw=self.powerlaw, fit_units=xarr_fit_units)
 
     def get_model(self, xarr=None, baselinepars=None, powerlaw=False, fit_units='pixels'):
         # create the full baseline spectrum...
@@ -326,12 +342,12 @@ class Baseline(interactive.Interactive):
             for ii,p in enumerate(self.baselinepars):
                 self.Spectrum.header.update('BLCOEF%0.2i' % (ii),p,comment="Baseline power-law best-fit coefficient x^%i" % (self.order-ii-1))
 
-    def _baseline(self, spectrum, xarr=None, err=None, 
-            order=1, quiet=True, mask=None, powerlaw=False,
-            xarr_fit_units='pixels', LoudDebug=False, renormalize='auto',
-            zeroerr_is_OK=True, spline=False, **kwargs):
+    def _baseline(self, spectrum, xarr=None, err=None,
+                  order=1, quiet=True, mask=None, powerlaw=False,
+                  xarr_fit_units='pixels', LoudDebug=False, renormalize='auto',
+                  zeroerr_is_OK=True, spline=False, **kwargs):
         """
-        Subtract a baseline from a spectrum
+        Fit a baseline/continuum to a spectrum
         """
 
         #if xmin == 'default':
@@ -377,16 +393,17 @@ class Baseline(interactive.Interactive):
         OK = True-mask
         xarrconv = xarr.as_unit(xarr_fit_units)
         if powerlaw:
-            pguess = [np.median(spectrum[OK]),2,xarrconv[OK][0]-1]
+            pguess = [np.median(spectrum[OK]),2.0,xarrconv[OK][0]-1]
             if LoudDebug: print "_baseline powerlaw Guesses: ",pguess
 
             def mpfitfun(data,err):
                 #def f(p,fjac=None): return [0,np.ravel(((p[0] * (xarrconv[OK]-p[2])**(-p[1]))-data)/err)]
                 # Logarithmic fitting:
                 def f(p,fjac=None):
-                    return [0,
-                            np.ravel( (np.log10(data) - np.log10(p[0]) + p[1]*np.log10(xarrconv[OK]/p[2])) / (err/data) )
-                            ]
+                    #return [0,
+                    #        np.ravel( (np.log10(data) - np.log10(p[0]) + p[1]*np.log10(xarrconv[OK]/p[2])) / (err/data) )
+                    #        ]
+                    return [0, np.ravel( (data - p[0]*(xarrconv[OK]/p[2])**(-p[1])) / err )]
                 return f
         else:
             pguess = [0]*(order+1)
