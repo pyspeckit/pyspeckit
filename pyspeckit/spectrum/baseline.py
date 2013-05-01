@@ -5,6 +5,7 @@ from ..config import ConfigDescriptor as cfgdec
 import interactive
 import copy
 import history
+from .. import specwarnings
 
 interactive_help_message = """
 (1) Left-click or press 1 (one) at two positions to select or add to the baseline fitting range - it will be 
@@ -61,6 +62,7 @@ class Baseline(interactive.Interactive):
         #self.include = [self.xmin,self.xmax]
         #self.includevelo = [Spectrum.xarr[self.xmin],Spectrum.xarr[self.xmax]]
         self.powerlaw=False
+        self._xfit_units = None
         self._plots = []
 
     @cfgdec
@@ -173,7 +175,7 @@ class Baseline(interactive.Interactive):
 
         self.clear_highlights()
 
-        xarr_fit_units = self.Spectrum.xarr.units
+        self._xfit_units = self.Spectrum.xarr.units
 
         if debug: print "Fitting baseline"
         self.basespec, self.baselinepars = self._baseline(
@@ -183,7 +185,7 @@ class Baseline(interactive.Interactive):
                 order=self.order, 
                 mask=(True-self.includemask),
                 powerlaw=powerlaw,
-                xarr_fit_units=xarr_fit_units,
+                xarr_fit_units=self._xfit_units,
                 **kwargs)
 
         self.set_basespec_frompars()
@@ -226,20 +228,18 @@ class Baseline(interactive.Interactive):
         self.basespec = self.get_model(xarr=self.Spectrum.xarr,
                 powerlaw=self.powerlaw, fit_units=xarr_fit_units)
 
-    def get_model(self, xarr=None, baselinepars=None, powerlaw=False, fit_units='pixels'):
+    def get_model(self, xarr=None, baselinepars=None):
         # create the full baseline spectrum...
+        fit_units = self._xfit_units
         if xarr is None:
             xarr = self.Spectrum.xarr.as_unit(fit_units)
         if baselinepars is None:
             baselinepars = self.baselinepars
         if baselinepars is None: # still...
             return 0 # no baseline has been computed
-        if powerlaw:
-            self.powerlaw = True
-            #self.basespec = (self.baselinepars[0]*(self.Spectrum.xarr.as_unit(xarr_fit_units)-self.baselinepars[2])**(-self.baselinepars[1])).squeeze()
-            return (baselinepars[0]*(xarr/baselinepars[2])**(-baselinepars[1])).squeeze()
+        if self.powerlaw:
+            return (baselinepars[0]*(xarr)**(-baselinepars[1])).squeeze()
         else:
-            self.powerlaw = False
             return np.poly1d(baselinepars)(xarr)
 
 
@@ -314,8 +314,7 @@ class Baseline(interactive.Interactive):
 
     def annotate(self,loc='upper left'):
         if self.powerlaw:
-            #bltext = "bl: $y=%6.3g\\times(x-%6.3g)^{-%6.3g}$" % (self.baselinepars[0],self.baselinepars[2],self.baselinepars[1])
-            bltext = "bl: $y=%6.3g\\times(x/%6.3g)^{-%6.3g}$" % (self.baselinepars[0],self.baselinepars[2],self.baselinepars[1])
+            bltext = "bl: $y=%6.3g\\times(x)^{-%6.3g}$" % (self.baselinepars[0],self.baselinepars[1])
         else:
             bltext = "bl: $y=$"+"".join(["$%+6.3gx^{%i}$" % (f,self.order-i)
                 for i,f in enumerate(self.baselinepars)])
@@ -393,7 +392,7 @@ class Baseline(interactive.Interactive):
         OK = True-mask
         xarrconv = xarr.as_unit(xarr_fit_units)
         if powerlaw:
-            pguess = [np.median(spectrum[OK]),2.0,xarrconv[OK][0]-1]
+            pguess = [np.median(spectrum[OK]),2.0]
             if LoudDebug: print "_baseline powerlaw Guesses: ",pguess
 
             def mpfitfun(data,err):
@@ -403,7 +402,7 @@ class Baseline(interactive.Interactive):
                     #return [0,
                     #        np.ravel( (np.log10(data) - np.log10(p[0]) + p[1]*np.log10(xarrconv[OK]/p[2])) / (err/data) )
                     #        ]
-                    return [0, np.ravel( (data - p[0]*(xarrconv[OK]/p[2])**(-p[1])) / err )]
+                    return [0, np.ravel( (data - p[0]*(xarrconv[OK])**(-p[1])) / err )]
                 return f
         else:
             pguess = [0]*(order+1)
@@ -427,8 +426,8 @@ class Baseline(interactive.Interactive):
             raise ValueError("chi^2 is NAN in baseline fitting")
         fitp = mp.params
         if powerlaw:
-            #bestfit = (fitp[0]*(xarrconv-fitp[2])**(-fitp[1])).squeeze()
-            bestfit = (fitp[0]*(xarrconv/fitp[2])**(-fitp[1])).squeeze()
+            #bestfit = (fitp[0]*(xarrconv)**(-fitp[1])).squeeze()
+            bestfit = (fitp[0]*(xarrconv)**(-fitp[1])).squeeze()
         else:
             bestfit = np.poly1d(fitp)(xarrconv).squeeze()
 

@@ -48,4 +48,4 @@ small_sp.baseline(xmin=1200, xmax=3500,exclude=[1200,1440,1490,1700,1830,1995,27
         reset_selection=True, highlight_fitregion=True,
         powerlaw=True,quiet=False,LoudDebug=True)
 
-small_sp.specfit(guesses=guesses, annotate=False, fittype='gaussian', quiet=False)
+#small_sp.specfit(guesses=guesses, annotate=False, fittype='gaussian', quiet=False)
