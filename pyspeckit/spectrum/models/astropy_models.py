@@ -2,24 +2,22 @@ from astropy.models import ParametricModel,Parameter,_convert_input,_convert_out
 import numpy as np
 
 class PowerLawModel(ParametricModel):
-    param_names = ['scale', 'alpha', 'characteristic']
+    param_names = ['scale', 'alpha']
 
-    def __init__(self, scale, alpha, characteristic, param_dim=1):
-        self.linear = False
+    def __init__(self, scale, alpha, param_dim=1):
         self._scale = Parameter(name='scale', val=scale, mclass=self, param_dim=param_dim)
         self._alpha = Parameter(name='alpha', val=alpha, mclass=self, param_dim=param_dim)
-        self._characteristic = Parameter(name='characteristic', val=characteristic, mclass=self, param_dim=param_dim)
         ParametricModel.__init__(self, self.param_names, ndim=1, outdim=1, param_dim=param_dim)
+        self.linear = False
+        self.deriv = None
     
     def eval(self, xvals, params):
-        return params[0]*((xvals/params[2])**params[1])
+        return params[0]*((xvals)**(-params[1]))
 
-    def deriv(self, params, xvals, yvals):
-        return
+    def noderiv(self, params, xvals, yvals):
         deriv_dict = {
-                'scale': ((xvals/params[2])**params[1]),
-                'alpha': params[0]*((xvals/params[2])**(params[1]-1))*np.log(1./params[2]),
-                'characteristic': -1*params[0]*((xvals/params[2])**(params[1])) * (params[1]/params[2])}
+                'scale': ((xvals)**(-params[1])),
+                'alpha': params[0]*((xvals)**(-params[1]-1))}
         derivval = [deriv_dict[par] for par in self.param_names]
         return np.array(derivval).T
         
