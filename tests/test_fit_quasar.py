@@ -4,7 +4,11 @@ C_IV=1549.48
 He_II=1640.4
 Si_IV=1397.61
 Si_O_IV=1399.8
-guesses = [5, C_IV, 80,10,C_IV,20,2, He_II, 100, 3, Si_IV, 70, 3, Si_O_IV, 50]
+guesses = [1, C_IV, 30, 
+           0.1,C_IV,30,
+           1, He_II, 30,
+           0.3, Si_IV, 70,
+           0.3, Si_O_IV, 50]
 import pyspeckit
 sp = pyspeckit.Spectrum('spectrum_4.txt')
 sp.data *= 1e15
