@@ -224,9 +224,7 @@ class Baseline(interactive.Interactive):
         Set the baseline spectrum based on the fitted parameters
         """
 
-        xarr_fit_units = self.Spectrum.xarr.units
-        self.basespec = self.get_model(xarr=self.Spectrum.xarr,
-                powerlaw=self.powerlaw, fit_units=xarr_fit_units)
+        self.basespec = self.get_model(xarr=self.Spectrum.xarr)
 
     def get_model(self, xarr=None, baselinepars=None):
         # create the full baseline spectrum...

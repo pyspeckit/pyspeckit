@@ -4,11 +4,11 @@ C_IV=1549.48
 He_II=1640.4
 Si_IV=1397.61
 Si_O_IV=1399.8
-guesses = [1, C_IV, 30, 
-           0.1,C_IV,30,
-           1, He_II, 30,
-           0.3, Si_IV, 70,
-           0.3, Si_O_IV, 50]
+guesses = [0.1, C_IV, 3, 
+           0.05, C_IV, 10,
+           0.02, He_II, 20,
+           0.08, Si_IV, 3,
+           0.08, Si_O_IV, 3]
 import pyspeckit
 sp = pyspeckit.Spectrum('spectrum_4.txt')
 sp.downsample(10)
@@ -48,4 +48,5 @@ small_sp.baseline(xmin=1200, xmax=3500,exclude=[1200,1440,1490,1700,1830,1995,27
         reset_selection=True, highlight_fitregion=True,
         powerlaw=True,quiet=False,LoudDebug=True)
 
-#small_sp.specfit(guesses=guesses, annotate=False, fittype='gaussian', quiet=False)
+small_sp.plotter(xmin=1300,xmax=1700,ymax=1)
+small_sp.specfit(guesses=guesses, annotate=False, fittype='gaussian', quiet=False)
