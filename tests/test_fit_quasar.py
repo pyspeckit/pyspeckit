@@ -11,6 +11,7 @@ guesses = [1, C_IV, 30,
            0.3, Si_O_IV, 50]
 import pyspeckit
 sp = pyspeckit.Spectrum('spectrum_4.txt')
+sp.downsample(10)
 sp.data *= 1e15
 sp.error[:] = 1 # just a guess...
 
