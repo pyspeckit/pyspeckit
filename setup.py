@@ -59,7 +59,10 @@ class PyTest(Command):
     user_options = []
 
     def initialize_options(self):
-        errno = subprocess.call(['git','clone','https://github.com/pyspeckit/pyspeckit-tests','tests'])
+        if os.path.exists("tests/"):
+            errno = subprocess.call(['git','pull'],cwd='tests/')
+        else:
+            errno = subprocess.call(['git','clone','https://github.com/pyspeckit/pyspeckit-tests','tests'])
         if errno != 0:
             raise SystemExit(errno)
 
