@@ -1,6 +1,10 @@
 CHANGES
 *******
 
+Release 0.1.13
+~~~~~~~~~~~~~~
+    * Cleanup excess data files
+
 Release 0.1.12
 ~~~~~~~~~~~~~~
     * New formaldehyde 218 GHz fitter
