@@ -7,7 +7,7 @@ class PowerLawModel(ParametricModel):
     def __init__(self, scale, alpha, param_dim=1):
         self._scale = Parameter(name='scale', val=scale, mclass=self, param_dim=param_dim)
         self._alpha = Parameter(name='alpha', val=alpha, mclass=self, param_dim=param_dim)
-        ParametricModel.__init__(self, self.param_names, ndim=1, outdim=1, param_dim=param_dim)
+        super(ParametricModel,self).__init__(self, self.param_names, ndim=1, outdim=1, param_dim=param_dim)
         self.linear = False
         self.deriv = None
     
