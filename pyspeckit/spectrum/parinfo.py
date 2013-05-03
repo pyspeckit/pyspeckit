@@ -1,6 +1,4 @@
-from astropy.models import parameters
-
-class ParinfoList(parameters.Parameters):
+class ParinfoList(list):
     """
     Store a list of model parameter values and their associated metadata (name,
     error, order, limits, etc.) in a class-friendly manner
