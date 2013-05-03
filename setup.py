@@ -59,7 +59,9 @@ class PyTest(Command):
     user_options = []
 
     def initialize_options(self):
-        pass
+        errno = subprocess.call(['git','clone','https://github.com/pyspeckit/pyspeckit-tests','tests'])
+        if errno != 0:
+            raise SystemExit(errno)
 
     def finalize_options(self):
         pass

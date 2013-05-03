@@ -4,6 +4,7 @@ CHANGES
 Release 0.1.13
 ~~~~~~~~~~~~~~
     * Cleanup excess data files
+    * Bugfixes in baseline fitting
 
 Release 0.1.12
 ~~~~~~~~~~~~~~
