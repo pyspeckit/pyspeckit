@@ -443,6 +443,26 @@ class Spectrum(object):
         
         return sp
 
+    def downsample(self, dsfactor):
+        """
+        Downsample the spectrum (and all of its subsidiaries) without smoothing
+
+        Parameters
+        ----------
+        dsfactor : int
+            Downsampling Factor
+        """
+
+        dsfactor = round(dsfactor)  # ensure int
+
+        self.data = self.data[::dsfactor]
+        self.xarr = self.xarr[::dsfactor]
+        if len(self.xarr) != len(self.data):
+            raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
+        if self.error is not None:
+            self.error = self.error[::dsfactor]
+        self.baseline.downsample(dsfactor)
+        self.specfit.downsample(dsfactor)
 
     def smooth(self,smooth,**kwargs):
         """
