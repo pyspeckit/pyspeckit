@@ -5,6 +5,7 @@ Release 0.1.13
 ~~~~~~~~~~~~~~
     * Cleanup excess data files
     * Bugfixes in baseline fitting
+    * Added astropy.models interface
 
 Release 0.1.12
 ~~~~~~~~~~~~~~

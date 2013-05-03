@@ -409,7 +409,6 @@ class SpectralModel(fitter.SimpleFitter):
 
         return self.mpp,self.model,self.mpperr,chi2
 
-
     def fitter(self, xax, data, err=None, quiet=True, veryverbose=False,
             debug=False, parinfo=None, **kwargs):
         """
@@ -846,3 +845,95 @@ class SpectralModel(fitter.SimpleFitter):
         
         return pymc.MCMC(d)
     
+class AstropyModel(SpectralModel):
+
+    def __init__(self, model, shortvarnames=None, **kwargs):
+        """
+        Override the SpectralModel initialization
+        """
+        if hasattr(self,__doc__): # how do you extend a docstring really?
+            self.__doc__ += SpectralModel.__doc__
+
+        if shortvarnames is None:
+            shortvarnames = model.param_names
+
+        super(AstropyModel,self).__init__(model, len(model.parameters),
+            shortvarnames=shortvarnames,
+            multisingle='multi',
+            model=model,
+            **kwargs)
+
+        self.mp = None
+        self.vheight = False
+        self.npeaks = 1
+        
+
+    def _make_parinfo(self, model=None):
+
+        self.parinfo = ParinfoList([
+            Parinfo(parname=name,value=value) 
+            for name,value in zip(model.param_names,model.parameters)])
+
+        return self.parinfo, {}
+
+    def _parse_parinfo(self, parinfo):
+        """
+        Parse a ParinfoList into astropy.models parameters
+        """
+        if len(parinfo) > self.npars:
+            if len(parinfo) % self.npars != 0:
+                raise ValueError("Need to have an integer number of models")
+            else:
+                self.modelfunc.param_names = parinfo.names
+                self.modelfunc.parameters = parinfo.values
+        else:
+            self.modelfunc.param_names = parinfo.names
+            self.modelfunc.parameters = parinfo.values
+
+    def fitter(self, xax, data, err=None, quiet=True, veryverbose=False,
+            debug=False, parinfo=None, params=None, npeaks=None, **kwargs):
+
+        import astropy.models as models
+
+        if npeaks is not None and npeaks > 1:
+            raise NotImplementedError("Astropy models cannot be used to fit multiple peaks yet")
+
+        if parinfo is not None:
+            self._parse_parinfo(parinfo)
+        if params is not None:
+            self.modelfunc.parameters = params
+
+        self.astropy_fitter = models.fitting.NonLinearLSQFitter(self.modelfunc)
+        
+        if err is None:
+            self.astropy_fitter(xax, data, **kwargs)
+        else:
+            self.astropy_fitter(xax, data, weights=1./err**2, **kwargs)
+
+        mpp = self.astropy_fitter.fitpars
+        cov = self.astropy_fitter.covar
+        if cov is None:
+            mpperr = np.zeros(len(mpp))
+        else:
+            mpperr = cov.diagonal()
+        self.model = self.astropy_fitter.model(xax)
+        if err is None:
+            chi2 = ((data-self.model)**2).sum()
+        else:
+            chi2 = ((data-self.model)**2/err**2).sum()
+
+        # update object paramters
+        self.modelfunc.parameters = mpp
+        self._make_parinfo(self.modelfunc)
+
+        return mpp,self.model,mpperr,chi2
+
+    def n_modelfunc(self, pars=None, debug=False, **kwargs):
+        """
+        Only deals with single-peak functions
+        """
+        try:
+            self._parse_parinfo(pars)
+        except AttributeError:
+            self.modelfunc.parameters = pars
+        return self.modelfunc
