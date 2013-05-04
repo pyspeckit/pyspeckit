@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Wrappers &mdash; pyspeckit 0.1.12 documentation</title>
+    <title>Wrappers &mdash; pyspeckit 0.1.13 documentation</title>
     
     <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '0.1.12',
+        URL_ROOT:    './',
+        VERSION:     '0.1.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -27,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
-    <link rel="top" title="pyspeckit 0.1.12 documentation" href="index.html" />
+    <link rel="top" title="pyspeckit 0.1.13 documentation" href="index.html" />
     <link rel="next" title="Examples" href="examples.html" />
     <link rel="prev" title="GBTIDL FITS files" href="gbtfiles.html" />
      
@@ -48,7 +46,7 @@
           <p class="logo"><a href="http://pyspeckit.bitbucket.org">
             <img class="logo" src="_static/logo.png" alt="Logo"/>
           </a></p>
-        <h1><a href="index.html">pyspeckit 0.1.12 documentation</a></h1>
+        <h1><a href="index.html">pyspeckit 0.1.13 documentation</a></h1>
         <div class="rel">
           <a href="http://pyspeckit.bitbucket.org/">PySpecKit Home </a>  |
           <a href=index.html>Docs Home </a>  |
@@ -159,6 +157,17 @@ will not be fit and will be left blank in the output fit parameter cube</p>
 <p>Wrapper to fit ammonia spectra.  Generates a reasonable guess at the position
 and velocity using a gaussian fit</p>
 <p>Example use:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pyspeckit</span>
+<span class="n">sp11</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;spec.nh3_11.dat&#39;</span><span class="p">,</span> <span class="n">errorcol</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
+<span class="n">sp22</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;spec.nh3_22.dat&#39;</span><span class="p">,</span> <span class="n">errorcol</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
+<span class="n">sp33</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;spec.nh3_33.dat&#39;</span><span class="p">,</span> <span class="n">errorcol</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
+<span class="n">sp11</span><span class="o">.</span><span class="n">xarr</span><span class="o">.</span><span class="n">refX</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ammonia</span><span class="o">.</span><span class="n">freq_dict</span><span class="p">[</span><span class="s">&#39;oneone&#39;</span><span class="p">]</span>
+<span class="n">sp22</span><span class="o">.</span><span class="n">xarr</span><span class="o">.</span><span class="n">refX</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ammonia</span><span class="o">.</span><span class="n">freq_dict</span><span class="p">[</span><span class="s">&#39;twotwo&#39;</span><span class="p">]</span>
+<span class="n">sp33</span><span class="o">.</span><span class="n">xarr</span><span class="o">.</span><span class="n">refX</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ammonia</span><span class="o">.</span><span class="n">freq_dict</span><span class="p">[</span><span class="s">&#39;threethree&#39;</span><span class="p">]</span>
+<span class="n">input_dict</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;oneone&#39;</span><span class="p">:</span><span class="n">sp11</span><span class="p">,</span><span class="s">&#39;twotwo&#39;</span><span class="p">:</span><span class="n">sp22</span><span class="p">,</span><span class="s">&#39;threethree&#39;</span><span class="p">:</span><span class="n">sp33</span><span class="p">}</span>
+<span class="n">spf</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">wrappers</span><span class="o">.</span><span class="n">fitnh3</span><span class="o">.</span><span class="n">fitnh3tkin</span><span class="p">(</span><span class="n">input_dict</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="function">
 <dt id="pyspeckit.wrappers.fitnh3.BigSpectrum_to_NH3dict">
 <tt class="descclassname">pyspeckit.wrappers.fitnh3.</tt><tt class="descname">BigSpectrum_to_NH3dict</tt><big>(</big><em>sp</em>, <em>vrange=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/wrappers/fitnh3.py#L171" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/wrappers/fitnh3.py#cl-171" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.wrappers.fitnh3.BigSpectrum_to_NH3dict" title="Permalink to this definition">¶</a></dt>
@@ -261,23 +270,7 @@ Draine 2011 textbook pgs 219-230)</dd>
         </div>
         <div class="sidebar">
           <h3>Table Of Contents</h3>
-          <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="index.html">Index</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Models &amp; Fitting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">High-Level Wrappers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#cube-fitting">Cube Fitting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#nh3-fitter-wrapper">NH3 fitter wrapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#n2h-fitter-wrapper">N2H+ fitter wrapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#n2h-extras">N2H+ extras</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="interactive.html">Interactive Use</a></li>
-</ul>
-
+          
           <h3 style="margin-top: 1.5em;">Search</h3>
           <form class="search" action="search.html" method="get">
             <input type="text" name="q" />
@@ -301,7 +294,7 @@ Draine 2011 textbook pgs 219-230)</dd>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Mar 31, 2013.
+      Last updated on May 04, 2013.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
