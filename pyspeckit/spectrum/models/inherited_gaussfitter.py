@@ -12,6 +12,7 @@ class.
 
 """
 import model
+import fitter
 import numpy 
 
 def gaussian(x,A,dx,w, return_components=False, normalized=False):
@@ -65,5 +66,25 @@ def gaussian_fitter(multisingle='multi'):
             fwhm_pars=['width'],
             )
     myclass.__name__ = "gaussian"
+    
+    return myclass
+
+def gaussian_vheight_fitter(multisingle='multi'):
+    """
+    Generator for Gaussian fitter class
+    """
+
+    vhg = fitter.vheightmodel(gaussian)
+    myclass =  model.SpectralModel(vhg, 4,
+            parnames=['height','amplitude','shift','width'], 
+            parlimited=[(False,False),(False,False),(False,False),(True,False)], 
+            parlimits=[(0,0),(0,0), (0,0), (0,0)],
+            shortvarnames=('B','A',r'\Delta x',r'\sigma'),
+            multisingle=multisingle,
+            centroid_par='shift',
+            fwhm_func=gaussian_fwhm,
+            fwhm_pars=['width'],
+            )
+    myclass.__name__ = "vheightgaussian"
     
     return myclass
