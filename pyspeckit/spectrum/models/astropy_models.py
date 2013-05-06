@@ -18,7 +18,7 @@ try:
         def noderiv(self, params, xvals, yvals):
             deriv_dict = {
                     'scale': ((xvals)**(-params[1])),
-                    'alpha': params[0]*((xvals)**(-params[1]-1))}
+                    'alpha': params[0]*((xvals)**(-params[1]))*np.log(xvals)}
             derivval = [deriv_dict[par] for par in self.param_names]
             return np.array(derivval).T
             
