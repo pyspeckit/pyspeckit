@@ -464,7 +464,7 @@ class Cube(spectrum.Spectrum):
                 sp.error = np.ones(sp.data.shape) * errmap[y,x]
             else:
                 if verbose_level > 1 and ii==0: print "WARNING: using data std() as error."
-                sp.error[:] = sp.data.std()
+                sp.error[:] = sp.data[sp.data==sp.data].std()
             if sp.error is not None and signal_cut > 0:
                 snr = sp.data / sp.error
                 if absorption:
