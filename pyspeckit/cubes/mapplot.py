@@ -182,9 +182,12 @@ class MapPlotter(object):
         elif type(estimator) is int:
             if hasattr(self.Cube,'parcube'):
                 self.plane = self.Cube.parcube[estimator,:,:]
-
+        
         if self.plane is None:
             raise ValueError("Invalid estimator %s" % (str(estimator)))
+
+        if np.sum(np.isfinite(self.plane)) == 0:
+            raise ValueError("Map is all NaNs or infs.  Check your estimator or your input cube.")
 
     def click(self,event):
         """
