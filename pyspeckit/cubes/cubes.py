@@ -107,7 +107,8 @@ def speccen_header(header,lon=None,lat=None):
 
     return newheader
 
-def extract_aperture(cube,ap,r_mask=False,wcs=None,coordsys='galactic',wunit='arcsec',debug=False):
+def extract_aperture(cube, ap, r_mask=False, wcs=None, coordsys='galactic',
+        wunit='arcsec', debug=False, method='mean'):
     """
     Extract an aperture from a data cube.  E.g. to acquire a spectrum
     of an outflow that is extended.
@@ -118,20 +119,27 @@ def extract_aperture(cube,ap,r_mask=False,wcs=None,coordsys='galactic',wunit='ar
     Apertures are specified in PIXEL units with an origin of 0,0 (NOT the 1,1
     fits standard!) unless wcs and coordsys are specified
     
-    INPUTS:
-        wcs - a pywcs.WCS instance associated with the data cube
-        coordsys - the coordinate system the aperture is specified in.
-            Options are 'celestial' and 'galactic'.  Default is 'galactic'
-        wunit - units of width/height.  default 'arcsec', options 'arcmin' and 'degree'
+    Parameters
+    ----------
+    ap : list
+        For a circular aperture, len(ap)=3:
+            ap = [xcen,ycen,radius]
+        For an elliptical aperture, len(ap)=5:
+            ap = [xcen,ycen,height,width,PA]
+    wcs : wcs
+        a pywcs.WCS instance associated with the data cube
+    coordsys : str
+        the coordinate system the aperture is specified in.
+        Options are 'celestial' and 'galactic'.  Default is 'galactic'
+    wunit : str
+        units of width/height.  default 'arcsec', options 'arcmin' and 'degree'
+    method : str
+        'mean' or 'sum' (average over spectra, or sum them)
 
-    For a circular aperture, len(ap)=3:
-        ap = [xcen,ycen,radius]
-
-    For an elliptical aperture, len(ap)=5:
-        ap = [xcen,ycen,height,width,PA]
-
-    Optional inputs:
-        r_mask - return mask in addition to spectrum (for error checking?)
+    Other Parameters
+    ----------------
+    r_mask : bool
+    return mask in addition to spectrum (for error checking?)
     """
 
     if wcs is not None and coordsys is not None:
@@ -158,7 +166,11 @@ def extract_aperture(cube,ap,r_mask=False,wcs=None,coordsys='galactic',wunit='ar
 
     npixinmask = mask.sum()
     mask3d = repeat(mask[newaxis,:,:],cube.shape[0],axis=0)
-    spec = nansum(nansum((cube*mask3d),axis=2),axis=1) / npixinmask
+    specsum = nansum(nansum((cube*mask3d),axis=2),axis=1) 
+    if method == 'mean':
+        spec = specsum / npixinmask
+    else:
+        spec = specsum
 
     if r_mask:
         return spec,mask

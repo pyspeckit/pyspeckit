@@ -251,20 +251,34 @@ class Cube(spectrum.Spectrum):
 
         self.specfit.plot_fit(**kwargs)
 
-    def plot_apspec(self, aperture, coordsys=None, reset_ylimits=True, **kwargs):
+    def plot_apspec(self, aperture, coordsys=None, reset_ylimits=True,
+            method='mean', **kwargs):
         """
         Extract an aperture using cubes.extract_aperture
         (defaults to Cube coordinates)
+
+        Parameters
+        ----------
+        aperture : list
+            A list of aperture parameters, e.g. 
+            For a circular aperture, len(ap)=3:
+                ap = [xcen,ycen,radius]
+            For an elliptical aperture, len(ap)=5:
+                ap = [xcen,ycen,height,width,PA]
+        coordsys : None or str
+            The coordinate system of the aperture (e.g., galactic, fk5, None
+            for pixel)
+        method : 'mean' or 'sum'
         """
 
 
         if self.plot_special is None:
-            self.set_apspec(aperture, coordsys=coordsys)
+            self.set_apspec(aperture, coordsys=coordsys, method=method)
             self.plotter(reset_ylimits=reset_ylimits, **kwargs)
         else:
             #self.plot_special(reset_ylimits=reset_ylimits, **dict(kwargs.items()+self.plot_special_kwargs.items()))
 
-            sp = self.get_apspec(aperture, coordsys=coordsys)
+            sp = self.get_apspec(aperture, coordsys=coordsys, method=method)
             sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
             sp.plot_special(reset_ylimits=reset_ylimits, **dict(kwargs.items()+self.plot_special_kwargs.items()))
 
@@ -305,7 +319,7 @@ class Cube(spectrum.Spectrum):
 
         return sp
 
-    def get_apspec(self, aperture, coordsys=None):
+    def get_apspec(self, aperture, coordsys=None, method='mean'):
         """
         Extract an aperture using cubes.extract_aperture
         (defaults to Cube coordinates)
@@ -321,9 +335,14 @@ class Cube(spectrum.Spectrum):
 
         import cubes
         if coordsys is not None:
-            sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs ), header=self.header)
+            sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
+                    data=cubes.extract_aperture( self.cube, aperture ,
+                        coordsys=coordsys , wcs=self.mapplot.wcs ),
+                    header=self.header, method=method)
         else:
-            sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=cubes.extract_aperture( self.cube, aperture , coordsys=None), header=self.header)
+            sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
+                    data=cubes.extract_aperture( self.cube, aperture ,
+                        coordsys=None), header=self.header, method=method)
 
         sp.specfit = copy.copy(self.specfit)
         sp.specfit.includemask = self.specfit.includemask.copy()
@@ -331,7 +350,7 @@ class Cube(spectrum.Spectrum):
 
         return sp
 
-    def set_apspec(self, aperture, coordsys=None):
+    def set_apspec(self, aperture, coordsys=None, method='mean'):
         """
         Extract an aperture using cubes.extract_aperture
         (defaults to Cube coordinates)
@@ -339,9 +358,9 @@ class Cube(spectrum.Spectrum):
 
         import cubes
         if coordsys is not None:
-            self.data = cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs )
+            self.data = cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs, method=method )
         else:
-            self.data = cubes.extract_aperture( self.cube, aperture , coordsys=None)
+            self.data = cubes.extract_aperture( self.cube, aperture , coordsys=None, method=method)
 
     def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
             verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
