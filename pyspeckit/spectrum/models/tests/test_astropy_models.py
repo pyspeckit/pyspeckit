@@ -1,7 +1,11 @@
 from .. import astropy_models
 import numpy as np
-from astropy.models import fitting
+try:
+    from astropy.models import fitting
+except ImportError:
+    pass
 
+# pytest.markif....
 def test_powerlaw(scale=5., alpha=2.):
     x = np.linspace(10,100)
     y = scale * (x)**(-alpha)
