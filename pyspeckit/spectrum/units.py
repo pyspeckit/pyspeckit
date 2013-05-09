@@ -496,10 +496,12 @@ class SpectroscopicAxis(np.ndarray):
         else: 
             return self.min()
 
-    def x_to_pix(self, xval):
+    def x_to_pix(self, xval, xval_units=None):
         """
         Given an X coordinate in SpectroscopicAxis' units, return the corresponding pixel number
         """
+        if xval_units is not None:
+            xval = self.x_to_coord(xval, xval_units)
         nearest_pix = np.argmin(np.abs(self-xval))
         return nearest_pix
 

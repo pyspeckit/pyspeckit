@@ -324,7 +324,18 @@ class Plotter(object):
         self.axis.set_ylim(self.ymin,self.ymax)
         
 
-    def label(self, title=None, xlabel=None, ylabel=None, verbose_label=False, **kwargs):
+    def label(self, title=None, xlabel=None, ylabel=None, verbose_label=False,
+            **kwargs):
+        """
+        Label the plot, with an attempt to parse standard units into nice latex labels
+
+        Parameters
+        ----------
+        title : str
+        xlabel : str
+        ylabel : str
+        verbose_label: bool
+        """
    
         if title is not None:
             self.title = title
