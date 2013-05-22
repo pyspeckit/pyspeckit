@@ -114,7 +114,7 @@ class hyperfinemodel(object):
           
                 tau_nu = np.array(tau_line * np.exp(-(xarr+nuoff-self.freq_dict[linename])**2/(2.0*nuwidth**2)))
                 tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
-                components.append( tau_nu )
+            components.append( tau_nu )
             tau_nu_cumul += tau_nu
 
         # add a list of the individual 'component' spectra to the total components...
