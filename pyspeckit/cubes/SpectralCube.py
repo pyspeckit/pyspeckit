@@ -335,14 +335,19 @@ class Cube(spectrum.Spectrum):
 
         import cubes
         if coordsys is not None:
+            data = cubes.extract_aperture(self.cube, aperture,
+                                          coordsys=coordsys,
+                                          wcs=self.mapplot.wcs,
+                                          method=method)
             sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
-                    data=cubes.extract_aperture( self.cube, aperture ,
-                        coordsys=coordsys , wcs=self.mapplot.wcs, method=method ),
-                    header=self.header)
+                                    data=data,
+                                    header=self.header)
         else:
+            data = cubes.extract_aperture(self.cube, aperture, coordsys=None,
+                                          method=method)
             sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
-                    data=cubes.extract_aperture( self.cube, aperture ,
-                        coordsys=None), header=self.header, method=method)
+                                    data=data,
+                                    header=self.header)
 
         sp.specfit = copy.copy(self.specfit)
         sp.specfit.includemask = self.specfit.includemask.copy()
