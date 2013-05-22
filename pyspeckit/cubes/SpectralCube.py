@@ -337,8 +337,8 @@ class Cube(spectrum.Spectrum):
         if coordsys is not None:
             sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
                     data=cubes.extract_aperture( self.cube, aperture ,
-                        coordsys=coordsys , wcs=self.mapplot.wcs ),
-                    header=self.header, method=method)
+                        coordsys=coordsys , wcs=self.mapplot.wcs, method=method ),
+                    header=self.header)
         else:
             sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
                     data=cubes.extract_aperture( self.cube, aperture ,
