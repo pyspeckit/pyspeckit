@@ -7,8 +7,11 @@ Unit parsing and conversion tool.
 The SpectroscopicAxis class is meant to deal with unit conversion internally
 
 Open Questions: Are there other FITS-valid projection types, unit types, etc.
-    that should be included?
-    What about for other fields (e.g., wavenumber?)
+that should be included?
+What about for other fields (e.g., wavenumber?)
+
+.. todo:: Incorporate astropy's Quantity array objects when they are ready
+
 """
 #.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 #Affiliation: University of Colorado at Boulder
@@ -447,31 +450,6 @@ class SpectroscopicAxis(np.ndarray):
         if not OK:
             raise InconsistentTypeError("Units: %s Type[units]: %s in %r" % (self.units,unit_type_dict[self.units],self) )
 
-    """ OBSOLETE use convert_to_unit
-    def change_xtype(self,new_xtype,**kwargs):
-        if new_xtype not in conversion_dict:
-            raise ValueError("There is no X-axis type %s" % new_xtype)
-        if conversion_dict[self.xtype] is velocity_dict:
-            if conversion_dict[new_xtype] is frequency_dict:
-                self.velocity_to_frequency(**kwargs)
-            elif conversion_dict[new_xtype] is wavelength_dict:
-                self.velocity_to_frequency()
-                self.frequency_to_wavelength(**kwargs)
-        elif conversion_dict[self.xtype] is frequency_dict:
-            if conversion_dict[new_xtype] is velocity_dict:
-                self.frequency_to_velocity(**kwargs)
-            elif conversion_dict[new_xtype] is wavelength_dict:
-                self.frequency_to_wavelength(**kwargs)
-        elif conversion_dict[self.xtype] is wavelength_dict:
-            if conversion_dict[new_xtype] is velocity_dict:
-                self.wavelength_to_frequency()
-                self.frequency_to_velocity(**kwargs)
-            elif conversion_dict[new_xtype] is wavelength_dict:
-                self.wavelength_to_frequency(**kwargs)
-        else:
-            raise ValueError("Conversion to xtype %s was not recognized." % xtype)
-    """
-
     def umax(self, units=None):
         """
         Return the maximum value of the SpectroscopicAxis.  If units specified,
@@ -667,6 +645,8 @@ class SpectroscopicAxis(np.ndarray):
 
         if unit in (None,'none'):
             return self
+        elif self.units in (None,'none'):
+            raise ValueError("xarr's units are blank; in order to convert to other units they must be specified.")
         elif unit in pixel_dict:
             return np.arange(self.shape[0])
         elif unit not in conversion_dict[self.xtype]:
