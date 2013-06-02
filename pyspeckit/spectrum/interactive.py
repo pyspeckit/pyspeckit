@@ -153,16 +153,20 @@ class Interactive(object):
 
         self._update_xminmax()
 
-    def highlight_fitregion(self,  drawstyle='steps-mid', color='g',
-            clear_highlights=True, **kwargs):
+    def highlight_fitregion(self,  drawstyle='steps-mid', color=(0,1,0,0.5),
+            linewidth=2, alpha=0.5, clear_highlights=True, **kwargs):
         """
         Re-highlight the fitted region
 
         kwargs are passed to `matplotlib.plot`
         """
-        if clear_highlights: self.clear_highlights()
+
+        if clear_highlights:
+            self.clear_highlights()
+
         bad = self.Spectrum.data*0
         bad[True-self.includemask] = numpy.nan
+
         self.button1plot += self.Spectrum.plotter.axis.plot(
                 self.Spectrum.xarr,
                 self.Spectrum.data+self.Spectrum.plotter.offset+bad,
@@ -231,7 +235,7 @@ class Interactive(object):
         if self.guesses is None:
             self.guesses = []
         elif len(self.guesses) > 0:
-            for ii in xrange(len(self.guesses)): 
+            for ii in xrange(len(self.guesses)):
                 self.guesses.pop()
 
     def clear_all_connections(self, debug=False):
@@ -255,13 +259,22 @@ class Interactive(object):
         self.Spectrum.plotter._reconnect_matplotlib_keys()
 
         # Click counters - should always be reset!
-        self.nclicks_b1 = 0 # button 1
-        self.nclicks_b2 = 0 # button 2
+        self.nclicks_b1 = 0  # button 1
+        self.nclicks_b2 = 0  # button 2
 
 
     def start_interactive(self, debug=False, LoudDebug=False,
             print_message=True, clear_all_connections=True, **kwargs):
         """
+        Initialize the interative session
+
+        Parameters
+        ----------
+        print_message : bool
+            Print the interactive help message?
+        clear_all_connections : bool
+            Clear all matplotlib event connections?
+            (calls :func:`self.clear_all_connections`)
 
         """
         if print_message: print self.interactive_help_message
@@ -300,6 +313,10 @@ class Interactive(object):
 
 
     def clear_highlights(self):
+        """
+        Hide and remove "highlight" colors from the plot indicating the
+        selected region
+        """
         for p in self.button1plot:
             p.set_visible(False)
             if p in self.Spectrum.plotter.axis.lines: self.Spectrum.plotter.axis.lines.remove(p)
@@ -324,18 +341,18 @@ class Interactive(object):
 
         *reset* : [ bool ]
             Reset the selected region to the full spectrum?  Only takes effect
-            if xmin and xmax are not (both) specified.   
+            if xmin and xmax are not (both) specified.
             TAKES PRECEDENCE ALL SUBSEQUENT BOOLEAN OPTIONS
 
         *fit_plotted_area* : [ bool ]
             Use the plot limits *as specified in :class:`pyspeckit.spectrum.plotters`*?
             Note that this is not necessarily the same as the window plot limits!
 
-        *use_window_limits* : [ bool ] 
+        *use_window_limits* : [ bool ]
             Use the plot limits *as displayed*.  Defaults to self.use_window_limits 
             (:attr:`pyspeckit.spectrum.interactive.use_window_limits`).
             Overwrites xmin,xmax set by plotter
-            
+
         exclude: {list of length 2n,'interactive', None}
             * interactive: start an interactive session to select the
               include/exclude regions
@@ -398,7 +415,7 @@ class Interactive(object):
 
         if highlight:
             self.highlight_fitregion()
-        
+
         self._update_xminmax()
 
     def _update_xminmax(self):
@@ -408,4 +425,3 @@ class Interactive(object):
             self.xmax = whinclude[0][-1]
         except IndexError:
             pass
-

@@ -7,20 +7,25 @@ In short, we will do the following:
 
 .. code-block:: python
 
-    # Load the spectrum
+    # 1. Load the spectrum
     sp = pyspeckit.Spectrum('hr2421.fit')
 
-    # Plot a particular spectral line
+    # 2. Plot a particular spectral line
     sp.plotter(xmin=4700,xmax=5000)
 
-    # Need to fit the continuum first
+    # 3. Need to fit the continuum first
     sp.baseline(interactive=True, subtract=False)
 
-    # (much work takes place interactively at this stage)
+    # 4... (much work takes place interactively at this stage)
 
-    # Start up an interactive line-fitting session
+    # 5. Start up an interactive line-fitting session
     sp.specfit(interactive=True)
 
+.. note:: 
+
+    If you don't see a plot window after step #2 above, make sure you're using
+    matplotlib in interactive mode.  This may require starting ipython as
+    ``ipython --pylab``
 
 .. figure:: images/interactive_example_hr2421_baseline_firstclick.png
 	:alt: First click fitting a baseline
