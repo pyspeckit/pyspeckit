@@ -170,6 +170,10 @@ class Baseline(interactive.Interactive):
         if self.subtracted:
             self.unsubtract()
 
+        # interactive guesspeakwidth passes this on; it should be excised
+        if 'nwidths' in kwargs:
+            kwargs.pop('nwidths')
+
         if powerlaw is not None:
             powerlaw = self.powerlaw
 
@@ -250,10 +254,29 @@ class Baseline(interactive.Interactive):
 
         return self.button2action(*args, subtract=False, **kwargs)
 
-    def plot_baseline(self, annotate=True, baseline_fit_color='orange',
-            use_window_limits=None, **kwargs):
+    def plot_baseline(self, annotate=True, baseline_fit_color=(1,0.65,0,0.75),
+            use_window_limits=None, linewidth=1, alpha=0.75, **kwargs):
         """
         Overplot the baseline fit
+
+        Parameters
+        ----------
+        annotate : bool
+            Display the fit parameters for the best-fit baseline on the
+            top-left of the plot
+        baseline_fit_color : matplotlib color
+            What color to use for overplotting the line
+            (default is slightly transparent orange)
+        use_window_limits : None or bool
+            Keep the current window or expand the plot limits?  If left as None,
+            will use `self.use_window_limits`
+
+        Other Parameters
+        ----------------
+        linewidth : number
+        alpha : float [0-1]
+        kwargs : dict
+            All are passed to matplotlib's plot function
         """
 
         # clear out the errorplot.  This should not be relevant...
@@ -284,7 +307,13 @@ class Baseline(interactive.Interactive):
                 # remove the old baseline plots
                 if p in self.Spectrum.plotter.axis.lines:
                     self.Spectrum.plotter.axis.lines.remove(p)
-            self._plots += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,self.basespec,color=baseline_fit_color)
+            self._plots += self.Spectrum.plotter.axis.plot(
+                    self.Spectrum.xarr,
+                    self.basespec,
+                    color=baseline_fit_color,
+                    linewidth=linewidth,
+                    alpha=alpha,
+                    **kwargs)
 
         if annotate: self.annotate() # refreshes automatically
         elif self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()

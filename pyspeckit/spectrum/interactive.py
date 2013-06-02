@@ -129,31 +129,26 @@ class Interactive(object):
             # ensure that the fit/plot range is at least as large as the click range
             if self.xmin > self._xclick1: self.xmin = self._xclick1
             if self.xmax < self._xclick2: self.xmax = self._xclick2
-        
-            if mark_include: 
-                color = 'g'
-                linewidth = 0.5
-            else:
-                try:
-                    color = self.Spectrum.plotter._spectrumplot[0].get_color()
-                    linewidth = self.Spectrum.plotter._spectrumplot[0].get_linewidth()
-                except IndexError:
-                    linewidth = 0.5
-                    color = 'k'
 
-            self.button1plot += self.Spectrum.plotter.axis.plot(
-                    self.Spectrum.xarr[self._xclick1:self._xclick2],
-                    self.Spectrum.data[self._xclick1:self._xclick2]+self.Spectrum.plotter.offset,
-                    drawstyle='steps-mid',
-                    color=color,
-                    linewidth=linewidth)
-            self.Spectrum.plotter.refresh()
+            # change the includemask
             self.includemask[self._xclick1:self._xclick2] = mark_include
+
+            if mark_include:
+                self.highlight_fitregion(**kwargs)
+            else:  # mark include=False -> mark_exclude=True
+                for highlight_line in self.button1plot:
+                    hlx,hly = highlight_line.get_data()
+                    hide = ((hlx > self.Spectrum.xarr[self._xclick1]) *
+                            (hlx < self.Spectrum.xarr[self._xclick2]))
+                    hly[hide] = numpy.nan
+                    highlight_line.set_ydata(hly)
+                self.Spectrum.plotter.refresh()
+
             if debug: print "Click 2: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax)
 
         self._update_xminmax()
 
-    def highlight_fitregion(self,  drawstyle='steps-mid', color=(0,1,0,0.5),
+    def highlight_fitregion(self,  drawstyle='steps-mid', color=(0,0.8,0,0.5),
             linewidth=2, alpha=0.5, clear_highlights=True, **kwargs):
         """
         Re-highlight the fitted region
@@ -169,8 +164,11 @@ class Interactive(object):
 
         self.button1plot += self.Spectrum.plotter.axis.plot(
                 self.Spectrum.xarr,
+                # +bad adds nans to points that are not to be included
                 self.Spectrum.data+self.Spectrum.plotter.offset+bad,
                 drawstyle=drawstyle, color=color, 
+                linewidth=linewidth,
+                alpha=alpha,
                 **kwargs)
         self.Spectrum.plotter.refresh()
 
