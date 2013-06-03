@@ -255,7 +255,8 @@ class Baseline(interactive.Interactive):
         return self.button2action(*args, subtract=False, **kwargs)
 
     def plot_baseline(self, annotate=True, baseline_fit_color=(1,0.65,0,0.75),
-            use_window_limits=None, linewidth=1, alpha=0.75, **kwargs):
+            use_window_limits=None, linewidth=1, alpha=0.75, plotkwargs={},
+            **kwargs):
         """
         Overplot the baseline fit
 
@@ -275,8 +276,8 @@ class Baseline(interactive.Interactive):
         ----------------
         linewidth : number
         alpha : float [0-1]
-        kwargs : dict
-            All are passed to matplotlib's plot function
+        plotkwargs : dict
+            Are passed to matplotlib's plot function
         """
 
         # clear out the errorplot.  This should not be relevant...
@@ -313,7 +314,7 @@ class Baseline(interactive.Interactive):
                     color=baseline_fit_color,
                     linewidth=linewidth,
                     alpha=alpha,
-                    **kwargs)
+                    **plotkwargs)
 
         if annotate: self.annotate() # refreshes automatically
         elif self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()

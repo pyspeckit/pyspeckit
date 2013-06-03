@@ -23,7 +23,14 @@ def open_1d_fits(filename, hdu=0, **kwargs):
 
     """
 
-    f = pyfits.open(filename, ignore_missing_end=True)
+    # try to open as an HDU...
+    if all((hasattr(filename,k) for k in ('data','header','_header'))):
+        f = [filename]
+        hdu = 0
+    elif isinstance(filename,pyfits.HDUList):
+        f = filename
+    else:
+        f = pyfits.open(filename, ignore_missing_end=True)
 
     return open_1d_pyfits(f[hdu],**kwargs)
 
