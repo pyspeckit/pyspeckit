@@ -1059,6 +1059,10 @@ class Specfit(interactive.Interactive):
         kwargs :
             passed to `self.fitter.integral` if ``not(direct)``
 
+        Returns
+        -------
+        np.scalar or np.ndarray with the integral or integral & error
+
         """
 
         if analytic:
@@ -1095,7 +1099,7 @@ class Specfit(interactive.Interactive):
                 # compute error assuming a "known mean" (not a sample mean).  If sample mean, multiply
                 # by sqrt(len(dx)/(len(dx)-1))  (which should be very near 1)
                 error = np.sqrt((dx[xmin:xmax] * self.Spectrum.error[xmin:xmax]**2).sum() / dx[xmin:xmax].sum())
-                return integ,error
+                return np.array([integ,error])
             else:
                 return integ
 
