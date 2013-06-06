@@ -1,6 +1,13 @@
 CHANGES
 *******
 
+Release 0.1.14
+~~~~~~~~~~~~~~
+    * Bugfix: integral(direct=True) double-subtracted the baseline if it was
+              already subtracted
+    * New Feature: Models now include analytic integrals (only implemented for
+                   Gaussian so far)
+
 Release 0.1.13
 ~~~~~~~~~~~~~~
     * Cleanup excess data files
