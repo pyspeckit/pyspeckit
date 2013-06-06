@@ -1027,13 +1027,18 @@ class Specfit(interactive.Interactive):
             self.fullmodel = self.fullmodel[x1pix:x2pix]
         self.includemask = self.includemask[x1pix:x2pix]
 
-    def integral(self, direct=False, threshold='auto', integration_limits=None,
-            integration_limit_units='pixels', return_error=False, **kwargs):
+    def integral(self, analytic=False, direct=False, threshold='auto',
+            integration_limits=None, integration_limit_units='pixels',
+            return_error=False, **kwargs):
         """
         Return the integral of the fitted spectrum
 
         Parameters
         ----------
+        analytic : bool
+            Return the analytic integral of the fitted function?  
+            .. WARNING:: This approach is only implemented for some models
+            .. TODO:: Implement error propagation for this approach
         direct : bool
             Return the integral of the *spectrum* (as opposed to the *fit*)
             over a range defined by the `integration_limits` if specified or
@@ -1054,13 +1059,10 @@ class Specfit(interactive.Interactive):
         kwargs :
             passed to `self.fitter.integral` if ``not(direct)``
 
-        # not true any more
-        note that integration_limits will operate directly on the DATA, which means that
-        if you've baselined without subtract=True, the baseline will be included in the integral
-
-
-
         """
+
+        if analytic:
+            return self.fitter.analytic_integral(modelpars=self.parinfo.values)
 
         xmin,xmax = self.get_model_xlimits(units='pixels', threshold=threshold)
         if integration_limits is None:
@@ -1082,12 +1084,13 @@ class Specfit(interactive.Interactive):
             # shouldn't shape be a 'property'?
             dx = np.repeat(np.abs(dx), self.Spectrum.shape)
 
-        # the model considered here must NOT include the baseline!
-        # if it does, you'll get the integral of the continuum
-        fullmodel = self.get_full_model(add_baseline=False)
 
         if direct:
-            integ = ((self.Spectrum.data[xmin:xmax]-self.Spectrum.baseline.basespec[xmin:xmax]) * dx[xmin:xmax]).sum()
+            integrand = self.Spectrum.data[xmin:xmax]
+            if not self.Spectrum.baseline.subtracted:
+                integrand -= self.Spectrum.baseline.basespec[xmin:xmax]
+
+            integ = (integrand * dx[xmin:xmax]).sum()
             if return_error:
                 # compute error assuming a "known mean" (not a sample mean).  If sample mean, multiply
                 # by sqrt(len(dx)/(len(dx)-1))  (which should be very near 1)
@@ -1102,6 +1105,10 @@ class Specfit(interactive.Interactive):
         else:
             if not hasattr(self.fitter,'integral'):
                 raise AttributeError("The fitter %s does not have an integral implemented" % self.fittype)
+            
+            # the model considered here must NOT include the baseline!
+            # if it does, you'll get the integral of the continuum
+            fullmodel = self.get_full_model(add_baseline=False)
 
             if self.Spectrum.xarr.cdelt() is not None:
                 dx = np.median(dx)

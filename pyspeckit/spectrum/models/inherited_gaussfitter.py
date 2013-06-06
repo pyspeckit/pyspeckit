@@ -78,9 +78,6 @@ def gaussian_fitter(multisingle='multi'):
             integral_func=_integral_modelpars,
             )
     myclass.__name__ = "gaussian"
-
-
-    myclass.analytic_integral = types.MethodType( integral, myclass )
     
     return myclass
 

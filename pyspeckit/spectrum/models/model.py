@@ -593,19 +593,24 @@ class SpectralModel(fitter.SimpleFitter):
         else:
             return self.model.sum()
 
-    def analytic_integral(self, modelpars=None):
+    def analytic_integral(self, modelpars=None, npeaks=None, npars=None):
         """
         Placeholder for analyic integrals; these must be defined for individual models
         """
         if self.integral_func is None:
             raise NotImplementedError("Analytic integrals must be implemented independently for each model type")
 
+        # all of these parameters are allowed to be overwritten
         if modelpars is None:
             modelpars = self.parinfo.values
+        if npeaks is None:
+            npeaks = self.npeaks
+        if npars is None:
+            npars = self.npars
 
         return np.sum([
-            self.integral_func(modelpars[self.npars*ii:self.npars*(1+ii)])
-            for ii in xrange(self.npeaks)])
+            self.integral_func(modelpars[npars*ii:npars*(1+ii)])
+            for ii in xrange(npeaks)])
 
     def component_integrals(self, xarr, dx=None):
         """
