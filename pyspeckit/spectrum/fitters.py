@@ -1028,31 +1028,47 @@ class Specfit(interactive.Interactive):
         self.includemask = self.includemask[x1pix:x2pix]
 
     def integral(self, direct=False, threshold='auto', integration_limits=None,
-            return_error=False, **kwargs):
+            integration_limit_units='pixels', return_error=False, **kwargs):
         """
         Return the integral of the fitted spectrum
 
-        if direct=True, return the integral of the spectrum over a range
-        defined by the threshold or integration limits if defined
+        Parameters
+        ----------
+        direct : bool
+            Return the integral of the *spectrum* (as opposed to the *fit*)
+            over a range defined by the `integration_limits` if specified or
+            `threshold` otherwise 
+        threshold : 'auto' or 'error' or float
+            Determines what data to be included in the integral based off of where
+            the model is greater than this number
+            If 'auto', the threshold will be set to peak_fraction * the peak
+            model value.  
+            If 'error', uses the error spectrum as the threshold
+            See `self.get_model_xlimits` for details
+        integration_limits : None or 2-tuple
+            Manually specify the limits in `integration_limit_units` units
+        return_error : bool
+            Return the error on the integral if set.
+            The error computed by
+            sigma = sqrt(sum(sigma_i^2)) * dx
+        kwargs :
+            passed to `self.fitter.integral` if ``not(direct)``
 
         # not true any more
         note that integration_limits will operate directly on the DATA, which means that
         if you've baselined without subtract=True, the baseline will be included in the integral
 
-        if return_error is set, the error computed by
-        sigma = sqrt(sum(sigma_i^2)) * dx
-        will be returned as well
 
-        kwargs are passed to self.fitter.integral if not(direct)
 
-        .. TODO: Merge this with EQW.  Both are equivalent, only difference is
-            units (and reference to baseline level)
-            DONE!!
         """
 
         xmin,xmax = self.get_model_xlimits(units='pixels', threshold=threshold)
         if integration_limits is None:
-            integration_limits=[xmin,xmax]
+            integration_limits = [xmin,xmax]
+        integration_limits = [
+                    self.Spectrum.xarr.x_to_pix(x,xval_units=integration_limit_units)
+                    for x in integration_limits]
+
         if xmax - xmin > 1: # can only get cdelt if there's more than 1 pixel
             dx = self.Spectrum.xarr[xmin:xmax].cdelt()
         else:

@@ -13,7 +13,8 @@ class.
 """
 import model
 import fitter
-import numpy 
+import numpy
+import types
 
 def gaussian(x,A,dx,w, return_components=False, normalized=False):
     """
@@ -50,6 +51,16 @@ def gaussian(x,A,dx,w, return_components=False, normalized=False):
 def gaussian_fwhm(sigma):
     return numpy.sqrt(8*numpy.log(2)) * sigma
 
+def gaussian_integral(amplitude, sigma):
+    """ Integral of a Gaussian """
+    return amplitude * numpy.sqrt(2*numpy.pi*sigma**2)
+
+def _integral_modelpars(modelpars=None):
+    """ light wrapper to match requirements for model.analytic_integral """
+    amplitude = modelpars[0]
+    sigma = modelpars[2]
+    return gaussian_integral(amplitude,sigma)
+
 def gaussian_fitter(multisingle='multi'):
     """
     Generator for Gaussian fitter class
@@ -64,8 +75,12 @@ def gaussian_fitter(multisingle='multi'):
             centroid_par='shift',
             fwhm_func=gaussian_fwhm,
             fwhm_pars=['width'],
+            integral_func=_integral_modelpars,
             )
     myclass.__name__ = "gaussian"
+
+
+    myclass.analytic_integral = types.MethodType( integral, myclass )
     
     return myclass
 

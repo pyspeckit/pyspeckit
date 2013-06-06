@@ -35,6 +35,7 @@ class SpectralModel(fitter.SimpleFitter):
             centroid_par=None,
             fwhm_func=None,
             fwhm_pars=None,
+            integral_func=None,
             use_lmfit=False, **kwargs):
         """Spectral Model Initialization
 
@@ -107,6 +108,9 @@ class SpectralModel(fitter.SimpleFitter):
         # FWHM function and parameters
         self.fwhm_func = fwhm_func
         self.fwhm_pars = fwhm_pars 
+
+        # analytic integral function
+        self.integral_func = integral_func
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
             parlimits=None, parlimited=None, parfixed=None, parerror=None,
@@ -588,6 +592,20 @@ class SpectralModel(fitter.SimpleFitter):
             return (self.model*dx).sum()
         else:
             return self.model.sum()
+
+    def analytic_integral(self, modelpars=None):
+        """
+        Placeholder for analyic integrals; these must be defined for individual models
+        """
+        if self.integral_func is None:
+            raise NotImplementedError("Analytic integrals must be implemented independently for each model type")
+
+        if modelpars is None:
+            modelpars = self.parinfo.values
+
+        return np.sum([
+            self.integral_func(modelpars[self.npars*ii:self.npars*(1+ii)])
+            for ii in xrange(self.npeaks)])
 
     def component_integrals(self, xarr, dx=None):
         """

@@ -1,4 +1,5 @@
 """
+                    ,xmax
 ===========================
 Units and SpectroscopicAxes
 ===========================
@@ -478,7 +479,9 @@ class SpectroscopicAxis(np.ndarray):
         """
         Given an X coordinate in SpectroscopicAxis' units, return the corresponding pixel number
         """
-        if xval_units is not None:
+        if xval_units in pixel_dict:
+            return xval
+        elif xval_units is not None:
             xval = self.x_to_coord(xval, xval_units)
         nearest_pix = np.argmin(np.abs(self-xval))
         return nearest_pix
