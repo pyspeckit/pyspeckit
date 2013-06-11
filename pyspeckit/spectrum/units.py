@@ -451,6 +451,12 @@ class SpectroscopicAxis(np.ndarray):
         if not OK:
             raise InconsistentTypeError("Units: %s Type[units]: %s in %r" % (self.units,unit_type_dict[self.units],self) )
 
+    def _fix_type(self):
+        try:
+            self._check_consistent_type()
+        except InconsistentTypeError:
+            self.xtype = unit_type_dict[self.units]
+
     def umax(self, units=None):
         """
         Return the maximum value of the SpectroscopicAxis.  If units specified,
@@ -622,7 +628,8 @@ class SpectroscopicAxis(np.ndarray):
         self.make_dxarr()
 
     def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
-            center_frequency_units=None, debug=False, **kwargs):
+            center_frequency_units=None, debug=False, xtype_check='check',
+            **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
         to convert between frequency/velocity/wavelength and simply change the 
@@ -644,7 +651,16 @@ class SpectroscopicAxis(np.ndarray):
             need to specify the central frequency around which that velocity is
             calculated.
             I think this can also accept wavelengths....
+
+        *xtype_check* [ 'check' | 'fix' ]
+            Check whether the xtype matches the units.  If 'fix', will set the
+            xtype to match the units.
         """
+
+        if xtype_check == 'check':
+            self._check_consistent_type()
+        elif xtype_check == 'fix':
+            self._fix_type()
 
         if unit in (None,'none'):
             return self
