@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.1.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -97,7 +99,7 @@ your fitting code must deal with units internally.</p>
 <span id="api-documentation-for-models"></span><h2>API Documentation for Models<a class="headerlink" href="#module-pyspeckit.spectrum.models.model" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel">
-<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>shortvarnames=('A'</em>, <em>'\Delta x'</em>, <em>'\sigma')</em>, <em>multisingle='multi'</em>, <em>fitunits=None</em>, <em>centroid_par=None</em>, <em>fwhm_func=None</em>, <em>fwhm_pars=None</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L22" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-22" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.spectrum.models.model.</tt><tt class="descname">SpectralModel</tt><big>(</big><em>modelfunc</em>, <em>npars</em>, <em>shortvarnames=('A'</em>, <em>'\Delta x'</em>, <em>'\sigma')</em>, <em>multisingle='multi'</em>, <em>fitunits=None</em>, <em>centroid_par=None</em>, <em>fwhm_func=None</em>, <em>fwhm_pars=None</em>, <em>integral_func=None</em>, <em>use_lmfit=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L22" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-22" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper class for a spectra model.  Includes internal functions to
 generate multi-component models, annotations, integrals, and individual
 components.  The declaration can be complex, since you should name
@@ -179,7 +181,7 @@ just a single peak (a background may/will be fit)</p>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.analytic_centroids">
-<tt class="descname">analytic_centroids</tt><big>(</big><em>centroidpar=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L625" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-625" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_centroids" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">analytic_centroids</tt><big>(</big><em>centroidpar=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L648" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-648" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_centroids" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the <em>analytic</em> centroids of the model components</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -202,7 +204,7 @@ if centroidpar is unspecified</em></p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.analytic_fwhm">
-<tt class="descname">analytic_fwhm</tt><big>(</big><em>parinfo=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L604" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-604" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_fwhm" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">analytic_fwhm</tt><big>(</big><em>parinfo=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L627" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-627" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_fwhm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the FWHMa of the model components <em>if</em> a fwhm_func has been
 defined</p>
 <p>Done with incomprehensible list comprehensions instead of nested for
@@ -211,8 +213,14 @@ unpythonic.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyspeckit.spectrum.models.model.SpectralModel.analytic_integral">
+<tt class="descname">analytic_integral</tt><big>(</big><em>modelpars=None</em>, <em>npeaks=None</em>, <em>npars=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L596" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-596" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.analytic_integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Placeholder for analyic integrals; these must be defined for individual models</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.annotations">
-<tt class="descname">annotations</tt><big>(</big><em>shortvarnames=None</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L514" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-514" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.annotations" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">annotations</tt><big>(</big><em>shortvarnames=None</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L518" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-518" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.annotations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of TeX-formatted labels</p>
 <p>The values and errors are formatted so that only the significant digits
 are displayed.  Rounding is performed using the decimal package.</p>
@@ -238,20 +246,20 @@ annotations.  Defaults to self.shortvarnames</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.component_integrals">
-<tt class="descname">component_integrals</tt><big>(</big><em>xarr</em>, <em>dx=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L592" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-592" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.component_integrals" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">component_integrals</tt><big>(</big><em>xarr</em>, <em>dx=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L615" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-615" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.component_integrals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the integrals of each component</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.components">
-<tt class="descname">components</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L563" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-563" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.components" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">components</tt><big>(</big><em>xarr</em>, <em>pars</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L567" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-567" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.components" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a numpy ndarray of shape [npeaks x modelshape] of the
 independent components of the fits</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.computed_centroid">
-<tt class="descname">computed_centroid</tt><big>(</big><em>xarr=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L650" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-650" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.computed_centroid" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">computed_centroid</tt><big>(</big><em>xarr=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L673" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-673" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.computed_centroid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the <em>computed</em> centroid of the model</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -270,7 +278,7 @@ computed.  If unspecified, the centroid will be in pixel units</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.fitter">
-<tt class="descname">fitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>quiet=True</em>, <em>veryverbose=False</em>, <em>debug=False</em>, <em>parinfo=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L412" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-412" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.fitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">fitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>quiet=True</em>, <em>veryverbose=False</em>, <em>debug=False</em>, <em>parinfo=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L416" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-416" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the fitter using mpfit.</p>
 <p>kwargs will be passed to _make_parinfo and mpfit.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -315,7 +323,7 @@ each iteration of the fitter</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.get_emcee_ensemblesampler">
-<tt class="descname">get_emcee_ensemblesampler</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>nwalkers</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L721" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-721" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_emcee_ensemblesampler" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_emcee_ensemblesampler</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>nwalkers</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L744" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-744" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_emcee_ensemblesampler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an emcee walker ensemble for the data &amp; model</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -349,7 +357,7 @@ each iteration of the fitter</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.get_emcee_sampler">
-<tt class="descname">get_emcee_sampler</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L685" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-685" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_emcee_sampler" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_emcee_sampler</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L708" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-708" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_emcee_sampler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an emcee walker for the data &amp; model</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -378,7 +386,7 @@ each iteration of the fitter</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.get_pymc">
-<tt class="descname">get_pymc</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>use_fitted_values=False</em>, <em>inf=inf</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L759" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-759" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_pymc" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_pymc</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>use_fitted_values=False</em>, <em>inf=inf</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L782" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-782" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.get_pymc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a pymc MCMC sampler.  Defaults to &#8216;uninformative&#8217; priors</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -415,7 +423,7 @@ the Normal distribution with sigma = par.error and mean = par.value</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.integral">
-<tt class="descname">integral</tt><big>(</big><em>modelpars</em>, <em>dx=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L581" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-581" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.integral" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">integral</tt><big>(</big><em>modelpars</em>, <em>dx=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L585" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-585" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.integral" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extremely simple integrator:
 IGNORES modelpars;
 just sums self.model</p>
@@ -423,13 +431,13 @@ just sums self.model</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.lmfitfun">
-<tt class="descname">lmfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L317" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-317" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitfun" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">lmfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em>, <em>debug=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L321" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-321" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitfun" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper function to compute the fit residuals in an lmfit-friendly format</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.lmfitter">
-<tt class="descname">lmfitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>parinfo=None</em>, <em>quiet=True</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L333" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-333" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">lmfitter</tt><big>(</big><em>xax</em>, <em>data</em>, <em>err=None</em>, <em>parinfo=None</em>, <em>quiet=True</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L337" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-337" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.lmfitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use lmfit instead of mpfit to do the fitting</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -464,25 +472,25 @@ just sums self.model</p>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.logp">
-<tt class="descname">logp</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>pars=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L666" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-666" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.logp" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">logp</tt><big>(</big><em>xarr</em>, <em>data</em>, <em>error</em>, <em>pars=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L689" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-689" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.logp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the log probability of the model</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.mpfitfun">
-<tt class="descname">mpfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L295" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-295" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.mpfitfun" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">mpfitfun</tt><big>(</big><em>x</em>, <em>y</em>, <em>err=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L299" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-299" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.mpfitfun" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper function to compute the fit residuals in an mpfit-friendly format</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc">
-<tt class="descname">n_modelfunc</tt><big>(</big><em>pars=None</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L258" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-258" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">n_modelfunc</tt><big>(</big><em>pars=None</em>, <em>debug=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L262" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-262" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.n_modelfunc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple wrapper to deal with N independent peaks for a given spectral model</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.spectrum.models.model.SpectralModel.slope">
-<tt class="descname">slope</tt><big>(</big><em>xinp</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L499" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-499" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.slope" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">slope</tt><big>(</big><em>xinp</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/model.py#L503" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/model.py#cl-503" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.model.SpectralModel.slope" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the local slope of the model at location x
 (x must be in xax&#8217;s units)</p>
 </dd></dl>
@@ -589,7 +597,7 @@ model!  Just make a function like gaussian and plug it into the SpectralModel
 class.</p>
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian</tt><big>(</big><em>x</em>, <em>A</em>, <em>dx</em>, <em>w</em>, <em>return_components=False</em>, <em>normalized=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_gaussfitter.py#L18" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/inherited_gaussfitter.py#cl-18" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian</tt><big>(</big><em>x</em>, <em>A</em>, <em>dx</em>, <em>w</em>, <em>return_components=False</em>, <em>normalized=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_gaussfitter.py#L19" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/inherited_gaussfitter.py#cl-19" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a 1-dimensional gaussian of form
 A*numpy.exp(-(x-dx)**2/(2*w**2))</p>
 <p>Area is sqrt(2*pi)*sigma^2*amplitude - i.e., this is NOT a normalized
@@ -632,13 +640,19 @@ fitters</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_fitter">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_gaussfitter.py#L53" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/inherited_gaussfitter.py#cl-53" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_fitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_gaussfitter.py#L64" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/inherited_gaussfitter.py#cl-64" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator for Gaussian fitter class</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_integral">
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian_integral</tt><big>(</big><em>amplitude</em>, <em>sigma</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_gaussfitter.py#L54" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/inherited_gaussfitter.py#cl-54" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integral of a Gaussian</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_vheight_fitter">
-<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian_vheight_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_gaussfitter.py#L72" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/inherited_gaussfitter.py#cl-72" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_vheight_fitter" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.inherited_gaussfitter.</tt><tt class="descname">gaussian_vheight_fitter</tt><big>(</big><em>multisingle='multi'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/inherited_gaussfitter.py#L84" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/inherited_gaussfitter.py#cl-84" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.inherited_gaussfitter.gaussian_vheight_fitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator for Gaussian fitter class</p>
 </dd></dl>
 
@@ -753,7 +767,7 @@ A*2*pi*w/((x-dx)**2 + ((w/2)**2))</p>
 
 <dl class="function">
 <dt id="pyspeckit.spectrum.models.modelgrid.line_model_2par">
-<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x1021bfed8&gt;</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/modelgrid.py#L48" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/modelgrid.py#cl-48" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.spectrum.models.modelgrid.</tt><tt class="descname">line_model_2par</tt><big>(</big><em>xax</em>, <em>center</em>, <em>width</em>, <em>gridval1</em>, <em>gridval2</em>, <em>griddim1</em>, <em>griddim2</em>, <em>maxampgrid</em>, <em>taugrid</em>, <em>linefunction=&lt;function gaussian_line at 0x10202f488&gt;</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/spectrum/models/modelgrid.py#L48" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/models/modelgrid.py#cl-48" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.spectrum.models.modelgrid.line_model_2par" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the spectral line that matches the given x-axis</p>
 <p>xax, center, width must be in the same units!</p>
 </dd></dl>
@@ -893,8 +907,8 @@ of the voigt profile</p>
 <h3>Hydrogen Models<a class="headerlink" href="#hydrogen-models" title="Permalink to this headline">¶</a></h3>
 <p>Hydrogen in HII regions is typically assumed to follow Case B recombination
 theory.</p>
-<p>The values for the Case B recombination coefficients are given by <a class="reference internal" href="#hummerstorey1987" id="id1">[HummerStorey1987]</a>.  
-They are also computed in <a class="reference internal" href="#hummer1994" id="id2">[Hummer1994]</a> and tabulated at a <a class="reference internal" href="#wiki" id="id3">[wiki]</a>.  I had to OCR and pull
+<p>The values for the Case B recombination coefficients are given by <a class="reference internal" href="#hummerstorey1987">[HummerStorey1987]</a>.  
+They are also computed in <a class="reference internal" href="#hummer1994">[Hummer1994]</a> and tabulated at a <a class="reference internal" href="#wiki">[wiki]</a>.  I had to OCR and pull
 out by hand some of the coefficients.</p>
 <table class="docutils citation" frame="void" id="hummerstorey1987" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
@@ -1023,7 +1037,29 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
         </div>
         <div class="sidebar">
           <h3>Table Of Contents</h3>
-          
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Models &amp; Fitting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pyspeckit.spectrum.models.model">API Documentation for Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-api">Module API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#n2h-fitter">N2H+ fitter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hydrogen-models">Hydrogen Models</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#model-documentation-table-of-contents">Model Documentation Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="parameters.html">Parameters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Class Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">File Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wrappers.html">High-Level Wrappers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactive.html">Interactive Use</a></li>
+</ul>
+
           <h3 style="margin-top: 1.5em;">Search</h3>
           <form class="search" action="search.html" method="get">
             <input type="text" name="q" />
@@ -1047,7 +1083,7 @@ from Brown, Lockman &amp; Knapp ARAA 1978 16 445</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Jun 02, 2013.
+      Last updated on Jun 18, 2013.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
