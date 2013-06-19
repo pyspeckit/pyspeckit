@@ -447,9 +447,19 @@ class SpectroscopicAxis(np.ndarray):
         Make sure self.xtype is unit_type_dict[units]
         if this is NOT true, can cause significant errors
         """
-        OK = self.xtype == unit_type_dict[self.units]
+        if self.xtype is None:
+            OK = False
+        else:
+            OK = self.xtype.lower() == unit_type_dict[self.units]
+
         if not OK:
             raise InconsistentTypeError("Units: %s Type[units]: %s in %r" % (self.units,unit_type_dict[self.units],self) )
+
+    def _fix_type(self):
+        try:
+            self._check_consistent_type()
+        except InconsistentTypeError:
+            self.xtype = unit_type_dict[self.units]
 
     def umax(self, units=None):
         """
@@ -611,18 +621,19 @@ class SpectroscopicAxis(np.ndarray):
         self[:] = self.as_unit(unit, **kwargs)
         
         if unit in velocity_dict:
-            self.xtype = "Velocity"
+            self.xtype = "velocity"
         elif unit in frequency_dict:
-            self.xtype = "Frequency"
+            self.xtype = "frequency"
         elif unit in wavelength_dict:
-            self.xtype = "Wavelength"
+            self.xtype = "wavelength"
 
         if unit in unit_type_dict and unit not in (None, 'unknown'):
             self.units = unit
         self.make_dxarr()
 
     def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
-            center_frequency_units=None, debug=False, **kwargs):
+            center_frequency_units=None, debug=False, xtype_check='check',
+            **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
         to convert between frequency/velocity/wavelength and simply change the 
@@ -644,7 +655,16 @@ class SpectroscopicAxis(np.ndarray):
             need to specify the central frequency around which that velocity is
             calculated.
             I think this can also accept wavelengths....
+
+        *xtype_check* [ 'check' | 'fix' ]
+            Check whether the xtype matches the units.  If 'fix', will set the
+            xtype to match the units.
         """
+
+        if xtype_check == 'check':
+            self._check_consistent_type()
+        elif xtype_check == 'fix':
+            self._fix_type()
 
         if unit in (None,'none'):
             return self
@@ -690,7 +710,7 @@ class SpectroscopicAxis(np.ndarray):
                             center_frequency=center_frequency,
                             center_frequency_units=center_frequency_units,
                             velocity_units=unit, convention=self.velocity_convention)
-                    newxtype = "Velocity"
+                    newxtype = "velocity"
                     newunit = unit
                 elif conversion_dict[self.xtype] is wavelength_dict:
                     if debug: print "Converting wavelength to velocity"
@@ -701,7 +721,7 @@ class SpectroscopicAxis(np.ndarray):
                             center_frequency=cf,
                             center_frequency_units=cfu,
                             velocity_units=unit, convention=self.velocity_convention)
-                    newxtype = "Velocity"
+                    newxtype = "velocity"
                     newunit = unit
                 else: 
                     raise ValueError("Could not convert from %s to %s" % (self.units,unit))
@@ -713,13 +733,13 @@ class SpectroscopicAxis(np.ndarray):
                             center_frequency=center_frequency,
                             center_frequency_units=center_frequency_units,
                             frequency_units=unit, convention=self.velocity_convention)
-                    newxtype = "Frequency"
+                    newxtype = "frequency"
                     newunit = unit
                 elif conversion_dict[self.xtype] is wavelength_dict:
                     if debug: print "Converting wavelength to frequency"
                     newxarr = wavelength_to_frequency(self, self.units,
                             frequency_units=unit)
-                    newxtype = "Frequency"
+                    newxtype = "frequency"
                     newunit = unit
                 else: 
                     raise ValueError("Could not convert from %s to %s" % (self.units,unit))
@@ -741,13 +761,13 @@ class SpectroscopicAxis(np.ndarray):
                                 center_wavelength_units=center_frequency_units,
                                 wavelength_units=unit,
                                 convention=self.velocity_convention)
-                    newxtype = "Wavelength"
+                    newxtype = "wavelength"
                     newunit = unit
                 elif conversion_dict[self.xtype] is frequency_dict:
                     if debug: print "Converting frequency to wavelength"
                     newxarr = frequency_to_wavelength(self, self.units,
                             wavelength_units=unit)
-                    newxtype = "Wavelength"
+                    newxtype = "wavelength"
                     newunit = unit
                 else: 
                     raise ValueError("Could not convert from %s to %s" % (self.units,unit))

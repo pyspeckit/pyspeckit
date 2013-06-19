@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Guide for IRAF users &mdash; pyspeckit 0.1.13 documentation</title>
+    <title>PySpecKit Projects &mdash; pyspeckit 0.1.13 documentation</title>
     
     <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -65,50 +65,46 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="guide-for-iraf-users">
-<h1>Guide for IRAF users<a class="headerlink" href="#guide-for-iraf-users" title="Permalink to this headline">¶</a></h1>
-<p>PySpecKit is similar in intent and implementation to IRAF&#8217;s <em>splot</em> routine.
-IRAF users will probably want to do most of their data reduction (i.e., turning
-an image/cube into a 1D wavelength-calibrated spectrum) in IRAF, but will be
-comfortable fitting lines and making publication-quality plots using PySpecKit.</p>
-<div class="section" id="loading-a-spectrum">
-<h2>Loading a Spectrum<a class="headerlink" href="#loading-a-spectrum" title="Permalink to this headline">¶</a></h2>
-<p>If you have an IRAF spectrum, it is straightforward to load into PySpecKit:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">sp</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;iraf_spectrum.ms.fits&#39;</span><span class="p">)</span>
-<span class="n">sp</span><span class="o">.</span><span class="n">plotter</span><span class="p">()</span>
-</pre></div>
+  <div class="section" id="pyspeckit-projects">
+<h1>PySpecKit Projects<a class="headerlink" href="#pyspeckit-projects" title="Permalink to this headline">¶</a></h1>
+<p>A few projects appropriate for a Google Summer of Code, <a class="reference external" href="http://sophia.estec.esa.int/socis2013/">ESA Summer of Code in
+Space</a>, or similar are outlined
+below.</p>
+<div class="section" id="incorporate-astropy-units-into-pyspeckit-units">
+<h2>Incorporate astropy.units into pyspeckit.units<a class="headerlink" href="#incorporate-astropy-units-into-pyspeckit-units" title="Permalink to this headline">¶</a></h2>
+<p>This project is at the core of both <tt class="xref py py-obj docutils literal"><span class="pre">pyspeckit</span></tt> and <a class="reference external" href="https://github.com/astropy/specutils">specutils</a>.</p>
+<p>The most important base functionality of a spectroscopic toolkit
+is to be able to convert between different spectroscopic systems,
+e.g. wavelength&lt;-&gt;frequency&lt;-&gt;velocity.  This can be achieved
+using <a class="reference external" href="www.astropy.org">astropy</a>&#8216;s <a class="reference external" href="https://github.com/astropy/astropy/pull/1176">unit equivalencies</a>.</p>
+<p>The X-axis unit changes will be straightforward project that should require
+about 2 weeks to complete.  The more complicated and interesting project is
+creating Y-axis units (i.e., flux units) that appropriately adjust with changes
+to the X-axis.  These would make use of other <a class="reference external" href="www.astropy.org">astropy</a> unit equivalencies,
+e.g.  the <a class="reference external" href="https://github.com/astropy/astropy/blob/master/astropy/units/equivalencies.py#L44">spectral density</a>
+equivalency.</p>
+<p>The end goal will be to have a <tt class="xref py py-obj docutils literal"><span class="pre">Spectrum</span></tt> object that will live in <a class="reference external" href="https://github.com/astropy/specutils">specutils</a>
+and be inherited by <tt class="xref py py-obj docutils literal"><span class="pre">pyspeckit</span></tt>, which will provide the interface to modeling
+and graphical tools.</p>
 </div>
-</div>
-<div class="section" id="fitting-line-profiles">
-<h2>Fitting Line Profiles<a class="headerlink" href="#fitting-line-profiles" title="Permalink to this headline">¶</a></h2>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">See <a class="reference internal" href="interactive.html"><em>A guide to interactive fitting</em></a> for a comprehensive graphical demonstration of these instructions.</p>
-</div>
-<p>In IRAF, a line profile is fitted using <em>k</em> to start the fitter, then <em>k</em>, <em>l</em>, or <em>v</em>
-to perform the fit.</p>
-<p>In PySpecKit, the continuum (<em>baseline</em>) and line profile are determined separately.</p>
-<p>Instead of using a key twice to specify the continuum level, a continuum must
-be fitted from the data.  This is done by pressing <em>b</em> to turn on the baseline fitter.
-Click or press <em>1</em> to select baseline regions - they will be highlighted in green.
-Press <em>3</em> to fit the baseline and display it as an orange line.</p>
-<p>In PySpecKit, the interactive fitter is started by pressing <em>f</em> in the plot
-window.  After pressing <em>f</em>, instructions will be provided in the terminal
-window telling you which line profiles are implemented.  Select one of these,
-or use a gaussian by default.</p>
-<p>Select the line fitting region by pressing <em>1</em> on either side of the line.
-Select the peak and full-width-half-maximum of the line by pressing <em>2</em> at each
-of these locations in turn.  You may repeat this cycle indefinitely to fit
-multiple profiles (comparable to IRAF*s <em>deblend</em> capability).  Then, press <em>3</em>
-to perform the fit.</p>
-<p>The fitted parameters can be accessed (as variables, or printed) through the
-<tt class="xref py py-obj docutils literal"><span class="pre">Spectrum.specfit.parinfo</span></tt> parameter.  They will also be displayed in the plot
-legend.</p>
+<div class="section" id="refactor-and-expand-the-pyspeckit-modeling-tools">
+<h2>Refactor and Expand the pyspeckit modeling tools<a class="headerlink" href="#refactor-and-expand-the-pyspeckit-modeling-tools" title="Permalink to this headline">¶</a></h2>
+<p>Since the development of pyspeckit, there has been substantial progress on a
+more general class of <a class="reference external" href="http://docs.astropy.org/en/latest/modeling/index.html">modeling tools from astropy</a>.
+Pyspeckit already has a wide variety of data fitting and modeling tools that
+can readily be modified to use the astropy modeling formalism.</p>
+<p>Details of this project need to be worked out, but will include:</p>
+<blockquote>
+<div><ul class="simple">
+<li>refactoring pyspeckit.models to use astropy.models</li>
+<li>building a graphical interface to astropy.models</li>
+</ul>
+</div></blockquote>
 </div>
 </div>
 <div class="edit-section section">
-<p class="edit-on-github-para"><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/guide_iraf.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></p>
-<p class="edit-on-bitbucket-para"><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/doc/guide_iraf.rst" title="Push the Edit button on the next page"><span class="edit-on-bitbucket">[edit this page on bitbucket]</span></a></p>
+<p class="edit-on-github-para"><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/projects.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></p>
+<p class="edit-on-bitbucket-para"><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/doc/projects.rst" title="Push the Edit button on the next page"><span class="edit-on-bitbucket">[edit this page on bitbucket]</span></a></p>
 </div>
 
 
@@ -152,7 +148,7 @@ legend.</p>
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on May 06, 2013.
+      Last updated on Jun 18, 2013.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>

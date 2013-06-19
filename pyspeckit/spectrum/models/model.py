@@ -84,7 +84,7 @@ class SpectralModel(fitter.SimpleFitter):
         self.modelfunc = modelfunc
         if self.__doc__ is None:
             self.__doc__ = modelfunc.__doc__
-        else:
+        elif modelfunc.__doc__ is not None:
             self.__doc__ += modelfunc.__doc__
         self.npars = npars 
         self.default_npars = npars
@@ -827,7 +827,9 @@ class SpectralModel(fitter.SimpleFitter):
         #UpLim = pymc.distributions.stochastic_from_dist('uplim', logp=upperlimit_like, dtype=np.float, mv=False)
 
         funcdict = {}
-        for par in self.parinfo:
+        # very, very worrisome: pymc changes the values of parinfo
+        parcopy = copy.deepcopy(self.parinfo)
+        for par in parcopy:
             lolim = par.limits[0] if par.limited[0] else -inf
             uplim = par.limits[1] if par.limited[1] else  inf
             if par.fixed:
@@ -853,7 +855,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         d = dict(funcdict)
 
-        def modelfunc(xarr, pars=self.parinfo, **kwargs):
+        def modelfunc(xarr, pars=parcopy, **kwargs):
             for k,v in kwargs.iteritems():
                 if k in pars.keys():
                     pars[k].value = v
