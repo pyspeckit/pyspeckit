@@ -779,7 +779,8 @@ class SpectralModel(fitter.SimpleFitter):
 
         return sampler
 
-    def get_pymc(self, xarr, data, error, use_fitted_values=False, inf=np.inf, **kwargs):
+    def get_pymc(self, xarr, data, error, use_fitted_values=False, inf=np.inf,
+            use_adaptive=False, return_dict=False, **kwargs):
         """
         Create a pymc MCMC sampler.  Defaults to 'uninformative' priors
 
@@ -865,8 +866,15 @@ class SpectralModel(fitter.SimpleFitter):
 
         datamodel = pymc.distributions.Normal('data',mu=funcdet,tau=1/np.asarray(error)**2,observed=True,value=np.asarray(data))
         d['data']=datamodel
+
+        if return_dict:
+            return d
         
-        return pymc.MCMC(d)
+        mc = pymc.MCMC(d)
+        if use_adaptive:
+            mc.use_step_method(pymc.AdaptiveMetropolis,[d[p] for p in self.parinfo.names])
+
+        return mc
     
 class AstropyModel(SpectralModel):
 
