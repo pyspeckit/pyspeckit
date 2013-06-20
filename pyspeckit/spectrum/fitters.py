@@ -864,8 +864,21 @@ class Specfit(interactive.Interactive):
 
     def fullsizemodel(self):
         """
-        If the gaussian was fit to a sub-region of the spectrum,
-        expand it (with zeros) to fill the spectrum.  
+        If the model was fit to a sub-region of the spectrum, expand it (with
+        zeros wherever the model was not defined) to fill the spectrum.  
+
+        Example
+        -------
+        >>> noise = np.random.randn(100)
+        >>> xarr = np.linspace(-50,50,100)
+        >>> signal = np.exp(-(xarr-5)**2/(2*3.**2))
+        >>> sp = pyspeckit.Spectrum(data=noise + signal, xarr=xarr, xarrkwargs={'units':'km/s'})
+        >>> sp.specfit(xmin=-25,xmax=25)
+        >>> sp.specfit.model.shape
+        (48,)
+        >>> sp.specfit.fullsizemodel()
+        >>> sp.specfit.model.shape
+        (100,)
         """
 
         if self.model.shape != self.Spectrum.data.shape:
