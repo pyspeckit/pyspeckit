@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Classes &mdash; pyspeckit 0.1.13 documentation</title>
+    <title>Fitting using a Template &mdash; pyspeckit 0.1.13 documentation</title>
     
     <link rel="stylesheet" href="_static/extra.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,6 +26,9 @@
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/logo.ico"/>
     <link rel="top" title="pyspeckit 0.1.13 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Monte Carlo examples" href="example_pymc.html" />
+    <link rel="prev" title="Complicated H-alpha Line Fitting" href="example_sn.html" />
      
     <script type="text/javascript">
 
@@ -63,22 +66,32 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="classes">
-<h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="spectrum.html">Spectrum, Spectra, and ObsBlocks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cubes.html">SpectroscopicCube and its supporting functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cubes.html#mapplot">MapPlot</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cubes.html#cubes-py">cubes.py</a></li>
-</ul>
-</li>
-</ul>
+  <div class="section" id="fitting-using-a-template">
+<h1>Fitting using a Template<a class="headerlink" href="#fitting-using-a-template" title="Permalink to this headline">¶</a></h1>
+<p>Pyspeckit allows you to use a spectral template as the model to fit to your spectrum.
+See <tt class="xref py py-obj docutils literal"><span class="pre">pyspeckit.spectrum.models.template</span></tt>.</p>
+<p>If your model spectrum only requires a shift and a scale, it&#8217;s easy to use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pyspeckit.spectrum.models.template</span> <span class="kn">import</span> <span class="n">template_fitter</span>
+
+<span class="n">template</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&#39;template_spectrum.fits&#39;</span><span class="p">)</span>
+<span class="n">dataspec</span> <span class="o">=</span> <span class="n">pyspeckit</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="s">&quot;DataSpectrum.fits&quot;</span><span class="p">)</span>
+
+<span class="c"># Create the fitter from the template spectrum and &quot;Register&quot; it</span>
+<span class="n">template_fitter</span> <span class="o">=</span> <span class="n">template_fitter</span><span class="p">(</span><span class="n">template</span><span class="p">,</span><span class="n">xshift_units</span><span class="o">=</span><span class="s">&#39;angstroms&#39;</span><span class="p">)</span>
+<span class="n">dataspec</span><span class="o">.</span><span class="n">Registry</span><span class="o">.</span><span class="n">add_fitter</span><span class="p">(</span><span class="s">&#39;template&#39;</span><span class="p">,</span><span class="n">template_fitter</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">multisingle</span><span class="o">=</span><span class="s">&#39;multi&#39;</span><span class="p">)</span>
+
+<span class="c"># The fitted parameters are amplitude &amp; xshift</span>
+<span class="c"># perform the fit:</span>
+<span class="n">dataspec</span><span class="o">.</span><span class="n">specfit</span><span class="p">(</span><span class="n">fittype</span><span class="o">=</span><span class="s">&#39;template&#39;</span><span class="p">,</span><span class="n">guesses</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c"># print the results</span>
+<span class="k">print</span> <span class="n">dataspec</span><span class="o">.</span><span class="n">specfit</span><span class="o">.</span><span class="n">parinfo</span>
+</pre></div>
 </div>
 </div>
 <div class="edit-section section">
-<p class="edit-on-github-para"><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/classes.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></p>
-<p class="edit-on-bitbucket-para"><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/doc/classes.rst" title="Push the Edit button on the next page"><span class="edit-on-bitbucket">[edit this page on bitbucket]</span></a></p>
+<p class="edit-on-github-para"><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/doc/example_template.rst" title="Push the Edit button on the next page"><span class="edit-on-github">[edit this page on github]</span></a></p>
+<p class="edit-on-bitbucket-para"><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/doc/example_template.rst" title="Push the Edit button on the next page"><span class="edit-on-bitbucket">[edit this page on bitbucket]</span></a></p>
 </div>
 
 
@@ -112,7 +125,7 @@
     <td align=right><a href="mailto:pyspeckit@gmail.com">Contact us</a></td>
     </tr>
     <tr><td>
-      Last updated on Jun 02, 2013.
+      Last updated on Jun 24, 2013.
     </td><td align=right>
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
     </td>
