@@ -441,7 +441,8 @@ class Specfit(interactive.Interactive):
             self.errspec = np.zeros_like(self.Spectrum.data)
             self._valid = False
             return
-        self.spectofit = np.copy(self.Spectrum.data)
+        # see https://github.com/numpy/numpy/issues/3474
+        self.spectofit = np.ma.copy(self.Spectrum.data)
         self._valid = True
         if hasattr(self.Spectrum,'baseline'):
             if (self.Spectrum.baseline.subtracted is False 
