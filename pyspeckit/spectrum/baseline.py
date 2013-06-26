@@ -124,7 +124,7 @@ class Baseline(interactive.Interactive):
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:
             self.start_interactive(clear_all_connections=clear_all_connections,
-                    debug=debug, **kwargs)
+                    debug=debug, reset_selection=reset_selection, **kwargs)
         else:
             if excludefit and specfit.modelpars is not None:
                 #vlo = self.Spectrum.plotter.specfit.modelpars[1] - 2*self.Spectrum.plotter.specfit.modelpars[2]
