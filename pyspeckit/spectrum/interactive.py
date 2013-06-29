@@ -262,7 +262,8 @@ class Interactive(object):
 
 
     def start_interactive(self, debug=False, LoudDebug=False,
-            print_message=True, clear_all_connections=True, **kwargs):
+                          reset_selection=False, print_message=True,
+                          clear_all_connections=True, **kwargs):
         """
         Initialize the interative session
 
@@ -273,9 +274,15 @@ class Interactive(object):
         clear_all_connections : bool
             Clear all matplotlib event connections?
             (calls :func:`self.clear_all_connections`)
+        reset_selection : bool
+            Reset the include mask to be empty, so that you're setting up a
+            fresh region.
 
         """
-        if print_message: print self.interactive_help_message
+        if reset_selection:
+            self.includemask[:] = False
+        if print_message: 
+            print self.interactive_help_message
         if clear_all_connections: 
             self.clear_all_connections()
             self.Spectrum.plotter._disconnect_matplotlib_keys()
