@@ -114,3 +114,5 @@ def plotter_override(sp, vrange=None, **kwargs):
         raise ValueError("Not enough lines; don't need to use the H2CO plot wrapper")
 
     plot_h2co(spdict, sp, **kwargs)
+
+    return spdict
