@@ -17,7 +17,8 @@ title_dict = {
     }
 
 def plot_h2co(spdict,spectra, fignum=1, show_components=False,
-        show_hyperfine_components=False, residfignum=None, **plotkwargs):
+        show_hyperfine_components=False, residfignum=None, annotate=None,
+        **plotkwargs):
     """
     Plot the results from a multi-h2co fit
     """ 
@@ -51,7 +52,7 @@ def plot_h2co(spdict,spectra, fignum=1, show_components=False,
             sp.specfit.plot_fit(annotate=False,
                     show_components=show_components,
                     show_hyperfine_components=show_hyperfine_components)
-    if spdict['oneone'].specfit.modelpars is not None:
+    if spdict['oneone'].specfit.modelpars is not None and annotate:
         spdict['oneone'].specfit.annotate(labelspacing=0.05,prop={'size':'small','stretch':'extra-condensed'},frameon=False)
 
     if residfignum is not None:
