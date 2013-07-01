@@ -933,7 +933,8 @@ class Specfit(interactive.Interactive):
             self.residualaxis.set_xlabel(self.Spectrum.plotter.xlabel)
             self.residualaxis.set_ylabel(self.Spectrum.plotter.ylabel)
             self.residualaxis.set_title("Residuals")
-        self.residualaxis.figure.canvas.draw()
+        if self.Spectrum.plotter.autorefresh:
+            self.residualaxis.figure.canvas.draw()
 
     def annotate(self,loc='upper right',labelspacing=0.25, markerscale=0.01,
             borderpad=0.1, handlelength=0.1, handletextpad=0.1, frameon=False,
