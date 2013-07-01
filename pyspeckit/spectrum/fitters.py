@@ -908,14 +908,25 @@ class Specfit(interactive.Interactive):
 
     def plotresiduals(self, fig=2, axis=None, clear=True, color='k',
             linewidth=0.5, drawstyle='steps-mid', yoffset=0.0, label=True,
+            pars=None,
             **kwargs):
         """
         Plot residuals of the fit.  Specify a figure or
         axis; defaults to figure(2).
 
+        Parameters
+        ----------
+        fig : int
+            Figure number.  Overridden by axis
+        axis : axis
+            The axis to plot on
+        pars : None or parlist
+            If set, the residuals will be computed for the input parameters
+
+
         kwargs are passed to matplotlib plot
         """
-        self._full_model()
+        self._full_model(pars=pars)
         if axis is None:
             if isinstance(fig,int):
                 fig=matplotlib.pyplot.figure(fig)
