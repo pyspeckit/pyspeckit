@@ -58,13 +58,13 @@ def plot_h2co(spdict,spectra, fignum=1, show_components=False,
         pyplot.figure(residfignum)
         pyplot.clf()
         if len(splist) == 2:
-            axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
+            residaxdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
         elif len(splist) == 3:
-            axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223), 'threethree':pyplot.subplot(224), 'fourfour':pyplot.subplot(224) }
+            residaxdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223), 'threethree':pyplot.subplot(224), 'fourfour':pyplot.subplot(224) }
         elif len(splist) == 4:
-            axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
+            residaxdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
         for linename,sp in spdict.iteritems():
-            sp.specfit.plotresiduals(axis=axdict[linename])
+            sp.specfit.plotresiduals(axis=residaxdict[linename],figure=residfignum)
 
     spectra.axisdict = axdict
     spectra.plotter.axis = axdict['oneone']
