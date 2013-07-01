@@ -736,7 +736,7 @@ class Specfit(interactive.Interactive):
         
 
                 
-    def plot_fit(self, annotate=None, show_components=None,
+    def plot_fit(self, xarr=None, annotate=None, show_components=None,
             composite_fit_color='red',  lw=0.5,
             composite_lw=0.75, pars=None, offset=None,
             use_window_limits=None, show_hyperfine_components=None,
@@ -751,6 +751,10 @@ class Specfit(interactive.Interactive):
 
         Parameters
         ----------
+        xarr : None
+            If none, will use the spectrum's xarr.  Otherwise, plot the
+            specified xarr.  This is useful if you want to plot a well-sampled
+            model when the input spectrum is undersampled
         annotate : None or bool
             Annotate the plot?  If not specified, defaults to self.autoannotate
         show_components : None or bool
@@ -776,21 +780,25 @@ class Specfit(interactive.Interactive):
         else:
             plot_offset = offset
 
+        if xarr is None:
+            xarr = self.Spectrum.xarr
+
         if pars is not None:
-            model = self.get_model_frompars(self.Spectrum.xarr, pars)
+            model = self.get_model_frompars(xarr, pars)
         else:
             self._full_model()
             model = self.fullmodel
 
         self.modelplot += self.Spectrum.plotter.axis.plot(
-                self.Spectrum.xarr,
+                xarr,
                 model + plot_offset,
                 color=composite_fit_color, linewidth=lw, 
                 **plotkwargs)
         
         # Plot components
         if show_components or show_hyperfine_components:
-            self.plot_components(show_hyperfine_components=show_hyperfine_components,
+            self.plot_components(xarr=xarr,
+                    show_hyperfine_components=show_hyperfine_components,
                     pars=pars, plotkwargs=plotkwargs)
 
         uwl = use_window_limits if use_window_limits is not None else self.use_window_limits
@@ -807,7 +815,7 @@ class Specfit(interactive.Interactive):
             self.annotate()
             if self.vheight: self.Spectrum.baseline.annotate()
 
-    def plot_components(self, show_hyperfine_components=None,
+    def plot_components(self, xarr=None, show_hyperfine_components=None,
             component_yoffset=0.0, component_lw=0.75, pars=None,
             component_fit_color='blue', component_kwargs={},
             add_baseline=False, plotkwargs={}, **kwargs): 
@@ -816,6 +824,10 @@ class Specfit(interactive.Interactive):
 
         Parameters
         ----------
+        xarr : None
+            If none, will use the spectrum's xarr.  Otherwise, plot the
+            specified xarr.  This is useful if you want to plot a well-sampled
+            model when the input spectrum is undersampled
         show_hyperfine_components : None | bool
             Keyword argument to pass to component codes; determines whether to return
             individual (e.g., hyperfine) components of a composite model
@@ -837,6 +849,9 @@ class Specfit(interactive.Interactive):
 
         plot_offset = self.Spectrum.plotter.offset
 
+        if xarr is None:
+            xarr = self.Spectrum.xarr
+
         if show_hyperfine_components is not None:
             component_kwargs['return_hyperfine_components'] = show_hyperfine_components
         self._component_kwargs = component_kwargs
@@ -844,7 +859,7 @@ class Specfit(interactive.Interactive):
         if pars is None:
             pars = self.modelpars
 
-        self.modelcomponents = self.fitter.components(self.Spectrum.xarr, pars, **component_kwargs)
+        self.modelcomponents = self.fitter.components(xarr, pars, **component_kwargs)
 
         yoffset = plot_offset + component_yoffset
         if add_baseline:
@@ -854,11 +869,11 @@ class Specfit(interactive.Interactive):
             # can have multidimensional components
             if len(data.shape) > 1:
                 for d in data:
-                    self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
+                    self._plotted_components += self.Spectrum.plotter.axis.plot(xarr,
                         d + yoffset,
                         color=component_fit_color, linewidth=component_lw, **plotkwargs)
             else:
-                self._plotted_components += self.Spectrum.plotter.axis.plot(self.Spectrum.xarr,
+                self._plotted_components += self.Spectrum.plotter.axis.plot(xarr,
                     data + yoffset,
                     color=component_fit_color, linewidth=component_lw, **plotkwargs)
                 
