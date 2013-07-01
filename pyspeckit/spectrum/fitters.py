@@ -704,17 +704,19 @@ class Specfit(interactive.Interactive):
         """ compute the model over the full axis """ 
         return self.get_model(self.Spectrum.xarr, debug=debug,**kwargs)
 
-    def get_model(self, xarr, debug=False, add_baseline=None):
+    def get_model(self, xarr, pars=None, debug=False, add_baseline=None):
+        """ Compute the model over a given axis """
+        if pars is None:
+            return self.get_model_frompars(xarr=xarr, pars=self.parinfo,
+                    add_baseline=add_baseline, debug=debug)
+        else:
+            return self.get_model_frompars(xarr=xarr, pars=pars,
+                    add_baseline=add_baseline, debug=debug)
+
+    def get_model_frompars(self, xarr, pars, debug=False, add_baseline=None):
         """ Compute the model over a given axis """
         if ((add_baseline is None and (self.Spectrum.baseline.subtracted or self.vheight)) 
                 or add_baseline is False):
-            return self.fitter.n_modelfunc(self.parinfo,**self.fitter.modelfunc_kwargs)(xarr)
-        else:
-            return self.fitter.n_modelfunc(self.parinfo,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
-
-    def get_model_frompars(self, xarr, pars, debug=False):
-        """ Compute the model over a given axis """
-        if self.Spectrum.baseline.subtracted or self.vheight:
             return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr)
         else:
             return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
