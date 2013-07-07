@@ -283,9 +283,9 @@ class Specfit(interactive.Interactive):
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
         else:
             if multifit:
-                print "Can't fit with given fittype %s: it is not Registryed as a multifitter." % self.fittype
+                print "Can't fit with given fittype %s: it is not Registered as a multifitter." % self.fittype
             else:
-                print "Can't fit with given fittype %s: it is not Registryed as a singlefitter." % self.fittype
+                print "Can't fit with given fittype %s: it is not Registered as a singlefitter." % self.fittype
             return
         if save: self.savefit()
 
@@ -562,6 +562,33 @@ class Specfit(interactive.Interactive):
         self._full_model()
 
         self.history_fitpars()
+
+    def refit(self, use_lmfit=False):
+        """ Redo a fit using the current parinfo as input """
+        mpp,model,mpperr,chi2 = self.fitter(
+                self.Spectrum.xarr[self.xmin:self.xmax], 
+                self.spectofit[self.xmin:self.xmax], 
+                err=self.errspec[self.xmin:self.xmax],
+                npeaks=self.npeaks,
+                parinfo=self.parinfo,
+                use_lmfit=use_lmfit,
+                **self.fitkwargs)
+        self.modelpars = self.parinfo.values
+        self.modelerrs = self.parinfo.errors
+        self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
+        self.chi2 = chi2
+        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]+np.sum(self.parinfo.fixed)
+        self.model = model
+
+        # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
+        if 'tied' in self.fitkwargs:
+            for ii, element in enumerate(self.fitkwargs['tied']):
+                if not element.strip(): continue
+                
+                i1 = element.index('[') + 1
+                i2 = element.index(']')
+                loc = int(element[i1:i2])
+                self.modelerrs[ii] = self.modelerrs[loc]
 
     def history_fitpars(self):
         if hasattr(self.Spectrum,'header'):

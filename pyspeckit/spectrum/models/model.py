@@ -445,7 +445,7 @@ class SpectralModel(fitter.SimpleFitter):
         else:
             if debug: print "Using user-specified parinfo dict"
             # clean out disallowed kwargs (don't want to pass them to mpfit)
-            throwaway, kwargs = self._make_parinfo(debug=debug, **kwargs)
+            #throwaway, kwargs = self._make_parinfo(debug=debug, **kwargs)
 
         self.xax = xax # the 'stored' xax is just a link to the original
         if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
