@@ -63,7 +63,7 @@ class SpectralModel(fitter.SimpleFitter):
             not the past tense of party.  Can declare, via text, that
             some parameters are tied to each other.  Defaults to zeros like the
             others, but it's not clear if that's a sensible default
-        fitunits : list (optional)
+        fitunits : str (optional)
             convert X-axis to these units before passing to model
         parsteps : list (optional)
             minimum step size for each paremeter          (defaults to ZEROS)
@@ -172,7 +172,6 @@ class SpectralModel(fitter.SimpleFitter):
         elif self.default_parinfo is not None and parlimits is None:
             parlimits = [p['limits'] for p in self.default_parinfo]
 
-        self.fitunits = fitunits
         self.npeaks = npeaks
 
         # the height / parvalue popping needs to be done before the temp_pardict is set in order to make sure
@@ -359,12 +358,14 @@ class SpectralModel(fitter.SimpleFitter):
             raise ImportError( "Could not import lmfit, try using mpfit instead." )
 
         self.xax = xax # the 'stored' xax is just a link to the original
-        if hasattr(xax,'convert_to_unit') and hasattr(self,'fitunits') and self.fitunits is not None:
+        if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
             # some models will depend on the input units.  For these, pass in an X-axis in those units
             # (gaussian, voigt, lorentz profiles should not depend on units.  Ammonia, formaldehyde,
             # H-alpha, etc. should)
             xax = copy.copy(xax)
             xax.convert_to_unit(self.fitunits, quiet=quiet)
+        elif self.fitunits is not None:
+            raise TypeError("X axis does not have a convert method")
 
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
             err[np.isnan(data) + np.isinf(data)] = np.inf
@@ -454,6 +455,8 @@ class SpectralModel(fitter.SimpleFitter):
             # H-alpha, etc. should)
             xax = copy.copy(xax)
             xax.convert_to_unit(self.fitunits, quiet=quiet)
+        elif self.fitunits is not None:
+            raise TypeError("X axis does not have a convert method")
 
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
             err[np.isnan(data) + np.isinf(data)] = np.inf

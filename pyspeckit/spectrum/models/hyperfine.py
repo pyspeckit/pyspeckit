@@ -55,6 +55,20 @@ class hyperfinemodel(object):
             shortvarnames=("amp","v","\\sigma"), # specify the parameter names (TeX is OK)
             fitunits='Hz' )
 
+        self.taufitter = model.SpectralModel(self.hyperfine_tau,3,
+            parnames=['tau','center','width'], 
+            parlimited=[(True,False), (False,False), (True,False)], 
+            parlimits=[(0,0), (0,0), (0,0)],
+            shortvarnames=(r'\tau',"v","\\sigma"), # specify the parameter names (TeX is OK)
+            fitunits='Hz')
+
+        self.totaltaufitter = model.SpectralModel(self.hyperfine_tau_total,3,
+            parnames=['tau','center','width'], 
+            parlimited=[(True,False), (False,False), (True,False)], 
+            parlimits=[(0,0), (0,0), (0,0)],
+            shortvarnames=(r'\tau',"v","\\sigma"), # specify the parameter names (TeX is OK)
+            fitunits='Hz')
+
     def __call__(self, *args, **kwargs):
         """
         Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.
@@ -70,15 +84,29 @@ class hyperfinemodel(object):
                 width=width, return_hyperfine_components=return_hyperfine_components,
                 Tbackground=Tbackground)
 
+    def hyperfine_tau(self, xarr, tau, xoff_v, width, **kwargs):
+        """ same as hyperfine, but with arguments in a different order, AND
+        tau is returned instead of exp(-tau)"""
+        return self.hyperfine(xarr, tau=tau, xoff_v=xoff_v, width=width,
+                return_tau=True, **kwargs)
+
+    def hyperfine_tau_total(self, xarr, tau_total, xoff_v, width, **kwargs):
+        """ same as hyperfine, but with arguments in a different order, AND
+        tau is returned instead of exp(-tau), AND the *peak* tau is used"""
+        return self.hyperfine(xarr, tau_total=tau_total, xoff_v=xoff_v, width=width,
+                return_tau=True, **kwargs)
 
     def hyperfine(self, xarr, Tex=5.0, tau=0.1, xoff_v=0.0, width=1.0, 
             return_hyperfine_components=False, Tbackground=2.73, amp=None,
-            return_tau=False ):
+            return_tau=False, tau_total=None):
         """
         Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.
 
         return_tau : bool
             If specified, return just the tau spectrum, ignoring Tex
+        tau_total : bool
+            If specified, use this *instead of tau*, and it tries to normalize
+            to the *peak of the line*
         """
 
         # Convert X-units to frequency in Hz
@@ -99,6 +127,9 @@ class hyperfinemodel(object):
             else:
                 return tau_nu_cumul
 
+        if tau_total is not None:
+            tau = 1
+
         components =[]
         for linename in self.line_names:
             voff_lines = np.array(self.voff_lines_dict[linename])
@@ -118,6 +149,12 @@ class hyperfinemodel(object):
             tau_nu_cumul += tau_nu
 
         # add a list of the individual 'component' spectra to the total components...
+
+        if tau_total is not None:
+            tau_max = tau_nu_cumul.max() # danger of undersampling...
+            tau_nu_cumul *= tau_total/tau_max
+            for c in components:
+                c *= tau_total/tau_max
 
         if return_hyperfine_components:
             if return_tau:
