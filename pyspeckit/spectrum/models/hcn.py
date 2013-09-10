@@ -6,7 +6,6 @@ This is an HCN fitter...
 ref for line params: http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn@hfs.dat
 """
 import numpy as np
-from pyspeckit.mpfit import mpfit
 from .. import units
 from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb
@@ -25,16 +24,20 @@ except ImportError:
 import hyperfine
 
 
-freq_dict={
-'10-01':88.6339360e9,
-'11-01':88.6304160e9,
-'12-01':88.6318470e9,
-}
-aval_dict = {
-'10-01':2.4075e-5,
-'11-01':2.4075e-5,
-'12-01':2.4075e-5,
-}
+freq_dict={# splatalogue frequencies
+           #'10-01':88.6339360e9,
+           #'11-01':88.6304160e9,
+           #'12-01':88.6318470e9,
+           # frequencies from Ahrens 2002 & Loughnane 2013
+           '11-01':88.63041376e9, # F=1-1
+           '12-01':88.63184666e9, # F=2-1
+           '10-01':88.63393544e9, # F=0-1
+           }
+aval_dict = { # not used
+             '10-01':2.4075e-5,
+             '11-01':2.4075e-5,
+             '12-01':2.4075e-5,
+             }
 """
 Line strengths of the 15 hyperfine components in J = 1 -  0  transition. The
 thickness of the lines indicates their relative weight compared to the others.
@@ -64,6 +67,9 @@ hcn_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line
 hcn_amp = hcn_vtau.ampfitter
 hcn_vtau_fitter = hcn_vtau.fitter
 hcn_vtau_vheight_fitter = hcn_vtau.vheight_fitter
+hcn_varyhf_fitter = hcn_vtau.varyhf_fitter 
+hcn_varyhf_amp_fitter = hcn_vtau.varyhf_amp_fitter 
+hcn_varyhf_amp_width_fitter = hcn_vtau.varyhf_amp_width_fitter 
 
 def hcn_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0, 
         grid_vwidth=1.0,
