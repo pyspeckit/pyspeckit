@@ -318,7 +318,7 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
 
 
 def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
-        return_hyperfine_components=False ):
+        return_hyperfine_components=False, texscale=0.01, tau=0.01, **kwargs):
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters
 
@@ -327,9 +327,10 @@ def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
     The final spectrum is then rescaled to that value
     """
 
-    mdl = formaldehyde_vtau(xarr, Tex=amp*0.01, tau=0.01, xoff_v=xoff_v,
+    mdl = formaldehyde_vtau(xarr, Tex=amp*texscale, tau=tau, xoff_v=xoff_v,
             width=width,
-            return_hyperfine_components=return_hyperfine_components)
+            return_tau=True,
+            return_hyperfine_components=return_hyperfine_components, **kwargs)
     if return_hyperfine_components:
         mdlpeak = np.abs(mdl).squeeze().sum(axis=0).max()
     else:
@@ -345,6 +346,7 @@ class formaldehyde_model(model.SpectralModel):
         """
         Return the integral of the individual components (ignoring height)
         """
+        raise NotImplementedError("Not implemented, but the integral is just amplitude * width * sqrt(2*pi)")
         # produced by directly computing the integral of gaussians and formaldehydeians as a function of 
         # line width and then fitting that with a broken logarithmic power law
         # The errors are <0.5% for all widths

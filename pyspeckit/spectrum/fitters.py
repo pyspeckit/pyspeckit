@@ -152,13 +152,13 @@ class Specfit(interactive.Interactive):
         
     @cfgdec
     def __call__(self, interactive=False, multifit=False, usemoments=True,
-            clear_all_connections=True, debug=False, 
-            guesses=None, save=True, annotate=None,
-            show_components=None, use_lmfit=False, verbose=True, clear=True,
-            fit_plotted_area=True, use_window_limits=None,
-            vheight=None, exclude=None, **kwargs):
+                 clear_all_connections=True, debug=False, 
+                 guesses=None, save=True, annotate=None,
+                 show_components=None, use_lmfit=False, verbose=True, clear=True,
+                 fit_plotted_area=True, use_window_limits=None,
+                 vheight=None, exclude=None, **kwargs):
         """
-        Fit gaussians (or other model functions) to a spectrum
+        Fit model functions to a spectrum
 
         Parameters
         ----------
