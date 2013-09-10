@@ -5,14 +5,20 @@ Generalized hyperfine component fitter
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
 import numpy as np
-import model,fitter
+import model
+import fitter
 
+# should be imported in the future
 ckms = 2.99792458e5
 
 class hyperfinemodel(object):
     """
     Wrapper for the hyperfine model class.  Specify the offsets and relative
     strengths when initializing, then you've got yourself a hyperfine modeler.
+
+    There are a wide variety of different fitter attributes, each designed to
+    free a different subset of the parameters.  Their purposes should be
+    evident from their names.
     """
 
     def __init__(self, line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy):
@@ -39,6 +45,34 @@ class hyperfinemodel(object):
             parlimited=[(False,False), (True,False), (False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
             shortvarnames=("T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
+            fitunits='Hz' )
+
+        self.nlines = len(line_names)
+
+        self.varyhf_fitter = model.SpectralModel(self.hyperfine_varyhf,3+self.nlines,
+            parnames=['Tex','center','width']+['tau%s' % k for k in self.line_names], 
+            parlimited=[(False,False), (False,False), (True,False)] + [(True,False),]*self.nlines, 
+            parlimits=[(0,0), (0,0), (0,0)]+[(0,0),]*self.nlines,
+            shortvarnames=("T_{ex}","v","\\sigma") + tuple(("\\tau(\\mathrm{%s})" % k for k in self.line_names)),
+            # specify the parameter names (TeX is OK)
+            fitunits='Hz' )
+
+        self.varyhf_amp_fitter = model.SpectralModel(self.hyperfine_varyhf_amp,2+self.nlines,
+            parnames=['center','width']+['amp%s' % k for k in self.line_names], 
+            parlimited=[(False,False), (True,False)] + [(True,False),]*self.nlines, 
+            parlimits=[(0,0), (0,0)]+[(0,0),]*self.nlines,
+            shortvarnames=("v","\\sigma") + tuple(("amp(\\mathrm{%s})" % k for k in self.line_names)),
+            # specify the parameter names (TeX is OK)
+            fitunits='Hz' )
+
+        self.varyhf_amp_width_fitter = model.SpectralModel(self.hyperfine_varyhf_amp_width,1+self.nlines*2,
+            parnames=['center']+['amp%s' % k for k in self.line_names]+['width%s' % k for k in self.line_names], 
+            parlimited=[(False,False)] + [(True,False),]*self.nlines + [(True,False)]*self.nlines, 
+            parlimits=[(0,0)]+[(0,0),]*self.nlines*2,
+            shortvarnames=(("v",) +
+                           tuple(("amp(\\mathrm{%s})" % k for k in self.line_names)) + 
+                           tuple(("\\sigma(\\mathrm{%s})" % k for k in self.line_names))), 
+            # specify the parameter names (TeX is OK)
             fitunits='Hz' )
 
         self.vheight_fitter = model.SpectralModel(fitter.vheightmodel(self),5,
@@ -96,9 +130,42 @@ class hyperfinemodel(object):
         return self.hyperfine(xarr, tau_total=tau_total, xoff_v=xoff_v, width=width,
                 return_tau=True, **kwargs)
 
+    def hyperfine_varyhf(self, xarr, Tex, xoff_v, width, *args, **kwargs):
+        """ Wrapper of hyperfine for using a variable number of peaks with specified
+        tau """
+        return self.hyperfine(xarr, Tex=Tex, xoff_v=xoff_v, width=width,
+                              tau=dict(zip(self.line_names,args)),
+                              vary_hyperfine_tau=True, **kwargs)
+
+    def hyperfine_varyhf_amp(self, xarr, xoff_v, width, *args, **kwargs):
+        """ Wrapper of hyperfine for using a variable number of peaks with specified
+        amplitude (rather than tau).  Uses some opaque tricks: Tex is basically ignored,
+        and return_tau means you're actually returning the amplitude,
+        which is just passed in as tau"""
+        return self.hyperfine(xarr, xoff_v=xoff_v, width=width,
+                              tau=dict(zip(self.line_names,args)),
+                              vary_hyperfine_tau=True,
+                              return_tau=True, **kwargs)
+
+    def hyperfine_varyhf_amp_width(self, xarr, xoff_v, *args, **kwargs):
+        """ Wrapper of hyperfine for using a variable number of peaks with specified
+        amplitude (rather than tau).  Uses some opaque tricks: Tex is basically ignored,
+        and return_tau means you're actually returning the amplitude,
+        which is just passed in as tau"""
+        if len(args) % 2 != 0:
+            raise ValueError("Incorrect number of arguments for varying amplitude"
+                             " and width.  Need N amplitudes, N widths.")
+        return self.hyperfine(xarr, xoff_v=xoff_v,
+                              tau=dict(zip(self.line_names,args[:len(args)/2])),
+                              width=dict(zip(self.line_names,args[len(args)/2:])),
+                              vary_hyperfine_tau=True,
+                              vary_hyperfine_width=True,
+                              return_tau=True, **kwargs)
+
     def hyperfine(self, xarr, Tex=5.0, tau=0.1, xoff_v=0.0, width=1.0, 
             return_hyperfine_components=False, Tbackground=2.73, amp=None,
-            return_tau=False, tau_total=None):
+            return_tau=False, tau_total=None, vary_hyperfine_tau=False,
+            vary_hyperfine_width=False):
         """
         Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.
 
@@ -107,21 +174,34 @@ class hyperfinemodel(object):
         tau_total : bool
             If specified, use this *instead of tau*, and it tries to normalize
             to the *peak of the line*
+        vary_hyperfine_tau : bool
+            If set to true, allows the hyperfine transition amplitudes to vary and
+            does not use the line_strength_dict.  If set, `tau` must be a dict
         """
 
         # Convert X-units to frequency in Hz
         xarr = xarr.as_unit('Hz')
 
-        # Ensure parameters are scalar
+        # Ensure parameters are scalar / have no extra dims
         if not np.isscalar(Tex): Tex = Tex.squeeze()
-        if not np.isscalar(tau): tau = tau.squeeze()
         if not np.isscalar(xoff_v): xoff_v = xoff_v.squeeze()
-        if not np.isscalar(width): width = width.squeeze()
+        if vary_hyperfine_width:
+            if not isinstance(width, dict):
+                raise TypeError("If varying the amplitude of the hyperfine lines, must specify tau as a dict")
+        else:
+            if not np.isscalar(width): width = width.squeeze()
+        if vary_hyperfine_tau:
+            if not isinstance(tau, dict):
+                raise TypeError("If varying the amplitude of the hyperfine lines, must specify tau as a dict")
+        else:
+            if not np.isscalar(tau): tau = tau.squeeze()
 
         # Generate an optical depth spectrum as a function of the X-axis 
         tau_nu_cumul = np.zeros(len(xarr))
         # Error check: inputing NANs results in meaningless output - return without computing a model
-        if np.any(np.isnan((tau,Tex,width,xoff_v))):
+        if (np.any(np.isnan((Tex,xoff_v))) or
+           ((not vary_hyperfine_tau) and np.isnan(tau)) or
+           ((not vary_hyperfine_width) and np.isnan(width))):
             if return_hyperfine_components:
                 return [tau_nu_cumul] * len(self.line_names)
             else:
@@ -135,13 +215,19 @@ class hyperfinemodel(object):
             voff_lines = np.array(self.voff_lines_dict[linename])
       
             lines = (1-voff_lines/ckms)*self.freq_dict[linename]
-            if width == 0:
+            if not vary_hyperfine_width and width == 0:
                 tau_nu = xarr*0
             else:
-                nuwidth = np.abs(width/ckms*lines)
+                if vary_hyperfine_width:
+                    nuwidth = np.abs(width[linename]/ckms*lines)
+                else:
+                    nuwidth = np.abs(width/ckms*lines)
                 nuoff = xoff_v/ckms*lines
-                # the total optical depth, which is being fitted, should be the sum of the components
-                tau_line = (tau * self.line_strength_dict[linename]/self.relative_strength_total_degeneracy[linename]) 
+                if vary_hyperfine_tau:
+                    tau_line = tau[linename]
+                else:
+                    # the total optical depth, which is being fitted, should be the sum of the components
+                    tau_line = (tau * self.line_strength_dict[linename]/self.relative_strength_total_degeneracy[linename]) 
           
                 tau_nu = np.array(tau_line * np.exp(-(xarr+nuoff-self.freq_dict[linename])**2/(2.0*nuwidth**2)))
                 tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
