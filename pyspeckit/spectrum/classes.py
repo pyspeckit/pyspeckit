@@ -267,7 +267,7 @@ class Spectrum(object):
         if they exist.  This routine will convert that dict to a pyfits header
         instance.
 
-        .. TODO:: Move this to the hdf5 reader?
+        .. todo:: Move this to the hdf5 reader?
         """    
         
         self.xarr.xtype = hdr['xtype']
@@ -285,7 +285,7 @@ class Spectrum(object):
         Parse parameters from a .fits header into required spectrum structure
         parameters
 
-        .. TODO:: This should be moved to the FITSSpectrum subclass when that is available
+        .. todo:: This should be moved to the FITSSpectrum subclass when that is available
         """
 
         if hdr.get('BUNIT'):

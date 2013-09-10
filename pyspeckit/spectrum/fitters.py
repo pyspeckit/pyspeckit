@@ -1108,7 +1108,7 @@ class Specfit(interactive.Interactive):
         analytic : bool
             Return the analytic integral of the fitted function?  
             .. WARNING:: This approach is only implemented for some models
-            .. TODO:: Implement error propagation for this approach
+            .. todo:: Implement error propagation for this approach
         direct : bool
             Return the integral of the *spectrum* (as opposed to the *fit*)
             over a range defined by the `integration_limits` if specified or
@@ -1338,7 +1338,7 @@ class Specfit(interactive.Interactive):
             at reasonable limits, but the guessing is not very sophisticated
             yet.
 
-        .. TODO:: Add a button in the navbar that makes this window pop up
+        .. todo:: Add a button in the navbar that makes this window pop up
         http://stackoverflow.com/questions/4740988/add-new-navigate-modes-in-matplotlib
         """
         import widgets
