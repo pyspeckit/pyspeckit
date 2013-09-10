@@ -1,8 +1,6 @@
 Parameters
 ==========
 
-.. default-role:: code-block
-
 Model parameters are very flexible, and can be accessed and modified in many
 parallel ways.
 

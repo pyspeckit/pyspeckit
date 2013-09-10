@@ -65,6 +65,8 @@
             
   <div class="section" id="module-pyspeckit.cubes.SpectralCube">
 <span id="cubes"></span><h1>Cubes<a class="headerlink" href="#module-pyspeckit.cubes.SpectralCube" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>Cubes<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>Tools to deal with spectroscopic data cubes.</p>
 <p>Many features in Cubes require additional packages:</p>
 <blockquote>
@@ -76,25 +78,11 @@
 </ul>
 </div></blockquote>
 <p>The &#8216;grunt work&#8217; is performed by the <tt class="xref py py-mod docutils literal"><span class="pre">cubes</span></tt> module</p>
-<hr class="docutils" />
+</div>
 <dl class="class">
 <dt id="pyspeckit.cubes.SpectralCube.Cube">
-<em class="property">class </em><tt class="descclassname">pyspeckit.cubes.SpectralCube.</tt><tt class="descname">Cube</tt><big>(</big><em>filename=None</em>, <em>xarr=None</em>, <em>cube=None</em>, <em>errorcube=None</em>, <em>header=None</em>, <em>x0=0</em>, <em>y0=0</em>, <em>maskfilename=None</em>, <em>maskmap=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L35" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-35" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.cubes.SpectralCube.</tt><tt class="descname">Cube</tt><big>(</big><em>filename=None</em>, <em>xarr=None</em>, <em>cube=None</em>, <em>errorcube=None</em>, <em>header=None</em>, <em>x0=0</em>, <em>y0=0</em>, <em>maskfilename=None</em>, <em>maskmap=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L33" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-33" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="spectrum.html#pyspeckit.spectrum.classes.Spectrum" title="pyspeckit.spectrum.classes.Spectrum"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.spectrum.classes.Spectrum</span></tt></a></p>
-<p>Tools to deal with spectroscopic data cubes.</p>
-<p>Many features in Cubes require additional packages:</p>
-<blockquote>
-<div><ul class="simple">
-<li>smoothing - requires <a class="reference external" href="https://agpy.googlecode.com/svn/trunk">agpy</a>&#8216;s smooth and parallel_map routines</li>
-<li><a class="reference external" href="http://stsdas.stsci.edu/astrolib/coords-0.37.tar.gz">coords</a> (<a class="reference external" href="http://www.scipy.org/AstroLibCoordsHome">homepage</a>)</li>
-<li><a class="reference external" href="git://github.com/leejjoon/pyregion.git">pyregion</a></li>
-<li><a class="reference external" href="git://github.com/astropy/astropy.git">pywcs</a></li>
-</ul>
-</div></blockquote>
-<p>The &#8216;grunt work&#8217; is performed by the <tt class="xref py py-mod docutils literal"><span class="pre">cubes</span></tt> module</p>
-<p>cubes.spectral_smooth doc:</p>
-<blockquote>
-<div>Smooth the cube along the spectral direction</div></blockquote>
 <dl class="docutils">
 <dt>Initialize the Cube.  Accepts files in the following formats:</dt>
 <dd><ul class="first last simple">
@@ -107,7 +95,7 @@ If nothing is specified, a blank :Cube: will be generated.</p>
 <p>x0,y0 - initial spectrum to use (defaults to lower-left corner)</p>
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.copy">
-<tt class="descname">copy</tt><big>(</big><em>deep=True</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L106" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-106" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.copy" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">copy</tt><big>(</big><em>deep=True</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L104" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-104" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a copy of the spectrum with its own plotter, fitter, etc.
 Useful for, e.g., comparing smoothed to unsmoothed data</p>
 </dd></dl>
@@ -145,40 +133,57 @@ units</p>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.fiteach">
-<tt class="descname">fiteach</tt><big>(</big><em>errspec=None</em>, <em>errmap=None</em>, <em>guesses=()</em>, <em>verbose=True</em>, <em>verbose_level=1</em>, <em>quiet=True</em>, <em>signal_cut=3</em>, <em>usemomentcube=False</em>, <em>blank_value=0</em>, <em>integral=True</em>, <em>direct=False</em>, <em>absorption=False</em>, <em>use_nearest_as_guess=False</em>, <em>start_from_point=(0</em>, <em>0)</em>, <em>multicore=0</em>, <em>**fitkwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L370" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-370" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.fiteach" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">fiteach</tt><big>(</big><em>errspec=None</em>, <em>errmap=None</em>, <em>guesses=()</em>, <em>verbose=True</em>, <em>verbose_level=1</em>, <em>quiet=True</em>, <em>signal_cut=3</em>, <em>usemomentcube=False</em>, <em>blank_value=0</em>, <em>integral=True</em>, <em>direct=False</em>, <em>absorption=False</em>, <em>use_nearest_as_guess=False</em>, <em>start_from_point=(0</em>, <em>0)</em>, <em>multicore=0</em>, <em>**fitkwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L368" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-368" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.fiteach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit a spectrum to each valid pixel in the cube</p>
 <p>For guesses, priority is <em>use_nearest_as_guess</em>, <em>usemomentcube</em>,
 <em>guesses</em>, None</p>
-<dl class="docutils">
-<dt><em>use_nearest_as_guess</em> [ False ] </dt>
-<dd>Unless the fitted point is the first, it will find the nearest
-other point with a successful fit and use its best-fit parameters
-as the guess</dd>
-<dt><em>start_from_point</em> [ &#8216;center&#8217;, (x,y) ]</dt>
-<dd>Either start from the center or from a point defined by a tuple.
-Work outward from that starting point.</dd>
-<dt><em>guesses</em> [ tuple, ndarray[naxis=3] ]</dt>
-<dd>Either a tuple/list of guesses with len(guesses) = npars or a cube
-of guesses with shape [npars, ny, nx]</dd>
-<dt><em>signal_cut</em> [ float ]</dt>
-<dd>Minimum signal-to-noise ratio to &#8220;cut&#8221; on (i.e., if peak in a given
-spectrum has s/n less than this value, ignore it)</dd>
-<dt><em>blank_value</em> [ float ]</dt>
-<dd>Value to replace non-fitted locations with.  A good alternative is
-numpy.nan</dd>
-</dl>
-<p><em>verbose</em>       [ bool ]
-<em>verbose_level</em> [ int ]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>use_nearest_as_guess: bool</strong> :</p>
 <blockquote>
-<div>Controls how much is output.
+<div><p>Unless the fitted point is the first, it will find the nearest
+other point with a successful fit and use its best-fit parameters
+as the guess</p>
+</div></blockquote>
+<p><strong>start_from_point: tuple(int,int)</strong> :</p>
+<blockquote>
+<div><p>Either start from the center or from a point defined by a tuple.
+Work outward from that starting point.</p>
+</div></blockquote>
+<p><strong>guesses: tuple or ndarray[naxis=3]</strong> :</p>
+<blockquote>
+<div><p>Either a tuple/list of guesses with len(guesses) = npars or a cube
+of guesses with shape [npars, ny, nx]</p>
+</div></blockquote>
+<p><strong>signal_cut: float</strong> :</p>
+<blockquote>
+<div><p>Minimum signal-to-noise ratio to &#8220;cut&#8221; on (i.e., if peak in a given
+spectrum has s/n less than this value, ignore it)</p>
+</div></blockquote>
+<p><strong>blank_value: float</strong> :</p>
+<blockquote>
+<div><p>Value to replace non-fitted locations with.  A good alternative is
+numpy.nan</p>
+</div></blockquote>
+<p><strong>verbose: bool</strong> :</p>
+<p><strong>verbose_level: int</strong> :</p>
+<blockquote>
+<div><p>Controls how much is output.
 0,1 - only changes frequency of updates in loop
 2 - print out messages when skipping pixels
 3 - print out messages when fitting pixels
-4 - specfit will be verbose</div></blockquote>
-<dl class="docutils">
-<dt><em>multicore</em> [ int ] </dt>
-<dd>if &gt;0, try to use multiprocessing via parallel_map to run on multiple cores</dd>
-</dl>
+4 - specfit will be verbose</p>
+</div></blockquote>
+<p><strong>multicore: int</strong> :</p>
+<blockquote class="last">
+<div><p>if &gt;0, try to use multiprocessing via parallel_map to run on multiple cores</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -190,7 +195,7 @@ Spectrum1D object).</p>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.get_apspec">
-<tt class="descname">get_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em>, <em>method='mean'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L322" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-322" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.get_apspec" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em>, <em>method='mean'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L320" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-320" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.get_apspec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract an aperture using cubes.extract_aperture
 (defaults to Cube coordinates)</p>
 <dl class="docutils">
@@ -204,7 +209,7 @@ None indicates pixel coordinates (default)</dd>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.get_spectrum">
-<tt class="descname">get_spectrum</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L285" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-285" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.get_spectrum" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_spectrum</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L283" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-283" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.get_spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Very simple: get the spectrum at coordinates x,y</p>
 <p>(inherits fitter from self)</p>
 <p>Returns a SpectroscopicAxis instance</p>
@@ -228,7 +233,7 @@ their neighbors using linear interpolation.</p>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.load_model_fit">
-<tt class="descname">load_model_fit</tt><big>(</big><em>fitsfilename</em>, <em>npars</em>, <em>npeaks=1</em>, <em>fittype=None</em>, <em>_temp_fit_loc=(0</em>, <em>0)</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L684" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-684" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.load_model_fit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">load_model_fit</tt><big>(</big><em>fitsfilename</em>, <em>npars</em>, <em>npeaks=1</em>, <em>fittype=None</em>, <em>_temp_fit_loc=(0</em>, <em>0)</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L680" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-680" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.load_model_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a parameter + error cube into the .parcube and .errcube
 attributes.</p>
 </dd></dl>
@@ -242,12 +247,20 @@ fitter otherwise pyspeckit will be angry!</p>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.momenteach">
-<tt class="descname">momenteach</tt><big>(</big><em>verbose=True</em>, <em>verbose_level=1</em>, <em>multicore=0</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L607" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-607" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.momenteach" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">momenteach</tt><big>(</big><em>verbose=True</em>, <em>verbose_level=1</em>, <em>multicore=0</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L601" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-601" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.momenteach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a cube of the moments of each pixel</p>
-<dl class="docutils">
-<dt><em>multicore</em> [ int ] </dt>
-<dd>if &gt;0, try to use multiprocessing via parallel_map to run on multiple cores</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>multicore: int</strong> :</p>
+<blockquote class="last">
+<div><p>if &gt;0, try to use multiprocessing via parallel_map to run on multiple cores</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -308,7 +321,7 @@ parameters</p>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.plot_apspec">
-<tt class="descname">plot_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em>, <em>reset_ylimits=True</em>, <em>method='mean'</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L254" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-254" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.plot_apspec" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em>, <em>reset_ylimits=True</em>, <em>method='mean'</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L252" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-252" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.plot_apspec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract an aperture using cubes.extract_aperture
 (defaults to Cube coordinates)</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -320,11 +333,11 @@ parameters</p>
 <div><p>A list of aperture parameters, e.g. 
 For a circular aperture, len(ap)=3:</p>
 <blockquote>
-<div><p>ap = [xcen,ycen,radius]</p>
+<div><p><tt class="docutils literal"><span class="pre">ap</span> <span class="pre">=</span> <span class="pre">[xcen,ycen,radius]</span></tt></p>
 </div></blockquote>
 <dl class="docutils">
 <dt>For an elliptical aperture, len(ap)=5:</dt>
-<dd><p class="first last">ap = [xcen,ycen,height,width,PA]</p>
+<dd><p class="first last"><tt class="docutils literal"><span class="pre">ap</span> <span class="pre">=</span> <span class="pre">[xcen,ycen,height,width,PA]</span></tt></p>
 </dd>
 </dl>
 </div></blockquote>
@@ -342,19 +355,19 @@ for pixel)</p>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.plot_fit">
-<tt class="descname">plot_fit</tt><big>(</big><em>x</em>, <em>y</em>, <em>silent=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L223" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-223" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.plot_fit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_fit</tt><big>(</big><em>x</em>, <em>y</em>, <em>silent=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L221" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-221" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.plot_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>If fiteach has been run, plot the best fit</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.plot_spectrum">
-<tt class="descname">plot_spectrum</tt><big>(</big><em>x</em>, <em>y</em>, <em>plot_fit=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L205" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-205" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.plot_spectrum" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_spectrum</tt><big>(</big><em>x</em>, <em>y</em>, <em>plot_fit=False</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L203" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-203" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.plot_spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fill the .data array with a real spectrum and plot it</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.set_apspec">
-<tt class="descname">set_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em>, <em>method='mean'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L358" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-358" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.set_apspec" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_apspec</tt><big>(</big><em>aperture</em>, <em>coordsys=None</em>, <em>method='mean'</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L356" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-356" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.set_apspec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract an aperture using cubes.extract_aperture
 (defaults to Cube coordinates)</p>
 </dd></dl>
@@ -367,25 +380,25 @@ for pixel)</p>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.show_fit_param">
-<tt class="descname">show_fit_param</tt><big>(</big><em>parnumber</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L670" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-670" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.show_fit_param" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">show_fit_param</tt><big>(</big><em>parnumber</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L666" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-666" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.show_fit_param" title="Permalink to this definition">¶</a></dt>
 <dd><p>If pars have been computed, display them in the mapplot window</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.show_moment">
-<tt class="descname">show_moment</tt><big>(</big><em>momentnumber</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L657" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-657" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.show_moment" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">show_moment</tt><big>(</big><em>momentnumber</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L653" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-653" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.show_moment" title="Permalink to this definition">¶</a></dt>
 <dd><p>If moments have been computed, display them in the mapplot window</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.slice">
-<tt class="descname">slice</tt><big>(</big><em>start=None</em>, <em>stop=None</em>, <em>units='pixel'</em>, <em>preserve_fits=False</em>, <em>copy=True</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L132" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-132" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.slice" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">slice</tt><big>(</big><em>start=None</em>, <em>stop=None</em>, <em>units='pixel'</em>, <em>preserve_fits=False</em>, <em>copy=True</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L130" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-130" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.slice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Slicing the spectrum</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.Cube.smooth">
-<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L727" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-727" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.smooth" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">smooth</tt><big>(</big><em>smooth</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L723" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-723" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.Cube.smooth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooth the spectrum by factor <a class="reference internal" href="#pyspeckit.cubes.SpectralCube.Cube.smooth" title="pyspeckit.cubes.SpectralCube.Cube.smooth"><tt class="xref py py-obj docutils literal"><span class="pre">smooth</span></tt></a>.</p>
 <p>Documentation from the <tt class="xref py py-mod docutils literal"><span class="pre">cubes.spectral_smooth</span></tt> module:</p>
 </dd></dl>
@@ -425,7 +438,7 @@ to determine type from suffix</p>
 
 <dl class="class">
 <dt id="pyspeckit.cubes.SpectralCube.CubeStack">
-<em class="property">class </em><tt class="descclassname">pyspeckit.cubes.SpectralCube.</tt><tt class="descname">CubeStack</tt><big>(</big><em>cubelist</em>, <em>xunits='GHz'</em>, <em>x0=0</em>, <em>y0=0</em>, <em>maskmap=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L764" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-764" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.CubeStack" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pyspeckit.cubes.SpectralCube.</tt><tt class="descname">CubeStack</tt><big>(</big><em>cubelist</em>, <em>xunits='GHz'</em>, <em>x0=0</em>, <em>y0=0</em>, <em>maskmap=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L760" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-760" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.CubeStack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyspeckit.cubes.SpectralCube.Cube" title="pyspeckit.cubes.SpectralCube.Cube"><tt class="xref py py-class docutils literal"><span class="pre">pyspeckit.cubes.SpectralCube.Cube</span></tt></a></p>
 <p>The Cube equivalent of Spectra: for stitching multiple cubes with the same
 spatial grid but different frequencies together</p>
@@ -439,7 +452,7 @@ spatial grid but different frequencies together</p>
 <p>x0,y0 - initial spectrum to use (defaults to lower-left corner)</p>
 <dl class="method">
 <dt id="pyspeckit.cubes.SpectralCube.CubeStack.write_fit">
-<tt class="descname">write_fit</tt><big>(</big><em>fitcubefilename</em>, <em>clobber=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L859" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-859" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.CubeStack.write_fit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">write_fit</tt><big>(</big><em>fitcubefilename</em>, <em>clobber=False</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/SpectralCube.py#L855" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/SpectralCube.py#cl-855" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.SpectralCube.CubeStack.write_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write out a fit cube using the information in the fit&#8217;s parinfo to set the header keywords</p>
 <dl class="docutils">
 <dt><em>fitcubefilename</em> [ string ] </dt>
@@ -501,7 +514,7 @@ to None to prevent overwriting a previous plot.</dd>
 
 <dl class="method">
 <dt id="pyspeckit.cubes.mapplot.MapPlotter.makeplane">
-<tt class="descname">makeplane</tt><big>(</big><em>estimator=&lt;function mean at 0x101a76c08&gt;</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/mapplot.py#L155" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/mapplot.py#cl-155" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.mapplot.MapPlotter.makeplane" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">makeplane</tt><big>(</big><em>estimator=&lt;function mean at 0x101a78578&gt;</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/mapplot.py#L155" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/mapplot.py#cl-155" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.mapplot.MapPlotter.makeplane" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt><em>estimator</em> [ function | &#8216;max&#8217; | &#8216;int&#8217; | FITS filename | integer | slice ]</dt>
 <dd>A non-pythonic, non-duck-typed variable.  If it&#8217;s a function, apply that function
@@ -518,8 +531,8 @@ If it&#8217;s a slice, slice the input data cube along the Z-axis with this slic
 <dt id="pyspeckit.cubes.mapplot.MapPlotter.mapplot">
 <tt class="descname">mapplot</tt><big>(</big><em>convention='calabretta'</em>, <em>colorbar=True</em>, <em>useaplpy=True</em>, <em>vmin=None</em>, <em>vmax=None</em>, <em>**kwargs</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/mapplot.py#L87" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/mapplot.py#cl-87" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.mapplot.MapPlotter.mapplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot up a map based on an input data cube.</p>
-<p>The map to be plotted is selected using <a href="#id6"><span class="problematic" id="id7">:function:`makeplane`</span></a>.
-The <a href="#id8"><span class="problematic" id="id9">:param:`estimator`</span></a> keyword argument is passed to that function.</p>
+<p>The map to be plotted is selected using <a href="#id2"><span class="problematic" id="id3">:function:`makeplane`</span></a>.
+The <a href="#id4"><span class="problematic" id="id5">:param:`estimator`</span></a> keyword argument is passed to that function.</p>
 <p><tt class="xref py py-obj docutils literal"><span class="pre">kwargs</span></tt> are passed to aplpy.show_colorscale or
 matplotlib.pyplot.imshow (depending on whether aplpy is installed)</p>
 <p>TODO: Allow mapplot in subfigure</p>
@@ -688,7 +701,7 @@ average=sum and dvmul=True to get an integrated value)</p>
 
 <dl class="function">
 <dt id="pyspeckit.cubes.cubes.subimage_integ">
-<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">subimage_integ</tt><big>(</big><em>cube</em>, <em>xcen</em>, <em>xwidth</em>, <em>ycen</em>, <em>ywidth</em>, <em>vrange</em>, <em>header=None</em>, <em>average=&lt;function mean at 0x101a76c08&gt;</em>, <em>dvmult=False</em>, <em>return_HDU=False</em>, <em>units='pixels'</em>, <em>zunits=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/cubes.py#L203" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/cubes.py#cl-203" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.cubes.subimage_integ" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pyspeckit.cubes.cubes.</tt><tt class="descname">subimage_integ</tt><big>(</big><em>cube</em>, <em>xcen</em>, <em>xwidth</em>, <em>ycen</em>, <em>ywidth</em>, <em>vrange</em>, <em>header=None</em>, <em>average=&lt;function mean at 0x101a78578&gt;</em>, <em>dvmult=False</em>, <em>return_HDU=False</em>, <em>units='pixels'</em>, <em>zunits=None</em><big>)</big><a class="reference external" href="http://github.com/keflavich/pyspeckit/tree/master/pyspeckit/cubes/cubes.py#L203" title="Push the Edit button on the next page"><span class="edit-on-github viewcode-link">&nbsp;[github]</span></a><a class="reference external" href="http://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/cubes/cubes.py#cl-203" title="Push the Edit button on the next page"><span class="edit-on-bitbucket viewcode-link">&nbsp;[bitbucket]</span></a><a class="headerlink" href="#pyspeckit.cubes.cubes.subimage_integ" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a sub-image from a data cube integrated over the specified velocity range</p>
 <p>All units assumed to be pixel units</p>
 <p>cube has dimensions (velocity, y, x)</p>

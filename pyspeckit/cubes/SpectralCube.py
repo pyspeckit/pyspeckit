@@ -1,5 +1,4 @@
 """
-=====
 Cubes
 =====
 
@@ -15,7 +14,6 @@ Many features in Cubes require additional packages:
     
 The 'grunt work' is performed by the :py:mod:`cubes` module
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 """
 # import parent package
@@ -262,9 +260,9 @@ class Cube(spectrum.Spectrum):
         aperture : list
             A list of aperture parameters, e.g. 
             For a circular aperture, len(ap)=3:
-                ap = [xcen,ycen,radius]
+                ``ap = [xcen,ycen,radius]``
             For an elliptical aperture, len(ap)=5:
-                ap = [xcen,ycen,height,width,PA]
+                ``ap = [xcen,ycen,height,width,PA]``
         coordsys : None or str
             The coordinate system of the aperture (e.g., galactic, fk5, None
             for pixel)
@@ -378,36 +376,32 @@ class Cube(spectrum.Spectrum):
         For guesses, priority is *use_nearest_as_guess*, *usemomentcube*,
         *guesses*, None
 
-        *use_nearest_as_guess* [ False ] 
+        Parameters
+        ----------
+        use_nearest_as_guess: bool
             Unless the fitted point is the first, it will find the nearest
             other point with a successful fit and use its best-fit parameters
             as the guess
-
-        *start_from_point* [ 'center', (x,y) ]
+        start_from_point: tuple(int,int)
             Either start from the center or from a point defined by a tuple.
             Work outward from that starting point.  
-
-        *guesses* [ tuple, ndarray[naxis=3] ]
+        guesses: tuple or ndarray[naxis=3]
             Either a tuple/list of guesses with len(guesses) = npars or a cube
             of guesses with shape [npars, ny, nx]
-
-        *signal_cut* [ float ]
+        signal_cut: float
             Minimum signal-to-noise ratio to "cut" on (i.e., if peak in a given
             spectrum has s/n less than this value, ignore it)
-
-        *blank_value* [ float ]
+        blank_value: float
             Value to replace non-fitted locations with.  A good alternative is
             numpy.nan
-
-        *verbose*       [ bool ]
-        *verbose_level* [ int ]
+        verbose: bool 
+        verbose_level: int
             Controls how much is output.
             0,1 - only changes frequency of updates in loop
             2 - print out messages when skipping pixels
             3 - print out messages when fitting pixels
             4 - specfit will be verbose 
-
-        *multicore* [ int ] 
+        multicore: int
             if >0, try to use multiprocessing via parallel_map to run on multiple cores
 
         """
@@ -608,7 +602,9 @@ class Cube(spectrum.Spectrum):
         """
         Return a cube of the moments of each pixel
 
-        *multicore* [ int ] 
+        Parameters
+        ----------
+        multicore: int
             if >0, try to use multiprocessing via parallel_map to run on multiple cores
         """
 

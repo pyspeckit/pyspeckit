@@ -3,7 +3,7 @@ Examples
 
 Check out the `flickr gallery <http://flic.kr/s/aHsjykNJWt>`_.
 
-.. flickr :: 109615
+.. flickr:: 109615
 
 Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
 

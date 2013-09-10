@@ -1,5 +1,5 @@
 GBTIDL FITS files
-----------------
+-----------------
 
 GBTIDL SDFITS sessions can be loaded as `pyspeckit.ObsBlock` objects using the
 GBTSession reader:

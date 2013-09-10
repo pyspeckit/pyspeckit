@@ -1,5 +1,5 @@
 Wrappers
-==================
+========
 
 These are wrappers to simplify some of the more complicated (and even some of
 the simpler) functions in PySpecKit
