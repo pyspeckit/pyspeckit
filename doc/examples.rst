@@ -22,10 +22,11 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    :maxdepth: 3
 
    Radio H2CO <example_h2co>
-   Radio NH3 <example_nh3>
+   Radio NH3: shows hyperfine fitting with fixed amplitude, width <example_nh3>
    Radio NH3 cube <example_nh3_cube>
    Radio N2H+ <example_n2hp>
    Radio N2H+ cube <example_n2hp_cube>
+   Radio HCN: shows hyperfine with varying amplitude & width <example_hcn>
    Radio HCO+ <example_hcop>
    Optical SDSS <example_sdss>
    Optical Vega Echelle <example_vega_echelle>
