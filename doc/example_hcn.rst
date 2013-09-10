@@ -28,14 +28,18 @@ Example hyperfine line fitting for the HCN 1-0 line.
     # background will not automatically be fit 
     # 5 is the number of parameters in the model (line center,
     # line width, and amplitude for the 0-1, 2-1, and 1-1 lines)
-    sp.Registry.add_fitter('hcn_varyhf', pyspeckit.models.hcn.hcn_varyhf_amp_fitter,
-        5, multisingle='multi')
+    sp.Registry.add_fitter('hcn_varyhf',
+                           pyspeckit.models.hcn.hcn_varyhf_amp_fitter,
+                           5, multisingle='multi')
 
     # Plot the results
     sp.plotter()
 
     # Run the fitter and show the individual fit components
-    sp.specfit(fittype='hcn_varyhf',multifit=True,guesses=[-53,1,0.2,0.6,0.3], show_hyperfine_components=True)
+    sp.specfit(fittype='hcn_varyhf',
+               multifit=True,
+               guesses=[-53,1,0.2,0.6,0.3],
+               show_hyperfine_components=True)
 
     # Save the figure (this step is just so that an image can be included on the web page)
     sp.plotter.savefig('hcn_freehf_fit.png')
@@ -47,11 +51,14 @@ Example hyperfine line fitting for the HCN 1-0 line.
     # 1. the centroid
     # 2,3,4 - the amplitudes of the 0-1, 2-1, and 1-1 lines
     # 5,6,7 - the widths of the 0-1, 2-1, and 1-1 lines
-    sp.Registry.add_fitter('hcn_varyhf_width', pyspeckit.models.hcn.hcn_varyhf_amp_width_fitter,
-        7, multisingle='multi')
+    sp.Registry.add_fitter('hcn_varyhf_width',
+                           pyspeckit.models.hcn.hcn_varyhf_amp_width_fitter,
+                           7, multisingle='multi')
 
     # Run the fitter
-    sp.specfit(fittype='hcn_varyhf_width',multifit=True,guesses=[-53,0.2,0.6,0.3,1,1,1], show_hyperfine_components=True)
+    sp.specfit(fittype='hcn_varyhf_width',multifit=True,
+               guesses=[-53,0.2,0.6,0.3,1,1,1],
+               show_hyperfine_components=True)
 
     # print the fitted parameters:
     print sp.specfit.parinfo
