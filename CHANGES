@@ -1,16 +1,16 @@
 CHANGES
 *******
 
-Release 0.1.14
-~~~~~~~~~~~~~~
+Release 0.1.14 (2013-09-10)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
     * Bugfix: integral(direct=True) double-subtracted the baseline if it was
               already subtracted
     * New Feature: Models now include analytic integrals (only implemented for
                    Gaussian so far)
     * New Feature: hyperfine models added that allow varying amplitudes & widths
 
-Release 0.1.13
-~~~~~~~~~~~~~~
+Release 0.1.13 (2013-03-04)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
     * Cleanup excess data files
     * Bugfixes in baseline fitting
     * Added astropy.models interface
