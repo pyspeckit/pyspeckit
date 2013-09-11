@@ -7,6 +7,7 @@ Release 0.1.14
               already subtracted
     * New Feature: Models now include analytic integrals (only implemented for
                    Gaussian so far)
+    * New Feature: hyperfine models added that allow varying amplitudes & widths
 
 Release 0.1.13
 ~~~~~~~~~~~~~~
