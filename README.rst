@@ -1,7 +1,8 @@
 PySpecKit Spectroscopic Toolkit
 -------------------------------
-`<pyspeckit.bitbucket.org>`_
-and `<https://github.com/pyspeckit/pyspeckit>`_
+Documentation: `<http://pyspeckit.readthedocs.org/en/latest/>`_
+Homepage: `<pyspeckit.bitbucket.org>`_.
+Source pages: `<https://github.com/pyspeckit/pyspeckit>`_ and `<https://bitbucket.org/pyspeckit/pyspeckit>`_.
 
 This is a code framework designed to allow for analysis of spectroscopic data
 from a wide variety of astronomical instruments.  It is motivated by the lack
@@ -26,7 +27,7 @@ and different methods of fit plotting.
 
 We're also looking for more users to give us more use cases!  Contact us
 at pyspeckit@gmail.com or post `issues
-<https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/issues>`_
+<https://bitbucket.org/pyspeckit/pyspeckit/issues>`_
 
 
 Requirements:
