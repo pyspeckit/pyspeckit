@@ -232,7 +232,7 @@ class Plotter(object):
                 self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr[::order]+xoffset,isX=True),
                     steppify((self.Spectrum.data*self.plotscale+self.offset-self.Spectrum.error*self.plotscale)[::order]),
                     steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[::order]),
-                    facecolor=errcolor, alpha=erralpha, **kwargs)]
+                    facecolor=errcolor, edgecolor=errcolor, alpha=erralpha, **kwargs)]
             elif errstyle == 'bars':
                 self.errorplot = self.axis.errorbar(self.Spectrum.xarr+xoffset, self.Spectrum.data*self.plotscale+self.offset,
                         yerr=self.Spectrum.error*self.plotscale, ecolor=errcolor, fmt=None,
