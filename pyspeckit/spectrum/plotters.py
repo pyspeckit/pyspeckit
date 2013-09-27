@@ -175,7 +175,7 @@ class Plotter(object):
         self._mpl_connect()
 
     def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid',
-            linewidth=0.5, errstyle=None, erralpha=0.2, silent=None,
+            linewidth=0.5, errstyle=None, erralpha=0.2, errcolor=None, silent=None,
             reset=True, refresh=True, use_window_limits=None, **kwargs):
         """
         Plot the spectrum!
@@ -224,21 +224,23 @@ class Plotter(object):
 
         if use_window_limits: self._stash_window_limits()
 
-        self._spectrumplot = self.axis.plot(self.Spectrum.xarr+xoffset,
-                self.Spectrum.data*self.plotscale+self.offset, color=color,
-                linestyle=linestyle, linewidth=linewidth, **kwargs)
-
         if errstyle is not None:
+            if errcolor is None:
+                errcolor = color
             if errstyle == 'fill':
                 order = -1 if self.Spectrum.xarr[-1] < self.Spectrum.xarr[0] else 1
                 self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr[::order]+xoffset,isX=True),
                     steppify((self.Spectrum.data*self.plotscale+self.offset-self.Spectrum.error*self.plotscale)[::order]),
                     steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[::order]),
-                    facecolor=color, alpha=erralpha, **kwargs)]
+                    facecolor=errcolor, alpha=erralpha, **kwargs)]
             elif errstyle == 'bars':
                 self.errorplot = self.axis.errorbar(self.Spectrum.xarr+xoffset, self.Spectrum.data*self.plotscale+self.offset,
-                        yerr=self.Spectrum.error*self.plotscale, ecolor=color, fmt=None,
+                        yerr=self.Spectrum.error*self.plotscale, ecolor=errcolor, fmt=None,
                         **kwargs)
+
+        self._spectrumplot = self.axis.plot(self.Spectrum.xarr+xoffset,
+                self.Spectrum.data*self.plotscale+self.offset, color=color,
+                linestyle=linestyle, linewidth=linewidth, **kwargs)
 
         if use_window_limits: self._reset_to_stashed_limits()
 
