@@ -431,6 +431,8 @@ class Cube(spectrum.Spectrum):
             npars = self.momentcube.shape[0]
         else:
             npars = len(guesses)
+            if npars == 0:
+                raise ValueError("Parameter guesses are required.")
 
         self.parcube = np.zeros((npars,)+self.mapplot.plane.shape)
         self.errcube = np.zeros((npars,)+self.mapplot.plane.shape) 
@@ -757,6 +759,49 @@ class Cube(spectrum.Spectrum):
             history.write_history(self.header,"SMOOTH: Changed CRPIX3 from %f to %f" % (self.header.get('CRPIX3')*float(smooth),self.header.get('CRPIX3')))
             history.write_history(self.header,"SMOOTH: Changed CDELT3 from %f to %f" % (self.header.get('CRPIX3')/float(smooth),self.header.get('CRPIX3')))
 
+
+    def write_fit(self, fitcubefilename, clobber=False):
+        """
+        Write out a fit cube using the information in the fit's parinfo to set the header keywords
+
+        *fitcubefilename* [ string ] 
+            Filename to write to
+
+        *clobber* [ bool ] 
+            Overwrite file if it exists?
+        """
+
+        try:
+            import astropy.io.fits as pyfits
+        except ImportError:
+            import pyfits
+        
+        try:
+            fitcubefile = pyfits.PrimaryHDU(data=np.concatenate([self.parcube,self.errcube]), header=self.header)
+            fitcubefile.header.update('FITTYPE',self.specfit.fittype)
+
+            for ii,par in enumerate(self.specfit.parinfo):
+                kw = "PLANE%i" % ii
+                parname = par['parname'].strip('0123456789')
+                fitcubefile.header.update(kw, parname)
+            # set error parameters
+            for jj,par in enumerate(self.specfit.parinfo):
+                kw = "PLANE%i" % (ii+jj)
+                parname = "e"+par['parname'].strip('0123456789')
+                fitcubefile.header.update(kw, parname)
+
+            # overwrite the WCS
+            fitcubefile.header.update('CDELT3',1)
+            fitcubefile.header.update('CTYPE3','FITPAR')
+            fitcubefile.header.update('CRVAL3',0)
+            fitcubefile.header.update('CRPIX3',1)
+        except AttributeError:
+            print "Make sure you run the cube fitter first."
+            return
+
+        fitcubefile.writeto(fitcubefilename, clobber=clobber)
+
+
 class CubeStack(Cube):
     """
     The Cube equivalent of Spectra: for stitching multiple cubes with the same
@@ -850,46 +895,3 @@ class CubeStack(Cube):
         self.cube = self.cube[indices,:,:]
         if self.errorcube is not None:
             self.errorcube = self.errorcube[indices,:,:]
-
-
-    def write_fit(self, fitcubefilename, clobber=False):
-        """
-        Write out a fit cube using the information in the fit's parinfo to set the header keywords
-
-        *fitcubefilename* [ string ] 
-            Filename to write to
-
-        *clobber* [ bool ] 
-            Overwrite file if it exists?
-        """
-
-        try:
-            import astropy.io.fits as pyfits
-        except ImportError:
-            import pyfits
-        
-        try:
-            fitcubefile = pyfits.PrimaryHDU(data=np.concatenate([self.parcube,self.errcube]), header=self.header)
-            fitcubefile.header.update('FITTYPE',self.specfit.fittype)
-
-            for ii,par in enumerate(self.specfit.parinfo):
-                kw = "PLANE%i" % ii
-                parname = par['parname'].strip('0123456789')
-                fitcubefile.header.update(kw, parname)
-            # set error parameters
-            for jj,par in enumerate(self.specfit.parinfo):
-                kw = "PLANE%i" % (ii+jj)
-                parname = "e"+par['parname'].strip('0123456789')
-                fitcubefile.header.update(kw, parname)
-
-            # overwrite the WCS
-            fitcubefile.header.update('CDELT3',1)
-            fitcubefile.header.update('CTYPE3','FITPAR')
-            fitcubefile.header.update('CRVAL3',0)
-            fitcubefile.header.update('CRPIX3',1)
-        except AttributeError:
-            print "Make sure you run the cube fitter first."
-            return
-
-        fitcubefile.writeto(fitcubefilename, clobber=clobber)
-
