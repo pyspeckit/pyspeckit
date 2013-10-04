@@ -92,6 +92,7 @@ class Cube(spectrum.Spectrum):
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
         self.plot_special = None
         self.plot_special_kwargs = {}
+        self._modelcube = None
 
         self.mapplot = mapplot.MapPlotter(self)
 
@@ -100,6 +101,7 @@ class Cube(spectrum.Spectrum):
                 (self.xarr.min(), self.xarr.max(), self.xarr.units,
                         self.data.min(), self.data.max(), self.units,
                         self.cube.shape, str(hex(self.__hash__())))
+
 
     def copy(self,deep=True):
         """
@@ -364,6 +366,16 @@ class Cube(spectrum.Spectrum):
             self.data = cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs, method=method )
         else:
             self.data = cubes.extract_aperture( self.cube, aperture , coordsys=None, method=method)
+
+    def get_modelcube(self, update=False):
+        if self._modelcube is None or update:
+            yy,xx = np.indices(self.mapplot.plane.shape)
+            self._modelcube = np.zeros_like(self.cube)
+            for x,y in zip(xx.flat,yy.flat):
+                self._modelcube[:,y,x] = self.specfit.get_full_model(pars=self.parcube[:,y,x])
+
+        return self._modelcube
+
 
     def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
             verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
@@ -800,6 +812,9 @@ class Cube(spectrum.Spectrum):
             return
 
         fitcubefile.writeto(fitcubefilename, clobber=clobber)
+
+    def write_cube(self):
+        raise NotImplementedError
 
 
 class CubeStack(Cube):
