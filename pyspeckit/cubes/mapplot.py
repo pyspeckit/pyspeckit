@@ -89,13 +89,13 @@ class MapPlotter(object):
         """
         Plot up a map based on an input data cube.
 
-        The map to be plotted is selected using :function:`makeplane`.
-        The :param:`estimator` keyword argument is passed to that function.
+        The map to be plotted is selected using `makeplane`.
+        The `estimator` keyword argument is passed to that function.
 
         `kwargs` are passed to aplpy.show_colorscale or
         matplotlib.pyplot.imshow (depending on whether aplpy is installed)
 
-        TODO: Allow mapplot in subfigure
+        .. todo: Allow mapplot in subfigure
         """
         if self.figure is None:
             self.figure = matplotlib.pyplot.figure()

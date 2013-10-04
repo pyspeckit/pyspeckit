@@ -638,24 +638,24 @@ class SpectroscopicAxis(np.ndarray):
         to convert between frequency/velocity/wavelength and simply change the 
         units of the X axis.  Frame conversion is... not necessarily implemented.
 
-        *unit* [ string ] 
+        Parameters
+        ----------
+        unit : string
             What unit do you want to 'view' the array as?
             None returns the x-axis unchanged (NOT a copy!)
-
-        *frame* [ None ]
+        frame : string
             NOT IMPLEMENTED.  When it is, it will allow you to convert between
             LSR, topocentric, heliocentric, rest, redshifted, and whatever other
             frames we can come up with.  Right now the main holdup is finding a 
             nice python interface to an LSR velocity calculator... and motivation.
- 
-        *center_frequency* [ None | float ]
-        *center_frequency_units* [ None | string ]
+        center_frequency: float
+            Central frequency in units specified by...
+        center_frequency_units: string
             If converting between velocity and any other spectroscopic type,
             need to specify the central frequency around which that velocity is
             calculated.
             I think this can also accept wavelengths....
-
-        *xtype_check* [ 'check' | 'fix' ]
+        xtype_check: 'check' or 'fix'
             Check whether the xtype matches the units.  If 'fix', will set the
             xtype to match the units.
         """
@@ -822,7 +822,9 @@ class SpectroscopicAxis(np.ndarray):
         """
         Create a "delta-x" array corresponding to the X array.
 
-        *coordinate_location* [ 'left', 'center', 'right' ]
+        Parameters
+        ----------
+        coordinate_location: [ 'left', 'center', 'right' ]
             Does the coordinate mark the left, center, or right edge of the
             pixel?  If 'center' or 'left', the *last* pixel will have the same
             dx as the second to last pixel.  If right, the *first* pixel will
@@ -1071,15 +1073,16 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
     return frequencies
 
 def frequency_to_velocity(frequencies, input_units, center_frequency=None,
-        center_frequency_units=None, velocity_units='m/s',
-        convention='radio'):
+                          center_frequency_units=None, velocity_units='m/s',
+                          convention='radio'):
     """
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
-    * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
-    * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )-1
-    * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
-    * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
+     
+     * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
+     * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )-1
+     * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
+     * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c)
     """
     if input_units in velocity_dict:
         print "Already in velocity units (%s)" % input_units
@@ -1149,10 +1152,11 @@ def velocity_to_wavelength(velocities, input_units, center_wavelength=None,
     """
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
-    * Radio 	V = c (c/l0 - c/l)/(c/l0) 	f(V) = (c/l0) ( 1 - V/c )
-    * Optical 	V = c ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + V/c )^-1
-    * Redshift 	z = ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + z )-1
-    * Relativistic 	V = c ((c/l0)^2 - (c/l)^2)/((c/l0)^2 + (c/l)^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c) 
+
+     * Radio 	V = c (c/l0 - c/l)/(c/l0) 	f(V) = (c/l0) ( 1 - V/c )
+     * Optical 	V = c ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + V/c )^-1
+     * Redshift 	z = ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + z )-1
+     * Relativistic 	V = c ((c/l0)^2 - (c/l)^2)/((c/l0)^2 + (c/l)^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c)
     """
     if input_units in wavelength_dict:
         print "Already in wavelength units (%s)" % input_units
@@ -1181,10 +1185,11 @@ def wavelength_to_velocity(wavelengths, input_units, center_wavelength=None,
     """
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
-    * Radio 	V = c (c/l0 - c/l)/(c/l0) 	f(V) = (c/l0) ( 1 - V/c )
-    * Optical 	V = c ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + V/c )^-1
-    * Redshift 	z = ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + z )-1
-    * Relativistic 	V = c ((c/l0)^2 - f^2)/((c/l0)^2 + f^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c) 
+
+     * Radio 	V = c (c/l0 - c/l)/(c/l0) 	f(V) = (c/l0) ( 1 - V/c )
+     * Optical 	V = c ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + V/c )^-1
+     * Redshift 	z = ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + z )-1
+     * Relativistic 	V = c ((c/l0)^2 - f^2)/((c/l0)^2 + f^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c)
     """
     if input_units in velocity_dict:
         print "Already in velocity units (%s)" % input_units

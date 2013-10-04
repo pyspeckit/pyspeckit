@@ -47,5 +47,6 @@ class FlickrDirective(Directive):
         return [flickr(*args)]
 
 def setup(app):
-    app.add_config_value('flickr', False, False)
+    app.add_config_value('flickr',False,False)
+    app.add_config_value('flickrID', None, 'html')
     app.add_directive('flickr',FlickrDirective)

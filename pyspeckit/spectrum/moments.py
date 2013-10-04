@@ -4,13 +4,9 @@ def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
         veryverbose=False, nsigcut=None, noise_guess=None,  **kwargs):
     """Returns (height, amplitude, x, width_x)
     the gaussian parameters of a 1D distribution by calculating its
-    moments.  Depending on the input parameters, will only output 
+    moments.  Depending on the input parameters, will only output
     a subset of the above.
-    "height" is the background level
-    "amplitude" is the maximum (or minimum) of the data after background subtraction
-    "x" is the first moment
-    "width_x" is the second moment
-    
+
     If using masked arrays, pass estimator=np.ma.median
     'estimator' is used to measure the background level (height)
 
@@ -18,16 +14,25 @@ def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
     or it will be "autodetected" (negamp=None)
 
     "nsigcut" - try to estimate the noise and only use data above/below nsigma
-        above the noise.  Estimate the noise from the data unless passed as a
-        keyword
+    above the noise.  Estimate the noise from the data unless passed as a
+    keyword
 
-    Theory:
-    From first principles (in the absence of noise):
+    Theory, from first principles (in the absence of noise):
     integral(gaussian) = sqrt(2*pi*sigma^2) * amp
     sigma = integral / amp / sqrt(2*pi)
     
     in the presence of noise, this gets much more complicated
 
+    Parameters
+    ----------
+    height:
+        is the background level
+    amplitude:
+        is the maximum (or minimum) of the data after background subtraction
+    x:
+        is the first moment
+    width_x:
+        is the second moment
     """
 
     Xax = np.array(Xax)

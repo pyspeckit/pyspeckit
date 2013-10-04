@@ -7,7 +7,6 @@ From `agpy <http://code.google.com/p/agpy/source/browse/trunk/agpy/cubes.py>`_,
 contains functions to perform various transformations on data cubes and their
 headers.  
 
-########
 
 """
 from numpy import sqrt,repeat,indices,newaxis,pi,cos,sin,array,mean,sum,nansum
@@ -411,9 +410,14 @@ def getspec(lon,lat,rad,cube,header,r_fits=True,inherit=True,wunit='arcsec'):
     Given a longitude, latitude, aperture radius (arcsec), and a cube file,
     return a .fits file or a spectrum.
     
-    lon,lat - longitude and latitude center of a circular aperture in WCS coordinates
-                must be in coordinate system of the file
-    rad     - radius (default degrees) of aperture
+    Parameters
+    ----------
+    lon: float
+    lat: float
+        longitude and latitude center of a circular aperture in WCS coordinates
+        must be in coordinate system of the file
+    rad: float
+        radius (default degrees) of aperture
     """
     if not wcsOK:
         raise ImportError( "cubes.py requires astropy.wcs or pywcs for some subimage_integ,aper_wordl2pix,getspec, and coords_in_image" )
@@ -469,7 +473,7 @@ def getspec_reg(cubefilename,region,**kwargs):
     The region must be in the same coordinate system as the cube header
 
     .. warning:: The second argument of getspec_reg requires a pyregion region list, 
-        and therefore this code depends on `pyregion <http://leejjoon.github.com/pyregion/>`_.
+        and therefore this code depends on `pyregion`_.
     """
 
     ds9tocoords = {'fk5':'celestial','galactic':'galactic','icrs':'celestial'}
@@ -538,9 +542,12 @@ def plane_smooth(cube,cubedim=0,parallel=True,numcores=None,**kwargs):
     """
     parallel-map the smooth function
 
-    parallel - defaults True.  Set to false if you want serial (for debug
-        purposes?)
-    numcores - pass to parallel_map (None = use all available)
+    Parameters
+    ----------
+    parallel: bool
+        defaults True.  Set to false if you want serial (for debug purposes?)
+    numcores: int
+        pass to parallel_map (None = use all available)
     """
     if not smoothOK:
         return

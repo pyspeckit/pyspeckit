@@ -7,10 +7,14 @@ Tools to deal with spectroscopic data cubes.
 
 Many features in Cubes require additional packages:
 
-   * smoothing - requires `agpy <https://agpy.googlecode.com/svn/trunk>`_\'s smooth and parallel_map routines
+   * smoothing - requires agpy_\'s smooth and parallel_map routines
    * `coords <http://stsdas.stsci.edu/astrolib/coords-0.37.tar.gz>`_ (`homepage <http://www.scipy.org/AstroLibCoordsHome>`_)
    * `pyregion <git://github.com/leejjoon/pyregion.git>`_
    * `pywcs <git://github.com/astropy/astropy.git>`_
+
+
+In the near future, the coords_ requirement will be replaced with `astropy
+<http://www.astropy.org>`_\'s coordinates module.
     
 The 'grunt work' is performed by the :py:mod:`cubes` module
 
@@ -37,7 +41,8 @@ class Cube(spectrum.Spectrum):
             **kwargs):
         """
         Initialize the Cube.  Accepts files in the following formats:
-            - .fits
+            
+          * .fits
 
         Alternatively, you can specify the *xarr*, *cube*, and *header* kwargs.
         If nothing is specified, a blank :Cube: will be generated.
@@ -252,7 +257,7 @@ class Cube(spectrum.Spectrum):
         self.specfit.plot_fit(**kwargs)
 
     def plot_apspec(self, aperture, coordsys=None, reset_ylimits=True,
-            method='mean', **kwargs):
+                    method='mean', **kwargs):
         """
         Extract an aperture using cubes.extract_aperture
         (defaults to Cube coordinates)
@@ -261,14 +266,15 @@ class Cube(spectrum.Spectrum):
         ----------
         aperture : list
             A list of aperture parameters, e.g. 
-            For a circular aperture, len(ap)=3:
-                ``ap = [xcen,ycen,radius]``
-            For an elliptical aperture, len(ap)=5:
-                ``ap = [xcen,ycen,height,width,PA]``
+             * For a circular aperture, len(ap)=3:
+               + ``ap = [xcen,ycen,radius]``
+             * For an elliptical aperture, len(ap)=5:
+               + ``ap = [xcen,ycen,height,width,PA]``
         coordsys : None or str
             The coordinate system of the aperture (e.g., galactic, fk5, None
             for pixel)
         method : 'mean' or 'sum'
+            Either average over parellel spectra or sum them.
         """
 
 

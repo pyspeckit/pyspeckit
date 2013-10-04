@@ -15,6 +15,21 @@ def voigt(xarr,amp,xcen,sigma,gamma,normalized=False):
     """
     Normalized Voigt profile
 
+    z = (x+i*gam)/(sig*sqrt(2))
+    V(x,sig,gam) = Re(w(z))/(sig*sqrt(2*pi))
+
+    The area of V in this definition is 1.
+    If normalized=False, then you can divide the integral of V by
+    sigma*sqrt(2*pi) to get the area.
+
+    Original implementation converted from 
+    http://mail.scipy.org/pipermail/scipy-user/2011-January/028327.html
+    (had an incorrect normalization and strange treatment of the input
+    parameters)
+
+    Modified implementation taken from wikipedia, using the definition.
+    http://en.wikipedia.org/wiki/Voigt_profile
+
     Parameters
     ----------
     xarr : np.ndarray
@@ -31,21 +46,6 @@ def voigt(xarr,amp,xcen,sigma,gamma,normalized=False):
     normalized : bool
         Determines whether "amp" refers to the area or the peak
         of the voigt profile
-
-    z = (x+i*gam)/(sig*sqrt(2))
-    V(x,sig,gam) = Re(w(z))/(sig*sqrt(2*pi))
-
-    The area of V in this definition is 1.
-    If normalized=False, then you can divide the integral of V by
-    sigma*sqrt(2*pi) to get the area.
-
-    Original implementation converted from 
-    http://mail.scipy.org/pipermail/scipy-user/2011-January/028327.html
-    (had an incorrect normalization and strange treatment of the input
-    parameters)
-
-    Modified implementation taken from wikipedia, using the definition.
-    http://en.wikipedia.org/wiki/Voigt_profile
     """
 
     if scipyOK:
@@ -72,10 +72,10 @@ def voigt_fwhm(sigma, gamma):
 
     Parameters
     ----------
-        sigma : float
-            The width / sigma parameter of the Gaussian distribution
-        gamma : float
-            The width / shape parameter of the Lorentzian distribution
+    sigma : float
+        The width / sigma parameter of the Gaussian distribution
+    gamma : float
+        The width / shape parameter of the Lorentzian distribution
     """
     return 0.5346 * 2 * gamma + np.sqrt(0.2166*(2*gamma)**2 + sigma**2*8*np.log(2))
 

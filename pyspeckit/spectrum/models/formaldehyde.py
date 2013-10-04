@@ -177,8 +177,8 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     xoff_v, width are both in km/s
 
     grid_vwidth is the velocity assumed when computing the grid in km/s
-        this is important because tau = modeltau / width (see, e.g., 
-        Draine 2011 textbook pgs 219-230)
+    this is important because tau = modeltau / width (see, e.g., 
+    Draine 2011 textbook pgs 219-230)
     grid_vwidth_scale is True or False: False for LVG, True for Sphere
     """
 
@@ -259,8 +259,8 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
     xoff_v, width are both in km/s
 
     grid_vwidth is the velocity assumed when computing the grid in km/s
-        this is important because tau = modeltau / width (see, e.g., 
-        Draine 2011 textbook pgs 219-230)
+    this is important because tau = modeltau / width (see, e.g.,
+    Draine 2011 textbook pgs 219-230)
     grid_vwidth_scale is True or False: False for LVG, True for Sphere
     """
 
@@ -322,8 +322,8 @@ def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters
 
-    the "amplitude" is an essentially arbitrary parameter; we therefore define it to be Tex given tau=0.01 when
-    passing to the fitter
+    the "amplitude" is an essentially arbitrary parameter; we therefore define
+    it to be Tex given tau=0.01 when passing to the fitter
     The final spectrum is then rescaled to that value
     """
 
@@ -397,8 +397,9 @@ def formaldehyde_radex_tau(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
         **kwargs):
     """
     Use a grid of RADEX-computed models to make a model line spectrum
-    -uses hyperfine components
-    -assumes *tau* varies but *tex* does not!
+
+     * uses hyperfine components
+     * assumes *tau* varies but *tex* does not!
 
     The RADEX models have to be available somewhere.
     OR they can be passed as arrays.  If as arrays, the form should be:
@@ -408,8 +409,8 @@ def formaldehyde_radex_tau(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     xoff_v, width are both in km/s
 
     grid_vwidth is the velocity assumed when computing the grid in km/s
-        this is important because tau = modeltau / width (see, e.g., 
-        Draine 2011 textbook pgs 219-230)
+    this is important because tau = modeltau / width (see, e.g., 
+    Draine 2011 textbook pgs 219-230)
     grid_vwidth_scale is True or False: False for LVG, True for Sphere
     """
 

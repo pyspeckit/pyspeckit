@@ -46,29 +46,25 @@ The default is gaussian ('g'), all options are listed below:
 
         Parameters
         ----------
-        *name*: [ string ]
+        name: string
             The fit function name. 
-
-        *function*: [ function ]
+        function: function
             The fitter function.  Single-fitters should take npars + 1 input
             parameters, where the +1 is for a 0th order baseline fit.  They
             should accept an X-axis and data and standard fitting-function
             inputs (see, e.g., gaussfitter).  Multi-fitters should take N *
             npars, but should also operate on X-axis and data arguments.
-
-        *npars*: [ int ]
+        npars: int
             How many parameters does the function being fit accept?
 
         Other Parameters
         ----------------
-        *multisingle*: [ 'multi' | 'single' ] 
+        multisingle: 'multi' | 'single'
             Is the function a single-function fitter (with a background), or
             does it allow N copies of the fitting function?
-
-        *override*: [ True | False ]
+        override: True | False
             Whether to override any existing type if already present.
-
-        *key*: [ char ]
+        key: char
             Key to select the fitter in interactive mode
         '''
 
