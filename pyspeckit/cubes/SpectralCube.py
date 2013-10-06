@@ -782,10 +782,11 @@ class Cube(spectrum.Spectrum):
         """
         Write out a fit cube using the information in the fit's parinfo to set the header keywords
 
-        *fitcubefilename* [ string ] 
+        Parameters
+        ----------
+        fitcubefilename: string
             Filename to write to
-
-        *clobber* [ bool ] 
+        clobber: bool
             Overwrite file if it exists?
         """
 
@@ -831,8 +832,7 @@ class CubeStack(Cube):
 
     def __init__(self, cubelist, xunits='GHz', x0=0, y0=0, maskmap=None, **kwargs):
         """
-        Initialize the Cube.  Accepts files in the following formats:
-            - .fits
+        Initialize the Cube.  Accepts FITS files.
 
         x0,y0 - initial spectrum to use (defaults to lower-left corner)
         """
@@ -854,7 +854,7 @@ class CubeStack(Cube):
         self.cube = np.ma.concatenate([cube.cube for cube in cubelist])
 
         if any([cube.errorcube is not None for cube in cubelist]):
-            if all([cube.errorcube is not None  for cube in cubelist]):
+            if all([cube.errorcube is not None for cube in cubelist]):
                 self.errorcube = np.ma.concatenate([cube.errorcube for cube in cubelist])
             else:
                 raise ValueError("Mismatched error cubes.")
@@ -899,7 +899,8 @@ class CubeStack(Cube):
         self.speclines = spectrum.speclines
         # Initialize writers TO DO: DO WRITERS WORK FOR CUBES?
         self.writer = {}
-        for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
+        for writer in spectrum.writers.writers:
+            self.writer[writer] = spectrum.writers.writers[writer](self)
         
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
         self.plot_special = None

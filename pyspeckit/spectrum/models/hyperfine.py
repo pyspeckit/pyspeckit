@@ -25,14 +25,18 @@ class hyperfinemodel(object):
         """
         Initialize the various parameters defining the hyperfine transitions
 
-        line_names is a LIST of the line names to be used as indices for the dictionaries
-
-        voff_lines_dict is a linename:v_off dictionary of velocity offsets for the hyperfine components.  Technically,
-            this is redundant with freq_dict
-        freq_dict - frequencies of the indvidual transitions
-
-        line_strength_dict - Relative strengths of the hyperfine components, usually determined by their degeneracy and 
-            Einstein A coefficients
+        Parameters
+        ----------
+        line_names: list
+            list of the line names to be used as indices for the dictionaries
+        voff_lines_dict: dict
+            a linename:v_off dictionary of velocity offsets for the hyperfine
+            components.  Technically, this is redundant with freq_dict
+        freq_dict: dict
+            frequencies of the indvidual transitions
+        line_strength_dict: dict
+            Relative strengths of the hyperfine components, usually determined
+            by their degeneracy and Einstein A coefficients
         """
         self.line_names = line_names
         self.voff_lines_dict = voff_lines_dict
@@ -169,6 +173,8 @@ class hyperfinemodel(object):
         """
         Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.
 
+        Parameters
+        ----------
         return_tau : bool
             If specified, return just the tau spectrum, ignoring Tex
         tau_total : bool
@@ -227,11 +233,11 @@ class hyperfinemodel(object):
                     tau_line = tau[linename]
                 else:
                     # the total optical depth, which is being fitted, should be the sum of the components
-                    tau_line = (tau * self.line_strength_dict[linename]/self.relative_strength_total_degeneracy[linename]) 
+                    tau_line = (tau * self.line_strength_dict[linename]/self.relative_strength_total_degeneracy[linename])
           
                 tau_nu = np.array(tau_line * np.exp(-(xarr+nuoff-self.freq_dict[linename])**2/(2.0*nuwidth**2)))
                 tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
-            components.append( tau_nu )
+            components.append(tau_nu)
             tau_nu_cumul += tau_nu
 
         # add a list of the individual 'component' spectra to the total components...

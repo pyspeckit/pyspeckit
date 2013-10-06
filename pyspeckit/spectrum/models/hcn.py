@@ -94,8 +94,8 @@ def hcn_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     xoff_v, width are both in km/s
 
     grid_vwidth is the velocity assumed when computing the grid in km/s
-        this is important because tau = modeltau / width (see, e.g., 
-        Draine 2011 textbook pgs 219-230)
+    this is important because tau = modeltau / width (see, e.g., 
+    Draine 2011 textbook pgs 219-230)
     grid_vwidth_scale is True or False: False for LVG, True for Sphere
     """
 

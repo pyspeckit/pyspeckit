@@ -9,8 +9,7 @@ http://www.strw.leidenuniv.nl/~moldata/N2H+.html
 
 http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D
 
-Does not yet implement:
-    http://adsabs.harvard.edu/abs/2010ApJ...716.1315K
+Does not yet implement: http://adsabs.harvard.edu/abs/2010ApJ...716.1315K
 
 """
 import numpy as np
@@ -118,22 +117,26 @@ ckms = units.speedoflight_ms / 1e3 #2.99792458e5
 voff_lines_dict = dict([(k,(v-93.176261e9)/93.176261e9*ckms) for k,v in freq_dict.iteritems()])
 
 n2hp_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict,
-        line_strength_dict, relative_strength_total_degeneracy)
+                                     line_strength_dict, relative_strength_total_degeneracy)
 n2hp_vtau_fitter = n2hp_vtau.fitter
 n2hp_vtau_vheight_fitter = n2hp_vtau.vheight_fitter
 
-def n2hp_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0, 
-        grid_vwidth=1.0,
-        grid_vwidth_scale=False,
-        texgrid=None,
-        taugrid=None,
-        hdr=None,
-        path_to_texgrid='',
-        path_to_taugrid='',
-        temperature_gridnumber=3,
-        debug=False,
-        verbose=False,
-        **kwargs):
+def n2hp_radex(xarr,
+               density=4,
+               column=13,
+               xoff_v=0.0,
+               width=1.0,
+               grid_vwidth=1.0,
+               grid_vwidth_scale=False,
+               texgrid=None,
+               taugrid=None,
+               hdr=None,
+               path_to_texgrid='',
+               path_to_taugrid='',
+               temperature_gridnumber=3,
+               debug=False,
+               verbose=False,
+               **kwargs):
     """
     Use a grid of RADEX-computed models to make a model line spectrum
 
@@ -145,8 +148,8 @@ def n2hp_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     xoff_v, width are both in km/s
 
     grid_vwidth is the velocity assumed when computing the grid in km/s
-        this is important because tau = modeltau / width (see, e.g., 
-        Draine 2011 textbook pgs 219-230)
+    this is important because tau = modeltau / width (see, e.g.,
+    Draine 2011 textbook pgs 219-230)
     grid_vwidth_scale is True or False: False for LVG, True for Sphere
     """
 
@@ -197,4 +200,3 @@ def n2hp_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
         import pdb; pdb.set_trace()
 
     return n2hp_vtau(xarr,Tex=tex,tau=tau,xoff_v=xoff_v,width=width,**kwargs)
-

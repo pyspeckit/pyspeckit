@@ -9,21 +9,27 @@ and Spectra for multi-spectrum analysis of different types.
 The Spectrum class is the main functional code.
 ObsBlocks are containers of multiple spectra of different objects
 The Spectra class is a container of multiple spectra of the *same* object at
-   different wavelengths/frequencies
+different wavelengths/frequencies
 
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 .. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
 """
 import numpy as np
 import smooth as sm
-try: 
+try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-import readers,plotters,writers,baseline,units,measurements,speclines,interpolation
+import readers
+import plotters
+import writers
+import baseline
+import units
+import measurements
+import speclines
+import interpolation
 import moments as moments_module
 import fitters
-import models
 import history
 import copy
 from pyspeckit.specwarnings import warn

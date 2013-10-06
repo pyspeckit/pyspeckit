@@ -17,10 +17,10 @@ try:
     import numpy
 except ImportError:
     print "Failed to import numpy"
-try:
-    import numpydoc
-except ImportError:
-    print "Failed to import numpydoc"
+#try:
+#    import numpydoc
+#except ImportError:
+#    print "Failed to import numpydoc"
 
 # read the docs mocks
 import sys
