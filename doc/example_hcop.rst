@@ -1,6 +1,5 @@
-
 Simple Radio Fitting: HCO+ example
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==================================
 
 .. include:: <isogrk3.txt>
 
