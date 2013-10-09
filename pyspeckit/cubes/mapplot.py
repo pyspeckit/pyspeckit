@@ -197,8 +197,8 @@ class MapPlotter(object):
         Record location of downclick
         """
         if event.inaxes:
-            self._clickX = event.xdata - self._origin
-            self._clickY = event.ydata - self._origin
+            self._clickX = np.round(event.xdata) - 1 - self._origin
+            self._clickY = np.round(event.ydata) - 1 - self._origin
 
     def plot_spectrum(self, event, plot_fit=True):
         """
@@ -206,8 +206,8 @@ class MapPlotter(object):
         """
         self.event = event
         if event.inaxes:
-            clickX = event.xdata - self._origin
-            clickY = event.ydata - self._origin
+            clickX = np.round(event.xdata) - 1 - self._origin
+            clickY = np.round(event.ydata) - 1 - self._origin
         
             # grab toolbar info so that we don't do anything if a tool is selected
             tb = self.canvas.toolbar

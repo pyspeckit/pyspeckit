@@ -24,8 +24,13 @@ spc.fiteach(fittype='n2hp_vtau', multifit=True,
 # However, pyspeckit@gmail.com will support them!  They are being used
 # in current and pending publications
 
+# Save the fitted parameters to a FITS file, and overwrite one if one exists
+spc.write_fit('n2hp_fitted_parameters.fits', clobber=True)
+
 # Show an integrated image
 spc.mapplot()
+# This particular cube is a 2x2 image; you can click on any pixel to see its
+# spectrum & fit
 
 # plot one of the fitted spectra
 spc.plot_spectrum(0,0,plot_fit=True)
