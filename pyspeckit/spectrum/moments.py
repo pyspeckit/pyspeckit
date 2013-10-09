@@ -12,6 +12,8 @@ def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
     sigma = integral / amp / sqrt(2*pi)
     
     In the presence of noise, this gets much more complicated.
+    The noisy approach is inspired by `mpfit
+    <http://cow.physics.wisc.edu/~craigm/idl/fitting.html>`_
 
     Parameters
     ----------
