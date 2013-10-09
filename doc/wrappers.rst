@@ -35,5 +35,7 @@ N2H+ extras
 
 In place of the actual contents of N2H+ fitter, here are the modules used to make the wrapper
 
-.. automethod:: pyspeckit.spectrum.models.model.SpectralModel
+.. autoclass:: pyspeckit.spectrum.models.model.SpectralModel
+   :noindex:
 .. automethod:: pyspeckit.spectrum.models.n2hp.n2hp_radex
+   :noindex:
