@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import shutil
 import sys
 from distutils.core import setup, Command
 import subprocess
@@ -23,8 +22,8 @@ try:  # Python 3.x
 except ImportError:  # Python 2.x
     from distutils.command.build_py import build_py
 
-
-from pyspeckit import __version__ as version_base
+execfile('pyspeckit/__version__.py')
+version_base = __version__
 tagname = "pyspeckit_%s" % (version_base)
 
 # this is all for determining the download URL
