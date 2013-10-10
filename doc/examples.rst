@@ -23,6 +23,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    :maxdepth: 3
 
    Radio H2CO <example_h2co>
+   Radio H2CO mm lines <example_h2co_mm>
    Radio NH3: shows hyperfine fitting with fixed amplitude, width <example_nh3>
    Radio NH3 cube <example_nh3_cube>
    Radio N2H+ <example_n2hp>
