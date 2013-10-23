@@ -10,8 +10,8 @@ An `extensible <registration.html>`_ spectroscopic analysis toolkit for astronom
 If you're just getting started, see the :doc:`examples page
 <examples>`.
 
-Download the `January 2012 version <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/January2012_Prerelease.tar.gz>`_,
-the `latest commit <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz>`_, see :doc:`install`, or see
+Download the `January 2012 version <https://bitbucket.org/pyspeckit/pyspeckit/get/January2012_Prerelease.tar.gz>`_,
+the `latest commit <https://bitbucket.org/pyspeckit/pyspeckit/get/tip.tar.gz>`_, see :doc:`install`, or see
 our `pypi entry <http://pypi.python.org/pypi/pyspeckit>`_.
 
 

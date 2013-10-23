@@ -318,6 +318,6 @@ edit_on_github_branch = "master"
 edit_on_github_source_root = ""
 edit_on_github_doc_root = "doc"
 
-edit_on_bitbucket_project = "pyspeckit/pyspeckit.bitbucket.org"
+edit_on_bitbucket_project = "pyspeckit/pyspeckit"
 edit_on_bitbucket_source_root = ""
 edit_on_bitbucket_doc_root = "doc"
