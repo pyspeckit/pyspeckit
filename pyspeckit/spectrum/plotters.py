@@ -173,6 +173,9 @@ class Plotter(object):
     def _mpl_reconnect(self):
         self._mpl_disconnect()
         self._mpl_connect()
+        # disable fullscreen & grid
+        matplotlib.pyplot.rcParams['keymap.fullscreen'] = 'ctrl+f'
+        matplotlib.pyplot.rcParams['keymap.grid'] = 'ctrl+g'
 
     def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid',
             linewidth=0.5, errstyle=None, erralpha=0.2, errcolor=None, silent=None,
