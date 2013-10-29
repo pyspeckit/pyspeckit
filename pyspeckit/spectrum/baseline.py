@@ -174,7 +174,7 @@ class Baseline(interactive.Interactive):
         if 'nwidths' in kwargs:
             kwargs.pop('nwidths')
 
-        if powerlaw is not None:
+        if powerlaw is None:
             powerlaw = self.powerlaw
 
         self.clear_highlights()
