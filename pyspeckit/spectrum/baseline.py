@@ -430,7 +430,7 @@ class Baseline(interactive.Interactive):
                     #return [0,
                     #        np.ravel( (np.log10(data) - np.log10(p[0]) + p[1]*np.log10(xarrconv[OK]/p[2])) / (err/data) )
                     #        ]
-                    return [0, np.ravel( (data - p[0]*(xarrconv[OK])**(-p[1])) / err )]
+                    return [0, np.ravel( (data - p[0]*(xarrconv[OK])**(-p[1])) / (err/data) )]
                 return f
         else:
             pguess = [0]*(order+1)
