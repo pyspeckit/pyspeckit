@@ -14,14 +14,14 @@ Example hyperfine line fitting for the HCN 1-0 line.
         :figwidth: 650
         :width: 650
 
-        Fit to the 3 hyperfine components of HCN 1-0 simultaneously.  The (0)'s indicate that this is the 0'th velocity component being fit
+        Fit to the 3 hyperfine components of HCN 1-0 simultaneously with fixed amplitudes.  The (0)'s indicate that this is the 0'th velocity component being fit (though that velocity corresponds to the 12-01 component of the line)
 
 .. figure:: images/hcn_freehf_fit.png
-        :alt: Fit to the 3 hyperfine components of HCN 1-0 simultaneously.  The (0)'s indicate that this is the 0'th velocity component being fit
+        :alt: Fit to the 3 hyperfine components of HCN 1-0 simultaneously with freely varying amplitudes.  The (0)'s indicate that this is the 0'th velocity component being fit
         :figwidth: 650
         :width: 650
 
-        Fit to the 3 hyperfine components of HCN 1-0 simultaneously.  The (0)'s indicate that this is the 0'th velocity component being fit
+        Fit to the 3 hyperfine components of HCN 1-0 simultaneously with freely varying amplitudes.  The (0)'s indicate that this is the 0'th velocity component being fit
 
 .. figure:: images/hcn_freehf_ampandwidth_fit.png
         :alt: Fit to the 3 hyperfine components of HCN 1-0 simultaneously.  The widths are allowed to vary in this example.
