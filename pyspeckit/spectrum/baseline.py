@@ -420,6 +420,8 @@ class Baseline(interactive.Interactive):
         OK = True-mask
         xarrconv = xarr.as_unit(xarr_fit_units)
         if powerlaw:
+            # for powerlaw fitting, only consider positive data
+            OK *= spectrum > 0
             pguess = [np.median(spectrum[OK]),2.0]
             if LoudDebug: print "_baseline powerlaw Guesses: ",pguess
 
