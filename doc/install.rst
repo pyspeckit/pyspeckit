@@ -24,7 +24,7 @@ PySpecKit requires at least the basic scientific packages:
 You'll most likely want at least one of the following packages
 to enable `file reading <readers>`_
 
-* `astrop <astropy.org>`_ >=0.1
+* `astropy <astropy.org>`_ >=0.1
 * `pyfits <http://www.stsci.edu/resources/software_hardware/pyfits/Download>`_ >=2.4
 * `atpy <http://atpy.github.com/>`_ (which depends on `asciitable <http://cxc.harvard.edu/contrib/asciitable/>`_ [`github link <https://github.com/taldcroft/asciitable>`_] )
 * `hdf5 <http://www.pytables.org/moin>`_
@@ -35,30 +35,24 @@ If you have pip (see http://pypi.python.org/pypi/pyspeckit), you can install wit
 
 Or the most recent version::
 
-    pip install https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz
+    pip install https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz
 
 You can acquire the code with this clone command::
 
-    hg clone https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org pyspeckit
+    git clone git@bitbucket.org:pyspeckit/pyspeckit.git pyspeckit
     cd pyspeckit
     python setup.py install
 
-or if you use git::
+Or you can `Download the latest tarball version <https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz>`_, 
+then extract and install using the standard python method (but the pip install version of this is easier)::
 
-    git clone git://github.com/keflavich/pyspeckit.git pyspeckit
-    cd pyspeckit
-    python setup.py install
-
-Or you can `Download the latest tarball version <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz>`_, 
-then extract and install using the standard python method::
-
-    wget https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz
-    tar -xzf pyspeckit-pyspeckit.bitbucket.org-tip.tar.gz
-    cd pyspeckit-pyspeckit.bitbucket.org-tip
+    wget --no-check-certificate https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz
+    tar -xzf master.tar.gz
+    cd pyspeckit-pyspeckit-[commit]
     python setup.py install
 
 
-You can also check out the `source code <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src>`_
+You can also check out the `source code <https://bitbucket.org/pyspeckit/pyspeckit/src>`_
 
 .. note ::
     If you use `easy_install pyspeckit` with the Enthought Python Distribution, you will
