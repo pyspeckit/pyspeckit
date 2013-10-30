@@ -61,7 +61,7 @@ relative_strength_total_degeneracy = {
 line_names = freq_dict.keys()
 
 ckms = units.speedoflight_ms / 1e3 #2.99792458e5
-voff_lines_dict = dict([(k,(v-83.6318470e9)/83.6318470e9*ckms) for k,v in freq_dict.iteritems()])
+voff_lines_dict = dict([(k,(v-88.6318470e9)/88.6318470e9*ckms) for k,v in freq_dict.iteritems()])
 
 hcn_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy)
 hcn_amp = hcn_vtau.ampfitter
