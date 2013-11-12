@@ -1,4 +1,5 @@
 import pyspeckit
+import pylab as pl
 
 # Load the spectrum & properly identify the units
 # The data is from http://adsabs.harvard.edu/abs/1999A%26A...348..600P
@@ -38,6 +39,10 @@ sp.specfit(fittype='hcn_fixedhf',
            guesses=[1,-48,0.6],
            show_hyperfine_components=True)
 
+# Now plot the residuals offset below the original
+sp.specfit.plotresiduals(axis=sp.plotter.axis,clear=False,yoffset=-1,color='g',label=False)
+sp.plotter.reset_limits(ymin=-2)
+
 # Save the figure (this step is just so that an image can be included on the web page)
 sp.plotter.savefig('hcn_fixedhf_fit.png')
 
@@ -46,7 +51,12 @@ sp.plotter.savefig('hcn_fixedhf_fit.png')
 sp.specfit(fittype='hcn_varyhf',
            multifit=True,
            guesses=[-48,1,0.2,0.6,0.3],
-           show_hyperfine_components=True)
+           show_hyperfine_components=True,
+           clear=True)
+
+# Again plot the residuals
+sp.specfit.plotresiduals(axis=sp.plotter.axis,clear=False,yoffset=-1,color='g',label=False)
+sp.plotter.reset_limits(ymin=-2)
 
 # Save the figure
 sp.plotter.savefig('hcn_freehf_fit.png')
@@ -67,7 +77,8 @@ sp.Registry.add_fitter('hcn_varyhf_width',
 sp.specfit(fittype='hcn_varyhf_width',
            multifit=True,
            guesses=[-48,0.2,0.6,0.3,1,1,1],
-           show_hyperfine_components=True)
+           show_hyperfine_components=True,
+           clear=True)
 
 # print the fitted parameters:
 print sp.specfit.parinfo
@@ -79,5 +90,20 @@ print sp.specfit.parinfo
 # Param #5  WIDTH12-010 =      1.90987 +/-       0.0476163   Range:   [0,inf)
 # Param #6  WIDTH11-010 =      1.64409 +/-        0.076998   Range:   [0,inf)
 
+sp.specfit.plotresiduals(axis=sp.plotter.axis,clear=False,yoffset=-1,color='g',label=False)
+sp.plotter.reset_limits(ymin=-2)
+
 # Save the figure (this step is just so that an image can be included on the web page)
 sp.plotter.savefig('hcn_freehf_ampandwidth_fit.png')
+
+# Finally, how well does a 2-component fit work?
+sp.specfit(fittype='hcn_fixedhf',
+           multifit=True,
+           guesses=[1,-48,0.6,0.1,-46,0.6],
+           show_hyperfine_components=True,
+           clear=True)
+sp.specfit.plotresiduals(axis=sp.plotter.axis,clear=False,yoffset=-1,color='g',label=False)
+sp.plotter.reset_limits(ymin=-2)
+
+# Save the figure (this step is just so that an image can be included on the web page)
+sp.plotter.savefig('hcn_fixedhf_fit_2components.png')
