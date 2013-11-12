@@ -178,6 +178,15 @@ class Spectrum(object):
 
         if doplot: self.plotter(**plotkwargs)
 
+    @classmethod
+    def from_spectrum1d(self, spec1d):
+        """
+        Tool to load a pyspeckit Spectrum from a specutils object
+
+        (this is intended to be temporary; long-term the pyspeckit Spectrum
+        object will inherit from a specutils Spectrum1D object)
+        """
+        raise NotImplementedError
 
     def _register_fitters(self, registry=None):
         """

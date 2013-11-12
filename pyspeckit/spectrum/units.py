@@ -926,6 +926,16 @@ class SpectroscopicAxis(np.ndarray):
             self.__dict__[attr] = obj.__dict__[attr]
 
 
+# from astropy import units as u
+# 
+# class SpectroscopicAxis(u.Unit):
+# 
+#     def __new__(self, xarr, refX, **kwargs):
+#         super(self, SpectroscopicAxis).__new__
+# 
+#     def as_unit(self, unit, doppler_type='relativistic', **kwargs):
+#         return self.to(unit, equivalencies=[u.spectral(),u.equivalencies.doppler_relativistic(self.refX)])
+
 class SpectroscopicAxes(SpectroscopicAxis):
     """
     Counterpart to Spectra: takes a list of SpectroscopicAxis's and

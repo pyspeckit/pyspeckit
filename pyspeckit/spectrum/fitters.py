@@ -1037,6 +1037,12 @@ class Specfit(interactive.Interactive):
             if legend: self._clearlegend()
             if components: self._clearcomponents()
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
+    
+        # remove residuals from self if they're there.
+        if hasattr(self,'residualplot'):
+            for L in self.residualplot:
+                if L in self.Spectrum.plotter.axis.lines:
+                    self.Spectrum.plotter.axis.lines.remove(L)
 
     def _clearcomponents(self):
         for pc in self._plotted_components:
