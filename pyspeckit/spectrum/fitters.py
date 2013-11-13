@@ -931,7 +931,7 @@ class Specfit(interactive.Interactive):
 
     def plotresiduals(self, fig=2, axis=None, clear=True, color='k',
             linewidth=0.5, drawstyle='steps-mid', yoffset=0.0, label=True,
-            pars=None,
+            pars=None, zeroline=None,
             **kwargs):
         """
         Plot residuals of the fit.  Specify a figure or
@@ -945,6 +945,9 @@ class Specfit(interactive.Interactive):
             The axis to plot on
         pars : None or parlist
             If set, the residuals will be computed for the input parameters
+        zeroline : bool or None
+            Plot the "zero" line through the center of the residuals.  If None,
+            defaults to "True if yoffset!=0, False otherwise"
 
 
         kwargs are passed to matplotlib plot
@@ -961,6 +964,12 @@ class Specfit(interactive.Interactive):
         self.residualplot = self.residualaxis.plot(self.Spectrum.xarr,
                 self.fullresiduals+yoffset,drawstyle=drawstyle,
                 linewidth=linewidth, color=color, **kwargs)
+        if zeroline or (zeroline is None and yoffset != 0):
+            self.residualplot += self.residualaxis.plot(self.Spectrum.xarr, 
+                                                        np.zeros_like(self.Spectrum.xarr) + yoffset,
+                                                        linestyle='--',
+                                                        color='k',
+                                                        alpha=0.5)
         if self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None:
             self.residualaxis.set_xlim(self.Spectrum.plotter.xmin,self.Spectrum.plotter.xmax)
         if self.Spectrum.plotter.ymin is not None and self.Spectrum.plotter.ymax is not None:
