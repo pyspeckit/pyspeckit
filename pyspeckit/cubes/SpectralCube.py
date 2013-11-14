@@ -325,7 +325,7 @@ class Cube(spectrum.Spectrum):
 
         return sp
 
-    def get_apspec(self, aperture, coordsys=None, method='mean'):
+    def get_apspec(self, aperture, coordsys=None, method='mean', **kwargs):
         """
         Extract an aperture using cubes.extract_aperture
         (defaults to Cube coordinates)
@@ -344,7 +344,8 @@ class Cube(spectrum.Spectrum):
             data = cubes.extract_aperture(self.cube, aperture,
                                           coordsys=coordsys,
                                           wcs=self.mapplot.wcs,
-                                          method=method)
+                                          method=method,
+                                          **kwargs)
             sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
                                     data=data,
                                     header=self.header)
