@@ -522,19 +522,32 @@ def coords_in_image(fitsfile,lon,lat,system='galactic'):
     else:
         return False
 
-def spectral_smooth(cube, smooth_factor, downsample=True, **kwargs):
+def spectral_smooth(cube, smooth_factor, downsample=True, parallel=True,
+                    numcores=None, **kwargs):
     """
     Smooth the cube along the spectral direction
     """
 
-    newcube = numpy.empty(cube.shape)
-    if downsample:
-        newcube = newcube[::smooth_factor,:,:]
     yy,xx = numpy.indices(cube.shape[1:])
 
-    for (x,y) in zip(xx.flat,yy.flat):
-        newcube[:,y,x] = pyspeckit.smooth.smooth(cube[:,y,x], smooth_factor,
-                downsample=downsample, **kwargs)
+    if downsample:
+        newshape = cube[::smooth_factor,:,:].shape
+    else:
+        newshape = cube.shape
+    
+    # need to make the cube "flat" along dims 1&2 for iteration in the "map"
+    flatshape = (cube.shape[0],cube.shape[1]*cube.shape[2])
+
+    Ssmooth = lambda x: pyspeckit.smooth.smooth(x, smooth_factor, downsample=downsample, **kwargs)
+    if parallel:
+        newcube = numpy.array(parallel_map(Ssmooth, cube.reshape(flatshape).T, numcores=numcores)).T.reshape(newshape)
+    else:
+        newcube = numpy.array(map(Ssmooth, cube.reshape(flatshape).T)).T.reshape(newshape)
+
+    #naive, non-optimal version
+    # for (x,y) in zip(xx.flat,yy.flat):
+    #     newcube[:,y,x] = pyspeckit.smooth.smooth(cube[:,y,x], smooth_factor,
+    #             downsample=downsample, **kwargs)
 
     return newcube
 
