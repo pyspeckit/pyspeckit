@@ -566,8 +566,13 @@ class Cube(spectrum.Spectrum):
             # ends up with a different intrinsic shape.  This is an attempt to
             # force it to maintain a sensible shape.
             try:
-                ((x,y), m1, m2) = merged_result[0]
+                if integral:
+                    ((x,y), m1, m2, intgl) = merged_result[0]
+                else:
+                    ((x,y), m1, m2) = merged_result[0]
             except ValueError:
+                if verbose > 1:
+                    print "ERROR: merged_result[0] is ",merged_result[0]," which has the wrong shape"
                 merged_result = itertools.chain.from_iterable(merged_result)
             for TEMP in merged_result:
                 if TEMP is None:
@@ -576,7 +581,10 @@ class Cube(spectrum.Spectrum):
                     # reached long before this level of complexity
                     continue
                 try:
-                    ((x,y), modelpars, modelerrs) = TEMP
+                    if integral:
+                        ((x,y), modelpars, modelerrs, intgl) = TEMP
+                    else:
+                        ((x,y), modelpars, modelerrs) = TEMP
                 except TypeError:
                     # implies that TEMP does not have the shape ((a,b),c,d)
                     # as above, shouldn't be possible, but it happens...
@@ -584,6 +592,8 @@ class Cube(spectrum.Spectrum):
                 self.parcube[:,y,x] = modelpars
                 self.errcube[:,y,x] = modelerrs
                 self.has_fit[y,x] = max(modelpars) > 0
+                if integral:
+                    self.integralmap[:,y,x] = intgl
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 fit_a_pixel((ii,x,y))
