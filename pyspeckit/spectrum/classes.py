@@ -479,24 +479,31 @@ class Spectrum(object):
         self.baseline.downsample(dsfactor)
         self.specfit.downsample(dsfactor)
 
-    def smooth(self,smooth,**kwargs):
+    def smooth(self,smooth,downsample=True,**kwargs):
         """
         Smooth the spectrum by factor `smooth`.  
 
+
         Documentation from the :mod:`smooth` module:
 
+        Parameters
+        ----------
+        downsample: bool
+            Downsample the spectrum by the smoothing factor?
         """
         smooth = round(smooth)
-        self.data = sm.smooth(self.data,smooth,**kwargs)
-        self.xarr = self.xarr[::smooth]
-        if len(self.xarr) != len(self.data):
-            raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
-        if self.error is not None:
-            self.error = sm.smooth(self.error,smooth,**kwargs)
-        self.baseline.downsample(smooth)
-        self.specfit.downsample(smooth)
+        self.data = sm.smooth(self.data,smooth,downsample=downsample,**kwargs)
+
+        if downsample:
+            self.xarr = self.xarr[::smooth]
+            if len(self.xarr) != len(self.data):
+                raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
+            if self.error is not None:
+                self.error = sm.smooth(self.error,smooth,**kwargs)
+            self.baseline.downsample(smooth)
+            self.specfit.downsample(smooth)
     
-        self._smooth_header(smooth)
+            self._smooth_header(smooth)
     smooth.__doc__ += "sm.smooth doc: \n" + sm.smooth.__doc__
 
     def _smooth_header(self,smooth):
