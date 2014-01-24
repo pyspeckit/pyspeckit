@@ -71,6 +71,8 @@ def flatten_header(header,delete=False):
             # if len(key) < 2
             pass
     newheader.update('NAXIS',2)
+    if header.get('WCSAXES'):
+        newheader.update('WCSAXES',2)
 
     return newheader
 
