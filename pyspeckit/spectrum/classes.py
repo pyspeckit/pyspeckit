@@ -66,7 +66,7 @@ class Spectrum(object):
 
         Parameters
         ----------
-        filename : string or pyfits.HDU
+        filename : string
             The file to read the spectrum from.  If data, xarr, and error are
             specified, leave filename blank.
         filetype : string
@@ -187,6 +187,15 @@ class Spectrum(object):
         object will inherit from a specutils Spectrum1D object)
         """
         raise NotImplementedError
+
+    @classmethod
+    def from_hdu(cls, hdu):
+        """
+        Create a pyspeckit Spectrum object from an HDU
+        """
+
+        spec,errspec,XAxis,hdr = readers.open_1d_pyfits(hdu)
+        return cls(data=spec, error=errspec, xarr=XAxis, header=hdr)
 
     def _register_fitters(self, registry=None):
         """

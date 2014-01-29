@@ -103,9 +103,14 @@ class MapPlotter(object):
             self._disconnect()
             self.figure.clf()
 
+        # this is where the map is created; everything below this is just plotting
         self.makeplane(**kwargs)
+
+        # have tot pop out estimator so that kwargs can be passed to imshow
         if 'estimator' in kwargs:
             kwargs.pop('estimator')
+
+        # Below here is all plotting stuff
 
         if vmin is None: vmin = self.plane[self.plane==self.plane].min()
         if vmax is None: vmax = self.plane[self.plane==self.plane].max()
@@ -155,11 +160,15 @@ class MapPlotter(object):
     def makeplane(self, estimator=np.mean):
         """
 
+        Parameters
+        ----------
+
         *estimator* [ function | 'max' | 'int' | FITS filename | integer | slice ]
             A non-pythonic, non-duck-typed variable.  If it's a function, apply that function
             along the cube's spectral axis to obtain an estimate (e.g., mean, min, max, etc.).
             'max' will do the same thing as passing np.max
             'int' will attempt to integrate the image (which is why I didn't duck-type)
+            (integrate means sum and multiply by dx)
             a .fits filename will be read using pyfits (so you can make your own cover figure)
             an integer will get the n'th slice in the parcube if it exists
             If it's a slice, slice the input data cube along the Z-axis with this slice
