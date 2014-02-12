@@ -124,23 +124,27 @@ class Baseline(interactive.Interactive):
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:
             self.start_interactive(clear_all_connections=clear_all_connections,
-                    debug=debug, reset_selection=reset_selection, **kwargs)
+                                   debug=debug,
+                                   reset_selection=reset_selection, **kwargs)
         else:
+            if reset_selection:
+                # this could be accomplished by passing reset=True to selectregion, but that may cause
+                # clashes [unclear; note added 2/12/2014]
+                self.includemask[:] = True
+            # must select region (i.e., exclude edges) AFTER setting 'positive' include region
+            # also, DON'T highlight here because it will be cleared
+            self.selectregion(fit_plotted_area=fit_plotted_area, exclude=exclude, debug=debug, **kwargs)
+
+            # have to do excludefit after selection, otherwise fit_plotted_area=True overrides
             if excludefit and specfit.modelpars is not None:
                 #vlo = self.Spectrum.plotter.specfit.modelpars[1] - 2*self.Spectrum.plotter.specfit.modelpars[2]
                 #vhi = self.Spectrum.plotter.specfit.modelpars[1] + 2*self.Spectrum.plotter.specfit.modelpars[2]
                 #exclude = [np.argmin(abs(self.Spectrum.xarr-vlo)),argmin(abs(self.Spectrum.xarr-vhi))]
                 specfit.fullsizemodel() # make sure the spectrum is the right size
-                if reset_selection:
-                    self.includemask = abs(specfit.model) < exclusionlevel*np.abs(specfit.model).max()
-                else:
-                    # only set additional FALSE
-                    self.includemask *= abs(specfit.model) < exclusionlevel*np.abs(specfit.model).max()
-            elif reset_selection:
-                self.includemask[:] = True
-            # must select region (i.e., exclude edges) AFTER setting 'positive' include region
-            # also, DON'T highlight here because it will be cleared
-            self.selectregion(fit_plotted_area=fit_plotted_area, exclude=exclude, debug=debug, **kwargs)
+                
+                # only set additional FALSE
+                self.includemask *= abs(specfit.model) < exclusionlevel*np.abs(specfit.model).max()
+
             self.button2action(
                     fit_original=fit_original,
                     baseline_fit_color=baseline_fit_color, 

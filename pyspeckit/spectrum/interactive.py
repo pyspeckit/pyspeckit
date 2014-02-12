@@ -412,6 +412,7 @@ class Interactive(object):
         self.includemask[self.xmax:] = False
 
         # Exclude keyword-specified excludes.  Assumes exclusion in current X array units
+        if debug: print "Exclude: ",exclude
         if exclude is not None and len(exclude) % 2 == 0:
             for x1,x2 in zip(exclude[::2],exclude[1::2]):
                 x1 = self.Spectrum.xarr.x_to_pix(x1)
