@@ -5,6 +5,8 @@ Release 0.1.15
 ~~~~~~~~~~~~~~
     * Bugfix: write_fit is part of Cube, not CubeStack
     * Bugfix: excludefit must occur after selectregion if fit_plotted_area is True
+    * API change: For the fitter & baseliner, data selection is end-inclusive
+                  if specified in world coordinates
 
 Release 0.1.14 (2013-09-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
