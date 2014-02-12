@@ -279,6 +279,7 @@ class Plotter(object):
 
         if use_window_limits:
             # this means DO NOT reset!
+            # it simply sets self.[xy][min/max] = current value
             self.set_limits_from_visible_window()
         else:
             if silent is not None:
@@ -412,18 +413,14 @@ class Plotter(object):
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
                 elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
-            elif event.key == 'b':
-                print "\n\nBaseline initiated from the interactive plotter.  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
+            elif event.key.lower() == 'b':
+                if event.key == 'b':
+                    print "\n\nBaseline initiated from the interactive plotter"
+                elif event.key == 'B':
+                    print "\n\nBaseline initiated from the interactive plotter (with reset)"
+                print "Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
                 self._disconnect_matplotlib_keys()
-                self.Spectrum.baseline(interactive=True, reset_selection=False)
-                if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
-                    self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
-                elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
-                    self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
-            elif event.key == 'B':
-                print "\n\nBaseline initiated from the interactive plotter (with reset).  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
-                self._disconnect_matplotlib_keys()
-                self.Spectrum.baseline(interactive=True, reset_selection=True)
+                self.Spectrum.baseline(interactive=True, reset_selection=(event.key=='B'))
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
                 elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():

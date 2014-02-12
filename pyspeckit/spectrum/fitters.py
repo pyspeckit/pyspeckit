@@ -540,9 +540,9 @@ class Specfit(interactive.Interactive):
             if color is not None:
                 kwargs.update({'composite_fit_color':color})
             self.plot_fit(annotate=annotate, 
-                    show_components=show_components,
-                    use_window_limits=use_window_limits,
-                    **kwargs)
+                          show_components=show_components,
+                          use_window_limits=use_window_limits,
+                          **kwargs)
                 
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
         if 'tied' in self.fitkwargs:
@@ -595,9 +595,10 @@ class Specfit(interactive.Interactive):
                         str(par))
                 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
-            negamp=None, fittype=None, renormalize='auto', color=None,
-            use_lmfit=False, show_components=None, debug=False,
-            nsigcut_moments=None, plot=True, **kwargs):
+                  negamp=None, fittype=None, renormalize='auto', color=None,
+                  use_lmfit=False, show_components=None, debug=False,
+                  use_window_limits=True,
+                  nsigcut_moments=None, plot=True, **kwargs):
         """
         Fit a single peak (plus a background)
 
@@ -671,7 +672,7 @@ class Specfit(interactive.Interactive):
                 debug=debug,
                 use_lmfit=use_lmfit,
                 **self.fitkwargs)
-        if debug: print "Guesses, fits after: ",self.guesses, mpp
+        if debug: print "1. Guesses, fits after: ",self.guesses, mpp
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
@@ -708,12 +709,14 @@ class Specfit(interactive.Interactive):
             if color is not None:
                 kwargs.update({'composite_fit_color':color})
             self.plot_fit(annotate=annotate,
-                show_components=show_components, **kwargs)
+                          use_window_limits=use_window_limits,
+                          show_components=show_components,
+                          **kwargs)
 
         # make sure the full model is populated
         self._full_model(debug=debug)
 
-        if debug: print "Guesses, fits after vheight removal: ",self.guesses, mpp
+        if debug: print "2. Guesses, fits after vheight removal: ",self.guesses, mpp
         self.history_fitpars()
 
     def _full_model(self, debug=False, **kwargs):
@@ -762,10 +765,10 @@ class Specfit(interactive.Interactive):
 
                 
     def plot_fit(self, xarr=None, annotate=None, show_components=None,
-            composite_fit_color='red',  lw=0.5,
-            composite_lw=0.75, pars=None, offset=None,
-            use_window_limits=None, show_hyperfine_components=None,
-            plotkwargs={}, **kwargs):
+                 composite_fit_color='red',  lw=0.5,
+                 composite_lw=0.75, pars=None, offset=None,
+                 use_window_limits=None, show_hyperfine_components=None,
+                 plotkwargs={}, **kwargs):
         """
         Plot the fit.  Must have fitted something before calling this!  
         

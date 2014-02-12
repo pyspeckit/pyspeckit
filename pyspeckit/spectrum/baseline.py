@@ -123,6 +123,10 @@ class Baseline(interactive.Interactive):
         self.set_spectofit(fit_original=fit_original)
         self.OKmask = (self.spectofit==self.spectofit)
         if exclude == 'interactive' or interactive:
+            if np.all(self.includemask):
+                specwarnings.warn("Include mask was uniformly True.  \n"
+                                  "This has the effect of making the 'baseline' command do nothing.\n"
+                                  "If this was not your intent, try spectrum.baseline(interactive=True,reset_selection=True)")
             self.start_interactive(clear_all_connections=clear_all_connections,
                                    debug=debug,
                                    reset_selection=reset_selection, **kwargs)
