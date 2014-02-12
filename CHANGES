@@ -4,6 +4,7 @@ CHANGES
 Release 0.1.15
 ~~~~~~~~~~~~~~
     * Bugfix: write_fit is part of Cube, not CubeStack
+    * Bugfix: excludefit must occur after selectregion if fit_plotted_area is True
 
 Release 0.1.14 (2013-09-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
