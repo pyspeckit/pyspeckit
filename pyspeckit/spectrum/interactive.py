@@ -371,14 +371,17 @@ class Interactive(object):
             if verbose or debug: print "Setting xmin,xmax from keywords %g,%g" % (xmin,xmax)
             if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
                 self.xmin = numpy.floor(self.Spectrum.xarr.x_to_pix(xmin))
-                self.xmax = numpy.ceil(self.Spectrum.xarr.x_to_pix(xmax))
+                # End-inclusive!
+                self.xmax = numpy.ceil(self.Spectrum.xarr.x_to_pix(xmax))+1
             else:
                 self.xmin = xmin
+                # NOT end-inclusive!  This is PYTHON indexing
                 self.xmax = xmax
             self.includemask[self.xmin:self.xmax] = True
         elif reset:
             if verbose or debug: print "Resetting xmin/xmax to full limits of data"
             self.xmin = 0
+            # End-inclusive!
             self.xmax = self.Spectrum.data.shape[0]
             self.includemask[self.xmin:self.xmax] = True
             #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
@@ -390,10 +393,12 @@ class Interactive(object):
             self.xmax = numpy.ceil(self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmax))
             if self.xmin>self.xmax: 
                 self.xmin,self.xmax = self.xmax,self.xmin
+            # End-inclusive!  Note that this must be done after the min/max swap!
+            # this feels sketchy to me, but if you don't do this the plot will not be edge-inclusive
+            # that means you could do this reset operation N times to continuously shrink the plot
+            self.xmax += 1
             if debug: print "Including all plotted area (as defined by [plotter.xmin=%f,plotter.xmax=%f]) for fit" % (self.Spectrum.plotter.xmin,self.Spectrum.plotter.xmax)
             if debug: print "Including self.xmin:self.xmax = %f:%f (and excluding the rest)" % (self.xmin,self.xmax)
-            self.includemask[:self.xmin] = False
-            self.includemask[self.xmax:] = False
             self.includemask[self.xmin:self.xmax] = True
         else:
             if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax)
@@ -401,6 +406,7 @@ class Interactive(object):
         if self.xmin == self.xmax:
             # Reset if there is no fitting region
             self.xmin = 0
+            # End-inclusive
             self.xmax = self.Spectrum.data.shape[0]
             if debug: print "Reset to full range because the endpoints were equal"
         elif self.xmin>self.xmax: 
@@ -416,7 +422,8 @@ class Interactive(object):
         if exclude is not None and len(exclude) % 2 == 0:
             for x1,x2 in zip(exclude[::2],exclude[1::2]):
                 x1 = self.Spectrum.xarr.x_to_pix(x1)
-                x2 = self.Spectrum.xarr.x_to_pix(x2)
+                # WCS units should be end-inclusive
+                x2 = self.Spectrum.xarr.x_to_pix(x2)+1
                 self.includemask[x1:x2] = False
 
         if highlight:
@@ -428,6 +435,7 @@ class Interactive(object):
         try:
             whinclude = numpy.where(self.includemask)
             self.xmin = whinclude[0][0]
-            self.xmax = whinclude[0][-1]
+            # MUST be end-inclusive!
+            self.xmax = whinclude[0][-1]+1
         except IndexError:
             pass

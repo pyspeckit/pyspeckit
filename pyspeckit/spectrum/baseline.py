@@ -144,18 +144,18 @@ class Baseline(interactive.Interactive):
                 #vlo = self.Spectrum.plotter.specfit.modelpars[1] - 2*self.Spectrum.plotter.specfit.modelpars[2]
                 #vhi = self.Spectrum.plotter.specfit.modelpars[1] + 2*self.Spectrum.plotter.specfit.modelpars[2]
                 #exclude = [np.argmin(abs(self.Spectrum.xarr-vlo)),argmin(abs(self.Spectrum.xarr-vhi))]
-                specfit.fullsizemodel() # make sure the spectrum is the right size
+                full_model = specfit.get_full_model(add_baseline=False)
                 
                 # only set additional FALSE
-                self.includemask *= abs(specfit.model) < exclusionlevel*np.abs(specfit.model).max()
+                self.includemask *= abs(full_model) < exclusionlevel*np.abs(full_model).max()
+                #import pdb; pdb.set_trace()
 
-            self.button2action(
-                    fit_original=fit_original,
-                    baseline_fit_color=baseline_fit_color, 
-                    debug=debug,
-                    subtract=subtract, 
-                    LoudDebug=LoudDebug,
-                    **kwargs)
+            self.button2action(fit_original=fit_original,
+                               baseline_fit_color=baseline_fit_color, 
+                               debug=debug,
+                               subtract=subtract, 
+                               LoudDebug=LoudDebug,
+                               **kwargs)
             if highlight_fitregion: self.highlight_fitregion()
         if save: self.savefit()
 
