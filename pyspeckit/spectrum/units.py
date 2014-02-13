@@ -335,6 +335,9 @@ class SpectroscopicAxis(np.ndarray):
         if units is not None and units in unit_type_dict and unit=='Hz':
             unit=units
 
+        if " " in unit:
+            unit = unit.replace(" ","")
+
         if unit in unit_type_dict:
             subarr.units = unit
         else:
