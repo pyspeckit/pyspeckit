@@ -239,12 +239,13 @@ class Baseline(interactive.Interactive):
                         ",".join([str(s) for s in self.baselinepars])) +
                         "(powerlaw)" if self.powerlaw else "")
 
-    def set_basespec_frompars(self):
+    def set_basespec_frompars(self, baselinepars=None):
         """
         Set the baseline spectrum based on the fitted parameters
         """
 
-        self.basespec = self.get_model(xarr=self.Spectrum.xarr)
+        self.basespec = self.get_model(xarr=self.Spectrum.xarr,
+                                       baselinepars=baselinepars)
 
     def get_model(self, xarr=None, baselinepars=None):
         # create the full baseline spectrum...
