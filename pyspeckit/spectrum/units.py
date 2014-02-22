@@ -27,7 +27,7 @@ import warnings
 # I changed this to a "SmartCase" dict, by analogy with VIM's smartcase, where anything with caps will
 # be case sensitive, BUT if there is no unit matching the exact case, will search for the lower version too
 # e.g., if you search for Mm, it will return Megameters.  If you search for mm or mM, it will get millimeters
-class SmartCaseDict(dict):
+class SmartCaseNoSpaceDict(dict):
     def __init__(self, inputdict=None):
         if inputdict:
             # Doesn't do keyword args
@@ -49,20 +49,20 @@ class SmartCaseDict(dict):
         try: 
             return dict.__getitem__(self,key)
         except KeyError:
-            return dict.__getitem__(self, key.lower())
+            return dict.__getitem__(self, key.lower().replace(" ",""))
 
     def __setitem__(self, key, value):
         dict.__setitem__(self,key,value)
         # only set lower-case version if there isn't one there already
         # prevents overwriting mm with Mm.lower()
         if hasattr(key,'lower'):
-            if key.lower() not in self:
-                self.__setitem__(key.lower(), value)
+            if key.lower().replace(" ","") not in self:
+                self.__setitem__(key.lower().replace(" ",""), value)
 
     def __contains__(self, key):
         cased = dict.__contains__(self,key)
         if hasattr(key,'lower') and cased is False:
-            return dict.__contains__(self, key.lower())
+            return dict.__contains__(self, key.lower().replace(" ",""))
         else:
             return cased
 
@@ -70,14 +70,14 @@ class SmartCaseDict(dict):
         """ This is deprecated, but we're keeping it around """
         cased = dict.has_key__(self,key)
         if hasattr(key,'lower') and cased is False:
-            return dict.has_key__(self, key.lower())
+            return dict.has_key__(self, key.lower().replace(" ",""))
         else:
             return cased
 
     def get(self, key, def_val=None):
         cased = dict.get(self,key)
         if hasattr(key,'lower') and cased is None:
-            return dict.get(self, key.lower(),def_val)
+            return dict.get(self, key.lower().replace(" ",""),def_val)
         else:
             return cased
 
@@ -88,7 +88,7 @@ class SmartCaseDict(dict):
         """
         cased = dict.setdefault(self,key)
         if hasattr(key,'lower') and cased is None:
-            return dict.setdefault(self, key.lower(),def_val)
+            return dict.setdefault(self, key.lower().replace(" ",""),def_val)
         else:
             return cased
 
@@ -106,7 +106,7 @@ class SmartCaseDict(dict):
     def pop(self, key, def_val=None):
         cased = dict.pop(self,key)
         if hasattr(key,'lower') and cased is None:
-            return dict.pop(self, key.lower(),def_val)
+            return dict.pop(self, key.lower().replace(" ",""),def_val)
         else:
             return cased
     
@@ -120,7 +120,7 @@ length_dict = {'meters':1.0,'m':1.0,
         'megameters':1e6,'Mm':1e6,
         'angstrom':1e-10,'angstroms':1e-10,'A':1e-10,
         }
-length_dict = SmartCaseDict(length_dict)
+length_dict = SmartCaseNoSpaceDict(length_dict)
 
 wavelength_dict = length_dict # synonym
 
@@ -131,17 +131,17 @@ frequency_dict = {
         'GHz':1e9,
         'THz':1e12,
         }
-frequency_dict = SmartCaseDict(frequency_dict)
+frequency_dict = SmartCaseNoSpaceDict(frequency_dict)
 
 velocity_dict = {'meters/second':1.0,'m/s':1.0,
         'kilometers/second':1e3,'kilometers/s':1e3,'km/s':1e3,'kms':1e3,
         'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
         'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
         }
-velocity_dict = SmartCaseDict(velocity_dict)
+velocity_dict = SmartCaseNoSpaceDict(velocity_dict)
 
 pixel_dict = {'pixel':1,'pixels':1}
-pixel_dict = SmartCaseDict(pixel_dict)
+pixel_dict = SmartCaseNoSpaceDict(pixel_dict)
 
 conversion_dict = {
         'VELOCITY':velocity_dict,  'Velocity':velocity_dict,  'velocity':velocity_dict,  'velo': velocity_dict, 'VELO': velocity_dict,
@@ -150,7 +150,7 @@ conversion_dict = {
         'FREQUENCY':frequency_dict,'Frequency':frequency_dict,'frequency':frequency_dict, 'freq': frequency_dict, 'FREQ': frequency_dict,
         'pixels':pixel_dict,'PIXELS':pixel_dict,
         }
-conversion_dict = SmartCaseDict(conversion_dict)
+conversion_dict = SmartCaseNoSpaceDict(conversion_dict)
 
 unit_type_dict = {
     'Hz' :'frequency', 'kHz':'frequency', 'MHz':'frequency', 'GHz':'frequency',
@@ -176,7 +176,7 @@ unit_type_dict = {
     None: 'pixels',
     }
 
-unit_type_dict = SmartCaseDict(unit_type_dict)
+unit_type_dict = SmartCaseNoSpaceDict(unit_type_dict)
 
 # to-do
 # unit_prettyprint = dict([(a,a.replace('angstroms','\\AA')) for a in unit_type_dict.keys() if a is not None])
@@ -199,7 +199,7 @@ xtype_dict = {
         # cm^-1 ? 'wavenumber':'wavenumber',
         }
 
-frame_dict = SmartCaseDict({
+frame_dict = SmartCaseNoSpaceDict({
         'VLSR':'LSRK','VRAD':'LSRK','VELO':'LSRK',
         'VOPT':'LSRK',
         'VELO-LSR':'LSRK',
@@ -292,7 +292,8 @@ class SpectroscopicAxis(np.ndarray):
             An array of X-axis values in whatever unit specified
 
         *unit* or *units* [ string ]
-            Any valid spectroscopic X-axis unit (km/s, Hz, angstroms, etc.)
+            Any valid spectroscopic X-axis unit (km/s, Hz, angstroms, etc.).
+            Spaces will be removed.
 
         *xtype* [ string | None ]
             irrelevant?
