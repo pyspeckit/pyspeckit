@@ -413,7 +413,7 @@ class Plotter(object):
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
                 elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
-            elif event.key.lower() == 'b':
+            elif event.key is not None and event.key.lower() == 'b':
                 if event.key == 'b':
                     print "\n\nBaseline initiated from the interactive plotter"
                 elif event.key == 'B':
