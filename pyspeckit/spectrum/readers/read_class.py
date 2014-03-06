@@ -10,8 +10,11 @@ try:
 except ImportError:
     import pyfits
 import numpy
+import numpy as np
 import struct
 from numpy import pi
+import progressbar
+import string
 
 import time
 
@@ -75,11 +78,40 @@ Additionally, the projection system is unclear to me... there is a 'systex'
 array in titout.f90 that has 6 entries, but the index in the smt files is 7.
 So...  I guess I have to assume simple fk5, tangent?
 
+
+
+Empirical work on APEX mapping data:
+    Index #383 is the last SgrA entry
+    last index starts at 50048
+    indexes seem to start at 1024
+    each index is 128 bits
+    there are 375 SGRA entries
+    after the last SGRA entry, the next RAFGL entry is 252 bytes ahead
+
 """
 
 """ Specification: http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html """
 filetype_dict = {'1A  ':'Multiple_IEEE','1   ':'Multiple_Vax','1B  ':'Multiple_EEEI',
     '9A  ':'Single_IEEE','9   ':'Single_Vax','9B  ':'Single_EEEI'}
+
+header_id_numbers = {-2: 'GENERAL',
+                     -3: 'POSITION',
+                     -4: 'SPECTRO',
+                    # -5: 'BASELINE',
+                    # -6: 'HISTORY',
+                    # -8: 'SWITCH',
+                     -10: 'DRIFT',
+                     -14: 'CALIBRATION',
+                    }
+
+header_id_lengths = {-2: 9, # may really be 10?
+                     -3: 17,
+                     -4: 17,
+                     -5: None, # variable length
+                     -6: None, # variable length
+                     -14: 25,
+                    }
+
 
 keys_lengths = {
         'unknown': [
@@ -95,7 +127,7 @@ keys_lengths = {
      ( 'SUBSCAN' ,1,'int32'), # Subscan number
      ],
         
-        -2: [ # 10 4-bytes?
+        'GENERAL': [ # 10 4-bytes?
      ( 'UT'      ,2,'float64'), #  rad UT of observation
      ( 'ST'      ,2,'float64'), #  rad LST of observation
      ( 'AZ'      ,1,'float32'), #  rad Azimuth
@@ -103,7 +135,8 @@ keys_lengths = {
      ( 'TAU'     ,1,'float32'), # neper Opacity
      ( 'TSYS'    ,1,'float32'), #    K System temperature
      ( 'TIME'    ,1,'float32'), #    s Integration time
-     ( 'XUNIT'   ,1,'int32'),   # code X unit (if xcoord_sec is present)
+                    # XUNIT should not be there?
+     #( 'XUNIT'   ,1,'int32'),   # code X unit (if xcoord_sec is present)
      ] ,
      'POSITION': [ # 11 4-bytes
     ('SOURC',3,'|S12')  , #  [ ] Source name
@@ -113,6 +146,9 @@ keys_lengths = {
     ('LAMOF',1,'float32'), #  [rad] Offset in Lambda
     ('BETOF',1,'float32'), #  [rad] Offset in Beta
     ('PROJ' ,1,'int32')  , # [rad] Projection system
+    ('SL0P' ,1,'float64'), # lambda of descriptive system # MAY NOT EXIST IN OLD CLASS
+    ('SB0P' ,1,'float64'), # beta of descriptive system   # MAY NOT EXIST IN OLD CLASS
+    ('SK0P' ,1,'float64'), # angle of descriptive system  # MAY NOT EXIST IN OLD CLASS
     ],
      'SPECTRO': [
      #('align'  ,1,'int32'),   #  [    ] Alignment padding
@@ -132,7 +168,7 @@ keys_lengths = {
      ('DOPPLER',2,'float64'), #  [    ] Doppler factor = -V/c (CLASS convention)
      ],
      'CALIBRATION': [
-     ('ALIGN',1,'int32'),    # BUFFER
+     ('ALIGN',1,'int32'),    # BUFFER (it's a zero - it is not declared in the docs!!!!)
      ('BEEFF',1,'float32'),   # [ ] Beam efficiency
      ('FOEFF',1,'float32'),   # [ ] Forward efficiency
      ('GAINI',1,'float32'),   # [ ] Image/Signal gain ratio
@@ -152,9 +188,37 @@ keys_lengths = {
      ('COUNT',3,'3float32'),   # [count] Power of Atm., Chopp., Cold
      ('LCALOF',1,'float32'),   # [ rad] Longitude offset for sky measurement
      ('BCALOF',1,'float32'),   # [ rad] Latitude offset for sky measurement
-     #('GEOLONG',2,'float64'),   # [ rad] Geographic longitude of observatory
-     #('GEOLAT',2,'float64'),   # [ rad] Geographic latitude of observatory
+     ('GEOLONG',1,'float64'),   # [ rad] Geographic longitude of observatory # MAY NOT EXIST IN OLD CLASS
+     ('GEOLAT',1,'float64'),   # [ rad] Geographic latitude of observatory   # MAY NOT EXIST IN OLD CLASS
          ],
+    'BASELINE':[
+        ('DEG',1,'int32'),       #! [         ] Degree of last baseline
+        ('SIGFI',1,'float32'),   #! [Int. unit] Sigma
+        ('AIRE',1,'float32'),    #! [Int. unit] Area under windows
+        ('NWIND',1,'int32'),     #! [ ] Number of line windows
+        # WARNING: These should probably have 'n', the second digit, = NWIND
+        # The docs are really unclear about this, they say "W1(MWIND)"
+        ('W1MWIND',1,'float32'), #! [km/s] Lower limits of windows
+        ('W2MWIND',1,'float32'), #! [km/s] Upper limits of windows
+        ('SINUS',3,'float32'),   #![]  Sinus baseline results
+    ],
+
+    'DRIFT':[ # 16?
+        ('FREQ',1,'float64') ,  #! [ MHz] Rest frequency                   real(kind=8)    :: 
+        ('WIDTH',1,'float32'),  #! [ MHz] Bandwidth                        real(kind=4)    :: 
+        ('NPOIN',1,'int32')  ,  #! [    ] Number of data points              integer(kind=4) :: 
+        ('RPOIN',1,'float32'),  #! [    ] Reference point                  real(kind=4)    :: 
+        ('TREF',1,'float32') ,  #! [   ?] Time at reference                real(kind=4)    :: 
+        ('AREF',1,'float32') ,  #! [ rad] Angular offset at ref.           real(kind=4)    :: 
+        ('APOS',1,'float32') ,  #! [ rad] Position angle of drift          real(kind=4)    :: 
+        ('TRES',1,'float32') ,  #! [   ?] Time resolution                  real(kind=4)    :: 
+        ('ARES',1,'float32') ,  #! [ rad] Angular resolution               real(kind=4)    :: 
+        ('BAD',1,'float32')  ,  #! [    ] Blanking value                   real(kind=4)    :: 
+        ('CTYPE',1,'int32')  ,  #! [code] Type of offsets                    integer(kind=4) :: 
+        ('CIMAG',1,'float64'),  #! [ MHz] Image frequency                  real(kind=8)    :: 
+        ('COLLA',1,'float32'),  #! [   ?] Collimation error Az             real(kind=4)    :: 
+        ('COLLE',1,'float32'),  #! [   ?] Collimation error El             real(kind=4)    :: 
+    ],
      
      }
 
@@ -251,26 +315,82 @@ def _read_obshead(f,verbose=False):
     #if IDcode.strip() != '2':
     #    raise IndexError("Failure at %i" % (f.tell() - 4))
     nblocks,nbyteob,data_address,nheaders,data_length,obindex,nsec,obsnum= numpy.fromfile(f,count=8,dtype='int32')
-    if verbose: print "nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum",nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum
+    if verbose:
+        print "nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum",nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum
+        print "DATA_LENGTH: ",data_length
+    
     seccodes = numpy.fromfile(f,count=nsec,dtype='int32')
-    secaddr = numpy.fromfile(f,count=nsec,dtype='int32')
+    # Documentation says addresses then length: It is apparently wrong
     seclen = numpy.fromfile(f,count=nsec,dtype='int32')
+    secaddr = numpy.fromfile(f,count=nsec,dtype='int32')
     if verbose: print "Section codes, addresses, lengths: ",seccodes,secaddr,seclen
 
     hdr = {'NBLOCKS':nblocks, 'NBYTEOB':nbyteob, 'DATAADDR':data_address,
             'DATALEN':data_length, 'NHEADERS':nheaders, 'OBINDEX':obindex,
-            'NSEC':nsec, 'OBSNUM':obsnum, 'SECCODES':str(seccodes),
-            'SECADDR':str(secaddr), 'SECLEN':str(seclen)}
+            'NSEC':nsec, 'OBSNUM':obsnum}
 
     #return obsnum,seccodes
-    return obsnum,hdr
+    return obsnum,hdr,dict(zip(seccodes,secaddr))
+
+# THIS IS IN READ_OBSHEAD!!!
+# def _read_preheader(f):
+#     """
+#     Not entirely clear what this is, but it is stuff that precedes the actual data
+# 
+#     Looks something like this:
+#     array([          1,          -2,          -3,          -4,         -14,
+#                  9,          17,          18,          25,          55,
+#                 64,          81,          99, -1179344801,   979657591,
+# 
+#     -2, -3, -4, -14 indicate the 4 header types
+#     9,17,18,25 *MAY* indicate the number of bytes in each
+#     
+# 
+#     HOW is it indicated how many entries there are?
+#     """
+#     # 13 comes from counting 1, -2,....99 above
+#     numbers = np.fromfile(f, count=13, dtype='int32')
+#     sections = [n for n in numbers if n in header_id_numbers]
+#     return sections
+
+def downsample_1d(myarr,factor,estimator=np.mean):
+    """
+    Downsample a 1D array by averaging over *factor* pixels.
+    Crops right side if the shape is not a multiple of factor.
+
+    This code is pure numpy and should be fast.
+
+    keywords:
+        estimator - default to mean.  You can downsample by summing or
+            something else if you want a different estimator
+            (e.g., downsampling error: you want to sum & divide by sqrt(n))
+    """
+    if myarr.ndim != 1:
+        raise ValueError("Only works on 1d data.  Says so in the title.")
+    xs = myarr.size
+    crarr = myarr[:xs-(xs % int(factor))]
+    dsarr = estimator(np.concatenate([[crarr[i::factor] for i in
+                                       range(factor)]]),axis=0)
+    return dsarr
 
 
 @print_timing
-def read_class(filename,  DEBUG=False, apex=False):
+def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
+               stop_position=None, start=512, skip_data=False,
+               downsample_factor=None):
     """
     A hacked-together method to read a binary CLASS file.  It is strongly dependent on the incomplete
     `GILDAS CLASS file type Specification <http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html>`_
+
+    Parameters
+    ----------
+    filename: str
+    skip_data: bool
+        Read the file but don't store any of the data in memory.  Useful for
+        getting headers.
+    downsample_factor: None or int
+        Factor by which to downsample data by averaging.  Useful for
+        overresolved data.
     """
     f = open(filename,'rb')
     filelen = len(f.read())
@@ -285,7 +405,9 @@ def read_class(filename,  DEBUG=False, apex=False):
     nextblock,nindex,nex,nrecords = numpy.fromfile(f,count=4,dtype='int32')
     if DEBUG: print "nextblock,nindex,nex,nrecords",nextblock,nindex,nex,nrecords
     firstblock=numpy.fromfile(f,count=nex,dtype='int32') #[_read_byte(f) for ii in xrange(nex)]
-    f.seek(512)
+    # purely empirical: HHT was always 512, apparently apex is 1024?
+    # (though I had apex=True and it sort of worked maybe before?!)
+    f.seek(start)
 
     if DEBUG: print "firstblock",firstblock
     if DEBUG: print "Done with header stuff at position %i" % f.tell()
@@ -302,26 +424,40 @@ def read_class(filename,  DEBUG=False, apex=False):
     #    f.seek((f.tell()/128 + 1)*128)
 
     spectra = []
-    header  = []
+    header_list  = []
     spcount = 0
     jj = -1
+    pb = progressbar.ProgressBar(maxval=filelen)
+    pb.start()
+    startpos = -1 # debug tool: make sure we are not in an infinite loop
     while f.tell() < filelen:
         jj += 1
+        pb.update(f.tell())
+        if f.tell() == startpos:
+            raise ValueError("Infinite Loop")
         startpos = f.tell()
+        if stop_position is not None and f.tell() > stop_position:
+            break
         IDcode = f.read(4)
         if IDcode == '\x00\x00\x00\x00':
             """ Skip over all blanks """
             f.seek(startpos)
             x = numpy.fromfile(f,count=128/4,dtype='int32')
             skipcount = 0
+            # must allow for zero skipping!!
+            pos = f.tell()
             while (x==0).all() and len(x)!=0:
                 skipcount += 1
                 pos = f.tell()
                 x = numpy.fromfile(f,count=128/4,dtype='int32')
             f.seek(pos)
+            if pos <= startpos:
+                raise ValueError("Went backwards or did not advance.")
             if DEBUG: print "Loop %i: Skipped %i entries starting at %i.  pos=%i" % (jj, skipcount, startpos, pos)
             if jj >= filelen/128:
-                raise Exception("Infinite Loop")
+                # pdb here instead of excepting so that we can continue & repeat
+                import pdb; pdb.set_trace()
+                #raise Exception("Infinite Loop")
             continue
         elif IDcode.strip() != '2':
             f.seek(startpos)
@@ -336,45 +472,71 @@ def read_class(filename,  DEBUG=False, apex=False):
                 raise Exception("Failure at %i: %i" % (jj,f.tell()))
         else:
             if DEBUG: print "Reading HEADER and OBSERVATION at %i" % f.tell()
-            obsnum,obshead = _read_obshead(f,verbose=DEBUG)
+            obsnum,obshead,sections = _read_obshead(f,verbose=DEBUG)
         pos = f.tell()
+        # first one of these starts
         if DEBUG:
-            print " UNCLEAR INFO AT %i PAST %i:" % (f.tell()-startpos,startpos)
+            print " UNCLEAR INFO AT %i PAST %i: %i" % (f.tell()-startpos,startpos,pos)
             junk =  f.read(168) 
             print junk
-            f.seek(pos)
             #f.seek(startpos)
             #print numpy.fromfile(f,count=168/4+10,dtype='int32') 
             #f.seek(startpos)
             #print numpy.fromfile(f,count=168/4+10,dtype='float32') 
             #f.seek(startpos)
             #print numpy.fromfile(f,count=168+40,dtype='int8') 
-        f.seek(pos+84+12*4)
-        Header2 = _read_header(f,type=-2)
-        if filetype.strip() == '9A':
-            if f.tell() != pos + 156:
-                #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
-                f.seek(pos+156)
-        else:
-            if f.tell() != pos + 168:
-                #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
-                f.seek(pos+168)
-        Header3 = _read_header(f,type='POSITION')
-        Header4 = _read_header(f,type='SPECTRO')
-        if DEBUG: print "Line %i (byte %i) - OBSERVATION %i (%i): %s, %s" % (f.tell(),(f.tell()-startpos)/4,obsnum,spcount,Header3['SOURC'],Header4['LINE']),
-        Header14 = _read_header(f,type='CALIBRATION')
-        if DEBUG: print "\nLine %i (byte %i) - CALIBRATION:" % (f.tell(),(f.tell()-startpos)/4)
 
-        # purely empirical; NO idea why 
-        if apex:
-            f.seek(238*4+f.tell())
+        if apex: # there are 33 bytes of junk...
+            f.seek(pos+84+12*4)
+        else: # ????
+            if filetype.strip() == '9A':
+                if f.tell() != pos + 156:
+                    #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
+                    f.seek(pos+156)
+            else:
+                if f.tell() != pos + 168:
+                    #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
+                    f.seek(pos+168)
 
-        hdr = Header3
-        hdr.update(Header2)
-        hdr.update(Header4)
-        hdr.update(Header14)
+        header = obshead
+
+
+        # datastart must be at the end of all these sections
+        datastart = 0
+
+        for section_id,section_address in sections.iteritems():
+            # Section addresses are 1-indexed byte addresses
+            # in the current "block"
+            f.seek(startpos + (section_address-1)*4)
+            temp_hdr = _read_header(f, type=header_id_numbers[section_id])
+            header.update(temp_hdr)
+            datastart = max(datastart,f.tell())
+
+        # can't guarantee that the loop above goes in the right order,
+        # so make sure we end up at the right spot
+        f.seek(datastart)
+
+        #Header2 = _read_header(f,type='GENERAL')
+        #Header3 = _read_header(f,type='POSITION')
+        #Header4 = _read_header(f,type='SPECTRO')
+        #if DEBUG: print "Line %i (byte %i) - OBSERVATION %i (%i): %s, %s" % (f.tell(),(f.tell()-startpos)/4,obsnum,spcount,Header3['SOURC'],Header4['LINE']),
+        #Header14 = _read_header(f,type='CALIBRATION')
+        #if DEBUG: print "\nLine %i (byte %i) - CALIBRATION:" % (f.tell(),(f.tell()-startpos)/4)
+
+        if not all((a in string.printable for a in header['SOURC'])):
+            raise ValueError("Source has weird name.")
+
+        ## purely empirical; NO idea why
+        #if apex:
+        #    f.seek(238*4+f.tell())
+
+        #hdr = Header3
+        #hdr.update(Header2)
+        #hdr.update(Header4)
+        #hdr.update(Header14)
         #hdr.update(unclear)
-        hdr.update(obshead)
+        hdr = header
+        hdr.update(obshead) # re-overwrite things
         hdr.update({'OBSNUM':obsnum,'RECNUM':spcount})
         hdr.update({'RA':hdr['LAM']/pi*180,'DEC':hdr['BET']/pi*180})
         hdr.update({'RAoff':hdr['LAMOF']/pi*180,'DECoff':hdr['BETOF']/pi*180})
@@ -387,24 +549,58 @@ def read_class(filename,  DEBUG=False, apex=False):
         #        hdr[key] = ''
         spcount += 1
 
-        nchan = hdr['NCHAN']
-        if nchan != hdr['DATALEN']:
-            raise ValueError("data_length != nchan")
-        if DEBUG: print "Spectrum has %i channels at %i" % (nchan,f.tell())
+        if -10 in sections and 'NPOIN' in hdr:
+            npoin = hdr['NPOIN']
+            nchan = npoin
+        else:
+            nchan = hdr['NCHAN']
+
+        if nchan != hdr['DATALEN'] and not skip_blank_spectra:
+            print "WARNING: nchan=%i, datalen=%i" % (nchan, hdr['NCHAN'])
+            #raise ValueError("data_length != nchan")
+        elif nchan != hdr['DATALEN'] and skip_blank_spectra:
+            print "Loop %i: Skipped a spectrum with nchan=%i, datalen=%i at %i" % (jj, nchan, hdr['DATALEN'], f.tell())
+            continue
+        else:
+            if DEBUG:
+                print "Everything is fine.  %i" % jj
+        if DEBUG:
+            print "Spectrum has %i channels at %i" % (nchan,f.tell())
         spectrum = numpy.fromfile(f,count=nchan,dtype='float32')
-        if DEBUG > 2: print "First digits of spectrum: ",spectrum[:10]
-        spectra.append( spectrum )
-        header.append( hdr )
+        if DEBUG > 2:
+            print "First digits of spectrum: ",spectrum[:10]
+        if not skip_data:
+            if downsample_factor is not None:
+                spectra.append(downsample_1d(spectrum, downsample_factor))
+            else:
+                spectra.append(spectrum)
+
+        if downsample_factor is not None:
+            if 'NCHAN' in hdr:
+                hdr['NCHAN'] /= downsample_factor
+            elif 'NPOIN' in hdr:
+                hdr['NPOIN'] /= downsample_factor
+            else:
+                print "Did not find any header keywords reporting NCHAN"
+            for kw in ['FRES','VRES']:
+                if kw in hdr:
+                    hdr[kw] *= downsample_factor
+            if 'RCHAN' in hdr:
+                scalefactor = 1./downsample_factor
+                hdr['RCHAN'] = (hdr['RCHAN']-1)*scalefactor + 0.5 + scalefactor/2.
+        header_list.append(hdr)
         if f.tell() % 128 != 0:
-            discard = f.read(128-f.tell()%128)
-            if DEBUG > 3: 
+            discard = f.read(128 - f.tell() % 128)
+            if DEBUG > 3:
                 print "DISCARD: ",discard," POSITION: ",f.tell()
             #raise ValueError("Bad position : %i "%f.tell())
         #f.seek((f.tell()/nchan + 1)*nchan)
-        if DEBUG: print "Continuing to sp# ",spcount+1," starting at ",f.tell()," out of ",filelen
+        if DEBUG:
+            print "Continuing to sp# ",spcount+1," starting at ",f.tell()," out of ",filelen
 
+    pb.finish()
     f.close()
-    return spectra,header,indexes
+    return spectra,header_list,indexes
 
 from .. import units
 def make_axis(header,imagfreq=False):
@@ -433,7 +629,8 @@ def make_axis(header,imagfreq=False):
     
 import pyspeckit
 @print_timing
-def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=False, **kwargs):
+def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
+                       imagfreq=False, DEBUG=False,  **kwargs):
     """
     Load an entire CLASS observing session into a list of ObsBlocks based on
     matches to the 'telescope', 'line' and 'source' names
@@ -451,8 +648,10 @@ def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=
     imagfreq : bool
         Create a SpectroscopicAxis with the image frequency.
     """
-    spectra,header,indexes = read_class(filename,DEBUG=DEBUG, **kwargs)
-
+    if datatuple is None:
+        spectra,header,indexes = read_class(filename,DEBUG=DEBUG, **kwargs)
+    else:
+        spectra,header,indexes = datatuple
 
     obslist = []
     lastscannum = -1
@@ -471,7 +670,7 @@ def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=
             elif pyfits.Card._comment_FSC_RE.match(str(v)) is not None:
                 H.update(k,v)
         scannum = hdr['XSCAN']
-        if hdr['XTEL'].strip() not in telescope:
+        if 'XTEL' in hdr and hdr['XTEL'].strip() not in telescope:
             continue
         if hdr['LINE'].strip() not in line:
             continue
@@ -500,12 +699,15 @@ def class_to_obsblocks(filename,telescope,line,source=None,imagfreq=False,DEBUG=
     return obslist
 
 @print_timing
-def class_to_spectra(filename, **kwargs):
+def class_to_spectra(filename, datatuple=None, **kwargs):
     """
     Load each individual spectrum within a CLASS file into a list of Spectrum
     objects
     """
-    spectra,header,indexes = read_class(filename, **kwargs)
+    if datatuple is None:
+        spectra,header,indexes = read_class(filename, **kwargs)
+    else:
+        spectra,header,indexes = datatuple
 
     spectrumlist = []
     for sp,hdr,ind in zip(spectra,header,indexes):
@@ -513,8 +715,8 @@ def class_to_spectra(filename, **kwargs):
         xarr = make_axis(hdr)
         spectrumlist.append(
             pyspeckit.Spectrum(xarr=xarr,
-                header=hdr,
-                data=sp))
+                               header=hdr,
+                               data=sp))
 
     return pyspeckit.Spectra(spectrumlist)
 

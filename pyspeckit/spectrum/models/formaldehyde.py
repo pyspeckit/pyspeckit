@@ -30,7 +30,10 @@ except ImportError:
     scipyOK=False
 
 line_names = ['oneone','twotwo','threethree']
-line_names = ['oneone_f10','oneone_f01','oneone_f22','oneone_f21','oneone_f12','oneone_f11','twotwo_f11','twotwo_f12','twotwo_f21','twotwo_f32','twotwo_f33','twotwo_f22','twotwo_f23']
+line_names = ['oneone_f10', 'oneone_f01', 'oneone_f22', 'oneone_f21',
+              'oneone_f12', 'oneone_f11', 'twotwo_f11', 'twotwo_f12',
+              'twotwo_f21', 'twotwo_f32', 'twotwo_f33', 'twotwo_f22',
+              'twotwo_f23']
 
 # http://adsabs.harvard.edu/abs/1971ApJ...169..429T has the most accurate freqs
 # http://adsabs.harvard.edu/abs/1972ApJ...174..463T [twotwo]
@@ -150,22 +153,17 @@ voff_lines_dict={ # opposite signs of freq offset
         }
 
 
-formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy)
+formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
+                                             freq_dict, line_strength_dict,
+                                             relative_strength_total_degeneracy)
 formaldehyde_vtau_fitter = formaldehyde_vtau.fitter
 formaldehyde_vtau_vheight_fitter = formaldehyde_vtau.vheight_fitter
 
-def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0, 
-        grid_vwidth=1.0,
-        grid_vwidth_scale=False,
-        texgrid=None,
-        taugrid=None,
-        hdr=None,
-        path_to_texgrid='',
-        path_to_taugrid='',
-        temperature_gridnumber=3,
-        debug=False,
-        verbose=False,
-        **kwargs):
+def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
+                       grid_vwidth=1.0, grid_vwidth_scale=False, texgrid=None,
+                       taugrid=None, hdr=None, path_to_texgrid='',
+                       path_to_taugrid='', temperature_gridnumber=3,
+                       debug=False, verbose=False, **kwargs):
     """
     Use a grid of RADEX-computed models to make a model line spectrum
 
@@ -340,6 +338,41 @@ def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
 
     return mdl
 
+def formaldehyde_pyradex(xarr, density=4, column=13, temperature=20,
+                         xoff_v=0.0, opr=1.0, width=1.0, tbackground=2.73,
+                         grid_vwidth=1.0, debug=False, verbose=False,
+                         **kwargs):
+    """
+    Use a grid of RADEX-computed models to make a model line spectrum
+
+    The RADEX models have to be available somewhere.
+    OR they can be passed as arrays.  If as arrays, the form should be:
+    texgrid = ((minfreq1,maxfreq1,texgrid1),(minfreq2,maxfreq2,texgrid2))
+
+    xarr must be a SpectroscopicAxis instance
+    xoff_v, width are both in km/s
+
+    grid_vwidth is the velocity assumed when computing the grid in km/s
+    this is important because tau = modeltau / width (see, e.g.,
+    Draine 2011 textbook pgs 219-230)
+    """
+
+    import pyradex
+    
+    # Convert X-units to frequency in GHz
+    xarr = xarr.as_unit('Hz', quiet=True)
+
+    tb_nu_cumul = np.zeros(len(xarr))
+
+    R = pyradex.Radex(molecule='oh2co-h2', column=column,
+                      temperature=temperature, density=10**density,
+                      tbackground=tbackground,)
+
+    spec = np.sum([(formaldehyde_vtau(xarr,Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)
+                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
+                axis=0)
+  
+    return spec
 
 class formaldehyde_model(model.SpectralModel):
     def formaldehyde_integral(self, modelpars, linename='oneone'):
