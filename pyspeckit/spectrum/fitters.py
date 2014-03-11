@@ -1462,6 +1462,8 @@ class Specfit(interactive.Interactive):
         """
         if hasattr(self.fitter,'get_pymc'):
             return self.fitter.get_pymc(self.Spectrum.xarr, self.spectofit, self.errspec, **kwargs)
+        else:
+            raise AttributeError("Fitter %r does not have pymc implemented." % self.fitter)
 
     def get_emcee(self, nwalkers=None, **kwargs):
         """

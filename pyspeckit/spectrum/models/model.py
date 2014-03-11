@@ -813,12 +813,12 @@ class SpectralModel(fitter.SimpleFitter):
         >>> MCwithpriors.stats()['AMPLITUDE0']
         
         """
+        old_errsettings = np.geterr()
         try:
-            old_errsettings = np.geterr()
-            import pymc # pymc breaks error settings
+            import pymc
+        finally:
+            # pymc breaks error settings
             np.seterr(**old_errsettings)
-        except ImportError:
-            return
 
         #def lowerlimit_like(x,lolim):
         #    "lower limit (log likelihood - set very positive for unacceptable values)"
@@ -848,7 +848,10 @@ class SpectralModel(fitter.SimpleFitter):
                     else:
                         funcdict[par.parname] = pymc.distributions.Normal(par.parname, par.value, 1./par.error**2)
                 else:
-                    funcdict[par.parname] = pymc.distributions.Uninformative(par.parname, value=par.value)
+                    if any(par.limited):
+                        funcdict[par.parname] = pymc.distributions.Uniform(par.parname, lolim, uplim, value=par.value)
+                    else:
+                        funcdict[par.parname] = pymc.distributions.Uninformative(par.parname, value=par.value)
             elif any(par.limited):
                 lolim = par.limits[0] if par.limited[0] else -1e10
                 uplim = par.limits[1] if par.limited[1] else  1e10
