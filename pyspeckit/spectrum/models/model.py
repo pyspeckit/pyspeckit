@@ -86,7 +86,7 @@ class SpectralModel(fitter.SimpleFitter):
             self.__doc__ = modelfunc.__doc__
         elif modelfunc.__doc__ is not None:
             self.__doc__ += modelfunc.__doc__
-        self.npars = npars 
+        self.npars = npars
         self.default_npars = npars
         self.multisingle = multisingle
         self.fitunits = fitunits

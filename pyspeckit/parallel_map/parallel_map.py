@@ -3,14 +3,15 @@ _multi=False
 _ncpus=1
 
 try:
-  # May raise ImportError
-  import multiprocessing
-  _multi=True
-
-  # May raise NotImplementedError
-  _ncpus = multiprocessing.cpu_count()
-except:
-  pass
+    # May raise ImportError
+    import multiprocessing
+    _multi=True
+   
+    # May raise NotImplementedError
+    _ncpus = multiprocessing.cpu_count()
+except Exception as ex:
+    pmap_exception = ex
+    _multi=False
 
 
 __all__ = ('parallel_map',)
@@ -116,7 +117,10 @@ def parallel_map(function, sequence, numcores=None):
   if not _multi or size == 1:
     return map(function, sequence)
 
-  if numcores is None:
+  if numcores is not None and numcores > _ncpus:
+      warnings.warn("Number of requested cores is greated than the "
+                    "number of available CPUs.")
+  elif numcores is None:
     numcores = _ncpus
 
   # Returns a started SyncManager object which can be used for sharing 

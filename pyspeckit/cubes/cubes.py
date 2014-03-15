@@ -12,6 +12,7 @@ headers.
 from numpy import sqrt,repeat,indices,newaxis,pi,cos,sin,array,mean,nansum
 from math import acos,atan2,tan
 import numpy
+import numpy as np
 import copy
 import os
 import astropy.io.fits as fits
@@ -22,13 +23,59 @@ import pyspeckit
 from astropy import coordinates
 from pyspeckit.specwarnings import warn
 try:
-    from AG_fft_tools.convolve import smooth
+    from AG_fft_tools import smooth
     from pyspeckit.parallel_map import parallel_map
     smoothOK = True
 except ImportError:
     smoothOK = False
 
 dtor = pi/180.0
+
+def baseline_cube(cube, polyorder, cubemask=None):
+    """
+    Given a cube, fit a polynomial to each spectrum
+
+    Parameters
+    ----------
+    cube: np.ndarray
+        An ndarray with ndim = 3, and the first dimension is the spectral axis
+    polyorder: int
+        Order of the polynomial to fit and subtract
+    cubemask: boolean ndarray
+        Mask to apply to cube.  Values that are True will be ignored when
+        fitting.
+    """
+    x = np.arange(cube.shape[0])
+    #polyfitfunc = lambda y: np.polyfit(x, y, polyorder)
+    def blfunc(args):
+        yfit,yreal = args
+        if hasattr(yfit,'mask'):
+            mask = True-yfit.mask
+        else:
+            mask = yfit==yfit
+
+        if mask.sum() < polyorder:
+            return x*0
+        else:
+            polypars = np.polyfit(x[mask], yfit[mask], polyorder)
+            return yreal-np.polyval(polypars, x)
+
+    reshaped_cube = cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
+
+    if cubemask is None:
+        fit_cube = reshaped_cube
+    else:
+        if cubemask.dtype != 'bool':
+            raise TypeError("Cube mask *must* be a boolean array.")
+        masked_cube = cube.copy()
+        masked_cube[cubemask] = np.nan
+        fit_cube = masked_cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
+
+
+    baselined = np.array(parallel_map(blfunc, zip(fit_cube,reshaped_cube)))
+    blcube = baselined.T.reshape(cube.shape)
+    return blcube
+
 
 def flatten_header(header,delete=False):
     """
@@ -315,8 +362,12 @@ def subcube(cube, xcen, xwidth, ycen, ywidth, header=None,
 
         xmid_sky,ymid_sky = wcs.wcs_pix2world(xlo+xwidth,ylo+ywidth,0)
 
-        newheader.update('CRVAL1',xmid_sky[0])
-        newheader.update('CRVAL2',ymid_sky[0])
+        try:
+            newheader.update('CRVAL1',xmid_sky[0])
+            newheader.update('CRVAL2',ymid_sky[0])
+        except IndexError:
+            newheader.update('CRVAL1',float(xmid_sky))
+            newheader.update('CRVAL2',float(ymid_sky))
         newheader.update('CRPIX1',1+xwidth)
         newheader.update('CRPIX2',1+ywidth)
         
