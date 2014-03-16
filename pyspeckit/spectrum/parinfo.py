@@ -91,6 +91,23 @@ class ParinfoList(list):
         else:
             return self._dict[key]
 
+    def __setitem__(self, key, val):
+        """
+        DO NOT allow items to be replaced/overwritten,
+        instead use their own setters
+        """
+        # if key already exists, use its setter
+        if key in self._dict or (type(key) is int and key < len(self)):
+            self[key] = val
+        elif type(key) is int:
+            # can't set a new list element this way
+            raise IndexError("Index %i out of range" % key)
+        elif isinstance(val,Parinfo):
+            # otherwise, add the item
+            self.__dict__[key] = val
+        else:
+            raise TypeError("Can only add Parinfo items to ParinfoLists")
+
     def _set_attributes(self):
         self.__dict__.update(dict([(pp['parname'],pp) for pp in self]))
 
