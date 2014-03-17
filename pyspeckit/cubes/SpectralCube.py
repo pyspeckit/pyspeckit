@@ -385,9 +385,10 @@ class Cube(spectrum.Spectrum):
 
 
     def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
-            verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
-            blank_value=0, integral=True, direct=False, absorption=False,
-            use_nearest_as_guess=False, start_from_point=(0,0), multicore=0,
+                verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
+                blank_value=0, integral=True, direct=False, absorption=False,
+                use_nearest_as_guess=False, start_from_point=(0,0), multicore=0,
+                continuum_map=None,
             **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
@@ -422,6 +423,8 @@ class Cube(spectrum.Spectrum):
             4 - specfit will be verbose 
         multicore: int
             if >0, try to use multiprocessing via parallel_map to run on multiple cores
+        continuum_map: np.ndarray
+            Same shape as error map.  Subtract this from data before estimating noise.
 
         """
 
@@ -486,7 +489,10 @@ class Cube(spectrum.Spectrum):
                 if verbose_level > 1 and ii==0: print "WARNING: using data std() as error."
                 sp.error[:] = sp.data[sp.data==sp.data].std()
             if sp.error is not None and signal_cut > 0:
-                snr = sp.data / sp.error
+                if continuum_map is not None:
+                    snr = (sp.data-continuum_map[y,x]) / sp.error
+                else:
+                    snr = sp.data / sp.error
                 if absorption:
                     max_sn = np.nanmax(-1*snr)
                 else:

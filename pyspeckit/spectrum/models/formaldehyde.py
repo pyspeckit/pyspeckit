@@ -158,6 +158,7 @@ formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
                                              relative_strength_total_degeneracy)
 formaldehyde_vtau_fitter = formaldehyde_vtau.fitter
 formaldehyde_vtau_vheight_fitter = formaldehyde_vtau.vheight_fitter
+formaldehyde_vtau_tbg_fitter = formaldehyde_vtau.background_fitter
 
 def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
                        grid_vwidth=1.0, grid_vwidth_scale=False, texgrid=None,

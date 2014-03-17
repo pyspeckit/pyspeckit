@@ -253,7 +253,7 @@ class Specfit(interactive.Interactive):
             self.guesses = []
 
             self.start_interactive(clear_all_connections=clear_all_connections,
-                    debug=debug, **kwargs)
+                                   debug=debug, **kwargs)
         elif (((multifit or multifit is None) and self.fittype in
             self.Registry.multifitters) or guesses is not None):
             if guesses is None:
