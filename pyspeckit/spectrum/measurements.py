@@ -15,9 +15,9 @@ spec.measure()
 cm_per_mpc = 3.08568e+24
 
 class Measurements(object):
-    def __init__(self, Spectrum, z=None, d=None, xunits=None, fluxnorm=None,
-            miscline=None, misctol=10., ignore=None, derive=True, debug=False,
-            restframe=False, ptol = 2):
+    def __init__(self, Spectrum, z=None, d=None, fluxnorm=None,
+                 miscline=None, misctol=10., ignore=None, derive=True, debug=False,
+                 restframe=False, ptol=2, sort=False):
         """
         This can be called after a fit is run.  It will inherit the specfit
         object and derive as much as it can from modelpars.  Just do:
@@ -27,15 +27,25 @@ class Measurements(object):
         integrated line luminosities rather than just fluxes.  Provide distance
         in cm.
 
-        Currently will only work with Gaussians.  To generalize:
+        Only works with Gaussians.  To generalize:
             1. make sure we manipulate modelpars correctly, i.e. read in
             entries corresponding to wavelength/frequency/whatever correctly.
 
-        miscline = dictionary
+        Parameters
+        ----------
+        z: float or None
+            redshift
+        d: float or None
+            distance in cm (used for luminosities)
+        fluxnorm: bool
+            Normalize the fluxes?
+        miscline: dictionary
             miscline = [{'name': H_alpha', 'wavelength': 6565}]
-
-        misctol = tolerance (in Angstroms) for identifying an unmatched line
+        misctol: tolerance (in Angstroms) for identifying an unmatched line
             to the line(s) we specify in miscline dictionary.
+        sort: bool
+            Sort the entries in order of observed wavelength (or velocity or
+            frequency)
 
         """
         self.debug = debug
@@ -67,9 +77,19 @@ class Measurements(object):
             tmp1 = np.delete(tmp1, ignore, 0)
             tmp2 = np.delete(tmp2, ignore, 0)
 
-        order = np.argsort(zip(*tmp1)[1])
-        self.obspos = np.sort(list(zip(*tmp1)[1]))
-        self.Nlines = len(self.obspos)
+        # each tmp1 contains amplitude,wavelength,width
+        # (Assumes gaussians)
+        wavelengths = tmp1[:,1]
+        
+        # sort by wavelength
+        if sort:
+            order = np.argsort(wavelengths)
+            self.obspos = wavelengths[order]
+        else:
+            order = np.arange(wavelengths.size)
+            self.obspos = wavelengths
+
+        self.Nlines = wavelengths.size
 
         # Read in modelpars and modelerrs, re-organize so they are 2D arrays sorted by ascending wavelength
         self.modelpars = np.zeros_like(tmp1)
@@ -96,7 +116,7 @@ class Measurements(object):
             self.cosmology = cosmology.Cosmology()
             self.d = self.cosmology.LuminosityDistance(z) * cm_per_mpc
 
-        self.unmatched = self.identify_by_position(ptol = ptol)
+        self.unmatched = self.identify_by_position(ptol=ptol)
 
         #if np.sum(unmatched) >= 2:
         #    self.identify_by_spacing(unmatched)
