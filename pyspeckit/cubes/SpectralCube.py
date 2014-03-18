@@ -214,7 +214,7 @@ class Cube(spectrum.Spectrum):
 
         self.data = self.cube[:,y,x]
         if self.errorcube is not None:
-            self.error = self.cube[:,y,x]
+            self.error = self.errorcube[:,y,x]
         if self.plot_special is None:
             self.plotter(**kwargs)
             if plot_fit: self.plot_fit(x,y)
@@ -222,8 +222,18 @@ class Cube(spectrum.Spectrum):
         else:
             sp = self.get_spectrum(x,y)
             sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
-            sp.plot_special(**dict(kwargs.items()+self.plot_special_kwargs.items()))
+            self._spdict = sp.plot_special(**dict(kwargs.items()+
+                                                  self.plot_special_kwargs.items()))
             self.plotted_spectrum = sp
+            self.plotter = sp.plotter
+            self.plotter.refresh = lambda: [spi.plotter.refresh()
+                                            for spi in self._spdict.values()]
+            self.specfit.modelplot = [comp
+                                      for spi in self._spdict.values()
+                                      for comp in spi.specfit.modelplot]
+            self.specfit._plotted_components = [comp
+                                                for spi in self._spdict.values()
+                                                for comp in spi.specfit._plotted_components]
 
     def plot_fit(self, x, y, silent=False, **kwargs):
         """

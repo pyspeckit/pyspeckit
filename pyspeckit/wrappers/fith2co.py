@@ -38,34 +38,55 @@ def plot_h2co(spdict,spectra, fignum=1, show_components=False,
                 sp.specfit.model = sp.specfit.fitter.n_modelfunc(pars=spectra.specfit.modelpars, **spectra.specfit.fitter.modelfunc_kwargs)(sp.xarr)
 
     if len(splist) == 2:
-        axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
+        axdict = {'oneone':pyplot.subplot(211),
+                  'twotwo':pyplot.subplot(212)}
     elif len(splist) == 3:
-        axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223), 'threethree':pyplot.subplot(224), 'fourfour':pyplot.subplot(224) }
+        axdict = {'oneone':pyplot.subplot(211),
+                  'twotwo':pyplot.subplot(223),
+                  'threethree':pyplot.subplot(224)}
     elif len(splist) == 4:
-        axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
+        axdict = {'oneone':pyplot.subplot(221),
+                  'twotwo':pyplot.subplot(222),
+                  'threethree':pyplot.subplot(223),
+                  'fourfour':pyplot.subplot(224)}
     for linename,sp in spdict.iteritems():
         sp.plotter.axis=axdict[linename] # permanent
-        sp.plotter(axis=axdict[linename],title=title_dict[linename], **plotkwargs)
+        sp.plotter(axis=axdict[linename],
+                   title=title_dict[linename],
+                   **plotkwargs)
         sp.specfit.Spectrum.plotter = sp.plotter
         #sp.specfit.selectregion(reset=True)
         if sp.specfit.modelpars is not None:
             sp.specfit.plot_fit(annotate=False,
-                    show_components=show_components,
-                    show_hyperfine_components=show_hyperfine_components)
+                                show_components=show_components,
+                                show_hyperfine_components=show_hyperfine_components)
+        sp.plotter.reset_limits()
     if spdict['oneone'].specfit.modelpars is not None and annotate:
-        spdict['oneone'].specfit.annotate(labelspacing=0.05,prop={'size':'small','stretch':'extra-condensed'},frameon=False)
+        spdict['oneone'].specfit.annotate(labelspacing=0.05,
+                                          prop={'size':'small',
+                                                'stretch':'extra-condensed'},
+                                          frameon=False)
 
     if residfignum is not None:
         pyplot.figure(residfignum)
         pyplot.clf()
         if len(splist) == 2:
-            residaxdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
+            residaxdict = {'oneone':pyplot.subplot(211),
+                           'twotwo':pyplot.subplot(212)}
         elif len(splist) == 3:
-            residaxdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223), 'threethree':pyplot.subplot(224), 'fourfour':pyplot.subplot(224) }
+            residaxdict = {'oneone':pyplot.subplot(211),
+                           'twotwo':pyplot.subplot(223),
+                           'threethree':pyplot.subplot(224),
+                           'fourfour':pyplot.subplot(224)}
         elif len(splist) == 4:
-            residaxdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
+            residaxdict = {'oneone':pyplot.subplot(221),
+                           'twotwo':pyplot.subplot(222),
+                           'threethree':pyplot.subplot(223),
+                           'fourfour':pyplot.subplot(224)}
         for linename,sp in spdict.iteritems():
-            sp.specfit.plotresiduals(axis=residaxdict[linename],figure=residfignum)
+            sp.specfit.Spectrum.plotter = sp.plotter
+            sp.specfit.plotresiduals(axis=residaxdict[linename],
+                                     figure=residfignum)
 
     spectra.axisdict = axdict
     spectra.plotter.axis = axdict['oneone']

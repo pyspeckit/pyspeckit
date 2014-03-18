@@ -283,11 +283,17 @@ class hyperfinemodel(object):
             return tau_nu_cumul
         else:
 
-            # This is not the full equation of radiative transfer, but a background-subtracted version
+            # This is not the full equation of radiative transfer, but a
+            # background-subtracted version
             # With "background" function B_nu = CMB, S_nu = absorber, and I_nu = received:
             # I_nu = B_nu * exp(-tau) + (1-exp(-tau)) * S_nu
             # This is a very good approximation for Rohlfs & Wilson eqn 15.29:
             spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(Tex-Tbackground)
+            
+            # This is the equation of radiative transfer using the RJ definitions
+            # (eqn 1.37 in Rohlfs)
+            # It is identical, except without T_background subtracted
+            # spec = Tex+(np.exp(-np.array(tau_nu_cumul)))*(Tbackground-Tex)
           
             if amp is None:
                 return spec

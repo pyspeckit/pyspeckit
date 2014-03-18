@@ -233,20 +233,17 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
   
     return spec
 
-def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13, 
-        orthopara=1.0,
-        temperature=15.0,
-        xoff_v=0.0, width=1.0, 
-        grid_vwidth=1.0,
-        grid_vwidth_scale=False,
-        texgrid=None,
-        taugrid=None,
-        hdr=None,
-        path_to_texgrid='',
-        path_to_taugrid='',
-        debug=False,
-        verbose=False,
-        **kwargs):
+def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
+                                      orthopara=1.0, temperature=15.0,
+                                      xoff_v=0.0, width=1.0,
+                                      Tbackground1=2.73,
+                                      Tbackground2=2.73,
+                                      grid_vwidth=1.0,
+                                      grid_vwidth_scale=False, texgrid=None,
+                                      taugrid=None, hdr=None,
+                                      path_to_texgrid='', path_to_taugrid='',
+                                      debug=False, verbose=False,
+                                      getpars=False, **kwargs):
     """
     Use a grid of RADEX-computed models to make a model line spectrum
 
@@ -280,11 +277,9 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
 
     densityarr = (np.arange(taugrid[0].shape[3])+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
     columnarr  = (np.arange(taugrid[0].shape[2])+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
-    temparr  = (np.arange(taugrid[0].shape[1])+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # temperature
-    oprarr  = (np.arange(taugrid[0].shape[0])+hdr['CRPIX4']-1)*hdr['CDELT4']+hdr['CRVAL4'] # log ortho/para ratio
+    temparr    = (np.arange(taugrid[0].shape[1])+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # temperature
+    oprarr     = (np.arange(taugrid[0].shape[0])+hdr['CRPIX4']-1)*hdr['CDELT4']+hdr['CRVAL4'] # log ortho/para ratio
     
-    tau_nu_cumul = np.zeros(len(xarr))
-
     gridval1 = np.interp(density,     densityarr,  np.arange(len(densityarr)))
     gridval2 = np.interp(column,      columnarr,   np.arange(len(columnarr)))
     gridval3 = np.interp(temperature, temparr,     np.arange(len(temparr)))
@@ -293,25 +288,50 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
         raise ValueError("Invalid column/density")
 
     if scipyOK:
-        slices = [slice(int(np.floor(gv)),int(np.floor(gv)+2)) for gv in (gridval4,gridval3,gridval2,gridval1)]
-        tau = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval4%1],[gridval3%1],[gridval2%1],[gridval1%1]]),order=1,prefilter=False) for tg in taugrid]
-        tex = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval4%1],[gridval3%1],[gridval2%1],[gridval1%1]]),order=1,prefilter=False) for tg in texgrid]
+        slices = [slice(int(np.floor(gv)),int(np.floor(gv)+2))
+                  for gv in (gridval4,gridval3,gridval2,gridval1)]
+        tau = [scipy.ndimage.map_coordinates(tg[slices],
+                                             np.array([[gridval4 % 1],
+                                                       [gridval3 % 1],
+                                                       [gridval2 % 1],
+                                                       [gridval1 % 1]]),
+                                             order=1, prefilter=False)
+               for tg in taugrid]
+        tex = [scipy.ndimage.map_coordinates(tg[slices],
+                                             np.array([[gridval4 % 1],
+                                                       [gridval3 % 1],
+                                                       [gridval2 % 1],
+                                                       [gridval1 % 1]]),
+                                             order=1,prefilter=False)
+               for tg in texgrid]
     else:
         raise ImportError("Couldn't import scipy, therefore cannot interpolate")
     #tau = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,taugrid[temperature_gridnumber,:,:])
     #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
 
+    # there can be different background temperatures at each frequency
+    tbg = [Tbackground1,Tbackground2]
+
     if verbose:
         print "density %20.12g   column: %20.12g   temperature: %20.12g   opr: %20.12g   xoff_v: %20.12g   width: %20.12g" % (density, column, temperature, orthopara, xoff_v, width)
         print "tau: ",tau," tex: ",tex
         print "minfreq: ",minfreq," maxfreq: ",maxfreq
+        print "tbg: ",tbg
 
     if debug > 1:
         import pdb; pdb.set_trace()
 
-    spec = np.sum([(formaldehyde_vtau(xarr.as_unit('Hz',quiet=True),Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)
-                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
-                axis=0)
+    if getpars:
+        return tau,tex
+
+    spec = np.sum([(formaldehyde_vtau(xarr.as_unit('Hz', quiet=True),
+                                      Tex=float(tex[ii]), tau=float(tau[ii]),
+                                      Tbackground=tbg[ii], xoff_v=xoff_v,
+                                      width=width, **kwargs)
+                    * (xarr.as_unit('GHz')>minfreq[ii])
+                    * (xarr.as_unit('GHz')<maxfreq[ii]))
+                   for ii in xrange(len(tex))],
+                  axis=0)
   
     return spec
 
@@ -358,6 +378,7 @@ def formaldehyde_pyradex(xarr, density=4, column=13, temperature=20,
     Draine 2011 textbook pgs 219-230)
     """
 
+    raise NotImplementedError("Not done yet.")
     import pyradex
     
     # Convert X-units to frequency in GHz

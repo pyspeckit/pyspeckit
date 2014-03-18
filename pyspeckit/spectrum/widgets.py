@@ -178,7 +178,9 @@ class FitterSliders(Widget):
             # update components too
             for ii,line in enumerate(self.specfit._plotted_components):
                 xdata = line.get_xdata()
-                modelcomponents = self.specfit.fitter.components(xdata, mpp, **self.specfit._component_kwargs)
+                modelcomponents = self.specfit.fitter.components(xdata,
+                                                                 mpp,
+                                                                 **self.specfit._component_kwargs)
                 for jj,data in enumerate(modelcomponents):
                     if ii % 2 == jj:
                         # can have multidimensional components

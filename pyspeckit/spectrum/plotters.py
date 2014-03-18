@@ -300,7 +300,9 @@ class Plotter(object):
             if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
             elif xpixmin == xpixmax:
                 if not self.silent: warn( "ERROR: the X axis limits specified were invalid.  Resetting." )
-                self.reset_limits(reset_xlimits=True, ymin=ymin, ymax=ymax, reset_ylimits=reset_ylimits, ypeakscale=ypeakscale, **kwargs)
+                self.reset_limits(reset_xlimits=True, ymin=ymin, ymax=ymax,
+                                  reset_ylimits=reset_ylimits,
+                                  ypeakscale=ypeakscale, **kwargs)
                 return
             
             if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
@@ -310,12 +312,12 @@ class Plotter(object):
                 self.ymax = None
 
             if ymin is not None: self.ymin = ymin
-            elif self.ymin is None: 
+            elif self.ymin is None:
                 try:
-                    self.ymin=np.nanmin(self.Spectrum.data[xpixmin:xpixmax])+0.0
+                    self.ymin = np.nanmin(self.Spectrum.data[xpixmin:xpixmax])*ypeakscale + 0.0
                 except TypeError:
                     # this is assumed to be a Masked Array error
-                    self.ymin = self.Spectrum.data[xpixmin:xpixmax].min() + 0.0
+                    self.ymin = self.Spectrum.data[xpixmin:xpixmax].min()*ypeakscale + 0.0
             if ymax is not None: self.ymax = ymax
             elif self.ymax is None:
                 try:
