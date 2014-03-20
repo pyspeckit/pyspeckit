@@ -262,20 +262,23 @@ class Specfit(interactive.Interactive):
             else:
                 self.guesses = guesses
                 self.multifit(show_components=show_components, verbose=verbose,
-                        debug=debug, use_lmfit=use_lmfit, annotate=annotate,
-                        **kwargs)
+                              debug=debug, use_lmfit=use_lmfit,
+                              annotate=annotate, **kwargs)
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
             if (self.Spectrum.baseline.order is None and vheight is None) or vheight:
                 self.Spectrum.baseline.order=0
                 self.peakbgfit(usemoments=usemoments,
-                        show_components=show_components, annotate=annotate,
-                        debug=debug, use_lmfit=use_lmfit, **kwargs)
+                               show_components=show_components,
+                               annotate=annotate, debug=debug,
+                               use_lmfit=use_lmfit, **kwargs)
             else:
                 self.peakbgfit(usemoments=usemoments, vheight=False,
-                        height=0.0, annotate=annotate, use_lmfit=use_lmfit,
-                        show_components=show_components, debug=debug, **kwargs)
+                               height=0.0, annotate=annotate,
+                               use_lmfit=use_lmfit,
+                               show_components=show_components, debug=debug,
+                               **kwargs)
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
         else:
             if multifit:
@@ -367,7 +370,7 @@ class Specfit(interactive.Interactive):
             if continuum is None:
                 continuum = np.median(self.Spectrum.baseline.basespec)
             eqw = sumofspec / continuum
-        if plot:
+        if plot and self.Spectrum.plotter.axis:
             midpt_pixel = np.round((xmin+xmax)/2.0)
             midpt       = self.Spectrum.xarr[midpt_pixel]
             midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
@@ -1016,15 +1019,17 @@ class Specfit(interactive.Interactive):
             else:
                 self._annotation_labels.append('$\\chi^2 = %0.2g$' % self.chi2)
 
-        self.fitleg = self.Spectrum.plotter.axis.legend(
+        if self.Spectrum.plotter.axis:
+            self.fitleg = self.Spectrum.plotter.axis.legend(
                 tuple([pl]*len(self._annotation_labels)),
                 self._annotation_labels, loc=loc, markerscale=markerscale,
                 borderpad=borderpad, handlelength=handlelength,
                 handletextpad=handletextpad, labelspacing=labelspacing,
                 frameon=frameon, **kwargs)
-        self.Spectrum.plotter.axis.add_artist(self.fitleg)
-        self.fitleg.draggable(True)
-        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
+            self.Spectrum.plotter.axis.add_artist(self.fitleg)
+            self.fitleg.draggable(True)
+            if self.Spectrum.plotter.autorefresh:
+                self.Spectrum.plotter.refresh()
 
     def print_fit(self, print_baseline=True, **kwargs):
         """
@@ -1067,13 +1072,16 @@ class Specfit(interactive.Interactive):
         """
         Remove the legend from the plot window
         """
-        if self.Spectrum.plotter.axis.legend_ == self.fitleg:
-            self.Spectrum.plotter.axis.legend_ = None
-        if self.fitleg is not None: 
-            # don't remove fitleg unless it's in the current axis self.fitleg.set_visible(False)
-            if self.fitleg in self.Spectrum.plotter.axis.artists:
-                self.Spectrum.plotter.axis.artists.remove(self.fitleg)
-        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
+        axis = self.Spectrum.plotter.axis
+        if axis and axis.legend_ == self.fitleg:
+            axis.legend_ = None
+        if axis and self.fitleg is not None:
+            # don't remove fitleg unless it's in the current axis
+            # self.fitleg.set_visible(False)
+            if self.fitleg in axis.artists:
+                axis.artists.remove(self.fitleg)
+        if self.Spectrum.plotter.autorefresh:
+            self.Spectrum.plotter.refresh()
     
 
     def savefit(self):

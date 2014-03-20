@@ -621,7 +621,11 @@ class SpectroscopicAxis(np.ndarray):
         if unit not in unit_type_dict:
             raise ValueError("Invalid unit; not in units.unit_type_dict.")
 
-        self.flags.writeable=True
+        try:
+            self.flags.writeable=True
+        except ValueError:
+            self = self.copy()
+            self.flags.writeable=True
         self[:] = self.as_unit(unit, **kwargs)
         self.flags.writeable=False
         
