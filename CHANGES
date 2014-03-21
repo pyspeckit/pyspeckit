@@ -7,6 +7,9 @@ Release 0.1.15
     * Bugfix: excludefit must occur after selectregion if fit_plotted_area is True
     * API change: For the fitter & baseliner, data selection is end-inclusive
                   if specified in world coordinates
+    * Bugfix: numpy 1.8 added a "writeable" flag that broke units; that is now 
+              corrected
+              http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.flags.html
 
 Release 0.1.14 (2013-09-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

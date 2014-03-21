@@ -17,8 +17,8 @@ title_dict = {
     }
 
 def plot_h2co(spdict,spectra, fignum=1, show_components=False,
-        show_hyperfine_components=False, residfignum=None, annotate=None,
-        **plotkwargs):
+              show_hyperfine_components=False, residfignum=None, annotate=None,
+              **plotkwargs):
     """
     Plot the results from a multi-h2co fit
     """ 

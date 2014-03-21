@@ -456,9 +456,9 @@ class Specfit(interactive.Interactive):
             self.errspec[True - self.includemask] = 1e10
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
-            show_components=None, verbose=True, color=None, 
-            use_window_limits=None, use_lmfit=False,
-            plot=True, **kwargs):
+                 show_components=None, verbose=True, color=None,
+                 guesses=None, parinfo=None, reset_fitspec=True,
+                 use_window_limits=None, use_lmfit=False, plot=True, **kwargs):
         """
         Fit multiple gaussians (or other profiles)
 
@@ -466,17 +466,28 @@ class Specfit(interactive.Interactive):
             singlefitters dict.  Uses default ('gaussian') if not specified
         renormalize - if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
             closer to 1 (scales by the median) so that the fit converges better
+        parinfo: supercedes guesses
         """
-        self.setfitspec()
+        if reset_fitspec:
+            self.setfitspec()
         if not self._valid:
             raise ValueError("Data are invalid; cannot be fit.")
         #if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp') # We now do this in gaussfitter.py
-        if fittype is not None: self.fittype = fittype
+        if fittype is not None:
+            self.fittype = fittype
         if 'fittype' in self.fitkwargs:
             del self.fitkwargs['fittype']
-        if len(self.guesses) < self.Registry.npars[self.fittype]:
+
+        if guesses is None:
+            guesses = self.guesses
+
+        if parinfo is not None:
+            guesses = parinfo.values
+
+        if len(guesses) < self.Registry.npars[self.fittype]:
             raise ValueError("Too few parameters input.  Need at least %i for %s models" % (self.Registry.npars[self.fittype],self.fittype))
-        self.npeaks = len(self.guesses)/self.Registry.npars[self.fittype]
+
+        self.npeaks = len(guesses)/self.Registry.npars[self.fittype]
         self.fitter = self.Registry.multifitters[self.fittype]
         self.vheight = False
 
@@ -502,18 +513,15 @@ class Specfit(interactive.Interactive):
                 # zip guesses with parinfo: truncates parinfo if len(parinfo) > len(guesses)
                 # actually not sure how/when/if this should happen; this might be a bad hack
                 # revisit with tests!!
-                for jj,(guess,par) in enumerate(zip(self.guesses,self.fitter.parinfo)):
+                for jj,(guess,par) in enumerate(zip(guesses,self.fitter.parinfo)):
                     if par.scaleable:
-                        self.guesses[jj] /= scalefactor
+                        guesses[jj] /= scalefactor
 
         mpp,model,mpperr,chi2 = self.fitter(
-                self.Spectrum.xarr[self.xmin:self.xmax], 
-                self.spectofit[self.xmin:self.xmax], 
-                err=self.errspec[self.xmin:self.xmax],
-                npeaks=self.npeaks,
-                params=self.guesses,
-                use_lmfit=use_lmfit,
-                **self.fitkwargs)
+            self.Spectrum.xarr[self.xmin:self.xmax],
+            self.spectofit[self.xmin:self.xmax],
+            err=self.errspec[self.xmin:self.xmax], npeaks=self.npeaks,
+            params=guesses, use_lmfit=use_lmfit, **self.fitkwargs)
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
@@ -542,7 +550,7 @@ class Specfit(interactive.Interactive):
         if self.Spectrum.plotter.axis is not None and plot:
             if color is not None:
                 kwargs.update({'composite_fit_color':color})
-            self.plot_fit(annotate=annotate, 
+            self.plot_fit(annotate=annotate,
                           show_components=show_components,
                           use_window_limits=use_window_limits,
                           **kwargs)
@@ -564,30 +572,8 @@ class Specfit(interactive.Interactive):
 
     def refit(self, use_lmfit=False):
         """ Redo a fit using the current parinfo as input """
-        mpp,model,mpperr,chi2 = self.fitter(
-                self.Spectrum.xarr[self.xmin:self.xmax], 
-                self.spectofit[self.xmin:self.xmax], 
-                err=self.errspec[self.xmin:self.xmax],
-                npeaks=self.npeaks,
-                parinfo=self.parinfo,
-                use_lmfit=use_lmfit,
-                **self.fitkwargs)
-        self.modelpars = self.parinfo.values
-        self.modelerrs = self.parinfo.errors
-        self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
-        self.chi2 = chi2
-        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]+np.sum(self.parinfo.fixed)
-        self.model = model
-
-        # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
-        if 'tied' in self.fitkwargs:
-            for ii, element in enumerate(self.fitkwargs['tied']):
-                if not element.strip(): continue
-                
-                i1 = element.index('[') + 1
-                i2 = element.index(']')
-                loc = int(element[i1:i2])
-                self.modelerrs[ii] = self.modelerrs[loc]
+        return self.multifit(parinfo=self.parinfo, use_lmfit=use_lmfit,
+                             reset_fitspec=False)
 
     def history_fitpars(self):
         if hasattr(self.Spectrum,'header'):
