@@ -230,9 +230,9 @@ def integ(file,vrange,xcen=None,xwidth=None,ycen=None,ywidth=None,**kwargs):
 
     if None in [xcen,xwidth,ycen,ywidth]:
         xcen = header['NAXIS1'] / 2
-        xwidth = xcen
+        xwidth = xcen + header['NAXIS1'] % 2
         ycen = header['NAXIS2'] / 2
-        ywidth = ycen
+        ywidth = ycen + header['NAXIS2'] % 2
 
     return subimage_integ(cube,xcen,xwidth,ycen,ywidth,vrange,header=header,**kwargs)
 
