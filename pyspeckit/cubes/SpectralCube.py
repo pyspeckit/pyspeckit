@@ -398,8 +398,7 @@ class Cube(spectrum.Spectrum):
                 verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
                 blank_value=0, integral=True, direct=False, absorption=False,
                 use_nearest_as_guess=False, start_from_point=(0,0), multicore=0,
-                continuum_map=None,
-            **fitkwargs):
+                continuum_map=None, **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
 
@@ -477,9 +476,12 @@ class Cube(spectrum.Spectrum):
         # array to store whether pixels have fits
         self.has_fit = np.zeros(self.mapplot.plane.shape, dtype='bool')
 
+        global counter = 0
+
         t0 = time.time()
 
         def fit_a_pixel(iixy):
+            global counter
             ii,x,y = iixy
             sp = self.get_spectrum(x,y)
 
@@ -559,13 +561,16 @@ class Cube(spectrum.Spectrum):
 
         
             if blank_value != 0:
-                self.errcube[self.parcube == 0] = blank_value
                 self.parcube[self.parcube == 0] = blank_value
+                self.errcube[self.parcube == 0] = blank_value
 
+            counter += 1
             if verbose:
                 if ii % (min(10**(3-verbose_level),1)) == 0:
-                    snmsg = " s/n=%0.1f" % (max_sn) if max_sn is not None else ""
-                    print "Finished fit %i of %i at (%i,%i)%s. Elapsed time is %0.1f seconds" % (ii, len(valid_pixels), x, y, snmsg, time.time()-t0)
+                    snmsg = " s/n=%5.1f" % (max_sn) if max_sn is not None else ""
+                    npix = len(valid_pixels)
+                    pct = 100 * counter/float(npix)
+                    print "Finished fit %6i of %6i at (%4i,%4i)%s. Elapsed time is %0.1f seconds.  %%%01.f" % (counter, npix, x, y, snmsg, time.time()-t0, pct)
 
             if integral:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs, self.integralmap[:,y,x])
@@ -574,10 +579,13 @@ class Cube(spectrum.Spectrum):
 
         # try a first fit for exception-catching
         try0 = fit_a_pixel((0,valid_pixels[0][0],valid_pixels[0][1]))
+        assert len(try0[1]) == len(guesses) == len(self.parcube) == len(self.errcube)
+        assert len(try0[2]) == len(guesses) == len(self.parcube) == len(self.errcube)
 
         if multicore > 0:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             result = parallel_map(fit_a_pixel, sequence, numcores=multicore)
+            self._result = result # backup - don't want to lose data in the case of a failure
             # a lot of ugly hacking to deal with the way parallel_map returns
             # its results needs TWO levels of None-filtering, because any
             # individual result can be None (I guess?) but apparently (and this
