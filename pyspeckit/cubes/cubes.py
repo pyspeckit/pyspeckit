@@ -171,6 +171,7 @@ def extract_aperture(cube, ap, r_mask=False, wcs=None,
         units of width/height.  default 'arcsec', options 'arcmin' and 'degree'
     method : str
         'mean' or 'sum' (average over spectra, or sum them)
+        or 'error' for sqrt(sum-of-squares / n)
 
     Other Parameters
     ----------------
@@ -191,22 +192,25 @@ def extract_aperture(cube, ap, r_mask=False, wcs=None,
     elif len(ap) == 5:
         yinds,xinds = indices(cube.shape[1:3])
         th = (ap[4])*dtor
-        xindr = (xinds-ap[0])*cos(th)  + (yinds-ap[1])*sin(th)
+        xindr = (xinds-ap[0])*cos(th) + (yinds-ap[1])*sin(th)
         yindr = (xinds-ap[0])*-sin(th) + (yinds-ap[1])*cos(th)
         ratio = max(ap[2:4])/min(ap[2:4])
-        mask = sqrt( (xindr*ratio)**2 + yindr**2) < max(ap[2:4])
+        mask = ((xindr*ratio)**2 + yindr**2)**0.5 < max(ap[2:4])
     else:
-        raise Exception("Wrong number of parameters.  Need either 3 parameters "+
-                "for a circular aperture or 5 parameters for an elliptical "+ 
-                "aperture.")
+        raise Exception("Wrong number of parameters.  Need either 3 parameters "
+                        "for a circular aperture or 5 parameters for an "
+                        "elliptical aperture.")
 
     npixinmask = mask.sum()
     mask3d = repeat(mask[newaxis,:,:],cube.shape[0],axis=0)
-    specsum = nansum(nansum((cube*mask3d),axis=2),axis=1) 
     if method == 'mean':
+        specsum = nansum(nansum((cube*mask3d),axis=2),axis=1)
         spec = specsum / npixinmask
+    elif method == 'error':
+        specsum = nansum(nansum((cube*mask3d)**2,axis=2),axis=1)
+        spec = (specsum / npixinmask)**0.5
     else:
-        spec = specsum
+        spec = nansum(nansum((cube*mask3d),axis=2),axis=1)
 
     if r_mask:
         return spec,mask

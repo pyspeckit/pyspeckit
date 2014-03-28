@@ -351,20 +351,27 @@ class Cube(spectrum.Spectrum):
 
         import cubes
         if coordsys is not None:
-            data = cubes.extract_aperture(self.cube, aperture,
-                                          coordsys=coordsys,
-                                          wcs=self.mapplot.wcs,
-                                          method=method,
-                                          **kwargs)
-            sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
-                                    data=data,
-                                    header=self.header)
+            wcs = self.mapplot.wcs
         else:
-            data = cubes.extract_aperture(self.cube, aperture, coordsys=None,
-                                          method=method)
-            sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
-                                    data=data,
-                                    header=self.header)
+            wcs = None
+
+        data = cubes.extract_aperture(self.cube, aperture,
+                                      coordsys=coordsys,
+                                      wcs=wcs,
+                                      method=method,
+                                      **kwargs)
+        if self.errorcube is not None:
+            error = cubes.extract_aperture(self.errorcube, aperture,
+                                           coordsys=coordsys,
+                                           wcs=self.mapplot.wcs,
+                                           method='error', **kwargs)
+        else:
+            error = None
+
+        sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
+                                data=data,
+                                error=error,
+                                header=self.header)
 
         sp.specfit = copy.copy(self.specfit)
         sp.specfit.includemask = self.specfit.includemask.copy()
@@ -446,6 +453,11 @@ class Cube(spectrum.Spectrum):
         else:
             OK = np.isfinite(self.mapplot.plane) * self.maskmap
 
+        # NAN guesses rule out the model too
+        if hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
+            bad = np.isnan(guesses).sum(axis=0)
+            OK *= (True-bad)
+
         distance = ((xx)**2 + (yy)**2)**0.5
         if start_from_point == 'center':
             start_from_point = (xx.max()/2., yy.max/2.)
@@ -476,7 +488,8 @@ class Cube(spectrum.Spectrum):
         # array to store whether pixels have fits
         self.has_fit = np.zeros(self.mapplot.plane.shape, dtype='bool')
 
-        global counter = 0
+        global counter
+        counter = 0
 
         t0 = time.time()
 
@@ -577,10 +590,34 @@ class Cube(spectrum.Spectrum):
             else:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs)
 
+        #### BEGIN TEST BLOCK ####
+        # This test block is to make sure you don't run a 30 hour fitting
+        # session that's just going to crash at the end.
         # try a first fit for exception-catching
         try0 = fit_a_pixel((0,valid_pixels[0][0],valid_pixels[0][1]))
         assert len(try0[1]) == len(guesses) == len(self.parcube) == len(self.errcube)
         assert len(try0[2]) == len(guesses) == len(self.parcube) == len(self.errcube)
+
+        # This is a secondary test... I'm not sure it's necessary, but it
+        # replicates what's inside the fit_a_pixel code and so should be a
+        # useful sanity check
+        x,y = valid_pixels[0]
+        sp = self.get_spectrum(x,y)
+        sp.specfit.Registry = self.Registry # copy over fitter registry
+        # this reproduced code is needed because the functional wrapping
+        # required for the multicore case prevents gg from being set earlier
+        if usemomentcube:
+            gg = self.momentcube[:,y,x]
+        elif hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
+            gg = guesses[:,y,x]
+        else:
+            gg = guesses
+
+        # This is NOT in a try/except block because we want to raise the
+        # exception here if an exception is going to happen
+        sp.specfit(guesses=gg, **fitkwargs)
+        #### END TEST BLOCK ####
+
 
         if multicore > 0:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
@@ -619,35 +656,25 @@ class Cube(spectrum.Spectrum):
                     # implies that TEMP does not have the shape ((a,b),c,d)
                     # as above, shouldn't be possible, but it happens...
                     continue
-                self.parcube[:,y,x] = modelpars
-                self.errcube[:,y,x] = modelerrs
-                self.has_fit[y,x] = max(modelpars) > 0
+                if ((len(modelpars) != len(modelerrs)) or
+                    (len(modelpars) != len(self.parcube))):
+                    raise ValueError("There was a serious problem; modelpar and error shape don't match that of the parameter cubes")
+                if np.any(np.isnan(modelpars)) or np.any(np.isnan(modelerrs)):
+                    self.parcube[:,y,x] = np.nan
+                    self.errcube[:,y,x] = np.nan
+                    self.has_fit[y,x] = False
+                else:
+                    self.parcube[:,y,x] = modelpars
+                    self.errcube[:,y,x] = modelerrs
+                    self.has_fit[y,x] = max(modelpars) > 0
                 if integral:
                     self.integralmap[:,y,x] = intgl
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 fit_a_pixel((ii,x,y))
 
-        x,y = valid_pixels[0]
-        sp = self.get_spectrum(x,y)
-        sp.specfit.Registry = self.Registry # copy over fitter registry
-        # this reproduced code is needed because the functional wrapping
-        # required for the multicore case prevents gg from being set earlier
-        if usemomentcube:
-            gg = self.momentcube[:,y,x]
-        elif hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
-            gg = guesses[:,y,x]
-        else:
-            gg = guesses
 
-        try:
-            sp.specfit(guesses=gg, **fitkwargs)
-        except Exception as ex:
-            print "Fit number %i at %i,%i failed on error " % (ii,x,y), ex
-            print "Guesses were: ",gg
-            print "Fitkwargs were: ",fitkwargs
-            if isinstance(ex,KeyboardInterrupt):
-                raise ex
+        # March 27, 2014: This is EXTREMELY confusing.  This isn't in a loop...
         # make sure the fitter / fittype are set for the cube
         # this has to be done within the loop because skipped-over spectra
         # don't ever get their fittypes set
