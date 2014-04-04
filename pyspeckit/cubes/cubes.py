@@ -208,7 +208,7 @@ def extract_aperture(cube, ap, r_mask=False, wcs=None,
         spec = specsum / npixinmask
     elif method == 'error':
         specsum = nansum(nansum((cube*mask3d)**2,axis=2),axis=1)
-        spec = (specsum / npixinmask)**0.5
+        spec = (specsum)**0.5 / npixinmask
     else:
         spec = nansum(nansum((cube*mask3d),axis=2),axis=1)
 

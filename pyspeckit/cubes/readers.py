@@ -49,10 +49,10 @@ def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
         dv = -1*hdr.get('CDELT3')
         v0 = hdr.get('RESTFREQ') + hdr.get('CRVAL3')
         p3 = hdr.get('CRPIX3')
-    elif hdr.get('CD3_3'+wcstype):
-        dv,v0,p3 = hdr['CD3_3'+wcstype],hdr['CRVAL3'+wcstype],hdr['CRPIX3'+wcstype]
+    elif hdr.get(('CD%i_%i' % (specaxis,specaxis))+wcstype):
+        dv,v0,p3 = hdr[('CD%i_%i' % (specaxis,specaxis))+wcstype],hdr[('CRVAL%i' % specaxis)+wcstype],hdr[('CRPIX%i' % specaxis)+wcstype]
     else:
-        dv,v0,p3 = hdr['CDELT3'+wcstype],hdr['CRVAL3'+wcstype],hdr['CRPIX3'+wcstype]
+        dv,v0,p3 = hdr[('CDELT%i' % specaxis)+wcstype],hdr[('CRVAL%i' % specaxis)+wcstype],hdr[('CRPIX%i' % specaxis)+wcstype]
 
     #if scale_keyword is not None and hdr.get(scale_keyword):
     try:
@@ -63,8 +63,8 @@ def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
         pass
 
     xconv = lambda v: ((v-p3+1)*dv+v0)
-    xarr = xconv(np.arange(cube.shape[0]))
+    xarr = xconv(np.arange(cube.shape[3-specaxis]))
 
-    XAxis = spectrum.readers.make_axis(xarr,hdr,wcstype=wcstype, specaxis=3, **kwargs)
+    XAxis = spectrum.readers.make_axis(xarr,hdr,wcstype=wcstype, specaxis=specaxis, **kwargs)
 
     return cube,XAxis,hdr,f

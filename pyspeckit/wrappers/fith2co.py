@@ -3,28 +3,27 @@
 H2CO fitter wrapper
 ===================
 
-Wrapper to fit formaldehyde spectra.  
+Wrapper to fit formaldehyde spectra.
 """
 import pyspeckit
-from matplotlib import pyplot 
+from matplotlib import pyplot
 import copy
-import random
 
-title_dict = {
-    'oneone':'H$_2$CO 1$_{11}$-1$_{10}$', 
-    'twotwo':'H$_2$CO 2$_{12}$-2$_{11}$',
-    'threethree':'H$_2$CO 3$_{23}$-3$_{22}$'
-    }
+title_dict = {'oneone':'H$_2$CO 1$_{11}$-1$_{10}$',
+              'twotwo':'H$_2$CO 2$_{12}$-2$_{11}$',
+              'threethree':'H$_2$CO 3$_{23}$-3$_{22}$'
+              }
 
-def plot_h2co(spdict,spectra, fignum=1, show_components=False,
+def plot_h2co(spdict, spectra, fignum=1, show_components=False,
               show_hyperfine_components=False, residfignum=None, annotate=None,
-              **plotkwargs):
+              clear=True, residkwargs={}, residclear=True, **plotkwargs):
     """
     Plot the results from a multi-h2co fit
-    """ 
+    """
     spectra.plotter.figure = pyplot.figure(fignum)
     spectra.plotter.axis = spectra.plotter.figure.gca()
-    pyplot.clf()
+    if clear:
+        spectra.plotter.figure.clf()
     splist = spdict.values()
 
     for sp in splist:
@@ -35,7 +34,10 @@ def plot_h2co(spdict,spectra, fignum=1, show_components=False,
             sp.specfit.npeaks = spectra.specfit.npeaks
             sp.specfit.fitter.npeaks = spectra.specfit.npeaks
             if spectra.specfit.modelpars is not None:
-                sp.specfit.model = sp.specfit.fitter.n_modelfunc(pars=spectra.specfit.modelpars, **spectra.specfit.fitter.modelfunc_kwargs)(sp.xarr)
+                mf = sp.specfit.fitter.n_modelfunc
+                kw = spectra.specfit.fitter.modelfunc_kwargs
+                sp.specfit.model = mf(pars=spectra.specfit.modelpars,
+                                      **kw)(sp.xarr)
 
     if len(splist) == 2:
         axdict = {'oneone':pyplot.subplot(211),
@@ -69,7 +71,8 @@ def plot_h2co(spdict,spectra, fignum=1, show_components=False,
 
     if residfignum is not None:
         pyplot.figure(residfignum)
-        pyplot.clf()
+        if residclear:
+            pyplot.clf()
         if len(splist) == 2:
             residaxdict = {'oneone':pyplot.subplot(211),
                            'twotwo':pyplot.subplot(212)}
@@ -86,7 +89,9 @@ def plot_h2co(spdict,spectra, fignum=1, show_components=False,
         for linename,sp in spdict.iteritems():
             sp.specfit.Spectrum.plotter = sp.plotter
             sp.specfit.plotresiduals(axis=residaxdict[linename],
-                                     figure=residfignum)
+                                     figure=residfignum,
+                                     **residkwargs)
+        spectra.residaxdict = residaxdict
 
     spectra.axisdict = axdict
     spectra.plotter.axis = axdict['oneone']

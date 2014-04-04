@@ -97,7 +97,7 @@ filetype_dict = {'1A  ':'Multiple_IEEE','1   ':'Multiple_Vax','1B  ':'Multiple_E
 header_id_numbers = {-2: 'GENERAL',
                      -3: 'POSITION',
                      -4: 'SPECTRO',
-                    # -5: 'BASELINE',
+                     -5: 'BASELINE',
                     # -6: 'HISTORY',
                     # -8: 'SWITCH',
                      -10: 'DRIFT',
