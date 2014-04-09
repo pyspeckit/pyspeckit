@@ -110,7 +110,7 @@ def flatten_header(header,delete=False):
 
     return newheader
 
-def speccen_header(header,lon=None,lat=None):
+def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
     """
     Turn a cube header into a spectrum header, retaining RA/Dec vals where possible
     (speccen is like flatten; spec-ify would be better but, specify?  nah)
@@ -125,20 +125,33 @@ def speccen_header(header,lon=None,lat=None):
     if 'CD3_3' in header: newheader.update('CDELT1',header.get('CD3_3'))
     elif 'CDELT3' in header: newheader.update('CDELT1',header.get('CDELT3'))
     newheader.update('CTYPE1','VRAD')
-    if header.get('CUNIT3'): newheader.update('CUNIT1',header.get('CUNIT3'))
+    if header.get('CUNIT3'):
+        newheader.update('CUNIT1',header.get('CUNIT3'))
     else: 
         print "Assuming CUNIT3 is km/s in speccen_header"
         newheader.update('CUNIT1','km/s')
     newheader.update('CRPIX2',1)
-    newheader.update('CTYPE2','RA---TAN')
     newheader.update('CRPIX3',1)
-    newheader.update('CTYPE3','DEC--TAN')
+    if system == 'celestial':
+        c2 = 'RA---'
+        c3 = 'DEC--'
+    elif system == 'galactic':
+        c2 = 'GLON-'
+        c3 = 'GLAT-'
+    newheader.update('CTYPE2',c2+proj)
+    newheader.update('CTYPE3',c3+proj)
 
-    if lon is not None: newheader.update('CRVAL2',lon)
-    if lat is not None: newheader.update('CRVAL3',lat)
+    if lon is not None:
+        newheader.update('CRVAL2',lon)
+    if lat is not None:
+        newheader.update('CRVAL3',lat)
 
-    if 'CD2_2' in header: newheader.rename_key('CD2_2','OLDCD2_2')
-    if 'CD3_3' in header: newheader.rename_key('CD3_3','OLDCD3_3')
+    if 'CD2_2' in header:
+        newheader.rename_key('CD2_2','OLDCD2_2')
+    if 'CD3_3' in header:
+        newheader.rename_key('CD3_3','OLDCD3_3')
+    if 'CROTA2' in header:
+        newheader.rename_key('CROTA2','OLDCROT2')
 
     return newheader
 
@@ -634,7 +647,7 @@ def plane_smooth(cube,cubedim=0,parallel=True,numcores=None,**kwargs):
 
 
 try:
-    import montage 
+    import montage
 
     def rotcrop_cube(x1, y1, x2, y2, cubename, outname, xwidth=25, ywidth=25,
                      in_system='galactic',  out_system='equatorial',

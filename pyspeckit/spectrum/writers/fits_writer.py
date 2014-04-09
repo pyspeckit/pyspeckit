@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from . import Writer
+import pyspeckit
 
 fitscheck = True
 try: 
@@ -25,6 +26,7 @@ class write_fits(Writer):
         else: fn = filename
 
         header = self.Spectrum.header
+        header['ORIGIN'] = 'pyspeckit version %s' % pyspeckit.__version__
 
         if header.get('CD1_1'): del header['CD1_1']
 

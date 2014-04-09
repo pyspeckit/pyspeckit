@@ -33,6 +33,7 @@ import types
 import copy
 import itertools
 from pyspeckit.spectrum import history
+from astropy.io import fits
 
 class Cube(spectrum.Spectrum):
 
@@ -98,6 +99,9 @@ class Cube(spectrum.Spectrum):
         self.plot_special = None
         self.plot_special_kwargs = {}
         self._modelcube = None
+
+        # TODO: improve this!!!
+        self.system = 'galactic' if 'GLON' in self.header['CTYPE1'] else 'celestial'
 
         self.mapplot = mapplot.MapPlotter(self)
 
@@ -306,8 +310,15 @@ class Cube(spectrum.Spectrum):
 
         Returns a SpectroscopicAxis instance
         """
+
+        header = cubes.speccen_header(fits.Header(cards=[(k,v) for k,v in
+                                                         self.header.iteritems()
+                                                         if k != 'HISTORY']),
+                                      lon=x, lat=y, system=self.system,
+                                      proj=self.header['CTYPE1'][-3:])
+
         sp = pyspeckit.Spectrum( xarr=self.xarr.copy(), data=self.cube[:,y,x],
-                header=self.header,
+                header=header,
                 error=self.errorcube[:,y,x] if self.errorcube is not None else None)
 
         sp.specfit = copy.copy(self.specfit)
@@ -368,10 +379,19 @@ class Cube(spectrum.Spectrum):
         else:
             error = None
 
+        header = cubes.speccen_header(fits.Header(cards=[(k,v) for k,v in
+                                                         self.header.iteritems()
+                                                         if k != 'HISTORY']),
+                                      lon=aperture[0],
+                                      lat=aperture[1],
+                                      system=self.system,
+                                      proj=self.header['CTYPE1'][-3:])
+        header['APRADIUS'] = aperture[2]
+
         sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
                                 data=data,
                                 error=error,
-                                header=self.header)
+                                header=header)
 
         sp.specfit = copy.copy(self.specfit)
         sp.specfit.includemask = self.specfit.includemask.copy()
@@ -947,6 +967,8 @@ class CubeStack(Cube):
             for key,value in cube.header.items():
                 self.header.update(key,value)
 
+        # TODO: Improve this!!!
+        self.system = 'galactic' if 'GLON' in self.header['CTYPE1'] else 'celestial'
         
         self.units = cubelist[0].units
         for cube in cubelist: 
