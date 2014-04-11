@@ -5,7 +5,7 @@ pyspeckit command line startup script
 import sys
 # remove script file's parent directory from path
 # (otherwise, can't import pyspeckit)
-sys.path.pop(0)
+#sys.path.pop(0)
 import pyspeckit
 import optparse
 import os

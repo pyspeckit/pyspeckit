@@ -102,7 +102,7 @@ setup(name='pyspeckit',
           '':['pyspeckit/config_default']},
       requires=requirements,
       cmdclass={'build_py': build_py, 'test': PyTest},
-      scripts=['scripts/pyspeckit.py'],
+      scripts=['scripts/pyspeckit'],
       classifiers=[
                    "Development Status :: 3 - Alpha",
                    "Programming Language :: Python",
