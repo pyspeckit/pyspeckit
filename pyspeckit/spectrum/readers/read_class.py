@@ -11,10 +11,10 @@ except ImportError:
     import pyfits
 import numpy
 import numpy as np
-import struct
 from numpy import pi
 import progressbar
 import string
+import struct
 
 import time
 
@@ -226,22 +226,26 @@ def _read_bytes(f, n):
     '''Read the next `n` bytes (from idlsave)'''
     return f.read(n)
 
+"""
+Warning: UNCLEAR what endianness should be!
+Numpy seemed to get it right, and I think numpy assumes NATIVE endianness
+"""
 
 def _read_byte(f):
     '''Read a single byte (from idlsave)'''
-    return numpy.uint8(struct.unpack('>B', f.read(4)[:1])[0])
+    return numpy.uint8(struct.unpack('=B', f.read(4)[:1])[0])
 
 def _read_int16(f):
     '''Read a signed 16-bit integer (from idlsave)'''
-    return numpy.int16(struct.unpack('>h', f.read(4)[2:4])[0])
+    return numpy.int16(struct.unpack('=h', f.read(4)[2:4])[0])
 
 def _read_int32(f):
     '''Read a signed 32-bit integer (from idlsave)'''
-    return numpy.int32(struct.unpack('>i', f.read(4))[0])
+    return numpy.int32(struct.unpack('=i', f.read(4))[0])
 
 def _read_float32(f):
     '''Read a 32-bit float (from idlsave)'''
-    return numpy.float32(struct.unpack('>f', f.read(4))[0])
+    return numpy.float32(struct.unpack('=f', f.read(4))[0])
 
 def _align_32(f):
     '''Align to the next 32-bit position in a file (from idlsave)'''
@@ -476,9 +480,12 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
         pos = f.tell()
         # first one of these starts
         if DEBUG:
+            # Actually, it's pretty clear that this is leading in to the start of headers.
             print " UNCLEAR INFO AT %i PAST %i: %i" % (f.tell()-startpos,startpos,pos)
             junk =  f.read(168) 
-            print junk
+            print "Junk as str: ",junk
+            print "Junk as int: ",[struct.unpack('=i',junk[i*4:i*4+4])[0] for i in range(len(junk)/4)]
+            print "Junk as flt: ",[struct.unpack('=f',junk[i*4:i*4+4])[0] for i in range(len(junk)/4)]
             #f.seek(startpos)
             #print numpy.fromfile(f,count=168/4+10,dtype='int32') 
             #f.seek(startpos)
@@ -487,6 +494,10 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
             #print numpy.fromfile(f,count=168+40,dtype='int8') 
 
         if apex: # there are 33 bytes of junk...
+            somejunk = f.read(33*4)
+            print "APEX Junk as str: ",somejunk
+            print "APEX Junk as int: ",[struct.unpack('=i',somejunk[i*4:i*4+4])[0] for i in range(len(somejunk)/4)]
+            print "APEX Junk as flt: ",[struct.unpack('=f',somejunk[i*4:i*4+4])[0] for i in range(len(somejunk)/4)]
             f.seek(pos+84+12*4)
         else: # ????
             if filetype.strip() == '9A':
@@ -582,6 +593,8 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
                 hdr['NPOIN'] /= downsample_factor
             else:
                 print "Did not find any header keywords reporting NCHAN"
+            if 'DATALEN' in hdr:
+                hdr['DATALEN'] /= downsample_factor
             for kw in ['FRES','VRES']:
                 if kw in hdr:
                     hdr[kw] *= downsample_factor
