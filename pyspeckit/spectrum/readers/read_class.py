@@ -15,6 +15,7 @@ from numpy import pi
 import progressbar
 import string
 import struct
+import warnings
 
 import time
 
@@ -79,6 +80,8 @@ array in titout.f90 that has 6 entries, but the index in the smt files is 7.
 So...  I guess I have to assume simple fk5, tangent?
 
 
+There is also a nearly-complete specification in clic_file.f90
+
 
 Empirical work on APEX mapping data:
     Index #383 is the last SgrA entry
@@ -113,6 +116,34 @@ header_id_lengths = {-2: 9, # may really be 10?
                     }
 
 
+"""
+GENERAL
+ integer(kind=obsnum_length) :: num      ! [         ] Observation number
+ integer(kind=4)             :: ver      ! [         ] Version number
+ integer(kind=4)             :: teles(3) ! [         ] Telescope name
+ integer(kind=4)             :: dobs     ! [MJD-60549] Date of observation
+ integer(kind=4)             :: dred     ! [MJD-60549] Date of reduction
+ integer(kind=4)             :: typec    ! [     code] Type of coordinates
+ integer(kind=4)             :: kind     ! [     code] Type of data
+ integer(kind=4)             :: qual     ! [     code] Quality of data
+ integer(kind=4)             :: subscan  ! [         ] Subscan number
+ integer(kind=obsnum_length) :: scan     ! [         ] Scan number
+ ! Written in the entry
+ real(kind=8)                :: ut       ! 1-2 [  rad] UT of observation
+ real(kind=8)                :: st       ! 3-4 [  rad] LST of observation
+ real(kind=4)                :: az       ! 5   [  rad] Azimuth
+ real(kind=4)                :: el       ! 6   [  rad] Elevation
+ real(kind=4)                :: tau      ! 7   [neper] Opacity
+ real(kind=4)                :: tsys     ! 8   [    K] System temperature
+ real(kind=4)                :: time     ! 9   [    s] Integration time
+ ! Not in this section in file
+ integer(kind=4)             :: xunit    ! [ code] X unit (if X coordinates section is present)
+ ! NOT in data ---
+ character(len=12)           :: cdobs    ! [string] Duplicate of dobs
+ character(len=12)           :: cdred    ! [string] Duplicate of dred
+
+"""
+
 keys_lengths = {
         'unknown': [
      ( 'NUM'     ,1,'int32'), # Observation number
@@ -127,7 +158,7 @@ keys_lengths = {
      ( 'SUBSCAN' ,1,'int32'), # Subscan number
      ],
         
-        'GENERAL': [ # 10 4-bytes?
+        'GENERAL': [ # -2
      ( 'UT'      ,2,'float64'), #  rad UT of observation
      ( 'ST'      ,2,'float64'), #  rad LST of observation
      ( 'AZ'      ,1,'float32'), #  rad Azimuth
@@ -138,7 +169,7 @@ keys_lengths = {
                     # XUNIT should not be there?
      #( 'XUNIT'   ,1,'int32'),   # code X unit (if xcoord_sec is present)
      ] ,
-     'POSITION': [ # 11 4-bytes
+     'POSITION': [ # -3
     ('SOURC',3,'|S12')  , #  [ ] Source name
     ('EPOCH',1,'float32'), #  [ ] Epoch of coordinates
     ('LAM'  ,2,'float64'), #[rad] Lambda
@@ -150,7 +181,7 @@ keys_lengths = {
     ('SB0P' ,1,'float64'), # beta of descriptive system   # MAY NOT EXIST IN OLD CLASS
     ('SK0P' ,1,'float64'), # angle of descriptive system  # MAY NOT EXIST IN OLD CLASS
     ],
-     'SPECTRO': [
+     'SPECTRO': [ # -4
      #('align'  ,1,'int32'),   #  [    ] Alignment padding
      ('LINE'   ,3,'|S12'),    #  [    ] Line name
      ('RESTF'  ,2,'float64'), #  [ MHz] Rest frequency
@@ -167,7 +198,7 @@ keys_lengths = {
      ('VTYPE'  ,1,'int32'),   #  [code] Type of velocity
      ('DOPPLER',2,'float64'), #  [    ] Doppler factor = -V/c (CLASS convention)
      ],
-     'CALIBRATION': [
+     'CALIBRATION': [ # -14
      ('ALIGN',1,'int32'),    # BUFFER (it's a zero - it is not declared in the docs!!!!)
      ('BEEFF',1,'float32'),   # [ ] Beam efficiency
      ('FOEFF',1,'float32'),   # [ ] Forward efficiency
@@ -265,32 +296,86 @@ def _read_word(f,length):
 
 def _read_int(f):
     return struct.unpack('i',f.read(4))
+"""
+from clic_file.f90: v1, v2
+    integer(kind=4)  :: bloc       !  1   : observation address [records]       integer(kind=8)  :: bloc       !  1- 2: observation address [records]     integer(kind=4)   :: bloc     !  1   : block read from index
+    integer(kind=4)  :: num        !  2   : observation number                  integer(kind=4)  :: word       !  3   : address offset      [4-bytes]     integer(kind=4)   :: num      !  2   : number read
+    integer(kind=4)  :: ver        !  3   : observation version                 integer(kind=4)  :: ver        !  4   : observation version               integer(kind=4)   :: ver      !  3   : version read from index
+    integer(kind=4)  :: sourc(3)   !  4- 6: source name                         integer(kind=8)  :: num        !  5- 6: observation number                character(len=12) :: csour    !  4- 6: source read from index
+    integer(kind=4)  :: line(3)    !  7- 9: line name                           integer(kind=4)  :: sourc(3)   !  7- 9: source name                       character(len=12) :: cline    !  7- 9: line read from index
+    integer(kind=4)  :: teles(3)   ! 10-12: telescope name                      integer(kind=4)  :: line(3)    ! 10-12: line name                         character(len=12) :: ctele    ! 10-12: telescope read from index
+    integer(kind=4)  :: dobs       ! 13   : observation date    [class_date]    integer(kind=4)  :: teles(3)   ! 13-15: telescope name                    integer(kind=4)   :: dobs     ! 13   : date obs. read from index
+    integer(kind=4)  :: dred       ! 14   : reduction date      [class_date]    integer(kind=4)  :: dobs       ! 16   : observation date    [class_date]  integer(kind=4)   :: dred     ! 14   : date red. read from index
+    real(kind=4)     :: off1       ! 15   : lambda offset       [radian]        integer(kind=4)  :: dred       ! 17   : reduction date      [class_date]  real(kind=4)      :: off1     ! 15   : read offset 1
+    real(kind=4)     :: off2       ! 16   : beta offset         [radian]        real(kind=4)     :: off1       ! 18   : lambda offset       [radian]      real(kind=4)      :: off2     ! 16   : read offset 2
+    integer(kind=4)  :: typec      ! 17   : coordinates types                   real(kind=4)     :: off2       ! 19   : beta offset         [radian]      integer(kind=4)   :: type     ! 17   : type of read offsets
+    integer(kind=4)  :: kind       ! 18   : data kind                           integer(kind=4)  :: typec      ! 20   : coordinates types                 integer(kind=4)   :: kind     ! 18   : type of observation
+    integer(kind=4)  :: qual       ! 19   : data quality                        integer(kind=4)  :: kind       ! 21   : data kind                         integer(kind=4)   :: qual     ! 19   : Quality read from index
+    integer(kind=4)  :: scan       ! 20   : scan number                         integer(kind=4)  :: qual       ! 22   : data quality                      integer(kind=4)   :: scan     ! 20   : Scan number read from index
+    integer(kind=4)  :: proc       ! 21   : procedure type                      integer(kind=4)  :: scan       ! 23   : scan number                       real(kind=4)      :: posa     ! 21   : Position angle
+    integer(kind=4)  :: itype      ! 22   : observation type                    integer(kind=4)  :: proc       ! 24   : procedure type                    integer(kind=4)   :: subscan  ! 22   : Subscan number
+    real(kind=4)     :: houra      ! 23   : hour angle          [radian]        integer(kind=4)  :: itype      ! 25   : observation type                  integer(kind=4)   :: pad(10)  ! 23-32: Pad to 32 words
+    integer(kind=4)  :: project    ! 24   : project name                        real(kind=4)     :: houra      ! 26   : hour angle          [radian]
+    integer(kind=4)  :: pad1       ! 25   : unused word                         integer(kind=4)  :: project(2) ! 27   : project name
+    integer(kind=4)  :: bpc        ! 26   : baseline bandpass cal status        integer(kind=4)  :: bpc        ! 29   : baseline bandpass cal status
+    integer(kind=4)  :: ic         ! 27   : instrumental cal status             integer(kind=4)  :: ic         ! 30   : instrumental cal status
+    integer(kind=4)  :: recei      ! 28   : receiver number                     integer(kind=4)  :: recei      ! 31   : receiver number
+    real(kind=4)     :: ut         ! 29   : UT                  [s]             real(kind=4)     :: ut         ! 32   : UT                  [s] 
+    integer(kind=4)  :: pad2(3)    ! 30-32: padding to 32 4-bytes word
 
-def _read_index(f, DEBUG=False):
+equivalently
+
+ integer(kind=obsnum_length) :: num      ! [         ] Observation number
+ integer(kind=4)             :: ver      ! [         ] Version number
+ integer(kind=4)             :: teles(3) ! [         ] Telescope name
+ integer(kind=4)             :: dobs     ! [MJD-60549] Date of observation
+ integer(kind=4)             :: dred     ! [MJD-60549] Date of reduction
+ integer(kind=4)             :: typec    ! [     code] Type of coordinates
+ integer(kind=4)             :: kind     ! [     code] Type of data
+ integer(kind=4)             :: qual     ! [     code] Quality of data
+ integer(kind=4)             :: subscan  ! [         ] Subscan number
+ integer(kind=obsnum_length) :: scan     ! [         ] Scan number
+"""
+
+def _read_index(f, DEBUG=False, clic=False):
     x0 = f.tell()
     index = {
-                "XBLOC":_read_byte(f),
-                "XNUM":_read_byte(f),
-                "XVER":_read_byte(f),
+                "XBLOC":_read_int32(f),
+                "XNUM":_read_int32(f),
+                "XVER":_read_int32(f),
                 "XSOURC":_read_word(f,12),
                 "XLINE":_read_word(f,12),
                 "XTEL":_read_word(f,12),
-                "XDOBS":_read_byte(f),
-                "XDRED":_read_byte(f),
+                "XDOBS":_read_int32(f),
+                "XDRED":_read_int32(f),
                 "XOFF1":_read_float32(f),# 		 first offset (real, radians) 
                 "XOFF2":_read_float32(f),# 		 second offset (real, radians) 
-                "XTYPE":_read_word(f,2),# 		 coordinate system ('EQ'', 'GA', 'HO') 
-                "XKIND":_read_byte(f),# 		 Kind of observation (0: spectral, 1: continuum, ) 
-                "XQUAL":_read_byte(f),# 		 Quality (0-9)  
-                "XSCAN":_read_byte(f),# 		 Scan number 
-                "XPOSA":_read_byte(f),# 		 Position Angle 
-                "XFRONT":numpy.fromfile(f,count=1,dtype='S8')[0],# 		 (8 char) Front-end  ID (PROPOSED) 
-                "XBACK" :numpy.fromfile(f,count=1,dtype='S8')[0],# 		 (8 char) Back-end   ID (PROPOSED) 
-                "XPROC" :numpy.fromfile(f,count=1,dtype='S8')[0],# 		 (8 char) Procedure  ID (PROPOSED) 
-                "XPROJ" :numpy.fromfile(f,count=1,dtype='S8')[0],# 		 (8 char) Project    ID (PROPOSED) 
-                "UNUSED":numpy.fromfile(f,count=1,dtype='S6')[0],
-                "BLANKKW":numpy.fromfile(f,count=1,dtype='S4')[0] # BLANK is NOT ALLOWED!!! It is a special KW
+                "XTYPE":_read_int32(f),# 		 coordinate system ('EQ'', 'GA', 'HO') 
+                "XKIND":_read_int32(f),# 		 Kind of observation (0: spectral, 1: continuum, ) 
+                "XQUAL":_read_int32(f),# 		 Quality (0-9)  
+                "XSCAN":_read_int32(f),# 		 Scan number 
             }
+    if clic: # use header set up in clic
+        nextchunk = {
+                    "XPROC":_read_int32(f),# "procedure type"
+                    "XITYPE":_read_int32(f),#
+                    "XHOURANG":_read_float32(f),#
+                    "XPROJNAME":_read_int32(f),#
+                    "XPAD1":_read_int32(f),
+                    "XBPC" :_read_int32(f),
+                    "XIC" :_read_int32(f),
+                    "XRECEI" :_read_int32(f),
+                    "XUT":_read_float32(f),
+                    "XPAD2":numpy.fromfile(f,count=3,dtype='int32') # BLANK is NOT ALLOWED!!! It is a special KW
+        }
+    else:
+        nextchunk = {"XPOSA":_read_float32(f),
+                     "XSUBSCAN":_read_int32(f),
+                     'XPAD2': numpy.fromfile(f,count=10,dtype='int32'),
+                     }
+
+    index.update(nextchunk)
+
     if f.tell() - x0 != 128:
         X = f.read(128-(f.tell()-x0))
         if DEBUG: print "read_index missed %i bits: %s" % (128-(f.tell()-x0),X)
@@ -494,6 +579,7 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
             #print numpy.fromfile(f,count=168+40,dtype='int8') 
 
         if apex: # there are 33 bytes of junk...
+            # This is only for old, not modern, APEX files (and I don't know where the cutoff is)
             somejunk = f.read(33*4)
             print "APEX Junk as str: ",somejunk
             print "APEX Junk as int: ",[struct.unpack('=i',somejunk[i*4:i*4+4])[0] for i in range(len(somejunk)/4)]
@@ -504,16 +590,21 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
                 if f.tell() != pos + 156:
                     #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
                     f.seek(pos+156)
+                    #warnings.warn("Skip from %i to %i" % (pos,pos+168))
             else:
                 if f.tell() != pos + 168:
                     #print "Wrong position %i, skipping to %i" % (f.tell(),pos+168)
                     f.seek(pos+168)
+                    #warnings.warn("Skip from %i to %i" % (pos,pos+168))
 
         header = obshead
 
 
         # datastart must be at the end of all these sections
         datastart = 0
+
+        if DEBUG:
+            print "Starting header reading at startpos=%i" % startpos
 
         for section_id,section_address in sections.iteritems():
             # Section addresses are 1-indexed byte addresses
@@ -522,6 +613,9 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
             temp_hdr = _read_header(f, type=header_id_numbers[section_id])
             header.update(temp_hdr)
             datastart = max(datastart,f.tell())
+
+        if DEBUG > 1:
+            raise ValueError("Debug Breakpoint")
 
         # can't guarantee that the loop above goes in the right order,
         # so make sure we end up at the right spot
@@ -615,11 +709,11 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
     f.close()
     return spectra,header_list,indexes
 
-from .. import units
 def make_axis(header,imagfreq=False):
     """
     Create a :class:`pyspeckit.spectrum.units.SpectroscopicAxis` from the CLASS "header"
     """
+    from .. import units
 
     rest_frequency = header.get('RESTF')
     xunits = 'MHz'
@@ -733,7 +827,7 @@ def class_to_spectra(filename, datatuple=None, **kwargs):
 
     return pyspeckit.Spectra(spectrumlist)
 
-if __name__ == "__main__":
+def tests():
     """
     Tests are specific to the machine on which this code was developed. 
     """

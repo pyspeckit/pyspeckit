@@ -577,11 +577,12 @@ class Specfit(interactive.Interactive):
 
     def history_fitpars(self):
         if hasattr(self.Spectrum,'header'):
-            history.write_history(self.Spectrum.header,
-                    "SPECFIT: Fitted profile of type %s" % (self.fittype))
+            history.write_history(self.Spectrum.header, "SPECFIT: Fitted "
+                                  "profile of type %s" % (self.fittype))
+            history.write_history(self.Spectrum.header, "Chi^2: %g  DOF: %i" %
+                                  (self.chi2, self.dof))
             for par in self.parinfo:
-                history.write_history(self.Spectrum.header,
-                        str(par))
+                history.write_history(self.Spectrum.header, str(par))
                 
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
                   negamp=None, fittype=None, renormalize='auto', color=None,
