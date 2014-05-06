@@ -234,7 +234,7 @@ class Specfit(interactive.Interactive):
                 fit_plotted_area=fit_plotted_area,
                 exclude=exclude,
                 use_window_limits=use_window_limits, **kwargs)
-        for arg in ['xmin','xmax','xtype','reset']: 
+        for arg in ['xmin','xmax','xtype','reset']:
             if arg in kwargs: kwargs.pop(arg)
 
         # multifit = True if the right number of guesses are passed
@@ -810,7 +810,7 @@ class Specfit(interactive.Interactive):
         self.modelplot += self.Spectrum.plotter.axis.plot(
                 xarr,
                 model + plot_offset,
-                color=composite_fit_color, linewidth=lw, 
+                color=composite_fit_color, linewidth=lw,
                 **plotkwargs)
         
         # Plot components
@@ -923,9 +923,9 @@ class Specfit(interactive.Interactive):
             self.selectregion(reset=True)
 
     def plotresiduals(self, fig=2, axis=None, clear=True, color='k',
-            linewidth=0.5, drawstyle='steps-mid', yoffset=0.0, label=True,
-            pars=None, zeroline=None,
-            **kwargs):
+                      linewidth=0.5, drawstyle='steps-mid', yoffset=0.0,
+                      label=True, pars=None, zeroline=None,
+                      set_limits=True, **kwargs):
         """
         Plot residuals of the fit.  Specify a figure or
         axis; defaults to figure(2).
@@ -950,23 +950,33 @@ class Specfit(interactive.Interactive):
             if isinstance(fig,int):
                 fig=matplotlib.pyplot.figure(fig)
             self.residualaxis = matplotlib.pyplot.gca()
-            if clear: self.residualaxis.clear()
+            if clear:
+                self.residualaxis.clear()
         else:
             self.residualaxis = axis
-            if clear: self.residualaxis.clear()
+            if clear:
+                self.residualaxis.clear()
         self.residualplot = self.residualaxis.plot(self.Spectrum.xarr,
-                self.fullresiduals+yoffset,drawstyle=drawstyle,
-                linewidth=linewidth, color=color, **kwargs)
+                                                   self.fullresiduals+yoffset,
+                                                   drawstyle=drawstyle,
+                                                   linewidth=linewidth,
+                                                   color=color, **kwargs)
         if zeroline or (zeroline is None and yoffset != 0):
-            self.residualplot += self.residualaxis.plot(self.Spectrum.xarr, 
-                                                        np.zeros_like(self.Spectrum.xarr) + yoffset,
+            self.residualplot += self.residualaxis.plot(self.Spectrum.xarr,
+                                                        (np.zeros_like(self.Spectrum.xarr)
+                                                         + yoffset),
                                                         linestyle='--',
                                                         color='k',
                                                         alpha=0.5)
-        if self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None:
-            self.residualaxis.set_xlim(self.Spectrum.plotter.xmin,self.Spectrum.plotter.xmax)
-        if self.Spectrum.plotter.ymin is not None and self.Spectrum.plotter.ymax is not None:
-            self.residualaxis.set_ylim(self.Spectrum.plotter.ymin,self.Spectrum.plotter.ymax)
+        if set_limits:
+            if ((self.Spectrum.plotter.xmin is not None) and
+                (self.Spectrum.plotter.xmax is not None)):
+                self.residualaxis.set_xlim(self.Spectrum.plotter.xmin,
+                                           self.Spectrum.plotter.xmax)
+            if ((self.Spectrum.plotter.ymin is not None) and
+                (self.Spectrum.plotter.ymax is not None)):
+                self.residualaxis.set_ylim(self.Spectrum.plotter.ymin,
+                                           self.Spectrum.plotter.ymax)
         if label:
             self.residualaxis.set_xlabel(self.Spectrum.plotter.xlabel)
             self.residualaxis.set_ylabel(self.Spectrum.plotter.ylabel)
@@ -975,14 +985,14 @@ class Specfit(interactive.Interactive):
             self.residualaxis.figure.canvas.draw()
 
     def annotate(self,loc='upper right',labelspacing=0.25, markerscale=0.01,
-            borderpad=0.1, handlelength=0.1, handletextpad=0.1, frameon=False,
-            chi2=None, **kwargs):
+                 borderpad=0.1, handlelength=0.1, handletextpad=0.1,
+                 frameon=False, chi2=None, optimal_chi2_kwargs={}, **kwargs):
         """
         Add a legend to the plot showing the fitted parameters
 
         _clearlegend() will remove the legend
 
-        chi2 : {True or 'reduced' or 'optimal'}
+        chi2 : {True or 'reduced' or 'optimal' or 'allthree'}
         
         kwargs passed to legend
         """
@@ -994,17 +1004,27 @@ class Specfit(interactive.Interactive):
             raise Exception("Fitter %s has no annotations." % self.fitter)
 
         #xtypename = units.unit_type_dict[self.Spectrum.xarr.xtype]
-        xcharconv = units.SmartCaseNoSpaceDict({'frequency':'\\nu', 'wavelength':'\\lambda', 'velocity':'v', 'pixels':'x'})
+        xcharconv = units.SmartCaseNoSpaceDict({'frequency':'\\nu',
+                                                'wavelength':'\\lambda',
+                                                'velocity':'v', 'pixels':'x'})
         xchar = xcharconv[self.Spectrum.xarr.xtype]
-        self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for L in self._annotation_labels]
+        self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for
+                                   L in self._annotation_labels]
 
         if chi2 is not None:
-            if chi2 == 'reduced':
-                self._annotation_labels.append('$\\chi^2/\\nu = %0.2g$' % (self.chi2/self.dof))
-            elif chi2 ==  'optimal':
-                self._annotation_labels.append('$\\chi^2/\\nu = %0.2g$' % self.optimal_chi2())
+            chi2n_label = '$\\chi^2/\\nu = %0.2g$' % (self.chi2/self.dof)
+            chi2opt_label = '$\\chi^2_o/\\nu = %0.2g$' % self.optimal_chi2(**optimal_chi2_kwargs)
+            chi2_label = '$\\chi^2 = %0.2g$' % self.chi2
+            if chi2 == 'allthree':
+                self._annotation_labels.append("\n".join([chi2n_label,
+                                                          chi2_label,
+                                                          chi2opt_label]))
+            elif chi2 == 'reduced':
+                self._annotation_labels.append(chi2n_label)
+            elif chi2 == 'optimal':
+                self._annotation_labels.append(chi2opt_label)
             else:
-                self._annotation_labels.append('$\\chi^2 = %0.2g$' % self.chi2)
+                self._annotation_labels.append(chi2_label)
 
         if self.Spectrum.plotter.axis:
             self.fitleg = self.Spectrum.plotter.axis.legend(
@@ -1210,8 +1230,25 @@ class Specfit(interactive.Interactive):
         else:
             return integ
 
+    def _compare_to_threshold(self, threshold='auto', peak_fraction=0.01,
+                              add_baseline=False):
+        """
+        Identify pixels that are above some threshold
+        """
+        model = self.get_full_model(add_baseline=add_baseline)
+
+        # auto-set threshold from some fraction of the model peak
+        if threshold=='auto':
+            threshold = peak_fraction * np.abs(model).max()
+        elif threshold=='error':
+            threshold = self.errspec
+
+        OK = np.abs(model) > threshold
+
+        return OK
+
     def get_model_xlimits(self, threshold='auto', peak_fraction=0.01,
-            add_baseline=False, units='pixels'):
+                          add_baseline=False, units='pixels'):
         """
         Return the x positions of the first and last points at which the model
         is above some threshold
@@ -1220,7 +1257,7 @@ class Specfit(interactive.Interactive):
         ----------
         threshold : 'auto' or 'error' or float
             If 'auto', the threshold will be set to peak_fraction * the peak
-            model value.  
+            model value.
             If 'error', uses the error spectrum as the threshold
         peak_fraction : float
             ignored unless threshold == 'auto'
@@ -1230,16 +1267,9 @@ class Specfit(interactive.Interactive):
         units : str
             A valid unit type, e.g. 'pixels' or 'angstroms'
         """
-
-        model = self.get_full_model(add_baseline=add_baseline)
-
-        # auto-set threshold from some fraction of the model peak
-        if threshold=='auto':
-            threshold = peak_fraction * np.abs( model ).max()
-        elif threshold=='error':
-            threshold = self.errspec
-
-        OK = np.abs( model ) > threshold
+        OK = self._compare_to_threshold(threshold=threshold,
+                                        peak_fraction=peak_fraction,
+                                        add_baseline=add_baseline)
 
         # find the first & last "True" values
         xpixmin = OK.argmax()
@@ -1249,8 +1279,6 @@ class Specfit(interactive.Interactive):
             return [xpixmin,xpixmax]
         else:
             return self.Spectrum.xarr[[xpixmin,xpixmax]].as_unit(units)
-
-
 
     def shift_pars(self, frame=None):
         """
@@ -1389,8 +1417,7 @@ class Specfit(interactive.Interactive):
         else:
             print "Must have a fitter instantiated before creating sliders"
 
-    def optimal_chi2(self, reduced=True, threshold='error',
-            **kwargs):
+    def optimal_chi2(self, reduced=True, threshold='error', **kwargs):
         """
         Compute an "optimal" :math:`\chi^2` statistic, i.e. one in which only pixels in
         which the model is statistically significant are included
@@ -1417,13 +1444,15 @@ class Specfit(interactive.Interactive):
                    \chi^2 = \sum( (d_i - m_i)^2 / e_i^2 )
         """
 
-        # old version modelmask = np.abs(self.fullmodel) > self.errspec
-        xmin,xmax = self.get_model_xlimits(units='pixels', threshold=threshold, **kwargs)
+        modelmask = self._compare_to_threshold(threshold=threshold, **kwargs)
 
-        chi2 = np.sum( (self.fullresiduals[xmin:xmax]/self.errspec[xmin:xmax])**2 )
+        chi2 = np.sum((self.fullresiduals[modelmask]/self.errspec[modelmask])**2)
 
         if reduced:
-            dof = (xmax-xmin) - self.fitter.npars - self.vheight + np.sum(self.parinfo.fixed)  # vheight included here or not?
+            # vheight included here or not?  assuming it should be...
+            dof = (modelmask.sum() -
+                   self.fitter.npars - self.vheight +
+                   np.sum(self.parinfo.fixed))
             return chi2/dof
         else:
             return chi2

@@ -16,7 +16,9 @@ title_dict = {'oneone':'H$_2$CO 1$_{11}$-1$_{10}$',
 
 def plot_h2co(spdict, spectra, fignum=1, show_components=False,
               show_hyperfine_components=False, residfignum=None, annotate=None,
-              clear=True, residkwargs={}, residclear=True, **plotkwargs):
+              clear=True, residkwargs={}, plot_fit_kwargs={}, residclear=True,
+              resid_overlay=False, resid_yoffsets=None,
+              **plotkwargs):
     """
     Plot the results from a multi-h2co fit
     """
@@ -55,13 +57,15 @@ def plot_h2co(spdict, spectra, fignum=1, show_components=False,
         sp.plotter.axis=axdict[linename] # permanent
         sp.plotter(axis=axdict[linename],
                    title=title_dict[linename],
+                   clear=clear,
                    **plotkwargs)
         sp.specfit.Spectrum.plotter = sp.plotter
         #sp.specfit.selectregion(reset=True)
         if sp.specfit.modelpars is not None:
             sp.specfit.plot_fit(annotate=False,
                                 show_components=show_components,
-                                show_hyperfine_components=show_hyperfine_components)
+                                show_hyperfine_components=show_hyperfine_components,
+                                **plot_fit_kwargs)
         sp.plotter.reset_limits()
     if spdict['oneone'].specfit.modelpars is not None and annotate:
         spdict['oneone'].specfit.annotate(labelspacing=0.05,
@@ -69,6 +73,7 @@ def plot_h2co(spdict, spectra, fignum=1, show_components=False,
                                                 'stretch':'extra-condensed'},
                                           frameon=False)
 
+    residaxdict = None
     if residfignum is not None:
         pyplot.figure(residfignum)
         if residclear:
@@ -86,10 +91,24 @@ def plot_h2co(spdict, spectra, fignum=1, show_components=False,
                            'twotwo':pyplot.subplot(222),
                            'threethree':pyplot.subplot(223),
                            'fourfour':pyplot.subplot(224)}
+    elif resid_overlay:
+        residaxdict = axdict
+        residclear = False # override defaults...
+        residfignum = fignum
+
+    if residaxdict is not None:
         for linename,sp in spdict.iteritems():
             sp.specfit.Spectrum.plotter = sp.plotter
+            try:
+                yoffset = resid_yoffsets[linename]
+            except TypeError:
+                yoffset = 0.0
             sp.specfit.plotresiduals(axis=residaxdict[linename],
                                      figure=residfignum,
+                                     clear=residclear,
+                                     set_limits=False,
+                                     label=False,
+                                     yoffset=yoffset,
                                      **residkwargs)
         spectra.residaxdict = residaxdict
 
