@@ -50,7 +50,7 @@ def open_1d_pyfits(pyfits_hdu, specnum=0, wcstype='', specaxis="1",
 
     hdr = pyfits_hdu._header
     if autofix: 
-        for card in hdr.ascard:
+        for card in hdr.cards:
             try:
                 if verbose: card.verify('fix')
                 else: card.verify('silentfix')
