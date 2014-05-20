@@ -890,18 +890,18 @@ class Cube(spectrum.Spectrum):
             for ii,par in enumerate(self.specfit.parinfo):
                 kw = "PLANE%i" % ii
                 parname = par['parname'].strip('0123456789')
-                fitcubefile.header.update(kw, parname)
+                fitcubefile.header[kw] =  parname
             # set error parameters
             for jj,par in enumerate(self.specfit.parinfo):
                 kw = "PLANE%i" % (ii+jj)
                 parname = "e"+par['parname'].strip('0123456789')
-                fitcubefile.header.update(kw, parname)
+                fitcubefile.header[kw] =  parname
 
             # overwrite the WCS
-            fitcubefile.header.update('CDELT3',1)
-            fitcubefile.header.update('CTYPE3','FITPAR')
-            fitcubefile.header.update('CRVAL3',0)
-            fitcubefile.header.update('CRPIX3',1)
+            fitcubefile.header['CDELT3'] = 1
+            fitcubefile.header['CTYPE3'] = 'FITPAR'
+            fitcubefile.header['CRVAL3'] = 0
+            fitcubefile.header['CRPIX3'] = 1
         except AttributeError:
             print "Make sure you run the cube fitter first."
             return
@@ -965,7 +965,7 @@ class CubeStack(Cube):
         self.header = cubelist[0].header
         for cube in cubelist:
             for key,value in cube.header.items():
-                self.header.update(key,value)
+                self.header[key] = value
 
         # TODO: Improve this!!!
         self.system = 'galactic' if 'GLON' in self.header['CTYPE1'] else 'celestial'

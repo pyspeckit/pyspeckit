@@ -104,9 +104,9 @@ def flatten_header(header,delete=False):
         except IndexError:
             # if len(key) < 2
             pass
-    newheader.update('NAXIS',2)
+    newheader['NAXIS'] = 2
     if header.get('WCSAXES'):
-        newheader.update('WCSAXES',2)
+        newheader['WCSAXES'] = 2
 
     return newheader
 
@@ -124,14 +124,14 @@ def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
     elif 'CDELT1' in header: newheader.rename_key('CDELT1','OLDCDEL1')
     if 'CD3_3' in header: newheader.update('CDELT1',header.get('CD3_3'))
     elif 'CDELT3' in header: newheader.update('CDELT1',header.get('CDELT3'))
-    newheader.update('CTYPE1','VRAD')
+    newheader['CTYPE1'] = 'VRAD'
     if header.get('CUNIT3'):
         newheader.update('CUNIT1',header.get('CUNIT3'))
     else: 
         print "Assuming CUNIT3 is km/s in speccen_header"
         newheader.update('CUNIT1','km/s')
-    newheader.update('CRPIX2',1)
-    newheader.update('CRPIX3',1)
+    newheader['CRPIX2'] = 1
+    newheader['CRPIX3'] = 1
     if system == 'celestial':
         c2 = 'RA---'
         c3 = 'DEC--'
@@ -142,9 +142,9 @@ def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
     newheader.update('CTYPE3',c3+proj)
 
     if lon is not None:
-        newheader.update('CRVAL2',lon)
+        newheader['CRVAL2'] = lon
     if lat is not None:
-        newheader.update('CRVAL3',lat)
+        newheader['CRVAL3'] = lat
 
     if 'CD2_2' in header:
         newheader.rename_key('CD2_2','OLDCD2_2')
@@ -525,8 +525,8 @@ def getspec(lon,lat,rad,cube,header,r_fits=True,inherit=True,wunit='arcsec'):
             print "Header did not contain CUNIT3 keyword.  Defaulting to km/s"
             newhead.update('CUNIT1',"km/s")
         newhead.update('BUNIT',header['BUNIT'])
-        newhead.update('APGLON',lon)
-        newhead.update('APGLAT',lat)
+        newhead['APGLON'] = lon
+        newhead['APGLAT'] = lat
         newhead.update('APRAD',rad*convopt[wunit],comment='arcseconds') # radius in arcsec
         newfile = fits.PrimaryHDU(data=spec,header=newhead)
         return newfile
