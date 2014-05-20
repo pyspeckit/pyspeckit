@@ -1,6 +1,5 @@
 build
 tests/ipython*
-tests
 ipython_log.py*
 
 syntax:glob

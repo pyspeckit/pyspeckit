@@ -349,8 +349,8 @@ class Specfit(interactive.Interactive):
                 plot = False
                 if mycfg.WARN: warn( "Cannot plot multiple Equivalent Widths" )
         elif fitted:
-            model = self.get_model(self.Spectrum.xarr[xmin:xmax], 
-                    add_baseline=False)
+            model = self.get_model(self.Spectrum.xarr[xmin:xmax],
+                                   add_baseline=False)
             if continuum is None:
                 # centroid in data units
                 # (may fail if model has pos + neg values)
@@ -391,8 +391,8 @@ class Specfit(interactive.Interactive):
             if self.Spectrum.plotter.autorefresh:
                 self.Spectrum.plotter.refresh()
         if hasattr(self.Spectrum,'header'):
-            history.write_history(self.Spectrum.header,
-                    "EQW for %s: %s" % (self.fittype,eqw))
+            history.write_history(self.Spectrum.header, "EQW for %s: %s" %
+                                  (self.fittype,eqw))
         return eqw
 
     def register_fitter(self,*args,**kwargs):
