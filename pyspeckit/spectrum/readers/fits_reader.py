@@ -141,10 +141,7 @@ will run into errors.""")
         dv = hdr['CD%s_%s%s' % (specaxis,specaxis,wcstype)]
         v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
         p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
-        try: # astropy.io.fits is not backwards compatible
-            hdr.update('CDELT%s' % specaxis,dv)
-        except AttributeError:
-            hdr.set('CDELT%s' % specaxis,dv)
+        hdr['CDELT%s' % specaxis] = dv
         if verbose: print "Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
     elif hdr.get(str('CDELT%s%s' % (specaxis,wcstype))):
         dv = hdr['CDELT%s%s' % (specaxis,wcstype)]

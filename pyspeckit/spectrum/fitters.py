@@ -1100,9 +1100,9 @@ class Specfit(interactive.Interactive):
         """
         if self.modelpars is not None and hasattr(self.Spectrum,'header'):
             for ii,p in enumerate(self.modelpars):
-                if ii % 3 == 0: self.Spectrum.header.update('AMP%1i' % (ii/3),p,comment="Gaussian best fit amplitude #%i" % (ii/3))
-                if ii % 3 == 1: self.Spectrum.header.update('CEN%1i' % (ii/3),p,comment="Gaussian best fit center #%i" % (ii/3))
-                if ii % 3 == 2: self.Spectrum.header.update('WID%1i' % (ii/3),p,comment="Gaussian best fit width #%i" % (ii/3))
+                if ii % 3 == 0: self.Spectrum.header['AMP%1i' % (ii/3)] = (p,"Gaussian best fit amplitude #%i" % (ii/3))
+                if ii % 3 == 1: self.Spectrum.header['CEN%1i' % (ii/3)] = (p,"Gaussian best fit center #%i" % (ii/3))
+                if ii % 3 == 2: self.Spectrum.header['WID%1i' % (ii/3)] = (p,"Gaussian best fit width #%i" % (ii/3))
 
     def downsample(self,factor):
         """

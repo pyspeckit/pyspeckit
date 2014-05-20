@@ -280,10 +280,10 @@ class Spectrum(object):
         self._update_header()
 
     def _update_header(self):
-        self.header.update('CUNIT1',self.xarr.units)
-        self.header.update('CTYPE1',self.xarr.xtype)
-        self.header.update('BUNIT',self.units)
-        self.header.update('BTYPE',self.ytype)
+        self.header['CUNIT1'] = self.xarr.units
+        self.header['CTYPE1'] = self.xarr.xtype
+        self.header['BUNIT'] = self.units
+        self.header['BTYPE'] = self.ytype
         
     def parse_hdf5_header(self, hdr):
         """
@@ -299,10 +299,10 @@ class Spectrum(object):
         self.ytype = hdr['ytype']
         self.units = hdr['yunits']
         self.header = pyfits.Header()
-        self.header.update('CUNIT1', self.xarr.xunits)
-        self.header.update('CTYPE1', self.xarr.xtype)
-        self.header.update('BUNIT', self.ytype)
-        self.header.update('BTYPE', self.units)
+        self.header['CUNIT1'] = self.xarr.xunits
+        self.header['CTYPE1'] = self.xarr.xtype
+        self.header['BUNIT'] = self.ytype
+        self.header['BTYPE'] = self.units
 
     def parse_header(self,hdr,specname=None):
         """
@@ -369,7 +369,7 @@ class Spectrum(object):
             history.write_history(self.header,"CROP: Cropped from %g to %g (pixel %i to %i)" % (x1,x2,x1pix,x2pix))
 
             if self.header.get('CRPIX1'):
-                self.header.update('CRPIX1',self.header.get('CRPIX1') - x1pix)
+                self.header['CRPIX1'] = self.header.get('CRPIX1') - x1pix
                 history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
     def slice(self, start=None, stop=None, units='pixel', copy=True, preserve_fits=False):
@@ -520,8 +520,8 @@ class Spectrum(object):
         Internal - correct the FITS header parameters when smoothing
         """
         if self.header.get('CDELT1') is not None and self.header.get('CRPIX1') is not None:
-            self.header.update('CDELT1',self.header.get('CDELT1') * float(smooth))
-            self.header.update('CRPIX1',self.header.get('CRPIX1') / float(smooth))
+            self.header['CDELT1'] = self.header.get('CDELT1') * float(smooth)
+            self.header['CRPIX1'] = self.header.get('CRPIX1') / float(smooth)
 
             history.write_history(self.header,"SMOOTH: Smoothed and downsampled spectrum by factor %i" % (smooth))
             history.write_history(self.header,"SMOOTH: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')*float(smooth),self.header.get('CRPIX1')))
@@ -738,9 +738,9 @@ class Spectra(Spectrum):
         for spec in speclist:
             for key,value in spec.header.items():
                 try:
-                    self.header.update(key,value)
-                except ValueError, KeyError:
-                    warn( "Could not update header KEY=%s to VALUE=%s" % (key,value) )
+                    self.header[key] = value
+                except (ValueError, KeyError):
+                    warn("Could not update header KEY=%s to VALUE=%s" % (key,value))
 
         self.plotter = plotters.Plotter(self)
         self._register_fitters()
@@ -748,8 +748,8 @@ class Spectra(Spectrum):
         self.baseline = baseline.Baseline(self)
         
         self.units = speclist[0].units
-        for spec in speclist: 
-            if spec.units != self.units: 
+        for spec in speclist:
+            if spec.units != self.units:
                 raise ValueError("Mismatched units")
 
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3

@@ -36,7 +36,7 @@ class write_fits(Writer):
         if self.Spectrum.xarr._make_header(tolerance=tolerance):
             for k,v in self.Spectrum.xarr.wcshead.iteritems():
                 if v is not None:
-                    header.update(k,v)
+                    header[k] = v
             if write_error:
                 data = np.array( [self.Spectrum.data, self.Spectrum.error] )
             else:
@@ -48,7 +48,7 @@ class write_fits(Writer):
                 if v is None:
                     if header.get(k): del header[k]
                 else:
-                    header.update(k,v)
+                    header[k] = v
             if write_error:
                 data = np.array( [self.Spectrum.xarr, self.Spectrum.data, self.Spectrum.error] )
             else:
