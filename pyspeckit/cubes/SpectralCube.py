@@ -858,8 +858,8 @@ class Cube(spectrum.Spectrum):
         Internal - correct the FITS header parameters when smoothing
         """
         if self.header.get('CDELT3') is not None and self.header.get('CRPIX3') is not None:
-            self.header.update('CDELT3',self.header.get('CDELT3') * float(smooth))
-            self.header.update('CRPIX3',self.header.get('CRPIX3') / float(smooth))
+            self.header['CDELT3'] = self.header.get('CDELT3') * float(smooth)
+            self.header['CRPIX3'] = self.header.get('CRPIX3') / float(smooth)
 
             history.write_history(self.header,"SMOOTH: Smoothed and downsampled spectrum by factor %i" % (smooth))
             history.write_history(self.header,"SMOOTH: Changed CRPIX3 from %f to %f" % (self.header.get('CRPIX3')*float(smooth),self.header.get('CRPIX3')))
@@ -885,7 +885,7 @@ class Cube(spectrum.Spectrum):
         
         try:
             fitcubefile = pyfits.PrimaryHDU(data=np.concatenate([self.parcube,self.errcube]), header=self.header)
-            fitcubefile.header.update('FITTYPE',self.specfit.fittype)
+            fitcubefile.header['FITTYPE'] = self.specfit.fittype
 
             for ii,par in enumerate(self.specfit.parinfo):
                 kw = "PLANE%i" % ii

@@ -375,7 +375,7 @@ class Baseline(interactive.Interactive):
     def savefit(self):
         if self.baselinepars is not None and hasattr(self.Spectrum,'header'):
             for ii,p in enumerate(self.baselinepars):
-                self.Spectrum.header.update('BLCOEF%0.2i' % (ii),p,comment="Baseline power-law best-fit coefficient x^%i" % (self.order-ii-1))
+                self.Spectrum.header['BLCOEF%0.2i' % (ii)] = (p,"Baseline power-law best-fit coefficient x^%i" % (self.order-ii-1))
 
     def _baseline(self, spectrum, xarr=None, err=None,
                   order=1, quiet=True, mask=None, powerlaw=False,

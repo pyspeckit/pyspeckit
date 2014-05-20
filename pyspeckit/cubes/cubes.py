@@ -118,18 +118,18 @@ def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
     Assumes 3rd axis is velocity
     """
     newheader = header.copy()
-    newheader.update('CRVAL1',header.get('CRVAL3'))
-    newheader.update('CRPIX1',header.get('CRPIX3'))
+    newheader['CRVAL1'] = header.get('CRVAL3')
+    newheader['CRPIX1'] = header.get('CRPIX3')
     if 'CD1_1' in header: newheader.rename_key('CD1_1','OLDCD1_1')
     elif 'CDELT1' in header: newheader.rename_key('CDELT1','OLDCDEL1')
-    if 'CD3_3' in header: newheader.update('CDELT1',header.get('CD3_3'))
-    elif 'CDELT3' in header: newheader.update('CDELT1',header.get('CDELT3'))
+    if 'CD3_3' in header: newheader['CDELT1'] = header.get('CD3_3')
+    elif 'CDELT3' in header: newheader['CDELT1'] = header.get('CDELT3')
     newheader['CTYPE1'] = 'VRAD'
     if header.get('CUNIT3'):
-        newheader.update('CUNIT1',header.get('CUNIT3'))
+        newheader['CUNIT1'] = header.get('CUNIT3')
     else: 
         print "Assuming CUNIT3 is km/s in speccen_header"
-        newheader.update('CUNIT1','km/s')
+        newheader['CUNIT1'] = 'km/s'
     newheader['CRPIX2'] = 1
     newheader['CRPIX3'] = 1
     if system == 'celestial':
@@ -138,8 +138,8 @@ def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
     elif system == 'galactic':
         c2 = 'GLON-'
         c3 = 'GLAT-'
-    newheader.update('CTYPE2',c2+proj)
-    newheader.update('CTYPE3',c3+proj)
+    newheader['CTYPE2'] = c2+proj
+    newheader['CTYPE3'] = c3+proj
 
     if lon is not None:
         newheader['CRVAL2'] = lon
@@ -380,13 +380,13 @@ def subcube(cube, xcen, xwidth, ycen, ywidth, header=None,
         xmid_sky,ymid_sky = wcs.wcs_pix2world(xlo+xwidth,ylo+ywidth,0)
 
         try:
-            newheader.update('CRVAL1',xmid_sky[0])
-            newheader.update('CRVAL2',ymid_sky[0])
+            newheader['CRVAL1'] = xmid_sky[0]
+            newheader['CRVAL2'] = ymid_sky[0]
         except IndexError:
-            newheader.update('CRVAL1',float(xmid_sky))
-            newheader.update('CRVAL2',float(ymid_sky))
-        newheader.update('CRPIX1',1+xwidth)
-        newheader.update('CRPIX2',1+ywidth)
+            newheader['CRVAL1'] = float(xmid_sky)
+            newheader['CRVAL2'] = float(ymid_sky)
+        newheader['CRPIX1'] = 1+xwidth
+        newheader['CRPIX2'] = 1+ywidth
         
         newHDU =  fits.PrimaryHDU(data=subim,header=newheader)
         if newHDU.header.get('NAXIS1') == 0 or newHDU.header.get('NAXIS2') == 0:
@@ -510,24 +510,24 @@ def getspec(lon,lat,rad,cube,header,r_fits=True,inherit=True,wunit='arcsec'):
         else:
             newhead = fits.Header()
         try:
-            newhead.update('CD1_1',header['CD3_3'])
+            newhead['CD1_1'] = header['CD3_3']
         except KeyError:
-            newhead.update('CD1_1',header['CDELT3'])
-        newhead.update('CRPIX1',header['CRPIX3'])
-        newhead.update('CRVAL1',header['CRVAL3'])
+            newhead['CD1_1'] = header['CDELT3']
+        newhead['CRPIX1'] = header['CRPIX3']
+        newhead['CRVAL1'] = header['CRVAL3']
         try:
-            newhead.update('CTYPE1',header['CTYPE3'])
+            newhead['CTYPE1'] = header['CTYPE3']
         except KeyError:
-            newhead.update('CTYPE1',"VRAD")
+            newhead['CTYPE1'] = "VRAD"
         try:
-            newhead.update('CUNIT1',header['CUNIT3'])
+            newhead['CUNIT1'] = header['CUNIT3']
         except KeyError:
             print "Header did not contain CUNIT3 keyword.  Defaulting to km/s"
-            newhead.update('CUNIT1',"km/s")
-        newhead.update('BUNIT',header['BUNIT'])
+            newhead['CUNIT1'] = "km/s"
+        newhead['BUNIT'] = header['BUNIT']
         newhead['APGLON'] = lon
         newhead['APGLAT'] = lat
-        newhead.update('APRAD',rad*convopt[wunit],comment='arcseconds') # radius in arcsec
+        newhead['APRAD'] = (rad*convopt[wunit],'arcseconds') # radius in arcsec
         newfile = fits.PrimaryHDU(data=spec,header=newhead)
         return newfile
     else:
@@ -707,9 +707,9 @@ try:
             #newheader2.fromtextfile(tempheader)
             for key in ('CRPIX3','CRVAL3','CDELT3','CD3_3','CUNIT3','WCSTYPE3','CTYPE3'):
                 if newheader.get(key):
-                    newheader2.update(key,newheader.get(key))
+                    newheader2[key] = newheader.get(key)
             if newheader.get('CD3_3') and newheader2.get('CDELT3') is None:
-                newheader2.update('CDELT3',newheader.get('CD3_3'))
+                newheader2['CDELT3'] = newheader.get('CD3_3')
             newheader2.toTxtFile(tempheader,clobber=True)
             #if newheader2.get('CDELT3') is None:
             #    raise Exception("No CD3_3 or CDELT3 in header.")
