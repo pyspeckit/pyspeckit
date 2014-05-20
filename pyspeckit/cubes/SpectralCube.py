@@ -38,8 +38,8 @@ from astropy.io import fits
 class Cube(spectrum.Spectrum):
 
     def __init__(self, filename=None, xarr=None, cube=None, errorcube=None,
-            header=None, x0=0, y0=0, maskfilename=None, maskmap=None,
-            **kwargs):
+                 header=None, x0=0, y0=0, maskfilename=None, maskmap=None,
+                 **kwargs):
         """
         Initialize the Cube.  Accepts files in the following formats:
             
@@ -93,7 +93,8 @@ class Cube(spectrum.Spectrum):
         self.speclines = spectrum.speclines
         # Initialize writers
         self.writer = {}
-        for writer in spectrum.writers.writers: self.writer[writer] = spectrum.writers.writers[writer](self)
+        for writer in spectrum.writers.writers:
+            self.writer[writer] = spectrum.writers.writers[writer](self)
 
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
         self.plot_special = None

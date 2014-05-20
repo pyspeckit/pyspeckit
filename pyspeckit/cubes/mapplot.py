@@ -71,7 +71,7 @@ class MapPlotter(object):
 
         self.overplot_colorcycle = itertools.cycle(['b', 'g', 'r', 'c', 'm', 'y'])
         self.overplot_linestyle = '-'
-
+ 
         self.Cube = Cube
         if self.Cube is not None:
             self.header = cubes.flatten_header(self.Cube.header, delete=True)

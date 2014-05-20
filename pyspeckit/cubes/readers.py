@@ -4,12 +4,11 @@ Created: 3/17/2011
 """
 import numpy as np
 import numpy.ma as ma
-import pyspeckit 
 from pyspeckit import spectrum
 import operator
 
-def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3, 
-        scale_keyword=None, scale_action=operator.div, **kwargs):
+def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
+                 scale_keyword=None, scale_action=operator.div, **kwargs):
     """
     Grabs all the relevant pieces of a simple FITS-compliant 3d data cube
 
