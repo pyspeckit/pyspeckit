@@ -148,9 +148,9 @@ class Specfit(interactive.Interactive):
         
     @cfgdec
     def __call__(self, interactive=False, multifit=False, usemoments=True,
-                 clear_all_connections=True, debug=False, 
-                 guesses=None, save=True, annotate=None,
-                 show_components=None, use_lmfit=False, verbose=True, clear=True,
+                 clear_all_connections=True, debug=False, guesses=None,
+                 save=True, annotate=None, show_components=None,
+                 use_lmfit=False, verbose=True, clear=True,
                  fit_plotted_area=True, use_window_limits=None,
                  vheight=None, exclude=None, **kwargs):
         """
@@ -167,7 +167,7 @@ class Specfit(interactive.Interactive):
             baseline) will be fit simultaneously with that peak.
         fittype : str
             [passed to fitting codes; defaults to gaussian]
-            The model to use.  Model must be registered in self.Registry.  
+            The model to use.  Model must be registered in self.Registry.
             gaussian, lorentzian, and voigt profiles are registered by default
         guesses : list
             A list of guesses.  Guesses must have length = n*number of parameters
@@ -175,6 +175,8 @@ class Specfit(interactive.Interactive):
             automated guessing for most models)
             EXAMPLE: for single-fit gaussian
             guesses = [height,amplitude,center,width]
+            for multi-fit gaussian, it is
+            [amplitude, center, width]
         use_lmfit : boolean
             If lmfit-py (https://github.com/newville/lmfit-py) is installed, you
             can use it instead of the pure-python (but slow) mpfit.
@@ -183,9 +185,9 @@ class Specfit(interactive.Interactive):
             used to define the fit region.  Only respects the x-axis limits,
             not the y-axis limits.
         use_window_limits : boolean
-            If `fit_plotted_area==True` and no other limits are specified, will
-            use the displayed window area (as set by the zoom tools) as the
-            fitting range.  Only respects the x-axis limits, not the y-axis
+            If ``fit_plotted_area==True`` and no other limits are specified,
+            will use the displayed window area (as set by the zoom tools) as
+            the fitting range.  Only respects the x-axis limits, not the y-axis
             limits.
         exclude : None or list
             Passed to selectregion; specifies regions to exclude in xarr units
@@ -290,7 +292,7 @@ class Specfit(interactive.Interactive):
 
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
             components=False, annotate=False, alpha=0.5, loc='lower left',
-            xmin=None, xmax=None):
+            xmin=None, xmax=None, xunits='pixel'):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
@@ -316,6 +318,8 @@ class Specfit(interactive.Interactive):
         xmin : float
         xmax : float
             The range over which to compute the EQW
+        xunits : str
+            The units of xmin/xmax
 
         Returns
         -------
@@ -331,11 +335,15 @@ class Specfit(interactive.Interactive):
 
         # determine range to use
         if xmin is None:
-            xmin = self.xmin
+            xmin = self.Spectrum.xarr.x_to_pix(self.xmin)
+        else:
+            xmin = self.Spectrum.xarr.x_to_pix(xmin, xval_units=xunits)
         if xmax is None:
-            xmax = self.xmax
+            xmax = self.Spectrum.xarr.x_to_pix(self.xmax)
+        else:
+            xmax = self.Spectrum.xarr.x_to_pix(xmax, xval_units=xunits)
 
-        dx = np.abs( self.Spectrum.xarr[xmin:xmax].cdelt(approx=True) )
+        dx = np.abs(self.Spectrum.xarr[xmin:xmax].cdelt(approx=True))
         if components:
             centroids = self.fitter.analytic_centroids()
             integrals = self.fitter.component_integrals(self.Spectrum.xarr[xmin:xmax],dx=dx)
