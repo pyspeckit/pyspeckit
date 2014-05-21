@@ -33,7 +33,6 @@ before_install:
    - pip install wheel
 install: 
    - export PYTHONIOENCODING=UTF8 # just in case
-   - pip install pytk
    - pip install --upgrade "numpy==$NUMPY_VERSION" -q --use-mirrors
    - $PIP_WHEEL_COMMAND "scipy==0.13.1"
    - $PIP_WHEEL_COMMAND "matplotlib==1.3.0"
