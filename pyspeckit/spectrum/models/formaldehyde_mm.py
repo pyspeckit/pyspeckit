@@ -8,14 +8,11 @@ It is based entirely on RADEX models.
 """
 import numpy as np
 import hyperfine
-pyfitsOK = True
 from . import fitter,model#,modelgrid
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-except ImportError:
-    pyfitsOK = False
 try:
     import scipy.interpolate
     import scipy.ndimage

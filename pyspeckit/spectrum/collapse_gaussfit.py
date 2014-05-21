@@ -11,7 +11,10 @@ import matplotlib
 #matplotlib.use('Agg')
 from pylab import indices,figure,clf,savefig,plot,legend,text,axes,title
 import pickle
-import pyfits
+try:
+    from astropy.io import fits as pyfits
+except ImportError:
+    import pyfits
 import time
 from mad import MAD
 from ratosexagesimal import ratos,dectos

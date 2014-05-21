@@ -21,12 +21,8 @@ from .. import units
 
 try:
     import astropy.io.fits as pyfits
-    pyfitscheck=True
 except ImportError:
     import pyfits
-    pyfitscheck=True
-except ImportError: 
-    pyfitscheck = False
 
 def open_hdf5(filename, xaxkey = 'xarr', datakey = 'data', errkey = 'error'):
     """

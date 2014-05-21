@@ -31,7 +31,10 @@ from mpfit import mpfit
 
 from collapse_gaussfit import *
 from ratosexagesimal import *
-import pyfits
+try:
+    from astropy.io import fits as pyfits
+except ImportError:
+    import pyfits
 import gaussfitter
 
 from numpy import isnan

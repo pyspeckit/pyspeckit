@@ -15,13 +15,10 @@ import matplotlib.cbook as mpcb
 import copy
 import hyperfine
 from pyspeckit.specwarnings import warn
-pyfitsOK = True
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-except ImportError:
-    pyfitsOK = False
 try:
     import scipy.interpolate
     import scipy.ndimage

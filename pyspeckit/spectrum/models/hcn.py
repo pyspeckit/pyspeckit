@@ -10,11 +10,10 @@ from .. import units
 from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb
 import copy
-try: # for model grid reading
+try:
+    from astropy.io import fits as pyfits
+except ImportError:
     import pyfits
-    pyfitsOK = True
-except:
-    pyfitsOK = False
 try:
     import scipy.interpolate
     import scipy.ndimage

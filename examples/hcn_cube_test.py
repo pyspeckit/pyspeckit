@@ -1,5 +1,8 @@
 import pyspeckit
-import pyfits
+try:
+    from astropy.io import fits as pyfits
+except ImportError:
+    import pyfits
 import numpy as np
 
 # Load the spectrum
