@@ -205,6 +205,64 @@ def _get_WATS(hdr):
 
     return WAT1_dict,specaxdict
 
+def make_linear_axis(hdr, axsplit, WAT1_dict):
+    num,beam,dtype,crval,cdelt,naxis,z,aplow,aphigh = axsplit[:9]
+    # this is a hack for cropped spectra...
+    #print "header naxis: %i, WAT naxis: %i" % (hdr['NAXIS1'], int(naxis))
+    if hdr['NAXIS1'] != int(naxis):
+        naxis = hdr['NAXIS1']
+        crpix = hdr.get('CRPIX1')
+        warn("Treating as cropped echelle spectrum.")
+    else:
+        crpix = 0
+        
+    if len(axsplit) > 9:
+        functions = axsplit[9:]
+        warn("Found but did not use functions %s" % str(functions))
+        
+    if int(dtype) == 0:
+        # Linear dispersion (eq 2, p.5 from Valdez, linked above)
+        xax = ((float(crval) + float(cdelt) * (np.arange(int(naxis)) + 1 -
+                                               crpix)) / (1.+float(z)))
+    else: raise ValueError("Unrecognized LINEAR dispersion in IRAF Echelle specification")
+    
+    headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt,'NAXIS1':naxis,
+             'NAXIS':1, 'REDSHIFT':z, 'CTYPE1':'wavelength',
+             'CUNIT1':WAT1_dict['units']}
+    
+    return xax, naxis, headerkws
+
+def make_multispec_axis(hdr, axsplit, WAT1_dict):
+    num,beam,dtype,crval,cdelt,naxis,z,aplow,aphigh = axsplit[:9]
+    # this is a hack for cropped spectra...
+    #print "header naxis: %i, WAT naxis: %i" % (hdr['NAXIS1'], int(naxis))
+    if hdr['NAXIS1'] != int(naxis):
+        crpix = int(naxis) - hdr['NAXIS']
+        naxis = hdr['NAXIS1']
+        warn("Treating as cropped echelle spectrum.")
+    else:
+        crpix = 0
+    
+    if len(axsplit) > 9:
+        functions = axsplit[9:]
+        warn("Found but did not use functions %s" % str(functions))
+        
+    if int(dtype) == 0:
+        # Linear dispersion (eq 11, p.9 from Valdez, linked above)
+        xax = (float(crval) + float(cdelt) * (np.arange(int(naxis)))) / (1.+float(z))
+    elif int(dtype) == 1:
+        # Log-linear dispersion (eq 12, p.9 from Valdez, linked above)
+        xax = 10.**(float(crval) + float(cdelt) * (np.arange(int(naxis)))) / (1.+float(z))
+    # elif int(dtype) == 2:
+        # Non-linear dispersion
+    # elif int(dtype) == -1:
+        # Data is not dispersion coords
+    else: raise ValueError("Unrecognized MULTISPE dispersion in IRAF Echelle specification")
+    
+    headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt, 'NAXIS1':naxis, 'NAXIS':1, 'REDSHIFT':z, 'CTYPE1':'wavelength', 'CUNIT1':WAT1_dict['units']}
+    
+    return xax, naxis, headerkws
+
 def read_echelle(pyfits_hdu):
     """
     Read an IRAF Echelle spectrum
@@ -224,25 +282,11 @@ def read_echelle(pyfits_hdu):
             raise ValueError("Mismatch in IRAF Echelle specification")
         num,beam,dtype,crval,cdelt,naxis,z,aplow,aphigh = axsplit[:9]
         
-        # this is a hack for cropped spectra...
-        #print "header naxis: %i, WAT naxis: %i" % (hdr['NAXIS1'], int(naxis))
-        if hdr['NAXIS1'] != int(naxis):
-            naxis = hdr['NAXIS1']
-            crpix = hdr.get('CRPIX1')
-            warn("Treating as cropped echelle spectrum.")
-        else:
-            crpix = 0
+        if hdr['CTYPE1'] == 'LINEAR':
+            xax,naxis,headerkws = make_linear_axis(hdr, axsplit, WAT1_dict)
+        elif hdr['CTYPE1'] == 'MULTISPE':
+            xax,naxis,headerkws = make_multispec_axis(hdr, axsplit, WAT1_dict)
 
-        if len(axsplit) > 9:
-            functions = axsplit[9:]
-            warn("Found but did not use functions %s" % str(functions))
-
-        if int(dtype) == 0:
-            xax = ( float(crval) + float(cdelt) * (np.arange(int(naxis)) + 1 - crpix) ) / (1.+float(z))
-
-        headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt,
-                'NAXIS1':naxis, 'NAXIS':1, 'REDSHIFT':z,
-                'CTYPE1':'wavelength', 'CUNIT1':WAT1_dict['units']}
         cards = [pyfits.Card(k,v) for (k,v) in headerkws.iteritems()]
         header = pyfits.Header(cards)
 
