@@ -293,7 +293,8 @@ class Specfit(interactive.Interactive):
 
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
             components=False, annotate=False, alpha=0.5, loc='lower left',
-            xmin=None, xmax=None, xunits='pixel', continuum_as_baseline=False):
+            xmin=None, xmax=None, xunits='pixel', continuum_as_baseline=False,
+            verbose=False):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
@@ -395,8 +396,12 @@ class Specfit(interactive.Interactive):
         if plot and self.Spectrum.plotter.axis:
             midpt_pixel = np.round((xmin+xmax)/2.0)
             midpt       = self.Spectrum.xarr[midpt_pixel]
-            midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
-            print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
+            if continuum_as_baseline:
+                midpt_level = continuum
+            else:
+                midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
+            if verbose:
+                print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
             self.EQW_plots.append(self.Spectrum.plotter.axis.fill_between(
                 [midpt-eqw/2.0,midpt+eqw/2.0], [0,0],
                 [midpt_level,midpt_level], color=plotcolor, alpha=alpha,
