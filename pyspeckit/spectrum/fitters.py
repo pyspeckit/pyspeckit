@@ -144,6 +144,7 @@ class Specfit(interactive.Interactive):
         self._component_kwargs = {}
         self.Registry = Registry
         self.autoannotate = mycfg['autoannotate']
+        self.EQW_plots = []
         #self.seterrspec()
         
     @cfgdec
@@ -292,7 +293,7 @@ class Specfit(interactive.Interactive):
 
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
             components=False, annotate=False, alpha=0.5, loc='lower left',
-            xmin=None, xmax=None, xunits='pixel'):
+            xmin=None, xmax=None, xunits='pixel', continuum_as_baseline=False):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
@@ -356,6 +357,8 @@ class Specfit(interactive.Interactive):
                 center_pix = self.Spectrum.xarr.x_to_pix(cen)
                 if continuum is None:
                     continuum = self.Spectrum.baseline.basespec[center_pix]
+                elif continuum_as_baseline:
+                    integrals[-1] += (self.Spectrum.baseline.basespec[xmin:xmax] - continuum).sum()
                 eqw.append( -integ / continuum)
             if plot:
                 plot = False
@@ -363,15 +366,20 @@ class Specfit(interactive.Interactive):
         elif fitted:
             model = self.get_model(self.Spectrum.xarr[xmin:xmax],
                                    add_baseline=False)
+
+            # EQW is positive for absorption lines
+            # fitted components are assume to be continuum-subtracted
+            integral = (-model).sum() * dx
+
             if continuum is None:
                 # centroid in data units
                 # (may fail if model has pos + neg values)
                 center = (model*self.Spectrum.xarr[xmin:xmax]).sum()/model.sum()
                 center_pix = self.Spectrum.xarr.x_to_pix(center)
                 continuum = self.Spectrum.baseline.basespec[center_pix]
-            # EQW is positive for absorption lines
-            # fitted components are assume to be continuum-subtracted
-            integral = (-model).sum() * dx
+            elif continuum_as_baseline:
+                integral += (self.Spectrum.baseline.basespec[xmin:xmax] - continuum).sum()
+
             eqw = integral / continuum
         else:
             if continuum_as_baseline:
@@ -389,13 +397,10 @@ class Specfit(interactive.Interactive):
             midpt       = self.Spectrum.xarr[midpt_pixel]
             midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
             print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
-            self.Spectrum.plotter.axis.fill_between(
-                    [midpt-eqw/2.0,midpt+eqw/2.0],
-                    [0,0],
-                    [midpt_level,midpt_level],
-                    color=plotcolor,
-                    alpha=alpha,
-                    label='EQW: %0.3g' % eqw)
+            self.EQW_plots += self.Spectrum.plotter.axis.fill_between(
+                [midpt-eqw/2.0,midpt+eqw/2.0], [0,0],
+                [midpt_level,midpt_level], color=plotcolor, alpha=alpha,
+                label='EQW: %0.3g' % eqw)
             if annotate:
                 self.Spectrum.plotter.axis.legend(
                         [(matplotlib.collections.CircleCollection([0],facecolors=[plotcolor],edgecolors=[plotcolor]))],
