@@ -20,10 +20,16 @@ before_install:
    - "sh -e /etc/init.d/xvfb start"
    # We do this to make sure we get the dependencies so pip works below
    - sudo apt-get update 
-   - sudo apt-get install python-numpy cython libatlas-dev liblapack-dev gfortran
+   - sudo apt-get install python-numpy
+   - sudo apt-get install cython 
+   - sudo apt-get install libatlas-dev 
+   - sudo apt-get install liblapack-dev 
+   - sudo apt-get install gfortran
    - sudo apt-get install python-scipy 
    - sudo apt-get install tk8.5
    - sudo apt-get install python-tk
+   - wget http://repo.continuum.io/miniconda/Miniconda-3.0.5-Linux-x86_64.sh
+   - bash Miniconda-3.0.5-Linux-x86_64.sh -b
    #- if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then sudo apt-get install python2.6-tk; fi
    - if [[ $TRAVIS_PYTHON_VERSION == "2.7" ]]; then sudo apt-get install python2.7-tk; fi
    - sudo apt-get build-dep python-matplotlib
@@ -32,15 +38,16 @@ before_install:
    - pip install setuptools --upgrade
    - pip install pip --upgrade
    - pip install wheel
-   - if [[ $ASTROPY_VERSION == stable ]]; then pip -q install astropy --use-mirrors; fi
-   - if [[ $ASTROPY_VERSION == development ]]; then pip -q install git+http://github.com/astropy/astropy.git#egg=astropy --use-mirrors; fi
      
 install: 
    - export PYTHONIOENCODING=UTF8 # just in case
+   - pip install --upgrade Cython --use-mirrors
    - pip install --upgrade "numpy==$NUMPY_VERSION" -q --use-mirrors
-   - $PIP_WHEEL_COMMAND "scipy==0.13.1"
+   #- $PIP_WHEEL_COMMAND "scipy==0.13.1"
    - $PIP_WHEEL_COMMAND "matplotlib==1.3.0"
    - pip install ordereddict --use-mirrors
+   - if [[ $ASTROPY_VERSION == stable ]]; then pip -q install astropy; fi
+   - if [[ $ASTROPY_VERSION == development ]]; then pip -q install git+http://github.com/astropy/astropy.git#egg=astropy; fi
    - python setup.py install # I guess?
 script:
    - python setup.py test
