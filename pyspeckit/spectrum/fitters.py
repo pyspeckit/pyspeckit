@@ -312,6 +312,9 @@ class Specfit(interactive.Interactive):
             the fitted baseline.  WARNING: continuum=0 will still "work", but
             will give numerically invalid results.  Similarly, a negative continuum
             will work, but will yield results with questionable physical meaning.
+        continuum_as_baseline : bool
+            If ``fitted==False``, this replaces the baseline with the specified
+            continuum when computing the absorption depth of the line
         components : bool
             If your fit is multi-component, will attempt to acquire centroids
             for each component and print out individual EQWs
@@ -335,15 +338,16 @@ class Specfit(interactive.Interactive):
 
         # determine range to use
         if xmin is None:
-            xmin = self.Spectrum.xarr.x_to_pix(self.xmin)
+            xmin = self.xmin #self.Spectrum.xarr.x_to_pix(self.xmin)
         else:
             xmin = self.Spectrum.xarr.x_to_pix(xmin, xval_units=xunits)
         if xmax is None:
-            xmax = self.Spectrum.xarr.x_to_pix(self.xmax)
+            xmax = self.xmax #self.Spectrum.xarr.x_to_pix(self.xmax)
         else:
             xmax = self.Spectrum.xarr.x_to_pix(xmax, xval_units=xunits)
 
         dx = np.abs(self.Spectrum.xarr[xmin:xmax].cdelt(approx=True))
+
         if components:
             centroids = self.fitter.analytic_centroids()
             integrals = self.fitter.component_integrals(self.Spectrum.xarr[xmin:xmax],dx=dx)
@@ -370,7 +374,9 @@ class Specfit(interactive.Interactive):
             integral = (-model).sum() * dx
             eqw = integral / continuum
         else:
-            if self.Spectrum.baseline.subtracted is False:
+            if continuum_as_baseline:
+                diffspec = (continuum - self.Spectrum.data)
+            elif self.Spectrum.baseline.subtracted is False:
                 diffspec = (self.Spectrum.baseline.basespec - self.Spectrum.data)
             else:
                 diffspec = -self.Spectrum.data
@@ -1237,6 +1243,36 @@ class Specfit(interactive.Interactive):
             return integ,error
         else:
             return integ
+
+    def model_mask(self, **kwargs):
+        """
+        Get a mask (boolean array) of the region where the fitted model is
+        significant
+
+        Parameters
+        ----------
+        threshold : 'auto' or 'error' or float
+            The threshold to compare the model values to for selecting the mask
+            region.
+            
+             * auto: uses `peak_fraction` times the model peak
+             * error: use the spectrum error
+             * float: any floating point number as an absolute threshold
+
+        peak_fraction : float
+            Parameter used if ``threshold=='auto'`` to determine fraction of
+            model peak to set threshold at
+        add_baseline : bool
+            Add the fitted baseline to the model before comparing to threshold?
+
+        Returns
+        -------
+        mask : `~numpy.ndarray`
+            A boolean mask array with the same size as the spectrum, set to
+            ``True`` where the fitted model has values above a specified
+            threshold
+        """
+        return self._compare_to_threshold(**kwargs)
 
     def _compare_to_threshold(self, threshold='auto', peak_fraction=0.01,
                               add_baseline=False):
