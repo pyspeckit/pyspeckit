@@ -314,8 +314,8 @@ class Specfit(interactive.Interactive):
             will give numerically invalid results.  Similarly, a negative continuum
             will work, but will yield results with questionable physical meaning.
         continuum_as_baseline : bool
-            If ``fitted==False``, this replaces the baseline with the specified
-            continuum when computing the absorption depth of the line
+            Replace the baseline with the specified continuum when computing
+            the absorption depth of the line
         components : bool
             If your fit is multi-component, will attempt to acquire centroids
             for each component and print out individual EQWs
@@ -358,7 +358,7 @@ class Specfit(interactive.Interactive):
                 if continuum is None:
                     continuum = self.Spectrum.baseline.basespec[center_pix]
                 elif continuum_as_baseline:
-                    integrals[-1] += (self.Spectrum.baseline.basespec[xmin:xmax] - continuum).sum()
+                    integrals[-1] += -(self.Spectrum.baseline.basespec[xmin:xmax] - continuum).sum() * dx
                 eqw.append( -integ / continuum)
             if plot:
                 plot = False
@@ -378,7 +378,7 @@ class Specfit(interactive.Interactive):
                 center_pix = self.Spectrum.xarr.x_to_pix(center)
                 continuum = self.Spectrum.baseline.basespec[center_pix]
             elif continuum_as_baseline:
-                integral += (self.Spectrum.baseline.basespec[xmin:xmax] - continuum).sum()
+                integral += -(self.Spectrum.baseline.basespec[xmin:xmax] - continuum).sum() * dx
 
             eqw = integral / continuum
         else:
@@ -397,10 +397,10 @@ class Specfit(interactive.Interactive):
             midpt       = self.Spectrum.xarr[midpt_pixel]
             midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
             print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
-            self.EQW_plots += self.Spectrum.plotter.axis.fill_between(
+            self.EQW_plots.append(self.Spectrum.plotter.axis.fill_between(
                 [midpt-eqw/2.0,midpt+eqw/2.0], [0,0],
                 [midpt_level,midpt_level], color=plotcolor, alpha=alpha,
-                label='EQW: %0.3g' % eqw)
+                label='EQW: %0.3g' % eqw))
             if annotate:
                 self.Spectrum.plotter.axis.legend(
                         [(matplotlib.collections.CircleCollection([0],facecolors=[plotcolor],edgecolors=[plotcolor]))],
