@@ -34,6 +34,7 @@ import copy
 import itertools
 from pyspeckit.spectrum import history
 from astropy.io import fits
+import cubes
 
 class Cube(spectrum.Spectrum):
 
