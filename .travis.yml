@@ -32,8 +32,8 @@ before_install:
    - pip install setuptools --upgrade
    - pip install pip --upgrade
    - pip install wheel
-   - if [[ $ASTROPY_VERSION == stable ]]; then pip -q install astropy --use-mirrors; fi
-   - if [[ $ASTROPY_VERSION == development ]]; then pip -q install git+http://github.com/astropy/astropy.git#egg=astropy --use-mirrors; fi
+   - if [[ $ASTROPY_VERSION == stable ]]; then pip -q install astropy; fi
+   - if [[ $ASTROPY_VERSION == development ]]; then pip -q install git+http://github.com/astropy/astropy.git#egg=astropy; fi
      
 install: 
    - export PYTHONIOENCODING=UTF8 # just in case
