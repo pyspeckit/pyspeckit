@@ -32,7 +32,7 @@ before_install:
    - sudo apt-get install python-tk
    - wget http://repo.continuum.io/miniconda/Miniconda-3.0.5-Linux-x86_64.sh
    - bash Miniconda-3.0.5-Linux-x86_64.sh -b
-   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY_VERSION astropy=$ASTROPY_VERSION pytest pip scipy matplotlib
+   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY_VERSION astropy pytest pip scipy matplotlib
    #- if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then sudo apt-get install python2.6-tk; fi
    - if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then pip install ordereddict; fi
    - if [[ $TRAVIS_PYTHON_VERSION == "2.7" ]]; then sudo apt-get install python2.7-tk; fi
