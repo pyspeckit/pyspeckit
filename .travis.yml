@@ -46,7 +46,7 @@ install:
    - export PYTHONIOENCODING=UTF8 # just in case
    - pip install --upgrade Cython --use-mirrors
    - pip install --upgrade "numpy==$NUMPY_VERSION" -q --use-mirrors
-   - pip install --upgrade scipy
+   #- pip install --upgrade scipy
    - $PIP_WHEEL_COMMAND "matplotlib==1.3.0"
    - pip install ordereddict --use-mirrors
    - if [[ $ASTROPY_VERSION == stable ]]; then pip -q install astropy; fi
