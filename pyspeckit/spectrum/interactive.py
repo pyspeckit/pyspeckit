@@ -53,7 +53,12 @@ class Interactive(object):
         """
         Decide what to do given input (click, keypress, etc.)
         """
-        toolbar = self.Spectrum.plotter.figure.canvas.manager.toolbar
+        if hasattr(self.Spectrum.plotter.figure.canvas.manager, 'toolbar'):
+            toolbar = self.Spectrum.plotter.figure.canvas.manager.toolbar
+            toolmode = toolbar.mode
+        else:
+            # If interactivity isn't possible, we don't really care what tool is 'active'
+            toolmode = ''
         self.event_history.append(event)
 
         if hasattr(self,'fitter') and self.fitter.npars > 3:
@@ -61,7 +66,7 @@ class Interactive(object):
         else:
             nwidths = 1
 
-        if toolbar.mode == '' and self.Spectrum.plotter.axis in event.canvas.figure.axes:
+        if toolmode == '' and self.Spectrum.plotter.axis in event.canvas.figure.axes:
             if hasattr(event,'button'):
                 button = event.button
             elif hasattr(event,'key'):
