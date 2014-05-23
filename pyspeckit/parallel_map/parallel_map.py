@@ -1,3 +1,8 @@
+"""
+Parellel Map snippet by Brian Refsdal
+
+http://www.astropython.org/snippet/2010/3/Parallel-map-using-multiprocessing
+"""
 import numpy
 _multi=False
 _ncpus=1
@@ -183,6 +188,3 @@ if __name__ == "__main__":
   print 'serial map in %g secs' % (time.time()-tt)
 
   assert (numpy.asarray(result) == numpy.asarray(presult)).all()
-
-
-
