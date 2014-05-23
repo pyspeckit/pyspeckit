@@ -10,4 +10,4 @@ else
 fi
 
 chmod +x miniconda.sh
-./miniconda.sh -b
+bash miniconda.sh -b
