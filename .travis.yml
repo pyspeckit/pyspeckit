@@ -30,7 +30,7 @@ before_install:
      #- sudo apt-get install python-scipy 
    - sudo apt-get install tk8.5
    - sudo apt-get install python-tk
-   - conda update anaconda
+   # apparently not installed... - conda update anaconda
    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY_VERSION astropy pytest pip scipy matplotlib
    #- if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then sudo apt-get install python2.6-tk; fi
    - if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then pip install ordereddict; fi
