@@ -111,13 +111,14 @@ class Plotter(object):
         if self.figure is not None and hasattr(self,'_mpl_key_callbacks'):
             self.figure.canvas.callbacks.callbacks['key_press_event'].update(self._mpl_key_callbacks)
 
-    def __call__(self, figure=None, axis=None, clear=True, autorefresh=None, plotscale=1.0, **kwargs):
+    def __call__(self, figure=None, axis=None, clear=True, autorefresh=None,
+                 plotscale=1.0, override_plotkwargs=False, **kwargs):
         """
         Plot a spectrum
         
         Keywords:
         figure - either a matplotlib figure instance or a figure number
-            to pass into pyplot.figure.  
+            to pass into pyplot.figure.
         axis - Alternative to figure, can pass an axis instance and use
             it as the plotting canvas
         clear - Clear the axis before plotting?
@@ -158,7 +159,10 @@ class Plotter(object):
 
         self.plotscale = plotscale
 
-        self.plotkwargs = kwargs
+        if self.plotkwargs and not override_plotkwargs:
+            self.plotkwargs.update(kwargs)
+        else:
+            self.plotkwargs = kwargs
 
         self.plot(**kwargs)
 
