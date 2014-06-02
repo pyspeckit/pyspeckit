@@ -12,10 +12,7 @@ except ImportError:
 import numpy
 import numpy as np
 from numpy import pi
-try:
-    from progressbar import ProgressBar
-except ImportError:
-    ProgressBar = False
+from astropy.utils.console import ProgressBar
 import string
 import struct
 
@@ -518,14 +515,11 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
     header_list  = []
     spcount = 0
     jj = -1
-    if progressbar:
-        pb = ProgressBar(maxval=filelen)
-        pb.start()
+    pb = ProgressBar(maxval=filelen)
     startpos = -1 # debug tool: make sure we are not in an infinite loop
     while f.tell() < filelen:
         jj += 1
-        if progressbar:
-            pb.update(f.tell())
+        pb.update(f.tell())
         if f.tell() == startpos:
             raise ValueError("Infinite Loop")
         startpos = f.tell()
@@ -709,7 +703,6 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
         if DEBUG:
             print "Continuing to sp# ",spcount+1," starting at ",f.tell()," out of ",filelen
 
-    pb.finish()
     f.close()
     return spectra,header_list,indexes
 

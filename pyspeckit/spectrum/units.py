@@ -680,7 +680,11 @@ class SpectroscopicAxis(np.ndarray):
         elif self.units in (None,'none'):
             raise ValueError("xarr's units are blank; in order to convert to other units they must be specified.")
         elif unit in pixel_dict:
-            return np.arange(self.shape[0])
+            newxarr = self.copy()
+            newxarr.units = 'pixels'
+            newxarr.xtype = 'pixels'
+            newxarr[:] = np.arange(self.shape[0])
+            return newxarr
         elif unit not in conversion_dict[self.xtype]:
             change_xtype = True
             change_units = True

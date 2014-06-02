@@ -1,6 +1,7 @@
 from matplotlib.widgets import Widget,Button,Slider
 from matplotlib import pyplot
 import matplotlib
+import warnings
 
 class dictlist(list):
     def __init__(self, *args):
@@ -100,7 +101,12 @@ class FitterSliders(Widget):
             matplotlib.rcParams['toolbar'] = 'None'
             self.toolfig = pyplot.figure(figsize=(6,3))
             if hasattr(targetfig.canvas.manager,'window'):
-                self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.title())
+                if hasattr(targetfig.canvas.manager.window, 'title'):
+                    self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.title())
+                elif hasattr(targetfig.canvas.manager.window, 'windowTitle'):
+                    self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.windowTitle())
+                else:
+                    warnings.warn("Only Qt4 and TkAgg support window titles (apparently)")
             self.toolfig.subplots_adjust(top=0.9,left=0.2,right=0.9)
             matplotlib.rcParams['toolbar'] = tbar
         else:
