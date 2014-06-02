@@ -480,6 +480,8 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
         Factor by which to downsample data by averaging.  Useful for
         overresolved data.
     """
+    t0 = time.time()
+    print "Loading file {0}".format(filename),":",
     f = open(filename,'rb')
     filelen = len(f.read())
     f.seek(0)
@@ -515,8 +517,9 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
     header_list  = []
     spcount = 0
     jj = -1
-    pb = ProgressBar(maxval=filelen)
+    pb = ProgressBar(filelen)
     startpos = -1 # debug tool: make sure we are not in an infinite loop
+    print "{0} seconds".format(time.time()-t0)
     while f.tell() < filelen:
         jj += 1
         pb.update(f.tell())
