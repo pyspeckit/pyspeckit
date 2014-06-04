@@ -417,7 +417,7 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
 
     if coordsys.lower() == 'galactic':
         pos = coordinates.Galactic(ap[0],ap[1],unit=('deg','deg'))
-    elif coordsys.lower() in ('radec','fk5','icrs'):
+    elif coordsys.lower() in ('radec','fk5','icrs','celestial'):
         pos = coordinates.ICRS(ap[0],ap[1],unit=('deg','deg'))
 
     if wcs.wcs.ctype[0][:2] == 'RA':
@@ -470,6 +470,8 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
             width  = ap[2] / conv / abs(wcs.wcs.cdelt[0])  # first is width, second is height in DS9 PA convention
         apold = copy.copy(ap)
         ap = [x,y,width]
+    else:
+        raise TypeError("Aperture length is incorrect.")
 
     return ap
 
