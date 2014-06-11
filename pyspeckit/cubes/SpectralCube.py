@@ -213,14 +213,18 @@ class Cube(spectrum.Spectrum):
 
         return newcube
 
+    def set_spectrum(self, x, y):
+        self.data = self.cube[:,y,x]
+        if self.errorcube is not None:
+            self.error = self.errorcube[:,y,x]
+
     def plot_spectrum(self, x, y, plot_fit=False, **kwargs):
         """
         Fill the .data array with a real spectrum and plot it
         """
 
-        self.data = self.cube[:,y,x]
-        if self.errorcube is not None:
-            self.error = self.errorcube[:,y,x]
+        self.set_spectrum(x,y)
+
         if self.plot_special is None:
             self.plotter(**kwargs)
             if plot_fit: self.plot_fit(x,y)
