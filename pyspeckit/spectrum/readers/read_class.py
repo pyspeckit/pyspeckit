@@ -12,7 +12,11 @@ except ImportError:
 import numpy
 import numpy as np
 from numpy import pi
-from astropy.utils.console import ProgressBar
+try:
+    from astropy.utils.console import ProgressBar
+except ImportError:
+    ProgressBar = lambda x: None
+    ProgressBar.update = lambda x: None
 import string
 import struct
 
