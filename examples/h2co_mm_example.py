@@ -7,6 +7,8 @@ from pyspeckit.spectrum import models
 
 # create the Formaldehyde Radex fitter
 # This step cannot be easily generalized: the user needs to read in their own grids
+# Some of these grids can be acquired from:
+# https://github.com/keflavich/radex_data_grids
 texgrid1 = pyfits.getdata('/Users/adam/work/h2co/radex/thermom/303-202_321-220_5kms_temperature_para_tex1.fits')
 taugrid1 = pyfits.getdata('/Users/adam/work/h2co/radex/thermom/303-202_321-220_5kms_temperature_para_tau1.fits')
 texgrid2 = pyfits.getdata('/Users/adam/work/h2co/radex/thermom/303-202_321-220_5kms_temperature_para_tex2.fits')
