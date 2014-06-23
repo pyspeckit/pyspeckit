@@ -16,7 +16,8 @@ import fitter
 import numpy
 import types
 
-def gaussian(x,A,dx,w, return_components=False, normalized=False):
+def gaussian(x,A,dx,w, return_components=False, normalized=False,
+             return_hyperfine_components=False):
     """
     Returns a 1-dimensional gaussian of form
     A*numpy.exp(-(x-dx)**2/(2*w**2))
@@ -37,6 +38,9 @@ def gaussian(x,A,dx,w, return_components=False, normalized=False):
         Width of the gaussian (sigma)
     return_components : bool
         dummy variable; return_components does nothing but is required by all
+        fitters
+    return_hyperfine_components : bool
+        dummy variable; does nothing but is required by all
         fitters
     normalized : bool
         Return a normalized Gaussian?

@@ -4,6 +4,7 @@ Parellel Map snippet by Brian Refsdal
 http://www.astropython.org/snippet/2010/3/Parallel-map-using-multiprocessing
 """
 import numpy
+from astropy import log
 _multi=False
 _ncpus=1
 
@@ -144,6 +145,7 @@ def parallel_map(function, sequence, numcores=None):
   # if sequence is less than numcores, only use len sequence number of 
   # processes
   if size < numcores:
+    log.info("Reduced number of cores to {0}".format(size))
     numcores = size 
 
   # group sequence into numcores-worth of chunks
