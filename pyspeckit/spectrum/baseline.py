@@ -8,8 +8,8 @@ import history
 from .. import specwarnings
 
 interactive_help_message = """
-(1) Left-click or press 1 (one) at two positions to select or add to the baseline fitting range - it will be 
-highlighted in green if the selection is successful.  
+(1) Left-click or press 1 (one) at two positions to select or add to the baseline fitting range - it will be
+highlighted in green if the selection is successful.
     You can select regions to e/x/clude by pressing 'x' at two positions
 (2) Middle or right click or press '2','m', '3', or 'd' to /d/isconnect and perform the fit.
     If you press '2','m', or middle-click, the baseline will be subtracted
@@ -73,7 +73,7 @@ class Baseline(interactive.Interactive):
             highlight_fitregion=False, reset_selection=False, subtract=True,
             **kwargs):
         """
-        Fit and remove a polynomial from the spectrum.  
+        Fit and remove a polynomial from the spectrum.
         It will be saved in the variable "self.basespec"
         and the fit parameters will be saved in "self.order"
 
@@ -145,15 +145,15 @@ class Baseline(interactive.Interactive):
                 #vhi = self.Spectrum.plotter.specfit.modelpars[1] + 2*self.Spectrum.plotter.specfit.modelpars[2]
                 #exclude = [np.argmin(abs(self.Spectrum.xarr-vlo)),argmin(abs(self.Spectrum.xarr-vhi))]
                 full_model = specfit.get_full_model(add_baseline=False)
-                
+
                 # only set additional FALSE
                 self.includemask *= abs(full_model) < exclusionlevel*np.abs(full_model).max()
                 #import pdb; pdb.set_trace()
 
             self.button2action(fit_original=fit_original,
-                               baseline_fit_color=baseline_fit_color, 
+                               baseline_fit_color=baseline_fit_color,
                                debug=debug,
-                               subtract=subtract, 
+                               subtract=subtract,
                                LoudDebug=LoudDebug,
                                **kwargs)
             if highlight_fitregion: self.highlight_fitregion()
@@ -167,6 +167,22 @@ class Baseline(interactive.Interactive):
             self.spectofit = self.Spectrum.data+self.basespec
         else:
             self.spectofit = self.Spectrum.data.copy()
+
+    def fit(self, powerlaw=None, order=None, includemask=None):
+
+        self.powerlaw = powerlaw or self.powerlaw
+        self.order = order or self.order
+        self.includemask = includemask if includemask is not None else self.includemask
+
+        xarr = self.Spectrum.xarr
+        # use a,b to keep line under 80 chars
+        a,b = self._baseline(self.spectofit, xarr=xarr,
+                             err=self.Spectrum.error, order=self.order,
+                             mask=~self.mask, powerlaw=self.powerlaw,
+                             xarr_fit_units=xarr.units, **kwargs)
+        self.basespec, self.baselinepars = (a,b)
+
+        self.set_basespec_frompars()
 
     def button2action(self, event=None, debug=False, subtract=True, powerlaw=None,
             fit_original=False, baseline_fit_color='orange', **kwargs):
@@ -190,20 +206,11 @@ class Baseline(interactive.Interactive):
         self._xfit_units = self.Spectrum.xarr.units
 
         if debug: print "Fitting baseline"
-        self.basespec, self.baselinepars = self._baseline(
-                                                          self.spectofit,
-                                                          xarr=self.Spectrum.xarr,
-                                                          err=self.Spectrum.error,
-                                                          order=self.order, 
-                                                          mask=(True-self.includemask),
-                                                          powerlaw=powerlaw,
-                                                          xarr_fit_units=self._xfit_units,
-                                                          **kwargs)
-
-        self.set_basespec_frompars()
+        self.fit(powerlaw=powerlaw, includemask=self.includemask,
+                 order=self.order)
 
         if subtract:
-            if self.subtracted and fit_original: 
+            if self.subtracted and fit_original:
                 # use the spectrum with the old baseline added in (that's what we fit to)
                 self.Spectrum.data = self.spectofit - self.basespec
             else:
@@ -216,7 +223,7 @@ class Baseline(interactive.Interactive):
 
         if self.Spectrum.plotter.axis is not None:
             if debug: print "Plotting baseline"
-            if event is not None: 
+            if event is not None:
                 # preserve frame if fitting interactively
                 kwargs.update({'use_window_limits':True})
             self.plot_baseline(baseline_fit_color=baseline_fit_color, **kwargs)
@@ -227,7 +234,7 @@ class Baseline(interactive.Interactive):
 
         if hasattr(self.Spectrum,'header'):
             history.write_history(self.Spectrum.header,
-                    "BASELINE order=%i pars=%s" % (self.order, 
+                    "BASELINE order=%i pars=%s" % (self.order,
                         ",".join([str(s) for s in self.baselinepars])) +
                         "(powerlaw)" if self.powerlaw else "")
 
@@ -289,18 +296,18 @@ class Baseline(interactive.Interactive):
         """
 
         # clear out the errorplot.  This should not be relevant...
-        if self.Spectrum.plotter.errorplot is not None: 
+        if self.Spectrum.plotter.errorplot is not None:
             for p in self.Spectrum.plotter.errorplot:
                 if isinstance(p,matplotlib.collections.PolyCollection):
-                    if p in self.Spectrum.plotter.axis.collections: 
+                    if p in self.Spectrum.plotter.axis.collections:
                         self.Spectrum.plotter.axis.collections.remove(p)
                 if isinstance(p,matplotlib.lines.Line2D):
-                    if p in self.Spectrum.plotter.axis.lines: 
+                    if p in self.Spectrum.plotter.axis.lines:
                         self.Spectrum.plotter.axis.lines.remove(p)
 
         # if we subtract the baseline, replot the now-subtracted data with rescaled Y axes
         if self.subtracted:
-            if self.Spectrum.plotter.axis is not None: 
+            if self.Spectrum.plotter.axis is not None:
                 for p in self.Spectrum.plotter.axis.lines:
                     self.Spectrum.plotter.axis.lines.remove(p)
             plotmask = self.OKmask*False # include nothing...
@@ -335,7 +342,7 @@ class Baseline(interactive.Interactive):
             Re-plot the spectrum?  (only happens if unsubtraction proceeds,
             i.e. if there was a baseline to unsubtract)
 
-        *preserve_limits* [ True ] 
+        *preserve_limits* [ True ]
             Preserve the current x,y limits
         """
         if self.subtracted:
@@ -345,7 +352,7 @@ class Baseline(interactive.Interactive):
                 kwargs = self.Spectrum.plotter.plotkwargs
                 kwargs.update({'use_window_limits':preserve_limits})
                 self.Spectrum.plotter(**kwargs)
-        else: 
+        else:
             print "Baseline wasn't subtracted; not unsubtracting."
 
     def annotate(self,loc='upper left'):
@@ -364,9 +371,9 @@ class Baseline(interactive.Interactive):
                 )
         self.Spectrum.plotter.axis.add_artist(self.blleg)
         if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
-  
+
     def clearlegend(self):
-        if self.blleg is not None: 
+        if self.blleg is not None:
             self.blleg.set_visible(False)
             if self.blleg in self.Spectrum.plotter.axis.artists:
                 self.Spectrum.plotter.axis.artists.remove(self.blleg)
@@ -395,7 +402,7 @@ class Baseline(interactive.Interactive):
         #    else: xmax = spectrum.shape[-1]
         #elif xmax is None:
         #    xmax = spectrum.shape[-1]
-        
+
         if xarr is None:
             xarr = np.indices(spectrum.shape).squeeze()
 
@@ -488,7 +495,7 @@ class Baseline(interactive.Interactive):
         """
         Create a copy of the baseline fit
 
-        [ parent ] 
+        [ parent ]
             A spectroscopic axis instance that is the parent of the specfit
             instance.  This needs to be specified at some point, but defaults
             to None to prevent overwriting a previous plot.
@@ -499,7 +506,7 @@ class Baseline(interactive.Interactive):
         newbaseline.OKmask = copy.copy( self.OKmask )
         newbaseline.basespec = copy.copy( self.basespec )
         newbaseline.baselinepars = copy.copy( self.baselinepars )
-        newbaseline.includemask = self.includemask.copy() 
+        newbaseline.includemask = self.includemask.copy()
 
         if parent is not None:
             newbaseline.Spectrum.plotter = parent.plotter
