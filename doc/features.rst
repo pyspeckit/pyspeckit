@@ -9,6 +9,7 @@ Features
     measurements
     units
     registration
+    classes
 
 ..
     .. include:: baseline.rst

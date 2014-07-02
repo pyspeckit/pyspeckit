@@ -486,11 +486,17 @@ class Specfit(interactive.Interactive):
         """
         Fit multiple gaussians (or other profiles)
 
-        fittype - What function will be fit?  fittype must have been Registryed in the
+        Parameters
+        ----------
+        fittype : str
+            What function will be fit?  fittype must have been Registryed in the
             singlefitters dict.  Uses default ('gaussian') if not specified
-        renormalize - if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
+        renormalize : 'auto' or bool
+            if 'auto' or True, will attempt to rescale small data (<1e-9) to be
             closer to 1 (scales by the median) so that the fit converges better
-        parinfo: supercedes guesses
+        parinfo : `~parinfo` structure
+            Guess structure; supercedes ``guesses``
+
         """
         if reset_fitspec:
             self.setfitspec()

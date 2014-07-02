@@ -32,7 +32,7 @@ Guides / Getting Started
     Intended for users of IRAF's `splot` interactive fitting routine.
 
 Classes and API
-=====================================
+===============
 At the core, PySpecKit runs on a 'Spectroscopic Object' class called
 :class:`Spectrum <pyspeckit.spectrum.Spectrum>`.  Therefore everything
 interesting about PySpecKit can be learned by digging into the properties of
@@ -84,5 +84,6 @@ Features
    High-Level Wrappers <wrappers>
    Examples <examples>
    Interactive Use <interactive>
-
+   CLASS Guide <guide_class>
+   IRAF Guide <guide_iraf>
 ..   Base Classes <classes>
