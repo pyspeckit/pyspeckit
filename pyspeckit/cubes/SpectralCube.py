@@ -399,9 +399,7 @@ class Cube(spectrum.Spectrum):
                                 error=error,
                                 header=header)
 
-        sp.specfit = copy.copy(self.specfit)
-        sp.specfit.includemask = self.specfit.includemask.copy()
-        sp.specfit.Spectrum = sp
+        sp.specfit = self.specfit.copy(parent=sp)
 
         return sp
 

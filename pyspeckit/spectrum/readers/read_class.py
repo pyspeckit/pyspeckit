@@ -12,6 +12,7 @@ except ImportError:
 import numpy
 import numpy as np
 from numpy import pi
+from astropy import log
 try:
     from astropy.utils.console import ProgressBar
 except ImportError:
@@ -32,7 +33,7 @@ def print_timing(func):
         t1 = time.time()
         res = func(*arg,**kwargs)
         t2 = time.time()
-        print '%s took %0.5g s' % (func.func_name, (t2-t1))
+        log.info('%s took %0.5g s' % (func.func_name, (t2-t1)))
         return res
     wrapper.__doc__ = func.__doc__
     return wrapper
@@ -485,14 +486,14 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
         overresolved data.
     """
     t0 = time.time()
-    print "Loading file {0}".format(filename),":",
+    log.info("Loading file {0} :".format(filename))
     f = open(filename,'rb')
     filelen = len(f.read())
     f.seek(0)
 
     filetype = f.read(4)
     if filetype in filetype_dict:
-        print "File %s is type %s" % (filename,filetype_dict[filetype])
+        log.info("File %s is type %s" % (filename,filetype_dict[filetype]))
     else:
         raise TypeError("File type error: %s." % filetype)
     
@@ -523,7 +524,7 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
     jj = -1
     pb = ProgressBar(filelen)
     startpos = -1 # debug tool: make sure we are not in an infinite loop
-    print "{0} seconds".format(time.time()-t0)
+    log.info("Pre-reading took {0} seconds".format(time.time()-t0))
     while f.tell() < filelen:
         jj += 1
         pb.update(f.tell())
@@ -691,7 +692,7 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
             elif 'NPOIN' in hdr:
                 hdr['NPOIN'] /= downsample_factor
             else:
-                print "Did not find any header keywords reporting NCHAN"
+                log.info("Did not find any header keywords reporting NCHAN")
             if 'DATALEN' in hdr:
                 hdr['DATALEN'] /= downsample_factor
             for kw in ['FRES','VRES']:

@@ -1386,13 +1386,12 @@ class Specfit(interactive.Interactive):
         the registry, the fitter, parinfo, modelpars, modelerrs, model, npeaks
 
         [ parent ] 
-            A spectroscopic axis instance that is the parent of the specfit
+            A `~Spectrum` instance that is the parent of the specfit
             instance.  This needs to be specified at some point, but defaults
             to None to prevent overwriting a previous plot.
         """
 
-        newspecfit = copy.copy(self)
-        newspecfit.Spectrum = parent
+        newspecfit = Specfit(parent, copy.deepcopy(self.Registry))
         newspecfit.parinfo = copy.deepcopy(self.parinfo)
         if newspecfit.parinfo is None:
             newspecfit.modelpars = None
@@ -1404,7 +1403,7 @@ class Specfit(interactive.Interactive):
         newspecfit.model = copy.copy( self.model )
         newspecfit.npeaks = self.npeaks
         if hasattr(self,'fitter'):
-            newspecfit.fitter = copy.copy( self.fitter )
+            newspecfit.fitter = copy.deepcopy( self.fitter )
             newspecfit.fitter.parinfo = newspecfit.parinfo
         if hasattr(self,'fullmodel'):
             newspecfit._full_model()
@@ -1418,6 +1417,9 @@ class Specfit(interactive.Interactive):
             newspecfit.Spectrum.plotter = None
 
         return newspecfit
+
+    def __copy__(self):
+        return self.copy()
 
     def add_sliders(self, parlimitdict=None, **kwargs):
         """
