@@ -9,7 +9,8 @@ An `extensible <registration.html>`_ spectroscopic analysis toolkit for astronom
 
 If you're just getting started, see the :doc:`examples page <examples>`.
 
-Downloads: 
+Downloads
+^^^^^^^^^
 
  * `September 2013 version <https://bitbucket.org/pyspeckit/pyspeckit/get/pyspeckit_0.1.14.tar.gz>`_,
  * `latest commit from bitbucket <https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz>`_ (see :doc:`install`) 
@@ -41,7 +42,7 @@ this class.
 * :doc:`spectrum` can read a variety of individual spectra types
 
   + :class:`~pyspeckit.spectrum.Spectrum` The Spectrum class, which is the core
-    of pyspeckit.  The __init__ procedure opens a spectrum file.
+    of pyspeckit.  The ``__init__`` procedure opens a spectrum file.
   + :class:`~pyspeckit.spectrum.Spectra` A group of ``Spectrum`` s.  Generally for
     when you have multiple wavelength observations you want to stitch together
     (e.g., two filterbanks on a heterodyne system, or the red/blue spectra from

@@ -92,7 +92,7 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
-html_sidebars = {'*':['globaltoc.html', 'localtoc.html', 'relations.html',
+html_sidebars = {'**':['globaltoc.html', 'localtoc.html', 'relations.html',
                       'sourcelink.html', 'searchbox.html']}
 
 # General information about the project.
@@ -184,7 +184,7 @@ html_theme_options = dict(
     pagewidth = '1000px',
     documentwidth = '760px',
     sidebarwidth = '200px',
-
+    nosidebar=False,
     headerbg="#666666",
     headercolor1="#000000",
     headercolor2="#000000",
