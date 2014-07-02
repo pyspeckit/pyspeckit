@@ -168,7 +168,7 @@ class Baseline(interactive.Interactive):
         else:
             self.spectofit = self.Spectrum.data.copy()
 
-    def fit(self, powerlaw=None, order=None, includemask=None):
+    def fit(self, powerlaw=None, order=None, includemask=None, **kwargs):
 
         self.powerlaw = powerlaw or self.powerlaw
         self.order = order or self.order
