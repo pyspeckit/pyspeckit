@@ -86,4 +86,6 @@ Features
    Interactive Use <interactive>
    CLASS Guide <guide_class>
    IRAF Guide <guide_iraf>
+   Student Projects <projects>
+
 ..   Base Classes <classes>
