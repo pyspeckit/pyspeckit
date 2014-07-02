@@ -35,7 +35,7 @@ Guides / Getting Started
 Classes and API
 ===============
 At the core, PySpecKit runs on a 'Spectroscopic Object' class called
-:class:`Spectrum <pyspeckit.spectrum.Spectrum>`.  Therefore everything
+:class:`Spectrum <pyspeckit.spectrum.classes.Spectrum>`.  Therefore everything
 interesting about PySpecKit can be learned by digging into the properties of
 this class.
 
@@ -68,7 +68,7 @@ Features
  * :doc:`fitting` describes the general process of model fitting.
  * :doc:`measurements` is a toolkit for performing EQW, column, and other measurements...
  * :doc:`units` contains the all-important
-   :class:`~pyspeckit.units.SpectroscopicAxis` class that is used to deal with
+   :class:`~pyspeckit.spectrum.units.SpectroscopicAxis` class that is used to deal with
    coordinate transformations
  * :doc:`registration` describes the extensible qualities of pyspeckit
 
