@@ -178,7 +178,7 @@ class Baseline(interactive.Interactive):
         # use a,b to keep line under 80 chars
         a,b = self._baseline(self.spectofit, xarr=xarr,
                              err=self.Spectrum.error, order=self.order,
-                             mask=~self.mask, powerlaw=self.powerlaw,
+                             mask=~self.includemask, powerlaw=self.powerlaw,
                              xarr_fit_units=xarr.units, **kwargs)
         self.basespec, self.baselinepars = (a,b)
 
