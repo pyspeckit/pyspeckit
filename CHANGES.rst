@@ -10,6 +10,9 @@ Release 0.1.15
     * Bugfix: numpy 1.8 added a "writeable" flag that broke units; that is now 
               corrected
               http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.flags.html
+    * Baseline: add a `fit` method that is independent from `button2action` to
+      make masking and fitting independent processes
+    * Added `astropy <http://astropy.org>`_ as a dependency
 
 Release 0.1.14 (2013-09-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

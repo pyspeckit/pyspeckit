@@ -8,10 +8,10 @@ if 'develop' in sys.argv:
     # use setuptools for develop, but nothing else
     from setuptools import setup
 
-with open('README.txt') as file:
+with open('README.rst') as file:
     long_description = file.read()
 
-with open('CHANGES') as file:
+with open('CHANGES.rst') as file:
     long_description += file.read()
 
 with open('REQUIREMENTS') as file:
