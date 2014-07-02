@@ -41,13 +41,13 @@ this class.
 
 * :doc:`spectrum` can read a variety of individual spectra types
 
-  + :class:`~pyspeckit.spectrum.Spectrum` The Spectrum class, which is the core
+  + :class:`~pyspeckit.spectrum.classes.Spectrum` The Spectrum class, which is the core
     of pyspeckit.  The ``__init__`` procedure opens a spectrum file.
-  + :class:`~pyspeckit.spectrum.Spectra` A group of ``Spectrum`` s.  Generally for
+  + :class:`~pyspeckit.spectrum.classes.Spectra` A group of ``Spectrum`` s.  Generally for
     when you have multiple wavelength observations you want to stitch together
     (e.g., two filterbanks on a heterodyne system, or the red/blue spectra from
     a multi-band spectrometer like the Double Imaging Spectrograph)
-  + :class:`~pyspeckit.spectrum.ObsBlock` An Observation Block - multiple
+  + :class:`~pyspeckit.spectrum.classes.ObsBlock` An Observation Block - multiple
     spectra of different objects or different times covering the same
     wavelength range
 
@@ -55,7 +55,7 @@ this class.
   `GAIA <http://astro.dur.ac.uk/~pdraper/gaia/gaia.html>`_ and `ds9
   <http://hea-www.harvard.edu/RD/ds9/>`_.
 
-  + :class:`~pyspeckit.cubes.Cube` A Cube of Spectra.  Has features to collapse
+  + :class:`~pyspeckit.cubes.SpectralCube.Cube` A Cube of Spectra.  Has features to collapse
     the cube along the spectral axis and fit spectra to each element of the
     cube.  Is meant to replicate `Starlink's GAIA
     <http://astro.dur.ac.uk/~pdraper/gaia/gaia.html>`_ in some ways, but with
@@ -85,8 +85,5 @@ Features
    High-Level Wrappers <wrappers>
    Examples <examples>
    Interactive Use <interactive>
-   CLASS Guide <guide_class>
-   IRAF Guide <guide_iraf>
-   Student Projects <projects>
 
 ..   Base Classes <classes>

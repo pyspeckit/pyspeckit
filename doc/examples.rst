@@ -37,6 +37,13 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    Template Fitting <example_template>
    Monte Carlo <example_pymc>
 
+.. toctree::
+   :maxdepth: 3
+   :hidden:
+
+   CLASS Guide <guide_class>
+   IRAF Guide <guide_iraf>
+   Student Projects <projects>
 
 ..
     TO DO:
