@@ -6,6 +6,10 @@ python:
 env:
     global:
         - PIP_WHEEL_COMMAND="pip install --find-links http://wheels.astropy.org/ --find-links http://wheels2.astropy.org/ --use-wheel --use-mirrors"
+        - NUMPY_VERSION=1.8
+        - ASTROPY_VERSION=stable
+        - CONDA_INSTALL='conda install -c astropy-ci-extras --yes'
+        - PIP_INSTALL='pip install'
     matrix:
         - NUMPY_VERSION=1.7.1 ONLY_EGG_INFO=false ASTROPY_VERSION=development
         #- NUMPY_VERSION=1.6.2 ONLY_EGG_INFO=false ASTROPY_VERSION=development
@@ -15,42 +19,53 @@ env:
         #- NUMPY_VERSION=1.4.1 ONLY_EGG_INFO=false
     
 before_install:
+   - export PYTHONIOENCODING=UTF8
+   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+   - chmod +x miniconda.sh
+   - ./miniconda.sh -b
+   - export PATH=/home/travis/miniconda/bin:$PATH
+   - conda update --yes conda
+
+   # DOCUMENTATION DEPENDENCIES
+   - if [[ $SETUP_CMD == build_sphinx* ]]; then sudo apt-get install graphviz texlive-latex-extra dvipng; fi
    # http://about.travis-ci.org/docs/user/gui-and-headless-browsers/
    - "export DISPLAY=:99.0"
    - "sh -e /etc/init.d/xvfb start"
-   - source .setup_conda.sh $TRAVIS_PYTHON_VERSION
-   - export PATH=/home/travis/anaconda/bin:/home/travis/miniconda/bin:/home/travis/miniconda3/bin:$PATH
+   #- source .setup_conda.sh $TRAVIS_PYTHON_VERSION
+   #- export PATH=/home/travis/anaconda/bin:/home/travis/miniconda/bin:/home/travis/miniconda3/bin:$PATH
    # We do this to make sure we get the dependencies so pip works below
-   - sudo apt-get update 
-   - sudo apt-get install python-numpy
-   - sudo apt-get install cython 
-   - sudo apt-get install libatlas-dev 
-   - sudo apt-get install liblapack-dev 
-   - sudo apt-get install gfortran
-     #- sudo apt-get install python-scipy 
-   - sudo apt-get install tk8.5
-   - sudo apt-get install python-tk
-   # apparently not installed... - conda update anaconda
-   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY_VERSION astropy pytest pip scipy matplotlib
-   #- if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then sudo apt-get install python2.6-tk; fi
-   - if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then pip install ordereddict; fi
-   - if [[ $TRAVIS_PYTHON_VERSION == "2.7" ]]; then sudo apt-get install python2.7-tk; fi
-   - sudo apt-get build-dep python-matplotlib
-   - sudo apt-get install python-matplotlib
-   # Install the pip that supports wheel
-   - pip install setuptools --upgrade
-   - pip install pip --upgrade
-   - pip install wheel
+   #- sudo apt-get update 
+   #- sudo apt-get install python-numpy
+   #- sudo apt-get install cython 
+   #- sudo apt-get install libatlas-dev 
+   #- sudo apt-get install liblapack-dev 
+   #- sudo apt-get install gfortran
+   #  #- sudo apt-get install python-scipy 
+   #- sudo apt-get install tk8.5
+   #- sudo apt-get install python-tk
+   ## apparently not installed... - conda update anaconda
+   #- conda install --yes python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY_VERSION astropy pytest pip scipy matplotlib
+   ##- if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then sudo apt-get install python2.6-tk; fi
+   #- if [[ $TRAVIS_PYTHON_VERSION == "2.6" ]]; then pip install ordereddict; fi
+   #- if [[ $TRAVIS_PYTHON_VERSION == "2.7" ]]; then sudo apt-get install python2.7-tk; fi
+   #- sudo apt-get build-dep python-matplotlib
+   #- sudo apt-get install python-matplotlib
+   ## Install the pip that supports wheel
+   #- pip install setuptools --upgrade
+   #- pip install pip --upgrade
+   #- pip install wheel
      
 install: 
-   - export PYTHONIOENCODING=UTF8 # just in case
-   - pip install --upgrade Cython --use-mirrors
-   - pip install --upgrade "numpy==$NUMPY_VERSION" -q --use-mirrors
-   #- pip install --upgrade scipy
-   #- $PIP_WHEEL_COMMAND "matplotlib==1.3.0"
-   - pip install ordereddict --use-mirrors
-   - if [[ $ASTROPY_VERSION == stable ]]; then pip -q install astropy; fi
-   - if [[ $ASTROPY_VERSION == development ]]; then pip -q install git+http://github.com/astropy/astropy.git#egg=astropy; fi
+   # CONDA
+   - conda create --yes -n test -c astropy-ci-extras python=$TRAVIS_PYTHON_VERSION
+   - source activate test
+
+   # CORE DEPENDENCIES
+   - $CONDA_INSTALL numpy=$NUMPY_VERSION pytest pip Cython
+   - $PIP_INSTALL pytest-xdist
+   - if [[ $ASTROPY_VERSION == stable ]]; then $CONDA_INSTALL numpy=$NUMPY_VERSION astropy; fi
+   - if [[ $ASTROPY_VERSION == development ]]; then $PIP_INSTALL git+http://github.com/astropy/astropy.git#egg=astropy; fi
+   - $PIP_INSTALL ordereddict
    - python setup.py install # I guess?
 script:
    - python setup.py test
