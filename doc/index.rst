@@ -4,15 +4,17 @@
    contain the root `toctree` directive.
 
 PySpecKit
-=====================================
+=========
 An `extensible <registration.html>`_ spectroscopic analysis toolkit for astronomy.
 
-If you're just getting started, see the :doc:`examples page
-<examples>`.
+If you're just getting started, see the :doc:`examples page <examples>`.
 
-Download the `September 2013 version <https://bitbucket.org/pyspeckit/pyspeckit/get/pyspeckit_0.1.14.tar.gz>`_,
-the `latest commit <https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz>`_, see :doc:`install`, or see
-our `pypi entry <http://pypi.python.org/pypi/pyspeckit>`_.
+Downloads: 
+
+ * `September 2013 version <https://bitbucket.org/pyspeckit/pyspeckit/get/pyspeckit_0.1.14.tar.gz>`_,
+ * `latest commit from bitbucket <https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz>`_ (see :doc:`install`) 
+ * `latest commit from github <https://github.com/pyspeckit/pyspeckit/archive/master.zip>`_ (same as above)
+ * `pypi entry <http://pypi.python.org/pypi/pyspeckit>`_.
 
 
 Supported file types and their formats:
@@ -38,13 +40,13 @@ this class.
 
 * :doc:`spectrum` can read a variety of individual spectra types
 
-  * :class:`~pyspeckit.spectrum.Spectrum` The Spectrum class, which is the core
+  + :class:`~pyspeckit.spectrum.Spectrum` The Spectrum class, which is the core
     of pyspeckit.  The __init__ procedure opens a spectrum file.
-  * :class:`~pyspeckit.spectrum.Spectra` A group of Spectrums.  Generally for
+  + :class:`~pyspeckit.spectrum.Spectra` A group of ``Spectrum`` s.  Generally for
     when you have multiple wavelength observations you want to stitch together
     (e.g., two filterbanks on a heterodyne system, or the red/blue spectra from
     a multi-band spectrometer like the Double Imaging Spectrograph)
-  * :class:`~pyspeckit.spectrum.ObsBlock` An Observation Block - multiple
+  + :class:`~pyspeckit.spectrum.ObsBlock` An Observation Block - multiple
     spectra of different objects or different times covering the same
     wavelength range
 
@@ -52,7 +54,7 @@ this class.
   `GAIA <http://astro.dur.ac.uk/~pdraper/gaia/gaia.html>`_ and `ds9
   <http://hea-www.harvard.edu/RD/ds9/>`_.
 
-  * :class:`~pyspeckit.cubes.Cube` A Cube of Spectra.  Has features to collapse
+  + :class:`~pyspeckit.cubes.Cube` A Cube of Spectra.  Has features to collapse
     the cube along the spectral axis and fit spectra to each element of the
     cube.  Is meant to replicate `Starlink's GAIA
     <http://astro.dur.ac.uk/~pdraper/gaia/gaia.html>`_ in some ways, but with
@@ -61,13 +63,13 @@ this class.
 Features
 ========
 
-* :doc:`baseline` describes baseline & continuum fitting.
-* :doc:`fitting` describes the general process of model fitting.
-* :doc:`measurements` is a toolkit for performing EQW, column, and other measurements...
-* :doc:`units` contains the all-important
-  :class:`~pyspeckit.units.SpectroscopicAxis` class that is used to deal with
-  coordinate transformations
-* :doc:`registration` describes the extensible qualities of pyspeckit
+ * :doc:`baseline` describes baseline & continuum fitting.
+ * :doc:`fitting` describes the general process of model fitting.
+ * :doc:`measurements` is a toolkit for performing EQW, column, and other measurements...
+ * :doc:`units` contains the all-important
+   :class:`~pyspeckit.units.SpectroscopicAxis` class that is used to deal with
+   coordinate transformations
+ * :doc:`registration` describes the extensible qualities of pyspeckit
 
 
 .. toctree::
