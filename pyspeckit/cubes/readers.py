@@ -12,10 +12,16 @@ def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
     """
     Grabs all the relevant pieces of a simple FITS-compliant 3d data cube
 
-    Inputs:
-        wcstype - the suffix on the WCS type to get to
-            velocity/frequency/whatever
-        specaxis - Which axis containts the spectrum?  Default 3
+    Parameters
+    ----------
+    wcstype : str
+        the suffix on the WCS type to get to
+        velocity/frequency/whatever
+    specaxis : int 
+        Which axis containts the spectrum?  Default 3
+    scale_keyword : str
+        A string to use to scale the data using the action
+        ``scale_action``
 
     """
     try:
@@ -53,13 +59,13 @@ def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
     else:
         dv,v0,p3 = hdr[('CDELT%i' % specaxis)+wcstype],hdr[('CRVAL%i' % specaxis)+wcstype],hdr[('CRPIX%i' % specaxis)+wcstype]
 
-    #if scale_keyword is not None and hdr.get(scale_keyword):
-    try:
-        scaleval = hdr[scale_keyword]
-        print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
-        cube = scale_action(cube,scaleval)
-    except (ValueError,KeyError):
-        pass
+    if scale_keyword is not None:
+        if scale_keyword in hdr:
+            scaleval = hdr[scale_keyword]
+            log.info("Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action))
+            cube = scale_action(cube,scaleval)
+        else:
+            raise KeyError('{0} not found in header for file {1}'.format(scale_keyword, filename))
 
     xconv = lambda v: ((v-p3+1)*dv+v0)
     xarr = xconv(np.arange(cube.shape[3-specaxis]))
