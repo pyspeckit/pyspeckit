@@ -6,6 +6,7 @@ import numpy as np
 import numpy.ma as ma
 from pyspeckit import spectrum
 import operator
+from astropy import log
 
 def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
                  scale_keyword=None, scale_action=operator.div, **kwargs):
