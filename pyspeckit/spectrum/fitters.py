@@ -1354,13 +1354,19 @@ class Specfit(interactive.Interactive):
                     if frame is not None:
                         self.modelpars[ii] = self.Spectrum.xarr.x_in_frame(self.modelpars[ii], frame)
 
-    def moments(self, **kwargs):
+    def moments(self, fittype=None, **kwargs):
         """
         Return the moments 
 
         see the :mod:`~pyspeckit.spectrum.moments` module
+        
+        Parameters
+        ----------
+        fittype : None or str
+            The registered fit type to use for moment computation
         """
-        return self.Registry.singlefitters[self.fittype].moments(
+        fittype = fittype or self.fittype
+        return self.Registry.singlefitters[fittype].moments(
                 self.Spectrum.xarr[self.xmin:self.xmax],
                 self.spectofit[self.xmin:self.xmax],  **kwargs)
 
