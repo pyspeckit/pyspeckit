@@ -103,9 +103,9 @@ will run into errors.""")
             # this is an IRAF .ms.fits file with a 'background' in the 3rd dimension
             spec = ma.array(data[specnum,apnum,:]).squeeze()
         else:
-            for ii in xrange(3,hdr.get('NAXIS')+1):
+            for ii in xrange(1,hdr.get('NAXIS')+1):
                 # only fail if extra axes have more than one row
-                if hdr.get('NAXIS%i' % ii) > 1:
+                if hdr.get('NAXIS%i' % ii) > 1 and (ii != int(specaxis)):
                     raise ValueError("Too many axes for open_1d_fits")
             spec = ma.array(data).squeeze()
         if errspecnum is None: 

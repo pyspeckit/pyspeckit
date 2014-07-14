@@ -23,7 +23,7 @@ except ImportError:
     import pyfits
 import numpy as np
 import os
-import agpy
+from astropy.convolution import convolve_fft,Gaussian2DKernel
 
 # set up CASA-like shortcuts
 F=False; T=True
@@ -59,12 +59,16 @@ cube44.units = "K"
 # Compute an error map.  We use the 1-1 errors for all 3 because they're
 # essentially the same, but you could use a different error map for each
 # frequency
-errmap11 = (pyfits.getdata('hotclump_11.cube_r0.5_rerun.image.moment_linefree.fits').squeeze()
-        * 13.6 * (300.0 /
-            (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2 *
-        1./cube11.header.get('BMAJ')/3600. * 1./cube11.header.get('BMIN')/3600.
-        )
-errmap11[errmap11 != errmap11] = agpy.smooth(errmap11, interp_nan=True)[errmap11 != errmap11]
+oneonemomentfn = 'hotclump_11.cube_r0.5_rerun.image.moment_linefree.fits'
+errmap11 = (pyfits.getdata(oneonemomentfn).squeeze() * 13.6 *
+            (300.0 /
+             (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2
+            * 1./cube11.header.get('BMAJ')/3600. *
+            1./cube11.header.get('BMIN')/3600.)
+# Interpolate errors across NaN pixels
+errmap11[errmap11 != errmap11] = convolve_fft(errmap11,
+                                              Gaussian2DKernel(3),
+                                              interpolate_nan=True)[errmap11 != errmap11]
 
 # Stack the cubes into one big cube.  The X-axis is no longer linear: there
 # will be jumps from 1-1 to 2-2 to 4-4.  
