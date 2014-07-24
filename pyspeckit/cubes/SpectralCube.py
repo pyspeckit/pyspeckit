@@ -277,6 +277,7 @@ class Cube(spectrum.Spectrum):
         self.specfit.plot_fit(**kwargs)
 
     def plot_apspec(self, aperture, coordsys=None, reset_ylimits=True,
+                    wunit='arcsec',
                     method='mean', **kwargs):
         """
         Extract an aperture using cubes.extract_aperture
@@ -304,7 +305,7 @@ class Cube(spectrum.Spectrum):
         else:
             #self.plot_special(reset_ylimits=reset_ylimits, **dict(kwargs.items()+self.plot_special_kwargs.items()))
 
-            sp = self.get_apspec(aperture, coordsys=coordsys, method=method)
+            sp = self.get_apspec(aperture, coordsys=coordsys, wunit=wunit, method=method)
             sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
             sp.plot_special(reset_ylimits=reset_ylimits, **dict(kwargs.items()+self.plot_special_kwargs.items()))
 

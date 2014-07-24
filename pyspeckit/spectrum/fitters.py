@@ -1431,7 +1431,7 @@ class Specfit(interactive.Interactive):
         return newspecfit
 
     def __copy__(self):
-        return self.copy()
+        return self.copy(parent=self.Spectrum)
 
     def add_sliders(self, parlimitdict=None, **kwargs):
         """

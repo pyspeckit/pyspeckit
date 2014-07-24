@@ -160,7 +160,8 @@ class Spectrum(object):
         if maskdata:
             if hasattr(self.data,'mask'):
                 self.data.mask += np.isnan(self.data) + np.isinf(self.data)
-                self.error.mask += np.isnan(self.data) + np.isinf(self.data)
+                if hasattr(self.error,'mask'):
+                    self.error.mask += np.isnan(self.data) + np.isinf(self.data)
             else:
                 self.data = np.ma.masked_where(np.isnan(self.data) + np.isinf(self.data), self.data)
                 self.error = np.ma.masked_where(np.isnan(self.data) + np.isinf(self.data), self.error)
