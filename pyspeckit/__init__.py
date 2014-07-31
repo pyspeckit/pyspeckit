@@ -3,7 +3,7 @@
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
 __all__ = ['spectrum','cubes','wrappers']
-from __version__ import __version__
+from version import version as __version__
 import spectrum
 import specwarnings
 try:

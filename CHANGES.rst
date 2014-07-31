@@ -13,6 +13,7 @@ Release 0.1.15
     * Baseline: add a `fit` method that is independent from `button2action` to
       make masking and fitting independent processes
     * Added `astropy <http://astropy.org>`_ as a dependency
+    * Converted to astropy-helper template for setup
 
 Release 0.1.14 (2013-09-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
