@@ -143,8 +143,8 @@ class Cube(spectrum.Spectrum):
     def slice(self, start=None, stop=None, units='pixel', preserve_fits=False, copy=True):
         """Slicing the spectrum
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         
         *start* [ numpy.float or int ]
             start of slice
