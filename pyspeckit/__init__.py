@@ -17,9 +17,9 @@ if not _ASTROPY_SETUP_:
     from wrappers import *
     from cubes import *
     from spectrum import *
+    from .tests import run_tests
 
     def test(*args, **kwargs):
-        import tests
         #import os
         #os.chdir(os.path.split(os.path.abspath(tests.__file__))[0])
-        tests.run_tests.test_everything()
+        run_tests.test_everything()
