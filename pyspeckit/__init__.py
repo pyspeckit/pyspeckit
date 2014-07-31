@@ -18,6 +18,7 @@ if not _ASTROPY_SETUP_:
     from wrappers import *
     from cubes import *
     from spectrum import *
+
     try:
         from .tests import run_tests
 
