@@ -16,4 +16,7 @@ from cubes import *
 from spectrum import *
 
 def test(*args, **kwargs):
-    execfile("../tests/run_tests.py")
+    import tests
+    #import os
+    #os.chdir(os.path.split(os.path.abspath(tests.__file__))[0])
+    tests.run_tests.test_everything()
