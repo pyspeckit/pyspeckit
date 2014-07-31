@@ -2,5 +2,5 @@
 	path = astropy_helpers
 	url = https://github.com/astropy/astropy-helpers.git
 [submodule "tests"]
-	path = tests
+	path = pyspeckit/tests
 	url = https://github.com/pyspeckit/pyspeckit-tests

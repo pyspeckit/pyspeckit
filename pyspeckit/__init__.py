@@ -14,3 +14,6 @@ import wrappers
 from wrappers import *
 from cubes import *
 from spectrum import *
+
+def test(*args, **kwargs):
+    execfile("../tests/run_tests.py")
