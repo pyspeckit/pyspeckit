@@ -8,6 +8,7 @@ from pyspeckit.specwarnings import warn
 import interactive
 import copy
 import history
+from astropy import log
 
 class Registry(object):
     """
@@ -1139,7 +1140,7 @@ class Specfit(interactive.Interactive):
                     elif ii % 3 == 2:
                         self.Spectrum.header['WID%1i' % (ii/3)] = (p,"Gaussian best fit width #%i" % (ii/3))
                 except ValueError as ex:
-                    log.info("Failed to save fit to header",extra=ex)
+                    log.info("Failed to save fit to header",exc_info=ex)
 
     def downsample(self,factor):
         """
