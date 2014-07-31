@@ -44,6 +44,9 @@ html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+	@echo "******** THIS HAS BEEN ADDED BY AG *******"
+	cp -R _build/html/ ../../pyspeckit.bitbucket.org/html/sphinx/
+	@echo "Copied _build/html/ to ../../pyspeckit.bitbucket.org/html/sphinx/"
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
@@ -76,17 +79,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/Astropy.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/pyspeckit.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/Astropy.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/pyspeckit.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/Astropy"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/Astropy"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/pyspeckit"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/pyspeckit"
 	@echo "# devhelp"
 
 epub:
@@ -104,8 +107,12 @@ latex:
 latexpdf:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
+	@echo "WARNING: Don't forget to ln -s ../../html/images . in the _build directory"
 	make -C $(BUILDDIR)/latex all-pdf
 	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
+	@echo "******** THIS HAS BEEN ADDED BY AG *******"
+	cp -R $(BUILDDIR)/latex/pyspeckit.pdf ../html/sphinx/
+	@echo "Copied $(BUILDDIR)/latex/pyspeckit.pdf to ../html/sphinx/"
 
 text:
 	$(SPHINXBUILD) -b text $(ALLSPHINXOPTS) $(BUILDDIR)/text
