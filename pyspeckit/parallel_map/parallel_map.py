@@ -4,6 +4,7 @@ Parellel Map snippet by Brian Refsdal
 http://www.astropython.org/snippet/2010/3/Parallel-map-using-multiprocessing
 """
 import numpy
+import warnings
 from astropy import log
 _multi=False
 _ncpus=1
