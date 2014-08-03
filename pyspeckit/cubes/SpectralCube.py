@@ -35,6 +35,7 @@ import itertools
 from pyspeckit.spectrum import history
 from astropy.io import fits
 import cubes
+from astropy import log
 
 class Cube(spectrum.Spectrum):
 
@@ -60,8 +61,8 @@ class Cube(spectrum.Spectrum):
                 self.error = None
                 self.cubeheader = self.header
             except TypeError as inst:
-                print "Failed to read fits file: wrong TYPE."
-                print inst
+                log.exception("Failed to read fits file: wrong TYPE.")
+                log.exception(str(inst))
                 raise inst
         else:
             self.cube = cube
@@ -250,7 +251,9 @@ class Cube(spectrum.Spectrum):
         If fiteach has been run, plot the best fit
         """
         if not hasattr(self,'parcube'):
-            if not silent: print "Must run fiteach before plotting a fit.  If you want to fit a single spectrum, use plot_spectrum() and specfit() directly."
+            if not silent: log.info("Must run fiteach before plotting a fit.  "
+                                    "If you want to fit a single spectrum, "
+                                    "use plot_spectrum() and specfit() directly.")
             return
 
         if self.plot_special is not None:
@@ -474,14 +477,14 @@ class Cube(spectrum.Spectrum):
 
         yy,xx = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
-            OK = (True-self.mapplot.plane.mask) * self.maskmap
+            OK = ((~self.mapplot.plane.mask) & self.maskmap.astype('bool')).astype('bool')
         else:
-            OK = np.isfinite(self.mapplot.plane) * self.maskmap
+            OK = (np.isfinite(self.mapplot.plane) & self.maskmap.astype('bool')).astype('bool')
 
         # NAN guesses rule out the model too
         if hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
-            bad = np.isnan(guesses).sum(axis=0)
-            OK *= (True-bad)
+            bad = np.isnan(guesses).sum(axis=0).astype('bool')
+            OK &= (~bad)
 
         distance = ((xx)**2 + (yy)**2)**0.5
         if start_from_point == 'center':
@@ -490,10 +493,14 @@ class Cube(spectrum.Spectrum):
         sort_distance = np.argsort(d_from_start.flat)
 
         valid_pixels = zip(xx.flat[sort_distance][OK.flat[sort_distance]], 
-                yy.flat[sort_distance][OK.flat[sort_distance]])
+                           yy.flat[sort_distance][OK.flat[sort_distance]])
+
+        if len(valid_pixels) != len(set(valid_pixels)):
+            raise ValueError("There are non-unique pixels in the 'valid pixel' list.  "
+                             "This should not be possible and indicates a major error.")
 
         if verbose_level > 0:
-            print "Number of valid pixels: %i" % len(valid_pixels)
+            log.debug("Number of valid pixels: %i" % len(valid_pixels))
 
         if usemomentcube:
             npars = self.momentcube.shape[0]
@@ -536,7 +543,7 @@ class Cube(spectrum.Spectrum):
             elif errmap is not None:
                 sp.error = np.ones(sp.data.shape) * errmap[y,x]
             else:
-                if verbose_level > 1 and ii==0: print "WARNING: using data std() as error."
+                if verbose_level > 1 and ii==0: log.warn("WARNING: using data std() as error.")
                 sp.error[:] = sp.data[sp.data==sp.data].std()
             if sp.error is not None and signal_cut > 0:
                 if continuum_map is not None:
@@ -549,42 +556,43 @@ class Cube(spectrum.Spectrum):
                     max_sn = np.nanmax(snr)
                 if max_sn < signal_cut:
                     if verbose_level > 1:
-                        print "Skipped %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
+                        log.info("Skipped %4i,%4i (s/n=%0.2g)" % (x,y,max_sn))
                     return
                 elif np.isnan(max_sn):
                     if verbose_level > 1:
-                        print "Skipped %4i,%4i (s/n is nan; max(data)=%0.2g, min(error)=%0.2g)" % (x,y,np.nanmax(sp.data),np.nanmin(sp.error))
+                        log.info("Skipped %4i,%4i (s/n is nan; max(data)=%0.2g, min(error)=%0.2g)" %
+                                 (x,y,np.nanmax(sp.data),np.nanmin(sp.error)))
                     return
                 if verbose_level > 2:
-                    print "Fitting %4i,%4i (s/n=%0.2g)" % (x,y,max_sn)
+                    log.info("Fitting %4i,%4i (s/n=%0.2g)" % (x,y,max_sn))
             else:
                 max_sn = None
             sp.specfit.Registry = self.Registry # copy over fitter registry
             
             if use_nearest_as_guess and self.has_fit.sum() > 0:
-                if verbose_level > 1 and ii == 0 or verbose_level > 4: print "Using nearest fit as guess"
+                if verbose_level > 1 and ii == 0 or verbose_level > 4: log.info("Using nearest fit as guess")
                 d = np.roll( np.roll( distance, x, 0), y, 1)
                 # If there's no fit, set its distance to be unreasonably large
                 nearest_ind = np.argmin(d+1e10*(True-self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
                 gg = self.parcube[:,nearest_y,nearest_x]
             elif usemomentcube:
-                if verbose_level > 1 and ii == 0: print "Using moment cube"
+                if verbose_level > 1 and ii == 0: log.info("Using moment cube")
                 gg = self.momentcube[:,y,x]
             elif hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
-                if verbose_level > 1 and ii == 0: print "Using input guess cube"
+                if verbose_level > 1 and ii == 0: log.info("Using input guess cube")
                 gg = guesses[:,y,x]
             else:
-                if verbose_level > 1 and ii == 0: print "Using input guess"
+                if verbose_level > 1 and ii == 0: log.info("Using input guess")
                 gg = guesses
 
             if np.all(np.isfinite(gg)):
                 try:
                     sp.specfit(guesses=gg, quiet=verbose_level<=3, verbose=verbose_level>3, **fitkwargs)
                 except Exception as ex:
-                    print "Fit number %i at %i,%i failed on error " % (ii,x,y), ex
-                    print "Guesses were: ",gg
-                    print "Fitkwargs were: ",fitkwargs
+                    log.exception("Fit number %i at %i,%i failed on error %s" % (ii,x,y, str(ex)))
+                    log.exception("Guesses were: {0}".format(str(gg)))
+                    log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
                     if isinstance(ex,KeyboardInterrupt):
                         raise ex
                 self.parcube[:,y,x] = sp.specfit.modelpars
@@ -608,7 +616,8 @@ class Cube(spectrum.Spectrum):
                     snmsg = " s/n=%5.1f" % (max_sn) if max_sn is not None else ""
                     npix = len(valid_pixels)
                     pct = 100 * counter/float(npix)
-                    print "Finished fit %6i of %6i at (%4i,%4i)%s. Elapsed time is %0.1f seconds.  %%%01.f" % (counter, npix, x, y, snmsg, time.time()-t0, pct)
+                    log.info("Finished fit %6i of %6i at (%4i,%4i)%s. Elapsed time is %0.1f seconds.  %%%01.f" %
+                             (counter, npix, x, y, snmsg, time.time()-t0, pct))
 
             if integral:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs, self.integralmap[:,y,x])
@@ -653,7 +662,7 @@ class Cube(spectrum.Spectrum):
             # individual result can be None (I guess?) but apparently (and this
             # part I don't believe) any individual *fit* result can be None as
             # well (apparently the x,y pairs can also be None?)
-            merged_result = [core_result for core_result in result if core_result is not None ]
+            merged_result = [core_result for core_result in result if core_result is not None]
             # for some reason, every other time I run this code, merged_result
             # ends up with a different intrinsic shape.  This is an attempt to
             # force it to maintain a sensible shape.
@@ -664,13 +673,14 @@ class Cube(spectrum.Spectrum):
                     ((x,y), m1, m2) = merged_result[0]
             except ValueError:
                 if verbose > 1:
-                    print "ERROR: merged_result[0] is ",merged_result[0]," which has the wrong shape"
+                    log.exception("ERROR: merged_result[0] is {0} which has the wrong shape".format(merged_result[0]))
                 merged_result = itertools.chain.from_iterable(merged_result)
             for TEMP in merged_result:
                 if TEMP is None:
                     # this shouldn't be possible, but it appears to happen
                     # anyway.  parallel_map is great, up to a limit that was
                     # reached long before this level of complexity
+                    log.debug("Skipped a None entry: {0}".format(str(TEMP)))
                     continue
                 try:
                     if integral:
@@ -680,6 +690,7 @@ class Cube(spectrum.Spectrum):
                 except TypeError:
                     # implies that TEMP does not have the shape ((a,b),c,d)
                     # as above, shouldn't be possible, but it happens...
+                    log.debug("Skipped a misshapen entry: {0}".format(str(TEMP)))
                     continue
                 if ((len(modelpars) != len(modelerrs)) or
                     (len(modelpars) != len(self.parcube))):
@@ -708,7 +719,7 @@ class Cube(spectrum.Spectrum):
         self.specfit.parinfo = sp.specfit.parinfo
 
         if verbose:
-            print "Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
+            log.info("Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0))
 
 
     def momenteach(self, verbose=True, verbose_level=1, multicore=0, **kwargs):
@@ -744,7 +755,7 @@ class Cube(spectrum.Spectrum):
             self.momentcube[:,y,x] = sp.moments(**kwargs)
             if verbose:
                 if ii % 10**(3-verbose_level) == 0:
-                    print "Finished moment %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0)
+                    log.info("Finished moment %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0))
 
             return ((x,y), self.momentcube[:,y,x])
 
@@ -761,7 +772,7 @@ class Cube(spectrum.Spectrum):
                 moment_a_pixel((ii,x,y))
 
         if verbose:
-            print "Finished final moment %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0)
+            log.info("Finished final moment %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0))
 
     def show_moment(self, momentnumber, **kwargs):
         """
@@ -769,8 +780,7 @@ class Cube(spectrum.Spectrum):
         """
 
         if not hasattr(self,'momentcube'):
-            print "Compute moments first"
-            return
+            raise ValueError("Compute moments first")
 
         self.mapplot.plane = self.momentcube[momentnumber,:,:].squeeze()
 
@@ -782,8 +792,7 @@ class Cube(spectrum.Spectrum):
         """
 
         if not hasattr(self,'parcube'):
-            print "Compute fit parameters first"
-            return
+            raise ValueError("Compute fit parameters first")
 
         self.mapplot.plane = self.parcube[parnumber,:,:].squeeze()
 
@@ -908,7 +917,7 @@ class Cube(spectrum.Spectrum):
             fitcubefile.header['CRVAL3'] = 0
             fitcubefile.header['CRPIX3'] = 1
         except AttributeError:
-            print "Make sure you run the cube fitter first."
+            log.exception("Make sure you run the cube fitter first.")
             return
 
         fitcubefile.writeto(fitcubefilename, clobber=clobber)
@@ -930,7 +939,7 @@ class CubeStack(Cube):
         x0,y0 - initial spectrum to use (defaults to lower-left corner)
         """
 
-        print "Creating Cube Stack"
+        log.info("Creating Cube Stack")
         cubelist = list(cubelist)
         for ii,cube in enumerate(cubelist):
             if type(cube) is str:
@@ -942,7 +951,7 @@ class CubeStack(Cube):
 
         self.cubelist = cubelist
 
-        print "Concatenating data"
+        log.info("Concatenating data")
         self.xarr = spectrum.units.SpectroscopicAxes([sp.xarr for sp in cubelist])
         self.cube = np.ma.concatenate([cube.cube for cube in cubelist])
 
