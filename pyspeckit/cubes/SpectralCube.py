@@ -520,13 +520,11 @@ class Cube(spectrum.Spectrum):
         # array to store whether pixels have fits
         self.has_fit = np.zeros(self.mapplot.plane.shape, dtype='bool')
 
-        global counter
-        counter = 0
+        self._counter = 0
 
         t0 = time.time()
 
         def fit_a_pixel(iixy):
-            global counter
             ii,x,y = iixy
             sp = self.get_spectrum(x,y)
 
@@ -610,14 +608,14 @@ class Cube(spectrum.Spectrum):
                 self.parcube[self.parcube == 0] = blank_value
                 self.errcube[self.parcube == 0] = blank_value
 
-            counter += 1
+            self._counter += 1
             if verbose:
                 if ii % (min(10**(3-verbose_level),1)) == 0:
                     snmsg = " s/n=%5.1f" % (max_sn) if max_sn is not None else ""
                     npix = len(valid_pixels)
-                    pct = 100 * counter/float(npix)
+                    pct = 100 * self._counter/float(npix)
                     log.info("Finished fit %6i of %6i at (%4i,%4i)%s. Elapsed time is %0.1f seconds.  %%%01.f" %
-                             (counter, npix, x, y, snmsg, time.time()-t0, pct))
+                             (self._counter, npix, x, y, snmsg, time.time()-t0, pct))
 
             if integral:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs, self.integralmap[:,y,x])
