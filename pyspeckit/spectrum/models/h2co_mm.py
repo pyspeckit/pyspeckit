@@ -102,18 +102,15 @@ def h2co_mm_radex(xarr,
 
     # Convert X-units to frequency in GHz
     xarr = xarr.as_unit('Hz', quiet=True)
-    Tex303,Tex322,Tex321,tau303,tau322,tau321 = gridbundle
 
-
-    # if this gets too far different from 1, we are gonna have a Bad Time.
-    scalefac = grid_vwidth/width
-
-    tex = (Tex303(logColumn,logDensity,Temperature),
-           Tex322(logColumn,logDensity,Temperature),
-           Tex321(logColumn,logDensity,Temperature))
-    tau =  (tau303(logColumn,logDensity,Temperature)*scalefac,
-            tau322(logColumn,logDensity,Temperature)*scalefac,
-            tau321(logColumn,logDensity,Temperature)*scalefac)
+    ModelDict = gridbundle(Temperature = Temperature,
+                           logColumn = logColumn,
+                           logDensity = logDensity,
+                           logwidth = np.log10(width))
+    
+    tex = (ModelDict['Tex303'],ModelDict['Tex322'],ModelDict['Tex321'])
+    tau = (ModelDict['tau303'],ModelDict['tau322'],ModelDict['tau321'])
+    
     if np.any(np.isnan(tex)) or np.any(np.isnan(tau)):
         raise ValueError("Invalid column/density")
 
@@ -133,12 +130,11 @@ def h2co_mm_radex(xarr,
         }
     Tbg = 2.73 #because it totally is
 
-
     nu0 = np.array([ 218.222192e9, 218.475632e9,218.760066e9])
     nuwidth = [width/ckms*nu for nu in nu0]
     nuoff = [xoff_v/ckms*nu for nu in nu0]
-    minfreq = nu0/1e9 - 0.25
-    maxfreq = nu0/1e9 + 0.25
+    minfreq = nu0/1e9 - 0.2
+    maxfreq = nu0/1e9 + 0.2
 #    spec2 = np.zeros(len(xarr))
 #    for ii in range(len(nu0)):
 #        taunu = tau[ii]*np.exp(-(xarr+nuoff[ii]-nu0[ii])**2/(2.0*nuwidth[ii]**2))
