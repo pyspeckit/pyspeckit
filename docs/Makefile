@@ -45,8 +45,10 @@ html:
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 	@echo "******** THIS HAS BEEN ADDED BY AG *******"
-	cp -R _build/html/ ../../pyspeckit.bitbucket.org/html/sphinx/
+	cp -R _build/html/* ../../pyspeckit.bitbucket.org/html/sphinx/
+	cp -R _build/html/* ../../pyspeckit.bitbucket.org/html/
 	@echo "Copied _build/html/ to ../../pyspeckit.bitbucket.org/html/sphinx/"
+	@echo "Copied _build/html/ to ../../pyspeckit.bitbucket.org/html/"
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
