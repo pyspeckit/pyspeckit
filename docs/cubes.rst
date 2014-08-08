@@ -1,5 +1,5 @@
 Cubes
-----------------
+-----
 
 .. automodule:: pyspeckit.cubes.SpectralCube
 .. autoclass:: Cube
