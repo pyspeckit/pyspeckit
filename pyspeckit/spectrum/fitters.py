@@ -932,8 +932,8 @@ class Specfit(interactive.Interactive):
         If the model was fit to a sub-region of the spectrum, expand it (with
         zeros wherever the model was not defined) to fill the spectrum.  
 
-        Example
-        -------
+        Examples
+        --------
         >>> noise = np.random.randn(100)
         >>> xarr = np.linspace(-50,50,100)
         >>> signal = np.exp(-(xarr-5)**2/(2*3.**2))

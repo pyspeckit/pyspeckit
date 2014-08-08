@@ -108,13 +108,14 @@ class Baseline(interactive.Interactive):
             Reset the selected region to those specified by this command only
             (will override previous xmin/xmax settings)
 
-        Plotting Parameters
-        -------------------
         baseline_fit_color: color name (string)
+            [plot parameter]
             Color to plot the baseline
         clear_all_connections: bool
+            [plot parameter]
             Disable any previous interactive sessions
         highlight_fitregion: bool
+            [plot parameter]
             Highlight the selected region for baseline fitting (default green)
 
         """
