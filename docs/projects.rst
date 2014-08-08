@@ -13,7 +13,7 @@ This project is at the core of both `pyspeckit` and `specutils
 The most important base functionality of a spectroscopic toolkit
 is to be able to convert between different spectroscopic systems,
 e.g. wavelength<->frequency<->velocity.  This can be achieved
-using `astropy <www.astropy.org>`_'s `unit equivalencies
+using astropy_'s `unit equivalencies
 <https://github.com/astropy/astropy/pull/1176>`_.  
 
 The X-axis unit changes will be straightforward project that should require

@@ -13,8 +13,8 @@ Many features in Cubes require additional packages:
    * `pywcs <git://github.com/astropy/astropy.git>`_
 
 
-In the near future, the coords_ requirement will be replaced with `astropy
-<http://www.astropy.org>`_\'s coordinates module.
+In the near future, the coords_ requirement will be replaced with astropy_\'s
+coordinates module.
     
 The 'grunt work' is performed by the :py:mod:`cubes` module
 

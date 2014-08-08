@@ -24,7 +24,7 @@ PySpecKit requires at least the basic scientific packages:
 You'll most likely want at least one of the following packages
 to enable `file reading <readers>`_
 
-* `astropy <astropy.org>`_ >=0.1
+* astropy_ >=0.4
 * `pyfits <http://www.stsci.edu/resources/software_hardware/pyfits/Download>`_ >=2.4
 * `atpy <http://atpy.github.com/>`_ (which depends on `asciitable <http://cxc.harvard.edu/contrib/asciitable/>`_ [`github link <https://github.com/taldcroft/asciitable>`_] )
 * `hdf5 <http://www.pytables.org/moin>`_
