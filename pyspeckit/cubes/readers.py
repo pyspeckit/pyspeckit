@@ -28,7 +28,7 @@ def open_3d_fits(filename, scale_keyword=None, scale_action=operator.div,
         scale_value = cube.header[scale_keyword]
         data = scale_action(cube.filled_data[:], scale_value)
     else:
-        data = cube.filled_data
+        data = cube.filled_data[:]
 
     xunit = cube.spectral_axis.unit.to_string().replace(" ","")
 
