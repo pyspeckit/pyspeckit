@@ -55,7 +55,7 @@ class Cube(spectrum.Spectrum):
 
         if filename is not None:
             try:
-                self.cube,self.xarr,self.header,self.fitsfile = readers.open_3d_fits(filename, **kwargs)
+                self.cube,self.xarr,self.header,self.fitscube = readers.open_3d_fits(filename, **kwargs)
                 self.errorcube = errorcube
                 self.data = self.cube[:,y0,x0]
                 self.error = None
