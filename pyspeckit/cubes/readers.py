@@ -28,14 +28,17 @@ def open_3d_fits(filename, scale_keyword=None, scale_action=operator.div,
         scale_value = cube.header[scale_keyword]
         data = scale_action(cube.filled_data[:], scale_value)
     else:
-        data = cube.filled_data[:]
+        data = cube.filled_data
+
+    xunit = cube.spectral_axis.unit.to_string().replace(" ","")
 
     vconv = spectral_cube.spectral_axis.determine_vconv_from_ctype(cube.wcs.wcs.ctype[2]).__name__[8:]
     XAxis = units.SpectroscopicAxis(cube.spectral_axis.value,
-                                    xunits=cube.spectral_axis.unit.to_string().replace(" ",""),
+                                    unit=xunit,
+                                    xtype=units.unit_type_dict[xunit],
                                     refX=cube.wcs.wcs.restfrq,
                                     refX_units='Hz',
                                     velocity_convention=vconv,
-                                   )
+                                    )
 
     return data,XAxis,cube.header,cube
