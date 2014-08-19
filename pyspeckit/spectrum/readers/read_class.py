@@ -677,10 +677,13 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
                 print "Everything is fine.  %i" % jj
         if DEBUG:
             print "Spectrum has %i channels at %i" % (nchan,f.tell())
-        spectrum = numpy.fromfile(f,count=nchan,dtype='float32')
-        if DEBUG > 2:
-            print "First digits of spectrum: ",spectrum[:10]
-        if not skip_data:
+        if skip_data:
+            # Skip the data: 4 bytes per float32
+            f.seek(f.tell() + nchan*4)
+        else:
+            spectrum = numpy.fromfile(f,count=nchan,dtype='float32')
+            if DEBUG > 2:
+                print "First digits of spectrum: ",spectrum[:10]
             if downsample_factor is not None:
                 spectra.append(downsample_1d(spectrum, downsample_factor))
             else:

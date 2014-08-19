@@ -308,16 +308,20 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
     if header is None:
         return subim
     else:
-        crv1,crv2 = wcs.wcs_pix2world(xlo,ylo,0)
+        # Cannot set crval2 != 0 for Galactic coordinates: therefore, probably
+        # wrong approach in general
+        #crv1,crv2 = wcs.wcs_pix2world(xlo,ylo,0)
 
-        try:
-            flathead['CRVAL1'] = crv1[0]
-            flathead['CRVAL2'] = crv2[0]
-        except IndexError:
-            flathead['CRVAL1'] = crv1.item() # np 0-d arrays are not scalar
-            flathead['CRVAL2'] = crv2.item() # np 0-d arrays are not scalar
-        flathead['CRPIX1'] = 1
-        flathead['CRPIX2'] = 1
+        #try:
+        #    flathead['CRVAL1'] = crv1[0]
+        #    flathead['CRVAL2'] = crv2[0]
+        #except IndexError:
+        #    flathead['CRVAL1'] = crv1.item() # np 0-d arrays are not scalar
+        #    flathead['CRVAL2'] = crv2.item() # np 0-d arrays are not scalar
+
+        # xlo, ylo have been forced to integers already above
+        flathead['CRPIX1'] = flathead['CRPIX1'] + xlo
+        flathead['CRPIX2'] = flathead['CRPIX2'] + ylo
         
         if return_HDU:
             return fits.PrimaryHDU(data=subim,header=flathead)
