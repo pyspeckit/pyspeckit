@@ -13,6 +13,7 @@ import numpy
 import numpy as np
 from numpy import pi
 from astropy import log
+import os
 try:
     from astropy.utils.console import ProgressBar
 except ImportError:
@@ -486,9 +487,10 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
         overresolved data.
     """
     t0 = time.time()
-    log.info("Loading file {0} :".format(filename))
+    statinfo = os.stat(filename)
+    filelen = statinfo.st_size
+    log.info("Loading file {0} with length {1} ({2} GB):".format(filename,filelen,filelen/(1024L**3)))
     f = open(filename,'rb')
-    filelen = len(f.read())
     f.seek(0)
 
     filetype = f.read(4)
