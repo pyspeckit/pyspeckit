@@ -329,7 +329,9 @@ class Cube(spectrum.Spectrum):
                                                          self.header.iteritems()
                                                          if k != 'HISTORY']),
                                       lon=x, lat=y, system=self.system,
-                                      proj=self.header['CTYPE1'][-3:])
+                                      proj=(self.header['CTYPE1'][-3:]
+                                            if 'CTYPE1' in self.header else
+                                            'CAR'))
 
         sp = pyspeckit.Spectrum( xarr=self.xarr.copy(), data=self.cube[:,y,x],
                 header=header,
