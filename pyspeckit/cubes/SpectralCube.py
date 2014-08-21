@@ -77,7 +77,7 @@ class Cube(spectrum.Spectrum):
             self.parse_header(self.header)
         else:
             self.units = 'undefined'
-            self.header = {}
+            self.header = fits.Header()
 
         if maskmap is not None:
             self.maskmap = maskmap
@@ -105,10 +105,10 @@ class Cube(spectrum.Spectrum):
         self._modelcube = None
 
         # TODO: improve this!!!
-        if self.header:
-            self.system = 'galactic' if 'GLON' in self.header['CTYPE1'] else 'celestial'
-        else:
-            self.system = 'celestial'
+        self.system = ('galactic'
+                       if ('CTYPE1' in self.header and 'GLON' in
+                           self.header['CTYPE1'])
+                       else 'celestial')
 
         self.mapplot = mapplot.MapPlotter(self)
 
