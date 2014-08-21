@@ -77,6 +77,7 @@ class Cube(spectrum.Spectrum):
             self.parse_header(self.header)
         else:
             self.units = 'undefined'
+            self.header = {}
 
         if maskmap is not None:
             self.maskmap = maskmap

@@ -8,6 +8,7 @@ from pyspeckit.specwarnings import warn
 import interactive
 import copy
 import history
+import re
 from astropy import log
 
 class Registry(object):
@@ -591,9 +592,21 @@ class Specfit(interactive.Interactive):
             for ii, element in enumerate(self.fitkwargs['tied']):
                 if not element.strip(): continue
                 
-                i1 = element.index('[') + 1
-                i2 = element.index(']')
-                loc = int(element[i1:i2])
+                if '[' in element and ']' in element:
+                    i1 = element.index('[') + 1
+                    i2 = element.index(']')
+                    loc = int(element[i1:i2])
+                else: # assume lmfit version
+                    varnames = re.compile('([a-zA-Z][a-zA-Z_0-9]*)').search(element).groups()
+                    if not varnames:
+                        continue
+                    elif len(varnames) > 1:
+                        warnings.warn("The 'tied' parameter {0} is not simple enough for error propagation".format(element))
+                        continue
+                    else:
+                        varname = varnames[0]
+                        loc = self.parinfo.names.index(varname)
+
                 self.modelerrs[ii] = self.modelerrs[loc]
 
         # make sure the full model is populated
