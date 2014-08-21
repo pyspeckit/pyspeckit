@@ -105,7 +105,10 @@ class Cube(spectrum.Spectrum):
         self._modelcube = None
 
         # TODO: improve this!!!
-        self.system = 'galactic' if 'GLON' in self.header['CTYPE1'] else 'celestial'
+        if self.header:
+            self.system = 'galactic' if 'GLON' in self.header['CTYPE1'] else 'celestial'
+        else:
+            self.system = 'celestial'
 
         self.mapplot = mapplot.MapPlotter(self)
 
