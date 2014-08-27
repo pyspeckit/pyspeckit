@@ -2,6 +2,7 @@ import pyspeckit
 from pyspeckit.spectrum import units
 import numpy as np
 import pytest
+from astropy import units as u
 
 convention = ['optical','radio','relativistic']
 params = [(a,b,c,d) for a in units.unit_type_dict if a not in ('unknown',None)
@@ -33,6 +34,11 @@ def test_convert_back(unit_from, unit_to,convention,ref_unit):
     assert all(np.abs((xarr - xvals)/xvals) < threshold)
     assert xarr.units == unit_from
 
+def test_from_quantity():
+    arr = np.linspace(-50,50)*u.km/u.s
+    xarr = units.SpectroscopicAxis.from_quantity(arr)
+
+    assert np.all(xarr == arr.value)
 
 if __name__=="__main__":
     unit_from='GHz'

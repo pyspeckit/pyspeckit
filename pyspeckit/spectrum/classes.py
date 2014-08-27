@@ -44,6 +44,11 @@ try:
 except ImportError:
     Spectrum1D = object
 
+try:
+    import astropy.units as u
+except ImportError:
+    u = None
+
 class Spectrum(object):
     """
     The core class for the spectroscopic toolkit.  Contains the data and error
@@ -138,11 +143,15 @@ class Spectrum(object):
                 self.parse_hdf5_header(self.header)
 
             if isinstance(filename,str):
-                self.fileprefix = filename.rsplit('.', 1)[0]    # Everything prior to .fits or .txt
+                # Everything prior to .fits or .txt
+                self.fileprefix = filename.rsplit('.', 1)[0]
         elif xarr is not None and data is not None:
-            # technically, this is unpythonic.  But I don't want to search for all 10 attributes required.
+            # technically, this is unpythonic.  But I don't want to search for
+            # all 10 attributes required.
             if issubclass(type(xarr),units.SpectroscopicAxis):
                 self.xarr = xarr
+            elif u is not None and isinstance(xarr, u.Quantity):
+                self.xarr = units.SpectroscopicAxis.from_quantity(xarr)
             else:
                 self.xarr = units.SpectroscopicAxis(xarr, **xarrkwargs)
             self.data = data

@@ -280,6 +280,10 @@ class SpectroscopicAxis(np.ndarray):
     a workaround is being sought but subclassing numpy arrays is harder than I thought
     """
 
+    @classmethod
+    def from_quantity(cls, array):
+        return cls(array.value, unit=str(array.unit).replace(" ",""))
+
     def __new__(self, xarr, unit="Hz", frame='rest', frame_offset=0.0,
             frame_offset_units='Hz', xtype=None, refX=None, redshift=None,
             refX_units=None, velocity_convention=None, use128bits=False,
