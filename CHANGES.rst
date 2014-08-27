@@ -14,6 +14,7 @@ Release 0.1.15
       make masking and fitting independent processes
     * Added `astropy <http://astropy.org>`_ as a dependency
     * Converted to astropy-helper template for setup
+    * Changed 'units' -> 'unit' in Spectrum
 
 Release 0.1.14 (2013-09-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
