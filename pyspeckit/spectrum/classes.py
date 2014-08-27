@@ -59,8 +59,8 @@ class Spectrum(object):
     from interpolation import interpnans
 
     def __init__(self, filename=None, filetype=None, xarr=None, data=None,
-            error=None, header=None, doplot=False, maskdata=True,
-            plotkwargs={}, xarrkwargs={}, **kwargs):
+                 error=None, header=None, doplot=False, maskdata=True,
+                 unit=None, plotkwargs={}, xarrkwargs={}, **kwargs):
         """
         Create a Spectrum object.
 
@@ -98,6 +98,8 @@ class Spectrum(object):
         xarrkwargs : dict
             keyword arguments to pass to the SpectroscopicAxis initialization
             (can be used in place of a header)
+        unit : str
+            The data unit
 
         Examples
         --------
@@ -160,7 +162,10 @@ class Spectrum(object):
             else:
                 self.error = data * 0
             if hasattr(header,'get'):
-                self.header = header
+                if not isinstance(header, pyfits.Header):
+                    self.header = pyfits.Header(header)
+                else:
+                    self.header = header
             else: # set as blank
                 warn( "WARNING: Blank header." )
                 self.header = pyfits.Header()
@@ -186,6 +191,9 @@ class Spectrum(object):
         self.plot_special = None
         self.plot_special_kwargs = {}
 
+        if unit is not None:
+            self._unit = unit
+
         if doplot: self.plotter(**plotkwargs)
 
     @classmethod
@@ -206,6 +214,23 @@ class Spectrum(object):
 
         spec,errspec,XAxis,hdr = readers.open_1d_pyfits(hdu)
         return cls(data=spec, error=errspec, xarr=XAxis, header=hdr)
+
+    @property
+    def unit(self):
+        return self._unit
+
+    @property
+    def units(self):
+        return self._unit
+
+    @unit.setter
+    def unit(self, value):
+        self._unit = value
+
+    @units.setter
+    def units(self, value):
+        warn("'units' is deprecated; please use 'unit'")
+        self._unit = value
 
     def _register_fitters(self, registry=None):
         """
@@ -282,9 +307,9 @@ class Spectrum(object):
             #raise ValueError("Invalid xtype in text header")
         self.ytype = Table.data.dtype.names[Table.datacol]
         try:
-            self.units = Table.columns[self.ytype].unit
+            self.unit = Table.columns[self.ytype].unit
         except ValueError:
-            self.units = None
+            self.unit = None
             pass # astropy 0.2.dev11 introduces an incompatibility here
         self.header = pyfits.Header()
         self._update_header()
@@ -292,7 +317,7 @@ class Spectrum(object):
     def _update_header(self):
         self.header['CUNIT1'] = self.xarr.units
         self.header['CTYPE1'] = self.xarr.xtype
-        self.header['BUNIT'] = self.units
+        self.header['BUNIT'] = self.unit
         self.header['BTYPE'] = self.ytype
         
     def parse_hdf5_header(self, hdr):
@@ -307,12 +332,12 @@ class Spectrum(object):
         self.xarr.xtype = hdr['xtype']
         self.xarr.xunits = hdr['xunits']
         self.ytype = hdr['ytype']
-        self.units = hdr['yunits']
+        self.unit = hdr['yunits']
         self.header = pyfits.Header()
         self.header['CUNIT1'] = self.xarr.xunits
         self.header['CTYPE1'] = self.xarr.xtype
         self.header['BUNIT'] = self.ytype
-        self.header['BTYPE'] = self.units
+        self.header['BTYPE'] = self.unit
 
     def parse_header(self,hdr,specname=None):
         """
@@ -323,9 +348,9 @@ class Spectrum(object):
         """
 
         if hdr.get('BUNIT'):
-            self.units = hdr.get('BUNIT').strip()
+            self.unit = hdr.get('BUNIT').strip()
         else:
-            self.units = 'undefined'
+            self.unit = 'undefined'
             
         if hdr.get('BTYPE'):
             self.ytype = hdr.get('BTYPE').strip()
@@ -555,7 +580,7 @@ class Spectrum(object):
             name = ""
         return r'<Spectrum object%s over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s at %s>' % \
                 (name, self.xarr.min(), self.xarr.max(), self.xarr.units,
-                        self.data.min(), self.data.max(), self.units,
+                        self.data.min(), self.data.max(), self.unit,
                         str(hex(self.__hash__())))
     
 
@@ -757,9 +782,9 @@ class Spectra(Spectrum):
         self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         
-        self.units = speclist[0].units
+        self.unit = speclist[0].units
         for spec in speclist:
-            if spec.units != self.units:
+            if spec.unit != self.unit:
                 raise ValueError("Mismatched units")
 
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
@@ -775,7 +800,7 @@ class Spectra(Spectrum):
             self.speclist += other.speclist
         elif type(other) is Spectrum:
             self.speclist += [other.speclist]
-        if other.units != self.units:
+        if other.unit != self.unit:
             raise ValueError("Mismatched units")
 
         if other.xarr.units != self.xarr.units:
@@ -823,10 +848,10 @@ class Spectra(Spectrum):
         if atpyOK:
             self.fittable = atpy.Table()
             self.fittable.add_column('name',[sp.specname for sp in self.speclist])
-            self.fittable.add_column('amplitude',[sp.specfit.modelpars[0] for sp in self.speclist],unit=self.units)
+            self.fittable.add_column('amplitude',[sp.specfit.modelpars[0] for sp in self.speclist],unit=self.unit)
             self.fittable.add_column('center',[sp.specfit.modelpars[1] for sp in self.speclist],unit=self.xarr.units)
             self.fittable.add_column('width',[sp.specfit.modelpars[2] for sp in self.speclist],unit=self.xarr.units)
-            self.fittable.add_column('amplitudeerr',[sp.specfit.modelerrs[0] for sp in self.speclist],unit=self.units)
+            self.fittable.add_column('amplitudeerr',[sp.specfit.modelerrs[0] for sp in self.speclist],unit=self.unit)
             self.fittable.add_column('centererr',[sp.specfit.modelerrs[1] for sp in self.speclist],unit=self.xarr.units)
             self.fittable.add_column('widtherr',[sp.specfit.modelerrs[2] for sp in self.speclist],unit=self.xarr.units)
 
@@ -866,7 +891,7 @@ class ObsBlock(Spectra):
         else:
             self.xarr = xarr
 
-        self.units = speclist[0].units
+        self.unit = speclist[0].unit
         self.header = speclist[0].header
         self.parse_header(self.header)
 
@@ -876,7 +901,7 @@ class ObsBlock(Spectra):
             if not np.array_equal(spec.xarr, self.xarr):
                 if not force:
                     raise ValueError("Mismatch between X axes in ObsBlock")
-            if spec.units != self.units: 
+            if spec.unit != self.unit: 
                 raise ValueError("Mismatched units")
 
         if force:
