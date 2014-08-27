@@ -5,6 +5,8 @@ Creating a Spectrum from scratch
 
 This example shows the initialization of a pyspeckit object from numpy arrays.
 
+.. code-block:: python
+
    import numpy as np
    import pyspeckit
 
