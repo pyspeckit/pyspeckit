@@ -21,6 +21,7 @@ import tempfile
 import posang # agpy code
 import pyspeckit
 from astropy import coordinates
+from astropy import log
 from pyspeckit.specwarnings import warn
 try:
     from AG_fft_tools import smooth
@@ -52,10 +53,10 @@ def baseline_cube(cube, polyorder, cubemask=None):
         if hasattr(yfit,'mask'):
             mask = True-yfit.mask
         else:
-            mask = yfit==yfit
+            mask = np.isfinite(yfit)
 
-        if mask.sum() < polyorder:
-            return x*0
+        if np.count_nonzero(mask) < polyorder:
+            return yreal
         else:
             polypars = np.polyfit(x[mask], yfit[mask], polyorder)
             return yreal-np.polyval(polypars, x)
@@ -63,10 +64,15 @@ def baseline_cube(cube, polyorder, cubemask=None):
     reshaped_cube = cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
 
     if cubemask is None:
+        log.debug("No mask defined.")
         fit_cube = reshaped_cube
     else:
         if cubemask.dtype != 'bool':
             raise TypeError("Cube mask *must* be a boolean array.")
+        if cubemask.shape != cube.shape:
+            raise ValueError("Mask shape does not match cube shape")
+        log.debug("Masking cube with shape {0} with mask of shape {1}".format(cube.shape,
+                                                                              cubemask.shape))
         masked_cube = cube.copy()
         masked_cube[cubemask] = np.nan
         fit_cube = masked_cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
