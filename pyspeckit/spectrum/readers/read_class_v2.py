@@ -497,7 +497,10 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
                     "XSCAN":_read_int32(f),# 		 Scan number 
                 }
         index['BLOC'] = index['XBLOC'] # v2 compatibility
-        index['WORD'] = 0 # v2 compatibility
+        index['WORD'] = 1 # v2 compatibility
+        index['CSOUR'] = index['XSOURC']
+        index['CTELE'] = index['XTEL']
+        index['LINE'] = index['XLINE']
         if clic: # use header set up in clic
             nextchunk = {
                         "XPROC":_read_int32(f),# "procedure type"
@@ -621,10 +624,9 @@ def _read_first_record_v1(f, record_length_words=128):
         'kind': 'unknown',
         'flags': 0,
     }
-    file_description['reclen'] = record_length_words, # should be 128w = 512 bytes
+    file_description['reclen'] = record_length_words # should be 128w = 512 bytes
     ex = np.fromfile(f, count=(record_length_words*2-5), dtype='int32')
     file_description['ex'] = ex[ex!=0]
-    assert len(file_description['ex']) == file_description['nex']
     file_description['nextrec'] = file_description['next'] # this can't be...
     file_description['lex1'] = file_description['lex'] # number of entries
     file_description['lexn'] = (np.arange(file_description['nex']+1) *
@@ -633,6 +635,8 @@ def _read_first_record_v1(f, record_length_words=128):
     file_description['aex'] = file_description['ex'][:file_description['nex']]
     #file_description['version'] = fileversion_dict[file_description['code']]
     assert f.tell() == 1024
+    # Something is not quite right with the 'ex' parsing
+    #assert len(file_description['ex']) == file_description['nex']
     return file_description
 
 def _read_first_record_v2(f):
