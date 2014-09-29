@@ -14,6 +14,7 @@ import numpy as np
 from numpy import pi
 from astropy import log
 import os
+import re
 try:
     from astropy.utils.console import ProgressBar
 except ImportError:
@@ -719,7 +720,71 @@ def gi8_dicho(ninp,lexn,xval,ceil=True):
     ival = isup
     return ival
 
-def _read_obshead(f, position=None, verbose=False):
+def _read_obshead(f, file_description, position=None):
+    if file_description['version'] == 1:
+        return _read_obshead_v1(f, position=position)
+    if file_description['version'] == 2:
+        return _read_obshead_v2(f, position=position)
+    else:
+        raise ValueError("Invalid file version {0}.".
+                         format(file_description['version']))
+
+def _read_obshead_v2(f, position=None):
+    """
+    ! Version 2 (public)
+    integer(kind=4), parameter :: entrydescv2_nw1=11  ! Number of words, in 1st part
+    integer(kind=4), parameter :: entrydescv2_nw2=5   ! Number of words for 1 section in 2nd part
+    type classic_entrydesc_t
+     sequence
+     integer(kind=4) :: code     !  1   : code observation icode
+     integer(kind=4) :: version  !  2   : observation version
+     integer(kind=4) :: nsec     !  3   : number of sections
+     integer(kind=4) :: pad1     !  -   : memory padding (not in data)
+     integer(kind=8) :: nword    !  4- 5: number of words
+     integer(kind=8) :: adata    !  6- 7: data address
+     integer(kind=8) :: ldata    !  8- 9: data length
+     integer(kind=8) :: xnum     ! 10-11: entry number
+     ! Out of the 'sequence' block:
+     integer(kind=4) :: msec     ! Not in data: maximum number of sections the
+                                 ! Observation Index can hold
+     integer(kind=4) :: pad2     ! Memory padding for 8 bytes alignment
+     integer(kind=4) :: seciden(classic_maxsec)  ! Section Numbers (on disk: 1 to ed%nsec)
+     integer(kind=8) :: secleng(classic_maxsec)  ! Section Lengths (on disk: 1 to ed%nsec)
+     integer(kind=8) :: secaddr(classic_maxsec)  ! Section Addresses (on disk: 1 to ed%nsec)
+    end type classic_entrydesc_t
+    """
+    if position is not None:
+        f.seek(position)
+    else:
+        position = f.tell()
+    IDcode = f.read(4)
+    if IDcode.strip() != '2':
+        raise IndexError("Observation Header reading failure at {0}.  "
+                         "Record does not appear to be an observation header.".
+                         format(position))
+    f.seek(position)
+    
+    entrydescv2_nw1=11
+    entrydescv2_nw2=5
+    obshead = {
+        'CODE': f.read(4),
+        'VERSION': _read_int32(f),
+        'NSEC': _read_int32(f),
+        #'_blank': _read_int32(f),
+        'NWORD': _read_int64(f),
+        'ADATA': _read_int64(f),
+        'LDATA': _read_int64(f),
+        'XNUM': _read_int64(f),
+        #'MSEC': _read_int32(f),
+        #'_blank2': _read_int32(f),
+    }
+    section_numbers = np.fromfile(f, count=obshead['NSEC'], dtype='int32')
+    section_lengths = np.fromfile(f, count=obshead['NSEC'], dtype='int64')
+    section_addresses = np.fromfile(f, count=obshead['NSEC'], dtype='int64')
+
+    return obshead['XNUM'],obshead,dict(zip(section_numbers,section_addresses))
+
+def _read_obshead_v1(f, position=None, verbose=False):
     """
     Read the observation header of a CLASS file
     (helper function for read_class; should not be used independently)
@@ -812,7 +877,8 @@ def read_observation(f, obsid, file_description=None, indices=None,
     index = indices[obsid]
 
     obs_position = (index['BLOC']-1)*file_description['reclen']*4 + (index['WORD']-1)*4
-    obsnum,obshead,sections = _read_obshead(f, position=obs_position)
+    obsnum,obshead,sections = _read_obshead(f, file_description,
+                                            position=obs_position)
     header = obshead
 
     datastart = 0
@@ -833,26 +899,119 @@ def read_observation(f, obsid, file_description=None, indices=None,
     hdr.update({'OBJECT':hdr['SOURC'].strip()})
     hdr.update({'BUNIT':'Tastar'})
     hdr.update({'EXPOSURE':hdr['TIME']})
+    hdr['HDRSTART'] = obs_position
+    hdr['DATASTART'] = datastart
+    hdr.update(indices[obsid])
 
+    if hdr['XNUM'] != obsid+1:
+        log.error("The spectrum read was {0} but {1} was requested.".
+                  format(hdr['XNUM']-1, obsid))
+
+    f.seek(datastart)
     spec = _read_spectrum(f, position=datastart, nchan=hdr['NCHAN'],
                           memmap=memmap, my_memmap=my_memmap)
 
     return spec, hdr
 
 def _read_spectrum(f, position, nchan, my_memmap=None, memmap=True):
+    if position != f.tell():
+        log.warn("Reading data from {0}, but the file is wound "
+                 "to {1}.".format(position, f.tell()))
     if memmap:
-        here = f.tell()
+        here = position
         #spectrum = numpy.memmap(filename, offset=here, dtype='float32',
         #                        mode='r', shape=(nchan,))
         spectrum = my_memmap[here/4:here/4+nchan]
         f.seek(here+nchan*4)
     else:
+        f.seek(position)
         spectrum = numpy.fromfile(f,count=nchan,dtype='float32')
 
     return spectrum
 
+class ClassObject(object):
+    def __init__(self, filename):
+        self._file = open(filename, 'rb')
+        self.file_description = _read_first_record(self._file)
+        self.allind = _read_indices(self._file, self.file_description)
+        self._data = np.memmap(self._file, dtype='float32', mode='r')
+        self._load_spectra()
 
+    @property
+    def sources(self):
+        if hasattr(self,'_source'):
+            return self._source
+        else:
+            self._source = set([h['SOURC'] for h in self.headers])
+            return self._source
 
+    @property
+    def lines(self):
+        if hasattr(self,'_lines'):
+            return self._lines
+        else:
+            self._lines = set([h['LINE'] for h in self.headers])
+            return self._lines
+
+    def _load_spectra(self, indices=None):
+        if indices is None:
+            indices = range(self.file_description['xnext']-1)
+
+        spec,hdr = zip(*[read_observation(self._file, ii,
+                                          file_description=self.file_description,
+                                          indices=self.allind,
+                                          my_memmap=self._data)
+                         for ii in ProgressBar(indices)])
+        self.spectra = spec
+        self.headers = hdr
+
+    def get_spectra(self,
+                    all=None,
+                    line=None,
+                    number=None,
+                    scan=None,
+                    offset=None,
+                    source=None,
+                    range=None,
+                    quality=None,
+                    telescope=None,
+                    subscan=None,
+                    entry=None,
+                    #observed=None,
+                    #reduced=None,
+                    frequency=None,
+                    section=None,
+                    user=None):
+        if entry is not None and len(entry==2):
+            return (self.spectra[entry[0]:entry[1]],
+                    self.headers[entry[0]:entry[1]])
+
+        sel = [(re.search(re.escape(line), h['CLINE'], re.IGNORECASE)
+                if line is not None else True) and
+               (h['SCAN'] == scan if scan is not None else True) and
+               ((h['OFF1'] == offset or
+                 h['OFF2'] == offset) if offset is not None else True) and
+               (re.search(re.escape(source), h['CSOUR'], re.IGNORECASE)
+                if source is not None else True) and
+               (h['OFF1']>range[0] and h['OFF1'] < range[1] and
+                h['OFF2']>range[2] and h['OFF2'] < range[3]
+                if range is not None and len(range)==4 else True) and
+               (h['QUAL'] == quality if quality is not None else True) and
+               (re.search(re.escape(telescope), h['CTELE'], re.IGNORECASE)
+                if telescope is not None else True) and
+               (h['SUBSCAN']==subscan if subscan is not None else True) and
+               (h['NUM'] >= number[0] and h['NUM'] < number[1]
+                if number is not None else True) and
+               (h['RESTF'] < frequency[0] and
+                h['RESTF'] > frequency[1]
+                if frequency is not None and len(frequency)==2
+                else True)
+               for h in self.headers]
+
+        return [(s,h) for s,h,k in zip(self.spectra,
+                                       self.headers,
+                                       sel)
+                if k]
 
 
 @print_timing
