@@ -912,6 +912,9 @@ def read_observation(f, obsid, file_description=None, indices=None,
                   format(hdr['XNUM']-1, obsid))
 
     f.seek(datastart)
+    if 'NCHAN' not in hdr:
+        log.error("No NCHAN in header.  This is not a spectrum.")
+        import ipdb; ipdb.set_trace()
     spec = _read_spectrum(f, position=datastart, nchan=hdr['NCHAN'],
                           memmap=memmap, my_memmap=my_memmap)
 
