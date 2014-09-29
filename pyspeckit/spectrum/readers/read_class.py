@@ -489,12 +489,12 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
                     "XTEL":_read_word(f,12),
                     "XDOBS":_read_int32(f),
                     "XDRED":_read_int32(f),
-                    "XOFF1":_read_float32(f),# 		 first offset (real, radians) 
-                    "XOFF2":_read_float32(f),# 		 second offset (real, radians) 
-                    "XTYPE":_read_int32(f),# 		 coordinate system ('EQ'', 'GA', 'HO') 
-                    "XKIND":_read_int32(f),# 		 Kind of observation (0: spectral, 1: continuum, ) 
-                    "XQUAL":_read_int32(f),# 		 Quality (0-9)  
-                    "XSCAN":_read_int32(f),# 		 Scan number 
+                    "XOFF1":_read_float32(f),# 	 first offset (real, radians) 
+                    "XOFF2":_read_float32(f),# 	 second offset (real, radians) 
+                    "XTYPE":_read_int32(f),# 	 coordinate system ('EQ'', 'GA', 'HO') 
+                    "XKIND":_read_int32(f),# 	 Kind of observation (0: spectral, 1: continuum, ) 
+                    "XQUAL":_read_int32(f),# 	 Quality (0-9)  
+                    "XSCAN":_read_int32(f),# 	 Scan number 
                 }
         index['BLOC'] = index['XBLOC'] # v2 compatibility
         index['WORD'] = 1 # v2 compatibility
@@ -912,10 +912,14 @@ def read_observation(f, obsid, file_description=None, indices=None,
                   format(hdr['XNUM']-1, obsid))
 
     f.seek(datastart)
-    if 'NCHAN' not in hdr:
+    if hdr['XKIND'] == 1: # continuum
+        nchan = hdr['NPOIN']
+    elif 'NCHAN' in hdr:
+        nchan = hdr['NCHAN']
+    else:
         log.error("No NCHAN in header.  This is not a spectrum.")
         import ipdb; ipdb.set_trace()
-    spec = _read_spectrum(f, position=datastart, nchan=hdr['NCHAN'],
+    spec = _read_spectrum(f, position=datastart, nchan=nchan,
                           memmap=memmap, my_memmap=my_memmap)
 
     return spec, hdr
