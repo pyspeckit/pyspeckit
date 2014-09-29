@@ -102,6 +102,9 @@ Empirical work on APEX mapping data:
 filetype_dict = {'1A  ':'Multiple_IEEE','1   ':'Multiple_Vax','1B  ':'Multiple_EEEI',
     '9A  ':'Single_IEEE','9   ':'Single_Vax','9B  ':'Single_EEEI'}
 
+record_lengths = {'1A': 512,
+                  '2A': 1024*4}
+
 header_id_numbers = {-2: 'GENERAL',
                      -3: 'POSITION',
                      -4: 'SPECTRO',
@@ -301,6 +304,17 @@ def _read_word(f,length):
 
 def _read_int(f):
     return struct.unpack('i',f.read(4))
+
+def is_ascii(s):
+    try:
+        s.decode('ascii')
+        return True
+    except UnicodeDecodeError:
+        return False
+    except UnicodeEncodeError:
+        return False
+
+
 """
 from clic_file.f90: v1, v2
     integer(kind=4)  :: bloc       !  1   : observation address [records]       integer(kind=8)  :: bloc       !  1- 2: observation address [records]     integer(kind=4)   :: bloc     !  1   : block read from index
@@ -385,6 +399,8 @@ def _read_index(f, DEBUG=False, clic=False):
         X = f.read(128-(f.tell()-x0))
         if DEBUG: print "read_index missed %i bits: %s" % (128-(f.tell()-x0),X)
         #raise IndexError("read_index did not successfully read 128 bytes at %i.  Read %i bytes." % (x0,f.tell()-x0))
+    if any(not is_ascii(index[x]) for x in ('XSOURC','XLINE','XTEL')):
+        raise ValueError("Invalid index read from {0}.".format(x0))
     return index
 
 def _read_header(f,type=0):
@@ -470,8 +486,8 @@ def downsample_1d(myarr,factor,estimator=np.mean):
 
 @print_timing
 def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
-               stop_position=None, start=512, skip_data=False,
-               downsample_factor=None):
+               stop_position=None, skip_data=False,
+               downsample_factor=None, memmap=False):
     """
     A hacked-together method to read a binary CLASS file.  It is strongly dependent on the incomplete
     `GILDAS CLASS file type Specification <http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html>`_
@@ -492,10 +508,15 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
     log.info("Loading file {0} with length {1} ({2} GB):".format(filename,filelen,filelen/(1024L**3)))
     f = open(filename,'rb')
     f.seek(0)
+    if memmap:
+        my_memmap = numpy.memmap(filename, offset=0, dtype='float32', mode='r')
+
 
     filetype = f.read(4)
     if filetype in filetype_dict:
         log.info("File %s is type %s" % (filename,filetype_dict[filetype]))
+        record_length = record_lengths[filetype.strip()]
+        version = 'v1' if '1' in filetype else 'v2'
     else:
         raise TypeError("File type error: %s." % filetype)
     
@@ -504,7 +525,9 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
     firstblock=numpy.fromfile(f,count=nex,dtype='int32') #[_read_byte(f) for ii in xrange(nex)]
     # purely empirical: HHT was always 512, apparently apex is 1024?
     # (though I had apex=True and it sort of worked maybe before?!)
-    f.seek(start)
+    # 9/27/2014: figured out that yeah, this really should be the first block
+    # (v1 files have 2 records for the 'header'; I think v2 do too?  Or their records are just longer?)
+    f.seek(1024)
 
     if DEBUG: print "firstblock",firstblock
     if DEBUG: print "Done with header stuff at position %i" % f.tell()
@@ -524,12 +547,13 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
     header_list  = []
     spcount = 0
     jj = -1
-    pb = ProgressBar(filelen)
-    startpos = -1 # debug tool: make sure we are not in an infinite loop
     log.info("Pre-reading took {0} seconds".format(time.time()-t0))
+    if not DEBUG: pb = ProgressBar(filelen)
+    startpos = -1 # debug tool: make sure we are not in an infinite loop
     while f.tell() < filelen:
         jj += 1
-        pb.update(f.tell())
+        if not DEBUG: pb.update(f.tell())
+        else: log.info("Iteration {0}".format(jj))
         if f.tell() == startpos:
             raise ValueError("Infinite Loop")
         startpos = f.tell()
@@ -683,7 +707,14 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
             # Skip the data: 4 bytes per float32
             f.seek(f.tell() + nchan*4)
         else:
-            spectrum = numpy.fromfile(f,count=nchan,dtype='float32')
+            if memmap:
+                here = f.tell()
+                #spectrum = numpy.memmap(filename, offset=here, dtype='float32',
+                #                        mode='r', shape=(nchan,))
+                spectrum = my_memmap[here/4:here/4+nchan]
+                f.seek(here+nchan*4)
+            else:
+                spectrum = numpy.fromfile(f,count=nchan,dtype='float32')
             if DEBUG > 2:
                 print "First digits of spectrum: ",spectrum[:10]
             if downsample_factor is not None:

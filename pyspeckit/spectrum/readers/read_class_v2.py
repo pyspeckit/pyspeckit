@@ -332,6 +332,9 @@ def is_ascii(s):
     except UnicodeEncodeError:
         return False
 
+def is_all_null(s):
+    return all(x=='\x00' for x in s)
+
 
 """
 from clic_file.f90: v1, v2
@@ -400,54 +403,77 @@ index.f90:
 """
 
 def _read_indices(f, file_description):
-    if file_description['version'] in (1,2):
-        extension_positions = (file_description['aex']-1)*file_description['reclen']*4
-        all_indices = {extension:
-                       [_read_index(f,
-                                    filetype=file_description['version'],
-                                    position=position,
-                                   )
-                           for ii in range(file_description['lex1'])]
-                       for extension,position in enumerate(extension_positions)
-                       if position > 0
-                      }
+    #if file_description['version'] in (1,2):
+    #    extension_positions = (file_description['aex']-1)*file_description['reclen']*4
+    #    all_indices = {extension:
+    #                   [_read_index(f,
+    #                                filetype=file_description['version'],
+    #                                entry=ii,
+    #                                #position=position,
+    #                               )
+    #                       for ii in range(file_description['lex1'])]
+    #                   for extension,position in enumerate(extension_positions)
+    #                   if position > 0
+    #                  }
 
-    elif file_description['version'] == 1:
-        extension_positions = ((file_description['ex'].astype('int64')-1)
-                               *file_description['reclen']*4)[:file_description['nex'][0]+1]
-        all_indices = {extension:
-                       [_read_index(f,
-                                    filetype=file_description['version'],
-                                    position=position,
-                                   )
-                           for ii in range(file_description['lex'])]
-                       for extension,position in enumerate(extension_positions)
-                       if position > 0
-                      }
-        #for ii in xrange(1,xnext+1):
-        #    ke = (entry_num-1)/lex1 + 1
-        #    kb = (entry_num-1 - (ke-1)*lex1)/4
-        #    kbl= aex[ke]+kb
-    else:
-        raise ValueError("Invalid file version {0}".format(file_description['version']))
+    #elif file_description['version'] == 1:
+    extension_positions = ((file_description['aex'].astype('int64')-1)
+                           *file_description['reclen']*4)
+    all_indices = [_read_index(f,
+                               filetype=file_description['version'],
+                               # 1-indexed files
+                               entry_number=ii+1,
+                               file_description=file_description,
+                              )
+                       for ii in range(file_description['xnext']-1)]
+    #else:
+    #    raise ValueError("Invalid file version {0}".format(file_description['version']))
 
                 
     return all_indices
 
 
-def _find_index(entry_number, file_description):
-    kex=(entry_number-1)/file_description['lex1']
-    ken = entry_number - file_description['lexn'][kex]
+def _find_index(entry_number, file_description, return_position=False):
+    if file_description['gex'] == 10:
+        kex=(entry_number-1)/file_description['lex1'] + 1
+    else:
+        # exponential growth:
+        #kex = gi8_dicho(file_description['nex'], file_description['lexn'], entry_number) - 1
+        kex = len([xx for xx in file_description['lexn'] if xx<entry_number])
+
+    ken = entry_number - file_description['lexn'][kex-1]
+    #! Find ken (relative entry number in the extension, starts from 1)
+    #ken = entry_num - file%desc%lexn(kex-1)
+
     kb = ((ken-1)*file_description['lind'])/file_description['reclen']
-    kbl = file_description['aex'][kex-1]+kb
-    k = ((ken-1)*file_description['lind'])  % file_description['reclen'] + 1
-    return kbl,k
+    #kb = ((ken-1)*file%desc%lind)/file%desc%reclen  ! In the extension, the
+    #    ! relative record position (as an offset, starts from 0) where the
+    #    ! Entry Index starts. NB: there can be a non-integer number of Entry
+    #    ! Indexes per record
+
+    # Subtract 1: 'aex' is 1-indexed
+    kbl = (file_description['aex'][kex-1]+kb)-1
+    # kbl = file%desc%aex(kex)+kb  ! The absolute record number where the Entry Index goes
+
+    k = ((ken-1)*file_description['lind'])  % file_description['reclen']
+    #k = mod((ken-1)*file%desc%lind,file%desc%reclen)+1  ! = in the record, the
+    #  ! first word of the Entry Index of the entry number 'entry_num'
+
+
+    if return_position:
+        return (kbl*file_description['reclen']+k)*4
+    else:
+        return kbl,k
     
 
-def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None):
+def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
+                entry_number=None, file_description=None):
 
     if position is not None:
         f.seek(position)
+    if entry_number is not None:
+        indpos = _find_index(entry_number, file_description, return_position=True)
+        f.seek(indpos)
 
     x0 = f.tell()
 
@@ -469,6 +495,8 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None):
                     "XQUAL":_read_int32(f),# 		 Quality (0-9)  
                     "XSCAN":_read_int32(f),# 		 Scan number 
                 }
+        index['BLOC'] = index['XBLOC'] # v2 compatibility
+        index['WORD'] = 0 # v2 compatibility
         if clic: # use header set up in clic
             nextchunk = {
                         "XPROC":_read_int32(f),# "procedure type"
@@ -518,7 +546,8 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None):
         }
         #last24bits = f.read(24)
         #log.debug("Read 24 bits: '{0}'".format(last24bits))
-        if any(not is_ascii(index[x]) for x in ('CSOUR','CLINE','CTELE')):
+        if any((is_all_null(index[x]) or not is_ascii(index[x]))
+               for x in ('CSOUR','CLINE','CTELE')):
             raise ValueError("Invalid index read from {0}.".format(x0))
 
     else:
@@ -527,11 +556,13 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None):
     log.debug("Indexing finished at {0}".format(f.tell()))
     return index
 
-def _read_header(f,type=0):
+def _read_header(f, type=0, position=None):
     """
     Read a header entry from a CLASS file
     (helper function)
     """
+    if position is not None:
+        f.seek(position)
     if type in keys_lengths:
         hdrsec = [(x[0],numpy.fromfile(f,count=1,dtype=x[2])[0])
                 for x in keys_lengths[type]]
@@ -539,6 +570,14 @@ def _read_header(f,type=0):
     else:
         return {}
         raise ValueError("Unrecognized type {0}".format(type))
+
+def _read_first_record(f):
+    f.seek(0)
+    filetype = f.read(4)
+    if fileversion_dict[filetype] == 'v1':
+        return _read_first_record_v1(f)
+    else:
+        return _read_first_record_v2(f)
 
 def _read_first_record_v1(f, record_length_words=128):
     r"""
@@ -559,6 +598,10 @@ def _read_first_record_v1(f, record_length_words=128):
      integer(kind=4) :: xnext        ! 5     Next available entry number
      integer(kind=4) :: aex(mex_v1)  ! 6:256 Extension addresses
 
+    from old (<dec2013) class, file.f90:
+     read(ilun,rec=1,err=11,iostat=ier) ibx%code,ibx%next,   &
+          &      ibx%ilex,ibx%imex,ibx%xnext
+
     also uses filedesc_v1tov2 from classic/lib/file.f90
     """
     f.seek(0)
@@ -568,8 +611,6 @@ def _read_first_record_v1(f, record_length_words=128):
         'lex':   _read_int32(f),
         'nex':   _read_int32(f),
         'xnext': _read_int32(f),
-        'ex': np.fromfile(f, count=(record_length_words*2-5), dtype='int32'),
-        'reclen': record_length_words, # should be 128w = 512 bytes
         'gex': 10.,
         'vind': 1, # classic_vind_v1 packages/classic/lib/classic_mod.f90
         'version': 1,
@@ -579,16 +620,21 @@ def _read_first_record_v1(f, record_length_words=128):
         'kind': 'unknown',
         'flags': 0,
     }
+    file_description['reclen'] = record_length_words, # should be 128w = 512 bytes
+    ex = np.fromfile(f, count=(record_length_words*2-5), dtype='int32')
+    file_description['ex'] = ex[ex!=0]
+    assert len(file_description['ex']) == file_description['nex']
     file_description['nextrec'] = file_description['next'] # this can't be...
     file_description['lex1'] = file_description['lex'] # number of entries
-    file_description['lexn'] = (np.arange(file_description['nex']) *
+    file_description['lexn'] = (np.arange(file_description['nex']+1) *
                                 file_description['lex1'])
-    file_description['aex'] = file_description['ex']
+    file_description['nentries'] = np.sum(file_description['lexn'])
+    file_description['aex'] = file_description['ex'][:file_description['nex']]
     #file_description['version'] = fileversion_dict[file_description['code']]
     assert f.tell() == 1024
     return file_description
 
-def _read_first_record_v2(f, record_length_words):
+def _read_first_record_v2(f):
     r""" packages/classic/lib/file.f90
     Position        & Parameter      & Fortran Kind & Purpose                               & Unit    \\
     \hline
@@ -623,23 +669,70 @@ def _read_first_record_v2(f, record_length_words):
         'lex1':     _read_int32(f),
         'nex':      _read_int32(f),
         'gex':      _read_int32(f),
-        'aex':      numpy.fromfile(f, count=(record_length_words-15)/2,
-                                   dtype='int64'),
     }
+    file_description['lexn'] = [0]
+    if file_description['gex'] == 10:
+        for ii in range(1, file_description['nex']+1):
+            file_description['lexn'].append(file_description['lexn'][-1]+file_description['lex1'])
+    else:
+        #! Exponential growth. Only growth with mantissa 2.0 is supported
+        for ii in range(1, file_description['nex']):
+            # I don't know what the fortran does here!!!
+            # ahh, maybe 2_8 means int(2, dtype='int64')
+            nent = int(file_description['lex1'] * 2**(ii-1))
+            #nent = int(file%desc%lex1,kind=8) * 2_8**(iex-1)
+            file_description['lexn'].append(file_description['lexn'][-1]+nent)
+            #file%desc%lexn(iex) = file%desc%lexn(iex-1) + nent
+    file_description['nentries'] = np.sum(file_description['lexn'])
+    record_length_words = file_description['reclen']
+    aex = numpy.fromfile(f, count=(record_length_words-15)/2, dtype='int64')
+    file_description['aex'] = aex[aex!=0]
+    assert len(file_description['aex']) == file_description['nex']
     file_description['version'] = 2
     return file_description
 
+def gi8_dicho(ninp,lexn,xval,ceil=True):
+    """
+    ! @ public
+    !  Find ival such as
+    !    X(ival-1) < xval <= X(ival)     (ceiling mode)
+    !  or
+    !    X(ival) <= xval < X(ival+1)     (floor mode)
+    ! for input data ordered. Use a dichotomic search for that.
+    call gi8_dicho(nex,file%desc%lexn,entry_num,.true.,kex,error)
+    """
+    #integer(kind=size_length), intent(in)    :: np     ! Number of input points
+    #integer(kind=8),           intent(in)    :: x(np)  ! Input ordered Values
+    #integer(kind=8),           intent(in)    :: xval   ! The value we search for
+    #logical,                   intent(in)    :: ceil   ! Ceiling or floor mode?
+    #integer(kind=size_length), intent(out)   :: ival   ! Position in the array
+    #logical,                   intent(inout) :: error  ! Logical error flag
+    iinf = 1
+    isup = ninp
+    #! Ceiling mode
+    while isup > (iinf+1):
+        imid = int(np.floor((isup + iinf)/2.))
+        if (lexn[imid-1] < xval):
+            iinf = imid
+        else:
+            isup = imid
+    ival = isup
+    return ival
 
-def _read_obshead(f,verbose=False):
+def _read_obshead(f, position=None, verbose=False):
     """
     Read the observation header of a CLASS file
     (helper function for read_class; should not be used independently)
     """
-    #IDcode = f.read(4)
-    #if verbose: print "IDcode: ",IDcode
-    #if IDcode.strip() != '2':
-    #    raise IndexError("Failure at %i" % (f.tell() - 4))
-    nblocks,nbyteob,data_address,nheaders,data_length,obindex,nsec,obsnum= numpy.fromfile(f,count=8,dtype='int32')
+    if position is not None:
+        f.seek(position)
+    IDcode = f.read(4)
+    if IDcode.strip() != '2':
+        raise IndexError("Observation Header reading failure at {0}.  "
+                         "Record does not appear to be an observation header.".
+                         format(f.tell() - 4))
+    (nblocks, nbyteob, data_address, nheaders, data_length, obindex, nsec,
+     obsnum) = numpy.fromfile(f, count=8, dtype='int32')
     if verbose:
         print "nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum",nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum
         print "DATA_LENGTH: ",data_length
@@ -697,6 +790,69 @@ def downsample_1d(myarr,factor,estimator=np.mean):
     dsarr = estimator(np.concatenate([[crarr[i::factor] for i in
                                        range(factor)]]),axis=0)
     return dsarr
+
+def read_observation(f, obsid, file_description=None, indices=None,
+                     my_memmap=None, memmap=True):
+    if isinstance(f, str):
+        f = open(f,'rb')
+        if memmap:
+            my_memmap = numpy.memmap(filename, offset=0, dtype='float32',
+                                     mode='r')
+        else:
+            my_memmap = None
+    elif my_memmap is None and memmap:
+        raise ValueError("Must pass in a memmap object if passing in a file object.")
+
+    if file_description is None:
+        file_description = _read_first_record(f)
+
+    if indices is None:
+        indices = _read_indices(f, file_description)
+
+    index = indices[obsid]
+
+    obs_position = (index['BLOC']-1)*file_description['reclen']*4 + (index['WORD']-1)*4
+    obsnum,obshead,sections = _read_obshead(f, position=obs_position)
+    header = obshead
+
+    datastart = 0
+    for section_id,section_address in sections.iteritems():
+        # Section addresses are 1-indexed byte addresses
+        # in the current "block"
+        sec_position = obs_position + (section_address-1)*4
+        temp_hdr = _read_header(f, type=header_id_numbers[section_id],
+                                position=sec_position)
+        header.update(temp_hdr)
+        datastart = max(datastart,f.tell())
+
+    hdr = header
+    hdr.update(obshead) # re-overwrite things
+    hdr.update({'OBSNUM':obsnum,'RECNUM':obsid})
+    hdr.update({'RA':hdr['LAM']/pi*180,'DEC':hdr['BET']/pi*180})
+    hdr.update({'RAoff':hdr['LAMOF']/pi*180,'DECoff':hdr['BETOF']/pi*180})
+    hdr.update({'OBJECT':hdr['SOURC'].strip()})
+    hdr.update({'BUNIT':'Tastar'})
+    hdr.update({'EXPOSURE':hdr['TIME']})
+
+    spec = _read_spectrum(f, position=datastart, nchan=hdr['NCHAN'],
+                          memmap=memmap, my_memmap=my_memmap)
+
+    return spec, hdr
+
+def _read_spectrum(f, position, nchan, my_memmap=None, memmap=True):
+    if memmap:
+        here = f.tell()
+        #spectrum = numpy.memmap(filename, offset=here, dtype='float32',
+        #                        mode='r', shape=(nchan,))
+        spectrum = my_memmap[here/4:here/4+nchan]
+        f.seek(here+nchan*4)
+    else:
+        spectrum = numpy.fromfile(f,count=nchan,dtype='float32')
+
+    return spectrum
+
+
+
 
 
 @print_timing
@@ -819,7 +975,8 @@ def read_class(filename,  DEBUG=False, apex=False, skip_blank_spectra=False,
                 raise Exception("Failure at %i: %i" % (jj,f.tell()))
         else:
             if DEBUG: print "Reading HEADER and OBSERVATION at %i" % f.tell()
-            obsnum,obshead,sections = _read_obshead(f,verbose=DEBUG)
+            obsnum,obshead,sections = _read_obshead(f, position=f.tell()-4,
+                                                    verbose=DEBUG)
         pos = f.tell()
         # first one of these starts
         if DEBUG:
