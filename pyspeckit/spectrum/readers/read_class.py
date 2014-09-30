@@ -919,6 +919,7 @@ def read_observation(f, obsid, file_description=None, indices=None,
     else:
         log.error("No NCHAN in header.  This is not a spectrum.")
         import ipdb; ipdb.set_trace()
+    # There may be a 1-channel offset?  CHECK!!!
     spec = _read_spectrum(f, position=datastart, nchan=nchan,
                           memmap=memmap, my_memmap=my_memmap)
 
@@ -1026,7 +1027,7 @@ class ClassObject(object):
 
 
 @print_timing
-def read_class(filename, downsample_factor=None):
+def read_class(filename, downsample_factor=None, sourcename=None, xtel=None):
     """
     A hacked-together method to read a binary CLASS file.  It is strongly dependent on the incomplete
     `GILDAS CLASS file type Specification <http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html>`_
@@ -1041,12 +1042,27 @@ def read_class(filename, downsample_factor=None):
         Factor by which to downsample data by averaging.  Useful for
         overresolved data. DEPRECATED
     """
-    if downsample_factor is not None:
-        log.warn("Downsampling on the fly has been disabled...")
-
     classobj = ClassObject(filename)
-    spectra = classobj.spectra
-    headers = indexes = classobj.headers
+
+    if not isinstance(sourcename, (list,tuple)):
+        sourcename = [sourcename]
+    if not isinstance(xtel, (list,tuple)):
+        xtel = [xtel]
+
+    spectra,headers = [],[]
+    for source in sourcename:
+        spec,hdr = zip(*classobj.get_spectra(source=source, xtel=xtel))
+        spectra += spec
+        headers += hdr
+
+    indexes = headers
+
+    if downsample_factor is not None:
+        log.info("Downsampling...")
+        spectra = [downsample_1d(spec, downsample_factor)
+                   for spec in ProgressBar(spectra)]
+        for h in headers:
+            h['NCHAN'] = h['NCHAN'] / downsample_factor
 
     return spectra,headers,indexes
 
