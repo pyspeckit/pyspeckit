@@ -1051,9 +1051,10 @@ def read_class(filename, downsample_factor=None, sourcename=None, telescope=None
 
     spectra,headers = [],[]
     for source in sourcename:
-        spec,hdr = zip(*classobj.get_spectra(source=source, telescope=telescope))
-        spectra += spec
-        headers += hdr
+        for tel in telescope:
+            spec,hdr = zip(*classobj.get_spectra(source=source, telescope=tel))
+            spectra += spec
+            headers += hdr
 
     indexes = headers
 
