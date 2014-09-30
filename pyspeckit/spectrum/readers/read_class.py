@@ -1027,7 +1027,7 @@ class ClassObject(object):
 
 
 @print_timing
-def read_class(filename, downsample_factor=None, sourcename=None, xtel=None):
+def read_class(filename, downsample_factor=None, sourcename=None, telescope=None):
     """
     A hacked-together method to read a binary CLASS file.  It is strongly dependent on the incomplete
     `GILDAS CLASS file type Specification <http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html>`_
@@ -1046,12 +1046,12 @@ def read_class(filename, downsample_factor=None, sourcename=None, xtel=None):
 
     if not isinstance(sourcename, (list,tuple)):
         sourcename = [sourcename]
-    if not isinstance(xtel, (list,tuple)):
-        xtel = [xtel]
+    if not isinstance(telescope, (list,tuple)):
+        telescope = [telescope]
 
     spectra,headers = [],[]
     for source in sourcename:
-        spec,hdr = zip(*classobj.get_spectra(source=source, xtel=xtel))
+        spec,hdr = zip(*classobj.get_spectra(source=source, telescope=telescope))
         spectra += spec
         headers += hdr
 
