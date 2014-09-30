@@ -1048,7 +1048,7 @@ def read_class(filename, downsample_factor=None):
     spectra = classobj.spectra
     headers = indexes = classobj.headers
 
-    return spectra,header_list,indexes
+    return spectra,headers,indexes
 
 def make_axis(header,imagfreq=False):
     """
