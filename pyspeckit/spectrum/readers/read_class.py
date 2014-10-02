@@ -41,63 +41,6 @@ def print_timing(func):
     return wrapper
 
 
-"""
-A note from the CLASS developers: 
-
-> Dear Adam,
-> 
-> Our policy regarding the Class binary data format changed 5 years again. It now
-> is private to class developers. We partly document it for the sake of
-> transparency (and it happens that the current documentation is out of date
-> because of lack of manpower) but only the API is public. The reason is that it
-> leaves us the freedom (even though seldom used) to make it evolve with the new
-> needs of the instruments. In other words, there is no warranty that the class
-> binary data format will stay as it is today but we always ensure that the Class
-> library is able to read a Class file, whatever its age: backward compatibility
-> is a must-have feature for us.
-> 
-> Our recommendation is thus that you use by a mean or an other the Class
-> library. Since you are a Python user, it should be easy for you to use the
-> Gildas-Python binding. You will find at the end of this email an example of a
-> session which uses it. We hope this will help you.
-> 
-> Best regards,
-> 
-> Sebastien Bardeau and Jerome Pety
-
-Because I want purely non-proprietary data access, I decided to go ahead and
-try to figure out what a CLASS file consists of anyway.
-
-The structure is pretty complicated - each observation has an INDEX and a
-HEADER.  The INDEX is what CLASS's LIST command accesses - it has scan numbers,
-source numbers, and "telescope" names (the quotes are because "telescope" often
-refers to the instrument on the telescope, not the dish).
-
-The various header sections include very useful information, but header section
--2 doesn't appear to exist in the data (Even though it is stated to be in the data
-at the tops of the headers).  The sort of stuff I haven't been able to parse looks like
-SHM_MAP: Segment key 0xcafe015, mapped to shmid 0x44e48010o shm 0xcafe015g 2, for spec 0 mode        Sky bin 0 walsh
-
-Without testing, I'm not sure about certain parameters, such as lamof/betof -
-are they in radians (like lam/bet) or some other system?
-
-Additionally, the projection system is unclear to me... there is a 'systex'
-array in titout.f90 that has 6 entries, but the index in the smt files is 7.
-So...  I guess I have to assume simple fk5, tangent?
-
-
-There is also a nearly-complete specification in clic_file.f90
-
-
-Empirical work on APEX mapping data:
-    Index #383 is the last SgrA entry
-    last index starts at 50048
-    indexes seem to start at 1024
-    each index is 128 bits
-    there are 375 SGRA entries
-    after the last SGRA entry, the next RAFGL entry is 252 bytes ahead
-
-"""
 
 """ Specification: http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html """
 filetype_dict = {'1A  ':'Multiple_IEEE','1   ':'Multiple_Vax','1B  ':'Multiple_EEEI',
@@ -498,9 +441,14 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
                 }
         index['BLOC'] = index['XBLOC'] # v2 compatibility
         index['WORD'] = 1 # v2 compatibility
-        index['CSOUR'] = index['XSOURC']
+        index['SOURC'] = index['CSOUR'] = index['XSOURC']
         index['CTELE'] = index['XTEL']
         index['LINE'] = index['XLINE']
+        index['OFF1'] = index['XOFF1']
+        index['OFF2'] = index['XOFF2']
+        index['QUAL'] = index['XQUAL']
+        index['SCAN'] = index['XSCAN']
+        index['KIND'] = index['XKIND']
         if clic: # use header set up in clic
             nextchunk = {
                         "XPROC":_read_int32(f),# "procedure type"
@@ -519,6 +467,8 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
                          "XSUBSCAN":_read_int32(f),
                          'XPAD2': numpy.fromfile(f,count=10,dtype='int32'),
                          }
+            nextchunk['SUBSCAN'] = nextchunk['XSUBSCAN']
+            nextchunk['POSA'] = nextchunk['XPOSA']
         index.update(nextchunk)
         if (f.tell() - x0 != 128):
             missed_bits = (f.tell()-x0)
@@ -553,6 +503,9 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
         if any((is_all_null(index[x]) or not is_ascii(index[x]))
                for x in ('CSOUR','CLINE','CTELE')):
             raise ValueError("Invalid index read from {0}.".format(x0))
+        index['SOURC'] = index['XSOURC'] = index['CSOUR']
+        index['LINE'] = index['XLINE'] = index['CLINE']
+        index['XKIND'] = index['KIND']
 
     else:
         raise NotImplementedError("Filetype {0} not implemented.".format(filetype))
@@ -911,8 +864,7 @@ def read_observation(f, obsid, file_description=None, indices=None,
         log.error("The spectrum read was {0} but {1} was requested.".
                   format(hdr['XNUM']-1, obsid))
 
-    f.seek(datastart)
-    if hdr['XKIND'] == 1: # continuum
+    if hdr['KIND'] == 1: # continuum
         nchan = hdr['NPOIN']
     elif 'NCHAN' in hdr:
         nchan = hdr['NCHAN']
@@ -920,7 +872,8 @@ def read_observation(f, obsid, file_description=None, indices=None,
         log.error("No NCHAN in header.  This is not a spectrum.")
         import ipdb; ipdb.set_trace()
     # There may be a 1-channel offset?  CHECK!!!
-    spec = _read_spectrum(f, position=datastart, nchan=nchan,
+    f.seek(datastart-1)
+    spec = _read_spectrum(f, position=datastart-1, nchan=nchan,
                           memmap=memmap, my_memmap=my_memmap)
 
     return spec, hdr
@@ -941,20 +894,27 @@ def _read_spectrum(f, position, nchan, my_memmap=None, memmap=True):
 
     return spectrum
 
+def _spectrum_from_header(fileobj, header, memmap=None):
+    return _read_spectrum(fileobj, position=header['DATASTART'],
+                          nchan=header['NCHAN'] if 'NCHAN' in hdr else hdr['NPOIN'],
+                          my_memmap=memmap)
+
 class ClassObject(object):
     def __init__(self, filename):
         self._file = open(filename, 'rb')
         self.file_description = _read_first_record(self._file)
         self.allind = _read_indices(self._file, self.file_description)
         self._data = np.memmap(self._file, dtype='float32', mode='r')
-        self._load_spectra()
+        # this will be overwritten if spectra are loaded with _load_all_spectra
+        self.headers = self.allind
+        #self._load_all_spectra()
 
     @property
     def sources(self):
         if hasattr(self,'_source'):
             return self._source
         else:
-            self._source = set([h['SOURC'] for h in self.headers])
+            self._source = set([h['SOURC'] for h in self.allind])
             return self._source
 
     @property
@@ -962,10 +922,10 @@ class ClassObject(object):
         if hasattr(self,'_lines'):
             return self._lines
         else:
-            self._lines = set([h['LINE'] for h in self.headers])
+            self._lines = set([h['LINE'] for h in self.allind])
             return self._lines
 
-    def _load_spectra(self, indices=None):
+    def _load_all_spectra(self, indices=None):
         if indices is None:
             indices = range(self.file_description['xnext']-1)
 
@@ -1020,9 +980,11 @@ class ClassObject(object):
                 else True)
                for h in self.headers]
 
-        return [(s,h) for s,h,k in zip(self.spectra,
-                                       self.headers,
-                                       sel)
+        return [read_observation(self._file, ii,
+                                 file_description=self.file_description,
+                                 indices=self.allind, my_memmap=self._data,
+                                 memmap=True)
+                for ii,k in enumerate(sel)
                 if k]
 
 
@@ -1064,6 +1026,7 @@ def read_class(filename, downsample_factor=None, sourcename=None, telescope=None
                    for spec in ProgressBar(spectra)]
         for h in headers:
             h['NCHAN'] = h['NCHAN'] / downsample_factor
+            h['RCHAN'] = (h['RCHAN']-1) / downsample_factor + 1
 
     return spectra,headers,indexes
 
@@ -1134,7 +1097,7 @@ def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
                     H.update(k,v[0])
             elif pyfits.Card._comment_FSC_RE.match(str(v)) is not None:
                 H.update(k,v)
-        scannum = hdr['XSCAN']
+        scannum = hdr['SCAN']
         if 'XTEL' in hdr and hdr['XTEL'].strip() not in telescope:
             continue
         if hdr['LINE'].strip() not in line:
