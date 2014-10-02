@@ -561,6 +561,18 @@ def _read_first_record_v1(f, record_length_words=128):
 
     also uses filedesc_v1tov2 from classic/lib/file.f90
     """
+
+#  OLD NOTES
+#        hdr = header
+#        hdr.update(obshead) # re-overwrite things
+#        hdr.update({'OBSNUM':obsnum,'RECNUM':spcount})
+#        hdr.update({'RA':hdr['LAM']/pi*180,'DEC':hdr['BET']/pi*180})
+#        hdr.update({'RAoff':hdr['LAMOF']/pi*180,'DECoff':hdr['BETOF']/pi*180})
+#        hdr.update({'OBJECT':hdr['SOURC'].strip()})
+#        hdr.update({'BUNIT':'Tastar'})
+#        hdr.update({'EXPOSURE':hdr['TIME']})
+
+
     f.seek(0)
     file_description = {
         'code': f.read(4),
@@ -954,9 +966,12 @@ class ClassObject(object):
                     frequency=None,
                     section=None,
                     user=None):
-        if entry is not None and len(entry==2):
-            return (self.spectra[entry[0]:entry[1]],
-                    self.headers[entry[0]:entry[1]])
+        if entry is not None and len(entry)==2:
+            return [read_observation(self._file, ii,
+                                     file_description=self.file_description,
+                                     indices=self.allind, my_memmap=self._data,
+                                     memmap=True)
+                    for ii in xrange(entry[0], entry[1])]
 
         sel = [(re.search(re.escape(line), h['CLINE'], re.IGNORECASE)
                 if line is not None else True) and
@@ -984,7 +999,7 @@ class ClassObject(object):
                                  file_description=self.file_description,
                                  indices=self.allind, my_memmap=self._data,
                                  memmap=True)
-                for ii,k in enumerate(sel)
+                for ii,k in enumerate(ProgressBar(sel))
                 if k]
 
 
@@ -1012,6 +1027,7 @@ def read_class(filename, downsample_factor=None, sourcename=None, telescope=None
         telescope = [telescope]
 
     spectra,headers = [],[]
+    log.info("Reading...")
     for source in sourcename:
         for tel in telescope:
             spec,hdr = zip(*classobj.get_spectra(source=source, telescope=tel))
@@ -1024,11 +1040,22 @@ def read_class(filename, downsample_factor=None, sourcename=None, telescope=None
         log.info("Downsampling...")
         spectra = [downsample_1d(spec, downsample_factor)
                    for spec in ProgressBar(spectra)]
-        for h in headers:
-            h['NCHAN'] = h['NCHAN'] / downsample_factor
-            h['RCHAN'] = (h['RCHAN']-1) / downsample_factor + 1
+        headers = [downsample_header(h, downsample_factor)
+                   for h in ProgressBar(headers)]
 
     return spectra,headers,indexes
+
+def downsample_header(hdr, downsample_factor):
+    for k in ('NCHAN','NPOIN','DATALEN'):
+        if k in hdr:
+            hdr[k] = hdr[k] / downsample_factor
+    # maybe wrong? h['RCHAN'] = (h['RCHAN']-1) / downsample_factor + 1
+    scalefactor = 1./downsample_factor
+    hdr['RCHAN'] = (hdr['RCHAN']-1)*scalefactor + 0.5 + scalefactor/2.
+    for kw in ['FRES','VRES']:
+        if kw in hdr:
+            hdr[kw] *= downsample_factor
+    return hdr
 
 def make_axis(header,imagfreq=False):
     """
