@@ -1006,18 +1006,21 @@ class ClassObject(object):
 @print_timing
 def read_class(filename, downsample_factor=None, sourcename=None, telescope=None):
     """
-    A hacked-together method to read a binary CLASS file.  It is strongly dependent on the incomplete
-    `GILDAS CLASS file type Specification <http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html>`_
+    Read a binary class file.
+    Based on the
+    `GILDAS CLASS file type Specification
+    <http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html>`_
 
     Parameters
     ----------
     filename: str
-    skip_data: bool
-        Read the file but don't store any of the data in memory.  Useful for
-        getting headers.
     downsample_factor: None or int
         Factor by which to downsample data by averaging.  Useful for
-        overresolved data. DEPRECATED
+        overresolved data. 
+    sourcename: str or list of str
+        Source names to match to the data
+    telescope: str or list of str
+        'XTEL' or 'TELE' parameters: the telescope & instrument
     """
     classobj = ClassObject(filename)
 
@@ -1030,9 +1033,15 @@ def read_class(filename, downsample_factor=None, sourcename=None, telescope=None
     log.info("Reading...")
     for source in sourcename:
         for tel in telescope:
-            spec,hdr = zip(*classobj.get_spectra(source=source, telescope=tel))
+            sphdr = classobj.get_spectra(source=source, telescope=tel)
+            if len(sphdr) == 0:
+                continue
+            spec,hdr = zip(*sphdr)
             spectra += spec
             headers += hdr
+
+    if len(spectra) == 0:
+        return None
 
     indexes = headers
 

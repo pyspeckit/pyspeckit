@@ -29,10 +29,57 @@ try:
     smoothOK = True
 except ImportError:
     smoothOK = False
+try:
+    from scipy.interpolate import UnivariateSpline
+    scipyOK = True
+except ImportError:
+    scipyOK = False
 
 dtor = pi/180.0
 
-def baseline_cube(cube, polyorder, cubemask=None):
+
+def blfunc_generator(x=None, polyorder=None, splineorder=None,
+                     splinesampling=1):
+    def blfunc(args, x=x):
+        yfit,yreal = args
+        if hasattr(yfit,'mask'):
+            mask = True-yfit.mask
+        else:
+            mask = np.isfinite(yfit)
+
+        if x is None:
+            x = np.arange(yfit.size)
+
+        if polyorder is not None:
+            if np.count_nonzero(mask) < polyorder:
+                return yreal
+            else:
+                polypars = np.polyfit(x[mask], yfit[mask], polyorder)
+                return yreal-np.polyval(polypars, x)
+
+        elif splineorder is not None and scipyOK:
+            ngood = np.count_nonzero(mask)
+            if ngood < splineorder:
+                return yreal
+            else:
+                log.debug("splinesampling: {0}  splineorder: {1}".format(splinesampling, splineorder))
+                endpoint = ngood - (ngood % splinesampling)
+                y = np.mean([yfit[mask][ii:endpoint:splinesampling] for ii in range(splinesampling)], axis=0)
+                spl = UnivariateSpline(x[mask][splinesampling/2:endpoint:splinesampling],
+                                       y,
+                                       k=splineorder,
+                                       s=0)
+                return yreal-spl(x)
+
+            return something
+        else:
+            raise ValueError("Must provide polyorder or splineorder")
+
+    return blfunc
+
+
+def baseline_cube(cube, polyorder=None, cubemask=None, splineorder=None,
+                  splinesampling=1):
     """
     Given a cube, fit a polynomial to each spectrum
 
@@ -48,18 +95,10 @@ def baseline_cube(cube, polyorder, cubemask=None):
     """
     x = np.arange(cube.shape[0])
     #polyfitfunc = lambda y: np.polyfit(x, y, polyorder)
-    def blfunc(args):
-        yfit,yreal = args
-        if hasattr(yfit,'mask'):
-            mask = True-yfit.mask
-        else:
-            mask = np.isfinite(yfit)
-
-        if np.count_nonzero(mask) < polyorder:
-            return yreal
-        else:
-            polypars = np.polyfit(x[mask], yfit[mask], polyorder)
-            return yreal-np.polyval(polypars, x)
+    blfunc = blfunc_generator(x=x,
+                              splineorder=splineorder,
+                              polyorder=polyorder,
+                              splinesampling=splinesampling)
 
     reshaped_cube = cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
 
@@ -81,6 +120,7 @@ def baseline_cube(cube, polyorder, cubemask=None):
     baselined = np.array(parallel_map(blfunc, zip(fit_cube,reshaped_cube)))
     blcube = baselined.T.reshape(cube.shape)
     return blcube
+
 
 
 def flatten_header(header,delete=False):
