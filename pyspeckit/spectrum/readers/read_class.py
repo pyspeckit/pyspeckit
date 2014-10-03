@@ -5,6 +5,7 @@ GILDAS CLASS file reader
 
 Read a CLASS file into an :class:`pyspeckit.spectrum.ObsBlock`
 """
+from __future__ import print_function
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -473,7 +474,7 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
         if (f.tell() - x0 != 128):
             missed_bits = (f.tell()-x0)
             X = f.read(128-missed_bits)
-            if DEBUG: print "read_index missed %i bits: %s" % (128-missed_bits,X)
+            if DEBUG: print("read_index missed %i bits: %s" % (128-missed_bits,X))
             #raise IndexError("read_index did not successfully read 128 bytes at %i.  Read %i bytes." % (x0,f.tell()-x0))
         if any(not is_ascii(index[x]) for x in ('XSOURC','XLINE','XTEL')):
             raise ValueError("Invalid index read from {0}.".format(x0))
@@ -768,14 +769,14 @@ def _read_obshead_v1(f, position=None, verbose=False):
     (nblocks, nbyteob, data_address, nheaders, data_length, obindex, nsec,
      obsnum) = numpy.fromfile(f, count=8, dtype='int32')
     if verbose:
-        print "nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum",nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum
-        print "DATA_LENGTH: ",data_length
+        print("nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum",nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum)
+        print("DATA_LENGTH: ",data_length)
     
     seccodes = numpy.fromfile(f,count=nsec,dtype='int32')
     # Documentation says addresses then length: It is apparently wrong
     seclen = numpy.fromfile(f,count=nsec,dtype='int32')
     secaddr = numpy.fromfile(f,count=nsec,dtype='int32')
-    if verbose: print "Section codes, addresses, lengths: ",seccodes,secaddr,seclen
+    if verbose: print("Section codes, addresses, lengths: ",seccodes,secaddr,seclen)
 
     hdr = {'NBLOCKS':nblocks, 'NBYTEOB':nbyteob, 'DATAADDR':data_address,
             'DATALEN':data_length, 'NHEADERS':nheaders, 'OBINDEX':obindex,
@@ -919,7 +920,125 @@ class ClassObject(object):
         self._data = np.memmap(self._file, dtype='float32', mode='r')
         # this will be overwritten if spectra are loaded with _load_all_spectra
         self.headers = self.allind
+        self.set_posang()
+        self.identify_otf_scans()
         #self._load_all_spectra()
+
+    def __repr__(self):
+        s = "\n".join(["{k}: {v}".format(k=k,v=v)
+                       for k,v in self.getinfo().iteritems()])
+        return "ClassObject({id})\n".format(id=id(self)) + s
+
+    def getinfo(self):
+        if not hasattr(self,'info'):
+            self.info = dict(
+                tels = set([h['XTEL'] for h in self.headers]),
+                lines = set([h['LINE'] for h in self.headers]),
+                scans = set([h['SCAN'] for h in self.headers]),
+                sources = set([h['SOURC'] for h in self.headers]),
+            )
+        return self.info
+
+    def set_posang(self):
+        h0 = self.headers[0]
+        for h in self.headers:
+            dx = h['OFF1'] - h0['OFF1']
+            dy = h['OFF2'] - h0['OFF2']
+            h['COMPPOSA'] = np.arctan2(dy,dx)*180/np.pi
+            h0 = h
+
+
+    def identify_otf_scans(self):
+        h0 = self.headers[0]
+        st = 0
+        otfscan = 0
+        posangs = [h['COMPPOSA'] for h in self.headers]
+        for ii,h in enumerate(self.headers):
+            if (h['SCAN'] != h0['SCAN']
+                or h['SOURC'] != h0['SOURC']):
+
+                h0['FIRSTSCAN'] = st
+                cpa = np.median(posangs[st:ii])
+                for hh in self.headers[st:ii]:
+                    hh['SCANPOSA'] = cpa % 180
+                st = ii
+                if h['SCAN'] == h0['SCAN']:
+                    h0['OTFSCAN'] = otfscan
+                    otfscan += 1
+                    h['OTFSCAN'] = otfscan
+                else:
+                    otfscan = 0
+                    h['OTFSCAN'] = otfscan
+            else:
+                h['OTFSCAN'] = otfscan
+
+    def listscans(self, source=None, telescope=None):
+        minid=0
+        scan = -1
+        sourc = ""
+        #tel = ''
+        minoff1,maxoff1 = np.inf,-np.inf
+        minoff2,maxoff2 = np.inf,-np.inf
+        ttlangle,nangle = 0.0,0
+        print("{entries:15s} {SOURC:12s} {XTEL:12s} {SCAN:>8s} {SUBSCAN:>8s} "
+              "[ {RAmin:>12s}, {RAmax:>12s} ] "
+              "[ {DECmin:>12s}, {DECmax:>12s} ] "
+              "{angle:>12s} {SCANPOSA:>12s} {OTFSCAN:>8s}"
+              .format(entries='Scans', SOURC='Source', XTEL='Telescope',
+                      SCAN='Scan', SUBSCAN='Subscan',
+                      RAmin='min(RA)', RAmax='max(RA)',
+                      DECmin='min(DEC)', DECmax='max(DEC)',
+                      SCANPOSA='Scan PA',
+                      angle='Angle', OTFSCAN='OTFscan'))
+
+        for ii,row in enumerate(self.headers):
+            if (row['SCAN'] == scan
+                and row['SOURC'] == sourc
+                #and row['XTEL'] == tel
+               ):
+                minoff1 = min(minoff1, row['OFF1'])
+                maxoff1 = max(maxoff1, row['OFF1'])
+                minoff2 = min(minoff2, row['OFF2'])
+                maxoff2 = max(maxoff2, row['OFF2'])
+                ttlangle += np.arctan2(row['OFF2'] - prevrow['OFF2'],
+                                       row['OFF1'] - prevrow['OFF1'])%np.pi
+                nangle += 1
+                prevrow = row
+
+            else:
+                if scan == -1:
+                    scan = row['SCAN']
+                    sourc = row['SOURC']
+                    #tel = row['XTEL']
+                    prevrow = row
+                    continue
+
+                ok = True
+                if source is not None:
+                    ok = ok and re.search((source), prevrow['SOURC'])
+                if telescope is not None:
+                    ok = ok and re.search((telescope), prevrow['XTEL'])
+                if ok:
+                    print("{e0:7d}-{e1:7d} {SOURC:12s} {XTEL:12s} {SCAN:8d} {SUBSCAN:8d} "
+                          "[ {RAmin:12f}, {RAmax:12f} ] "
+                          "[ {DECmin:12f}, {DECmax:12f} ] "
+                          "{angle:12.1f} {SCANPOSA:12.1f} {OTFSCAN:8d}".
+                          format(RAmin=minoff1*180/np.pi*3600,
+                                 RAmax=maxoff1*180/np.pi*3600,
+                                 DECmin=minoff2*180/np.pi*3600,
+                                 DECmax=maxoff2*180/np.pi*3600,
+                                 angle=(ttlangle/nangle)*180/np.pi if nangle>0 else 0,
+                                 e0=minid,
+                                 e1=ii-1,
+                                 **prevrow))
+
+                minoff1,maxoff1 = np.inf,-np.inf
+                minoff2,maxoff2 = np.inf,-np.inf
+                ttlangle,nangle = 0.0,0
+                scan = row['SCAN']
+                sourc = row['SOURC']
+                #tel = row['XTEL']
+                minid = ii
 
     @property
     def sources(self):
@@ -949,29 +1068,26 @@ class ClassObject(object):
         self.spectra = spec
         self.headers = hdr
 
-    def get_spectra(self,
-                    all=None,
-                    line=None,
-                    number=None,
-                    scan=None,
-                    offset=None,
-                    source=None,
-                    range=None,
-                    quality=None,
-                    telescope=None,
-                    subscan=None,
-                    entry=None,
-                    #observed=None,
-                    #reduced=None,
-                    frequency=None,
-                    section=None,
-                    user=None):
+    def select_spectra(self,
+                       all=None,
+                       line=None,
+                       number=None,
+                       scan=None,
+                       offset=None,
+                       source=None,
+                       range=None,
+                       quality=None,
+                       telescope=None,
+                       subscan=None,
+                       entry=None,
+                       posang=None,
+                       #observed=None,
+                       #reduced=None,
+                       frequency=None,
+                       section=None,
+                       user=None):
         if entry is not None and len(entry)==2:
-            return [read_observation(self._file, ii,
-                                     file_description=self.file_description,
-                                     indices=self.allind, my_memmap=self._data,
-                                     memmap=True)
-                    for ii in xrange(entry[0], entry[1])]
+            return range(entry[0], entry[1])
 
         sel = [(re.search(re.escape(line), h['CLINE'], re.IGNORECASE)
                 if line is not None else True) and
@@ -989,22 +1105,40 @@ class ClassObject(object):
                (h['SUBSCAN']==subscan if subscan is not None else True) and
                (h['NUM'] >= number[0] and h['NUM'] < number[1]
                 if number is not None else True) and
-               (h['RESTF'] < frequency[0] and
-                h['RESTF'] > frequency[1]
+               (h['RESTF'] > frequency[0] and
+                h['RESTF'] < frequency[1]
                 if frequency is not None and len(frequency)==2
+                else True) and
+               (h['COMPPOSA'] > posang[0] and
+                h['COMPPOSA'] < posang[1]
+                if posang is not None and len(posang)==2
                 else True)
                for h in self.headers]
+
+        return [ii for ii,k in enumerate(sel) if k]
+
+    def get_spectra(self, progressbar=True, **kwargs):
+        selected_indices = self.select_spectra(**kwargs)
+
+        return self.read_observations(selected_indices,
+                                      progressbar=progressbar)
+
+    def read_observations(self, observation_indices, progressbar=True):
+        if not progressbar:
+            pb = lambda x: x
+        else:
+            pb = ProgressBar
 
         return [read_observation(self._file, ii,
                                  file_description=self.file_description,
                                  indices=self.allind, my_memmap=self._data,
                                  memmap=True)
-                for ii,k in enumerate(ProgressBar(sel))
-                if k]
+                for ii in pb(observation_indices)]
 
 
 @print_timing
-def read_class(filename, downsample_factor=None, sourcename=None, telescope=None):
+def read_class(filename, downsample_factor=None, sourcename=None,
+               telescope=None, posang=None):
     """
     Read a binary class file.
     Based on the
@@ -1031,17 +1165,19 @@ def read_class(filename, downsample_factor=None, sourcename=None, telescope=None
 
     spectra,headers = [],[]
     log.info("Reading...")
-    for source in sourcename:
-        for tel in telescope:
-            sphdr = classobj.get_spectra(source=source, telescope=tel)
-            if len(sphdr) == 0:
-                continue
-            spec,hdr = zip(*sphdr)
-            spectra += spec
-            headers += hdr
+    selection = [ii
+                 for source in sourcename
+                 for tel in telescope
+                 for ii in classobj.select_spectra(source=source,
+                                                   telescope=tel,
+                                                   posang=posang)]
 
-    if len(spectra) == 0:
+    sphdr = classobj.read_observations(selection)
+    if len(sphdr) == 0:
         return None
+    spec,hdr = zip(*sphdr)
+    spectra += spec
+    headers += hdr
 
     indexes = headers
 
