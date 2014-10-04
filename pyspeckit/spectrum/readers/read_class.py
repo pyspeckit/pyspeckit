@@ -873,9 +873,10 @@ def read_observation(f, obsid, file_description=None, indices=None,
     hdr['DATASTART'] = datastart
     hdr.update(indices[obsid])
 
-    if hdr['XNUM'] != obsid+1:
-        log.error("The spectrum read was {0} but {1} was requested.".
-                  format(hdr['XNUM']-1, obsid))
+    # Apparently the data are still valid in this case?
+    #if hdr['XNUM'] != obsid+1:
+    #    log.error("The spectrum read was {0} but {1} was requested.".
+    #              format(hdr['XNUM']-1, obsid))
 
     if hdr['KIND'] == 1: # continuum
         nchan = hdr['NPOIN']
@@ -914,15 +915,23 @@ def _spectrum_from_header(fileobj, header, memmap=None):
 
 class ClassObject(object):
     def __init__(self, filename):
+        t0 = time.time()
         self._file = open(filename, 'rb')
         self.file_description = _read_first_record(self._file)
         self.allind = _read_indices(self._file, self.file_description)
         self._data = np.memmap(self._file, dtype='float32', mode='r')
         # this will be overwritten if spectra are loaded with _load_all_spectra
         self.headers = self.allind
+        t1 = time.time()
         self.set_posang()
+        t2 = time.time()
         self.identify_otf_scans()
+        t3 = time.time()
         #self._load_all_spectra()
+        log.info("Loaded CLASS object with {3} indices.  Time breakdown:"
+                 " {0}s for indices, "
+                 "{1}s for posang, and {2}s for OTF scan identification"
+                 .format(t1-t0, t2-t1, t3-t2, len(self.allind)))
 
     def __repr__(self):
         s = "\n".join(["{k}: {v}".format(k=k,v=v)
