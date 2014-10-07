@@ -39,7 +39,23 @@ dtor = pi/180.0
 
 
 def blfunc_generator(x=None, polyorder=None, splineorder=None,
-                     splinesampling=1):
+                     sampling=1):
+    """
+    Generate a function that will fit a baseline (polynomial or spline) to a
+    data set.  Either ``splineorder`` or ``polyorder`` must be set
+
+    Parameters
+    ----------
+    x : np.ndarray or None
+        The X-axis of the fitted array.  Will be set to
+        ``np.arange(len(data))`` if not specified
+    polyorder : None or int
+        The polynomial order.
+    splineorder : None or int
+    sampling : int
+        The sampling rate to use for the data.  Can set to higher numbers to
+        effectively downsample the data before fitting
+    """
     def blfunc(args, x=x):
         yfit,yreal = args
         if hasattr(yfit,'mask'):
@@ -48,24 +64,30 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
             mask = np.isfinite(yfit)
 
         if x is None:
-            x = np.arange(yfit.size)
+            x = np.arange(yfit.size, dtype=yfit.dtype)
 
         if polyorder is not None:
             if np.count_nonzero(mask) < polyorder:
                 return yreal
             else:
-                polypars = np.polyfit(x[mask], yfit[mask], polyorder)
-                return yreal-np.polyval(polypars, x)
+                endpoint = ngood - (ngood % sampling)
+                y = np.mean([yfit[mask][ii:endpoint:sampling]
+                             for ii in range(sampling)], axis=0)
+                polypars = np.polyfit(x[mask][sampling/2:endpoint:sampling],
+                                      y, polyorder)
+                return yreal-np.polyval(polypars, x).astype(yreal.dtype)
 
         elif splineorder is not None and scipyOK:
             ngood = np.count_nonzero(mask)
             if ngood < splineorder:
                 return yreal
             else:
-                log.debug("splinesampling: {0}  splineorder: {1}".format(splinesampling, splineorder))
-                endpoint = ngood - (ngood % splinesampling)
-                y = np.mean([yfit[mask][ii:endpoint:splinesampling] for ii in range(splinesampling)], axis=0)
-                spl = UnivariateSpline(x[mask][splinesampling/2:endpoint:splinesampling],
+                log.debug("splinesampling: {0}  "
+                          "splineorder: {1}".format(sampling, splineorder))
+                endpoint = ngood - (ngood % sampling)
+                y = np.mean([yfit[mask][ii:endpoint:sampling]
+                             for ii in range(sampling)], axis=0)
+                spl = UnivariateSpline(x[mask][sampling/2:endpoint:sampling],
                                        y,
                                        k=splineorder,
                                        s=0)
@@ -79,7 +101,7 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
 
 
 def baseline_cube(cube, polyorder=None, cubemask=None, splineorder=None,
-                  splinesampling=1):
+                  sampling=1):
     """
     Given a cube, fit a polynomial to each spectrum
 
@@ -93,12 +115,12 @@ def baseline_cube(cube, polyorder=None, cubemask=None, splineorder=None,
         Mask to apply to cube.  Values that are True will be ignored when
         fitting.
     """
-    x = np.arange(cube.shape[0])
+    x = np.arange(cube.shape[0], dtype=cube.dtype)
     #polyfitfunc = lambda y: np.polyfit(x, y, polyorder)
     blfunc = blfunc_generator(x=x,
                               splineorder=splineorder,
                               polyorder=polyorder,
-                              splinesampling=splinesampling)
+                              sampling=sampling)
 
     reshaped_cube = cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
 
@@ -110,8 +132,8 @@ def baseline_cube(cube, polyorder=None, cubemask=None, splineorder=None,
             raise TypeError("Cube mask *must* be a boolean array.")
         if cubemask.shape != cube.shape:
             raise ValueError("Mask shape does not match cube shape")
-        log.debug("Masking cube with shape {0} with mask of shape {1}".format(cube.shape,
-                                                                              cubemask.shape))
+        log.debug("Masking cube with shape {0} "
+                  "with mask of shape {1}".format(cube.shape, cubemask.shape))
         masked_cube = cube.copy()
         masked_cube[cubemask] = np.nan
         fit_cube = masked_cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
@@ -788,9 +810,6 @@ try:
         #print "\n",outname
         #os.system('imhead %s | grep CDELT' % outname)
 
-        #print "\nnewheader2"
-        #print newheader2.ascard
-        #print
         
         return
 
