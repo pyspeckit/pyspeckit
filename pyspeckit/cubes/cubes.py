@@ -66,8 +66,9 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
         if x is None:
             x = np.arange(yfit.size, dtype=yfit.dtype)
 
+        ngood = np.count_nonzero(mask)
         if polyorder is not None:
-            if np.count_nonzero(mask) < polyorder:
+            if ngood < polyorder:
                 return yreal
             else:
                 endpoint = ngood - (ngood % sampling)
@@ -78,7 +79,6 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
                 return yreal-np.polyval(polypars, x).astype(yreal.dtype)
 
         elif splineorder is not None and scipyOK:
-            ngood = np.count_nonzero(mask)
             if ngood < splineorder:
                 return yreal
             else:

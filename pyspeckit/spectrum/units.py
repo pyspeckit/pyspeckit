@@ -268,6 +268,23 @@ unitdict = {
         }
 
 
+def generate_xarr(input_array, unit=None):
+    """
+    Create an 'xarr' from an array; can be a quantity
+
+    unit is ignored unless the input is a simple ndarray
+    """
+    from astropy import units as u
+    if isinstance(input_array, u.Quantity):
+        return SpectroscopicAxis(input_array.value,
+                                 unit=input_array.unit.to_string())
+    elif isinstance(input_array, SpectroscopicAxis):
+        return input_array
+    elif isinstance(input_array, np.ndarray):
+        return SpectroscopicAxis(input_array, unit=unit)
+    else:
+        raise TypeError("Unrecognized input type")
+
 class SpectroscopicAxis(np.ndarray):
     """
     A Spectroscopic Axis object to store the current units of the spectrum and

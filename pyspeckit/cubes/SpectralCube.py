@@ -23,6 +23,7 @@ The 'grunt work' is performed by the :py:mod:`cubes` module
 # import parent package
 import pyspeckit
 from pyspeckit import spectrum
+from ..spectrum.units import generate_xarr
 # import local things
 import mapplot
 import readers
@@ -65,9 +66,16 @@ class Cube(spectrum.Spectrum):
                 log.exception(str(inst))
                 raise inst
         else:
-            self.cube = cube
-            self.errorcube = errorcube
-            self.xarr = xarr
+            if hasattr(cube, 'unit'):
+                self.cube = cube.value
+                self.unit = cube.unit
+            else:
+                self.cube = cube
+            if hasattr(errorcube, 'unit'):
+                self.errorcube = errorcube.value
+            else:
+                self.errorcube = errorcube
+            self.xarr = generate_xarr(xarr)
             self.header = header
             self.error = None
             if self.cube is not None:
