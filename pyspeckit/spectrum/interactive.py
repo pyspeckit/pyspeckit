@@ -406,7 +406,7 @@ class Interactive(object):
             if debug: print "Including self.xmin:self.xmax = %f:%f (and excluding the rest)" % (self.xmin,self.xmax)
             self.includemask[self.xmin:self.xmax] = True
         else:
-            if verbose: log.info("Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax))
+            if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax)
         
         if self.xmin == self.xmax:
             # Reset if there is no fitting region
