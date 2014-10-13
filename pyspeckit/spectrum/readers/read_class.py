@@ -14,6 +14,7 @@ import numpy
 import numpy as np
 from numpy import pi
 from astropy import log
+from astropy.time import Time
 import os
 import re
 try:
@@ -25,6 +26,9 @@ import string
 import struct
 
 import time
+
+# 'range' is needed as a keyword
+irange = range
 
 def print_timing(func):
     """
@@ -443,6 +447,7 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
         index['BLOC'] = index['XBLOC'] # v2 compatibility
         index['WORD'] = 1 # v2 compatibility
         index['SOURC'] = index['CSOUR'] = index['XSOURC']
+        index['DOBS'] = index['CDOBS'] = index['XDOBS']
         index['CTELE'] = index['XTEL']
         index['LINE'] = index['XLINE']
         index['OFF1'] = index['XOFF1']
@@ -507,9 +512,15 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
         index['SOURC'] = index['XSOURC'] = index['CSOUR']
         index['LINE'] = index['XLINE'] = index['CLINE']
         index['XKIND'] = index['KIND']
+        index['DOBS'] = index['XDOBS'] = index['CDOBS']
 
     else:
         raise NotImplementedError("Filetype {0} not implemented.".format(filetype))
+
+    # from kernel/lib/gsys/date.f90: gag_julda
+    index['DOBS'] = ((index['DOBS'] + 365*2025)/365.2425 + 1)
+    index['DATEOBS'] = Time(index['DOBS'], format='jyear')
+    index['DATEOBSS'] = index['DATEOBS'].iso
 
     log.debug("Indexing finished at {0}".format(f.tell()))
     return index
@@ -1096,7 +1107,7 @@ class ClassObject(object):
                        section=None,
                        user=None):
         if entry is not None and len(entry)==2:
-            return range(entry[0], entry[1])
+            return irange(entry[0], entry[1])
 
         sel = [(re.search(re.escape(line), h['CLINE'], re.IGNORECASE)
                 if line is not None else True) and
