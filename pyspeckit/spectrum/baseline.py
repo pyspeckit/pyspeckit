@@ -63,6 +63,7 @@ class Baseline(interactive.Interactive):
         #self.include = [self.xmin,self.xmax]
         #self.includevelo = [Spectrum.xarr[self.xmin],Spectrum.xarr[self.xmax]]
         self.powerlaw=False
+        self.spline=False
         self._xfit_units = None
         self._plots = []
 
