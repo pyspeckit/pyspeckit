@@ -68,11 +68,12 @@ class Baseline(interactive.Interactive):
 
     @cfgdec
     def __call__(self, order=1, excludefit=False, save=True, exclude=None,
-            exclusionlevel=0.01, interactive=False, debug=False,
-            LoudDebug=False, fit_original=True, baseline_fit_color='orange',
-            clear_all_connections=True, fit_plotted_area=True,
-            highlight_fitregion=False, reset_selection=False, subtract=True,
-            **kwargs):
+                 exclusionlevel=0.01, interactive=False, debug=False,
+                 LoudDebug=False, fit_original=True,
+                 baseline_fit_color='orange', clear_all_connections=True,
+                 fit_plotted_area=True, highlight_fitregion=False,
+                 reset_selection=False, subtract=True, selectregion=True,
+                 **kwargs):
         """
         Fit and remove a polynomial from the spectrum.
         It will be saved in the variable "self.basespec"
@@ -108,6 +109,9 @@ class Baseline(interactive.Interactive):
         reset_selection: bool
             Reset the selected region to those specified by this command only
             (will override previous xmin/xmax settings)
+        select_region: bool
+            Run the region selection procedure?  If false, will leave
+            'includemask' untouched
 
         baseline_fit_color: color name (string)
             [plot parameter]
@@ -141,11 +145,12 @@ class Baseline(interactive.Interactive):
                 # selectregion, but that may cause
                 # clashes [unclear; note added 2/12/2014]
                 self.includemask[:] = True
-            # must select region (i.e., exclude edges) AFTER setting 'positive'
-            # include region
-            # also, DON'T highlight here because it will be cleared
-            self.selectregion(fit_plotted_area=fit_plotted_area,
-                              exclude=exclude, debug=debug, **kwargs)
+            elif selectregion:
+                # must select region (i.e., exclude edges) AFTER setting 'positive'
+                # include region
+                # also, DON'T highlight here because it will be cleared
+                self.selectregion(fit_plotted_area=fit_plotted_area,
+                                  exclude=exclude, debug=debug, **kwargs)
 
             # have to do excludefit after selection, otherwise
             # fit_plotted_area=True overrides
@@ -169,17 +174,19 @@ class Baseline(interactive.Interactive):
             if highlight_fitregion: self.highlight_fitregion()
         if save: self.savefit()
 
-    def set_spectofit(self, fit_original=True):
+    def set_spectofit(self, fit_original=True, fit_residuals=False):
         """
         Reset the spectrum-to-fit from the data
         """
-        if self.subtracted and fit_original: # add back in the old baseline
+        if fit_residuals:
+            self.spectofit = self.Spectrum.specfit.residuals
+        elif self.subtracted and fit_original: # add back in the old baseline
             self.spectofit = self.Spectrum.data+self.basespec
         else:
             self.spectofit = self.Spectrum.data.copy()
 
     def fit(self, powerlaw=None, order=None, includemask=None, spline=False,
-            spline_sampling=10, **kwargs):
+            spline_sampling=10, spline_downsampler=np.median, **kwargs):
         """
         Run the fit and set `self.basespec`
         """
@@ -198,6 +205,7 @@ class Baseline(interactive.Interactive):
                                          xarr=xarr,
                                          masktofit=self.includemask,
                                          sampling=spline_sampling,
+                                         downsampler=spline_downsampler,
                                          order=self.order)
         else:
             # use a,b to keep line under 80 chars
@@ -214,6 +222,7 @@ class Baseline(interactive.Interactive):
                       powerlaw=None, fit_original=False,
                       spline=False,
                       spline_sampling=None,
+                      spline_downsampler=np.median,
                       baseline_fit_color='orange', **kwargs):
         """
         Do the baseline fitting and save and plot the results.
@@ -238,7 +247,8 @@ class Baseline(interactive.Interactive):
                   "spline={1}".format(self.powerlaw, spline))
         self.fit(powerlaw=powerlaw, includemask=self.includemask,
                  order=self.order, spline=spline,
-                 spline_sampling=spline_sampling)
+                 spline_sampling=spline_sampling,
+                 spline_downsampler=spline_downsampler)
 
         if subtract:
             if self.subtracted and fit_original:
@@ -520,7 +530,8 @@ class Baseline(interactive.Interactive):
 
         return bestfit,fitp
 
-    def _spline(self, data, xarr=None, masktofit=None, order=3, sampling=10):
+    def _spline(self, data, xarr=None, masktofit=None, order=3, sampling=10,
+                downsampler=np.median, append_endpoints=True):
         from scipy.interpolate import UnivariateSpline
 
         assert masktofit.shape == data.shape
@@ -533,20 +544,36 @@ class Baseline(interactive.Interactive):
         if xarr is None:
             xarr = np.arange(data.size, dtype=data.dtype)
 
-        ngood = np.count_nonzero(masktofit)
-        if ngood == 0:
-            log.warn("Fitting all data with spline")
-            masktofit[:] = True
-            ngood = masktofit.size
-        endpoint = ngood - (ngood % sampling)
-        yarr = np.mean([data[masktofit][ii:endpoint:sampling]
-                        for ii in range(sampling)], axis=0)
-        spl = UnivariateSpline(xarr[masktofit][sampling/2:endpoint:sampling],
-                               yarr,
-                               k=order,
-                               s=0)
+        if downsampler is not None:
+            ngood = np.count_nonzero(masktofit)
+            if ngood == 0:
+                log.warn("Fitting all data with spline")
+                masktofit[:] = True
+                ngood = masktofit.size
+            endpoint = ngood - (ngood % sampling)
+            yfit = downsampler([data[masktofit][ii:endpoint:sampling]
+                                for ii in range(sampling)], axis=0)
+            xfit = xarr[masktofit][sampling/2:endpoint:sampling]
+            if append_endpoints:
+                xfit = np.array([xarr[0]-(xarr[1]-xarr[0])] +
+                                xfit.tolist() +
+                                [xarr[-1]+(xarr[1]-xarr[0])])
+                yfit = np.array([yfit[0]] + yfit.tolist() + [yfit[-1]])
+            spl = UnivariateSpline(xfit,
+                                   yfit,
+                                   k=order,
+                                   s=0)
+        else:
+            spl = UnivariateSpline(xarr[masktofit],
+                                   data[masktofit],
+                                   k=order,
+                                   s=sampling)
 
-        return spl(xarr)
+        baseline_fitted = spl(xarr)
+        if np.any(np.isnan(baseline_fitted)):
+            log.error("NaNs in baseline.")
+            import ipdb; ipdb.set_trace()
+        return baseline_fitted
 
 
     def crop(self,x1pix,x2pix):

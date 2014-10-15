@@ -334,8 +334,9 @@ class Interactive(object):
         self.Spectrum.plotter.refresh()
 
     def selectregion(self, xmin=None, xmax=None, xtype='wcs', highlight=False,
-            fit_plotted_area=True, reset=False, verbose=False, debug=False,
-            use_window_limits=None, exclude=None, **kwargs):
+                     fit_plotted_area=True, reset=False, verbose=False,
+                     debug=False, use_window_limits=None, exclude=None,
+                     **kwargs):
         """
         Pick a fitting region in either WCS units or pixel units
 
