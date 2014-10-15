@@ -92,8 +92,6 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
                                        k=splineorder,
                                        s=0)
                 return yreal-spl(x)
-
-            return something
         else:
             raise ValueError("Must provide polyorder or splineorder")
 
@@ -101,7 +99,7 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
 
 
 def baseline_cube(cube, polyorder=None, cubemask=None, splineorder=None,
-                  sampling=1):
+                  numcores=None, sampling=1):
     """
     Given a cube, fit a polynomial to each spectrum
 
@@ -114,6 +112,9 @@ def baseline_cube(cube, polyorder=None, cubemask=None, splineorder=None,
     cubemask: boolean ndarray
         Mask to apply to cube.  Values that are True will be ignored when
         fitting.
+    numcores : None or int
+        Number of cores to use for parallelization.  If None, will be set to
+        the number of available cores.
     """
     x = np.arange(cube.shape[0], dtype=cube.dtype)
     #polyfitfunc = lambda y: np.polyfit(x, y, polyorder)
@@ -139,7 +140,7 @@ def baseline_cube(cube, polyorder=None, cubemask=None, splineorder=None,
         fit_cube = masked_cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
 
 
-    baselined = np.array(parallel_map(blfunc, zip(fit_cube,reshaped_cube)))
+    baselined = np.array(parallel_map(blfunc, zip(fit_cube,reshaped_cube), numcores=numcores))
     blcube = baselined.T.reshape(cube.shape)
     return blcube
 
@@ -488,9 +489,9 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
         raise Exception("WCS header has no CTYPE.")
 
     if coordsys.lower() == 'galactic':
-        pos = coordinates.Galactic(ap[0],ap[1],unit=('deg','deg'))
+        pos = coordinates.SkyCoord(ap[0],ap[1],unit=('deg','deg'), frame='galactic')
     elif coordsys.lower() in ('radec','fk5','icrs','celestial'):
-        pos = coordinates.ICRS(ap[0],ap[1],unit=('deg','deg'))
+        pos = coordinates.SkyCoord(ap[0],ap[1],unit=('deg','deg'), frame='fk5')
 
     if wcs.wcs.ctype[0][:2] == 'RA':
         ra,dec = pos.icrs.ra.deg,pos.icrs.dec.deg

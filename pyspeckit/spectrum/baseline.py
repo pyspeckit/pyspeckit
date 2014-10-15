@@ -6,6 +6,7 @@ import interactive
 import copy
 import history
 from .. import specwarnings
+from astropy import log
 
 interactive_help_message = """
 (1) Left-click or press 1 (one) at two positions to select or add to the baseline fitting range - it will be
@@ -126,21 +127,28 @@ class Baseline(interactive.Interactive):
         if exclude == 'interactive' or interactive:
             if np.all(self.includemask):
                 specwarnings.warn("Include mask was uniformly True.  \n"
-                                  "This has the effect of making the 'baseline' command do nothing.\n"
-                                  "If this was not your intent, try spectrum.baseline(interactive=True,reset_selection=True)")
+                                  "This has the effect of making the 'baseline'"
+                                  " command do nothing.\n"
+                                  "If this was not your intent, try"
+                                  " spectrum.baseline(interactive=True,"
+                                  "reset_selection=True)")
             self.start_interactive(clear_all_connections=clear_all_connections,
                                    debug=debug,
                                    reset_selection=reset_selection, **kwargs)
         else:
             if reset_selection:
-                # this could be accomplished by passing reset=True to selectregion, but that may cause
+                # this could be accomplished by passing reset=True to
+                # selectregion, but that may cause
                 # clashes [unclear; note added 2/12/2014]
                 self.includemask[:] = True
-            # must select region (i.e., exclude edges) AFTER setting 'positive' include region
+            # must select region (i.e., exclude edges) AFTER setting 'positive'
+            # include region
             # also, DON'T highlight here because it will be cleared
-            self.selectregion(fit_plotted_area=fit_plotted_area, exclude=exclude, debug=debug, **kwargs)
+            self.selectregion(fit_plotted_area=fit_plotted_area,
+                              exclude=exclude, debug=debug, **kwargs)
 
-            # have to do excludefit after selection, otherwise fit_plotted_area=True overrides
+            # have to do excludefit after selection, otherwise
+            # fit_plotted_area=True overrides
             if excludefit and specfit.modelpars is not None:
                 #vlo = self.Spectrum.plotter.specfit.modelpars[1] - 2*self.Spectrum.plotter.specfit.modelpars[2]
                 #vhi = self.Spectrum.plotter.specfit.modelpars[1] + 2*self.Spectrum.plotter.specfit.modelpars[2]
@@ -148,7 +156,8 @@ class Baseline(interactive.Interactive):
                 full_model = specfit.get_full_model(add_baseline=False)
 
                 # only set additional FALSE
-                self.includemask *= abs(full_model) < exclusionlevel*np.abs(full_model).max()
+                self.includemask *= (abs(full_model) <
+                                     exclusionlevel*np.abs(full_model).max())
                 #import pdb; pdb.set_trace()
 
             self.button2action(fit_original=fit_original,
@@ -169,24 +178,43 @@ class Baseline(interactive.Interactive):
         else:
             self.spectofit = self.Spectrum.data.copy()
 
-    def fit(self, powerlaw=None, order=None, includemask=None, **kwargs):
+    def fit(self, powerlaw=None, order=None, includemask=None, spline=False,
+            spline_sampling=10, **kwargs):
+        """
+        Run the fit and set `self.basespec`
+        """
 
         self.powerlaw = powerlaw or self.powerlaw
+        self.spline = spline
         self.order = order or self.order
-        self.includemask = includemask if includemask is not None else self.includemask
+        if includemask is not None:
+            self.includemask = includemask
+
+        spline_sampling = (1 if spline_sampling is None else spline_sampling)
 
         xarr = self.Spectrum.xarr
-        # use a,b to keep line under 80 chars
-        a,b = self._baseline(self.spectofit, xarr=xarr,
-                             err=self.Spectrum.error, order=self.order,
-                             mask=~self.includemask, powerlaw=self.powerlaw,
-                             xarr_fit_units=xarr.units, **kwargs)
-        self.basespec, self.baselinepars = (a,b)
+        if spline:
+            self.basespec = self._spline(self.spectofit,
+                                         xarr=xarr,
+                                         masktofit=self.includemask,
+                                         sampling=spline_sampling,
+                                         order=self.order)
+        else:
+            # use a,b to keep line under 80 chars
+            a,b = self._baseline(self.spectofit, xarr=xarr,
+                                 err=self.Spectrum.error, order=self.order,
+                                 masktoexclude=~self.includemask,
+                                 powerlaw=self.powerlaw,
+                                 xarr_fit_units=xarr.units, **kwargs)
+            self.basespec, self.baselinepars = (a,b)
 
-        self.set_basespec_frompars()
+            self.set_basespec_frompars()
 
-    def button2action(self, event=None, debug=False, subtract=True, powerlaw=None,
-            fit_original=False, baseline_fit_color='orange', **kwargs):
+    def button2action(self, event=None, debug=False, subtract=True,
+                      powerlaw=None, fit_original=False,
+                      spline=False,
+                      spline_sampling=None,
+                      baseline_fit_color='orange', **kwargs):
         """
         Do the baseline fitting and save and plot the results.
 
@@ -206,9 +234,11 @@ class Baseline(interactive.Interactive):
 
         self._xfit_units = self.Spectrum.xarr.units
 
-        if debug: print "Fitting baseline"
+        log.debug("Fitting baseline: powerlaw={0} "
+                  "spline={1}".format(self.powerlaw, spline))
         self.fit(powerlaw=powerlaw, includemask=self.includemask,
-                 order=self.order)
+                 order=self.order, spline=spline,
+                 spline_sampling=spline_sampling)
 
         if subtract:
             if self.subtracted and fit_original:
@@ -360,6 +390,8 @@ class Baseline(interactive.Interactive):
     def annotate(self,loc='upper left'):
         if self.powerlaw:
             bltext = "bl: $y=%6.3g\\times(x)^{-%6.3g}$" % (self.baselinepars[0],self.baselinepars[1])
+        elif self.spline:
+            bltext = "bl: spline"
         else:
             bltext = "bl: $y=$"+"".join(["$%+6.3gx^{%i}$" % (f,self.order-i)
                 for i,f in enumerate(self.baselinepars)])
@@ -387,11 +419,18 @@ class Baseline(interactive.Interactive):
                 self.Spectrum.header['BLCOEF%0.2i' % (ii)] = (p,"Baseline power-law best-fit coefficient x^%i" % (self.order-ii-1))
 
     def _baseline(self, spectrum, xarr=None, err=None,
-                  order=1, quiet=True, mask=None, powerlaw=False,
+                  order=1, quiet=True, masktoexclude=None, powerlaw=False,
                   xarr_fit_units='pixels', LoudDebug=False, renormalize='auto',
                   zeroerr_is_OK=True, spline=False, **kwargs):
         """
         Fit a baseline/continuum to a spectrum
+
+        Parameters
+        ----------
+        masktoexclude : boolean array
+            True: will not be fit
+            False: will be fit
+            *if ALL are True, ALL pixels will be fit - just with silly weights*
         """
 
         #if xmin == 'default':
@@ -425,16 +464,17 @@ class Baseline(interactive.Interactive):
 
         #err[:xmin] = 1e10
         #err[xmax:] = 1e10
-        if mask is not None:
-            if mask.dtype.name != 'bool': mask = mask.astype('bool')
-            err[mask] = 1e10
-            if LoudDebug: print "In _baseline: %i points masked out" % mask.sum()
+        if masktoexclude is not None:
+            if masktoexclude.dtype.name != 'bool':
+                masktoexclude = masktoexclude.astype('bool')
+            err[masktoexclude] = 1e10
+            if LoudDebug: print "In _baseline: %i points masked out" % masktoexclude.sum()
         if (spectrum!=spectrum).sum() > 0:
             print "There is an error in baseline: some values are NaN"
             import pdb; pdb.set_trace()
 
         #xarrconv = xarr[xmin:xmax].as_unit(xarr_fit_units)
-        OK = True-mask
+        OK = True-masktoexclude
         xarrconv = xarr.as_unit(xarr_fit_units)
         if powerlaw:
             # for powerlaw fitting, only consider positive data
@@ -479,6 +519,35 @@ class Baseline(interactive.Interactive):
             bestfit = np.poly1d(fitp)(xarrconv).squeeze()
 
         return bestfit,fitp
+
+    def _spline(self, data, xarr=None, masktofit=None, order=3, sampling=10):
+        from scipy.interpolate import UnivariateSpline
+
+        assert masktofit.shape == data.shape
+
+        if masktofit is None:
+            masktofit = np.isfinite(data)
+            if not any(masktofit):
+                log.warn("All data was infinite or NaN")
+
+        if xarr is None:
+            xarr = np.arange(data.size, dtype=data.dtype)
+
+        ngood = np.count_nonzero(masktofit)
+        if ngood == 0:
+            log.warn("Fitting all data with spline")
+            masktofit[:] = True
+            ngood = masktofit.size
+        endpoint = ngood - (ngood % sampling)
+        yarr = np.mean([data[masktofit][ii:endpoint:sampling]
+                        for ii in range(sampling)], axis=0)
+        spl = UnivariateSpline(xarr[masktofit][sampling/2:endpoint:sampling],
+                               yarr,
+                               k=order,
+                               s=0)
+
+        return spl(xarr)
+
 
     def crop(self,x1pix,x2pix):
         """

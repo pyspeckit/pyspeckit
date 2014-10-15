@@ -37,6 +37,7 @@ from pyspeckit.spectrum import history
 from astropy.io import fits
 import cubes
 from astropy import log
+#from spectral_cube import SpectralCube as SpectralCubeClass
 
 class Cube(spectrum.Spectrum):
 
@@ -373,7 +374,7 @@ class Cube(spectrum.Spectrum):
     def get_apspec(self, aperture, coordsys=None, method='mean', **kwargs):
         """
         Extract an aperture using cubes.extract_aperture
-        (defaults to Cube coordinates)
+        (defaults to Cube pixel coordinates)
 
         *aperture* [tuple or list] (x, y, radius)
             The aperture to use when extracting the data
@@ -381,6 +382,10 @@ class Cube(spectrum.Spectrum):
         *coordsys* [ 'celestial' | 'galactic' | None]
             the coordinate system the aperture is specified in
             None indicates pixel coordinates (default)
+
+        *wunit* [str]
+            arcsec, arcmin, or degree
+            
 
         """
 
