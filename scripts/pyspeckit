@@ -10,6 +10,7 @@ import pyspeckit
 import optparse
 import os
 import re
+import IPython
 
 if __name__ == "__main__":
 
@@ -106,3 +107,5 @@ if __name__ == "__main__":
 
     if options.fitnh3:
         pyspeckit.wrappers.fitnh3.fitnh3(sp)
+
+    IPython.embed()
