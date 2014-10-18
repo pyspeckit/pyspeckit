@@ -202,12 +202,12 @@ class Baseline(interactive.Interactive):
 
         xarr = self.Spectrum.xarr
         if spline:
-            self.basespec = self._spline(self.spectofit,
-                                         xarr=xarr,
-                                         masktofit=self.includemask,
-                                         sampling=spline_sampling,
-                                         downsampler=spline_downsampler,
-                                         order=self.order)
+            self.basespec = _spline(self.spectofit,
+                                    xarr=xarr,
+                                    masktofit=self.includemask,
+                                    sampling=spline_sampling,
+                                    downsampler=spline_downsampler,
+                                    order=self.order)
         else:
             # use a,b to keep line under 80 chars
             a,b = self._baseline(self.spectofit, xarr=xarr,
@@ -531,51 +531,6 @@ class Baseline(interactive.Interactive):
 
         return bestfit,fitp
 
-    def _spline(self, data, xarr=None, masktofit=None, order=3, sampling=10,
-                downsampler=np.median, append_endpoints=True):
-        from scipy.interpolate import UnivariateSpline
-
-        assert masktofit.shape == data.shape
-
-        if masktofit is None:
-            masktofit = np.isfinite(data)
-            if not any(masktofit):
-                log.warn("All data was infinite or NaN")
-
-        if xarr is None:
-            xarr = np.arange(data.size, dtype=data.dtype)
-
-        if downsampler is not None:
-            ngood = np.count_nonzero(masktofit)
-            if ngood == 0:
-                log.warn("Fitting all data with spline")
-                masktofit[:] = True
-                ngood = masktofit.size
-            endpoint = ngood - (ngood % sampling)
-            yfit = downsampler([data[masktofit][ii:endpoint:sampling]
-                                for ii in range(sampling)], axis=0)
-            xfit = xarr[masktofit][sampling/2:endpoint:sampling]
-            if append_endpoints:
-                xfit = np.array([xarr[0]-(xarr[1]-xarr[0])] +
-                                xfit.tolist() +
-                                [xarr[-1]+(xarr[1]-xarr[0])])
-                yfit = np.array([yfit[0]] + yfit.tolist() + [yfit[-1]])
-            spl = UnivariateSpline(xfit,
-                                   yfit,
-                                   k=order,
-                                   s=0)
-        else:
-            spl = UnivariateSpline(xarr[masktofit],
-                                   data[masktofit],
-                                   k=order,
-                                   s=sampling)
-
-        baseline_fitted = spl(xarr)
-        if np.any(np.isnan(baseline_fitted)):
-            log.error("NaNs in baseline.")
-            import ipdb; ipdb.set_trace()
-        return baseline_fitted
-
 
     def crop(self,x1pix,x2pix):
         """
@@ -613,3 +568,49 @@ class Baseline(interactive.Interactive):
             newbaseline.Spectrum.plotter = None
 
         return newbaseline
+
+def _spline(data, xarr=None, masktofit=None, order=3, sampling=10,
+            downsampler=np.median, append_endpoints=True):
+    from scipy.interpolate import UnivariateSpline
+
+    assert masktofit.shape == data.shape
+
+    if masktofit is None:
+        masktofit = np.isfinite(data)
+        if not any(masktofit):
+            log.warn("All data was infinite or NaN")
+
+    if xarr is None:
+        xarr = np.arange(data.size, dtype=data.dtype)
+
+    if downsampler is not None:
+        ngood = np.count_nonzero(masktofit)
+        if ngood == 0:
+            log.warn("Fitting all data with spline")
+            masktofit[:] = True
+            ngood = masktofit.size
+        endpoint = ngood - (ngood % sampling)
+        yfit = downsampler([data[masktofit][ii:endpoint:sampling]
+                            for ii in range(sampling)], axis=0)
+        xfit = xarr[masktofit][sampling/2:endpoint:sampling]
+        if append_endpoints:
+            xfit = np.array([xarr[0]-(xarr[1]-xarr[0])] +
+                            xfit.tolist() +
+                            [xarr[-1]+(xarr[1]-xarr[0])])
+            yfit = np.array([yfit[0]] + yfit.tolist() + [yfit[-1]])
+        spl = UnivariateSpline(xfit,
+                               yfit,
+                               k=order,
+                               s=0)
+    else:
+        spl = UnivariateSpline(xarr[masktofit],
+                               data[masktofit],
+                               k=order,
+                               s=sampling)
+
+    baseline_fitted = spl(xarr)
+    if np.any(np.isnan(baseline_fitted)):
+        log.error("NaNs in baseline.")
+        import ipdb; ipdb.set_trace()
+    return baseline_fitted
+

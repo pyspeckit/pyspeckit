@@ -897,8 +897,9 @@ def read_observation(f, obsid, file_description=None, indices=None,
         log.error("No NCHAN in header.  This is not a spectrum.")
         import ipdb; ipdb.set_trace()
     # There may be a 1-channel offset?  CHECK!!!
-    f.seek(datastart-1)
-    spec = _read_spectrum(f, position=datastart-1, nchan=nchan,
+    # (changed by 1 pixel - October 14, 2014)
+    f.seek(datastart)
+    spec = _read_spectrum(f, position=datastart, nchan=nchan,
                           memmap=memmap, my_memmap=my_memmap)
 
     return spec, hdr
@@ -1109,7 +1110,7 @@ class ClassObject(object):
         if entry is not None and len(entry)==2:
             return irange(entry[0], entry[1])
 
-        sel = [(re.search(re.escape(line), h['CLINE'], re.IGNORECASE)
+        sel = [(re.search(re.escape(line), h['LINE'], re.IGNORECASE)
                 if line is not None else True) and
                (h['SCAN'] == scan if scan is not None else True) and
                ((h['OFF1'] == offset or

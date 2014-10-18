@@ -133,10 +133,10 @@ frequency_dict = {
         }
 frequency_dict = SmartCaseNoSpaceDict(frequency_dict)
 
-velocity_dict = {'meters/second':1.0,'m/s':1.0,
-        'kilometers/second':1e3,'kilometers/s':1e3,'km/s':1e3,'kms':1e3,
-        'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
-        'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
+velocity_dict = {'meters/second':1.0,'m/s':1.0,'m s-1':1.0,
+                 'kilometers/second':1e3,'kilometers/s':1e3,'km/s':1e3,'kms':1e3,'km s-1':1e3,
+                'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
+                'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
         }
 velocity_dict = SmartCaseNoSpaceDict(velocity_dict)
 
