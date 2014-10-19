@@ -163,6 +163,7 @@ unit_type_dict = {
     'megameters/s':'velocity',
     'megameters/second':'velocity','Mm/s':'velocity',
     'km/s':'velocity', 'kms':'velocity', 'centimeters/s':'velocity',
+    'kms-1':'velocity', 'km s-1':'velocity', 'm s-1':'velocity',  'ms-1':'velocity',
     'cm/s':'velocity', 'cms':'velocity', 
     'meters':'wavelength','m':'wavelength',
     'centimeters':'wavelength','cm':'wavelength',

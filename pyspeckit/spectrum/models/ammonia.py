@@ -100,9 +100,9 @@ tau_wts_dict = {
     'eighteight': [0.00459516014524, 0.00459939439378, 0.324116135075, 0.289534720829, 0.367960035019, 0.00459939439378, 0.00459516014524],
 }
 
-def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1,
-        xoff_v=0.0, fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
-        thin=False, verbose=False, return_components=False, debug=False ):
+def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
+            fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
+            thin=False, verbose=False, return_components=False, debug=False ):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
     gaussian parameters

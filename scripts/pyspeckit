@@ -15,6 +15,7 @@ import IPython
 if __name__ == "__main__":
 
     import matplotlib, itertools, pylab
+    import pylab as pl
 
     parser=optparse.OptionParser()
     parser.add_option("--verbose","-v",help="Be loud? Default True",default=False,action='store_true')
