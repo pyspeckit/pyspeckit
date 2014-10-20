@@ -67,6 +67,7 @@ print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
 # Run the ammonia spec fitter with a reasonable guess 
+# Parameters are Tkin, Tex, column, width, centroid, ortho fraction
 sp.specfit(fittype='ammonia',
         multifit=True,guesses=[5.9,4.45,8.3e14,0.84,96.2,0.43],quiet=False)
 

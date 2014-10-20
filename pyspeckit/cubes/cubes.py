@@ -79,7 +79,9 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
                 return yreal-np.polyval(polypars, x).astype(yreal.dtype)
 
         elif splineorder is not None and scipyOK:
-            if ngood < splineorder:
+            if splineorder < 1 or splineorder > 4:
+                raise ValueError("Spline order must be in {1,2,3,4}")
+            elif ngood < splineorder:
                 return yreal
             else:
                 log.debug("splinesampling: {0}  "
