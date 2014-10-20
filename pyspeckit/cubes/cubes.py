@@ -81,7 +81,7 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
         elif splineorder is not None and scipyOK:
             if splineorder < 1 or splineorder > 4:
                 raise ValueError("Spline order must be in {1,2,3,4}")
-            elif ngood < splineorder:
+            elif ngood <= splineorder:
                 return yreal
             else:
                 log.debug("splinesampling: {0}  "
@@ -89,6 +89,9 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
                 endpoint = ngood - (ngood % sampling)
                 y = np.mean([yfit[mask][ii:endpoint:sampling]
                              for ii in range(sampling)], axis=0)
+                if len(y) <= splineorder:
+                    raise ValueError("Sampling is too sparse.  Use finer sampling or "
+                                     "decrease the spline order.")
                 spl = UnivariateSpline(x[mask][sampling/2:endpoint:sampling],
                                        y,
                                        k=splineorder,

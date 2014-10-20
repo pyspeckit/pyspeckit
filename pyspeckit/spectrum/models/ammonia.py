@@ -22,7 +22,8 @@ import model
 
 
 line_names = ['oneone','twotwo','threethree','fourfour', "fivefive", "sixsix",
-              "sevenseven", "eighteight", 'ninenine']
+              "sevenseven", "eighteight",]
+              #'ninenine']
 
 freq_dict = { 
     'oneone':     23.694506e9,
@@ -30,11 +31,11 @@ freq_dict = {
     'threethree': 23.8701296e9,
     'fourfour':   24.1394169e9,
     # fivefive - eighteight come from TopModel on splatalogue
-    'fivefive': 24.53299,
-    'sixsix': 25.05603,
-    'sevenseven': 25.71518,
-    'eighteight': 26.51898,
-    'ninenine': 27.47794,
+    'fivefive': 24.53299e9,
+    'sixsix': 25.05603e9,
+    'sevenseven': 25.71518e9,
+    'eighteight': 26.51898e9,
+    #'ninenine': 27.47794,
     }
 aval_dict = {
     'oneone':     1.712e-7,  #64*!pi**4/(3*h*c**3)*nu11**3*mu0**2*(1/2.)
@@ -45,6 +46,7 @@ aval_dict = {
     'sixsix': 3.395797e-07,
     'sevenseven': 3.747560e-07,
     'eighteight': 4.175308e-07,
+    #'ninenine': xxx,
     }
 ortho_dict = {
     'oneone':     False,
@@ -55,7 +57,7 @@ ortho_dict = {
     'sixsix':   True,
     'sevenseven':   False,
     'eighteight':   False,
-    'ninenine':   True,
+    #'ninenine':   True,
     }
 #n_ortho = np.arange(0,28,3) # 0..3..27
 #n_para = np.array([x for x in range(28) if x % 3 != 0])
@@ -301,6 +303,11 @@ class ammonia_model(model.SpectralModel):
         self.default_parinfo = None
         self.default_parinfo, kwargs = self._make_parinfo(**kwargs)
 
+        # Remove keywords parsed by parinfo and ignored by the fitter
+        for kw in ('tied','partied'):
+            if kw in kwargs:
+                kwargs.pop(kw)
+
         # enforce ammonia-specific parameter limits
         for par in self.default_parinfo:
             if 'tex' in par.parname.lower():
@@ -324,9 +331,10 @@ class ammonia_model(model.SpectralModel):
 
         self.parinfo = copy.copy(self.default_parinfo)
 
-
         self.modelfunc_kwargs = kwargs
         # lower case? self.modelfunc_kwargs.update({'parnames':self.parinfo.parnames})
+        self.use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else False
+        self.fitunits = 'GHz'
 
     def __call__(self,*args,**kwargs):
         #if 'use_lmfit' in kwargs: kwargs.pop('use_lmfit')
@@ -410,14 +418,16 @@ class ammonia_model(model.SpectralModel):
         return modelcomponents
 
 
-    def multinh3fit(self, xax, data, npeaks=1, err=None, 
-            params=(20,20,14,1.0,0.0,0.5),
-            parnames=None,
-            fixed=(False,False,False,False,False,False),
-            limitedmin=(True,True,True,True,False,True),
-            limitedmax=(False,False,False,False,False,True), minpars=(2.73,2.73,0,0,0,0),
-            parinfo=None,
-            maxpars=(0,0,0,0,0,1), quiet=True, shh=True, veryverbose=False, **kwargs):
+    def multinh3fit(self, xax, data, npeaks=1, err=None,
+                    params=(20,20,14,1.0,0.0,0.5), parnames=None,
+                    fixed=(False,False,False,False,False,False),
+                    limitedmin=(True,True,True,True,False,True),
+                    limitedmax=(False,False,False,False,False,True),
+                    minpars=(2.73,2.73,0,0,0,0), parinfo=None,
+                    maxpars=(0,0,0,0,0,1),
+                    tied=('',)*6,
+                    quiet=True, shh=True,
+                    veryverbose=False, **kwargs):
         """
         Fit multiple nh3 profiles (multiple can be 1)
 
@@ -462,14 +472,21 @@ class ammonia_model(model.SpectralModel):
             # _default_parnames is the workaround)
             if parnames is None: parnames = copy.copy(self._default_parnames)
 
-            partype_dict = dict(zip(['params','parnames','fixed','limitedmin','limitedmax','minpars','maxpars'],
-                    [params,parnames,fixed,limitedmin,limitedmax,minpars,maxpars]))
+            partype_dict = dict(zip(['params', 'parnames', 'fixed',
+                                     'limitedmin', 'limitedmax', 'minpars',
+                                     'maxpars', 'tied'], 
+                                    [params, parnames, fixed, limitedmin,
+                                     limitedmax, minpars, maxpars, tied]))
 
-            # make sure all various things are the right length; if they're not, fix them using the defaults
+            # make sure all various things are the right length; if they're
+            # not, fix them using the defaults
+            # (you can put in guesses of length 12 but leave the rest length 6;
+            # this code then doubles the length of everything else)
             for partype,parlist in partype_dict.iteritems():
                 if len(parlist) != self.npars*self.npeaks:
-                    # if you leave the defaults, or enter something that can be multiplied by npars to get to the
-                    # right number of gaussians, it will just replicate
+                    # if you leave the defaults, or enter something that can be
+                    # multiplied by npars to get to the right number of
+                    # gaussians, it will just replicate
                     if len(parlist) == self.npars: 
                         partype_dict[partype] *= npeaks 
                     elif len(parlist) > self.npars:
@@ -484,12 +501,18 @@ class ammonia_model(model.SpectralModel):
                         partype_dict[partype] = (np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')
                     elif parlist==limitedmin: # no physical values can be negative except velocity
                         partype_dict[partype] = (np.array(parnames) != 'xoff_v')
-                    elif parlist==minpars: # all have minima of zero except kinetic temperature, which can't be below CMB.  Excitation temperature technically can be, but not in this model
+                    elif parlist==minpars:
+                        # all have minima of zero except kinetic temperature, which can't be below CMB.
+                        # Excitation temperature technically can be, but not in this model
                         partype_dict[partype] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * 2.73
                     elif parlist==maxpars: # fractions have upper limits of 1.0
                         partype_dict[partype] = ((np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')).astype('float')
                     elif parlist==parnames: # assumes the right number of parnames (essential)
                         partype_dict[partype] = list(parnames) * self.npeaks 
+                    elif parlist==tied:
+                        partype_dict[partype] = [_increment_string_number(t, ii*self.npars)
+                                                 for t in tied
+                                                 for ii in range(self.npeaks)]
 
             if len(parnames) != len(partype_dict['params']):
                 raise ValueError("Wrong array lengths AFTER fixing them")
@@ -498,11 +521,12 @@ class ammonia_model(model.SpectralModel):
             self.parnames = partype_dict['parnames']
 
             parinfo = [ {'n':ii, 'value':partype_dict['params'][ii],
-                'limits':[partype_dict['minpars'][ii],partype_dict['maxpars'][ii]],
-                'limited':[partype_dict['limitedmin'][ii],partype_dict['limitedmax'][ii]], 'fixed':partype_dict['fixed'][ii],
-                'parname':partype_dict['parnames'][ii]+str(ii/self.npars),
-                'mpmaxstep':float(partype_dict['parnames'][ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
-                'error': 0} 
+                         'limits':[partype_dict['minpars'][ii],partype_dict['maxpars'][ii]],
+                         'limited':[partype_dict['limitedmin'][ii],partype_dict['limitedmax'][ii]], 'fixed':partype_dict['fixed'][ii],
+                         'parname':partype_dict['parnames'][ii]+str(ii/self.npars),
+                         'tied':partype_dict['tied'][ii],
+                         'mpmaxstep':float(partype_dict['parnames'][ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
+                         'error': 0} 
                 for ii in xrange(len(partype_dict['params'])) ]
 
             # hack: remove 'fixed' pars
@@ -656,3 +680,19 @@ class ammonia_model_vtau(ammonia_model):
         elif self.multisingle == 'multi':
             return self.multinh3fit(*args,**kwargs)
 
+
+def _increment_string_number(st, count):
+    """
+    Increment a number in a string
+    
+    Expects input of the form: p[6]
+    """
+
+    dig = re.compile('[0-9]+')
+
+    if dig.search(st):
+        n = int(dig.search(st).group())
+        result = dig.sub(str(n+count), st)
+        return result
+    else:
+        return st
