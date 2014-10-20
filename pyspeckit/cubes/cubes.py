@@ -23,9 +23,9 @@ import pyspeckit
 from astropy import coordinates
 from astropy import log
 from pyspeckit.specwarnings import warn
+from pyspeckit.parallel_map import parallel_map
 try:
     from AG_fft_tools import smooth
-    from pyspeckit.parallel_map import parallel_map
     smoothOK = True
 except ImportError:
     smoothOK = False
