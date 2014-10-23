@@ -16,6 +16,7 @@ from numpy import pi
 from astropy import log
 from astropy.time import Time
 import os
+import sys
 import re
 try:
     from astropy.utils.console import ProgressBar
@@ -898,8 +899,10 @@ def read_observation(f, obsid, file_description=None, indices=None,
         import ipdb; ipdb.set_trace()
     # There may be a 1-channel offset?  CHECK!!!
     # (changed by 1 pixel - October 14, 2014)
-    f.seek(datastart)
-    spec = _read_spectrum(f, position=datastart, nchan=nchan,
+    # (changed back - October 21, 2014 - I think the ends are just bad, but not
+    # zero.)
+    f.seek(datastart-1)
+    spec = _read_spectrum(f, position=datastart-1, nchan=nchan,
                           memmap=memmap, my_memmap=my_memmap)
 
     return spec, hdr
@@ -993,7 +996,7 @@ class ClassObject(object):
             else:
                 h['OTFSCAN'] = otfscan
 
-    def listscans(self, source=None, telescope=None):
+    def listscans(self, source=None, telescope=None, out=sys.stdout):
         minid=0
         scan = -1
         sourc = ""
@@ -1010,7 +1013,8 @@ class ClassObject(object):
                       RAmin='min(RA)', RAmax='max(RA)',
                       DECmin='min(DEC)', DECmax='max(DEC)',
                       SCANPOSA='Scan PA',
-                      angle='Angle', OTFSCAN='OTFscan'))
+                      angle='Angle', OTFSCAN='OTFscan'),
+             file=out)
 
         for ii,row in enumerate(self.headers):
             if (row['SCAN'] == scan
@@ -1036,7 +1040,11 @@ class ClassObject(object):
 
                 ok = True
                 if source is not None:
-                    ok = ok and re.search((source), prevrow['SOURC'])
+                    if isinstance(source, (list,tuple)):
+                        ok = ok and any(re.search((s), prevrow['SOURC'])
+                                        for s in source)
+                    else:
+                        ok = ok and re.search((source), prevrow['SOURC'])
                 if telescope is not None:
                     ok = ok and re.search((telescope), prevrow['XTEL'])
                 if ok:
@@ -1051,7 +1059,8 @@ class ClassObject(object):
                                  angle=(ttlangle/nangle)*180/np.pi if nangle>0 else 0,
                                  e0=minid,
                                  e1=ii-1,
-                                 **prevrow))
+                                 **prevrow),
+                         file=out)
 
                 minoff1,maxoff1 = np.inf,-np.inf
                 minoff2,maxoff2 = np.inf,-np.inf
@@ -1130,8 +1139,8 @@ class ClassObject(object):
                 h['RESTF'] < frequency[1]
                 if frequency is not None and len(frequency)==2
                 else True) and
-               (h['COMPPOSA'] > posang[0] and
-                h['COMPPOSA'] < posang[1]
+               (h['COMPPOSA']%180 > posang[0] and
+                h['COMPPOSA']%180 < posang[1]
                 if posang is not None and len(posang)==2
                 else True)
                for h in self.headers]
