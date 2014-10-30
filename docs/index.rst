@@ -9,6 +9,8 @@ An `extensible <registration.html>`_ spectroscopic analysis toolkit for astronom
 
 If you're just getting started, see the :doc:`examples page <examples>`.
 
+To cite pyspeckit, use http://adsabs.harvard.edu/abs/2011ascl.soft09001G.
+
 Downloads
 ^^^^^^^^^
 
