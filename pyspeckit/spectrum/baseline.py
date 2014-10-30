@@ -598,13 +598,17 @@ def _spline(data, xarr=None, masktofit=None, order=3, sampling=10,
                             xfit.tolist() +
                             [xarr[-1]+(xarr[1]-xarr[0])])
             yfit = np.array([yfit[0]] + yfit.tolist() + [yfit[-1]])
-        spl = UnivariateSpline(xfit,
-                               yfit,
+        inds = np.argsort(xfit)
+        spl = UnivariateSpline(xfit[inds],
+                               yfit[inds],
                                k=order,
                                s=0)
     else:
-        spl = UnivariateSpline(xarr[masktofit],
-                               data[masktofit],
+        xfit = xarr[masktofit]
+        yfit = data[masktofit]
+        inds = np.argsort(xfit)
+        spl = UnivariateSpline(xfit[inds],
+                               yfit[inds],
                                k=order,
                                s=sampling)
 

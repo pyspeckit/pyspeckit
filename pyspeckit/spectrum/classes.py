@@ -167,7 +167,7 @@ class Spectrum(object):
                 else:
                     self.header = header
             else: # set as blank
-                warn( "WARNING: Blank header." )
+                warn( "WARNING: No header given.  Creating an empty one." )
                 self.header = pyfits.Header()
             self.parse_header(self.header)
 
