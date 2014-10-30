@@ -1,6 +1,12 @@
 CHANGES
 *******
 
+Release 0.1.16
+~~~~~~~~~~~~~~
+
+    * Baseline: add spline fitting
+    * Add Zenodo badge
+
 Release 0.1.15
 ~~~~~~~~~~~~~~
     * Bugfix: write_fit is part of Cube, not CubeStack
