@@ -1168,6 +1168,8 @@ class ClassObject(object):
                        range=None,
                        quality=None,
                        telescope=None,
+                       telescopere=None,
+                       telescopereflags=re.IGNORECASE,
                        subscan=None,
                        entry=None,
                        posang=None,
@@ -1199,11 +1201,13 @@ class ClassObject(object):
                (h['QUAL'] == quality if quality is not None else True) and
                (re.search(re.escape(telescope), h['CTELE'], re.IGNORECASE)
                 if telescope is not None else True) and
+               (re.search(telescopere, h['CTELE'], telescopereflags)
+                if telescopere is not None else True) and
                (h['SUBSCAN']==subscan if subscan is not None else True) and
                (h['NUM'] >= number[0] and h['NUM'] < number[1]
                 if number is not None else True) and
-               ('RESTF' in h) and # Need to check that it IS a spectrum: continuum data can't be accessed this way
-               (h['RESTF'] > frequency[0] and
+               ('RESTF' in h and # Need to check that it IS a spectrum: continuum data can't be accessed this way
+                h['RESTF'] > frequency[0] and
                 h['RESTF'] < frequency[1]
                 if frequency is not None and len(frequency)==2
                 else True) and
