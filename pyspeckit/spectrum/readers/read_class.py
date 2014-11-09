@@ -520,9 +520,11 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
         raise NotImplementedError("Filetype {0} not implemented.".format(filetype))
 
     # from kernel/lib/gsys/date.f90: gag_julda
-    index['DOBS'] = ((index['DOBS'] + 365*2025)/365.2425 + 1)
-    index['DATEOBS'] = Time(index['DOBS'], format='jyear')
-    index['DATEOBSS'] = index['DATEOBS'].iso
+    class_dobs = index['DOBS']
+    index['DOBS'] = ((class_dobs + 365*2025)/365.2425 + 1)
+    # SLOW
+    #index['DATEOBS'] = Time(index['DOBS'], format='jyear')
+    #index['DATEOBSS'] = index['DATEOBS'].iso
 
     log.debug("Indexing finished at {0}".format(f.tell()))
     return index
@@ -946,7 +948,7 @@ def clean_header(header):
     return newheader
 
 class ClassObject(object):
-    def __init__(self, filename):
+    def __init__(self, filename, verbose=False):
         t0 = time.time()
         self._file = open(filename, 'rb')
         self.file_description = _read_first_record(self._file)
@@ -960,10 +962,11 @@ class ClassObject(object):
         self.identify_otf_scans()
         t3 = time.time()
         #self._load_all_spectra()
-        log.info("Loaded CLASS object with {3} indices.  Time breakdown:"
-                 " {0}s for indices, "
-                 "{1}s for posang, and {2}s for OTF scan identification"
-                 .format(t1-t0, t2-t1, t3-t2, len(self.allind)))
+        if verbose:
+            log.info("Loaded CLASS object with {3} indices.  Time breakdown:"
+                     " {0}s for indices, "
+                     "{1}s for posang, and {2}s for OTF scan identification"
+                     .format(t1-t0, t2-t1, t3-t2, len(self.allind)))
 
     def __repr__(self):
         s = "\n".join(["{k}: {v}".format(k=k,v=v)
@@ -1088,6 +1091,14 @@ class ClassObject(object):
                 minid = ii
 
     @property
+    def tels(self):
+        if hasattr(self,'_tels'):
+            return self._tels
+        else:
+            self._tels = set([h['XTEL'] for h in self.allind])
+            return self._tels
+
+    @property
     def sources(self):
         if hasattr(self,'_source'):
             return self._source
@@ -1118,10 +1129,14 @@ class ClassObject(object):
     def select_spectra(self,
                        all=None,
                        line=None,
+                       linere=None,
+                       linereflags=re.IGNORECASE,
                        number=None,
                        scan=None,
                        offset=None,
                        source=None,
+                       sourcere=None,
+                       sourcereflags=re.IGNORECASE,
                        range=None,
                        quality=None,
                        telescope=None,
@@ -1138,11 +1153,15 @@ class ClassObject(object):
 
         sel = [(re.search(re.escape(line), h['LINE'], re.IGNORECASE)
                 if line is not None else True) and
+               (re.search(linere, h['LINE'], linereflags)
+                if linere is not None else True) and
                (h['SCAN'] == scan if scan is not None else True) and
                ((h['OFF1'] == offset or
                  h['OFF2'] == offset) if offset is not None else True) and
                (re.search(re.escape(source), h['CSOUR'], re.IGNORECASE)
                 if source is not None else True) and
+               (re.search(sourcere, h['CSOUR'], sourcereflags)
+                if sourcere is not None else True) and
                (h['OFF1']>range[0] and h['OFF1'] < range[1] and
                 h['OFF2']>range[2] and h['OFF2'] < range[3]
                 if range is not None and len(range)==4 else True) and
@@ -1152,6 +1171,7 @@ class ClassObject(object):
                (h['SUBSCAN']==subscan if subscan is not None else True) and
                (h['NUM'] >= number[0] and h['NUM'] < number[1]
                 if number is not None else True) and
+               ('RESTF' in h) and # Need to check that it IS a spectrum: continuum data can't be accessed this way
                (h['RESTF'] > frequency[0] and
                 h['RESTF'] < frequency[1]
                 if frequency is not None and len(frequency)==2
@@ -1160,7 +1180,8 @@ class ClassObject(object):
                 h['COMPPOSA']%180 < posang[1]
                 if posang is not None and len(posang)==2
                 else True)
-               for h in self.headers]
+               for h in self.headers
+              ]
 
         return [ii for ii,k in enumerate(sel) if k]
 
@@ -1197,7 +1218,7 @@ class ClassObject(object):
 
 @print_timing
 def read_class(filename, downsample_factor=None, sourcename=None,
-               telescope=None, posang=None):
+               telescope=None, posang=None, verbose=False):
     """
     Read a binary class file.
     Based on the
@@ -1223,7 +1244,8 @@ def read_class(filename, downsample_factor=None, sourcename=None,
         telescope = [telescope]
 
     spectra,headers = [],[]
-    log.info("Reading...")
+    if verbose:
+        log.info("Reading...")
     selection = [ii
                  for source in sourcename
                  for tel in telescope
@@ -1241,7 +1263,8 @@ def read_class(filename, downsample_factor=None, sourcename=None,
     indexes = headers
 
     if downsample_factor is not None:
-        log.info("Downsampling...")
+        if verbose:
+            log.info("Downsampling...")
         spectra = [downsample_1d(spec, downsample_factor)
                    for spec in ProgressBar(spectra)]
         headers = [downsample_header(h, downsample_factor)
