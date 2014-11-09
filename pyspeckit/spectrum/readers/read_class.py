@@ -15,6 +15,7 @@ import numpy as np
 from numpy import pi
 from astropy import log
 from astropy.time import Time
+import pyspeckit
 import os
 import sys
 import re
@@ -928,6 +929,22 @@ def _spectrum_from_header(fileobj, header, memmap=None):
                           nchan=header['NCHAN'] if 'NCHAN' in hdr else hdr['NPOIN'],
                           my_memmap=memmap)
 
+def clean_header(header):
+    newheader = {}
+    for k in header:
+        if not isinstance(header[k], (int, float, str)):
+            if isinstance(header[k], np.ndarray) and header[k].size > 1:
+                if header[k].size > 10:
+                    raise ValueError("Large array being put in header.  That's no good.  key={0}".format(k))
+                for ii,val in enumerate(header[k]):
+                    newheader[k[:7]+str(ii)] = val
+            else:
+                newheader[k[:8]] = str(header[k])
+        else:
+            newheader[k[:8]] = header[k]
+
+    return newheader
+
 class ClassObject(object):
     def __init__(self, filename):
         t0 = time.time()
@@ -1153,6 +1170,18 @@ class ClassObject(object):
         return self.read_observations(selected_indices,
                                       progressbar=progressbar)
 
+    def get_pyspeckit_spectra(self, progressbar=True, **kwargs):
+
+        spdata = self.get_spectra(progressbar=progressbar, **kwargs)
+
+        spectra = [pyspeckit.Spectrum(data=data,
+                                      xarr=make_axis(header),
+                                      header=clean_header(header))
+                   for data,header in spdata]
+
+        return pyspeckit.Spectra(spectra)
+
+
     def read_observations(self, observation_indices, progressbar=True):
         if not progressbar:
             pb = lambda x: x
@@ -1257,7 +1286,6 @@ def make_axis(header,imagfreq=False):
 
     return XAxis
     
-import pyspeckit
 @print_timing
 def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
                        imagfreq=False, DEBUG=False,  **kwargs):

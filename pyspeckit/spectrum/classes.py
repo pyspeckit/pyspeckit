@@ -163,7 +163,8 @@ class Spectrum(object):
                 self.error = data * 0
             if hasattr(header,'get'):
                 if not isinstance(header, pyfits.Header):
-                    self.header = pyfits.Header(header)
+                    cards = [pyfits.Card(k, header[k]) for k in header]
+                    self.header = pyfits.Header(cards)
                 else:
                     self.header = header
             else: # set as blank

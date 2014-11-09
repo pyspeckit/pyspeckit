@@ -9,6 +9,7 @@ import interactive
 import copy
 import history
 import re
+import itertools
 from astropy import log
 
 class Registry(object):
@@ -152,10 +153,10 @@ class Specfit(interactive.Interactive):
     @cfgdec
     def __call__(self, interactive=False, multifit=False, usemoments=True,
                  clear_all_connections=True, debug=False, guesses=None,
-                 save=True, annotate=None, show_components=None,
+                 parinfo=None, save=True, annotate=None, show_components=None,
                  use_lmfit=False, verbose=True, clear=True,
-                 fit_plotted_area=True, use_window_limits=None,
-                 vheight=None, exclude=None, **kwargs):
+                 fit_plotted_area=True, use_window_limits=None, vheight=None,
+                 exclude=None, **kwargs):
         """
         Fit model functions to a spectrum
 
@@ -180,6 +181,8 @@ class Specfit(interactive.Interactive):
             guesses = [height,amplitude,center,width]
             for multi-fit gaussian, it is
             [amplitude, center, width]
+        parinfo : `pyspeckit.spectrum.parinfo.ParinfoList`
+            An alternative way to specify guesses.  Supercedes guesses.
         use_lmfit : boolean
             If lmfit-py (https://github.com/newville/lmfit-py) is installed, you
             can use it instead of the pure-python (but slow) mpfit.
@@ -261,14 +264,23 @@ class Specfit(interactive.Interactive):
                                    debug=debug, **kwargs)
         elif (((multifit or multifit is None) and self.fittype in
             self.Registry.multifitters) or guesses is not None):
-            if guesses is None:
-                print "You must input guesses when using multifit.  Also, baseline (continuum fit) first!"
-                return
-            else:
+            if guesses is None and parinfo is None:
+                raise ValueError("You must input guesses when using multifit."
+                                 "  Also, baseline (continuum fit) first!")
+            elif parinfo is not None:
+                self.guesses = parinfo.values
+                self.parinfo = parinfo
+                self.multifit(show_components=show_components, verbose=verbose,
+                              debug=debug, use_lmfit=use_lmfit,
+                              annotate=annotate, parinfo=parinfo,
+                              guesses=guesses, **kwargs)
+            elif guesses is not None:
                 self.guesses = guesses
                 self.multifit(show_components=show_components, verbose=verbose,
                               debug=debug, use_lmfit=use_lmfit,
-                              annotate=annotate, **kwargs)
+                              guesses=guesses, annotate=annotate, **kwargs)
+            else:
+                raise ValueError("Guess and parinfo were somehow invalid.")
         # SINGLEFITTERS SHOULD BE PHASED OUT
         elif self.fittype in self.Registry.singlefitters:
             #print "Non-interactive, 1D fit with automatic guessing"
@@ -284,12 +296,15 @@ class Specfit(interactive.Interactive):
                                use_lmfit=use_lmfit,
                                show_components=show_components, debug=debug,
                                **kwargs)
-            if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
+            if self.Spectrum.plotter.autorefresh:
+                self.Spectrum.plotter.refresh()
         else:
             if multifit:
-                print "Can't fit with given fittype %s: it is not Registered as a multifitter." % self.fittype
+                print("Can't fit with given fittype {0}:"
+                      " it is not Registered as a multifitter.".format(self.fittype))
             else:
-                print "Can't fit with given fittype %s: it is not Registered as a singlefitter." % self.fittype
+                print("Can't fit with given fittype {0}:"
+                      " it is not Registered as a singlefitter.".format(self.fittype))
             return
         if save: self.savefit()
 
@@ -631,7 +646,7 @@ class Specfit(interactive.Interactive):
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
                   negamp=None, fittype=None, renormalize='auto', color=None,
                   use_lmfit=False, show_components=None, debug=False,
-                  use_window_limits=True,
+                  use_window_limits=True, guesses=None,
                   nsigcut_moments=None, plot=True, **kwargs):
         """
         Fit a single peak (plus a background)
@@ -662,11 +677,25 @@ class Specfit(interactive.Interactive):
 
         """
         self.npeaks = 1
+        NP = self.Registry.singlefitters[self.fittype].default_npars
         self.auto = True
         self.setfitspec()
-        if fittype is not None: self.fittype=fittype
-        if usemoments: # this can be done within gaussfit but I want to save them
+
+        if fittype is not None:
+            self.fittype=fittype
+
+        if guesses is not None:
+            log.debug("Using user-specified guesses.")
+            self.guesses = guesses
+            if len(guesses) != NP:
+                raise ValueError("Invalid guesses specified for single-fitter."
+                                 "Expected {0}, got {1}.  Perhaps you should "
+                                 "use the multifitter (multifit=True)?"
+                                 .format(NP, len(guesses)))
+
+        elif usemoments: # this can be done within gaussfit but I want to save them
             # use this INDEPENDENT of fittype for now (voigt and gauss get same guesses)
+            log.debug("Using moment-based guesses.")
             self.guesses = self.Registry.singlefitters[self.fittype].moments(
                     self.Spectrum.xarr[self.xmin:self.xmax],
                     self.spectofit[self.xmin:self.xmax], vheight=vheight,
@@ -676,14 +705,16 @@ class Specfit(interactive.Interactive):
             if negamp: self.guesses = [height,-1,0,1]
             else:  self.guesses = [height,1,0,1]
 
-        NP = self.Registry.singlefitters[self.fittype].default_npars
+        # If we're fitting anything but a simple Gaussian, we need the length
+        # of guesses to be right so we pad with appended zeros
         if NP > 3:
             for ii in xrange(3,NP):
                 self.guesses += [0.0]
 
         self.fitter = self.Registry.singlefitters[self.fittype]
 
-        if debug: print "n(guesses): %s  Guesses: %s  vheight: %s " % (len(self.guesses),self.guesses,vheight)
+        log.debug("n(guesses): %s  Guesses: %s  vheight: %s " %
+                  (len(self.guesses),self.guesses,vheight))
 
         scalefactor = 1.0
         if renormalize in ('auto',True):
@@ -797,6 +828,23 @@ class Specfit(interactive.Interactive):
         return self.plot_fit(pars=pars, offset=offset, annotate=False, **kwargs)
         
 
+    #def assess_npeaks(self):
+    #    """
+    #    Attempt to determine whether any of the peaks are unnecessary
+    #    """
+    #    if self.npeaks <= 1:
+    #        return
+    #    npars = self.fitter.npars
+    #    perpeakpars = [self.parinfo.values[ii*npars:(ii+1)*npars] for ii in
+    #                   range(self.npeaks)]
+    #    parsets = [((x[0][0],x[1][0]),x[0][1]+x[1][1]) for x in
+    #               itertools.combinations(perpeakpars, self.npeaks-1)]
+    #    parsets = [x
+    #               for y in itertools.combinations(perpeakpars, self.npeaks-1)
+    #               for x in y]
+
+    #    chi2_without = [(self.spectofit[self.xmin:self.xmax] -
+    #                     self.get_model_frompars(self.xarr, self.pars[ii*npars:
                 
     def plot_fit(self, xarr=None, annotate=None, show_components=None,
                  composite_fit_color='red',  lw=0.5,
