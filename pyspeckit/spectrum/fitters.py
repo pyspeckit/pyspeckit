@@ -262,8 +262,10 @@ class Specfit(interactive.Interactive):
 
             self.start_interactive(clear_all_connections=clear_all_connections,
                                    debug=debug, **kwargs)
-        elif (((multifit or multifit is None) and self.fittype in
-            self.Registry.multifitters) or guesses is not None):
+        elif (((multifit or multifit is None) and
+               self.fittype in self.Registry.multifitters)
+              or guesses is not None
+              or parinfo is not None):
             if guesses is None and parinfo is None:
                 raise ValueError("You must input guesses when using multifit."
                                  "  Also, baseline (continuum fit) first!")
@@ -1676,13 +1678,15 @@ class Specfit(interactive.Interactive):
             return self.modelcomponents
 
     def measure_approximate_fwhm(self, threshold='error', emission=True,
-            interpolate_factor=1, plot=False, grow_threshold=2, **kwargs):
+                                 interpolate_factor=1, plot=False,
+                                 grow_threshold=2, **kwargs):
         """
         Measure the FWHM of a fitted line
 
-        This procedure is designed for multi-component lines; if the true FWHM
-        is known (i.e., the line is well-represented by a single
-        gauss/voigt/lorentz profile), use that instead!
+        This procedure is designed for multi-component *blended* lines; if the
+        true FWHM is known (i.e., the line is well-represented by a single
+        gauss/voigt/lorentz profile), use that instead.  Do not use this for
+        multiple independently peaked profiles.
 
         This MUST be run AFTER a fit has been performed!
 

@@ -39,5 +39,10 @@ parinfo.append(pyspeckit.parinfo.Parinfo(parname='GWIDTH',value=2))
 parinfo.append(pyspeckit.parinfo.Parinfo(parname='LWIDTH',value=2))
 
 sp1.specfit(fittype='voigt', parinfo=parinfo, multifit=True,
-            composite_fit_color='r',clear=False,annotate=True)
+            composite_fit_color='r', clear=False, annotate=True)
 
+# Want to know the FWHM?
+fwhm = sp1.specfit.fitter.analytic_fwhm()
+real_fwhm = [inherited_voigtfitter.voigt_fwhm(6.5,0.5),
+             inherited_voigtfitter.voigt_fwhm(1.5,6.5)]
+print(fwhm,real_fwhm)
