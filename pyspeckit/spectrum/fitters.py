@@ -679,12 +679,12 @@ class Specfit(interactive.Interactive):
 
         """
         self.npeaks = 1
-        NP = self.Registry.singlefitters[self.fittype].default_npars
         self.auto = True
         self.setfitspec()
 
         if fittype is not None:
             self.fittype=fittype
+        NP = self.Registry.singlefitters[self.fittype].default_npars
 
         if guesses is not None:
             log.debug("Using user-specified guesses.")
