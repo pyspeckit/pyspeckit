@@ -954,12 +954,14 @@ class ClassObject(object):
         self.file_description = _read_first_record(self._file)
         self.allind = _read_indices(self._file, self.file_description)
         self._data = np.memmap(self._file, dtype='float32', mode='r')
-        # this will be overwritten if spectra are loaded with _load_all_spectra
-        self.headers = self.allind
+        if verbose: log.info("Setting _spectra")
+        self._spectra = LazyItem(self)
         t1 = time.time()
+        if verbose: log.info("Setting posang.  t={0}".format(t1-t0))
         self.set_posang()
         t2 = time.time()
-        self.identify_otf_scans()
+        if verbose: log.info("Identifying otf scans.  t={0}".format(t2-t1))
+        self._identify_otf_scans(verbose=verbose)
         t3 = time.time()
         #self._load_all_spectra()
         if verbose:
@@ -967,6 +969,7 @@ class ClassObject(object):
                      " {0}s for indices, "
                      "{1}s for posang, and {2}s for OTF scan identification"
                      .format(t1-t0, t2-t1, t3-t2, len(self.allind)))
+
 
     def __repr__(self):
         s = "\n".join(["{k}: {v}".format(k=k,v=v)
@@ -992,18 +995,21 @@ class ClassObject(object):
             h0 = h
 
 
-    def identify_otf_scans(self):
-        h0 = self.headers[0]
+    def _identify_otf_scans(self, verbose=False):
+        h0 = self.allind[0]
         st = 0
         otfscan = 0
-        posangs = [h['COMPPOSA'] for h in self.headers]
-        for ii,h in enumerate(self.headers):
+        posangs = [h['COMPPOSA'] for h in self.allind]
+        if verbose:
+            pb = ProgressBar(len(self.allind))
+
+        for ii,h in enumerate(self.allind):
             if (h['SCAN'] != h0['SCAN']
                 or h['SOURC'] != h0['SOURC']):
 
                 h0['FIRSTSCAN'] = st
                 cpa = np.median(posangs[st:ii])
-                for hh in self.headers[st:ii]:
+                for hh in self.allind[st:ii]:
                     hh['SCANPOSA'] = cpa % 180
                 st = ii
                 if h['SCAN'] == h0['SCAN']:
@@ -1015,6 +1021,9 @@ class ClassObject(object):
                     h['OTFSCAN'] = otfscan
             else:
                 h['OTFSCAN'] = otfscan
+
+            if verbose:
+                pb.update(ii)
 
     def listscans(self, source=None, telescope=None, out=sys.stdout):
         minid=0
@@ -1118,13 +1127,32 @@ class ClassObject(object):
         if indices is None:
             indices = range(self.file_description['xnext']-1)
 
-        spec,hdr = zip(*[read_observation(self._file, ii,
-                                          file_description=self.file_description,
-                                          indices=self.allind,
-                                          my_memmap=self._data)
-                         for ii in ProgressBar(indices)])
-        self.spectra = spec
-        self.headers = hdr
+        if hasattr(self, '_loaded_indices'):
+            indices_set = set(indices)
+            indices_to_load = (indices_set.difference(self._loaded_indices))
+            self._loaded_indices = self._loaded_indices.union(indices_set)
+
+            if any(indices_to_load):
+                pb = ProgressBar(len(indices_to_load))
+                for ii,k in enumerate(xrange(indices_to_load)):
+                    self._spectra[k]
+                    pb.update(ii)
+
+        else:
+            self._loaded_indices = set(indices)
+
+            self._spectra.load_all()
+
+
+    @property
+    def spectra(self):
+        return [x[0] for x in self._spectra]
+
+    @property
+    def headers(self):
+        return [self._spectra[ii][1] 
+                if ii in self._spectra else x
+                for ii,x in enumerate(self.allind)]
 
     def select_spectra(self,
                        all=None,
@@ -1150,6 +1178,9 @@ class ClassObject(object):
                        user=None):
         if entry is not None and len(entry)==2:
             return irange(entry[0], entry[1])
+
+        if frequency is not None:
+            self._load_all_spectra()
 
         sel = [(re.search(re.escape(line), h['LINE'], re.IGNORECASE)
                 if line is not None else True) and
@@ -1187,6 +1218,9 @@ class ClassObject(object):
 
     def get_spectra(self, progressbar=True, **kwargs):
         selected_indices = self.select_spectra(**kwargs)
+
+        if not any(selected_indices):
+            raise ValueError("Selection yielded empty.")
 
         return self.read_observations(selected_indices,
                                       progressbar=progressbar)
@@ -1378,6 +1412,57 @@ def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
                     data=sp))
 
     return obslist
+
+class LazyItem(object):
+    """
+    Simple lazy spectrum-retriever wrapper
+    """
+    def __init__(self, parent):
+        self.parent = parent
+        self.sphdr = {}
+        self.nind = len(self.parent.allind)
+        self.nloaded = 0
+
+    def __repr__(self):
+        return ("Set of {0} spectra & headers, {1} loaded"
+                " ({2:0.2f}%)".format(self.nind, self.nloaded,
+                                      (float(self.nloaded)/self.nind)*100))
+
+    def load_all(self, progressbar=True):
+        pb = ProgressBar(self.nind)
+        for k in xrange(self.nind):
+            self[k]
+            pb.update(k)
+
+    def __getitem__(self, key):
+        if key in self.sphdr:
+            return self.sphdr[key]
+        elif isinstance(key, slice):
+            return [self[k] for k in xrange(key.start or 0,
+                                            key.end or len(self.parent.allind),
+                                            key.step or 1)]
+        else:
+            sphd = read_observation(self.parent._file, key,
+                                    file_description=self.parent.file_description,
+                                    indices=self.parent.allind,
+                                    my_memmap=self.parent._data)
+            # Update the header with OTFSCAN and POSANG info
+            sphd[1].update(self.parent.allind[key])
+            self.sphdr[key] = sphd
+            self.nloaded += 1
+            return sphd
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        for k in self.spheader:
+            yield self.spheader[k]
+
+    def __contains__(self, key):
+        return key in self.sphdr
+
+
 
 @print_timing
 def class_to_spectra(filename, datatuple=None, **kwargs):
