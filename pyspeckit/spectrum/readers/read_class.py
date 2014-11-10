@@ -1351,8 +1351,12 @@ def make_axis(header,imagfreq=False):
     refchan = header.get('RCHAN')
     imfreq = header.get('IMAGE')
 
+    if foff in (None, 0.0) and voff not in (None, 0.0):
+        # Radio convention
+        foff = -voff/2.997924580e5 * rest_frequency
+
     if not imagfreq:
-        xarr =  rest_frequency + (numpy.arange(1, nchan+1) - refchan) * fres
+        xarr =  rest_frequency + foff + (numpy.arange(1, nchan+1) - refchan) * fres
         XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=rest_frequency)
     else:
         xarr = imfreq - (numpy.arange(1, nchan+1) - refchan) * fres
@@ -1470,7 +1474,7 @@ class LazyItem(object):
             return sphd
 
     def __iter__(self):
-        return self
+        return self.next()
 
     def __next__(self):
         for k in self.spheader:

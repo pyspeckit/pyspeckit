@@ -689,11 +689,11 @@ class Specfit(interactive.Interactive):
         if guesses is not None:
             log.debug("Using user-specified guesses.")
             self.guesses = guesses
-            if len(guesses) != NP:
+            if len(guesses) != NP + vheight:
                 raise ValueError("Invalid guesses specified for single-fitter."
                                  "Expected {0}, got {1}.  Perhaps you should "
                                  "use the multifitter (multifit=True)?"
-                                 .format(NP, len(guesses)))
+                                 .format(NP+vheight, len(guesses)))
 
         elif usemoments: # this can be done within gaussfit but I want to save them
             # use this INDEPENDENT of fittype for now (voigt and gauss get same guesses)
