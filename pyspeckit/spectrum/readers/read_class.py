@@ -1116,6 +1116,12 @@ class ClassObject(object):
             return self._source
 
     @property
+    def sci_sources(self):
+        return set([s for s in self.sources
+                    if s[:4] not in ('SKY-', 'TSYS', 'TCAL', 'TREC', 'HOT-',
+                                     'COLD')])
+
+    @property
     def lines(self):
         if hasattr(self,'_lines'):
             return self._lines
