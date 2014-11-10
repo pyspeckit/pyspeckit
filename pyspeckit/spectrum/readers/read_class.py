@@ -976,15 +976,14 @@ class ClassObject(object):
                        for k,v in self.getinfo().iteritems()])
         return "ClassObject({id})\n".format(id=id(self)) + s
 
-    def getinfo(self):
-        if not hasattr(self,'info'):
-            self.info = dict(
-                tels = set([h['XTEL'] for h in self.headers]),
-                lines = set([h['LINE'] for h in self.headers]),
-                scans = set([h['SCAN'] for h in self.headers]),
-                sources = set([h['SOURC'] for h in self.headers]),
-            )
-        return self.info
+    def getinfo(self, allsources=False):
+        info = dict(
+                    tels = self.tels,
+                    lines = self.lines,
+                    scans = self.scans,
+                    sources = self.sources if allsources else self.sci_sources,
+                   )
+        return info
 
     def set_posang(self):
         h0 = self.headers[0]
@@ -1114,6 +1113,14 @@ class ClassObject(object):
         else:
             self._source = set([h['SOURC'] for h in self.allind])
             return self._source
+
+    @property
+    def scans(self):
+        if hasattr(self,'_scan'):
+            return self._scan
+        else:
+            self._scan = set([h['SCAN'] for h in self.allind])
+            return self._scan
 
     @property
     def sci_sources(self):
