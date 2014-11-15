@@ -11,6 +11,8 @@ except ImportError:
 except ImportError:
     fitscheck = False
 
+from spectral_cube import wcs_utils
+
 class write_fits(Writer):
     def write_data(self, filename=None, newsuffix='out', clobber=True,
                    tolerance=1e-8, write_error=True, **kwargs):
@@ -28,9 +30,14 @@ class write_fits(Writer):
 
         header = self.Spectrum.header
         header['ORIGIN'] = 'pyspeckit version %s' % pyspeckit.__version__
+        header['OBJECT'] = self.Spectrum.specname
+        unit = self.Spectrum.unit or self.Spectrum.header.get('BUNIT')
+        if unit is not None:
+            header['BUNIT'] = unit
 
-        if header.get('CD1_1'):
-            del header['CD1_1']
+        #header_nowcs = wcs_utils.strip_wcs_from_header(header)
+        #header.insert(2, pyfits.Card(keyword='NAXIS', value=1))
+        #header.insert(3, pyfits.Card(keyword='NAXIS1', value=len(self.Spectrum)))
 
         # Generate a WCS header from the X-array
         if self.Spectrum.xarr._make_header(tolerance=tolerance):

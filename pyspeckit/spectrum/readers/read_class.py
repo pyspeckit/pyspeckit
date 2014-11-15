@@ -821,7 +821,7 @@ def _read_obshead_v1(f, position=None, verbose=False):
 #     sections = [n for n in numbers if n in header_id_numbers]
 #     return sections
 
-def downsample_1d(myarr,factor,estimator=np.mean):
+def downsample_1d(myarr,factor,estimator=np.mean, weight=None):
     """
     Downsample a 1D array by averaging over *factor* pixels.
     Crops right side if the shape is not a multiple of factor.
@@ -832,6 +832,9 @@ def downsample_1d(myarr,factor,estimator=np.mean):
         estimator - default to mean.  You can downsample by summing or
             something else if you want a different estimator
             (e.g., downsampling error: you want to sum & divide by sqrt(n))
+        weight: np.ndarray
+            An array of weights to use for the downsampling.  If None,
+            assumes uniform 1
     """
     if myarr.ndim != 1:
         raise ValueError("Only works on 1d data.  Says so in the title.")
@@ -839,6 +842,10 @@ def downsample_1d(myarr,factor,estimator=np.mean):
     crarr = myarr[:xs-(xs % int(factor))]
     dsarr = estimator(np.concatenate([[crarr[i::factor] for i in
                                        range(factor)]]),axis=0)
+    if weight is not None:
+        warr = estimator(np.concatenate([[weight[i::factor] for i in
+                                          range(factor)]]),axis=0)
+        dsarr = dsarr/warr
     return dsarr
 
 def read_observation(f, obsid, file_description=None, indices=None,
@@ -974,7 +981,8 @@ class ClassObject(object):
     def __repr__(self):
         s = "\n".join(["{k}: {v}".format(k=k,v=v)
                        for k,v in self.getinfo().iteritems()])
-        return "ClassObject({id})\n".format(id=id(self)) + s
+        return "ClassObject({id}) with {nspec} entries\n".format(id=id(self),
+                                                                 nspec=len(self.allind)) + s
 
     def getinfo(self, allsources=False):
         info = dict(
@@ -1269,7 +1277,8 @@ class ClassObject(object):
 
 @print_timing
 def read_class(filename, downsample_factor=None, sourcename=None,
-               telescope=None, posang=None, verbose=False):
+               telescope=None, posang=None, verbose=False,
+               flag_array=None):
     """
     Read a binary class file.
     Based on the
@@ -1286,6 +1295,9 @@ def read_class(filename, downsample_factor=None, sourcename=None,
         Source names to match to the data
     telescope: str or list of str
         'XTEL' or 'TELE' parameters: the telescope & instrument
+    flag_array: np.ndarray
+        An array with the same shape as the data used to flag out
+        (remove) data when downsampling.  True = flag out
     """
     classobj = ClassObject(filename)
 
@@ -1313,10 +1325,13 @@ def read_class(filename, downsample_factor=None, sourcename=None,
 
     indexes = headers
 
+    weight = ~flag_array if flag_array is not None else None
+
     if downsample_factor is not None:
         if verbose:
             log.info("Downsampling...")
-        spectra = [downsample_1d(spec, downsample_factor)
+        spectra = [downsample_1d(spec, downsample_factor,
+                                 weight=weight)
                    for spec in ProgressBar(spectra)]
         headers = [downsample_header(h, downsample_factor)
                    for h in ProgressBar(headers)]
