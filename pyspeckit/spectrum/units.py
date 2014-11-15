@@ -20,7 +20,6 @@ What about for other fields (e.g., wavenumber?)
 
 import numpy as np
 import warnings
-from spectral_cube import spectral_axis
 
 # declare a case-insensitive dict class to return case-insensitive versions of each dictionary...
 # this is just a shortcut so that units can be specified as, e.g., Hz, hz, HZ, hZ, etc.  3 of those 4 are "legitimate".  
@@ -936,9 +935,13 @@ class SpectroscopicAxis(np.ndarray):
         else:
             ctype = fits_type[self.xtype]
         #self.wcshead['CTYPE1'] = ctype+fits_frame[self.frame]
-        self.wcshead['CTYPE1'] = spectral_axis.determine_ctype_from_vconv(ctype,
-                                                                          self.units,
-                                                                          self.velocity_convention)
+        try:
+            from spectral_cube import spectral_axis
+            self.wcshead['CTYPE1'] = spectral_axis.determine_ctype_from_vconv(ctype,
+                                                                              self.units,
+                                                                              self.velocity_convention)
+        except ImportError:
+            self.wcshead['CTYPE1'] = ctype
         # not needed ? self.wcshead['SPECSYS'] = fits_specsys[self.frame]
         self.wcshead['RESTFRQ'] = self.refX
 

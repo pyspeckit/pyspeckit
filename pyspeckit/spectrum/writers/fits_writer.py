@@ -11,8 +11,6 @@ except ImportError:
 except ImportError:
     fitscheck = False
 
-from spectral_cube import wcs_utils
-
 class write_fits(Writer):
     def write_data(self, filename=None, newsuffix='out', clobber=True,
                    tolerance=1e-8, write_error=True, **kwargs):
