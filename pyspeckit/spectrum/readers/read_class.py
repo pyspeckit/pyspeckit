@@ -1292,7 +1292,7 @@ def read_class(filename, downsample_factor=None, sourcename=None,
         Factor by which to downsample data by averaging.  Useful for
         overresolved data. 
     sourcename: str or list of str
-        Source names to match to the data
+        Source names to match to the data (uses regex)
     telescope: str or list of str
         'XTEL' or 'TELE' parameters: the telescope & instrument
     flag_array: np.ndarray
@@ -1312,7 +1312,7 @@ def read_class(filename, downsample_factor=None, sourcename=None,
     selection = [ii
                  for source in sourcename
                  for tel in telescope
-                 for ii in classobj.select_spectra(source=source,
+                 for ii in classobj.select_spectra(sourcere=source,
                                                    telescope=tel,
                                                    posang=posang)]
 
