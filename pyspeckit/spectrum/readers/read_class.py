@@ -840,9 +840,12 @@ def downsample_1d(myarr,factor,estimator=np.mean, weight=None):
         raise ValueError("Only works on 1d data.  Says so in the title.")
     xs = myarr.size
     crarr = myarr[:xs-(xs % int(factor))]
-    dsarr = estimator(np.concatenate([[crarr[i::factor] for i in
-                                       range(factor)]]),axis=0)
-    if weight is not None:
+    if weight is None:
+        dsarr = estimator(np.concatenate([[crarr[i::factor] for i in
+                                           range(factor)]]),axis=0)
+    else:
+        dsarr = estimator(np.concatenate([[crarr[i::factor]*weight[i::factor] for i in
+                                           range(factor)]]),axis=0)
         warr = estimator(np.concatenate([[weight[i::factor] for i in
                                           range(factor)]]),axis=0)
         dsarr = dsarr/warr
