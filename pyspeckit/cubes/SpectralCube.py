@@ -204,28 +204,9 @@ class Cube(spectrum.Spectrum):
         the first dimension to slice on the xarr and the data
         """
 
-        newcube = copy.copy(self)
-        newcube.cube = newcube.cube.__getitem__(indx)
-        if hasattr(newcube,'errcube'):
-            newcube.errcube = newcube.errcube.__getitem__(indx)
-        newcube.data = newcube.data.__getitem__(indx[0])
-        if newcube.error is not None:
-            newcube.error = newcube.error.__getitem__(indx[0])
-        newcube.xarr = newcube.xarr.__getitem__(indx[0])
-        
-        # this should be done by deepcopy, but deepcopy fails with current pyfits
-        newcube.plotter = copy.copy(self.plotter)
-        newcube.plotter.Spectrum = newcube
-        newcube.specfit = copy.copy(self.specfit)
-        newcube.specfit.Spectrum = newcube
-        newcube.specfit.Spectrum.plotter = newcube.plotter
-        newcube.baseline = copy.copy(self.baseline)
-        newcube.baseline.Spectrum = newcube
-        newcube.baseline.Spectrum.plotter = newcube.plotter
-        newcube.mapplot = copy.copy(self.mapplot)
-        newcube.mapplot.Cube = newcube
-
-        return newcube
+        return Cube(xarr=self.xarr.__getitem__(indx[0]), cube=self.cube[indx],
+                    errorcube=self.errorcube[indx] if self.errorcube else None,
+                    maskmap=self.maskmap)
 
     def set_spectrum(self, x, y):
         self.data = self.cube[:,y,x]

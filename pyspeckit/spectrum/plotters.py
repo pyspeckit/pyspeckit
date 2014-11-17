@@ -25,6 +25,7 @@ you have initiated the fitter.
 'B' - initiate the /b/aseliner (reset the selection too)
 'r' - re-attach matplotlib keys
 'R' - redraw the plot cleanly
+'i' : individual components / show each fitted component
 """
 
 class Plotter(object):
@@ -438,6 +439,8 @@ class Plotter(object):
                 self._reconnect_matplotlib_keys()
             elif event.key == 'R':
                 self()
+            elif event.key == 'i':
+                self.Spectrum.specfit.plot_fit(show_components=True)
 
     def get_two_clicks(self,event):
 

@@ -206,8 +206,8 @@ class MapPlotter(object):
         Record location of downclick
         """
         if event.inaxes:
-            self._clickX = np.round(event.xdata) - 1 - self._origin
-            self._clickY = np.round(event.ydata) - 1 - self._origin
+            self._clickX = np.round(event.xdata) - self._origin
+            self._clickY = np.round(event.ydata) - self._origin
 
     def plot_spectrum(self, event, plot_fit=True):
         """
@@ -224,13 +224,13 @@ class MapPlotter(object):
                 return
             elif event.key is not None:
                 if event.key == 'c':
-                    self._center = (clickX,clickY)
+                    self._center = (clickX-1,clickY-1)
                     self._remove_circle()
                     self._add_click_mark(clickX,clickY,clear=True)
                 elif event.key == 'r':
                     x,y = self._center
                     self._add_circle(x,y,clickX,clickY)
-                    self.circle(x,y,clickX,clickY)
+                    self.circle(x,y,clickX-1,clickY-1)
             elif (hasattr(event,'button') and event.button in (1,2) 
                     and not (self._clickX == clickX and self._clickY == clickY)):
                 if event.button == 1:
@@ -252,14 +252,14 @@ class MapPlotter(object):
                     print "Plotting spectrum from point %i,%i" % (clickX,clickY)
                     self._remove_circle()
                     self._add_click_mark(clickX,clickY,clear=True)
-                    self.Cube.plot_spectrum(clickX,clickY,clear=True)
-                    if plot_fit: self.Cube.plot_fit(clickX, clickY, silent=True)
+                    self.Cube.plot_spectrum(clickX-1,clickY-1,clear=True)
+                    if plot_fit: self.Cube.plot_fit(clickX-1, clickY-1, silent=True)
                 elif event.button==2:
                     clickX,clickY = round(clickX),round(clickY)
                     print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
                     color=self.overplot_colorcycle.next()
                     self._add_click_mark(clickX,clickY,clear=False, color=color)
-                    self.Cube.plot_spectrum(clickX,clickY,clear=False, color=color, linestyle=self.overplot_linestyle)
+                    self.Cube.plot_spectrum(clickX-1,clickY-1,clear=False, color=color, linestyle=self.overplot_linestyle)
                 elif event.button==3:
                     print "Disconnecting GAIA-like tool"
                     self._disconnect()
