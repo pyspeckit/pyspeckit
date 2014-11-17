@@ -23,6 +23,8 @@ you have initiated the fitter.
 'f' - initiate the /f/itter 
 'b' - initiate the /b/aseliner 
 'B' - initiate the /b/aseliner (reset the selection too)
+'r' - re-attach matplotlib keys
+'R' - redraw the plot cleanly
 """
 
 class Plotter(object):
@@ -412,7 +414,7 @@ class Plotter(object):
             if event.key == '?':
                 print interactive_help_message
             elif event.key == 'f':
-                print "\n\nFitter initiated from the interactive plotter.  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
+                print "\n\nFitter initiated from the interactive plotter."#  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
                 self._disconnect_matplotlib_keys()
                 self.Spectrum.specfit(interactive=True)
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
@@ -432,8 +434,10 @@ class Plotter(object):
                 elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
             elif event.key == 'r':
-                print "\n\nReconnected matplotlib shortcut keys."
+                #print "\n\nReconnected matplotlib shortcut keys."
                 self._reconnect_matplotlib_keys()
+            elif event.key == 'R':
+                self()
 
     def get_two_clicks(self,event):
 

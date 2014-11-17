@@ -528,7 +528,7 @@ class GBTSession(object):
         """
         Load a Target...
         """
-        self.targets[target] = GBTTarget(self, target)
+        self.targets[target] = GBTTarget(self, target, **kwargs)
         return self.targets[target]
 
     def reduce_target(self, target, **kwargs):

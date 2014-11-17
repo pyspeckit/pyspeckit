@@ -215,8 +215,8 @@ class MapPlotter(object):
         """
         self.event = event
         if event.inaxes:
-            clickX = np.round(event.xdata) - 1 - self._origin
-            clickY = np.round(event.ydata) - 1 - self._origin
+            clickX = np.round(event.xdata) - self._origin
+            clickY = np.round(event.ydata) - self._origin
         
             # grab toolbar info so that we don't do anything if a tool is selected
             tb = self.canvas.toolbar

@@ -26,7 +26,8 @@ class Registry(object):
 
         self._interactive_help_message_root = """
 
-'?' will print this help message again. The / / keys are mnemonics.
+'?' will print this help message again. The keys denoted by surrounding / / are
+mnemonics.
 1. Left-click or hit 'p' (/p/ick) with the cursor over the plot at both of the
 two desired X-values to select a fitting range.  You can e/x/clude parts of the
 spectrum by hitting 'x' at two positions.  
@@ -36,6 +37,15 @@ approximate half-max point on the curve.
 3. When you're done, right-click or hit 'd' to perform the fit and disconnect
 the mouse and keyboard (/d/isconnect because you're /d/one).  Any time before
 you're /d/one, you can select a different fitter (see below).
+
+To /c/ancel or /c/lear all connections, press 'c'
+
+'?' : get help (this message)
+'c' : cancel / clear
+'p','1' : pick / selection region for fitting
+'m','2' : mark / identify a peak
+'d','3' : done / do the fit, then disconnect the fitter
+'i' : individual components / show each fitted component
 
 You can select different fitters to use with the interactive fitting routine.
 The default is gaussian ('g'), all options are listed below:
@@ -261,6 +271,7 @@ class Specfit(interactive.Interactive):
             self.guesses = []
 
             self.start_interactive(clear_all_connections=clear_all_connections,
+                                   reset_selection=True,
                                    debug=debug, **kwargs)
         elif (((multifit or multifit is None) and
                self.fittype in self.Registry.multifitters)

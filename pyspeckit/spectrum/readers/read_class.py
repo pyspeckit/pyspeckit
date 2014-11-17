@@ -851,6 +851,14 @@ def downsample_1d(myarr,factor,estimator=np.mean, weight=None):
         dsarr = dsarr/warr
     return dsarr
 
+# unit test
+def test_downsample1d():
+    data = np.arange(10)
+    weight = np.ones(10)
+    weight[5]=0
+    assert np.all(downsample_1d(data, 2, weight=weight, estimator=np.mean) ==
+                  np.array([ 0.5,  2.5,  4. ,  6.5,  8.5]))
+
 def read_observation(f, obsid, file_description=None, indices=None,
                      my_memmap=None, memmap=True):
     if isinstance(f, str):
