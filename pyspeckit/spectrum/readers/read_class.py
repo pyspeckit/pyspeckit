@@ -66,7 +66,7 @@ header_id_numbers = {0: 'USER CODE',
                      -3: 'POSITION',
                      -4: 'SPECTRO',
                      -5: 'BASELINE',
-                    # -6: 'HISTORY',
+                     -6: 'HISTORY',
                     # -8: 'SWITCH',
                      -10: 'DRIFT',
                      -14: 'CALIBRATION',
@@ -76,7 +76,7 @@ header_id_lengths = {-2: 9, # may really be 10?
                      -3: 17,
                      -4: 17,
                      -5: None, # variable length
-                     -6: None, # variable length
+                     -6: 3, # variable length
                      -14: 25,
                     }
 
