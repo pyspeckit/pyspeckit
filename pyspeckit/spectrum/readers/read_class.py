@@ -1270,7 +1270,7 @@ class ClassObject(object):
                                       header=clean_header(header))
                    for data,header in spdata]
 
-        return pyspeckit.Spectra(spectra)
+        return spectra
 
 
     def read_observations(self, observation_indices, progressbar=True):
