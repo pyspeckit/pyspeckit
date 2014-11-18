@@ -142,7 +142,7 @@ class Plotter(object):
                 self.figure = matplotlib.pyplot.figure()
 
         if not matplotlib.pyplot.fignum_exists(self.figure.number):
-            self.figure = pl.figure(self.figure.number)
+            self.figure = matplotlib.pyplot.figure(self.figure.number)
             self.axis = self.figure.gca()
 
         # always re-connect the interactive keys to avoid frustration...
