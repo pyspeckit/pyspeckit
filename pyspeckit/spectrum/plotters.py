@@ -157,6 +157,11 @@ class Plotter(object):
         elif self.axis is None:
             self.axis = self.figure.gca()
 
+        if self.axis is not None and self.axis not in self.figure.axes:
+            # if you've cleared the axis, but the figure is still open, you
+            # need a new axis
+            self.figure.add_axes(self.axis)
+
 
         if clear and self.axis is not None: self.axis.clear()
 
@@ -324,16 +329,26 @@ class Plotter(object):
             if ymin is not None: self.ymin = ymin
             elif self.ymin is None:
                 try:
-                    self.ymin = np.nanmin(self.Spectrum.data[xpixmin:xpixmax])*ypeakscale + 0.0
+                    yminval = np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
                 except TypeError:
                     # this is assumed to be a Masked Array error
-                    self.ymin = self.Spectrum.data[xpixmin:xpixmax].min()*ypeakscale + 0.0
+                    self.ymin = self.Spectrum.data[xpixmin:xpixmax].min()
+                # Increase the range fractionally.  This means dividing a positive #, multiplying a negative #
+                if yminval < 0:
+                    self.ymin = yminval*ypeakscale + 0.0
+                else:
+                    self.ymin = yminval/ypeakscale + 0.0
+
             if ymax is not None: self.ymax = ymax
             elif self.ymax is None:
                 try:
-                    self.ymax=(np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin) * ypeakscale + self.ymin
+                    ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin)
                 except TypeError:
-                    self.ymax=((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin) * ypeakscale + self.ymin
+                    ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin)
+                if ymaxval > 0:
+                    self.ymax = ymaxval * ypeakscale + self.ymin
+                else:
+                    self.ymax = ymaxval / ypeakscale + self.ymin
 
             self.ymin += self.offset
             self.ymax += self.offset
