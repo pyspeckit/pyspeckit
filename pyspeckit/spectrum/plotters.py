@@ -332,12 +332,12 @@ class Plotter(object):
                     yminval = np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
                 except TypeError:
                     # this is assumed to be a Masked Array error
-                    self.ymin = self.Spectrum.data[xpixmin:xpixmax].min()
+                    yminval = self.Spectrum.data[xpixmin:xpixmax].min()
                 # Increase the range fractionally.  This means dividing a positive #, multiplying a negative #
                 if yminval < 0:
-                    self.ymin = yminval*ypeakscale + 0.0
+                    self.ymin = float(yminval)*float(ypeakscale)
                 else:
-                    self.ymin = yminval/ypeakscale + 0.0
+                    self.ymin = float(yminval)/float(ypeakscale)
 
             if ymax is not None: self.ymax = ymax
             elif self.ymax is None:
@@ -346,9 +346,9 @@ class Plotter(object):
                 except TypeError:
                     ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin)
                 if ymaxval > 0:
-                    self.ymax = ymaxval * ypeakscale + self.ymin
+                    self.ymax = float(ymaxval) * float(ypeakscale) + self.ymin
                 else:
-                    self.ymax = ymaxval / ypeakscale + self.ymin
+                    self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin
 
             self.ymin += self.offset
             self.ymax += self.offset
