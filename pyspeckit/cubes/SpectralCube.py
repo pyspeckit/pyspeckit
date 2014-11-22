@@ -37,7 +37,6 @@ from pyspeckit.spectrum import history
 from astropy.io import fits
 import cubes
 from astropy import log
-#from spectral_cube import SpectralCube as SpectralCubeClass
 
 class Cube(spectrum.Spectrum):
 
@@ -67,12 +66,24 @@ class Cube(spectrum.Spectrum):
                 log.exception(str(inst))
                 raise inst
         else:
-            if hasattr(cube, 'unit'):
+            if hasattr(cube, 'spectral_axis'):
+                # Load from a SpectralCube instance
+                self.cube = cube.hdu.data
+                self.unit = cube.unit
+                if xarr is None:
+                    xarr = cube.spectral_axis
+                if header is None:
+                    header = cube.header
+            elif hasattr(cube, 'unit'):
                 self.cube = cube.value
                 self.unit = cube.unit
             else:
                 self.cube = cube
-            if hasattr(errorcube, 'unit'):
+
+            if hasattr(errorcube, 'spectral_axis'):
+                # Load from a SpectralCube instance
+                self.errorcube = errorcube.hdu.data
+            elif hasattr(errorcube, 'unit'):
                 self.errorcube = errorcube.value
             else:
                 self.errorcube = errorcube
