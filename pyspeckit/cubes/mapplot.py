@@ -243,20 +243,20 @@ class MapPlotter(object):
                     linestyle = self.overplot_linestyle
                     clear=False
                 rad = ( (self._clickX-clickX)**2 + (self._clickY-clickY)**2 )**0.5
-                print "Plotting circle from point %i,%i to %i,%i (r=%f)" % (self._clickX,self._clickY,clickX,clickY,rad)
+                print "Plotting circle from point %i,%i to %i,%i (r=%f)" % (self._clickX-1,self._clickY-1,clickX-1,clickY-1,rad)
                 self._add_circle(self._clickX,self._clickY,clickX,clickY)
-                self.circle(self._clickX,self._clickY,clickX,clickY,clear=clear,linestyle=linestyle,color=color)
+                self.circle(self._clickX-1,self._clickY-1,clickX-1,clickY-1,clear=clear,linestyle=linestyle,color=color)
             elif hasattr(event,'button') and event.button is not None:
                 if event.button==1:
                     clickX,clickY = round(clickX),round(clickY)
-                    print "Plotting spectrum from point %i,%i" % (clickX,clickY)
+                    print "Plotting spectrum from point %i,%i" % (clickX-1,clickY-1)
                     self._remove_circle()
                     self._add_click_mark(clickX,clickY,clear=True)
                     self.Cube.plot_spectrum(clickX-1,clickY-1,clear=True)
                     if plot_fit: self.Cube.plot_fit(clickX-1, clickY-1, silent=True)
                 elif event.button==2:
                     clickX,clickY = round(clickX),round(clickY)
-                    print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
+                    print "OverPlotting spectrum from point %i,%i" % (clickX-1,clickY-1)
                     color=self.overplot_colorcycle.next()
                     self._add_click_mark(clickX,clickY,clear=False, color=color)
                     self.Cube.plot_spectrum(clickX-1,clickY-1,clear=False, color=color, linestyle=self.overplot_linestyle)

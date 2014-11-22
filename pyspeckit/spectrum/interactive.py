@@ -434,9 +434,10 @@ class Interactive(object):
         if debug or self._debug: print "Exclude: ",exclude
         if exclude is not None and len(exclude) % 2 == 0:
             for x1,x2 in zip(exclude[::2],exclude[1::2]):
-                x1 = self.Spectrum.xarr.x_to_pix(x1)
-                # WCS units should be end-inclusive
-                x2 = self.Spectrum.xarr.x_to_pix(x2)+1
+                if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
+                    x1 = self.Spectrum.xarr.x_to_pix(x1)
+                    # WCS units should be end-inclusive
+                    x2 = self.Spectrum.xarr.x_to_pix(x2)+1
                 self.includemask[x1:x2] = False
 
         if highlight:

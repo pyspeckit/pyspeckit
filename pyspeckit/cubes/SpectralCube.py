@@ -462,7 +462,12 @@ class Cube(spectrum.Spectrum):
             Work outward from that starting point.  
         guesses: tuple or ndarray[naxis=3]
             Either a tuple/list of guesses with len(guesses) = npars or a cube
-            of guesses with shape [npars, ny, nx]
+            of guesses with shape [npars, ny, nx].
+            NOT TRUE, but a good idea in principle:
+            You can also use a dictionary of the form {(y,x): [list of length
+            npars]}, where (y,x) specifies a pixel location. If the dictionary
+            method is used, npars must be specified and it sets the length of
+            the first parameter axis
         signal_cut: float
             Minimum signal-to-noise ratio to "cut" on (i.e., if peak in a given
             spectrum has s/n less than this value, ignore it)
@@ -591,6 +596,9 @@ class Cube(spectrum.Spectrum):
             elif hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
                 if verbose_level > 1 and ii == 0: log.info("Using input guess cube")
                 gg = guesses[:,y,x]
+            elif isinstance(guesses, dict):
+                if verbose_level > 1 and ii == 0: log.info("Using input guess dict")
+                gg = guesses[(y,x)]
             else:
                 if verbose_level > 1 and ii == 0: log.info("Using input guess")
                 gg = guesses
