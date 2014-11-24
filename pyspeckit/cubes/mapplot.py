@@ -231,6 +231,10 @@ class MapPlotter(object):
                     x,y = self._center
                     self._add_circle(x,y,clickX,clickY)
                     self.circle(x,y,clickX-1,clickY-1)
+                elif event.key in ('1','2'):
+                    event.button = int(event.key)
+                    event.key = None
+                    self.plot_spectrum(event)
             elif (hasattr(event,'button') and event.button in (1,2) 
                     and not (self._clickX == clickX and self._clickY == clickY)):
                 if event.button == 1:
