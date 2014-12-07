@@ -1,5 +1,6 @@
 import numpy as np
-import itertools, cosmology
+import itertools
+from . import cosmology
 from collections import OrderedDict
 
 """
