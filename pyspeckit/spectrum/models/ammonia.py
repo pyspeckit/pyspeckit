@@ -104,29 +104,62 @@ tau_wts_dict = {
 
 def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
-            thin=False, verbose=False, return_components=False, debug=False ):
+            thin=False, verbose=False, return_components=False, debug=False):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
     gaussian parameters
 
-    ntot can be specified as a column density (e.g., 10^15) or a log-column-density (e.g., 15)
+    Parameters
+    ----------
+    xarr: `pyspeckit.spectrum.units.SpectroscopicAxis`
+        Array of wavelength/frequency values
+    ntot: float
+        can be specified as a column density (e.g., 10^15) or a
+        log-column-density (e.g., 15)
+    tex: float or None
+        Excitation temperature. Assumed LTE if unspecified (``None``), if
+        tex>tkin, or if ``thin`` is specified.
+    ntot: float
+        Total column density of NH3.  Can be specified as a float in the range
+        5-25 or an exponential (1e5-1e25)
+    width: float
+        Line width in km/s
+    xoff_v: float
+        Line offset in km/s
+    fortho: float
+        Fraction of NH3 molecules in ortho state.  Default assumes all para
+        (fortho=0).
+    tau: None or float
+        If tau (optical depth in the 1-1 line) is specified, ntot is NOT fit
+        but is set to a fixed value.  The optical depths of the other lines are
+        fixed relative to tau_oneone
+    fillingfraction: None or float
+        fillingfraction is an arbitrary scaling factor to apply to the model
+    return_tau: bool
+        Return a dictionary of the optical depths in each line instead of a
+        synthetic spectrum
+    thin: bool
+        uses a different parametetrization and requires only the optical depth,
+        width, offset, and tkin to be specified.  In the 'thin' approximation,
+        tex is not used in computation of the partition function - LTE is
+        implicitly assumed
+    return_components: bool
+        Return a list of arrays, one for each hyperfine component, instead of
+        just one array
+    verbose: bool
+        More messages
+    debug: bool
+        For debugging.
 
-    tex can be specified or can be assumed LTE if unspecified, if tex>tkin, or if "thin"
-        is specified
-
-    "thin" uses a different parametetrization and requires only the optical depth, width, offset,
-        and tkin to be specified.  In the 'thin' approximation, tex is not used in computation of
-        the partition function - LTE is implicitly assumed
-
-    If tau is specified, ntot is NOT fit but is set to a fixed value
-    fillingfraction is an arbitrary scaling factor to apply to the model
-    fortho is the ortho/(ortho+para) fraction.  The default is to assume all ortho.
-    xoff_v is the velocity offset in km/s 
-
-    tau refers to the optical depth of the 1-1 line.  The optical depths of the
-    other lines are fixed relative to tau_oneone
-
-    (not implemented) if tau is specified, ntot is ignored
+    Returns
+    -------
+    spectrum: `numpy.ndarray`
+        Synthetic spectrum with same shape as ``xarr``
+    component_list: list
+        List of `numpy.ndarray`'s, one for each hyperfine component
+    tau_dict: dict
+        Dictionary of optical depth values for the various lines
+        (if ``return_tau`` is set)
     """
 
     # Convert X-units to frequency in GHz
@@ -202,9 +235,9 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
         comment each step carefully.  
         """
         Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
-            (Crot-Brot)*Jpara**2)/(kb*tkin))
+                                       (Crot-Brot)*Jpara**2)/(kb*tkin))
         Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
-            (Crot-Brot)*Jortho**2)/(kb*tkin))
+                                           (Crot-Brot)*Jortho**2)/(kb*tkin))
         for linename in line_names:
             if ortho_dict[linename]:
                 orthoparafrac = fortho
@@ -216,11 +249,20 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
                 Z = Zpara
                 count = para_count # need to treat partition function separately
                 para_count += 1
-            tau_dict[linename] = (ntot * orthoparafrac * Z[count]/(Z.sum()) / ( 1
-                + np.exp(-h*freq_dict[linename]/(kb*tkin) )) * ccms**2 /
-                (8*np.pi*freq_dict[linename]**2) * aval_dict[linename]*
-                (1-np.exp(-h*freq_dict[linename]/(kb*tex))) /
-                (width/ckms*freq_dict[linename]*np.sqrt(2*np.pi)) )
+
+            # short variable names for readability
+            frq = freqdict[linename]
+            partition = Z[count]
+            aval = aval_dict[linename]
+
+            # Total population of the higher energy inversion transition
+            population_upperstate = ntot * orthoparafrac * partition/(Z.sum())
+
+            tau_dict[linename] = (population_upperstate /
+                                  (1. + np.exp(-h*frq/(kb*tkin) ))*ccms**2 /
+                                  (8*np.pi*frq**2) * aval *
+                                  (1-np.exp(-h*frq/(kb*tex))) /
+                                  (width/ckms*frq*np.sqrt(2*np.pi)) )
 
     # allow tau(11) to be specified instead of ntot
     # in the thin case, this is not needed: ntot plays no role

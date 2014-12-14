@@ -231,6 +231,12 @@ class MapPlotter(object):
                     x,y = self._center
                     self._add_circle(x,y,clickX,clickY)
                     self.circle(x,y,clickX-1,clickY-1)
+                elif event.key == 'o':
+                    clickX,clickY = round(clickX),round(clickY)
+                    print "OverPlotting spectrum from point %i,%i" % (clickX-1,clickY-1)
+                    color=self.overplot_colorcycle.next()
+                    self._add_click_mark(clickX,clickY,clear=False, color=color)
+                    self.Cube.plot_spectrum(clickX-1,clickY-1,clear=False, color=color, linestyle=self.overplot_linestyle)
                 elif event.key in ('1','2'):
                     event.button = int(event.key)
                     event.key = None
