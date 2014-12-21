@@ -2,12 +2,29 @@ from ..interpolation import interp,_interp
 import numpy as np
 import model
 
-def spectral_template_generator(template_spectrum, xshift_units='km/s'):
+def spectral_template_generator(template_spectrum, xshift_units='km/s', left=0,
+                                right=0):
     """
     Given a spectral_template, return a model function with scale and shift as
     free parameters.
+
+    Parameters
+    ----------
+    template_spectrum: `pyspeckit.spectrum.classes.Spectrum`
+        The template spectrum to fit
+    xshift_units: str
+        The units of the shift parameter
+    left/right: float
+        The left and right edge parameters used for extrapolating outside the
+        template if the template is smaller than the input spectrum.  These
+        cannot be NaN.
+
+    Returns
+    -------
+    spectral_template: function
+        The model function that interpolates the template onto the given X-axis
     """
-    def spectral_template(xarr,  scale, xshift, xshift_units=xshift_units):
+    def spectral_template(xarr, scale, xshift, xshift_units=xshift_units):
         """
         Given a template Spectrum (which should be a Spectrum instance),
         scale & shift it
@@ -15,8 +32,10 @@ def spectral_template_generator(template_spectrum, xshift_units='km/s'):
         shift = xarr.x_to_coord(xshift, xshift_units)
         model = scale * _interp(xarr,
                                 template_spectrum.xarr.as_unit(xarr.units)+shift,
-                                template_spectrum.data, left=np.nan,
-                                right=np.nan)
+                                template_spectrum.data,
+                                left=left,
+                                right=right,
+                               )
         
         return model
 
@@ -39,21 +58,22 @@ def template_fitter(template_spectrum, xshift_units='km/s'):
     --------
     >>> template = pyspeckit.Spectrum("template_spectrum.fits")
     >>> dataspec = pyspeckit.Spectrum("DataSpectrum.fits")
-    >>> template_fitter = pyspeckit.models.template_fitter(template,xshift_units='angstroms')
-    >>> dataspec.Registry.add_fitter('template',template_fitter,2,multisingle='multi')
+    >>> template_fitter = pyspeckit.models.template_fitter(template,
+    ...                                                    xshift_units='angstroms')
+    >>> dataspec.Registry.add_fitter('template',template_fitter, 2,
+    ...                              multisingle='multi')
     >>> dataspec.specfit(fittype='template',guesses=[1,0])
     >>> print dataspec.specfit.parinfo
     """
 
-    modelfunc = spectral_template_generator(template_spectrum, xshift_units=xshift_units)
+    modelfunc = spectral_template_generator(template_spectrum,
+                                            xshift_units=xshift_units)
 
-    myclass =  model.SpectralModel(modelfunc, 2,
-            parnames=['scale','shift'], 
-            parlimited=[(True,False),(False,False)], 
-            parlimits=[(0,0), (0,0)],
-            shortvarnames=('A',r'\Delta x'),
-            centroid_par='shift',
-            )
+    myclass =  model.SpectralModel(modelfunc, 2, parnames=['scale','shift'],
+                                   parlimited=[(True,False),(False,False)],
+                                   parlimits=[(0,0), (0,0)],
+                                   shortvarnames=('A',r'\Delta x'),
+                                   centroid_par='shift',)
     myclass.__name__ = "spectral_template"
     
     return myclass

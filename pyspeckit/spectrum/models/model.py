@@ -30,14 +30,16 @@ class SpectralModel(fitter.SimpleFitter):
     """
 
     def __init__(self, modelfunc, npars, 
-            shortvarnames=("A","\\Delta x","\\sigma"), multisingle='multi',
-            fitunits=None,
-            centroid_par=None,
-            fwhm_func=None,
-            fwhm_pars=None,
-            integral_func=None,
-            use_lmfit=False, **kwargs):
-        """Spectral Model Initialization
+                 shortvarnames=("A","\\Delta x","\\sigma"),
+                 multisingle='multi',
+                 fitunits=None,
+                 centroid_par=None,
+                 fwhm_func=None,
+                 fwhm_pars=None,
+                 integral_func=None,
+                 use_lmfit=False, **kwargs):
+        """
+        Spectral Model Initialization
 
         Create a Spectral Model class for data fitting
 
@@ -113,17 +115,13 @@ class SpectralModel(fitter.SimpleFitter):
         self.integral_func = integral_func
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
-            parlimits=None, parlimited=None, parfixed=None, parerror=None,
-            partied=None, fitunits=None, parsteps=None, npeaks=1,
-            parinfo=None,
-            names=None, values=None, limits=None,
-            limited=None, fixed=None, error=None, tied=None, steps=None,
-            negamp=None,
-            limitedmin=None, limitedmax=None,
-            minpars=None, maxpars=None,
-            vheight=False,
-            debug=False,
-            **kwargs):
+                      parlimits=None, parlimited=None, parfixed=None,
+                      parerror=None, partied=None, fitunits=None,
+                      parsteps=None, npeaks=1, parinfo=None, names=None,
+                      values=None, limits=None, limited=None, fixed=None,
+                      error=None, tied=None, steps=None, negamp=None,
+                      limitedmin=None, limitedmax=None, minpars=None,
+                      maxpars=None, vheight=False, debug=False, **kwargs):
         """
         Generate a `ParinfoList` that matches the inputs
 
@@ -300,9 +298,13 @@ class SpectralModel(fitter.SimpleFitter):
         Wrapper function to compute the fit residuals in an mpfit-friendly format
         """
         if err is None:
-            def f(p,fjac=None): return [0,(y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))]
+            def f(p,fjac=None):
+                residuals = (y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))
+                return [0,residuals]
         else:
-            def f(p,fjac=None): return [0,(y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))/err]
+            def f(p,fjac=None):
+                residuals = (y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))/err
+                return [0,residuals]
         return f
 
     def __call__(self, *args, **kwargs):
