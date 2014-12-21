@@ -251,7 +251,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
                 para_count += 1
 
             # short variable names for readability
-            frq = freqdict[linename]
+            frq = freq_dict[linename]
             partition = Z[count]
             aval = aval_dict[linename]
 
