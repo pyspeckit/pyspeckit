@@ -12,11 +12,15 @@ def spectral_template_generator(template_spectrum, xshift_units='km/s'):
         Given a template Spectrum (which should be a Spectrum instance),
         scale & shift it
         """
-        shift = xarr.x_to_units(xshift, xshift_units)
-        model = _interp(xarr, template_spectrum.xarr.as_unit(xarr.units)+shift,
-                template_spectrum.data, left=np.nan, right=np.nan) * scale
+        shift = xarr.x_to_coord(xshift, xshift_units)
+        model = scale * _interp(xarr,
+                                template_spectrum.xarr.as_unit(xarr.units)+shift,
+                                template_spectrum.data, left=np.nan,
+                                right=np.nan)
         
         return model
+
+    return spectral_template
 
 def template_fitter(template_spectrum, xshift_units='km/s'):
     """
