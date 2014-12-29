@@ -255,6 +255,11 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
             partition = Z[count]
             aval = aval_dict[linename]
 
+            # Friesen 2009 eqn A4 points out that the partition function actually says
+            # how many molecules are in the NH3(1-1) state, both upper *and* lower.
+            # population_upperlower = ntot * orthoparafrac * partition/(Z.sum())
+            # population_upperstate = population_upperlower / (1+np.exp(h*frq/(kb*tex)))
+
             # Total population of the higher energy inversion transition
             population_upperstate = ntot * orthoparafrac * partition/(Z.sum())
 
