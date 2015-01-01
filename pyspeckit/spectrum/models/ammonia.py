@@ -259,6 +259,11 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
             # how many molecules are in the NH3(1-1) state, both upper *and* lower.
             # population_upperlower = ntot * orthoparafrac * partition/(Z.sum())
             # population_upperstate = population_upperlower / (1+np.exp(h*frq/(kb*tex)))
+            #
+            # Note Jan 1, 2015: This is accounted for in the eqn below.  The
+            # only difference is that I have used Tkin where Friesen et al 2009
+            # use Tex.  Since Tex describes which states are populated, that may
+            # be the correct one to use.
 
             # Total population of the higher energy inversion transition
             population_upperstate = ntot * orthoparafrac * partition/(Z.sum())
@@ -292,9 +297,9 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
   
         # tau array
         tauprof = np.zeros(len(xarr))
-        for kk,no in enumerate(nuoff):
+        for kk,nuo in enumerate(nuoff):
             tauprof += (tau_dict[linename] * tau_wts[kk] *
-                    np.exp(-(xarr+no-lines[kk])**2 / (2.0*nuwidth[kk]**2)) *
+                    np.exp(-(xarr+nuo-lines[kk])**2 / (2.0*nuwidth[kk]**2)) *
                     fillingfraction)
             components.append( tauprof )
   
