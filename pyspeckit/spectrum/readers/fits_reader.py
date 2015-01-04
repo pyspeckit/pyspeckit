@@ -7,7 +7,6 @@ import numpy.ma as ma
 import numpy as np
 from . import make_axis
 import operator
-from __future__ import division
 from pyspeckit.specwarnings import warn
 
 def open_1d_fits(filename, hdu=0, **kwargs):
