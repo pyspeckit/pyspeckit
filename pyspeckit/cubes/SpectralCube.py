@@ -632,7 +632,7 @@ class Cube(spectrum.Spectrum):
                 if ii % (min(10**(3-verbose_level),1)) == 0:
                     snmsg = " s/n=%5.1f" % (max_sn) if max_sn is not None else ""
                     npix = len(valid_pixels)
-                    pct = 100 * self._counter/float(npix)
+                    pct = 100 * self._counter/float(npix) * multicore
                     log.info("Finished fit %6i of %6i at (%4i,%4i)%s. Elapsed time is %0.1f seconds.  %%%01.f" %
                              (self._counter, npix, x, y, snmsg, time.time()-t0, pct))
 

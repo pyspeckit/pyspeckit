@@ -85,7 +85,7 @@ class MapPlotter(object):
         return self.mapplot(**kwargs)
 
     def mapplot(self, convention='calabretta', colorbar=True, useaplpy=True,
-            vmin=None, vmax=None, **kwargs):
+                vmin=None, vmax=None, cmap=None, plotkwargs={}, **kwargs):
         """
         Plot up a map based on an input data cube.
 
@@ -118,7 +118,7 @@ class MapPlotter(object):
         if icanhasaplpy and useaplpy:
             self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=self.header)
             self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure,convention=convention)
-            self.FITSFigure.show_colorscale(vmin=vmin, vmax=vmax, **kwargs)
+            self.FITSFigure.show_colorscale(vmin=vmin, vmax=vmax, cmap=cmap, **plotkwargs)
             self.axis = self.FITSFigure._ax1
             if colorbar:
                 try:
@@ -132,7 +132,7 @@ class MapPlotter(object):
             if hasattr(self,'colorbar') and self.colorbar is not None:
                 if self.colorbar.ax in self.axis.figure.axes:
                     self.axis.figure.delaxes(self.colorbar.ax)
-            self.axis.imshow(self.plane, vmin=vmin, vmax=vmax, **kwargs)
+            self.axis.imshow(self.plane, vmin=vmin, vmax=vmax, cmap=cmap, **plotkwargs)
             if colorbar: 
                 try:
                     self.colorbar = matplotlib.pyplot.colorbar(self.axis.images[0])
