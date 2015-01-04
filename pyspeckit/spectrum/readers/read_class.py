@@ -424,7 +424,7 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
         f.seek(position)
     if entry_number is not None:
         indpos = _find_index(entry_number, file_description, return_position=True)
-        f.seek(indpos)
+        f.seek(int(indpos))
 
     x0 = f.tell()
 
@@ -546,7 +546,7 @@ def _read_header(f, type=0, position=None):
 
 def _read_first_record(f):
     f.seek(0)
-    filetype = f.read(4)
+    filetype = f.read(4).decode("utf-8")
     if fileversion_dict[filetype] == 'v1':
         return _read_first_record_v1(f)
     else:
