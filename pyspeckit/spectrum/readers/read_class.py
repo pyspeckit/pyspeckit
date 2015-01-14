@@ -514,7 +514,10 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
         index['SOURC'] = index['XSOURC'] = index['CSOUR']
         index['LINE'] = index['XLINE'] = index['CLINE']
         index['XKIND'] = index['KIND']
-        index['DOBS'] = index['XDOBS'] = index['CDOBS']
+        try:
+            index['DOBS'] = index['XDOBS'] = index['CDOBS']
+        except KeyError:
+            index['CDOBS'] = index['XDOBS'] = index['DOBS']
 
     else:
         raise NotImplementedError("Filetype {0} not implemented.".format(filetype))
@@ -1054,14 +1057,17 @@ class ClassObject(object):
         print("{entries:15s} {SOURC:12s} {XTEL:12s} {SCAN:>8s} {SUBSCAN:>8s} "
               "[ {RAmin:>12s}, {RAmax:>12s} ] "
               "[ {DECmin:>12s}, {DECmax:>12s} ] "
-              "{angle:>12s} {SCANPOSA:>12s} {OTFSCAN:>8s}"
+              "{angle:>12s} {SCANPOSA:>12s} {OTFSCAN:>8s} {TSYS:>8s} {UTD:>12s}"
               .format(entries='Scans', SOURC='Source', XTEL='Telescope',
                       SCAN='Scan', SUBSCAN='Subscan',
                       RAmin='min(RA)', RAmax='max(RA)',
                       DECmin='min(DEC)', DECmax='max(DEC)',
                       SCANPOSA='Scan PA',
-                      angle='Angle', OTFSCAN='OTFscan'),
+                      angle='Angle', OTFSCAN='OTFscan',
+                      TSYS='TSYS', UTD='UTD'),
              file=out)
+
+        data_rows = []
 
         for ii,row in enumerate(self.headers):
             if (row['SCAN'] == scan
@@ -1095,19 +1101,25 @@ class ClassObject(object):
                 if telescope is not None:
                     ok = ok and re.search((telescope), prevrow['XTEL'])
                 if ok:
+                    data = dict(RAmin=minoff1*180/np.pi*3600,
+                                RAmax=maxoff1*180/np.pi*3600,
+                                DECmin=minoff2*180/np.pi*3600,
+                                DECmax=maxoff2*180/np.pi*3600,
+                                angle=(ttlangle/nangle)*180/np.pi if nangle>0 else 0,
+                                e0=minid,
+                                e1=ii-1,
+                                #TSYS=row['TSYS'] if 'TSYS' in row else '--',
+                                UTD=row['DOBS']+row['UT'] if 'UT' in row else -99,
+                                **prevrow)
                     print("{e0:7d}-{e1:7d} {SOURC:12s} {XTEL:12s} {SCAN:8d} {SUBSCAN:8d} "
                           "[ {RAmin:12f}, {RAmax:12f} ] "
                           "[ {DECmin:12f}, {DECmax:12f} ] "
-                          "{angle:12.1f} {SCANPOSA:12.1f} {OTFSCAN:8d}".
-                          format(RAmin=minoff1*180/np.pi*3600,
-                                 RAmax=maxoff1*180/np.pi*3600,
-                                 DECmin=minoff2*180/np.pi*3600,
-                                 DECmax=maxoff2*180/np.pi*3600,
-                                 angle=(ttlangle/nangle)*180/np.pi if nangle>0 else 0,
-                                 e0=minid,
-                                 e1=ii-1,
-                                 **prevrow),
+                          "{angle:12.1f} {SCANPOSA:12.1f} {OTFSCAN:8d}"
+                          " {TSYS:>8.1f} {UTD:12f}".
+                          format(**data),
                          file=out)
+
+                    data_rows.append(data)
 
                 minoff1,maxoff1 = np.inf,-np.inf
                 minoff2,maxoff2 = np.inf,-np.inf
@@ -1116,6 +1128,8 @@ class ClassObject(object):
                 sourc = row['SOURC']
                 #tel = row['XTEL']
                 minid = ii
+
+        return data
 
     @property
     def tels(self):
@@ -1258,8 +1272,8 @@ class ClassObject(object):
         if not any(selected_indices):
             raise ValueError("Selection yielded empty.")
 
-        return self.read_observations(selected_indices,
-                                      progressbar=progressbar)
+        self._spectra.load(selected_indices, progressbar=progressbar)
+        return [self._spectra[ii] for ii in selected_indices]
 
     def get_pyspeckit_spectra(self, progressbar=True, **kwargs):
 
@@ -1274,16 +1288,8 @@ class ClassObject(object):
 
 
     def read_observations(self, observation_indices, progressbar=True):
-        if not progressbar:
-            pb = lambda x: x
-        else:
-            pb = ProgressBar
-
-        return [read_observation(self._file, ii,
-                                 file_description=self.file_description,
-                                 indices=self.allind, my_memmap=self._data,
-                                 memmap=True)
-                for ii in pb(observation_indices)]
+        self._spectra.load(observation_indices, progressbar=progressbar)
+        return [self._spectra[ii] for ii in selected_indices]
 
 
 @print_timing
@@ -1476,8 +1482,11 @@ class LazyItem(object):
                                       (float(self.nloaded)/self.nind)*100))
 
     def load_all(self, progressbar=True):
-        pb = ProgressBar(self.nind)
-        for k in xrange(self.nind):
+        self.load(range(self.nind))
+
+    def load(self, indices, progressbar=True):
+        pb = ProgressBar(max(indices))
+        for k in indices:
             self[k]
             pb.update(k)
 
