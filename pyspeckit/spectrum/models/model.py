@@ -372,6 +372,17 @@ class SpectralModel(fitter.SimpleFitter):
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
             err[np.isnan(data) + np.isinf(data)] = np.inf
             data[np.isnan(data) + np.isinf(data)] = 0
+        if np.any(np.isnan(err)):
+            raise ValueError("One or more of the error values is NaN."
+                             "  This is not allowed.  Errors can be infinite "
+                             "(which is equivalent to giving zero weight to "
+                             "a data point), but otherwise they must be positive "
+                             "floats.")
+        elif np.any(err<0):
+            raise ValueError("At least one error value is negative, which is "
+                             "not allowed as negative errors are not "
+                             "meaningful in the optimization process.")
+
 
         if parinfo is None:
             parinfo, kwargs = self._make_parinfo(debug=debug, **kwargs)
@@ -463,6 +474,17 @@ class SpectralModel(fitter.SimpleFitter):
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
             err[np.isnan(data) + np.isinf(data)] = np.inf
             data[np.isnan(data) + np.isinf(data)] = 0
+
+        if np.any(np.isnan(err)):
+            raise ValueError("One or more of the error values is NaN."
+                             "  This is not allowed.  Errors can be infinite "
+                             "(which is equivalent to giving zero weight to "
+                             "a data point), but otherwise they must be positive "
+                             "floats.")
+        elif np.any(err<0):
+            raise ValueError("At least one error value is negative, which is "
+                             "not allowed as negative errors are not "
+                             "meaningful in the optimization process.")
 
         if debug:
             for p in parinfo: print p
