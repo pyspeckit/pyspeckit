@@ -22,7 +22,7 @@ def gaussian(x,A,dx,w, return_components=False, normalized=False,
     Returns a 1-dimensional gaussian of form
     A*numpy.exp(-(x-dx)**2/(2*w**2))
 
-    Area is sqrt(2*pi)*sigma^2*amplitude - i.e., this is NOT a normalized
+    Area is sqrt(2*pi*sigma^2)*amplitude - i.e., this is NOT a normalized
     gaussian, unless normalized=True in which case A = Area
     
     Parameters
