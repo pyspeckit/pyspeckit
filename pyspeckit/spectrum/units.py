@@ -276,7 +276,7 @@ def generate_xarr(input_array, unit=None):
     unit is ignored unless the input is a simple ndarray
     """
     from astropy import units as u
-    if isinstance(input_array, u.Quantity):
+    if hasattr(input_array, 'value') and hasattr(input_array, 'unit'):
         return SpectroscopicAxis(input_array.value,
                                  unit=input_array.unit.to_string())
     elif isinstance(input_array, SpectroscopicAxis):
