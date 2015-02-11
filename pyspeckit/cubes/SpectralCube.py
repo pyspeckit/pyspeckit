@@ -407,7 +407,13 @@ class Cube(spectrum.Spectrum):
                                       lat=aperture[1],
                                       system=self.system,
                                       proj=self.header['CTYPE1'][-3:])
-        header['APRADIUS'] = aperture[2]
+        if len(aperture) == 3:
+            header['APRADIUS'] = aperture[2]
+        if len(aperture) == 5:
+            header['APMAJ'] = aperture[2]
+            header['APMIN'] = aperture[3]
+            header['APREFF'] = (aperture[2]*aperture[3])**0.5
+            header['APPA'] = aperture[4]
 
         sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
                                 data=data,
