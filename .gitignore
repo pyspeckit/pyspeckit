@@ -14,6 +14,7 @@ __pycache__
 */cython_version.py
 htmlcov
 .coverage
+MANIFEST
 
 # Sphinx
 docs/api
@@ -23,6 +24,9 @@ docs/_build
 .project
 .pydevproject
 .settings
+
+# Pycharm editor project files
+.idea
 
 # Packages/installer info
 *.egg
