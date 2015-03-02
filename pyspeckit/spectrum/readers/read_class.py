@@ -1223,7 +1223,16 @@ class ClassObject(object):
                        #reduced=None,
                        frequency=None,
                        section=None,
-                       user=None):
+                       user=None,
+                       include_old_versions=False,
+                      ):
+        """
+        Parameters
+        ----------
+        include_old_versions: bool
+            Include spectra with XVER numbers <0?  These are CLASS spectra that
+            have been "overwritten" (re-reduced?)
+        """
         if entry is not None and len(entry)==2:
             return irange(entry[0], entry[1])
 
@@ -1260,7 +1269,8 @@ class ClassObject(object):
                (h['COMPPOSA']%180 > posang[0] and
                 h['COMPPOSA']%180 < posang[1]
                 if posang is not None and len(posang)==2
-                else True)
+                else True) and
+               (h['XVER'] > 0 if not include_old_versions else True)
                for h in self.headers
               ]
 
@@ -1485,10 +1495,12 @@ class LazyItem(object):
         self.load(range(self.nind))
 
     def load(self, indices, progressbar=True):
-        pb = ProgressBar(max(indices))
+        pb = ProgressBar(len(indices))
+        counter = 0
         for k in indices:
             self[k]
-            pb.update(k)
+            counter += 1
+            pb.update(counter)
 
     def __getitem__(self, key):
         if key in self.sphdr:
