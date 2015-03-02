@@ -1,6 +1,10 @@
 PySpecKit Spectroscopic Toolkit
 -------------------------------
 
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/pyspeckit/pyspeckit
+   :target: https://gitter.im/pyspeckit/pyspeckit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
  * Documentation: `<http://pyspeckit.readthedocs.org/en/latest/>`_
  * Homepage: `<pyspeckit.bitbucket.org>`_
  * Source pages: `<https://github.com/pyspeckit/pyspeckit>`_ and `<https://bitbucket.org/pyspeckit/pyspeckit>`_
