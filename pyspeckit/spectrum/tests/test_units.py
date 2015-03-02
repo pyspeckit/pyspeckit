@@ -11,6 +11,13 @@ params = [(a,b,c,d) for a in units.unit_type_dict if a not in ('unknown',None)
                   for d in ['GHz','cm']]
 params = params[:5]
 
+
+def test_initialize_units():
+    xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=u.dimensionless_unscaled)
+    assert xarr.unit == u.dimensionless_unscaled
+    xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=u.m)
+    assert xarr.unit == u.m
+
 @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
 def test_convert_units(unit_from,unit_to,convention,ref_unit):
     xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=unit_from,refX=5,refX_units=ref_unit,xtype=units.unit_type_dict[unit_from])
