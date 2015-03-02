@@ -1,7 +1,8 @@
 from .. import astropy_models
 import numpy as np
 try:
-    from astropy.models import fitting
+    from astropy.modeling import fitting
+    from astropy.modeling import powerlaws
 except ImportError:
     pass
 
@@ -9,9 +10,9 @@ except ImportError:
 def test_powerlaw(scale=5., alpha=2.):
     x = np.linspace(10,100)
     y = scale * (x)**(-alpha)
-    plm = astropy_models.PowerLawModel(1,1,1)
-    fitter = fitting.NonLinearLSQFitter(plm)
-    result = fitter(x,y)
+    plm = powerlaws.PowerLaw1D(1,1,1)
+    fitter = fitting.LevMarLSQFitter()
+    result = fitter(plm, x, y)
     print "Result: ",result
     print "plm.params: ",plm
     return plm
