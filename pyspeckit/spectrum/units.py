@@ -694,9 +694,9 @@ class SpectroscopicAxis(u.Quantity):
             self.unit = unit
         self.make_dxarr()
 
-    def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
-            center_frequency_units=None, debug=False, xtype_check='check',
-            **kwargs):
+    def as_unit(self, unit, equivalencies=[], velocity_convention=None,
+                center_frequency=None, center_frequency_unit=None,
+                 **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
         to convert between frequency/velocity/wavelength and simply change the 
@@ -723,159 +723,22 @@ class SpectroscopicAxis(u.Quantity):
             Check whether the xtype matches the units.  If 'fix', will set the
             xtype to match the units.
         """
+        if velocity_convention and center_frequency and equivalencies:
+            raise ValueError('You cannot specify all 3: velocity_convetion, center_frequency and equivalencies') 
 
-        if xtype_check == 'check':
-            self._check_consistent_type()
-        elif xtype_check == 'fix':
-            self._fix_type()
+        # velocity_convention xor center_frequency
+        if bool(velocity_convention) != bool(center_frequency):
+            raise ValueError('Either specify both velocity_convention and center_frequency, or neither')
 
+        if not hasattr(center_frequency, 'unit') and center_frequency_unit is not None:
+            center_frequency = center_frequency * u.Unit(center_frequency_unit)
+        elif not hasattr(center_frequency, 'unit') and center_frequency_unit is None:
+            raise AttributeError("If center_frequency_unit is None, center_frequency should have unit attribute")
 
-        if self.unit is None:
-            return self*u.dimensionless_unscaled
-        if unit in (None, 'none', u.dimensionless_unscaled):
-            return self
-        elif self.unit in (None,'none', u.dimensionless_unscaled):
-            raise ValueError("xarr's units are blank; in order to convert to other units they must be specified.")
-        elif unit in pixel_dict:
-            newxarr = self.copy()
-            newxarr.units = 'pixels'
-            newxarr.xtype = 'pixels'
-            newxarr[:] = np.arange(self.shape[0])
-            return newxarr
-        elif unit not in conversion_dict[self.xtype]:
-            change_xtype = True
-            change_units = True
-        elif unit != self.units: 
-            change_xtype = False
-            change_units = True
-        else: 
-            change_xtype = False
-            change_units = False
-        if frame is not None and frame != self.frame: change_frame = True
-        else: change_frame = False
+        conventions = {'optical': u.doppler_optical, 'radio': u.doppler_radio, 'relativistic': u.doppler_relativistic}
+        equivalencies = conventions[velocity_convention](center_frequency) + equivalencies
 
-        if center_frequency is None:
-            center_frequency = self.refX
-        if center_frequency_units is None:
-            center_frequency_units = self.refX_units
-
-        # make sure "center frequency" is actually a frequency (required by later code!)
-        # (but you only need a center_frequency if one of the units is velocity)
-        if (center_frequency_units not in frequency_dict and 
-                (unit in velocity_dict or
-                 self.unit in velocity_dict)):
-            if center_frequency_units in wavelength_dict:
-                center_frequency = wavelength_to_frequency(center_frequency, 
-                        center_frequency_units, frequency_units='GHz')
-                center_frequency_units='GHz'
-            else:
-                raise ValueError("ERROR: %s is not a valid reference unit." % center_frequency_units)
-
-        if change_xtype:
-            if unit in velocity_dict:
-                if debug: print "Converting to velocity"
-                if conversion_dict[self.xtype] is frequency_dict:
-                    if debug: print "Converting frequency to velocity"
-                    newxarr = frequency_to_velocity(self,self.units,
-                            center_frequency=center_frequency,
-                            center_frequency_units=center_frequency_units,
-                            velocity_units=unit, convention=self.velocity_convention)
-                    newxtype = "velocity"
-                    newunit = unit
-                elif conversion_dict[self.xtype] is wavelength_dict:
-                    if debug: print "Converting wavelength to velocity"
-                    freqx = wavelength_to_frequency(self, self.units) 
-                    cf = wavelength_to_frequency(center_frequency, center_frequency_units)
-                    cfu = 'GHz'
-                    newxarr = frequency_to_velocity(freqx, 'GHz',
-                            center_frequency=cf,
-                            center_frequency_units=cfu,
-                            velocity_units=unit, convention=self.velocity_convention)
-                    newxtype = "velocity"
-                    newunit = unit
-                else: 
-                    raise ValueError("Could not convert from %s to %s" % (self.unit,unit))
-            elif unit in frequency_dict:
-                if debug: print "Converting to frequency"
-                if conversion_dict[self.xtype] is velocity_dict:
-                    if debug: print "Converting velocity to frequency"
-                    newxarr = velocity_to_frequency(self,self.unit,
-                            center_frequency=center_frequency,
-                            center_frequency_units=center_frequency_units,
-                            frequency_units=unit, convention=self.velocity_convention)
-                    newxtype = "frequency"
-                    newunit = unit
-                elif conversion_dict[self.xtype] is wavelength_dict:
-                    if debug: print "Converting wavelength to frequency"
-                    newxarr = wavelength_to_frequency(self, self.unit,
-                            frequency_units=unit)
-                    newxtype = "frequency"
-                    newunit = unit
-                else: 
-                    raise ValueError("Could not convert from %s to %s" % (self.unit,unit))
-            elif unit in wavelength_dict:
-                if debug: print "Converting to wavelength"
-                if conversion_dict[self.xtype] is velocity_dict:
-                    if debug: print "Converting velocity to wavelength"
-                    if center_frequency_units in frequency_dict:
-                        freqx = velocity_to_frequency(self, self.unit,
-                                center_frequency=center_frequency,
-                                center_frequency_units=center_frequency_units,
-                                frequency_units='Hz',
-                                convention=self.velocity_convention)
-                        newxarr = frequency_to_wavelength(freqx, 'Hz',
-                                wavelength_units=unit)
-                    elif center_frequency_units in wavelength_dict:
-                        newxarr = velocity_to_wavelength(self, self.unit,
-                                center_wavelength=center_frequency,
-                                center_wavelength_units=center_frequency_units,
-                                wavelength_units=unit,
-                                convention=self.velocity_convention)
-                    newxtype = "wavelength"
-                    newunit = unit
-                elif conversion_dict[self.xtype] is frequency_dict:
-                    if debug: print "Converting frequency to wavelength"
-                    newxarr = frequency_to_wavelength(self, self.unit,
-                            wavelength_units=unit)
-                    newxtype = "wavelength"
-                    newunit = unit
-                else: 
-                    raise ValueError("Could not convert from %s to %s" % (self.unit,unit))
-            else:
-                warnings.warn("Could not convert from %s to %s" % (self.unit,unit))
-        else:
-            newxtype = self.xtype
-            newxarr = self
-            newunit = self.unit
-
-        if debug: 
-            print "Converted from %s:%s to %s:%s" % (self.xtype, self.unit, newxtype, newunit)
-
-        # re-check whether units need to be changed; it is possible that change_xtype left you 
-        # with the correct units
-        if unit != newunit and change_units:
-            conversion_factor = conversion_dict[newxtype][newunit] / conversion_dict[newxtype][unit] 
-            if not quiet: print "Converting units from %s to %s" % (newunit,unit)
-            newxarr = newxarr*conversion_factor
-            newunit = unit
-
-        if change_frame and not quiet:
-            if not quiet: print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
-
-        if not change_units and not change_xtype and not change_frame:
-            if not quiet: print "Already in desired units, X-type, and frame"
-
-        if not quiet:
-            print "Converted to %s (%s)" % (newxtype,newunit)
-
-        # this should be implemented but requires a callback to spectrum...
-        #if replot:
-        #    self.spectrum.plotter(reset_xlimits=True)
-
-        newxarr.units = newunit
-        newxarr.xtype = newxtype
-
-        return newxarr
+        return self.to(unit, self.equivalencies + equivalencies)
 
     def change_frame(self, frame):
         """
