@@ -1,3 +1,5 @@
+from astropy.tests.pytest_plugins import *
+
 collect_ignore = ["setup.py", "debug_test.py",
         "build",
         "*ipython*",
