@@ -12,6 +12,20 @@ params = [(a,b,c,d) for a in units.unit_type_dict if a not in ('unknown',None)
 params = params[:5]
 
 
+def test_equivalencies_1():
+    x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, equivalencies=u.doppler_optical(3*u.AA))
+    assert x.equivalencies == u.doppler_optical(3*u.AA)
+
+@pytest.mark.parametrize(('velocity_convention'), convention)
+def test_equivalencies_2(velocity_convention):
+    x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, refX=3*u.AA, velocity_convention=velocity_convention)
+    assert x.equivalencies == u.doppler_optical(3*u.AA)
+
+@pytest.mark.parametrize(('velocity_convention'), convention)
+def test_equivalencies_3(velocity_convention):
+    x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, refX=3, refX_unit='angstrom', velocity_convention=velocity_convention)
+    assert x.equivalencies == u.doppler_optical(3*u.AA)
+
 def test_initialize_units():
     xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=u.dimensionless_unscaled)
     assert xarr.unit == u.dimensionless_unscaled
