@@ -328,23 +328,6 @@ class SpectroscopicAxis(u.Quantity):
 
         *refX_units* [ string ]
             Units of the reference frequency/wavelength
-        
-        *frame* [ frame_dict key ]
-            **NOT IMPLEMENTED**
-            The frame of the axis, e.g. 
-                * Topocentric (observatory-center) [up to 0.5 km/s offset from Earth-center]
-                * Geocentric (earth-center) 
-                * Barycentric (Solar System center) 
-                * Heliocentric (Sun-center)
-                * Kinematic Local Standard of Rest (LSRK)
-                * Dynamic Local Standard of Rest (LSRD)
-                * Galactocentric
-                * Supergalactic
-                * CMB?
-                * "Rest" (relative to the rest frequency of the line)
-                * Redshifted
-            SOME tools for frame shifting are now incorporated into 
-            velocity_frames.py
 
         *bad_unit_response* [ 'raise', 'pixel' ]
             What should pyspeckit do if the units are not recognized?  Default
@@ -423,8 +406,12 @@ class SpectroscopicAxis(u.Quantity):
         else:
             subarr.velocity_convention = velocity_convention
 
-        subarr.center_frequency, subarr._equivalencies  = SpectroscopicAxis.find_equivalencies(velocity_convention, center_frequency, center_frequency_unit, equivalencies)
-        subarr.center_frequency.unit = center_frequency_unit
+        subarr.center_frequency, subarr._equivalencies = self.find_equivalencies(velocity_convention,
+                                                                                 refX, refX_units, 
+                                                                                 center_frequency, center_frequency_unit, 
+                                                                                 equivalencies)
+        if subarr.center_frequency:
+            subarr.center_frequency.unit = center_frequency_unit
             
         return subarr
 
@@ -674,9 +661,9 @@ class SpectroscopicAxis(u.Quantity):
             self.unit = unit
         self.make_dxarr()
 
-    def as_unit(self, unit, equivalencies=[], velocity_convention=None,
-                center_frequency=None, center_frequency_unit=None,
-                 **kwargs):
+    def as_unit(self, unit, equivalencies=[], velocity_convention=None, refX=None,
+                refX_units=None, center_frequency=None, center_frequency_unit=None,
+                **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
         to convert between frequency/velocity/wavelength and simply change the 
@@ -703,7 +690,10 @@ class SpectroscopicAxis(u.Quantity):
             Check whether the xtype matches the units.  If 'fix', will set the
             xtype to match the units.
         """
-        center_frequency, equivalencies = SpectroscopicAxis.find_equivalencies(velocity_convention, center_frequency, center_frequency_unit, equivalencies)
+        center_frequency, equivalencies = self.find_equivalencies(velocity_convention, 
+                                                                  refX, refX_units,
+                                                                  center_frequency, center_frequency_unit, 
+                                                                  equivalencies)
         return self.to(unit, self.equivalencies + equivalencies)
 
     
@@ -788,12 +778,16 @@ class SpectroscopicAxis(u.Quantity):
             self.wcshead['CRPIX1'] = 1.0
             return True
 
-    @staticmethod
-    def find_equivalencies(self, velocity_convention=None, center_frequency=None, center_frequency_unit=None, equivalencies=[]):
+    @classmethod
+    def find_equivalencies(self, velocity_convention=None, refX=None, refX_units=None,
+                           center_frequency=None, center_frequency_unit=None, equivalencies=[]):
         """
         Utility function used to validate parameters and add equivalencies
         """
         # parameter validation
+        if refX and center_frequency:
+            raise ValueError("Cannot accept both refX and center_frequency")
+
         if equivalencies and (velocity_convetion or center_frequency):
             raise ValueError("Equivalencies cannot be passed alongside velocity_convention or center_frequency")
 
@@ -801,11 +795,10 @@ class SpectroscopicAxis(u.Quantity):
             raise ValueError("Either equivalencies or velocity_convention must be set")
 
         if hasattr(center_frequency, 'unit') and center_frequency_unit:
-            raise ValueError("center_frequency_unit must not be set if center_frequency has unit attribute")
+            raise ValueError("center_frequency_unit cannot be passed if center_frequency has unit attribute")
 
-        # velocity_convention xor center_frequency
-        if bool(velocity_convention) != bool(center_frequency):
-            raise ValueError('Either specify both velocity_convention and center_frequency, or neither')
+        if not (velocity_convention and (center_frequency or refX)):
+            raise ValueError("velocity_convention requires center_frequency or refX")
 
         if not hasattr(center_frequency, 'unit'):
             if center_frequency_unit:
@@ -814,11 +807,8 @@ class SpectroscopicAxis(u.Quantity):
                 raise AttributeError("If center_frequency_unit is None, center_frequency should have unit attribute")
 
         # equivalency finding
-        if not equivalencies:
+        if not equivalencies and center_frequency:
             equivalencies = velocity_conventions[velocity_convention](center_frequency)
-        # make sure there are no duplicates?
-        else:
-            pass
 
         return (center_frequency, equivalencies)
 
