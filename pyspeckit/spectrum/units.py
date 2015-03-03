@@ -406,10 +406,10 @@ class SpectroscopicAxis(u.Quantity):
         else:
             subarr.velocity_convention = velocity_convention
 
-        subarr.center_frequency, subarr._equivalencies = self.find_equivalencies(velocity_convention,
-                                                                                 refX, refX_units, 
-                                                                                 center_frequency, center_frequency_unit, 
-                                                                                 equivalencies)
+        subarr.center_frequency, subarr._equivalencies = self.find_equivalencies(subarr.velocity_convention,
+                                                                                 subarr.refX, subarr.refX_units, 
+                                                                                 subarr.center_frequency, subarr.center_frequency_unit, 
+                                                                                 subarr.equivalencies)
         if subarr.center_frequency:
             subarr.center_frequency.unit = center_frequency_unit
             
@@ -690,6 +690,8 @@ class SpectroscopicAxis(u.Quantity):
             Check whether the xtype matches the units.  If 'fix', will set the
             xtype to match the units.
         """
+        #TOASK if a keyword argument e.g. velocity_convention is not passed should we use 
+        # self.velocity_convention instead of the defaul value None?
         center_frequency, equivalencies = self.find_equivalencies(velocity_convention, 
                                                                   refX, refX_units,
                                                                   center_frequency, center_frequency_unit, 
@@ -811,8 +813,6 @@ class SpectroscopicAxis(u.Quantity):
             equivalencies = velocity_conventions[velocity_convention](center_frequency)
 
         return (center_frequency, equivalencies)
-
-
 
 # from astropy import units as u
 # 

@@ -13,7 +13,7 @@ params = params[:5]
 
 
 def test_equivalencies_1():
-    x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, equivalencies=u.doppler_optical(3*u.AA))
+    x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, velocity_convention='optical', equivalencies=u.doppler_optical(3*u.AA))
     assert x.equivalencies == u.doppler_optical(3*u.AA)
 
 # @pytest.mark.parametrize(('velocity_convention'), convention)
