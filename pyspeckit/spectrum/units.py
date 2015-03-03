@@ -237,6 +237,7 @@ fits_specsys = {'rest':'REST','LSRK':'LSRK','LSRD':'LSRD','heliocentric':'HEL','
 fits_type = {'velocity':'VELO','frequency':'FREQ','wavelength':'WAVE','length':'WAVE','redshift':'REDS',
         'Velocity':'VELO','Frequency':'FREQ','Wavelength':'WAVE','Length':'WAVE','Redshift':'REDS'}
 convention_suffix = {'radio':'RAD','optical':'OPT','relativistic':'REL','redshift':'RED'}
+conventions = {'optical': u.doppler_optical, 'radio': u.doppler_radio, 'relativistic': u.doppler_relativistic}
 
 speedoflight_ms  = np.float64(2.99792458e8) # m/s
 speedoflight_kms = np.float64(2.99792458e5) # km/s
@@ -304,9 +305,10 @@ class SpectroscopicAxis(u.Quantity):
         return cls(array.value, unit=str(array.unit).replace(" ",""))
 
     def __new__(self, xarr, unit="Hz", frame='rest', frame_offset=0.0,
-            frame_offset_units='Hz', xtype=None, refX=None, redshift=None,
-            refX_units=None, velocity_convention=None, use128bits=False, 
-            bad_unit_response='raise'):
+                frame_offset_units='Hz', xtype=None, refX=None, redshift=None,
+                refX_units=None, velocity_convention=None, use128bits=False, 
+                bad_unit_response='raise', equivalencies=[],
+                center_frequency=None, center_frequency_unit=None):
         """
         Make a new spectroscopic axis instance
         Default units Hz
@@ -421,8 +423,10 @@ class SpectroscopicAxis(u.Quantity):
         else:
             subarr.velocity_convention = velocity_convention
 
-        subarr.unit = subarr.units
-
+        subarr._equivalencies = equivalencies
+        if center_frequency:
+            subarr.center_frequency, subarr._equivalencies  = self.find_equivalencies(velocity_convention, center_frequency, center_frequency_unit, equivalencies)
+        subarr.center_frequency_unit = center_frequency_unit
         return subarr
 
     def __array_finalize__(self,obj):
@@ -723,21 +727,7 @@ class SpectroscopicAxis(u.Quantity):
             Check whether the xtype matches the units.  If 'fix', will set the
             xtype to match the units.
         """
-        if velocity_convention and center_frequency and equivalencies:
-            raise ValueError('You cannot specify all 3: velocity_convetion, center_frequency and equivalencies') 
-
-        # velocity_convention xor center_frequency
-        if bool(velocity_convention) != bool(center_frequency):
-            raise ValueError('Either specify both velocity_convention and center_frequency, or neither')
-
-        if not hasattr(center_frequency, 'unit') and center_frequency_unit is not None:
-            center_frequency = center_frequency * u.Unit(center_frequency_unit)
-        elif not hasattr(center_frequency, 'unit') and center_frequency_unit is None:
-            raise AttributeError("If center_frequency_unit is None, center_frequency should have unit attribute")
-
-        conventions = {'optical': u.doppler_optical, 'radio': u.doppler_radio, 'relativistic': u.doppler_relativistic}
-        equivalencies = conventions[velocity_convention](center_frequency) + equivalencies
-
+        center_frequency, equivalencies = self.find_equivalencies(velocity_convention, center_frequency, center_frequency_unit, equivalencies)
         return self.to(unit, self.equivalencies + equivalencies)
 
     def change_frame(self, frame):
@@ -865,6 +855,27 @@ class SpectroscopicAxis(u.Quantity):
         for attr in ('frame', 'redshift', 'refX', 'refX_units', '_unit',
                      'velocity_convention', 'wcshead', 'xtype'):
             self.__dict__[attr] = obj.__dict__[attr]
+
+    def find_equivalencies(self, velocity_convention, center_frequency, center_frequency_unit, equivalencies):
+        """
+        Utility function used to validate parameters and add equivalencies
+        """
+        if velocity_convention and center_frequency and equivalencies:
+            raise ValueError('You cannot specify all 3: velocity_convetion, center_frequency and equivalencies') 
+
+        # velocity_convention xor center_frequency
+        if bool(velocity_convention) != bool(center_frequency):
+            raise ValueError('Either specify both velocity_convention and center_frequency, or neither')
+
+        if not hasattr(center_frequency, 'unit'):
+            if center_frequency_unit:
+                center_frequency = center_frequency * u.Unit(center_frequency_unit)
+            else:
+                raise AttributeError("If center_frequency_unit is None, center_frequency should have unit attribute")
+
+        equivalencies = conventions[velocity_convention](center_frequency) + equivalencies
+        return (center_frequency, equivalencies)
+
 
 
 # from astropy import units as u
