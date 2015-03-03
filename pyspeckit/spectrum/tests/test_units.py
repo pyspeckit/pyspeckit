@@ -50,17 +50,12 @@ def test_convert_back(unit_from, unit_to,convention,ref_unit):
     threshold = np.spacing(units.speedoflight_ms) * 100
     if 'megameter' in unit_from or 'Mm' in unit_from:
         threshold *= 10
-    xarr = units.SpectroscopicAxis(xvals,unit=unit_from,refX=5,refX_units=ref_unit,xtype=units.unit_type_dict[unit_from])
+    xarr = units.SpectroscopicAxis(xvals,unit=unit_from,refX=5,refX_units=ref_unit,xtype=units.unit_type_dict[unit_from],velocity_convention=convention)
     xarr.convert_to_unit(unit_to,convention=convention)
     xarr.convert_to_unit(unit_from,convention=convention)
     assert all(np.abs((xarr - xvals)/xvals) < threshold)
     assert xarr.units == unit_from
 
-def test_from_quantity():
-    arr = np.linspace(-50,50)*u.km/u.s
-    xarr = units.SpectroscopicAxis.from_quantity(arr)
-
-    assert np.all(xarr == arr.value)
 
 if __name__=="__main__":
     unit_from='GHz'

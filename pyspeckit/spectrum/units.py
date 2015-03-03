@@ -299,11 +299,6 @@ class SpectroscopicAxis(u.Quantity):
     a SpectroscopicAxis without a dxarr attribute!  This can result in major problems;
     a workaround is being sought but subclassing numpy arrays is harder than I thought
     """
-
-    @classmethod
-    def from_quantity(cls, array):
-        return cls(array.value, unit=str(array.unit).replace(" ",""))
-
     def __new__(self, xarr, unit="Hz", frame='rest', frame_offset=0.0,
                 frame_offset_units='Hz', xtype=None, refX=None, redshift=None,
                 refX_units=None, velocity_convention=None, use128bits=False, 
@@ -429,6 +424,9 @@ class SpectroscopicAxis(u.Quantity):
         self.velocity_convention = getattr(obj, 'velocity_convention', None)
         self.redshift = getattr(obj, 'redshift', None)
         self.wcshead = getattr(obj, 'wcshead', None)
+        self.center_frequency = getattr(obj, 'center_frequency', None)
+        self.center_frequency_unit = getattr(obj, 'center_frequency_unit', None)
+        self._equivalencies = getattr(obj, 'equivalencies', [])
         # moved from __init__ - needs to be done whenever viewed
         # (this is slow, though - may be better not to do this)
         if self.shape: # check to make sure non-scalar
@@ -696,7 +694,7 @@ class SpectroscopicAxis(u.Quantity):
                                                                   refX, refX_units,
                                                                   center_frequency, center_frequency_unit, 
                                                                   equivalencies)
-        return self.to(unit, self.equivalencies + equivalencies)
+        return self.to(unit, self._equivalencies + equivalencies)
 
     
 
@@ -805,7 +803,7 @@ class SpectroscopicAxis(u.Quantity):
         if not hasattr(center_frequency, 'unit'):
             if center_frequency_unit:
                 center_frequency = center_frequency * u.Unit(center_frequency_unit)
-            else:
+            elif not refX:
                 raise AttributeError("If center_frequency_unit is None, center_frequency should have unit attribute")
 
         # equivalency finding
