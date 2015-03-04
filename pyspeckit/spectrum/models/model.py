@@ -31,7 +31,6 @@ class SpectralModel(fitter.SimpleFitter):
 
     def __init__(self, modelfunc, npars, 
                  shortvarnames=("A","\\Delta x","\\sigma"),
-                 multisingle='multi',
                  fitunits=None,
                  centroid_par=None,
                  fwhm_func=None,
@@ -73,9 +72,6 @@ class SpectralModel(fitter.SimpleFitter):
             default number of peaks to assume when fitting (can be overridden)
         shortvarnames : list (optional)
             TeX names of the variables to use when annotating
-        multisingle : list (optional)
-            Are there multiple peaks (no background will be fit) or
-            just a single peak (a background may/will be fit)
 
         Returns
         -------
@@ -90,7 +86,6 @@ class SpectralModel(fitter.SimpleFitter):
             self.__doc__ += modelfunc.__doc__
         self.npars = npars
         self.default_npars = npars
-        self.multisingle = multisingle
         self.fitunits = fitunits
         
         # this needs to be set once only
@@ -312,12 +307,7 @@ class SpectralModel(fitter.SimpleFitter):
         use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
         if use_lmfit:
             return self.lmfitter(*args,**kwargs)
-        if self.multisingle == 'single':
-            # Generate a variable-height version of the model
-            # not used func = fitter.vheightmodel(self.modelfunc)
-            return self.fitter(*args, **kwargs)
-        elif self.multisingle == 'multi':
-            return self.fitter(*args,**kwargs)
+        return self.fitter(*args,**kwargs)
 
     def lmfitfun(self,x,y,err=None,debug=False):
         """
@@ -922,7 +912,6 @@ class AstropyModel(SpectralModel):
 
         super(AstropyModel,self).__init__(model, len(model.parameters),
             shortvarnames=shortvarnames,
-            multisingle='multi',
             model=model,
             **kwargs)
 

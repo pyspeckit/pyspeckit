@@ -86,11 +86,11 @@ if __name__ == "__main__":
 
     # register the fitters
     sp.Registry.add_fitter('formaldehyde_mm_radex',
-                           formaldehyde_radex_fitter,5,multisingle='multi')
+                           formaldehyde_radex_fitter,5)
     sp.Registry.add_fitter('formaldehyde_mm_radex_b',
-                           formaldehyde_radex_fitter_b,5,multisingle='multi')
+                           formaldehyde_radex_fitter_b,5)
     sp.Registry.add_fitter('formaldehyde_mm_radex_both',
-                           formaldehyde_radex_fitter_both,5,multisingle='multi')
+                           formaldehyde_radex_fitter_both,5)
 
     # make 3 copies so that we can view independent fits
     # This step isn't really necessary, but it's a nice way to compare the fits

@@ -86,9 +86,9 @@ are available on the `pyspeckit bitbucket download page <https://bitbucket.org/p
     sp = pyspeckit.Spectra([sp1,sp2])
 
     sp.Registry.add_fitter('formaldehyde_radex',
-            formaldehyde_radex_fitter,4,multisingle='multi')
+            formaldehyde_radex_fitter,4)
     sp.Registry.add_fitter('formaldehyde_radex_sphere',
-            formaldehyde_radex_fitter_sphere,4,multisingle='multi')
+            formaldehyde_radex_fitter_sphere,4)
 
     sp.plotter()
     sp.specfit(fittype='formaldehyde_radex',multifit=True,guesses=[4,12,3.75,0.43],quiet=False)

@@ -292,5 +292,5 @@ def add_to_registry(sp):
             fitunits='microns')
 
     sp.Registry.add_fitter('hydrogen', extincted_hydrogen_emission,
-            extincted_hydrogen_emission.npars, multisingle='multi')
+            extincted_hydrogen_emission.npars)
 

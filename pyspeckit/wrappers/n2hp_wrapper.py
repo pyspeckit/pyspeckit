@@ -96,9 +96,9 @@ if __name__ == "__main__":
     sp.baseline(excludefit=True)
 
     sp.Registry.add_fitter('n2hp_radex',
-            n2hp_radex_fitter,4,multisingle='multi')
+            n2hp_radex_fitter,4)
     sp.Registry.add_fitter('n2hp_vtau',
-            n2hp.n2hp_vtau_fitter,4,multisingle='multi')
+            n2hp.n2hp_vtau_fitter,4)
 
     sp.plotter(figure=1)
     sp.specfit(fittype='n2hp_radex',multifit=True,guesses=[4,12,options.vguess,0.43],quiet=False)

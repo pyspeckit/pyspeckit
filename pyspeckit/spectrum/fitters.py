@@ -20,7 +20,7 @@ class Registry(object):
     def __init__(self):
         self.npars = {}
         self.multifitters = {}
-        self.singlefitters = {}
+        # self.singlefitters = {}
         self.fitkeys = {}
         self.associatedkeys = {}
 
@@ -52,7 +52,7 @@ The default is gaussian ('g'), all options are listed below:
         """
         self._make_interactive_help_message()
 
-    def add_fitter(self, name, function, npars, multisingle='single',
+    def add_fitter(self, name, function, npars,
         override=False, key=None):
         ''' 
         Register a fitter function.
@@ -72,24 +72,13 @@ The default is gaussian ('g'), all options are listed below:
 
         Other Parameters
         ----------------
-        multisingle: 'multi' | 'single'
-            Is the function a single-function fitter (with a background), or
-            does it allow N copies of the fitting function?
         override: True | False
             Whether to override any existing type if already present.
         key: char
             Key to select the fitter in interactive mode
         '''
-
-
-        if multisingle == 'single':
-            if not name in self.singlefitters or override:
-                self.singlefitters[name] = function
-        elif multisingle == 'multi':
-            if not name in self.multifitters or override:
-                self.multifitters[name] = function
-        elif name in self.singlefitters or name in self.multifitters:
-            raise Exception("Fitting function %s is already defined" % name)
+        if not name in self.multifitters or override:
+            self.multifitters[name] = function
 
         if key is not None:
             self.fitkeys[key] = name
@@ -111,20 +100,20 @@ The default is gaussian ('g'), all options are listed below:
 
 # Declare default registry built in for all spectra
 default_Registry = Registry()
-default_Registry.add_fitter('ammonia',models.ammonia_model(multisingle='multi'),6,multisingle='multi',key='a')
-default_Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(multisingle='multi'),6,multisingle='multi')
-# not implemented default_Registry.add_fitter(Registry,'ammonia',models.ammonia_model(multisingle='single'),6,multisingle='single',key='A')
-default_Registry.add_fitter('formaldehyde',models.formaldehyde_fitter,3,multisingle='multi',key='F') # CAN'T USE f!  reserved for fitting
-default_Registry.add_fitter('formaldehyde',models.formaldehyde_vheight_fitter,3,multisingle='single')
-default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='multi'),3,multisingle='multi',key='g')
-default_Registry.add_fitter('vheightgaussian',models.gaussian_vheight_fitter(multisingle='multi'),4,multisingle='multi')
-default_Registry.add_fitter('gaussian',models.gaussian_fitter(multisingle='single'),3,multisingle='single')
-default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='multi'),4,multisingle='multi',key='v')
-default_Registry.add_fitter('voigt',models.voigt_fitter(multisingle='single'),4,multisingle='single')
-default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(multisingle='multi'),3,multisingle='multi',key='L')
-default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(multisingle='single'),3,multisingle='single')
-default_Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5,multisingle='multi')
-default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4,multisingle='multi')
+default_Registry.add_fitter('ammonia',models.ammonia_model(),6,key='a')
+default_Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(),6)
+# not implemented default_Registry.add_fitter(Registry,'ammonia',models.ammonia_model( ),6, ,key='A')
+default_Registry.add_fitter('formaldehyde',models.formaldehyde_fitter,3,key='F') # CAN'T USE f!  reserved for fitting
+default_Registry.add_fitter('formaldehyde',models.formaldehyde_vheight_fitter,3)
+default_Registry.add_fitter('gaussian',models.gaussian_fitter(),3,key='g')
+default_Registry.add_fitter('vheightgaussian',models.gaussian_vheight_fitter(),4)
+default_Registry.add_fitter('gaussian',models.gaussian_fitter(),3)
+default_Registry.add_fitter('voigt',models.voigt_fitter(),4,key='v')
+default_Registry.add_fitter('voigt',models.voigt_fitter(),4)
+default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(),3,key='L')
+default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(),3)
+default_Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5)
+default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4)
 
 
 class Specfit(interactive.Interactive):
@@ -295,22 +284,22 @@ class Specfit(interactive.Interactive):
             else:
                 raise ValueError("Guess and parinfo were somehow invalid.")
         # SINGLEFITTERS SHOULD BE PHASED OUT
-        elif self.fittype in self.Registry.singlefitters:
-            #print "Non-interactive, 1D fit with automatic guessing"
-            if (self.Spectrum.baseline.order is None and vheight is None) or vheight:
-                self.Spectrum.baseline.order=0
-                self.peakbgfit(usemoments=usemoments,
-                               show_components=show_components,
-                               annotate=annotate, debug=debug,
-                               use_lmfit=use_lmfit, **kwargs)
-            else:
-                self.peakbgfit(usemoments=usemoments, vheight=False,
-                               height=0.0, annotate=annotate,
-                               use_lmfit=use_lmfit,
-                               show_components=show_components, debug=debug,
-                               **kwargs)
-            if self.Spectrum.plotter.autorefresh:
-                self.Spectrum.plotter.refresh()
+        # elif self.fittype in self.Registry.singlefitters:
+        #     #print "Non-interactive, 1D fit with automatic guessing"
+        #     if (self.Spectrum.baseline.order is None and vheight is None) or vheight:
+        #         self.Spectrum.baseline.order=0
+        #         self.peakbgfit(usemoments=usemoments,
+        #                        show_components=show_components,
+        #                        annotate=annotate, debug=debug,
+        #                        use_lmfit=use_lmfit, **kwargs)
+        #     else:
+        #         self.peakbgfit(usemoments=usemoments, vheight=False,
+        #                        height=0.0, annotate=annotate,
+        #                        use_lmfit=use_lmfit,
+        #                        show_components=show_components, debug=debug,
+        #                        **kwargs)
+        #     if self.Spectrum.plotter.autorefresh:
+        #         self.Spectrum.plotter.refresh()
         else:
             if multifit:
                 print("Can't fit with given fittype {0}:"
@@ -695,7 +684,7 @@ class Specfit(interactive.Interactive):
 
         if fittype is not None:
             self.fittype=fittype
-        NP = self.Registry.singlefitters[self.fittype].default_npars
+        # NP = self.Registry.singlefitters[self.fittype].default_npars
 
         if guesses is not None:
             log.debug("Using user-specified guesses.")
@@ -1448,7 +1437,7 @@ class Specfit(interactive.Interactive):
             The registered fit type to use for moment computation
         """
         fittype = fittype or self.fittype
-        return self.Registry.singlefitters[fittype].moments(
+        return self.Registry.multifitters[fittype].moments(
                 self.Spectrum.xarr[self.xmin:self.xmax],
                 self.spectofit[self.xmin:self.xmax],  **kwargs)
 

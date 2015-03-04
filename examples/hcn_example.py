@@ -19,16 +19,10 @@ sp.error[:] = sp.stats((-35,-25))['std']
 # background will not automatically be fit
 # 5 is the number of parameters in the model (line center,
 # line width, and amplitude for the 0-1, 2-1, and 1-1 lines)
-sp.Registry.add_fitter('hcn_varyhf',
-                       pyspeckit.models.hcn.hcn_varyhf_amp_fitter,
-                       5,
-                       multisingle='multi')
+sp.Registry.add_fitter('hcn_varyhf',pyspeckit.models.hcn.hcn_varyhf_amp_fitter,5)
 
 # This one is the same, but with fixed relative ampltidue hyperfine components
-sp.Registry.add_fitter('hcn_fixedhf',
-                       pyspeckit.models.hcn.hcn_amp,
-                       3,
-                       multisingle='multi')
+sp.Registry.add_fitter('hcn_fixedhf',pyspeckit.models.hcn.hcn_amp,3)
 
 # Plot the results
 sp.plotter()
@@ -68,10 +62,7 @@ sp.plotter.savefig('hcn_freehf_fit.png')
 # 1. the centroid
 # 2,3,4 - the amplitudes of the 0-1, 2-1, and 1-1 lines
 # 5,6,7 - the widths of the 0-1, 2-1, and 1-1 lines
-sp.Registry.add_fitter('hcn_varyhf_width',
-                       pyspeckit.models.hcn.hcn_varyhf_amp_width_fitter,
-                       7,
-                       multisingle='multi')
+sp.Registry.add_fitter('hcn_varyhf_width',pyspeckit.models.hcn.hcn_varyhf_amp_width_fitter,7)
 
 # Run the fitter
 sp.specfit(fittype='hcn_varyhf_width',

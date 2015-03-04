@@ -14,7 +14,7 @@ errmap = pyfits.getdata('region5.hcn.errmap.fits')
 # shows how to register a fitting procedure
 # 'multi' indicates that it is possible to fit multiple components and a background will not automatically be fit
 # 4 is the number of parameters in the model (excitation temperature, optical depth, line center, and line width)
-sp.Registry.add_fitter('hcn_amp',pyspeckit.models.hcn.hcn_amp,3,multisingle='multi')
+sp.Registry.add_fitter('hcn_amp',pyspeckit.models.hcn.hcn_amp,3)
 
 # Run the fitter
 sp.mapplot()

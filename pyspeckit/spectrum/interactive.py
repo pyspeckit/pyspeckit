@@ -105,10 +105,6 @@ class Interactive(object):
                     self.fitter = self.Registry.multifitters[fittername]
                     self.fittype = fittername
                     print "Selected multi-fitter %s" % fittername
-                elif fittername in self.Registry.singlefitters:
-                    self.fitter = self.Registry.singlefitters[fittername]
-                    self.fittype = fittername
-                    print "Selected single-fitter %s" % fittername
                 else: 
                     print "ERROR: Did not find fitter %s" % fittername
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
