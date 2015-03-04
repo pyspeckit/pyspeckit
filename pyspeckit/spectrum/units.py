@@ -338,8 +338,8 @@ class SpectroscopicAxis(u.Quantity):
         # allow either plural or singular unit
         # if unit is not None and unit in unit_type_dict and unit=='Hz':
         #     unit=units
-
-        if unit is not None and " " in unit:
+        # print(str(unit))
+        if unit is not None and " " in str(unit):
             unit = unit.replace(" ","")
 
         if unit is None:
@@ -401,7 +401,8 @@ class SpectroscopicAxis(u.Quantity):
         else:
             subarr.velocity_convention = velocity_convention
 
-        subarr.center_frequency, subarr._equivalencies = self.find_equivalencies(subarr.velocity_convention,
+        if subarr.velocity_convention or subarr.center_frequency or subarr.refX:
+            subarr.center_frequency, subarr._equivalencies = self.find_equivalencies(subarr.velocity_convention,
                                                                                  subarr.refX, subarr.refX_units, 
                                                                                  subarr.center_frequency, subarr.center_frequency_unit, 
                                                                                  subarr.equivalencies)
@@ -690,7 +691,21 @@ class SpectroscopicAxis(u.Quantity):
         """
         #TOASK if a keyword argument e.g. velocity_convention is not passed should we use 
         # self.velocity_convention instead of the defaul value None?
-        center_frequency, equivalencies = self.find_equivalencies(velocity_convention, 
+        if not velocity_convention:
+            velocity_convention = self.velocity_convention
+        if not equivalencies:
+            equivalencies = self.equivalencies
+        if not refX:
+            refX = self.refX
+        if not refX_units:
+            refX_units = self.refX_units
+        if not center_frequency:
+            center_frequency = self.center_frequency
+        if not center_frequency_unit:
+            center_frequency_unit = self.center_frequency_unit
+        
+
+        self.center_frequency, equivalencies = self.find_equivalencies(velocity_convention, 
                                                                   refX, refX_units,
                                                                   center_frequency, center_frequency_unit, 
                                                                   equivalencies)
@@ -797,7 +812,7 @@ class SpectroscopicAxis(u.Quantity):
         if hasattr(center_frequency, 'unit') and center_frequency_unit:
             raise ValueError("center_frequency_unit cannot be passed if center_frequency has unit attribute")
 
-        if not (velocity_convention and (center_frequency or refX)):
+        if (velocity_convention and not (center_frequency or refX)):
             raise ValueError("velocity_convention requires center_frequency or refX")
 
         if not hasattr(center_frequency, 'unit'):
@@ -812,15 +827,6 @@ class SpectroscopicAxis(u.Quantity):
 
         return (center_frequency, equivalencies)
 
-# from astropy import units as u
-# 
-# class SpectroscopicAxis(u.Unit):
-# 
-#     def __new__(self, xarr, refX, **kwargs):
-#         super(self, SpectroscopicAxis).__new__
-# 
-#     def as_unit(self, unit, doppler_type='relativistic', **kwargs):
-#         return self.to(unit, equivalencies=[u.spectral(),u.equivalencies.doppler_relativistic(self.refX)])
 
 class SpectroscopicAxes(SpectroscopicAxis):
     """
