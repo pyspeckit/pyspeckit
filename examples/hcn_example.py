@@ -29,7 +29,7 @@ sp.plotter()
 
 # Run the fixed-ampltiude fitter and show the individual fit components
 sp.specfit(fittype='hcn_fixedhf',
-           multifit=True,
+           multifit=None,
            guesses=[1,-48,0.6],
            show_hyperfine_components=True)
 
@@ -43,7 +43,7 @@ sp.plotter.savefig('hcn_fixedhf_fit.png')
 # Run the variable-ampltiude fitter and show the individual fit components
 # Note the different order of the arguments (velocity, width, then three amplitudes)
 sp.specfit(fittype='hcn_varyhf',
-           multifit=True,
+           multifit=None,
            guesses=[-48,1,0.2,0.6,0.3],
            show_hyperfine_components=True,
            clear=True)
@@ -66,7 +66,7 @@ sp.Registry.add_fitter('hcn_varyhf_width',pyspeckit.models.hcn.hcn_varyhf_amp_wi
 
 # Run the fitter
 sp.specfit(fittype='hcn_varyhf_width',
-           multifit=True,
+           multifit=None,
            guesses=[-48,0.2,0.6,0.3,1,1,1],
            show_hyperfine_components=True,
            clear=True)
@@ -89,7 +89,7 @@ sp.plotter.savefig('hcn_freehf_ampandwidth_fit.png')
 
 # Finally, how well does a 2-component fit work?
 sp.specfit(fittype='hcn_fixedhf',
-           multifit=True,
+           multifit=None,
            guesses=[1,-48,0.6,0.1,-46,0.6],
            show_hyperfine_components=True,
            clear=True)

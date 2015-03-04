@@ -25,8 +25,8 @@ sp.mapplot()
 #s.plotter()
 #s.Registry = sp.Registry
 #s.specfit.Registry = sp.Registry
-#s.specfit(fittype='hcn_amp',multifit=True,guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
-#s.specfit(fittype='hcn_amp',multifit=True,guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
+#s.specfit(fittype='hcn_amp',multifit=None,guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
+#s.specfit(fittype='hcn_amp',multifit=None,guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
 #sp.error = s.specfit.errspec
 
 
@@ -35,7 +35,7 @@ sp.mapplot()
 # there are bad pixels
 sp.momenteach(vheight=False, verbose=False)
 sp.momentcube[2,:,:] /= 2.5 # the HCN line profile makes the fitter assume a 2.5x too large line
-sp.fiteach(fittype='hcn_amp', errmap=errmap, multifit=True,
+sp.fiteach(fittype='hcn_amp', errmap=errmap, multifit=None,
         guesses=[1.0,-5.6,1.5], verbose_level=2, signal_cut=4,
         usemomentcube=True, blank_value=np.nan, verbose=False,
         direct=True, multicore=4)

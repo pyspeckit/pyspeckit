@@ -101,7 +101,7 @@ if __name__ == "__main__":
             n2hp.n2hp_vtau_fitter,4)
 
     sp.plotter(figure=1)
-    sp.specfit(fittype='n2hp_radex',multifit=True,guesses=[4,12,options.vguess,0.43],quiet=False)
+    sp.specfit(fittype='n2hp_radex',multifit=None,guesses=[4,12,options.vguess,0.43],quiet=False)
 
     sp.plotter(figure=2)
-    sp.specfit(fittype='n2hp_vtau',multifit=True,guesses=[15,2,options.vguess,0.43],quiet=False)
+    sp.specfit(fittype='n2hp_vtau',multifit=None,guesses=[15,2,options.vguess,0.43],quiet=False)

@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     sp1.plotter(figure=1)
     sp1.specfit(fittype='formaldehyde_mm_radex',
-                multifit=True,
+                multifit=None,
                 guesses=[100,13.2,4.5,0,7.0],
                 limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)],
                 limited=[(True,True)]*5,
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
     sp2.plotter(figure=2)
     sp2.specfit(fittype='formaldehyde_mm_radex_b',
-                multifit=True,
+                multifit=None,
                 guesses=[100,13.2,4.5,0,7.0],
                 limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)],
                 limited=[(True,True)]*5,
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     # Do two versions of the fit with different input guesses
     sp3.plotter(figure=3)
     sp3.specfit(fittype='formaldehyde_mm_radex_both',
-                multifit=True,
+                multifit=None,
                 guesses=[95,13.2,4.5,0,7.0],
                 limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)],
                 limited=[(True,True)]*5,
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     sp3.plotter(figure=4)
     sp3.specfit(fittype='formaldehyde_mm_radex_both',
-                multifit=True,
+                multifit=None,
                 guesses=[105,13.2,4.5,0,7.0],
                 limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)],
                 limited=[(True,True)]*5,

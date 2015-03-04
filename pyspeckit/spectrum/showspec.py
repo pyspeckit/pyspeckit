@@ -565,13 +565,15 @@ class Specfit:
         #self.seterrspec()
 
     def __call__(self, interactive=False, usemoments=True, fitcolor='r',
-            multifit=False, guesses=None, annotate=True, save=True,
+            multifit=None, guesses=None, annotate=True, save=True,
             **kwargs):
         """
         Fit gaussians to a spectrum
 
         guesses = [height,amplitude,center,width]
         """
+        if multifit:
+          log.warn("The multifit keyword has been deprecated", warnings.DeprecationWarning)
   
         self.fitcolor = fitcolor
         self.clear()
@@ -585,22 +587,22 @@ class Specfit:
             self.guesses = []
             self.click = self.specplotter.axis.figure.canvas.mpl_connect('button_press_event',self.makeguess)
             self.autoannotate = annotate
-        elif multifit:
+        else:
             if guesses is None:
                 print "You must input guesses when using multifit.  Also, baseline first!"
             else:
                 self.guesses = guesses
                 self.multifit()
                 self.autoannotate = annotate
-        else:
-            #print "Non-interactive, 1D fit with automatic guessing"
-            if self.specplotter.baseline.order is None:
-                self.specplotter.baseline.order=0
-                self.onedfit(usemoments=usemoments,annotate=annotate,**kwargs)
-            else:
-                self.onedfit(usemoments=usemoments,annotate=annotate,
-                        vheight=False,height=0.0,**kwargs)
-            if self.specplotter.autorefresh: self.specplotter.refresh()
+        # else:
+        #     #print "Non-interactive, 1D fit with automatic guessing"
+        #     if self.specplotter.baseline.order is None:
+        #         self.specplotter.baseline.order=0
+        #         self.onedfit(usemoments=usemoments,annotate=annotate,**kwargs)
+        #     else:
+        #         self.onedfit(usemoments=usemoments,annotate=annotate,
+        #                 vheight=False,height=0.0,**kwargs)
+        #     if self.specplotter.autorefresh: self.specplotter.refresh()
         if save: self.savefit()
 
     def seterrspec(self,usestd=None,useresiduals=True):

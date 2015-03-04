@@ -20,7 +20,8 @@ class Registry(object):
     def __init__(self):
         self.npars = {}
         self.multifitters = {}
-        # self.singlefitters = {}
+        #to delete
+        self.singlefitters = {}
         self.fitkeys = {}
         self.associatedkeys = {}
 
@@ -150,7 +151,7 @@ class Specfit(interactive.Interactive):
         #self.seterrspec()
         
     @cfgdec
-    def __call__(self, interactive=False, multifit=False, usemoments=True,
+    def __call__(self, interactive=False, multifit=None, usemoments=True,
                  clear_all_connections=True, debug=False, guesses=None,
                  parinfo=None, save=True, annotate=None, show_components=None,
                  use_lmfit=False, verbose=True, clear=True,
@@ -165,9 +166,6 @@ class Specfit(interactive.Interactive):
             The plotter window will go into interactive mode.  See
             self.interactive_help_message for details on how to use the
             interactive fitter.
-        multifit : boolean
-            If false, only a single peak is allower, but a "height" (0'th-order
-            baseline) will be fit simultaneously with that peak.
         fittype : str
             [passed to fitting codes; defaults to gaussian]
             The model to use.  Model must be registered in self.Registry.
@@ -221,6 +219,9 @@ class Specfit(interactive.Interactive):
             for gaussian and gaussian-like models.  Only works for single-fit
             mode (not multifit)
             DEPRECATED
+        multifit : boolean
+            If false, only a single peak is allower, but a "height" (0'th-order
+            baseline) will be fit simultaneously with that peak.
         debug : boolean
             Print debug statements?
         save : boolean
@@ -233,8 +234,9 @@ class Specfit(interactive.Interactive):
             Determines whether a 0th order baseline will be fit along with the
             line
         
-
         """
+        if multifit:
+            log.warn("The multifit keyword has been deprecated", warnings.DeprecationWarning)
 
         if clear: self.clear()
         self.selectregion(verbose=verbose, debug=debug,
@@ -247,7 +249,8 @@ class Specfit(interactive.Interactive):
         # multifit = True if the right number of guesses are passed
         if guesses is not None:
             if len(guesses) > 5:
-                multifit = True
+                # multifit = True
+                pass
 
         self.npeaks = 0
         self.fitkwargs = kwargs
@@ -262,13 +265,13 @@ class Specfit(interactive.Interactive):
             self.start_interactive(clear_all_connections=clear_all_connections,
                                    reset_selection=True,
                                    debug=debug, **kwargs)
-        elif (((multifit or multifit is None) and
-               self.fittype in self.Registry.multifitters)
+        elif (self.fittype in self.Registry.multifitters
               or guesses is not None
               or parinfo is not None):
             if guesses is None and parinfo is None:
-                raise ValueError("You must input guesses when using multifit."
-                                 "  Also, baseline (continuum fit) first!")
+                # raise ValueError("You must input guesses when using multifit."
+                                 # "  Also, baseline (continuum fit) first!")
+                pass
             elif parinfo is not None:
                 self.guesses = parinfo.values
                 self.parinfo = parinfo
@@ -283,30 +286,9 @@ class Specfit(interactive.Interactive):
                               guesses=guesses, annotate=annotate, **kwargs)
             else:
                 raise ValueError("Guess and parinfo were somehow invalid.")
-        # SINGLEFITTERS SHOULD BE PHASED OUT
-        # elif self.fittype in self.Registry.singlefitters:
-        #     #print "Non-interactive, 1D fit with automatic guessing"
-        #     if (self.Spectrum.baseline.order is None and vheight is None) or vheight:
-        #         self.Spectrum.baseline.order=0
-        #         self.peakbgfit(usemoments=usemoments,
-        #                        show_components=show_components,
-        #                        annotate=annotate, debug=debug,
-        #                        use_lmfit=use_lmfit, **kwargs)
-        #     else:
-        #         self.peakbgfit(usemoments=usemoments, vheight=False,
-        #                        height=0.0, annotate=annotate,
-        #                        use_lmfit=use_lmfit,
-        #                        show_components=show_components, debug=debug,
-        #                        **kwargs)
-        #     if self.Spectrum.plotter.autorefresh:
-        #         self.Spectrum.plotter.refresh()
         else:
-            if multifit:
-                print("Can't fit with given fittype {0}:"
-                      " it is not Registered as a multifitter.".format(self.fittype))
-            else:
-                print("Can't fit with given fittype {0}:"
-                      " it is not Registered as a singlefitter.".format(self.fittype))
+            print("Can't fit with given fittype {0}:"
+                  " it is not Registered as a multifitter.".format(self.fittype))
             return
         if save: self.savefit()
 
@@ -684,7 +666,7 @@ class Specfit(interactive.Interactive):
 
         if fittype is not None:
             self.fittype=fittype
-        # NP = self.Registry.singlefitters[self.fittype].default_npars
+        NP = self.Registry.singlefitters[self.fittype].default_npars
 
         if guesses is not None:
             log.debug("Using user-specified guesses.")

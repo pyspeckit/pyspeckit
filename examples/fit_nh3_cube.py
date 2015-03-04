@@ -124,7 +124,7 @@ if fitcube:
     # 12 parallel fitting processes will run), this actually means that EACH
     # core will have its own sub-set of the cube that it will search for good 
     # fits. So if you REALLY want consistency, you need to do the fit in serial.
-    cubes.fiteach(fittype='ammonia', multifit=True, guesses=guesses,
+    cubes.fiteach(fittype='ammonia', multifit=None, guesses=guesses,
             integral=False, verbose_level=3, fixed=[F,F,F,F,F,T], signal_cut=3,
             limitedmax=[F,F,F,F,T,T],
             maxpars=[0,0,0,0,101,1],

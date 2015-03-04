@@ -91,7 +91,7 @@ are available on the `pyspeckit bitbucket download page <https://bitbucket.org/p
             formaldehyde_radex_fitter_sphere,4)
 
     sp.plotter()
-    sp.specfit(fittype='formaldehyde_radex',multifit=True,guesses=[4,12,3.75,0.43],quiet=False)
+    sp.specfit(fittype='formaldehyde_radex',multifit=None,guesses=[4,12,3.75,0.43],quiet=False)
 
     # these are just for pretty plotting:
     sp1.specfit.fitter = sp.specfit.fitter
@@ -112,7 +112,7 @@ are available on the `pyspeckit bitbucket download page <https://bitbucket.org/p
 
 
     sp.plotter(figure=5)
-    sp.specfit(fittype='formaldehyde_radex_sphere',multifit=True,guesses=[4,13,3.75,0.43],quiet=False)
+    sp.specfit(fittype='formaldehyde_radex_sphere',multifit=None,guesses=[4,13,3.75,0.43],quiet=False)
 
     # these are just for pretty plotting:
     sp1.specfit.fitter = sp.specfit.fitter
