@@ -5,11 +5,41 @@ import pytest
 from astropy import units as u
 
 convention = ['optical','radio','relativistic']
-params = [(a,b,c,d) for a in units.unit_type_dict if a not in ('unknown',None)
-                  for b in units.unit_type_dict if b not in ('unknown',None)
+
+unit_type_dict = {
+    'Hz' :'frequency', 'kHz':'frequency', 'MHz':'frequency', 'GHz':'frequency',
+    'hz' :'frequency', 'khz':'frequency', 'mhz':'frequency', 'ghz':'frequency',
+    'THz':'frequency', 
+    'meters/second':'velocity', 'm/s':'velocity', 'kilometers/s':'velocity',
+    'kilometers/second':'velocity',
+    'centimeters/second':'velocity',
+    'megameters/s':'velocity',
+    'megameters/second':'velocity','Mm/s':'velocity',
+    'km/s':'velocity', 'kms':'velocity', 'centimeters/s':'velocity',
+    'kms-1':'velocity', 'km s-1':'velocity', 'm s-1':'velocity',  'ms-1':'velocity',
+    'cm/s':'velocity', 'cms':'velocity', 
+    'meters':'wavelength','m':'wavelength',
+    'centimeters':'wavelength','cm':'wavelength',
+    'millimeters':'wavelength','mm':'wavelength',
+    'nanometers':'wavelength','nm':'wavelength',
+    'micrometers':'wavelength','micron':'wavelength','microns':'wavelength','um':'wavelength',
+    'kilometers':'wavelength','km':'wavelength',
+    'megameters':'wavelength','Mm':'wavelength',
+    'angstrom':'wavelength','angstroms':'wavelength','A':'wavelength',
+    'unknown':'pixels',
+    None: 'pixels',
+}
+
+params = [(a,b,c,d) for a in unit_type_dict if a not in ('unknown',None)
+                  for b in unit_type_dict if b not in ('unknown',None)
                   for c in convention
                   for d in ['GHz','cm']]
 params = params[:5]
+
+@pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
+def test_convert_to(unit_from, unit_to, convention, ref_unit):
+    x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, velocity_convention='optical', equivalencies=u.doppler_optical(3*u.AA))
+    x.convert_to_unit(unit_to,convention=convention)
 
 
 def test_equivalencies_1():
@@ -37,6 +67,20 @@ def test_convert_units(unit_from,unit_to,convention,ref_unit):
     xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=unit_from,refX=5,refX_units=ref_unit,xtype=units.unit_type_dict[unit_from])
     xarr.convert_to_unit(unit_to,convention=convention)
     assert xarr.units == unit_to
+
+def test_convert_units2():
+    xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit='Hz')
+
+    velocity_arr = xarr.as_unit('km/s', velocity_convention='optical', refX=5*u.GHz)
+
+    xarr2 = units.SpectroscopicAxis(np.linspace(1,10,10),unit='Hz',
+                                    velocity_convention='optical',
+                                    refX=5*u.GHz)
+    velocity_arr2 = xarr2.to(u.km/u.s)
+
+    assert np.all(velocity_arr==velocity_arr2)
+
+
 
 @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
 def test_convert_back(unit_from, unit_to,convention,ref_unit):
