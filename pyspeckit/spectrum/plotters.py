@@ -384,7 +384,7 @@ class Plotter(object):
                 self.xlabel = "%s %s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
                         self.Spectrum.xarr.frame.title(),
                         self.xlabel )
-            if isinstance(self.Spectrum.xarr.units,str):
+            if isinstance(self.Spectrum.xarr.unit,str):
                 self.xlabel += " ("+self.Spectrum.xarr.units+")"
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
