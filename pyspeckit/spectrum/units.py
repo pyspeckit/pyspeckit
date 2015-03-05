@@ -444,10 +444,22 @@ class SpectroscopicAxis(u.Quantity):
         """
         if xval_units in pixel_dict:
             return xval
-        elif xval_units is not None:
+        else:
+            try:
+                if not xval_units:
+                    xval_units = xval.unit
+            except AttributeError:
+                xval_units = u.dimensionless_unscaled
             xval = xval * u.Unit(xval_units)            
-        nearest_pix = np.argmin(np.abs(self.value-xval.value))
-        return nearest_pix
+            nearest_pix = np.argmin(np.abs(self.value-xval.value))
+            
+        
+            print("sa.value: ",self.value)
+            print("sa.unit:",self.unit)
+            print("xval: ",xval)
+            print("xval_units:",xval_units)
+            # nearest_pix = np.argmin(np.abs(self.value-xval))
+            return nearest_pix
 
     def in_range(self, xval):
         """
@@ -468,53 +480,53 @@ class SpectroscopicAxis(u.Quantity):
         #    xval = wavelength_to_frequency(xval, xunit, 'Hz')
         #    xunit = 'Hz'
 
-        # if not hasattr(xval, 'unit'):
-        #      xval = xval * u.Unit(xunit)
-        # return xval.to(self.unit, self.equivalencies)
+        if not hasattr(xval, 'unit'):
+             xval = xval * u.Unit(xunit)
+        return xval.to(self.unit, self.equivalencies)
 
-        if unit_type_dict[self.unit] == unit_type_dict[xunit]:
-            if verbose: print "Input units of same type as output units."
-            return xval * conversion_dict[unit_type_dict[xunit]][xunit] / conversion_dict[unit_type_dict[self.units]][self.units]
-        elif xunit in velocity_dict:
-            if verbose: print "Requested units are Velocity"
-            if self.unit in frequency_dict:
-                return velocity_to_frequency(xval, xunit,
-                        center_frequency=self.refX,
-                        center_frequency_units=self.refX_units,
-                        frequency_units=self.unit,
-                        convention=self.velocity_convention)
-            elif self.unit in wavelength_dict:
-                FREQ = velocity_to_frequency(xval, xunit,
-                        center_frequency=self.refX,
-                        center_frequency_units=self.refX_units,
-                        frequency_units='Hz',
-                        convention=self.velocity_convention)
-                return frequency_to_wavelength(FREQ, 'Hz',
-                        wavelength_units=self.unit)
-        elif xunit in frequency_dict:
-            if verbose: print "Requested units are Frequency"
-            if self.units in velocity_dict:
-                return frequency_to_velocity(xval, xunit,
-                        center_frequency=self.refX,
-                        center_frequency_units=self.refX_units,
-                        velocity_units=self.unit,
-                        convention=self.velocity_convention)
-            elif self.unit in wavelength_dict:
-                return frequency_to_wavelength(xval, xunit,
-                        wavelength_units=self.unit)
-        elif xunit in wavelength_dict:
-            if verbose: print "Requested units are Frequency"
-            if self.unit in velocity_dict:
-                return wavelength_to_velocity(xval, xunit,
-                        center_wavelength=self.refX,
-                        center_wavelength_units=self.refX_units,
-                        velocity_units=self.unit,
-                        convention=self.velocity_convention)
-            elif self.unit in frequency_dict:
-                return wavelength_to_frequency(xval, xunit,
-                        frequency_units=self.unit)
-        else:
-            raise ValueError("Units not recognized.")
+        # if unit_type_dict[self.unit] == unit_type_dict[xunit]:
+        #     if verbose: print "Input units of same type as output units."
+        #     return xval * conversion_dict[unit_type_dict[xunit]][xunit] / conversion_dict[unit_type_dict[self.units]][self.units]
+        # elif xunit in velocity_dict:
+        #     if verbose: print "Requested units are Velocity"
+        #     if self.unit in frequency_dict:
+        #         return velocity_to_frequency(xval, xunit,
+        #                 center_frequency=self.refX,
+        #                 center_frequency_units=self.refX_units,
+        #                 frequency_units=self.unit,
+        #                 convention=self.velocity_convention)
+        #     elif self.unit in wavelength_dict:
+        #         FREQ = velocity_to_frequency(xval, xunit,
+        #                 center_frequency=self.refX,
+        #                 center_frequency_units=self.refX_units,
+        #                 frequency_units='Hz',
+        #                 convention=self.velocity_convention)
+        #         return frequency_to_wavelength(FREQ, 'Hz',
+        #                 wavelength_units=self.unit)
+        # elif xunit in frequency_dict:
+        #     if verbose: print "Requested units are Frequency"
+        #     if self.units in velocity_dict:
+        #         return frequency_to_velocity(xval, xunit,
+        #                 center_frequency=self.refX,
+        #                 center_frequency_units=self.refX_units,
+        #                 velocity_units=self.unit,
+        #                 convention=self.velocity_convention)
+        #     elif self.unit in wavelength_dict:
+        #         return frequency_to_wavelength(xval, xunit,
+        #                 wavelength_units=self.unit)
+        # elif xunit in wavelength_dict:
+        #     if verbose: print "Requested units are Frequency"
+        #     if self.unit in velocity_dict:
+        #         return wavelength_to_velocity(xval, xunit,
+        #                 center_wavelength=self.refX,
+        #                 center_wavelength_units=self.refX_units,
+        #                 velocity_units=self.unit,
+        #                 convention=self.velocity_convention)
+        #     elif self.unit in frequency_dict:
+        #         return wavelength_to_frequency(xval, xunit,
+        #                 frequency_units=self.unit)
+        # else:
+        #     raise ValueError("Units not recognized.")
 
     def coord_to_x(self, xval, xunit):
         """
