@@ -300,7 +300,7 @@ class Plotter(object):
             if silent is not None:
                 self.silent = silent
 
-            if (self.Spectrum.xarr.umax() < self.xmin or self.Spectrum.xarr.umin() > self.xmax 
+            if (self.Spectrum.xarr.max() < self.xmin or self.Spectrum.xarr.min() > self.xmax 
                     or reset_xlimits):
                 if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
                 self.xmin = None
