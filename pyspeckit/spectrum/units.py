@@ -445,10 +445,8 @@ class SpectroscopicAxis(u.Quantity):
         if xval_units in pixel_dict:
             return xval
         elif xval_units is not None:
-            xval = self.x_to_coord(xval, xval_units)
-            nearest_pix = np.argmin(np.abs(self.value-xval.value))
-            return nearest_pix
-        nearest_pix = np.argmin(np.abs(self.value-xval))
+            xval = xval * u.Unit(xval_units)            
+        nearest_pix = np.argmin(np.abs(self.value-xval.value))
         return nearest_pix
 
     def in_range(self, xval):
@@ -469,6 +467,10 @@ class SpectroscopicAxis(u.Quantity):
         #if xunit in wavelength_dict: # shortcut - convert wavelength to freq
         #    xval = wavelength_to_frequency(xval, xunit, 'Hz')
         #    xunit = 'Hz'
+
+        # if not hasattr(xval, 'unit'):
+        #      xval = xval * u.Unit(xunit)
+        # return xval.to(self.unit, self.equivalencies)
 
         if unit_type_dict[self.unit] == unit_type_dict[xunit]:
             if verbose: print "Input units of same type as output units."
@@ -751,8 +753,9 @@ class SpectroscopicAxis(u.Quantity):
         # equivalency finding
         if refX and not center_frequency:
             center_frequency = refX
-        print("generating the equivalencies")
-        equivalencies = velocity_conventions[velocity_convention](center_frequency)
+        if velocity_convention:
+            print("generating the equivalencies")
+            equivalencies = velocity_conventions[velocity_convention](center_frequency)
 
         return (center_frequency, equivalencies)
 
