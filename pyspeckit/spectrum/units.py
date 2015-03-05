@@ -446,7 +446,9 @@ class SpectroscopicAxis(u.Quantity):
             return xval
         elif xval_units is not None:
             xval = self.x_to_coord(xval, xval_units)
-        nearest_pix = np.argmin(np.abs(self-xval))
+            nearest_pix = np.argmin(np.abs(self.value-xval.value))
+            return nearest_pix
+        nearest_pix = np.argmin(np.abs(self.value-xval))
         return nearest_pix
 
     def in_range(self, xval):
@@ -732,23 +734,14 @@ class SpectroscopicAxis(u.Quantity):
         """
         Utility function used to validate parameters and add equivalencies
         """
-        # parameter validation
-        if not velocity_convention and not refX and not center_frequency and not equivalencies:
+        if equivalencies:
             return (center_frequency, equivalencies)
-        elif equivalencies:
+        elif not velocity_convention and not refX and not center_frequency:
             return (center_frequency, equivalencies)
 
+        # parameter validation
         if refX and center_frequency and (refX != center_frequency):
             raise ValueError("Cannot accept different values for refX and center_frequency")
-        if equivalencies and (velocity_convention or center_frequency):
-            raise ValueError("Equivalencies cannot be passed alongside velocity_convention or center_frequency")
-        if not equivalencies and not velocity_convention:
-            raise ValueError("Either equivalencies or velocity_convention must be set")
-        if hasattr(center_frequency, 'unit') and center_frequency_unit:
-            raise ValueError("center_frequency_unit cannot be passed if center_frequency has unit attribute")
-        # if (velocity_convention and not (center_frequency or refX)):
-            # raise ValueError("velocity_convention requires center_frequency or refX")
-
         if not hasattr(center_frequency, 'unit'):
             if center_frequency_unit:
                 center_frequency = center_frequency * u.Unit(center_frequency_unit)
@@ -756,11 +749,10 @@ class SpectroscopicAxis(u.Quantity):
                 raise AttributeError("If center_frequency_unit is None, center_frequency should have unit attribute")
 
         # equivalency finding
-        if refX:
+        if refX and not center_frequency:
             center_frequency = refX
-        if not equivalencies and center_frequency and velocity_convention:
-            print("generating the equivalencies")
-            equivalencies = velocity_conventions[velocity_convention](center_frequency)
+        print("generating the equivalencies")
+        equivalencies = velocity_conventions[velocity_convention](center_frequency)
 
         return (center_frequency, equivalencies)
 
