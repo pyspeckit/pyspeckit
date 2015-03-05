@@ -214,7 +214,7 @@ class Baseline(interactive.Interactive):
                                  err=self.Spectrum.error, order=self.order,
                                  masktoexclude=~self.includemask,
                                  powerlaw=self.powerlaw,
-                                 xarr_fit_units=xarr.units, **kwargs)
+                                 xarr_fit_units=xarr.unit, **kwargs)
             self.basespec, self.baselinepars = (a,b)
 
             self.set_basespec_frompars()
@@ -242,7 +242,7 @@ class Baseline(interactive.Interactive):
 
         self.clear_highlights()
 
-        self._xfit_units = self.Spectrum.xarr.units
+        self._xfit_units = self.Spectrum.xarr.unit
 
         log.debug("Fitting baseline: powerlaw={0} "
                   "spline={1}".format(self.powerlaw, spline))
