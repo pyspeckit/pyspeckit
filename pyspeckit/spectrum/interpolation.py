@@ -10,11 +10,10 @@ def _interp(x, xp, fp, left=None, right=None):
     """
     Overrides numpy's interp function, which fails to check for increasingness....
     """
-
-    if not np.all(np.diff(xp) > 0):
-        return np.interp(x, xp[::-1], fp[::-1], left=left, right=right)
-    else:
-        return np.interp(x, xp, fp, left=left, right=right)
+    indices = np.argsort(xp)
+    xp = np.array(xp)[indices]
+    fp = np.array(fp)[indices]
+    return np.interp(x, xp, fp, left, right)
 
 def interp(spec1, spec2, left=0, right=0):
     """

@@ -8,8 +8,8 @@ import numpy as np
 def test_template():
     xarr = pyspeckit.spectrum.units.SpectroscopicAxis(np.linspace(-5,5,100),
                                                       unit='km/s')
-    gauss = np.exp(-xarr**2/(2.*1.**2))
-    gauss2 = np.exp(-(xarr-1)**2/(2.*1.**2))
+    gauss = np.exp(-xarr.value**2/(2.*1.**2))
+    gauss2 = np.exp(-(xarr.value-1)**2/(2.*1.**2))
     np.random.seed(0)
     noise = np.random.randn(xarr.size) / 100.
 
@@ -33,12 +33,12 @@ def test_template_withcont():
     scale = 0.5
     shift = 1.1
 
-    gauss = np.exp(-xarr**2/(2.*1.**2))
+    gauss = np.exp(-xarr.value**2/(2.*1.**2))
     cont_ = np.linspace(0.5,1,100)
     cont = np.linspace(-5,5,100)*0.05+0.75
     np.testing.assert_array_almost_equal(cont_, cont)
 
-    gauss2 = np.exp(-(xarr-shift)**2/(2.*1.**2))
+    gauss2 = np.exp(-(xarr.value-shift)**2/(2.*1.**2))
     # 0.5 = m*-5 + b
     # 1.0 = m*5 + b
     # 0.5 = m*-5 + 1 - m*5

@@ -31,7 +31,7 @@ def spectral_template_generator(template_spectrum, xshift_units='km/s', left=0,
         """
         shift = xarr.x_to_coord(xshift, xshift_units)
         model = scale * _interp(xarr,
-                                template_spectrum.xarr.as_unit(xarr.units)+shift,
+                                template_spectrum.xarr.as_unit(xarr.unit)+shift,
                                 template_spectrum.data,
                                 left=left,
                                 right=right,
