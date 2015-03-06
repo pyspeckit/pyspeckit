@@ -11,6 +11,7 @@ import matplotlib.figure
 import itertools
 from ..config import *
 import numpy as np
+import astropy.units as u
 from pyspeckit.specwarnings import warn
 import copy
 import widgets
@@ -66,14 +67,14 @@ class Plotter(object):
         def getprop(self):
             if xy == 'x':
                 if minmax == 'min':
-                    return self._xlim[0]
+                    return self._xlim[0]*self.SpectroscopicAxis.unit
                 elif minmax == 'max':
-                    return self._xlim[1]
+                    return self._xlim[1]*self.SpectroscopicAxis.unit
             elif xy == 'y':
                 if minmax == 'min':
-                    return self._ylim[0]
+                    return self._ylim[0]*self.SpectroscopicAxis.unit
                 elif minmax == 'max':
-                    return self._ylim[1]
+                    return self._ylim[1]*self.SpectroscopicAxis.unit
         return getprop
 
     def _set_prop(xy, minmax):
@@ -292,7 +293,6 @@ class Plotter(object):
         """
         Automatically or manually reset the plot limits
         """
-        print("use_window_limits:",use_window_limits)
         # if not use_window_limits: use_window_limits = False
         if self.debug:
             frame = inspect.currentframe()
@@ -389,14 +389,18 @@ class Plotter(object):
 
         if xlabel is not None:
             self.xlabel = xlabel
-        elif isinstance(self.Spectrum.xarr.xtype,str):
-            self.xlabel = self.Spectrum.xarr.xtype.title()
+        #TODO should i change this to self.Spectrum.xarr.unit
+        # elif isinstance(self.Spectrum.xarr.xtype,str):
+        #   self.xlabel = self.Spectrum.xarr.xtype.title()
+        elif isinstance(self.Spectrum.xarr.unit,str):
+            self.xlabel += "("+self.Spectrum.xarr.unit+")"
+        elif self.Spectrum.xarr.unit.name:
+            self.xlabel += " ("+self.Spectrum.xarr.unit.to_string(format=u.format.Latex)+")"
             if verbose_label:
                 self.xlabel = "%s %s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
-                        self.Spectrum.xarr.frame.title(),
+                        # self.Spectrum.xarr.frame.title(),
                         self.xlabel )
-            if isinstance(self.Spectrum.xarr.unit,str):
-                self.xlabel += " ("+self.Spectrum.xarr.units+")"
+            
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
 
