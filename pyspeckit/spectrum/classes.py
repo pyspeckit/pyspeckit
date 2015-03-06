@@ -118,7 +118,6 @@ class Spectrum(object):
         >>> # if you already have a simple fits file
         >>> sp = pyspeckit.Spectrum('test.fits')
         """
-
         if filename:
             if filetype is None:
                 suffix = filename.rsplit('.',1)[1]
@@ -297,14 +296,14 @@ class Spectrum(object):
         xtype = Table.data.dtype.names[Table.xaxcol]
         if xtype in units.xtype_dict.values():
             self.xarr.xtype = xtype
-            self.xarr.units = Table.columns[xtype].unit
+            self.xarr.unit = Table.columns[xtype].unit
         elif xtype in units.xtype_dict:
             self.xarr.xtype = units.xtype_dict[xtype]
-            self.xarr.units = Table.columns[xtype].unit
+            self.xarr.unit = Table.columns[xtype].unit
         else:
             warn( "Warning: Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels unless you set them manually (e.g., sp.xarr.unit='angstroms')")
             self.xarr.xtype = 'pixels'
-            self.xarr.units = 'none'
+            self.xarr.unit = 'none'
             #raise ValueError("Invalid xtype in text header")
         self.ytype = Table.data.dtype.names[Table.datacol]
         try:
@@ -316,7 +315,7 @@ class Spectrum(object):
         self._update_header()
 
     def _update_header(self):
-        self.header['CUNIT1'] = self.xarr.units
+        self.header['CUNIT1'] = self.xarr.unit
         self.header['CTYPE1'] = self.xarr.xtype
         self.header['BUNIT'] = self.unit
         self.header['BTYPE'] = self.ytype
@@ -580,7 +579,7 @@ class Spectrum(object):
         else:
             name = ""
         return r'<Spectrum object%s over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s at %s>' % \
-                (name, self.xarr.min(), self.xarr.max(), self.xarr.units,
+                (name, self.xarr.min(), self.xarr.max(), self.xarr.unit,
                         self.data.min(), self.data.max(), self.unit,
                         str(hex(self.__hash__())))
     
@@ -725,7 +724,7 @@ class Spectrum(object):
     def _arithmetic_threshold(self, value, units=None):
         self._arithmetic_threshold_value = value
         if units is None:
-            self._arithmetic_threshold_units = self.xarr.units
+            self._arithmetic_threshold_units = self.xarr.unit
         else:
             self._arithmetic_threshold_units = units
 
@@ -764,7 +763,7 @@ class Spectra(Spectrum):
 
         print "Concatenating data"
         self.xarr = units.SpectroscopicAxes([sp.xarr.as_unit(xunits) for sp in speclist])
-        self.xarr.units = xunits 
+        self.xarr.unit = xunits 
         self.xarr.xtype = units.unit_type_dict[xunits]
         self.data = np.ma.concatenate([sp.data for sp in speclist])
         self.error = np.ma.concatenate([sp.error for sp in speclist])
@@ -804,9 +803,9 @@ class Spectra(Spectrum):
         if other.unit != self.unit:
             raise ValueError("Mismatched units")
 
-        if other.xarr.units != self.xarr.units:
+        if other.xarr.unit != self.xarr.unit:
             # convert all inputs to same units
-            spec.xarr.convert_to_units(self.xarr.units,**kwargs)
+            spec.xarr.convert_to_units(self.xarr.unit,**kwargs)
         self.xarr = units.SpectroscopicAxes([self.xarr,spec.xarr])
         self.data = np.concatenate([self.data,spec.data])
         self.error = np.concatenate([self.error,spec.error])
@@ -850,11 +849,11 @@ class Spectra(Spectrum):
             self.fittable = atpy.Table()
             self.fittable.add_column('name',[sp.specname for sp in self.speclist])
             self.fittable.add_column('amplitude',[sp.specfit.modelpars[0] for sp in self.speclist],unit=self.unit)
-            self.fittable.add_column('center',[sp.specfit.modelpars[1] for sp in self.speclist],unit=self.xarr.units)
-            self.fittable.add_column('width',[sp.specfit.modelpars[2] for sp in self.speclist],unit=self.xarr.units)
+            self.fittable.add_column('center',[sp.specfit.modelpars[1] for sp in self.speclist],unit=self.xarr.unit)
+            self.fittable.add_column('width',[sp.specfit.modelpars[2] for sp in self.speclist],unit=self.xarr.unit)
             self.fittable.add_column('amplitudeerr',[sp.specfit.modelerrs[0] for sp in self.speclist],unit=self.unit)
-            self.fittable.add_column('centererr',[sp.specfit.modelerrs[1] for sp in self.speclist],unit=self.xarr.units)
-            self.fittable.add_column('widtherr',[sp.specfit.modelerrs[2] for sp in self.speclist],unit=self.xarr.units)
+            self.fittable.add_column('centererr',[sp.specfit.modelerrs[1] for sp in self.speclist],unit=self.xarr.unit)
+            self.fittable.add_column('widtherr',[sp.specfit.modelerrs[2] for sp in self.speclist],unit=self.xarr.unit)
 
     def ploteach(self, xunits=None, inherit_fit=False, plot_fit=True, plotfitkwargs={}, **plotkwargs):
         """
@@ -867,7 +866,7 @@ class Spectra(Spectrum):
             if inherit_fit:
                 sp.specfit.fitter = self.specfit.fitter
                 sp.specfit.modelpars = self.specfit.modelpars
-                sp.specfit.model = np.interp(sp.xarr.as_unit(self.xarr.units),self.xarr,self.specfit.fullmodel)
+                sp.specfit.model = np.interp(sp.xarr.as_unit(self.xarr.unit),self.xarr,self.specfit.fullmodel)
 
             sp.plotter(**plotkwargs)
             

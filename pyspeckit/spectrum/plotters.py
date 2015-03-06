@@ -11,6 +11,7 @@ import matplotlib.figure
 import itertools
 from ..config import *
 import numpy as np
+import astropy.units as u
 from pyspeckit.specwarnings import warn
 import copy
 import widgets
@@ -39,6 +40,7 @@ class Plotter(object):
         self.figure = None
         self.axis = None
         self.Spectrum = Spectrum
+        self._xunit = Spectrum.xarr.unit
 
         # plot parameters
         self.offset = 0.0 # vertical offset
@@ -61,18 +63,38 @@ class Plotter(object):
 
         self.automake_fitter_tool = False
 
-
     def _get_prop(xy, minmax):
         def getprop(self):
             if xy == 'x':
                 if minmax == 'min':
+                    print("ti einai to xlim[0]?:",self._xlim[0])
+                    if self._xlim[0] and self._xunit:
+                        try:
+                            self._xlim[0]._unit = self._xunit 
+                        except AttributeError:
+                            self._xlim[0] = u.Quantity(self._xlim[0], self._xunit)
                     return self._xlim[0]
                 elif minmax == 'max':
+                    if self._xlim[1] and self._xunit:
+                        try:
+                            self._xlim[1]._unit = self._xunit 
+                        except AttributeError:
+                            self._xlim[1] = u.Quantity(self._xlim[1], self._xunit)
                     return self._xlim[1]
             elif xy == 'y':
                 if minmax == 'min':
+                    if self._ylim[0] and self._xunit:
+                        try:
+                            self._ylim[0]._unit = self._xunit 
+                        except AttributeError:
+                            self._ylim[0] = u.Quantity(self._ylim[0], self._xunit)    
                     return self._ylim[0]
                 elif minmax == 'max':
+                    if self._ylim[1] and self._xunit:
+                        try:
+                            self._ylim[1]._unit = self._xunit 
+                        except AttributeError:
+                            self._ylim[1] = u.Quantity(self._ylim[1], self._xunit)    
                     return self._ylim[1]
         return getprop
 
@@ -265,6 +287,11 @@ class Plotter(object):
         if silent is not None:
             self.silent = silent
 
+        print('in plot:')
+        print('self.xmin:',self.xmin)
+        print('self.xmax:',self.xmax)
+        print('use_window_limits:',use_window_limits)
+        print('-----------------------------')
         if reset:
             self.reset_limits(use_window_limits=use_window_limits, **reset_kwargs)
 
@@ -281,12 +308,13 @@ class Plotter(object):
         self.ymin,self.ymax = self._window_limits[1]
         if self.debug: print "Recovered window limits: ",self._window_limits
     
-    def reset_limits(self,xmin=None, xmax=None, ymin=None, ymax=None,
+    def reset_limits(self, xmin=None, xmax=None, ymin=None, ymax=None,
             reset_xlimits=True, reset_ylimits=True, ypeakscale=1.2,
             silent=None, use_window_limits=False, **kwargs):
         """
         Automatically or manually reset the plot limits
         """
+        # if not use_window_limits: use_window_limits = False
         if self.debug:
             frame = inspect.currentframe()
             args, _, _, values = inspect.getargvalues(frame)
@@ -300,18 +328,26 @@ class Plotter(object):
             if silent is not None:
                 self.silent = silent
 
-            if (self.Spectrum.xarr.max() < self.xmin or self.Spectrum.xarr.min() > self.xmax 
-                    or reset_xlimits):
-                if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
-                self.xmin = None
-                self.xmax = None
-            if xmin is not None: self.xmin = xmin
-            elif self.xmin is None: self.xmin=self.Spectrum.xarr.min()
-            if xmax is not None: self.xmax = xmax
-            elif self.xmax is None: self.xmax=self.Spectrum.xarr.max()
+            print('self.xmin:',self.xmin)
+            print('self.xmax:',self.xmax)
+            print('type(self.xmin):',type(self.xmin))
+            print('type(self.xmax):',type(self.xmax))
 
-            xpixmin = np.argmin(np.abs(self.Spectrum.xarr-self.xmin))
-            xpixmax = np.argmin(np.abs(self.Spectrum.xarr-self.xmax))
+            if self.xmin and self.xmax:
+                print('self.Spectrum.xarr.min:',self.Spectrum.xarr.min())
+                print('self.xmin.value:',self.xmin.value)
+                if (self.Spectrum.xarr.min() < self.xmin or self.Spectrum.xarr.max() > self.xmax 
+                        or reset_xlimits):
+                    if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
+                    self.xmin = None
+                    self.xmax = None
+            if xmin is not None: self.xmin = u.Quantity(xmin, self._xunit)
+            elif self.xmin is None: self.xmin = u.Quantity(self.Spectrum.xarr.min(), self._xunit)
+            if xmax is not None: self.xmax = u.Quantity(xmax, self._xunit)
+            elif self.xmax is None: self.xmax = u.Quantity(self.Spectrum.xarr.max(), self._xunit)
+
+            xpixmin = np.argmin(np.abs(self.Spectrum.xarr.value-self.xmin.value))
+            xpixmax = np.argmin(np.abs(self.Spectrum.xarr.value-self.xmax.value))
             if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
             elif xpixmin == xpixmax:
                 if not self.silent: warn( "ERROR: the X axis limits specified were invalid.  Resetting." )
@@ -320,11 +356,12 @@ class Plotter(object):
                                   ypeakscale=ypeakscale, **kwargs)
                 return
             
-            if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
-                    or reset_ylimits):
-                if not self.silent and not reset_ylimits: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
-                self.ymin = None
-                self.ymax = None
+            if self.ymin and self.ymax:
+                if (self.Spectrum.xarr.max() < self.ymin or self.Spectrum.xarr.min() > self.ymax
+                        or reset_ylimits):
+                    if not self.silent and not reset_ylimits: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
+                    self.ymin = None
+                    self.ymax = None
 
             if ymin is not None: self.ymin = ymin
             elif self.ymin is None:
@@ -341,19 +378,20 @@ class Plotter(object):
             if ymax is not None: self.ymax = ymax
             elif self.ymax is None:
                 if hasattr(self.Spectrum.data, 'mask'):
-                    ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin)
+                    ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin.value)
                 else:
-                    ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin)
+                    ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin.value)
                 if ymaxval > 0:
-                    self.ymax = float(ymaxval) * float(ypeakscale) + self.ymin
+                    self.ymax = float(ymaxval) * float(ypeakscale) + self.ymin.value
                 else:
-                    self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin
+                    self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin.value
 
-            self.ymin += self.offset
-            self.ymax += self.offset
+            print('self.ymin:',self.ymin)
+            self.ymin += u.Quantity(self.offset, self.ymin.unit)
+            self.ymax += u.Quantity(self.offset, self.ymax.unit)
 
-        self.axis.set_xlim(self.xmin,self.xmax)
-        self.axis.set_ylim(self.ymin,self.ymax)
+        self.axis.set_xlim(self.xmin.value,self.xmax.value)
+        self.axis.set_ylim(self.ymin.value,self.ymax.value)
         
 
     def label(self, title=None, xlabel=None, ylabel=None, verbose_label=False,
@@ -378,14 +416,18 @@ class Plotter(object):
 
         if xlabel is not None:
             self.xlabel = xlabel
-        elif isinstance(self.Spectrum.xarr.xtype,str):
-            self.xlabel = self.Spectrum.xarr.xtype.title()
+        #TODO should i change this to self.Spectrum.xarr.unit
+        # elif isinstance(self.Spectrum.xarr.xtype,str):
+        #   self.xlabel = self.Spectrum.xarr.xtype.title()
+        elif self._xunit:
+        #     self.xlabel += "("+self.Spectrum.xarr.unit+")"
+        # elif self.Spectrum.xarr.unit.name:
+            self.xlabel += " ("+self._xunit.to_string(format=u.format.Latex)+")"
             if verbose_label:
                 self.xlabel = "%s %s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
-                        self.Spectrum.xarr.frame.title(),
+                        # self.Spectrum.xarr.frame.title(),
                         self.xlabel )
-            if isinstance(self.Spectrum.xarr.units,str):
-                self.xlabel += " ("+self.Spectrum.xarr.units+")"
+            
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
 
@@ -534,6 +576,8 @@ class Plotter(object):
 
         # convert line_xvals to current units
         xvals = [self.Spectrum.xarr.x_to_coord(c, xval_units) for c in line_xvals]
+        if self.Spectrum.xarr.unit != self._xunit:
+            self._xunit = self.Spectrum.xarr.unit
 
         if auto_yloc:
             yr = self.axis.get_ylim()

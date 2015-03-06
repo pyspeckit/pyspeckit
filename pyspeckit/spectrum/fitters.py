@@ -11,6 +11,7 @@ import history
 import re
 import itertools
 from astropy import log
+from astropy import units as u
 
 class Registry(object):
     """
@@ -1109,10 +1110,10 @@ class Specfit(interactive.Interactive):
             raise Exception("Fitter %s has no annotations." % self.fitter)
 
         #xtypename = units.unit_type_dict[self.Spectrum.xarr.xtype]
-        xcharconv = units.SmartCaseNoSpaceDict({'frequency':'\\nu',
-                                                'wavelength':'\\lambda',
-                                                'velocity':'v', 'pixels':'x'})
-        xchar = xcharconv[self.Spectrum.xarr.xtype]
+        xcharconv = units.SmartCaseNoSpaceDict({u.Hz.physical_type:'\\nu',
+                                                u.m.physical_type:'\\lambda',
+                                                (u.km/u.s).physical_type:'v', 'pixels':'x'})
+        xchar = xcharconv[self.Spectrum.xarr.unit.physical_type]
         self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for
                                    L in self._annotation_labels]
 
@@ -1759,9 +1760,12 @@ class Specfit(interactive.Interactive):
         
         if interpolate_factor > 1:
             newxarr = units.SpectroscopicAxis(
-                    np.arange(xarr.min()-cd,xarr.max()+cd,cd / float(interpolate_factor)))
+                    np.arange(xarr.min().value-cd,xarr.max().value+cd,cd / float(interpolate_factor)),
+                    unit=xarr._unit,
+                    equivalencies=xarr.equivalencies
+                    )
             # load the metadata from xarr
-            newxarr._update_from(xarr)
+            # newxarr._update_from(xarr)
             data = np.interp(newxarr,xarr,data[line_region])
             xarr = newxarr
         else:

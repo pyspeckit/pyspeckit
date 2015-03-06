@@ -55,8 +55,8 @@ def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True,
         convention, frame = None,None
         vframe = 0.0
 
-    XAxis = units.SpectroscopicAxis(xarr, xunits, xtype=xtype, refX=refX,
-            velocity_convention=convention, frame=frame, frame_offset=vframe, **kwargs)
+    XAxis = units.SpectroscopicAxis(xarr, xunits, refX=refX,
+            velocity_convention=convention, **kwargs)
 
     return XAxis
 
