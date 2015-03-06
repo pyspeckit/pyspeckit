@@ -269,9 +269,9 @@ class Specfit(interactive.Interactive):
               or guesses is not None
               or parinfo is not None):
             if guesses is None and parinfo is None:
-                # raise ValueError("You must input guesses when using multifit."
-                                 # "  Also, baseline (continuum fit) first!")
-                pass
+                raise ValueError("You must input guesses when using multifit."
+                                 "  Also, baseline (continuum fit) first!")
+                # pass
             elif parinfo is not None:
                 self.guesses = parinfo.values
                 self.parinfo = parinfo
