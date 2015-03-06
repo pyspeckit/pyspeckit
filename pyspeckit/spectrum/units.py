@@ -210,7 +210,8 @@ frame_type_dict = {'LSRK':'velocity','LSRD':'velocity','LSR':'velocity',
 fits_frame = {'rest':'REST','LSRK':'-LSR','heliocentric':'-HEL','geocentric':'-GEO'}
 fits_specsys = {'rest':'REST','LSRK':'LSRK','LSRD':'LSRD','heliocentric':'HEL','geocentric':'GEO'}
 fits_type = {'velocity':'VELO','frequency':'FREQ','wavelength':'WAVE','length':'WAVE','redshift':'REDS',
-        'Velocity':'VELO','Frequency':'FREQ','Wavelength':'WAVE','Length':'WAVE','Redshift':'REDS'}
+        'Velocity':'VELO','Frequency':'FREQ','Wavelength':'WAVE','Length':'WAVE','Redshift':'REDS',
+        u.Hz.physical_type:'FREQ', (u.km/u.s).physical_type:'VELO', u.m.physical_type:'WAVE'}
 convention_suffix = {'radio':'RAD','optical':'OPT','relativistic':'REL','redshift':'RED'}
 
 speedoflight_ms  = np.float64(2.99792458e8) # m/s
@@ -390,7 +391,7 @@ class SpectroscopicAxis(u.Quantity):
 
     def __str__(self):
         selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
-                self.unit,self.umin(),self.umax())
+                self.unit,self.umin().value,self.umax().value)
         if self.refX is not None:
             selfstr += "Reference is %g %s" % (self.refX, self.refX_units)
         return selfstr
@@ -412,7 +413,7 @@ class SpectroscopicAxis(u.Quantity):
         try:
             self._check_consistent_type()
         except InconsistentTypeError:
-            self.xtype = unit_type_dict[self.units]
+            self.xtype = unit_type_dict[self.unit]
 
     def umax(self, unit=None):
         """
@@ -557,12 +558,12 @@ class SpectroscopicAxis(u.Quantity):
         self[:] = self.as_unit(unit, **kwargs)
         self.flags.writeable=False
         
-        if unit in velocity_dict:
-            self.xtype = "velocity"
-        elif unit in frequency_dict:
-            self.xtype = "frequency"
-        elif unit in wavelength_dict:
-            self.xtype = "wavelength"
+        # if unit in velocity_dict:
+        #     self.xtype = "velocity"
+        # elif unit in frequency_dict:
+        #     self.xtype = "frequency"
+        # elif unit in wavelength_dict:
+        #     self.xtype = "wavelength"
 
         # if isinstance(unit, u.Unit) or isinstance(unit, u.Unit) and unit not in (None, 'unknown'):
         # self._unit = unit
@@ -669,16 +670,16 @@ class SpectroscopicAxis(u.Quantity):
         if self.wcshead is None:
             self.wcshead = {}
 
-        self.wcshead['CUNIT1'] = self.units
-        if fits_type[self.xtype] == 'VELO' and self.velocity_convention is not None:
+        self.wcshead['CUNIT1'] = self.unit
+        if fits_type[self.unit.physical_type] == 'VELO' and self.velocity_convention is not None:
             ctype = 'V'+convention_suffix[self.velocity_convention]
         else:
-            ctype = fits_type[self.xtype]
+            ctype = fits_type[self.unit.physical_type]
         #self.wcshead['CTYPE1'] = ctype+fits_frame[self.frame]
         try:
             from spectral_cube import spectral_axis
             self.wcshead['CTYPE1'] = spectral_axis.determine_ctype_from_vconv(ctype,
-                                                                              self.units,
+                                                                              self.unit,
                                                                               self.velocity_convention)
         except ImportError:
             self.wcshead['CTYPE1'] = ctype
@@ -711,6 +712,8 @@ class SpectroscopicAxis(u.Quantity):
 
         # parameter validation
         if refX and center_frequency and (refX != center_frequency):
+            print('refX:',refX)
+            print('center_frequency:',center_frequency)
             raise ValueError("Cannot accept different values for refX and center_frequency")
         if not hasattr(center_frequency, 'unit'):
             if center_frequency_unit:
