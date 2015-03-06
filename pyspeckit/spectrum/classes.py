@@ -180,14 +180,12 @@ class Spectrum(object):
                 self.data = np.ma.masked_where(np.isnan(self.data) + np.isinf(self.data), self.data)
                 self.error = np.ma.masked_where(np.isnan(self.data) + np.isinf(self.data), self.error)
 
-        # it is very important that this be done BEFORE the spectofit is set!
-        self._sort()
-
         self.plotter = plotters.Plotter(self)
         self._register_fitters()
         self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         self.speclines = speclines
+        self._sort()
 
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
         self.plot_special = None
@@ -300,7 +298,7 @@ class Spectrum(object):
         else:
             warn( "Warning: Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels unless you set them manually (e.g., sp.xarr.unit='angstroms')")
             self.xarr.xtype = 'pixels'
-            self.xarr.units = 'none'
+            self.xarr.unit = 'none'
             #raise ValueError("Invalid xtype in text header")
         self.ytype = Table.data.dtype.names[Table.datacol]
         try:
@@ -327,11 +325,11 @@ class Spectrum(object):
         """    
         
         self.xarr.xtype = hdr['xtype']
-        self.xarr.xunit = hdr['xunit']
+        self.xarr.xunits = hdr['xunits']
         self.ytype = hdr['ytype']
-        self.unit = hdr['yunit']
+        self.unit = hdr['yunits']
         self.header = pyfits.Header()
-        self.header['CUNIT1'] = self.xarr.xunit
+        self.header['CUNIT1'] = self.xarr.xunits
         self.header['CTYPE1'] = self.xarr.xtype
         self.header['BUNIT'] = self.ytype
         self.header['BTYPE'] = self.unit
@@ -374,7 +372,7 @@ class Spectrum(object):
                 fluxnorm=fluxnorm, miscline=miscline, misctol=misctol,
                 ignore=ignore, derive=derive, **kwargs)
 
-    def crop(self, x1, x2, unit=None, **kwargs):
+    def crop(self, x1, x2, units=None, **kwargs):
         """
         Replace the current spectrum with a subset from x1 to x2 in current
         units
@@ -383,13 +381,13 @@ class Spectrum(object):
 
         """
         # do slice (this code is redundant... need to figure out how to fix that)
-        x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(unit)))
-        x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(unit)))
+        x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(units)))
+        x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(units)))
         if x1pix > x2pix: x1pix,x2pix = x2pix,x1pix
         if x1pix == x2pix:
             raise IndexError("ERROR: Trying to crop to zero size.")
 
-        self = self.slice(x1pix, x2pix, unit='pixels', copy=False, **kwargs)
+        self = self.slice(x1pix, x2pix, units='pixels', copy=False, **kwargs)
         # a baseline spectrum is always defined, even if it is all zeros
         # this is needed to prevent size mismatches.  There may be a more
         # elegant way to do this...
@@ -405,8 +403,7 @@ class Spectrum(object):
                 self.header['CRPIX1'] = self.header.get('CRPIX1') - x1pix
                 history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
-    def slice(self, start=None, stop=None, unit='pixel', copy=True,
-              preserve_fits=False):
+    def slice(self, start=None, stop=None, units='pixel', copy=True, preserve_fits=False):
         """Slicing the spectrum
 
         .. WARNING:: this is the same as cropping right now, but it returns a
@@ -418,7 +415,7 @@ class Spectrum(object):
             start of slice
         stop :  numpy.float or int
             stop of slice
-        unit : str
+        units : str
             allowed values are any supported physical unit, 'pixel'
         copy : bool
             Return a 'view' of the data or a copy?
@@ -426,11 +423,11 @@ class Spectrum(object):
             Save the fitted parameters from self.fitter?
         """
         
-        if unit in ('pixel','pixels'):
+        if units in ('pixel','pixels'):
             start_ind = start
             stop_ind  = stop
         else:
-            x_in_units = self.xarr.as_unit(unit)
+            x_in_units = self.xarr.as_unit(units)
             start_ind = x_in_units.x_to_pix(start)
             stop_ind  = x_in_units.x_to_pix(stop)
         if start_ind > stop_ind: start_ind,stop_ind = stop_ind,start_ind
@@ -720,12 +717,12 @@ class Spectrum(object):
         return self._arithmetic_threshold_value
 
     @_arithmetic_threshold.setter
-    def _arithmetic_threshold(self, value, unit=None):
+    def _arithmetic_threshold(self, value, units=None):
         self._arithmetic_threshold_value = value
-        if unit is None:
+        if units is None:
             self._arithmetic_threshold_units = self.xarr.unit
         else:
-            self._arithmetic_threshold_units = unit
+            self._arithmetic_threshold_units = units
 
     _arithmetic_threshold_value = 'exact'
     _arithmetic_threshold_units = None
@@ -750,7 +747,7 @@ class Spectra(Spectrum):
     X array is forcibly sorted in increasing order
     """
 
-    def __init__(self, speclist, xunit='GHz', **kwargs):
+    def __init__(self, speclist, xunits='GHz', **kwargs):
         print "Creating spectra"
         speclist = list(speclist)
         for ii,spec in enumerate(speclist):
@@ -761,9 +758,9 @@ class Spectra(Spectrum):
         self.speclist = speclist
 
         print "Concatenating data"
-        self.xarr = units.SpectroscopicAxes([sp.xarr.as_unit(xunit) for sp in speclist])
-        self.xarr.unit = xunit
-        self.xarr.xtype = units.unit_type_dict[xunit]
+        self.xarr = units.SpectroscopicAxes([sp.xarr.as_unit(xunits) for sp in speclist])
+        self.xarr.unit = xunits 
+        self.xarr.xtype = units.unit_type_dict[xunits]
         self.data = np.ma.concatenate([sp.data for sp in speclist])
         self.error = np.ma.concatenate([sp.error for sp in speclist])
         self._sort()
@@ -781,10 +778,10 @@ class Spectra(Spectrum):
         self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         
-        self.unit = speclist[0].unit
+        self.unit = speclist[0].units
         for spec in speclist:
             if spec.unit != self.unit:
-                raise ValueError("Mismatched unit")
+                raise ValueError("Mismatched units")
 
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
         self.plot_special = None
@@ -800,10 +797,10 @@ class Spectra(Spectrum):
         elif type(other) is Spectrum:
             self.speclist += [other.speclist]
         if other.unit != self.unit:
-            raise ValueError("Mismatched unit")
+            raise ValueError("Mismatched units")
 
         if other.xarr.unit != self.xarr.unit:
-            # convert all inputs to same unit
+            # convert all inputs to same units
             spec.xarr.convert_to_units(self.xarr.unit,**kwargs)
         self.xarr = units.SpectroscopicAxes([self.xarr,spec.xarr])
         self.data = np.concatenate([self.data,spec.data])
@@ -854,20 +851,18 @@ class Spectra(Spectrum):
             self.fittable.add_column('centererr',[sp.specfit.modelerrs[1] for sp in self.speclist],unit=self.xarr.unit)
             self.fittable.add_column('widtherr',[sp.specfit.modelerrs[2] for sp in self.speclist],unit=self.xarr.unit)
 
-    def ploteach(self, xunit=None, inherit_fit=False, plot_fit=True,
-                 plotfitkwargs={}, **plotkwargs):
+    def ploteach(self, xunits=None, inherit_fit=False, plot_fit=True, plotfitkwargs={}, **plotkwargs):
         """
         Plot each spectrum in its own window
         inherit_fit - if specified, will grab the fitter & fitter properties from Spectra
         """
         for sp in self.speclist:
-            if xunit is not None:
-                sp.xarr.convert_to_unit(xunit,quiet=True)
+            if xunits is not None:
+                sp.xarr.convert_to_unit(xunits,quiet=True)
             if inherit_fit:
                 sp.specfit.fitter = self.specfit.fitter
                 sp.specfit.modelpars = self.specfit.modelpars
-                sp.specfit.model = np.interp(sp.xarr.as_unit(self.xarr.unit),
-                                             self.xarr, self.specfit.fullmodel)
+                sp.specfit.model = np.interp(sp.xarr.as_unit(self.xarr.unit),self.xarr,self.specfit.fullmodel)
 
             sp.plotter(**plotkwargs)
             
