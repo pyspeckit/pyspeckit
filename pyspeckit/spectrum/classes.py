@@ -118,7 +118,6 @@ class Spectrum(object):
         >>> # if you already have a simple fits file
         >>> sp = pyspeckit.Spectrum('test.fits')
         """
-
         if filename:
             if filetype is None:
                 suffix = filename.rsplit('.',1)[1]

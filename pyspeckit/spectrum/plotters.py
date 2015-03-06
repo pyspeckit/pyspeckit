@@ -265,6 +265,11 @@ class Plotter(object):
         if silent is not None:
             self.silent = silent
 
+        print('in plot:')
+        print('self.xmin:',self.xmin)
+        print('self.xmax:',self.xmax)
+        print('use_window_limits:',use_window_limits)
+        print('-----------------------------')
         if reset:
             self.reset_limits(use_window_limits=use_window_limits, **reset_kwargs)
 
@@ -287,6 +292,8 @@ class Plotter(object):
         """
         Automatically or manually reset the plot limits
         """
+        print("use_window_limits:",use_window_limits)
+        # if not use_window_limits: use_window_limits = False
         if self.debug:
             frame = inspect.currentframe()
             args, _, _, values = inspect.getargvalues(frame)
@@ -300,6 +307,10 @@ class Plotter(object):
             if silent is not None:
                 self.silent = silent
 
+            print('self.xmin:',self.xmin)
+            print('self.xmax:',self.xmax)
+            print('type(self.xmin):',type(self.xmin))
+            print('type(self.xmax):',type(self.xmax))
             if (self.Spectrum.xarr.max() < self.xmin or self.Spectrum.xarr.min() > self.xmax 
                     or reset_xlimits):
                 if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
