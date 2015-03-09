@@ -615,6 +615,7 @@ class SpectroscopicAxis(u.Quantity):
                                                                   refX, refX_units,
                                                                   center_frequency, center_frequency_unit, 
                                                                   equivalencies)
+        print('calling to() with:',(unit, equivalencies+self.equivalencies))
         return self.to(unit, self._equivalencies + equivalencies)
 
     
