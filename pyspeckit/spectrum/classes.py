@@ -575,8 +575,8 @@ class Spectrum(object):
         else:
             name = ""
         return r'<Spectrum object%s over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s at %s>' % \
-                (name, self.xarr.min(), self.xarr.max().value, self.xarr.unit,
-                        self.data.min().value, self.data.max().value, self.unit,
+                (name, self.xarr.min().value, self.xarr.max().value, self.xarr.unit,
+                        self.data.min(), self.data.max(), self.unit,
                         str(hex(self.__hash__())))
     
 

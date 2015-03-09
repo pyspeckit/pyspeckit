@@ -3,7 +3,7 @@
 Units and SpectroscopicAxes
 ===========================
 
-Unit parsing and conversion tool.  
+Unit parsing and conversion tool.
 The SpectroscopicAxis class is meant to deal with unit conversion internally
 
 Open Questions: Are there other FITS-valid projection types, unit types, etc.
@@ -276,7 +276,7 @@ class SpectroscopicAxis(u.Quantity):
     """
     def __new__(self, xarr, unit='Hz', refX=None, redshift=None,
                 refX_units=None, velocity_convention=None, use128bits=False, 
-                bad_unit_response='raise', equivalencies=[],
+                bad_unit_response='raise', equivalencies=u.spectral(),
                 center_frequency=None, center_frequency_unit=None):
         """
         Make a new spectroscopic axis instance
@@ -337,10 +337,11 @@ class SpectroscopicAxis(u.Quantity):
         if equivalencies:
             subarr._equivalencies = equivalencies
         else:
-            subarr.center_frequency, subarr._equivalencies = self.find_equivalencies(subarr.velocity_convention,
-                                                                                 subarr.refX, subarr.refX_units, 
-                                                                                 subarr.center_frequency, subarr.center_frequency_unit, 
-                                                                                 equivalencies)
+            subarr.center_frequency, subarr._equivalencies = \
+                self.find_equivalencies(subarr.velocity_convention,
+                                        subarr.refX, subarr.refX_units, 
+                                        subarr.center_frequency, subarr.center_frequency_unit, 
+                                        equivalencies)
         if subarr.center_frequency:
             subarr.center_frequency_unit = center_frequency_unit
         return subarr
@@ -557,19 +558,9 @@ class SpectroscopicAxis(u.Quantity):
 
         self[:] = self.as_unit(unit, **kwargs)
         self.flags.writeable=False
-        
-        # if unit in velocity_dict:
-        #     self.xtype = "velocity"
-        # elif unit in frequency_dict:
-        #     self.xtype = "frequency"
-        # elif unit in wavelength_dict:
-        #     self.xtype = "wavelength"
-
-        # if isinstance(unit, u.Unit) or isinstance(unit, u.Unit) and unit not in (None, 'unknown'):
-        # self._unit = unit
         self.make_dxarr()
 
-    def as_unit(self, unit, equivalencies=[], velocity_convention=None, refX=None,
+    def as_unit(self, unit, equivalencies=u.spectral(), velocity_convention=None, refX=None,
                 refX_units=None, center_frequency=None, center_frequency_unit=None,
                 **kwargs):
         """
@@ -615,10 +606,32 @@ class SpectroscopicAxis(u.Quantity):
                                                                   refX, refX_units,
                                                                   center_frequency, center_frequency_unit, 
                                                                   equivalencies)
-        print('calling to() with:',(unit, equivalencies+self.equivalencies))
-        return self.to(unit, self._equivalencies + equivalencies)
+        # self._equivalencies = self.remove_duplicate_equivalencies
+        # self.remove_duplicate_equivalencies(equivalencies)
+        print('calling to() with:',(unit, self.equivalencies))
+        print('self:',self)
+        print('type(self):',type(self))
+        # import IPython
+        # IPython.embed()
+        # self._equivalencies += list(set(equivalencies) - set(self._equivalencies))
+
+        return self.to(unit, self.equivalencies+equivalencies)
+        # return self.to(unit, self._equivalencies + list(set(equivalencies) - set(self._equivalencies)))
 
     
+    def remove_duplicate_equivalencies(self, equivalencies):
+        """
+        Utility method to merge and remove duplicate equivalencies 
+        """
+        seen = {}
+        result = []
+        for item in self._equivalencies+equivalencies:
+           if item in seen: continue
+           seen[item] = 1
+           result.append(item)
+        print('result:',result)
+        print('seen:',seen)
+        self._equivalencies = result
 
     def make_dxarr(self, coordinate_location='center'):
         """
@@ -702,13 +715,13 @@ class SpectroscopicAxis(u.Quantity):
 
     @classmethod
     def find_equivalencies(self, velocity_convention=None, refX=None, refX_units=None,
-                           center_frequency=None, center_frequency_unit=None, equivalencies=[]):
+                           center_frequency=None, center_frequency_unit=None, equivalencies=u.spectral()):
         """
         Utility function used to validate parameters and add equivalencies
         """
-        if equivalencies:
-            return (center_frequency, equivalencies)
-        elif not velocity_convention and not refX and not center_frequency:
+        # if equivalencies:
+        #     return (center_frequency, equivalencies)
+        if not velocity_convention and not refX and not center_frequency:
             return (center_frequency, equivalencies)
 
         # parameter validation
