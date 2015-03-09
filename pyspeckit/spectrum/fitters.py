@@ -78,6 +78,9 @@ The default is gaussian ('g'), all options are listed below:
         key: char
             Key to select the fitter in interactive mode
         '''
+        if not name in self.singlefitters or override:
+                self.singlefitters[name] = function
+
         if not name in self.multifitters or override:
             self.multifitters[name] = function
 
