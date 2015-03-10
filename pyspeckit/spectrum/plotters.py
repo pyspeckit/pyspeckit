@@ -67,7 +67,6 @@ class Plotter(object):
         def getprop(self):
             if xy == 'x':
                 if minmax == 'min':
-                    print("ti einai to xlim[0]?:",self._xlim[0])
                     if self._xlim[0] and self._xunit:
                         try:
                             self._xlim[0]._unit = self._xunit 
@@ -287,11 +286,11 @@ class Plotter(object):
         if silent is not None:
             self.silent = silent
 
-        print('in plot:')
-        print('self.xmin:',self.xmin)
-        print('self.xmax:',self.xmax)
-        print('use_window_limits:',use_window_limits)
-        print('-----------------------------')
+        # print('in plot:')
+        # print('self.xmin:',self.xmin)
+        # print('self.xmax:',self.xmax)
+        # print('use_window_limits:',use_window_limits)
+        # print('-----------------------------')
         if reset:
             self.reset_limits(use_window_limits=use_window_limits, **reset_kwargs)
 
@@ -328,10 +327,10 @@ class Plotter(object):
             if silent is not None:
                 self.silent = silent
 
-            print('self.xmin:',self.xmin)
-            print('self.xmax:',self.xmax)
-            print('type(self.xmin):',type(self.xmin))
-            print('type(self.xmax):',type(self.xmax))
+            # print('self.xmin:',self.xmin)
+            # print('self.xmax:',self.xmax)
+            # print('type(self.xmin):',type(self.xmin))
+            # print('type(self.xmax):',type(self.xmax))
 
             if self.xmin and self.xmax:
                 print('self.Spectrum.xarr.min:',self.Spectrum.xarr.min())
@@ -386,7 +385,7 @@ class Plotter(object):
                 else:
                     self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin.value
 
-            print('self.ymin:',self.ymin)
+            # print('self.ymin:',self.ymin)
             self.ymin += u.Quantity(self.offset, self.ymin.unit)
             self.ymax += u.Quantity(self.offset, self.ymax.unit)
 
