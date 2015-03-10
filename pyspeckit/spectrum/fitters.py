@@ -408,7 +408,7 @@ class Specfit(interactive.Interactive):
             if verbose:
                 print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
             self.EQW_plots.append(self.Spectrum.plotter.axis.fill_between(
-                [midpt-eqw/2.0,midpt+eqw/2.0], [0,0],
+                [midpt.value-eqw/2.0,midpt.value+eqw/2.0], [0,0],
                 [midpt_level,midpt_level], color=plotcolor, alpha=alpha,
                 label='EQW: %0.3g' % eqw))
             if annotate:
@@ -1112,7 +1112,16 @@ class Specfit(interactive.Interactive):
         xcharconv = units.SmartCaseNoSpaceDict({u.Hz.physical_type:'\\nu',
                                                 u.m.physical_type:'\\lambda',
                                                 (u.km/u.s).physical_type:'v', 'pixels':'x'})
-        xchar = xcharconv[self.Spectrum.xarr.unit.physical_type]
+        try:
+            xchar = xcharconv[self.Spectrum.xarr.unit.physical_type]
+        except AttributeError:
+            unit_key = self.Spectrum.xarr.unit
+            if unit_key == 'microns':
+                unit_key = 'micron'
+            elif unit_key == 'angstroms':
+                unit_key = 'Angstrom'
+            xchar = xcharconv[u.Unit(unit_key).physical_type]
+            
         self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for
                                    L in self._annotation_labels]
 

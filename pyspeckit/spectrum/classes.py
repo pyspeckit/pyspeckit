@@ -291,7 +291,7 @@ class Spectrum(object):
         xtype = Table.data.dtype.names[Table.xaxcol]
         if xtype in units.xtype_dict.values():
             self.xarr.xtype = xtype
-            self.xarr.unit = Table.columns[xtype].unit
+            self.xarr._unit = Table.columns[xtype].unit
         elif xtype in units.xtype_dict:
             self.xarr.xtype = units.xtype_dict[xtype]
             self.xarr.unit = Table.columns[xtype].unit
@@ -380,9 +380,16 @@ class Spectrum(object):
         Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum
 
         """
+        if self.xarr.unit and not units:
+            units = self.xarr.unit
+        elif not self.xarr.unit and not units:
+            units = u.dimensionless_unscaled
+
+        import IPython
+        IPython.embed()
         # do slice (this code is redundant... need to figure out how to fix that)
-        x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(units)))
-        x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(units)))
+        x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(units).value))
+        x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(units).value))
         if x1pix > x2pix: x1pix,x2pix = x2pix,x1pix
         if x1pix == x2pix:
             raise IndexError("ERROR: Trying to crop to zero size.")
