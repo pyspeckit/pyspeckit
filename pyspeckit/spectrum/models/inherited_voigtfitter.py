@@ -51,7 +51,7 @@ def voigt(xarr,amp,xcen,sigma,gamma,normalized=False):
     """
 
     if scipyOK:
-        z = ((xarr-xcen) + 1j*gamma) / (sigma * np.sqrt(2))
+        z = ((xarr.value-xcen) + 1j*gamma) / (sigma * np.sqrt(2))
         V = amp * np.real(scipy.special.wofz(z)) 
         if normalized:
             return V / (sigma*np.sqrt(2*np.pi))

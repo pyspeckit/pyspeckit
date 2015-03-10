@@ -309,9 +309,15 @@ class SpectroscopicAxis(u.Quantity):
         subarr = np.array(xarr,dtype=dtype)
         subarr = subarr.view(self)
 
+        
+        
         try:
             if unit is None:
                 unit = u.dimensionless_unscaled
+            elif unit == 'angstroms':
+                unit = 'Angstrom'
+            elif unit == 'microns':
+                unit = 'micron'
             subarr._unit = u.Unit(unit)
         except ValueError:
             if bad_unit_response=="pixel":
@@ -553,13 +559,20 @@ class SpectroscopicAxis(u.Quantity):
         if not center_frequency_unit:
             center_frequency_unit = self.center_frequency_unit
         
-        # print('calling find_equivalencies with velocity_convention:%s, center_frequency:%s, center_frequency_unit:%s' %(velocity_convention, center_frequency, center_frequency_unit))
+        print('calling find_equivalencies with velocity_convention:%s, center_frequency:%s, center_frequency_unit:%s' %(velocity_convention, center_frequency, center_frequency_unit))
         self.center_frequency, self._equivalencies = \
             self.find_equivalencies(velocity_convention, 
                                     refX, refX_units,
                                     center_frequency, center_frequency_unit, 
                                     equivalencies)
-        # print("going to transform %s to %s with equivalencies: %s" % (self.unit, unit, self.equivalencies))
+        print("going to transform %s to %s with equivalencies: %s" % (self.unit, unit, self.equivalencies))
+        if unit == 'microns':
+            unit = 'micron'
+        if isinstance(self.unit, str):
+            if self._unit == 'microns':
+                self._unit = 'micron'
+            self._unit = u.Unit(self.unit)
+        print 'self is:', self
         return self.to(unit, equivalencies=self.equivalencies)
         # return self.to(unit, self._equivalencies + list(set(equivalencies) - set(self._equivalencies)))
 
@@ -650,7 +663,7 @@ class SpectroscopicAxis(u.Quantity):
         Utility function used to validate parameters and add equivalencies
         """
         if not velocity_convention and not refX and not center_frequency:
-            return (center_frequency, equivalencies)
+            return center_frequency, equivalencies
 
         # parameter validation
         if refX and center_frequency and (refX != center_frequency):

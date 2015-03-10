@@ -41,6 +41,10 @@ class Plotter(object):
         self.axis = None
         self.Spectrum = Spectrum
         self._xunit = Spectrum.xarr.unit
+        if self._xunit == 'microns':
+            self._xunit = 'micron'
+        elif self._xunit == 'angstroms':
+            self._xunit = 'Angstrom'
 
         # plot parameters
         self.offset = 0.0 # vertical offset
@@ -277,7 +281,7 @@ class Plotter(object):
                         yerr=self.Spectrum.error*self.plotscale, ecolor=errcolor, fmt=None,
                         **kwargs)
 
-        self._spectrumplot = self.axis.plot(self.Spectrum.xarr+xoffset,
+        self._spectrumplot = self.axis.plot(self.Spectrum.xarr.value+xoffset,
                 self.Spectrum.data*self.plotscale+self.offset, color=color,
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
 
@@ -341,9 +345,9 @@ class Plotter(object):
                     self.xmin = None
                     self.xmax = None
             if xmin is not None: self.xmin = u.Quantity(xmin, self._xunit)
-            elif self.xmin is None: self.xmin = u.Quantity(self.Spectrum.xarr.min(), self._xunit)
+            elif self.xmin is None: self.xmin = u.Quantity(self.Spectrum.xarr.min().value, self._xunit)
             if xmax is not None: self.xmax = u.Quantity(xmax, self._xunit)
-            elif self.xmax is None: self.xmax = u.Quantity(self.Spectrum.xarr.max(), self._xunit)
+            elif self.xmax is None: self.xmax = u.Quantity(self.Spectrum.xarr.max().value, self._xunit)
 
             xpixmin = np.argmin(np.abs(self.Spectrum.xarr.value-self.xmin.value))
             xpixmax = np.argmin(np.abs(self.Spectrum.xarr.value-self.xmax.value))
@@ -421,7 +425,7 @@ class Plotter(object):
         elif self._xunit:
         #     self.xlabel += "("+self.Spectrum.xarr.unit+")"
         # elif self.Spectrum.xarr.unit.name:
-            self.xlabel += " ("+self._xunit.to_string(format=u.format.Latex)+")"
+            self.xlabel += " ("+u.Unit(self._xunit).to_string(format=u.format.Latex)+")"
             if verbose_label:
                 self.xlabel = "%s %s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
                         # self.Spectrum.xarr.frame.title(),
@@ -582,7 +586,6 @@ class Plotter(object):
             yr = self.axis.get_ylim()
             kwargs['box_loc'] = (yr[1]-yr[0])*auto_yloc_fraction + yr[0]
             kwargs['arrow_tip'] = (yr[1]-yr[0])*(auto_yloc_fraction*0.9) + yr[0]
-
 
         lineid_plot.plot_line_ids(self.Spectrum.xarr,
                 self.Spectrum.data, 
