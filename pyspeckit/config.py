@@ -9,10 +9,10 @@ to reflect preferences we set in ~/.pyspeckit/config.
 To see what values exist in config file, do:
     from config import mycfg
     mycfg.keys()
-    
+
 To decorate a new __call__ method, do:
     from config import ConfigDescriptor as cfgdec
-    
+
     @cfgdec
     def __call__(self, **kwargs):
         pass    # do something!
@@ -83,62 +83,62 @@ class ConfigParser:
             for line in f:
                 if not line.strip(): continue
                 thisline = line.split()
-            
+
                 if thisline[0][0] == '#': continue
-                
+
                 if thisline[2] in ['True', 1]: return_dict[thisline[0]] = True
                 elif thisline[2] in ['False', 0]: return_dict[thisline[0]] = False
                 elif thisline[2] == 'None': return_dict[thisline[0]] = None
                 elif thisline[2].isalpha(): return_dict[thisline[0]] = str(thisline[2])
                 else: return_dict[thisline[0]] = float(thisline[2])
-    	            	        
-    	    self.cfg = dotdictify(return_dict)
-    	else: 
-    	    self.cfg = dotdictify(cfgDefaults)
-            	    	
+
+            self.cfg = dotdictify(return_dict)
+        else:
+            self.cfg = dotdictify(cfgDefaults)
+
 __fn = os.path.expanduser("~/.pyspeckit/config")
-if os.path.exists(__fn): 
+if os.path.exists(__fn):
     mycfg = dotdictify(ConfigParser(__fn).cfg)
 else:
     mycfg = dotdictify(ConfigParser().cfg)
-   
-def ConfigDescriptor(f):    
-                                
+
+def ConfigDescriptor(f):
+
     def decorator(self, *args, **kwargs):
         """
         This is our decorator function, used to modify the inputs of __call__
         methods to reflect preferences we set in config file.
-                
+
         Notes:
         inspect.getargspec will tell us the names of all arguments and their default values.
         Later we'll have to be more careful - all_defs only makes entries for arguments that actually
-        have default values          
-        """  
+        have default values
+        """
 
-        all_args, all_vars, all_keys, all_defs = inspect.getargspec(f)                
+        all_args, all_vars, all_keys, all_defs = inspect.getargspec(f)
         all_args.pop(0) # pop self
-        
-        # Construct dictionary containing all of f's keyword arguments                                   
+
+        # Construct dictionary containing all of f's keyword arguments
         argsdefs = {}
         for i, arg in enumerate(all_args):
             argsdefs[arg] = all_defs[i]
-                                                                   
-        # Include these in our new_kwargs dictionary                                                                                                     
+
+        # Include these in our new_kwargs dictionary
         new_kwargs = argsdefs
-        
+
         # Read in config file and replace keyword arguments that have been defined in it
         for arg in new_kwargs:
             if arg in mycfg: new_kwargs[arg] = mycfg[arg]
-                
+
         # If we've changed anything on call, reflect this in new_kwargs
         for arg in kwargs:
-            new_kwargs[arg] = kwargs[arg]       
-                                                                                                                                       
+            new_kwargs[arg] = kwargs[arg]
+
         f(self, *args, **new_kwargs)
-            
+
     # documentation should be passed on, else sphinx doesn't work and the user can't access the docs
     decorator.__doc__ = f.__doc__
     decorator.__defaults__ = f.__defaults__
     decorator.__repr__ = f.__repr__
-    return decorator      
+    return decorator
 

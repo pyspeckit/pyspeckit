@@ -9,7 +9,7 @@ import operator
 from astropy import log
 
 def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
-                 scale_keyword=None, scale_action=operator.div, **kwargs):
+                 scale_keyword=None, scale_action=operator.truediv, **kwargs):
     """
     Grabs all the relevant pieces of a simple FITS-compliant 3d data cube
 

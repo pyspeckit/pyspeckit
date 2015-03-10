@@ -198,14 +198,18 @@ class SpectralModel(fitter.SimpleFitter):
         else:
             self.parinfo = []
 
-        if debug: print "After VHEIGHT parse len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight)
+        if debug: print("After VHEIGHT parse len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight))
 
 
         # this is a clever way to turn the parameter lists into a dict of lists
         # clever = hard to read
-        temp_pardict = OrderedDict([(varname, np.zeros(self.npars*self.npeaks, dtype='bool'))
-            if locals()[varname] is None else (varname, list(locals()[varname]) )
-            for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
+        temp_pardict = []
+        for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",","):
+            if locals()[varname] is None:
+                temp_pardict.append((varname, np.zeros(self.npars*self.npeaks, dtype='bool')))
+            else:
+                temp_pardict.append((varname, list(locals()[varname])))
+        temp_pardict = OrderedDict(temp_pardict)
         temp_pardict['parlimits'] = parlimits if parlimits is not None else [(0,0)] * (self.npars*self.npeaks)
         temp_pardict['parlimited'] = parlimited if parlimited is not None else [(False,False)] * (self.npars*self.npeaks)
         for k,v in temp_pardict.iteritems():
