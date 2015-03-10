@@ -238,8 +238,8 @@ class Specfit(interactive.Interactive):
             line
         
         """
-        if multifit:
-            log.warn("The multifit keyword has been deprecated", warnings.DeprecationWarning)
+        # if multifit:
+        #     log.warn("The multifit keyword has been deprecated", warnings.DeprecationWarning)
 
         if clear: self.clear()
         self.selectregion(verbose=verbose, debug=debug,
@@ -630,7 +630,7 @@ class Specfit(interactive.Interactive):
             for par in self.parinfo:
                 history.write_history(self.Spectrum.header, str(par))
                 
-    def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
+    def peakbgfit(self, usemoments=True, annotate=None, vheight=False, height=0,
                   negamp=None, fittype=None, renormalize='auto', color=None,
                   use_lmfit=False, show_components=None, debug=False,
                   use_window_limits=True, guesses=None,
@@ -715,13 +715,14 @@ class Specfit(interactive.Interactive):
                 if vheight: self.guesses[1] /= scalefactor
 
         if debug: print "Guesses before fit: ",self.guesses
+
         mpp,model,mpperr,chi2 = self.fitter(
                 self.Spectrum.xarr[self.xmin:self.xmax],
                 self.spectofit[self.xmin:self.xmax],
                 err=self.errspec[self.xmin:self.xmax],
                 vheight=vheight,
                 params=self.guesses,
-                debug=debug,
+                # debug=debug,
                 use_lmfit=use_lmfit,
                 **self.fitkwargs)
         if debug: print "1. Guesses, fits after: ",self.guesses, mpp
