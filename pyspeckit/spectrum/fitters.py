@@ -10,7 +10,7 @@ import copy
 import history
 import re
 import itertools
-from astropy import log
+from distutils import log
 
 class Registry(object):
     """
@@ -154,7 +154,7 @@ class Specfit(interactive.Interactive):
         #self.seterrspec()
         
     @cfgdec
-    def __call__(self, interactive=False, multifit=None, usemoments=True,
+    def __call__(self, interactive=False, usemoments=True,
                  clear_all_connections=True, debug=False, guesses=None,
                  parinfo=None, save=True, annotate=None, show_components=None,
                  use_lmfit=False, verbose=True, clear=True,
@@ -238,9 +238,7 @@ class Specfit(interactive.Interactive):
             line
         
         """
-        # if multifit:
-        #     log.warn("The multifit keyword has been deprecated", warnings.DeprecationWarning)
-
+        print 'calling specfit with guesses:', guesses
         if clear: self.clear()
         self.selectregion(verbose=verbose, debug=debug,
                 fit_plotted_area=fit_plotted_area,
@@ -248,12 +246,6 @@ class Specfit(interactive.Interactive):
                 use_window_limits=use_window_limits, **kwargs)
         for arg in ['xmin','xmax','xtype','reset']:
             if arg in kwargs: kwargs.pop(arg)
-
-        # multifit = True if the right number of guesses are passed
-        if guesses is not None:
-            if len(guesses) > 5:
-                # multifit = True
-                pass
 
         self.npeaks = 0
         self.fitkwargs = kwargs
@@ -272,9 +264,10 @@ class Specfit(interactive.Interactive):
               or guesses is not None
               or parinfo is not None):
             if guesses is None and parinfo is None:
-                raise ValueError("You must input guesses when using multifit."
-                                 "  Also, baseline (continuum fit) first!")
-                # pass
+                # raise ValueError("You must input guesses when using multifit."
+                                 # "  Also, baseline (continuum fit) first!")
+                log.warn("""You must input guesses when using multifit. 
+                            Also, baseline (continuum fit) first!""")
             elif parinfo is not None:
                 self.guesses = parinfo.values
                 self.parinfo = parinfo
