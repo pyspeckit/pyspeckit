@@ -385,8 +385,8 @@ class Spectrum(object):
         elif not self.xarr.unit and not units:
             units = u.dimensionless_unscaled
 
-        import IPython
-        IPython.embed()
+        # import IPython
+        # IPython.embed()
         # do slice (this code is redundant... need to figure out how to fix that)
         x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(units).value))
         x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(units).value))
