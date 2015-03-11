@@ -109,6 +109,18 @@ class SpectralModel(fitter.SimpleFitter):
 
         # analytic integral function
         self.integral_func = integral_func
+
+    def __call__(self, *args, **kwargs):
+        
+        use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
+        if use_lmfit:
+            return self.lmfitter(*args,**kwargs)
+        if self.multisingle == 'single':
+            # Generate a variable-height version of the model
+            # not used func = fitter.vheightmodel(self.modelfunc)
+            return self.fitter(*args, **kwargs)
+        elif self.multisingle == 'multi':
+            return self.fitter(*args,**kwargs)
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
                       parlimits=None, parlimited=None, parfixed=None,
@@ -304,13 +316,6 @@ class SpectralModel(fitter.SimpleFitter):
                 return [0,residuals]
         return f
 
-    def __call__(self, *args, **kwargs):
-        
-        use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
-        if use_lmfit:
-            return self.lmfitter(*args,**kwargs)
-        return self.fitter(*args,**kwargs)
-
     def lmfitfun(self,x,y,err=None,debug=False):
         """
         Wrapper function to compute the fit residuals in an lmfit-friendly format
@@ -459,7 +464,10 @@ class SpectralModel(fitter.SimpleFitter):
             # (gaussian, voigt, lorentz profiles should not depend on units.  Ammonia, formaldehyde,
             # H-alpha, etc. should)
             xax = copy.copy(xax)
-            xax.convert_to_unit(self.fitunits, quiet=quiet)
+            # xax.convert_to_unit(self.fitunits, quiet=quiet)
+            import IPython
+            IPython.embed()
+            xax = xax.as_unit(self.fitunits, quiet=quiet, **kwargs)
         elif self.fitunits is not None:
             raise TypeError("X axis does not have a convert method")
 
