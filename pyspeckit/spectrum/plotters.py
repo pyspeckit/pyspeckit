@@ -41,10 +41,6 @@ class Plotter(object):
         self.axis = None
         self.Spectrum = Spectrum
         self._xunit = Spectrum.xarr.unit
-        if self._xunit == 'microns':
-            self._xunit = 'micron'
-        elif self._xunit == 'angstroms':
-            self._xunit = 'Angstrom'
 
         # plot parameters
         self.offset = 0.0 # vertical offset
@@ -69,6 +65,12 @@ class Plotter(object):
 
     def _get_prop(xy, minmax):
         def getprop(self):
+            if self.Spectrum.xarr.unit != self._xunit:
+                self._xunit = self.Spectrum.xarr.unit
+                if self._xunit == 'microns':
+                    self._xunit = 'micron'
+                elif self._xunit == 'angstroms':
+                    self._xunit = 'Angstrom'
             if xy == 'x':
                 if minmax == 'min':
                     if self._xlim[0] and self._xunit:
@@ -338,7 +340,10 @@ class Plotter(object):
 
             if self.xmin and self.xmax:
                 print('self.Spectrum.xarr.min:',self.Spectrum.xarr.min())
-                print('self.xmin.value:',self.xmin.value)
+                print('self.Spectrum.xarr.min.unit:',self.Spectrum.xarr.min().unit)
+                print('self.xmin:',self.xmin)
+                print('self.xmin.unit:',self.xmin.unit)
+
                 if (self.Spectrum.xarr.min() < self.xmin or self.Spectrum.xarr.max() > self.xmax 
                         or reset_xlimits):
                     if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
@@ -579,8 +584,6 @@ class Plotter(object):
 
         # convert line_xvals to current units
         xvals = [self.Spectrum.xarr.x_to_coord(c, xval_units) for c in line_xvals]
-        if self.Spectrum.xarr.unit != self._xunit:
-            self._xunit = self.Spectrum.xarr.unit
 
         if auto_yloc:
             yr = self.axis.get_ylim()
