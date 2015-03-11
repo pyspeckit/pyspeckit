@@ -513,7 +513,6 @@ class SpectroscopicAxis(u.Quantity):
             self.flags.writeable=True
 
         self[:] = self.as_unit(unit, **kwargs)
-        print("after the call to as_unit:", self.unit)
         self.flags.writeable=False
         self.make_dxarr()
 
