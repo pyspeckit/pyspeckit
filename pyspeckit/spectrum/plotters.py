@@ -41,6 +41,10 @@ class Plotter(object):
         self.axis = None
         self.Spectrum = Spectrum
         self._xunit = Spectrum.xarr.unit
+        if self._xunit == 'microns':
+            self._xunit = 'micron'
+        elif self._xunit == 'angstroms':
+            self._xunit = 'Angstrom'
 
         # plot parameters
         self.offset = 0.0 # vertical offset
