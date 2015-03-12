@@ -7,6 +7,7 @@ Generalized hyperfine component fitter
 import numpy as np
 import model
 import fitter
+from astropy import units as u
 
 # should be imported in the future
 ckms = 2.99792458e5
@@ -121,28 +122,26 @@ class hyperfinemodel(object):
         """
         return self.hyperfine(*args,**kwargs)
 
-    def hyperfine_amp(self, xarr, amp=None, xoff_v=0.0, width=1.0,
-                      return_hyperfine_components=False, Tbackground=2.73,
-                      Tex=5.0, tau=0.1):
+    def hyperfine_amp(self, xarr, amp=None, xoff_v=0.0, width=1.0, 
+            return_hyperfine_components=False, Tbackground=2.73, Tex=5.0, tau=0.1):
         """
         wrapper of self.hyperfine with order of arguments changed
         """ 
         return self.hyperfine(xarr, amp=amp, Tex=Tex, tau=tau, xoff_v=xoff_v,
-                              width=width,
-                              return_hyperfine_components=return_hyperfine_components,
-                              Tbackground=Tbackground)
+                width=width, return_hyperfine_components=return_hyperfine_components,
+                Tbackground=Tbackground)
 
     def hyperfine_tau(self, xarr, tau, xoff_v, width, **kwargs):
         """ same as hyperfine, but with arguments in a different order, AND
         tau is returned instead of exp(-tau)"""
         return self.hyperfine(xarr, tau=tau, xoff_v=xoff_v, width=width,
-                              return_tau=True, **kwargs)
+                return_tau=True, **kwargs)
 
     def hyperfine_tau_total(self, xarr, tau_total, xoff_v, width, **kwargs):
         """ same as hyperfine, but with arguments in a different order, AND
         tau is returned instead of exp(-tau), AND the *peak* tau is used"""
-        return self.hyperfine(xarr, tau_total=tau_total, xoff_v=xoff_v,
-                              width=width, return_tau=True, **kwargs)
+        return self.hyperfine(xarr, tau_total=tau_total, xoff_v=xoff_v, width=width,
+                return_tau=True, **kwargs)
 
     def hyperfine_varyhf(self, xarr, Tex, xoff_v, width, *args, **kwargs):
         """ Wrapper of hyperfine for using a variable number of peaks with specified
@@ -210,7 +209,7 @@ class hyperfinemodel(object):
         """
 
         # Convert X-units to frequency in Hz
-        xarr = xarr.as_unit('Hz')
+        xarr = xarr.as_unit('Hz', equivalencies=u.doppler_radio(xarr.center_frequency*u.Hz))
 
         # Ensure parameters are scalar / have no extra dims
         if not np.isscalar(Tex): Tex = Tex.squeeze()
@@ -257,12 +256,9 @@ class hyperfinemodel(object):
                     tau_line = tau[linename]
                 else:
                     # the total optical depth, which is being fitted, should be the sum of the components
-                    tau_line = (tau * self.line_strength_dict[linename] /
-                                self.relative_strength_total_degeneracy[linename])
+                    tau_line = (tau * self.line_strength_dict[linename]/self.relative_strength_total_degeneracy[linename])
           
-                tau_nu = np.array(tau_line *
-                                  np.exp(-(xarr+nuoff-self.freq_dict[linename])**2 /
-                                         (2.0*nuwidth**2)))
+                tau_nu = np.array(tau_line * np.exp(-(xarr.value+nuoff-self.freq_dict[linename])**2/(2.0*nuwidth**2)))
                 tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
             components.append(tau_nu)
             tau_nu_cumul += tau_nu
