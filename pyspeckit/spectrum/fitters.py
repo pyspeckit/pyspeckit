@@ -10,7 +10,7 @@ import copy
 import history
 import re
 import itertools
-from distutils import log
+from astropy import log
 
 class Registry(object):
     """
@@ -21,7 +21,7 @@ class Registry(object):
         self.npars = {}
         self.multifitters = {}
         #to delete
-        self.singlefitters = {}
+        self.peakbgfitters = {}
         self.fitkeys = {}
         self.associatedkeys = {}
 
@@ -78,8 +78,8 @@ The default is gaussian ('g'), all options are listed below:
         key: char
             Key to select the fitter in interactive mode
         '''
-        if not name in self.singlefitters or override:
-                self.singlefitters[name] = function
+        if not name in self.peakbgfitters or override:
+                self.peakbgfitters[name] = function
 
         if not name in self.multifitters or override:
             self.multifitters[name] = function
@@ -222,9 +222,6 @@ class Specfit(interactive.Interactive):
             for gaussian and gaussian-like models.  Only works for single-fit
             mode (not multifit)
             DEPRECATED
-        multifit : boolean
-            If false, only a single peak is allower, but a "height" (0'th-order
-            baseline) will be fit simultaneously with that peak.
         debug : boolean
             Print debug statements?
         save : boolean
@@ -238,7 +235,6 @@ class Specfit(interactive.Interactive):
             line
         
         """
-        print 'calling specfit with guesses:', guesses
         if clear: self.clear()
         self.selectregion(verbose=verbose, debug=debug,
                 fit_plotted_area=fit_plotted_area,
@@ -264,10 +260,8 @@ class Specfit(interactive.Interactive):
               or guesses is not None
               or parinfo is not None):
             if guesses is None and parinfo is None:
-                # raise ValueError("You must input guesses when using multifit."
-                                 # "  Also, baseline (continuum fit) first!")
-                log.warn("""You must input guesses when using multifit. 
-                            Also, baseline (continuum fit) first!""")
+                raise ValueError("You must input guesses when using multifit."
+                                 "  Also, baseline (continuum fit) first!")
             elif parinfo is not None:
                 self.guesses = parinfo.values
                 self.parinfo = parinfo
@@ -284,7 +278,7 @@ class Specfit(interactive.Interactive):
                 raise ValueError("Guess and parinfo were somehow invalid.")
         else:
             print("Can't fit with given fittype {0}:"
-                  " it is not Registered as a multifitter.".format(self.fittype))
+                  " it is not Registered as a fitter.".format(self.fittype))
             return
         if save: self.savefit()
 
@@ -487,7 +481,7 @@ class Specfit(interactive.Interactive):
         ----------
         fittype : str
             What function will be fit?  fittype must have been Registryed in the
-            singlefitters dict.  Uses default ('gaussian') if not specified
+            peakbgfitters dict.  Uses default ('gaussian') if not specified
         renormalize : 'auto' or bool
             if 'auto' or True, will attempt to rescale small data (<1e-9) to be
             closer to 1 (scales by the median) so that the fit converges better
@@ -647,7 +641,7 @@ class Specfit(interactive.Interactive):
             None, can be either.
         fittype : bool
             What function will be fit?  fittype must have been Registryed in the
-            singlefitters dict
+            peakbgfitters dict
         renormalize : 'auto' or bool
             if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
             closer to 1 (scales by the median) so that the fit converges better
@@ -662,7 +656,7 @@ class Specfit(interactive.Interactive):
 
         if fittype is not None:
             self.fittype=fittype
-        NP = self.Registry.singlefitters[self.fittype].default_npars
+        NP = self.Registry.peakbgfitters[self.fittype].default_npars
 
         if guesses is not None:
             log.debug("Using user-specified guesses.")
@@ -676,7 +670,7 @@ class Specfit(interactive.Interactive):
         elif usemoments: # this can be done within gaussfit but I want to save them
             # use this INDEPENDENT of fittype for now (voigt and gauss get same guesses)
             log.debug("Using moment-based guesses.")
-            self.guesses = self.Registry.singlefitters[self.fittype].moments(
+            self.guesses = self.Registry.peakbgfitters[self.fittype].moments(
                     self.Spectrum.xarr[self.xmin:self.xmax],
                     self.spectofit[self.xmin:self.xmax], vheight=vheight,
                     negamp=negamp, nsigcut=nsigcut_moments, **kwargs)
@@ -691,7 +685,7 @@ class Specfit(interactive.Interactive):
             for ii in xrange(3,NP):
                 self.guesses += [0.0]
 
-        self.fitter = self.Registry.singlefitters[self.fittype]
+        self.fitter = self.Registry.peakbgfitters[self.fittype]
 
         log.debug("n(guesses): %s  Guesses: %s  vheight: %s " %
                   (len(self.guesses),self.guesses,vheight))
@@ -709,13 +703,17 @@ class Specfit(interactive.Interactive):
 
         if debug: print "Guesses before fit: ",self.guesses
 
+        if 'debug' in self.fitkwargs:
+            debug = self.fitkwargs['debug']
+            del self.fitkwargs['debug']
+
         mpp,model,mpperr,chi2 = self.fitter(
                 self.Spectrum.xarr[self.xmin:self.xmax],
                 self.spectofit[self.xmin:self.xmax],
                 err=self.errspec[self.xmin:self.xmax],
                 vheight=vheight,
                 params=self.guesses,
-                # debug=debug,
+                debug=debug,
                 use_lmfit=use_lmfit,
                 **self.fitkwargs)
         if debug: print "1. Guesses, fits after: ",self.guesses, mpp

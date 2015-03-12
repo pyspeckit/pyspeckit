@@ -23,12 +23,12 @@ Example hyperfine line fitting for the N\ :sub:`2`\ H+ 1-0 line.
     sp.Registry.add_fitter('n2hp_vtau', pyspeckit.models.n2hp.n2hp_vtau_fitter,4)
 
     # Run the fitter
-    sp.specfit(fittype='n2hp_vtau',multifit=None,guesses=[15,2,4,0.2])
+    sp.specfit(fittype='n2hp_vtau',guesses=[15,2,4,0.2])
 
     # Plot the results
     sp.plotter()
     # Re-run the fitter (to get proper error bars) and show the individual fit components
-    sp.specfit(fittype='n2hp_vtau',multifit=None,guesses=[15,2,4,0.2],show_hyperfine_components=True)
+    sp.specfit(fittype='n2hp_vtau', guesses=[15,2,4,0.2], show_hyperfine_components=True)
 
     # Save the figure (this step is just so that an image can be included on the web page)
     sp.plotter.savefig('n2hp_ophA_fit.png')
