@@ -312,7 +312,7 @@ class SpectroscopicAxis(u.Quantity):
         
         
         try:
-            if unit is None:
+            if unit is None or unit == 'unknown':
                 unit = u.dimensionless_unscaled
             elif unit == 'angstroms':
                 unit = 'Angstrom'
@@ -541,14 +541,11 @@ class SpectroscopicAxis(u.Quantity):
             need to specify the central frequency around which that velocity is
             calculated.
             I think this can also accept wavelengths....
-        xtype_check: 'check' or 'fix'
-            Check whether the xtype matches the units.  If 'fix', will set the
-            xtype to match the units.
         """
         if not velocity_convention:
             velocity_convention = self.velocity_convention
         if not equivalencies:
-            equivalencies = self.equivalencies
+            equivalencies = kwargs.get('equivalencies', self.equivalencies)
         if not refX:
             refX = self.refX
         if not refX_units:
@@ -558,22 +555,19 @@ class SpectroscopicAxis(u.Quantity):
         if not center_frequency_unit:
             center_frequency_unit = self.center_frequency_unit
         
-        print('calling find_equivalencies with velocity_convention:%s, center_frequency:%s, center_frequency_unit:%s' %(velocity_convention, center_frequency, center_frequency_unit))
         self.center_frequency, self._equivalencies = \
             self.find_equivalencies(velocity_convention, 
                                     refX, refX_units,
                                     center_frequency, center_frequency_unit, 
                                     equivalencies)
-        print("going to transform %s to %s with equivalencies: %s" % (self.unit, unit, self.equivalencies))
         if unit == 'microns':
             unit = 'micron'
         if isinstance(self.unit, str):
             if self._unit == 'microns':
                 self._unit = 'micron'
             self._unit = u.Unit(self.unit)
-        print 'self is:', self
+        print("going to transform %s to %s with equivalencies: %s" % (self.unit, unit, self.equivalencies))
         return self.to(unit, equivalencies=self.equivalencies)
-        # return self.to(unit, self._equivalencies + list(set(equivalencies) - set(self._equivalencies)))
 
     def make_dxarr(self, coordinate_location='center'):
         """
@@ -683,8 +677,7 @@ class SpectroscopicAxis(u.Quantity):
             new_equivalencies = velocity_conventions[velocity_convention](center_frequency)
             return center_frequency, merge_equivalencies(equivalencies, new_equivalencies)
         else:
-            return center_frequency, equivalencies
-        # print("final equivalencies:", equivalencies)
+            return center_frequency, merge_equivalencies(u.spectral(), equivalencies)
 
 def merge_equivalencies(old_equivalencies, new_equivalencies):
     """

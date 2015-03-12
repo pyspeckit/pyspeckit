@@ -298,7 +298,7 @@ class Spectrum(object):
         else:
             warn( "Warning: Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels unless you set them manually (e.g., sp.xarr.unit='angstroms')")
             self.xarr.xtype = 'pixels'
-            self.xarr.unit = 'none'
+            self.xarr._unit = 'pix'
             #raise ValueError("Invalid xtype in text header")
         self.ytype = Table.data.dtype.names[Table.datacol]
         try:
@@ -385,8 +385,6 @@ class Spectrum(object):
         elif not self.xarr.unit and not units:
             units = u.dimensionless_unscaled
 
-        # import IPython
-        # IPython.embed()
         # do slice (this code is redundant... need to figure out how to fix that)
         x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(units).value))
         x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(units).value))

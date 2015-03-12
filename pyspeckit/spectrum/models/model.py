@@ -459,14 +459,12 @@ class SpectralModel(fitter.SimpleFitter):
             #throwaway, kwargs = self._make_parinfo(debug=debug, **kwargs)
 
         self.xax = xax # the 'stored' xax is just a link to the original
-        if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
+        if hasattr(xax,'as_unit') and self.fitunits is not None:
             # some models will depend on the input units.  For these, pass in an X-axis in those units
             # (gaussian, voigt, lorentz profiles should not depend on units.  Ammonia, formaldehyde,
             # H-alpha, etc. should)
             xax = copy.copy(xax)
             # xax.convert_to_unit(self.fitunits, quiet=quiet)
-            import IPython
-            IPython.embed()
             xax = xax.as_unit(self.fitunits, quiet=quiet, **kwargs)
         elif self.fitunits is not None:
             raise TypeError("X axis does not have a convert method")
