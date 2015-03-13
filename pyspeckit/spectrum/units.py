@@ -309,8 +309,6 @@ class SpectroscopicAxis(u.Quantity):
         subarr = np.array(xarr,dtype=dtype)
         subarr = subarr.view(self)
 
-        
-        
         try:
             if unit is None or unit == 'unknown':
                 unit = u.dimensionless_unscaled
@@ -340,14 +338,24 @@ class SpectroscopicAxis(u.Quantity):
         subarr.wcshead = {}
         subarr.velocity_convention = velocity_convention
 
+        if not center_frequency:
+            if refX:
+                center_frequency = refX    
+        if not center_frequency_unit:
+            if refX_units:
+                center_frequency_unit = refX_units
+            else:
+                center_frequency_unit = unit
+        if center_frequency:
+            subarr.center_frequency = u.Quantity(center_frequency, center_frequency_unit)
+        else:
+            subarr.center_frequency = None
+
         subarr.center_frequency, subarr._equivalencies = \
                 self.find_equivalencies(subarr.velocity_convention,
                                         subarr.refX, subarr.refX_units, 
-                                        subarr.center_frequency, subarr.center_frequency_unit, 
+                                        subarr.center_frequency, 
                                         equivalencies)
-
-        if center_frequency_unit:
-            subarr.center_frequency_unit = center_frequency_unit
         return subarr
 
     def __array_finalize__(self,obj):
@@ -551,14 +559,24 @@ class SpectroscopicAxis(u.Quantity):
         if not refX_units:
             refX_units = self.refX_units
         if not center_frequency:
-            center_frequency = self.center_frequency
+            if self.center_frequency:
+                center_frequency = self.center_frequency
+            elif refX:
+                center_frequency = refX
         if not center_frequency_unit:
-            center_frequency_unit = self.center_frequency_unit
-        
+            if refX_units:
+                center_frequency_unit = refX_units
+        try:
+            if not hasattr(center_frequency, 'unit'):
+                center_frequency = u.Quantity(center_frequency, center_frequency_unit)
+        except:
+            center_frequency = None
+
+
         self.center_frequency, self._equivalencies = \
             self.find_equivalencies(velocity_convention, 
                                     refX, refX_units,
-                                    center_frequency, center_frequency_unit, 
+                                    center_frequency,
                                     equivalencies)
         if unit == 'microns':
             unit = 'micron'
@@ -566,7 +584,7 @@ class SpectroscopicAxis(u.Quantity):
             if self._unit == 'microns':
                 self._unit = 'micron'
             self._unit = u.Unit(self.unit)
-        print("going to transform %s to %s with equivalencies: %s" % (self.unit, unit, self.equivalencies))
+        # print("going to transform %s to %s with equivalencies: %s" % (self.unit, unit, self.equivalencies))
         return self.to(unit, equivalencies=self.equivalencies)
 
     def make_dxarr(self, coordinate_location='center'):
@@ -651,27 +669,12 @@ class SpectroscopicAxis(u.Quantity):
 
     @classmethod
     def find_equivalencies(self, velocity_convention=None, refX=None, refX_units=None,
-                           center_frequency=None, center_frequency_unit=None, equivalencies=[]):
+                           center_frequency=None, equivalencies=[]):
         """
-        Utility function used to validate parameters and add equivalencies
+        Utility function to add equivalencies from the velocity_convention 
+        and the center_frequency
         """
-        if not velocity_convention and not refX and not center_frequency:
-            return center_frequency, equivalencies
-
-        # parameter validation
-        if refX and center_frequency and (refX != center_frequency):
-            print('refX:',refX)
-            print('center_frequency:',center_frequency)
-            # raise ValueError("Cannot accept different values for refX and center_frequency")
-        if not hasattr(center_frequency, 'unit'):
-            if center_frequency_unit:
-                center_frequency = center_frequency * u.Unit(center_frequency_unit)
-            elif not refX:
-                raise AttributeError("If center_frequency_unit is None, center_frequency should have unit attribute")
-
         # equivalency finding
-        if refX and not center_frequency:
-            center_frequency = refX
         if velocity_convention:
             print("generating the equivalencies")
             new_equivalencies = velocity_conventions[velocity_convention](center_frequency)
@@ -681,9 +684,8 @@ class SpectroscopicAxis(u.Quantity):
 
 def merge_equivalencies(old_equivalencies, new_equivalencies):
     """
-    Utility method to merge an equivalency list with
-    the current SpectroscopicAxis.equivalencies list 
-    and remove duplicates
+    Utility method to merge two equivalency lists
+    Uses a dict with concatenated units as keys
     """
     seen = {}
     result = []
@@ -777,7 +779,7 @@ class EchelleAxes(SpectroscopicAxis):
 
         subarr = np.array(axislist)
         subarr = subarr.view(self)
-        subarr.unit = unit
+        subarr._unit = unit
         subarr.xtype = xtype
         subarr.redshift = redshift
         subarr.velocity_convention = velocity_convention

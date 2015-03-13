@@ -209,7 +209,7 @@ class hyperfinemodel(object):
         """
 
         # Convert X-units to frequency in Hz
-        xarr = xarr.as_unit('Hz', equivalencies=u.doppler_radio(xarr.center_frequency*u.Hz))
+        xarr = xarr.as_unit('Hz', equivalencies=u.doppler_radio(xarr.center_frequency))
 
         # Ensure parameters are scalar / have no extra dims
         if not np.isscalar(Tex): Tex = Tex.squeeze()
