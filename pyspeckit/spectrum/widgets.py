@@ -228,11 +228,6 @@ class FitterSliders(Widget):
                 vmax = max([value/4.0,value*4.0])
             else:
                 vmax = 1
-            print 'value is:',value
-            print 'type(ax):',type(ax)
-            print 'type(vmin):', type(vmin)
-            print 'type(vmax):', type(vmax)
-            # print 'self.sliders[name]:', self.sliders[name]
             try:
                 self.sliders[name] = ModifiableSlider(ax, 
                     name, vmin, vmax, valinit=value)

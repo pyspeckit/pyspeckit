@@ -1116,10 +1116,6 @@ class Specfit(interactive.Interactive):
             xchar = xcharconv[self.Spectrum.xarr.unit.physical_type]
         except AttributeError:
             unit_key = self.Spectrum.xarr.unit
-            if unit_key == 'microns':
-                unit_key = 'micron'
-            elif unit_key == 'angstroms':
-                unit_key = 'Angstrom'
             xchar = xcharconv[u.Unit(unit_key).physical_type]
             
         self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for

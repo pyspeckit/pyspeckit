@@ -486,7 +486,6 @@ class Baseline(interactive.Interactive):
 
         #xarrconv = xarr[xmin:xmax].as_unit(xarr_fit_units)
         OK = True-masktoexclude
-        print 'xarr is of type:', type(xarr)
         xarrconv = xarr.as_unit(xarr_fit_units)
         if powerlaw:
             # for powerlaw fitting, only consider positive data
