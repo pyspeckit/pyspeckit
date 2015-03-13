@@ -617,7 +617,7 @@ class Specfit(interactive.Interactive):
             for par in self.parinfo:
                 history.write_history(self.Spectrum.header, str(par))
                 
-    def peakbgfit(self, usemoments=True, annotate=None, vheight=False, height=0,
+    def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
                   negamp=None, fittype=None, renormalize='auto', color=None,
                   use_lmfit=False, show_components=None, debug=False,
                   use_window_limits=True, guesses=None,
