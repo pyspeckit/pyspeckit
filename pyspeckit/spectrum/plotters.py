@@ -41,11 +41,6 @@ class Plotter(object):
         self.axis = None
         self.Spectrum = Spectrum
         self._xunit = Spectrum.xarr.unit
-        if self._xunit == 'microns':
-            self._xunit = 'micron'
-        elif self._xunit == 'angstroms':
-            self._xunit = 'Angstrom'
-
         # plot parameters
         self.offset = 0.0 # vertical offset
         self.autorefresh = autorefresh
@@ -328,12 +323,11 @@ class Plotter(object):
             if silent is not None:
                 self.silent = silent
 
-            if self.xmin and self.xmax:
-                if (self.Spectrum.xarr.min() < self.xmin or self.Spectrum.xarr.max() > self.xmax 
-                        or reset_xlimits):
-                    if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
-                    self.xmin = None
-                    self.xmax = None
+            # if self.xmin and self.xmax:
+            if (reset_xlimits or self.Spectrum.xarr.min().value < self.xmin or self.Spectrum.xarr.max().value > self.xmax):
+                if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
+                self.xmin = None
+                self.xmax = None
             if xmin is not None: self.xmin = u.Quantity(xmin, self._xunit)
             elif self.xmin is None: self.xmin = u.Quantity(self.Spectrum.xarr.min().value, self._xunit)
             if xmax is not None: self.xmax = u.Quantity(xmax, self._xunit)
