@@ -572,19 +572,14 @@ class SpectroscopicAxis(u.Quantity):
         except:
             center_frequency = None
 
-
         self.center_frequency, self._equivalencies = \
             self.find_equivalencies(velocity_convention, 
                                     refX, refX_units,
                                     center_frequency,
                                     equivalencies)
-        if unit == 'microns':
-            unit = 'micron'
+        
         if isinstance(self.unit, str):
-            if self._unit == 'microns':
-                self._unit = 'micron'
             self._unit = u.Unit(self.unit)
-        # print("going to transform %s to %s with equivalencies: %s" % (self.unit, unit, self.equivalencies))
         return self.to(unit, equivalencies=self.equivalencies)
 
     def make_dxarr(self, coordinate_location='center'):

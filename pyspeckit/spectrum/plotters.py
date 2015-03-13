@@ -71,10 +71,6 @@ class Plotter(object):
         def getprop(self):
             if self.Spectrum.xarr.unit != self._xunit:
                 self._xunit = self.Spectrum.xarr.unit
-                if self._xunit == 'microns':
-                    self._xunit = 'micron'
-                elif self._xunit == 'angstroms':
-                    self._xunit = 'Angstrom'
             if xy == 'x':
                 if minmax == 'min':
                     if self._xlim[0] and self._xunit:
@@ -296,11 +292,6 @@ class Plotter(object):
         if silent is not None:
             self.silent = silent
 
-        # print('in plot:')
-        # print('self.xmin:',self.xmin)
-        # print('self.xmax:',self.xmax)
-        # print('use_window_limits:',use_window_limits)
-        # print('-----------------------------')
         if reset:
             self.reset_limits(use_window_limits=use_window_limits, **reset_kwargs)
 
@@ -337,17 +328,7 @@ class Plotter(object):
             if silent is not None:
                 self.silent = silent
 
-            # print('self.xmin:',self.xmin)
-            # print('self.xmax:',self.xmax)
-            # print('type(self.xmin):',type(self.xmin))
-            # print('type(self.xmax):',type(self.xmax))
-
             if self.xmin and self.xmax:
-                print('self.Spectrum.xarr.min:',self.Spectrum.xarr.min())
-                print('self.Spectrum.xarr.min.unit:',self.Spectrum.xarr.min().unit)
-                print('self.xmin:',self.xmin)
-                print('self.xmin.unit:',self.xmin.unit)
-
                 if (self.Spectrum.xarr.min() < self.xmin or self.Spectrum.xarr.max() > self.xmax 
                         or reset_xlimits):
                     if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
@@ -428,12 +409,7 @@ class Plotter(object):
 
         if xlabel is not None:
             self.xlabel = xlabel
-        #TODO should i change this to self.Spectrum.xarr.unit
-        # elif isinstance(self.Spectrum.xarr.xtype,str):
-        #   self.xlabel = self.Spectrum.xarr.xtype.title()
         elif self._xunit:
-        #     self.xlabel += "("+self.Spectrum.xarr.unit+")"
-        # elif self.Spectrum.xarr.unit.name:
             self.xlabel += " ("+u.Unit(self._xunit).to_string(format=u.format.Latex)+")"
             if verbose_label:
                 self.xlabel = "%s %s %s" % ( self.Spectrum.xarr.velocity_convention.title(),

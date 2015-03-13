@@ -209,7 +209,7 @@ class hyperfinemodel(object):
         """
 
         # Convert X-units to frequency in Hz
-        xarr = xarr.as_unit('Hz', equivalencies=u.doppler_radio(xarr.center_frequency))
+        xarr = xarr.as_unit('Hz', equivalencies=u.doppler_radio(xarr.center_frequency)).value
 
         # Ensure parameters are scalar / have no extra dims
         if not np.isscalar(Tex): Tex = Tex.squeeze()
@@ -258,7 +258,7 @@ class hyperfinemodel(object):
                     # the total optical depth, which is being fitted, should be the sum of the components
                     tau_line = (tau * self.line_strength_dict[linename]/self.relative_strength_total_degeneracy[linename])
           
-                tau_nu = np.array(tau_line * np.exp(-(xarr.value+nuoff-self.freq_dict[linename])**2/(2.0*nuwidth**2)))
+                tau_nu = np.array(tau_line * np.exp(-(xarr+nuoff-self.freq_dict[linename])**2/(2.0*nuwidth**2)))
                 tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
             components.append(tau_nu)
             tau_nu_cumul += tau_nu

@@ -39,17 +39,18 @@ class write_fits(Writer):
 
         # Generate a WCS header from the X-array
         if self.Spectrum.xarr._make_header(tolerance=tolerance):
-            # print('iteratig over:', self.Spectrum.xarr.wcshead)
             for k,v in self.Spectrum.xarr.wcshead.iteritems():
-                # print('v is type: %s and has a value: %s' % (type(v), v))
                 if v is not None:
                     try:
                         header[k] = v
                     except ValueError:
                         try:
+                            #v is a SpectroscopicAxis
                             header[k] = v.value
                         except AttributeError:
-                            pass
+                            #v is a Unit
+                            header[k] = v.to_string()
+
             if write_error:
                 data = np.array( [self.Spectrum.data, self.Spectrum.error] )
             else:
