@@ -312,10 +312,6 @@ class SpectroscopicAxis(u.Quantity):
         try:
             if unit is None or unit == 'unknown':
                 unit = u.dimensionless_unscaled
-            elif unit == 'angstroms':
-                unit = 'Angstrom'
-            elif unit == 'microns':
-                unit = 'micron'
             subarr._unit = u.Unit(unit)
         except ValueError:
             if bad_unit_response=="pixel":
@@ -671,7 +667,6 @@ class SpectroscopicAxis(u.Quantity):
         """
         # equivalency finding
         if velocity_convention:
-            print("generating the equivalencies")
             new_equivalencies = velocity_conventions[velocity_convention](center_frequency)
             return center_frequency, merge_equivalencies(equivalencies, new_equivalencies)
         else:
