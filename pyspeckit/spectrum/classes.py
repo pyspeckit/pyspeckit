@@ -258,7 +258,7 @@ class Spectrum(object):
             self.data = self.data[argsort]
             self.error = self.error[argsort]
             self.xarr = self.xarr[argsort]
-            self.xarr.dxarr = np.diff(self.xarr)
+            self.xarr.dxarr = np.diff(self.xarr.value)
         
     def write(self,filename,type=None,**kwargs):
         """
@@ -764,8 +764,8 @@ class Spectra(Spectrum):
 
         print "Concatenating data"
         self.xarr = units.SpectroscopicAxes([sp.xarr.as_unit(xunits) for sp in speclist])
-        self.xarr.unit = xunits 
-        self.xarr.xtype = units.unit_type_dict[xunits]
+        self.xarr._unit = xunits 
+        self.xarr.xtype = u.Unit(xunits)
         self.data = np.ma.concatenate([sp.data for sp in speclist])
         self.error = np.ma.concatenate([sp.error for sp in speclist])
         self._sort()
