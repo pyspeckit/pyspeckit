@@ -23,7 +23,7 @@ def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True,
         
     # SDSS doesn't use FITS standard! Argh.    
     if hdr.get('TELESCOP') == 'SDSS 2.5-M':   
-        xunits = 'angstroms' 
+        xunits = 'angstrom' 
 
     # IRAF also doesn't use the same standard
     if xunits is None:
