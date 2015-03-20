@@ -104,6 +104,7 @@ tau_wts_dict = {
 
 def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
+            background_tb=2.7315,
             thin=False, verbose=False, return_components=False, debug=False):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
@@ -146,6 +147,8 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
     return_components: bool
         Return a list of arrays, one for each hyperfine component, instead of
         just one array
+    background_tb : float
+        The background brightness temperature.  Defaults to TCMB.
     verbose: bool
         More messages
     debug: bool
@@ -166,9 +169,10 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
     xarr = xarr.as_unit('GHz')
 
     if tex is not None:
-        if tex > tkin: # cannot have Tex > Tkin
-            tex = tkin 
-        elif thin: # tex is not used in this case
+        # Yes, you certainly can have nonthermal excitation, tex>tkin.
+        #if tex > tkin: # cannot have Tex > Tkin
+        #    tex = tkin 
+        if thin: # tex is not used in this case
             tex = tkin
     else:
         tex = tkin
@@ -307,10 +311,10 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
         if tau is not None and thin:
             #runspec = tauprof+runspec
             # is there ever a case where you want to ignore the optical depth function? I think no
-            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
+            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-tauprof))+runspec
         else:
-            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
-        if runspec.min() < 0:
+            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-tauprof))+runspec
+        if runspec.min() < 0 and background_tb == 2.7315:
             raise ValueError("Model dropped below zero.  That is not possible normally.  Here are the input values: "+
                     ("tex: %f " % tex) + 
                     ("tkin: %f " % tkin) + 
@@ -324,7 +328,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
         print "tkin: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (tkin,tex,ntot,width,xoff_v,fortho,fillingfraction)
 
     if return_components:
-        return (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-1*np.array(components)))
+        return (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-1*np.array(components)))
 
     if return_tau:
         return tau_dict
