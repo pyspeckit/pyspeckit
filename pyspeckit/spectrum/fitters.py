@@ -581,6 +581,7 @@ class Specfit(interactive.Interactive):
             self.Spectrum.xarr[self.xmin:self.xmax],
             self.spectofit[self.xmin:self.xmax],
             err=self.errspec[self.xmin:self.xmax], npeaks=self.npeaks,
+            parinfo=parinfo, # the user MUST be allowed to override parinfo.
             params=guesses, use_lmfit=use_lmfit, **self.fitkwargs)
 
         self.spectofit *= scalefactor
@@ -747,6 +748,7 @@ class Specfit(interactive.Interactive):
                 err=self.errspec[self.xmin:self.xmax],
                 vheight=vheight,
                 params=self.guesses,
+                parinfo=parinfo,
                 debug=debug,
                 use_lmfit=use_lmfit,
                 **self.fitkwargs)

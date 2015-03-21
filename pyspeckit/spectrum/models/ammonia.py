@@ -20,87 +20,8 @@ import matplotlib.cbook as mpcb
 import copy
 import model
 
-
-line_names = ['oneone','twotwo','threethree','fourfour', "fivefive", "sixsix",
-              "sevenseven", "eighteight",]
-              #'ninenine']
-
-freq_dict = { 
-    'oneone':     23.694506e9,
-    'twotwo':     23.722633335e9,
-    'threethree': 23.8701296e9,
-    'fourfour':   24.1394169e9,
-    # fivefive - eighteight come from TopModel on splatalogue
-    'fivefive': 24.53299e9,
-    'sixsix': 25.05603e9,
-    'sevenseven': 25.71518e9,
-    'eighteight': 26.51898e9,
-    #'ninenine': 27.47794,
-    }
-aval_dict = {
-    'oneone':     1.712e-7,  #64*!pi**4/(3*h*c**3)*nu11**3*mu0**2*(1/2.)
-    'twotwo':     2.291e-7,  #64*!pi**4/(3*h*c**3)*nu22**3*mu0**2*(2/3.)
-    'threethree': 2.625e-7,  #64*!pi**4/(3*h*c**3)*nu33**3*mu0**2*(3/4.)
-    'fourfour':   3.167e-7,  #64*!pi**4/(3*h*c**3)*nu44**3*mu0**2*(4/5.)
-    'fivefive': 3.099109e-07,
-    'sixsix': 3.395797e-07,
-    'sevenseven': 3.747560e-07,
-    'eighteight': 4.175308e-07,
-    #'ninenine': xxx,
-    }
-ortho_dict = {
-    'oneone':     False,
-    'twotwo':     False,
-    'threethree': True,
-    'fourfour':   False,
-    'fivefive':   False,
-    'sixsix':   True,
-    'sevenseven':   False,
-    'eighteight':   False,
-    #'ninenine':   True,
-    }
-#n_ortho = np.arange(0,28,3) # 0..3..27
-#n_para = np.array([x for x in range(28) if x % 3 != 0])
-
-voff_lines_dict = {
-    'oneone': [19.8513, 19.3159, 7.88669, 7.46967, 7.35132, 0.460409, 0.322042,
-        -0.0751680, -0.213003, 0.311034, 0.192266, -0.132382, -0.250923, -7.23349,
-        -7.37280, -7.81526, -19.4117, -19.5500],
-    'twotwo':[26.5263, 26.0111, 25.9505, 16.3917, 16.3793, 15.8642, 0.562503,
-        0.528408, 0.523745, 0.0132820, -0.00379100, -0.0132820, -0.501831,
-        -0.531340, -0.589080, -15.8547, -16.3698, -16.3822, -25.9505, -26.0111,
-        -26.5263],
-    'threethree':[29.195098, 29.044147, 28.941877, 28.911408, 21.234827,
-        21.214619, 21.136387, 21.087456, 1.005122, 0.806082, 0.778062,
-        0.628569, 0.016754, -0.005589, -0.013401, -0.639734, -0.744554,
-        -1.031924, -21.125222, -21.203441, -21.223649, -21.076291, -28.908067,
-        -28.938523, -29.040794, -29.191744],
-    'fourfour':[  0.        , -30.49783692,  30.49783692,   0., 24.25907811,
-        -24.25907811,   0.        ],
-    'fivefive': [31.4053287863, 26.0285409785, 0.0, 0.0, 0.0, -25.9063412556, -31.2831290633],
-    'sixsix': [31.5872901302, 27.0406347326, 0.0, 0.0, 0.0, -26.9209859064, -31.4676413039],
-    'sevenseven': [31.3605314845, 27.3967468359, 0.0, 0.0, 0.0, -27.5133287373, -31.477113386],
-    'eighteight': [30.9752235915, 27.4707274918, 0.0, 0.0, 0.0, -27.5837757531, -30.9752235915],
-                      }
-
-tau_wts_dict = {
-    'oneone': [0.0740740, 0.148148, 0.0925930, 0.166667, 0.0185190, 0.0370370,
-        0.0185190, 0.0185190, 0.0925930, 0.0333330, 0.300000, 0.466667,
-        0.0333330, 0.0925930, 0.0185190, 0.166667, 0.0740740, 0.148148],
-    'twotwo': [0.00418600, 0.0376740, 0.0209300, 0.0372090, 0.0260470,
-        0.00186000, 0.0209300, 0.0116280, 0.0106310, 0.267442, 0.499668,
-        0.146512, 0.0116280, 0.0106310, 0.0209300, 0.00186000, 0.0260470,
-        0.0372090, 0.0209300, 0.0376740, 0.00418600],
-    'threethree': [0.012263, 0.008409, 0.003434, 0.005494, 0.006652, 0.008852,
-        0.004967, 0.011589, 0.019228, 0.010387, 0.010820, 0.009482, 0.293302,
-        0.459109, 0.177372, 0.009482, 0.010820, 0.019228, 0.004967, 0.008852,
-        0.006652, 0.011589, 0.005494, 0.003434, 0.008409, 0.012263],
-    'fourfour': [0.2431, 0.0162, 0.0162, 0.3008, 0.0163, 0.0163, 0.3911],
-    'fivefive': [0.0109080940831, 0.0109433143618, 0.311493418617, 0.261847767275, 0.382955997218, 0.0109433143618, 0.0109080940831],
-    'sixsix': [0.0078350431801, 0.00784948916416, 0.317644539734, 0.274246689798, 0.376739705779, 0.00784948916416, 0.0078350431801],
-    'sevenseven': [0.00589524944656, 0.00590204051181, 0.371879455317, 0.321515700951, 0.283010263815, 0.00590204051181, 0.00589524944656],
-    'eighteight': [0.00459516014524, 0.00459939439378, 0.324116135075, 0.289534720829, 0.367960035019, 0.00459939439378, 0.00459516014524],
-}
+from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
+                               voff_lines_dict, tau_wts_dict)
 
 def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
@@ -335,12 +256,15 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
   
     return runspec
 
+
 class ammonia_model(model.SpectralModel):
 
-    def __init__(self,npeaks=1,npars=6,multisingle='multi',**kwargs):
+    def __init__(self,npeaks=1,npars=6,multisingle='multi',
+                 parnames=['tkin','tex','ntot','width','xoff_v','fortho'],
+                 **kwargs):
         self.npeaks = npeaks
         self.npars = npars
-        self._default_parnames = ['tkin','tex','ntot','width','xoff_v','fortho']
+        self._default_parnames = parnames
         self.parnames = copy.copy(self._default_parnames)
 
         # all fitters must have declared modelfuncs, which should take the fitted pars...
@@ -441,7 +365,6 @@ class ammonia_model(model.SpectralModel):
         else:
             npars = len(parvals) / self.npeaks
 
-
         self._components = []
         def L(x):
             v = np.zeros(len(x))
@@ -454,7 +377,7 @@ class ammonia_model(model.SpectralModel):
             return v
         return L
 
-    def components(self, xarr, pars, hyperfine=False):
+    def components(self, xarr, pars, hyperfine=False, **kwargs):
         """
         Ammonia components don't follow the default, since in Galactic astronomy the hyperfine components should be well-separated.
         If you want to see the individual components overlaid, you'll need to pass hyperfine to the plot_fit call
@@ -475,13 +398,15 @@ class ammonia_model(model.SpectralModel):
 
 
     def multinh3fit(self, xax, data, npeaks=1, err=None,
+                    parinfo=None,
                     params=(20,20,14,1.0,0.0,0.5), parnames=None,
                     fixed=(False,False,False,False,False,False),
                     limitedmin=(True,True,True,True,False,True),
                     limitedmax=(False,False,False,False,False,True),
-                    minpars=(2.73,2.73,0,0,0,0), parinfo=None,
+                    minpars=(2.73,2.73,0,0,0,0),
                     maxpars=(0,0,0,0,0,1),
                     tied=('',)*6,
+                    max_tem_step=1.,
                     quiet=True, shh=True,
                     veryverbose=False, **kwargs):
         """
@@ -513,6 +438,8 @@ class ammonia_model(model.SpectralModel):
         """
 
         if parinfo is None:
+            if not quiet:
+                print("Creating a 'parinfo' from guesses.")
             self.npars = len(params) / npeaks
 
             if len(params) != npeaks and (len(params) / self.npars) > npeaks:
@@ -581,14 +508,16 @@ class ammonia_model(model.SpectralModel):
                          'limited':[partype_dict['limitedmin'][ii],partype_dict['limitedmax'][ii]], 'fixed':partype_dict['fixed'][ii],
                          'parname':partype_dict['parnames'][ii]+str(ii/self.npars),
                          'tied':partype_dict['tied'][ii],
-                         'mpmaxstep':float(partype_dict['parnames'][ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
+                         'mpmaxstep':max_tem_step*float(partype_dict['parnames'][ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
                          'error': 0} 
                 for ii in xrange(len(partype_dict['params'])) ]
 
             # hack: remove 'fixed' pars
             parinfo_with_fixed = parinfo
             parinfo = [p for p in parinfo_with_fixed if not p['fixed']]
-            fixed_kwargs = dict((p['parname'].strip("0123456789").lower(),p['value']) for p in parinfo_with_fixed if p['fixed'])
+            fixed_kwargs = dict((p['parname'].strip("0123456789").lower(),
+                                 p['value'])
+                                for p in parinfo_with_fixed if p['fixed'])
             # don't do this - it breaks the NEXT call because npars != len(parnames) self.parnames = [p['parname'] for p in parinfo]
             # this is OK - not a permanent change
             parnames = [p['parname'] for p in parinfo]
@@ -596,11 +525,23 @@ class ammonia_model(model.SpectralModel):
             parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True)
             #import pdb; pdb.set_trace()
         else: 
-            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True) 
+            if isinstance(parinfo, ParinfoList):
+                if not quiet:
+                    print("Using user-specified parinfo.")
+                self.parinfo = parinfo
+            else:
+                if not quiet:
+                    print("Using something like a user-specified parinfo, but not.")
+                self.parinfo = ParinfoList([p if isinstance(p,Parinfo) else Parinfo(p)
+                                            for p in parinfo],
+                                           preserve_order=True) 
             parinfo_with_fixed = None
             fixed_kwargs = {}
 
         fitfun_kwargs = dict(kwargs.items()+fixed_kwargs.items())
+        if 'use_lmfit' in fitfun_kwargs:
+            raise KeyError("use_lmfit was specified in a location where it "
+                           "is unacceptable")
 
         npars = len(parinfo)/self.npeaks
 
@@ -613,14 +554,19 @@ class ammonia_model(model.SpectralModel):
 
         def mpfitfun(x,y,err):
             if err is None:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=parinfo.parnames, **fitfun_kwargs)(x))]
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p,
+                                                                parnames=parinfo.parnames,
+                                                                **fitfun_kwargs)(x))]
             else:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=parinfo.parnames, **fitfun_kwargs)(x))/err]
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p,
+                                                                parnames=parinfo.parnames,
+                                                                **fitfun_kwargs)(x))/err]
             return f
 
         if veryverbose:
             print "GUESSES: "
-            print "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
+            print parinfo
+            #print "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
 
         mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet)
         mpp = mp.params
@@ -643,11 +589,12 @@ class ammonia_model(model.SpectralModel):
                 print parinfo[i]['parname'],p," +/- ",mpperr[i]
             print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
 
-        if any(['tex' in s for s in parnames]) and any(['tkin' in s for s in parnames]):
-            texnum = (i for i,s in enumerate(parnames) if 'tex' in s)
-            tkinnum = (i for i,s in enumerate(parnames) if 'tkin' in s)
-            for txn,tkn in zip(texnum,tkinnum):
-                if mpp[txn] > mpp[tkn]: mpp[txn] = mpp[tkn]  # force Tex>Tkin to Tex=Tkin (already done in n_ammonia)
+        # this is wrong: tex can be greater than tkin
+        #if any(['tex' in s for s in parnames]) and any(['tkin' in s for s in parnames]):
+        #    texnum = (i for i,s in enumerate(parnames) if 'tex' in s)
+        #    tkinnum = (i for i,s in enumerate(parnames) if 'tkin' in s)
+        #    for txn,tkn in zip(texnum,tkinnum):
+        #        if mpp[txn] > mpp[tkn]: mpp[txn] = mpp[tkn]  # force Tex>Tkin to Tex=Tkin (already done in n_ammonia)
         self.mp = mp
 
         if parinfo_with_fixed is not None:
@@ -655,10 +602,13 @@ class ammonia_model(model.SpectralModel):
             # ORDER MATTERS!
             for p in parinfo:
                 parinfo_with_fixed[p['n']] = p
-            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo_with_fixed], preserve_order=True)
+            self.parinfo = ParinfoList([Parinfo(p) for p in
+                                        parinfo_with_fixed],
+                                       preserve_order=True)
         else:
             self.parinfo = parinfo
-            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True)
+            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo],
+                                       preserve_order=True)
 
         # I don't THINK these are necessary?
         #self.parinfo = parinfo
@@ -680,7 +630,8 @@ class ammonia_model(model.SpectralModel):
         #    print "DON'T FORGET TO REMOVE THIS ERROR!"
         #    raise ValueError("Model is zeros.")
 
-        indiv_parinfo = [self.parinfo[jj*self.npars:(jj+1)*self.npars] for jj in xrange(len(self.parinfo)/self.npars)]
+        indiv_parinfo = [self.parinfo[jj*self.npars:(jj+1)*self.npars]
+                         for jj in xrange(len(self.parinfo)/self.npars)]
         modelkwargs = [
                 dict([(p['parname'].strip("0123456789").lower(),p['value']) for p in pi])
                 for pi in indiv_parinfo]
@@ -698,7 +649,9 @@ class ammonia_model(model.SpectralModel):
 
     def annotations(self):
         from decimal import Decimal # for formatting
-        tex_key = {'tkin':'T_K','tex':'T_{ex}','ntot':'N','fortho':'F_o','width':'\\sigma','xoff_v':'v','fillingfraction':'FF','tau':'\\tau_{1-1}'}
+        tex_key = {'tkin':'T_K', 'tex':'T_{ex}', 'ntot':'N', 'fortho':'F_o',
+                   'width':'\\sigma', 'xoff_v':'v', 'fillingfraction':'FF',
+                   'tau':'\\tau_{1-1}'}
         # small hack below: don't quantize if error > value.  We want to see the values.
         label_list = []
         for pinfo in self.parinfo:
@@ -719,8 +672,7 @@ class ammonia_model(model.SpectralModel):
 
 class ammonia_model_vtau(ammonia_model):
     def __init__(self,**kwargs):
-        super(ammonia_model_vtau,self).__init__()
-        self.parnames = ['tkin','tex','tau','width','xoff_v','fortho']
+        super(ammonia_model_vtau,self).__init__(parnames=['tkin','tex','tau','width','xoff_v','fortho'])
 
     def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
         """
@@ -731,11 +683,80 @@ class ammonia_model_vtau(ammonia_model):
         return [20,10, 1, 1.0, 0.0, 1.0]
 
     def __call__(self,*args,**kwargs):
+        use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
         if self.multisingle == 'single':
             return self.onepeakammoniafit(*args,**kwargs)
         elif self.multisingle == 'multi':
             return self.multinh3fit(*args,**kwargs)
 
+
+class ammonia_model_background(ammonia_model):
+    def __init__(self,**kwargs):
+        super(ammonia_model_background,self).__init__(npars=7,
+                                                      parnames=['tkin', 'tex',
+                                                                'ntot',
+                                                                'width',
+                                                                'xoff_v',
+                                                                'fortho',
+                                                                'background_tb'])
+
+    def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
+        """
+        Returns a very simple and likely incorrect guess
+        """
+
+        # TKIN, TEX, ntot, width, center, ortho fraction
+        return [20,10, 1, 1.0, 0.0, 1.0, 2.73]
+
+    def __call__(self,*args,**kwargs):
+        use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
+        if self.multisingle == 'single':
+            return self.onepeakammoniafit(*args,**kwargs)
+        elif self.multisingle == 'multi':
+            # Why is tied 6 instead of 7?
+            return self.multinh3fit(*args,**kwargs)
+
+    def multinh3fit(self, xax, data, npeaks=1, err=None,
+                    params=(20,20,14,1.0,0.0,0.5,2.73), parnames=None,
+                    fixed=(False,False,False,False,False,False,True),
+                    limitedmin=(True,True,True,True,False,True,True),
+                    limitedmax=(False,False,False,False,False,True,True),
+                    minpars=(2.73,2.73,0,0,0,0,2.73), parinfo=None,
+                    maxpars=(0,0,0,0,0,1,2.73),
+                    tied=('',)*7,
+                    quiet=True, shh=True,
+                    veryverbose=False, **kwargs):
+        return super(ammonia_model_background,
+                     self).multinh3fit(xax, data, npeaks=npeaks, err=err,
+                                       params=params, parnames=parnames,
+                                       fixed=fixed, limitedmin=limitedmin,
+                                       limitedmax=limitedmax, minpars=minpars,
+                                       parinfo=parinfo, maxpars=maxpars,
+                                       tied=tied, quiet=quiet, shh=shh,
+                                       veryverbose=veryverbose, **kwargs)
+
+    def annotations(self):
+        from decimal import Decimal # for formatting
+        tex_key = {'tkin':'T_K', 'tex':'T_{ex}', 'ntot':'N', 'fortho':'F_o',
+                   'width':'\\sigma', 'xoff_v':'v', 'fillingfraction':'FF',
+                   'tau':'\\tau_{1-1}', 'background_tb':'T_{BG}'}
+        # small hack below: don't quantize if error > value.  We want to see the values.
+        label_list = []
+        for pinfo in self.parinfo:
+            parname = tex_key[pinfo['parname'].strip("0123456789").lower()]
+            parnum = int(pinfo['parname'][-1])
+            if pinfo['fixed']:
+                formatted_value = "%s" % pinfo['value']
+                pm = ""
+                formatted_error=""
+            else:
+                formatted_value = Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value']))))
+                pm = "$\\pm$"
+                formatted_error = Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error']))
+            label =  "$%s(%i)$=%8s %s %8s" % (parname, parnum, formatted_value, pm, formatted_error)
+            label_list.append(label)
+        labels = tuple(mpcb.flatten(label_list))
+        return labels
 
 def _increment_string_number(st, count):
     """
@@ -744,6 +765,7 @@ def _increment_string_number(st, count):
     Expects input of the form: p[6]
     """
 
+    import re
     dig = re.compile('[0-9]+')
 
     if dig.search(st):
