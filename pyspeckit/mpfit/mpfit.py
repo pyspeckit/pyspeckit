@@ -918,7 +918,7 @@ class mpfit:
 
         # FIXED parameters ?
         pfixed = self.parinfo(parinfo, 'fixed', default=0, n=npar)
-        pfixed = (pfixed == 1)
+        pfixed = (numpy.array(pfixed,dtype='int') == 1)
         for i in range(npar):
             pfixed[i] = pfixed[i] or (ptied[i] != '') # Tied parameters are also effectively fixed
 
@@ -942,13 +942,15 @@ class mpfit:
         # Finish up the free parameters
         ifree = (numpy.nonzero(pfixed != 1))[0]
         nfree = len(ifree)
+        if debug:
+            print("Number of free parameters: {0} out of {1}".format(nfree, npar))
         if nfree == 0:
             self.errmsg = 'ERROR: no free parameters'
             return
 
         # Compose only VARYING parameters
         self.params = xall.copy()     # self.params is the set of parameters to be returned
-        x = self.params[ifree]  # x is the set of free parameters
+        free_pars_x = self.params[ifree]  # x is the set of free parameters
 
         # LIMITED parameters ?
         limited = self.parinfo(parinfo, 'limited', default=[0,0], n=npar)
@@ -978,12 +980,12 @@ class mpfit:
         else:
             # Fill in local variables with dummy values
             qulim = numpy.zeros(nfree)
-            ulim  = x * 0.
+            ulim  = free_pars_x * 0.
             qllim = qulim
-            llim  = x * 0.
+            llim  = free_pars_x * 0.
             qanylim = 0
 
-        n = len(x)
+        n = len(free_pars_x)
         # Check input parameters for errors
         if (n < 0) or (ftol <= 0) or (xtol <= 0) or (gtol <= 0) \
                     or (maxiter < 0) or (factor <= 0):
@@ -1019,12 +1021,15 @@ class mpfit:
             return
         self.dof = m-nfree
         self.fnorm = self.enorm(fvec)
+        if debug:
+            print("initial fnorm={0}".format(self.fnorm))
+            print("initial params={0}".format(self.params))
 
         # Initialize Levelberg-Marquardt parameter and iteration counter
 
         par = 0.
         self.niter = 1
-        qtf = x * 0.
+        qtf = free_pars_x * 0.
         self.status = 0
 
         # Beginning of the outer loop
@@ -1032,7 +1037,7 @@ class mpfit:
         while(1):
 
             # If requested, call fcn to enable printing of iterates
-            self.params[ifree] = x
+            self.params[ifree] = free_pars_x
             if self.qanytied:
                 self.params = self.tie(self.params, ptied)
 
@@ -1041,7 +1046,7 @@ class mpfit:
                     mperr = 0
                     xnew0 = self.params.copy()
 
-                    dof = numpy.max([len(fvec) - len(x), 0])
+                    dof = numpy.max([len(fvec) - len(free_pars_x), 0])
                     status = iterfunct(fcn, self.params, self.niter, self.fnorm**2,
                        functkw=functkw, parinfo=parinfo, quiet=quiet,
                        dof=dof, **iterkw)
@@ -1057,13 +1062,13 @@ class mpfit:
                     if numpy.max(numpy.abs(xnew0-self.params)) > 0:
                         if self.qanytied:
                             self.params = self.tie(self.params, ptied)
-                        x = self.params[ifree]
+                        free_pars_x = self.params[ifree]
 
 
             # Calculate the jacobian matrix
             self.status = 2
             catch_msg = 'calling MPFIT_FDJAC2'
-            fjac = self.fdjac2(fcn, x, fvec, step, qulim, ulim, dside,
+            fjac = self.fdjac2(fcn, free_pars_x, fvec, step, qulim, ulim, dside,
                           epsfcn=epsfcn,
                           autoderivative=autoderivative, dstep=dstep,
                           functkw=functkw, ifree=ifree, xall=self.params)
@@ -1074,9 +1079,9 @@ class mpfit:
             # Determine if any of the parameters are pegged at the limits
             if qanylim:
                 catch_msg = 'zeroing derivatives of pegged parameters'
-                whlpeg = (numpy.nonzero(qllim & (x == llim)))[0]
+                whlpeg = (numpy.nonzero(qllim & (free_pars_x == llim)))[0]
                 nlpeg = len(whlpeg)
-                whupeg = (numpy.nonzero(qulim & (x == ulim)))[0]
+                whupeg = (numpy.nonzero(qulim & (free_pars_x == ulim)))[0]
                 nupeg = len(whupeg)
                 # See if any "pegged" values should keep their derivatives
                 if nlpeg > 0:
@@ -1094,6 +1099,10 @@ class mpfit:
 
             # Compute the QR factorization of the jacobian
             [fjac, ipvt, wa1, wa2] = self.qrfac(fjac, pivot=1)
+
+            if debug:
+                print("outer loop; wa1={0}".format(wa1))
+                print("outer loop; wa2={0}".format(wa2))
             
             # On the first iteration if "diag" is unspecified, scale
             # according to the norms of the columns of the initial jacobian
@@ -1105,7 +1114,7 @@ class mpfit:
 
                 # On the first iteration, calculate the norm of the scaled x
                 # and initialize the step bound delta
-                wa3 = diag * x
+                wa3 = diag * free_pars_x
                 xnorm = self.enorm(wa3)
                 delta = factor*xnorm
                 if delta == 0.:
@@ -1170,11 +1179,15 @@ class mpfit:
                                                      delta, wa1, wa2, par=par)
                 # Store the direction p and x+p. Calculate the norm of p
                 wa1 = -wa1
+                if debug:
+                    print("before parameter setting; wa1={0}".format(wa1))
+                    print("before parameter setting; wa2={0}".format(wa2))
+                    print("before parameter setting; params={0}".format(self.params))
 
                 if (qanylim == 0) and (qminmax == 0):
                     # No parameter limits, so just move to new position WA2
                     alpha = 1.
-                    wa2 = x + wa1
+                    wa2 = free_pars_x + wa1
 
                 else:
 
@@ -1192,21 +1205,22 @@ class mpfit:
                             wa1[whupeg] = numpy.clip(wa1[whupeg], numpy.min(wa1), 0.)
 
                         dwa1 = numpy.abs(wa1) > machep
-                        whl = (numpy.nonzero(((dwa1!=0.) & qllim) & ((x + wa1) < llim)))[0]
+                        whl = (numpy.nonzero(((dwa1!=0.) & qllim) & ((free_pars_x + wa1) < llim)))[0]
                         if len(whl) > 0:
-                            t = ((llim[whl] - x[whl]) /
+                            t = ((llim[whl] - free_pars_x[whl]) /
                                   wa1[whl])
                             alpha = numpy.min([alpha, numpy.min(t)])
-                        whu = (numpy.nonzero(((dwa1!=0.) & qulim) & ((x + wa1) > ulim)))[0]
+                        whu = (numpy.nonzero(((dwa1!=0.) & qulim) & ((free_pars_x + wa1) > ulim)))[0]
                         if len(whu) > 0:
-                            t = ((ulim[whu] - x[whu]) /
+                            t = ((ulim[whu] - free_pars_x[whu]) /
                                   wa1[whu])
                             alpha = numpy.min([alpha, numpy.min(t)])
 
                     # Obey any max step values.
                     if qminmax:
                         nwa1 = wa1 * alpha
-                        whmax = (numpy.nonzero((qmax != 0.) & (maxstep > 0)))[0]
+                        whmax = (numpy.nonzero((qmax[ifree] != 0.) &
+                                               (maxstep[ifree] > 0)))[0]
                         if len(whmax) > 0:
                             mrat = numpy.max(numpy.abs(nwa1[whmax]) /
                                        numpy.abs(maxstep[ifree[whmax]]))
@@ -1215,7 +1229,7 @@ class mpfit:
 
                     # Scale the resulting vector
                     wa1 = wa1 * alpha
-                    wa2 = x + wa1
+                    wa2 = free_pars_x + wa1
 
                     # Adjust the final output values.  If the step put us exactly
                     # on a boundary, make sure it is exact.
@@ -1240,6 +1254,9 @@ class mpfit:
                     delta = numpy.min([delta,pnorm])
 
                 self.params[ifree] = wa2
+                if debug:
+                    print("after parameter setting: wa2={0}".format(wa2))
+                    print("after parameter setting: params={0}".format(self.params))
 
                 # Evaluate the function at x+p and calculate its norm
                 mperr = 0
@@ -1249,12 +1266,19 @@ class mpfit:
                     self.errmsg = 'WARNING: premature termination by "'+fcn+'"'
                     return
                 fnorm1 = self.enorm(wa4)
+                if debug:
+                    print("params={0}".format(self.params))
+                    print("fnorm={0}".format(self.fnorm))
+                    print("fnorm1={0}".format(fnorm1))
+                    #print("wa4={0}".format(wa4))
 
                 # Compute the scaled actual reduction
                 catch_msg = 'computing convergence criteria'
                 actred = -1.
                 if (0.1 * fnorm1) < self.fnorm:
                     actred = - (fnorm1/self.fnorm)**2 + 1.
+                if debug:
+                    print("actred={0}".format(actred))
 
                 # Compute the scaled predicted reduction and the scaled directional
                 # derivative
@@ -1289,11 +1313,14 @@ class mpfit:
                         delta = pnorm/.5
                         par = .5*par
 
+                if debug:
+                    print("ratio={0}".format(ratio))
+
                 # Test for successful iteration
                 if ratio >= 0.0001:
                     # Successful iteration.  Update x, fvec, and their norms
-                    x = wa2
-                    wa2 = diag * x
+                    free_pars_x = wa2
+                    wa2 = diag * free_pars_x
                     fvec = wa4
                     xnorm = self.enorm(wa2)
                     self.fnorm = fnorm1
@@ -1330,7 +1357,7 @@ class mpfit:
 
                 # Check for over/underflow
                 if ~numpy.all(numpy.isfinite(wa1) & numpy.isfinite(wa2) & \
-                            numpy.isfinite(x)) or ~numpy.isfinite(ratio):
+                            numpy.isfinite(free_pars_x)) or ~numpy.isfinite(ratio):
                     errmsg = ('''ERROR: parameter or function value(s) have become 
                         'infinite; check model function for over- 'and underflow''')
                     self.status = -16
@@ -1349,7 +1376,7 @@ class mpfit:
         if nfree == 0:
             self.params = xall.copy()
         else:
-            self.params[ifree] = x
+            self.params[ifree] = free_pars_x
         if (nprint > 0) and (self.status > 0):
             catch_msg = 'calling ' + str(fcn)
             [status, fvec] = self.call(fcn, self.params, functkw)
