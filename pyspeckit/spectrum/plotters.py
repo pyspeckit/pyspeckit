@@ -373,7 +373,6 @@ class Plotter(object):
                 else:
                     self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin.value
 
-            # print('self.ymin:',self.ymin)
             self.ymin += u.Quantity(self.offset, self.ymin.unit)
             self.ymax += u.Quantity(self.offset, self.ymax.unit)
 
@@ -404,7 +403,7 @@ class Plotter(object):
         if xlabel is not None:
             self.xlabel = xlabel
         elif self._xunit:
-            self.xlabel += " ("+u.Unit(self._xunit).to_string(format=u.format.Latex)+")"
+            self.xlabel += " ("+u.Unit(self._xunit).to_string()+")"
             if verbose_label:
                 self.xlabel = "%s %s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
                         # self.Spectrum.xarr.frame.title(),
