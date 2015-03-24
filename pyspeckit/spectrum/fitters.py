@@ -627,7 +627,7 @@ class Specfit(interactive.Interactive):
                   negamp=None, fittype=None, renormalize='auto', color=None,
                   use_lmfit=False, show_components=None, debug=False,
                   use_window_limits=True, guesses=None,
-                  nsigcut_moments=None, plot=True, **kwargs):
+                  nsigcut_moments=None, plot=True, parinfo=None, **kwargs):
         """
         Fit a single peak (plus a background)
 
