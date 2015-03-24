@@ -22,7 +22,7 @@ def powerlaw(x, scale, power, return_components=False):
     return scale*x**power
 
 
-def powerlaw_fitter(order=1, multisingle='multi'):
+def powerlaw_fitter(order=1):
     """
     Generator for powerlaw fitter class
     """
@@ -31,8 +31,7 @@ def powerlaw_fitter(order=1, multisingle='multi'):
             parnames=['scale','power'], 
             parlimited=[(False,False),(False,False)], 
             parlimits=[(0,0),(0,0)], 
-            shortvarnames=('S','P'),
-            multisingle=multisingle,
+            shortvarnames=('S','P')
             )
     myclass.__name__ = "powerlaw"
     

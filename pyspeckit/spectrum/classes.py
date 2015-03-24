@@ -248,12 +248,7 @@ class Spectrum(object):
 
         for modelname, model in registry.multifitters.iteritems():
             self.Registry.add_fitter(modelname, model,
-                    registry.npars[modelname], multisingle='multi',
-                    key=registry.associated_keys.get(modelname))
-        for modelname, model in registry.singlefitters.iteritems():
-            self.Registry.add_fitter(modelname, model,
-                    registry.npars[modelname], multisingle='single',
-                    key=registry.associated_keys.get(modelname))
+                    registry.npars[modelname], key=registry.associated_keys.get(modelname))
 
     def _sort(self):
         """

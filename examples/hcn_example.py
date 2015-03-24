@@ -19,23 +19,17 @@ sp.error[:] = sp.stats((-35,-25))['std']
 # background will not automatically be fit
 # 5 is the number of parameters in the model (line center,
 # line width, and amplitude for the 0-1, 2-1, and 1-1 lines)
-sp.Registry.add_fitter('hcn_varyhf',
-                       pyspeckit.models.hcn.hcn_varyhf_amp_fitter,
-                       5,
-                       multisingle='multi')
+sp.Registry.add_fitter('hcn_varyhf',pyspeckit.models.hcn.hcn_varyhf_amp_fitter,5)
 
 # This one is the same, but with fixed relative ampltidue hyperfine components
-sp.Registry.add_fitter('hcn_fixedhf',
-                       pyspeckit.models.hcn.hcn_amp,
-                       3,
-                       multisingle='multi')
+sp.Registry.add_fitter('hcn_fixedhf',pyspeckit.models.hcn.hcn_amp,3)
 
 # Plot the results
 sp.plotter()
 
 # Run the fixed-ampltiude fitter and show the individual fit components
 sp.specfit(fittype='hcn_fixedhf',
-           multifit=True,
+           multifit=None,
            guesses=[1,-48,0.6],
            show_hyperfine_components=True)
 
@@ -49,7 +43,7 @@ sp.plotter.savefig('hcn_fixedhf_fit.png')
 # Run the variable-ampltiude fitter and show the individual fit components
 # Note the different order of the arguments (velocity, width, then three amplitudes)
 sp.specfit(fittype='hcn_varyhf',
-           multifit=True,
+           multifit=None,
            guesses=[-48,1,0.2,0.6,0.3],
            show_hyperfine_components=True,
            clear=True)
@@ -68,14 +62,11 @@ sp.plotter.savefig('hcn_freehf_fit.png')
 # 1. the centroid
 # 2,3,4 - the amplitudes of the 0-1, 2-1, and 1-1 lines
 # 5,6,7 - the widths of the 0-1, 2-1, and 1-1 lines
-sp.Registry.add_fitter('hcn_varyhf_width',
-                       pyspeckit.models.hcn.hcn_varyhf_amp_width_fitter,
-                       7,
-                       multisingle='multi')
+sp.Registry.add_fitter('hcn_varyhf_width',pyspeckit.models.hcn.hcn_varyhf_amp_width_fitter,7)
 
 # Run the fitter
 sp.specfit(fittype='hcn_varyhf_width',
-           multifit=True,
+           multifit=None,
            guesses=[-48,0.2,0.6,0.3,1,1,1],
            show_hyperfine_components=True,
            clear=True)
@@ -98,7 +89,7 @@ sp.plotter.savefig('hcn_freehf_ampandwidth_fit.png')
 
 # Finally, how well does a 2-component fit work?
 sp.specfit(fittype='hcn_fixedhf',
-           multifit=True,
+           multifit=None,
            guesses=[1,-48,0.6,0.1,-46,0.6],
            show_hyperfine_components=True,
            clear=True)
