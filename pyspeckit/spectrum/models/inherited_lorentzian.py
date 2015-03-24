@@ -26,7 +26,7 @@ def lorentzian(x,A,dx,w, return_components=False):
     x = numpy.array(x) # make sure xarr is no longer a spectroscopic axis
     return A/(2.0*numpy.pi)*w/((x-dx)**2 + (w/2.0)**2)
 
-def lorentzian_fitter(multisingle='multi'):
+def lorentzian_fitter():
     """
     Generator for lorentzian fitter class
     """
@@ -36,7 +36,6 @@ def lorentzian_fitter(multisingle='multi'):
             parlimited=[(False,False),(False,False),(True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma'),
-            multisingle=multisingle,
             )
     myclass.__name__ = "lorentzian"
     

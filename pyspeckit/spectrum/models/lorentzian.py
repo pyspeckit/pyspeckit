@@ -11,20 +11,13 @@ from . import fitter
 
 class LorentzianFitter(fitter.SimpleFitter):
 
-    def __init__(self,multisingle='multi'):
+    def __init__():
         self.npars = 3
         self.npeaks = 1
         self.onepeaklorentzfit = self._fourparfitter(self.onepeaklorentzian)
-        if multisingle in ('multi','single'):
-            self.multisingle = multisingle
-        else:
-            raise Exception("multisingle must be multi or single")
 
     def __call__(self,*args,**kwargs):
-        if self.multisingle == 'single':
-            return self.onepeaklorentzfit(*args,**kwargs)
-        elif self.multisingle == 'multi':
-            return self.multilorentzfit(*args,**kwargs)
+        return self.multilorentzfit(*args,**kwargs)
 
 
     def onedlorentzian(x,H,A,dx,w):

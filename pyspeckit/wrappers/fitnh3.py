@@ -85,11 +85,11 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
     if tau is not None:
         if guesses is None:
             guesses = [a for i in xrange(npeaks) for a in (tkin+random.random()*i,tex,tau+random.random()*i,widthguess+random.random()*i,vguess+random.random()*i,fortho)]
-        spectra.specfit(fittype='ammonia_tau',quiet=quiet,multifit=True,guesses=guesses, thin=thin, **kwargs)
+        spectra.specfit(fittype='ammonia_tau',quiet=quiet,multifit=None,guesses=guesses, thin=thin, **kwargs)
     else:
         if guesses is None:
             guesses = [a for i in xrange(npeaks) for a in (tkin+random.random()*i,tex,column+random.random()*i,widthguess+random.random()*i,vguess+random.random()*i,fortho)]
-        spectra.specfit(fittype='ammonia',quiet=quiet,multifit=True,guesses=guesses, thin=thin, **kwargs)
+        spectra.specfit(fittype='ammonia',quiet=quiet,multifit=None,guesses=guesses, thin=thin, **kwargs)
 
     if doplot:
         plot_nh3(spdict,spectra,fignum=fignum)
@@ -161,9 +161,9 @@ def fitnh3(spectrum, vrange=[-100,100], vrangeunits='km/s', quiet=False,
     ampguess,vguess,widthguess = spectrum.specfit.modelpars
 
     if tau is None:
-        spectrum.specfit(fittype='ammonia',quiet=quiet,multifit=True,guesses=[Tex,Tkin,column,widthguess,vguess,fortho])
+        spectrum.specfit(fittype='ammonia',quiet=quiet,multifit=None,guesses=[Tex,Tkin,column,widthguess,vguess,fortho])
     else:
-        spectrum.specfit(fittype='ammonia_tau',quiet=quiet,multifit=True,guesses=[Tex,Tkin,tau,widthguess,vguess,fortho])
+        spectrum.specfit(fittype='ammonia_tau',quiet=quiet,multifit=None,guesses=[Tex,Tkin,tau,widthguess,vguess,fortho])
 
     return spectrum
 

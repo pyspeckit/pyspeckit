@@ -574,7 +574,7 @@ class Plotter(object):
                     units='km/s', refX=6562.8, refX_units='angstroms'),
                 data=np.random.randn(101), error=np.ones(101))
         >>> sp.plotter()
-        >>> sp.specfit(multifit=True, fittype='gaussian', guesses=[1,0,1]) # fitting noise....
+        >>> sp.specfit(multifit=None, fittype='gaussian', guesses=[1,0,1]) # fitting noise....
         >>> sp.measure()
         >>> sp.plotter.line_ids_from_measurements()
         """

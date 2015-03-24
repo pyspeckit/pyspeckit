@@ -39,7 +39,7 @@ parinfo.append(pyspeckit.parinfo.Parinfo(parname='VELO',value=35, tied='p[1]+65'
 parinfo.append(pyspeckit.parinfo.Parinfo(parname='GWIDTH',value=2))
 parinfo.append(pyspeckit.parinfo.Parinfo(parname='LWIDTH',value=2))
 
-sp1.specfit(fittype='voigt', parinfo=parinfo, multifit=True,
+sp1.specfit(fittype='voigt', parinfo=parinfo, multifit=None,
             composite_fit_color='c', clear=False, annotate=True)
 
 # Want to know the FWHM?

@@ -260,7 +260,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
 
 class ammonia_model(model.SpectralModel):
 
-    def __init__(self,npeaks=1,npars=6,multisingle='multi',
+    def __init__(self,npeaks=1,npars=6,
                  parnames=['tkin','tex','ntot','width','xoff_v','fortho'],
                  **kwargs):
         self.npeaks = npeaks
@@ -275,11 +275,6 @@ class ammonia_model(model.SpectralModel):
         # for fitting ammonia simultaneously with a flat background
         self.onepeakammonia = fitter.vheightmodel(ammonia)
         #self.onepeakammoniafit = self._fourparfitter(self.onepeakammonia)
-
-        if multisingle in ('multi','single'):
-            self.multisingle = multisingle
-        else:
-            raise Exception("multisingle must be multi or single")
 
         self.default_parinfo = None
         self.default_parinfo, kwargs = self._make_parinfo(**kwargs)
@@ -318,10 +313,7 @@ class ammonia_model(model.SpectralModel):
         self.fitunits = 'GHz'
 
     def __call__(self,*args,**kwargs):
-        if self.multisingle == 'single':
-            return self.onepeakammoniafit(*args,**kwargs)
-        elif self.multisingle == 'multi':
-            return self.multinh3fit(*args,**kwargs)
+        return self.multinh3fit(*args,**kwargs)
 
     def n_ammonia(self, pars=None, parnames=None, **kwargs):
         """
@@ -667,10 +659,7 @@ class ammonia_model_vtau(ammonia_model):
         return [20,10, 1, 1.0, 0.0, 1.0]
 
     def __call__(self,*args,**kwargs):
-        if self.multisingle == 'single':
-            return self.onepeakammoniafit(*args,**kwargs)
-        elif self.multisingle == 'multi':
-            return self.multinh3fit(*args,**kwargs)
+        return self.multinh3fit(*args,**kwargs)
 
 
 class ammonia_model_background(ammonia_model):

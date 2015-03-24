@@ -493,6 +493,8 @@ class Cube(spectrum.Spectrum):
             Same shape as error map.  Subtract this from data before estimating noise.
 
         """
+        if 'multifit' in fitkwargs:
+            log.warn("The multifit keyword is no longer required.  All fits allow for multiple components.", log.DeprecationWarning)
 
         if not hasattr(self.mapplot,'plane'):
             self.mapplot.makeplane()

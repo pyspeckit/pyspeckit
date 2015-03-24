@@ -14,7 +14,7 @@ If your model spectrum only requires a shift and a scale, it's easy to use:
 
     # Create the fitter from the template spectrum and "Register" it
     template_fitter = template_fitter(template,xshift_units='angstroms')
-    dataspec.Registry.add_fitter('template',template_fitter,2,multisingle='multi')
+    dataspec.Registry.add_fitter('template',template_fitter,2)
 
     # The fitted parameters are amplitude & xshift
     # perform the fit:

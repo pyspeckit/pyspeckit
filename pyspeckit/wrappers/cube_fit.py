@@ -74,7 +74,7 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
     # This speeds up the process enormously, but can easily mess up the fits if
     # there are bad pixels
     sp.momenteach(vheight=vheight, verbose=verbose)
-    sp.fiteach(errmap=errmap, multifit=True, verbose_level=verbose_level,
+    sp.fiteach(errmap=errmap, multifit=None, verbose_level=verbose_level,
                signal_cut=signal_cut, usemomentcube=True, blank_value=np.nan,
                verbose=verbose, **kwargs)
 

@@ -32,7 +32,7 @@ the correlation between width and amplitude.
     # create the spectrum object
     sp = pyspeckit.Spectrum(data=d, xarr=x, error=np.ones(50)*e.std())
     # fit it
-    sp.specfit(fittype='gaussian',multifit=True,guesses=[1,0,1])
+    sp.specfit(fittype='gaussian',multifit=None,guesses=[1,0,1])
     # then get the pymc values
     MCuninformed = sp.specfit.get_pymc()
     MCwithpriors = sp.specfit.get_pymc(use_fitted_values=True)
