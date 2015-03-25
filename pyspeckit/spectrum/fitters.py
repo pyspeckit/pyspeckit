@@ -158,6 +158,7 @@ class Specfit(interactive.Interactive):
                  clear_all_connections=True, debug=False, guesses=None,
                  parinfo=None, save=True, annotate=None, show_components=None,
                  use_lmfit=False, verbose=True, clear=True,
+                 reset_selection=True,
                  fit_plotted_area=True, use_window_limits=None, vheight=None,
                  exclude=None, **kwargs):
         """
@@ -186,6 +187,9 @@ class Specfit(interactive.Interactive):
         use_lmfit : boolean
             If lmfit-py (https://github.com/newville/lmfit-py) is installed, you
             can use it instead of the pure-python (but slow) mpfit.
+        reset_selection : boolean
+            Override any selections previously made using `fit_plotted_area` or
+            other keywords?
         fit_plotted_area : boolean
             If no other limits are specified, the plotter's xmin/xmax will be
             used to define the fit region.  Only respects the x-axis limits,
@@ -236,10 +240,11 @@ class Specfit(interactive.Interactive):
         
         """
         if clear: self.clear()
-        self.selectregion(verbose=verbose, debug=debug,
-                fit_plotted_area=fit_plotted_area,
-                exclude=exclude,
-                use_window_limits=use_window_limits, **kwargs)
+        if reset_selection:
+            self.selectregion(verbose=verbose, debug=debug,
+                              fit_plotted_area=fit_plotted_area,
+                              exclude=exclude,
+                              use_window_limits=use_window_limits, **kwargs)
         for arg in ['xmin','xmax','xtype','reset']:
             if arg in kwargs: kwargs.pop(arg)
 
@@ -468,7 +473,7 @@ class Specfit(interactive.Interactive):
         self.seterrspec()
         self.errspec[(True-OKmask)] = 1e10
         if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
-            self.errspec[True - self.includemask] = 1e10
+            self.errspec[~self.includemask] = 1e10*self.errspec.max()
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
                  show_components=None, verbose=True, color=None,
@@ -542,6 +547,7 @@ class Specfit(interactive.Interactive):
             self.Spectrum.xarr[self.xmin:self.xmax],
             self.spectofit[self.xmin:self.xmax],
             err=self.errspec[self.xmin:self.xmax], npeaks=self.npeaks,
+            parinfo=parinfo, # the user MUST be allowed to override parinfo.
             params=guesses, use_lmfit=use_lmfit, **self.fitkwargs)
 
         self.spectofit *= scalefactor
@@ -621,7 +627,7 @@ class Specfit(interactive.Interactive):
                   negamp=None, fittype=None, renormalize='auto', color=None,
                   use_lmfit=False, show_components=None, debug=False,
                   use_window_limits=True, guesses=None,
-                  nsigcut_moments=None, plot=True, **kwargs):
+                  nsigcut_moments=None, plot=True, parinfo=None, **kwargs):
         """
         Fit a single peak (plus a background)
 
@@ -713,6 +719,7 @@ class Specfit(interactive.Interactive):
                 err=self.errspec[self.xmin:self.xmax],
                 vheight=vheight,
                 params=self.guesses,
+                parinfo=parinfo,
                 debug=debug,
                 use_lmfit=use_lmfit,
                 **self.fitkwargs)
