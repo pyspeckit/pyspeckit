@@ -19,6 +19,7 @@ import fitter
 import matplotlib.cbook as mpcb
 import copy
 import model
+from astropy import log
 from . import mpfit_messages
 
 from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
@@ -247,7 +248,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
                     )
 
     if verbose or debug:
-        print "tkin: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (tkin,tex,ntot,width,xoff_v,fortho,fillingfraction)
+        log.info("tkin: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (tkin,tex,ntot,width,xoff_v,fortho,fillingfraction))
 
     if return_components:
         return (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-1*np.array(components)))
@@ -426,11 +427,11 @@ class ammonia_model(model.SpectralModel):
         else: 
             if isinstance(parinfo, ParinfoList):
                 if not quiet:
-                    print("Using user-specified parinfo.")
+                    log.info("Using user-specified parinfo.")
                 self.parinfo = parinfo
             else:
                 if not quiet:
-                    print("Using something like a user-specified parinfo, but not.")
+                    log.info("Using something like a user-specified parinfo, but not.")
                 self.parinfo = ParinfoList([p if isinstance(p,Parinfo) else Parinfo(p)
                                             for p in parinfo],
                                            preserve_order=True) 
@@ -458,16 +459,15 @@ class ammonia_model(model.SpectralModel):
             return f
 
         if veryverbose:
-            print "GUESSES: "
-            print parinfo
-            #print "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
+            log.info("GUESSES: ")
+            log.info(str(parinfo))
+            #log.info "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
 
         if use_lmfit:
             return self.lmfitter(xax, data, err=err,
                                  parinfo=parinfo,
                                  quiet=quiet,
-                                 debug=debug,
-                                 **kwargs)
+                                 debug=debug)
         else:
             mp = mpfit(mpfitfun(xax,data,err),
                        parinfo=parinfo,
@@ -487,13 +487,14 @@ class ammonia_model(model.SpectralModel):
             parinfo[i]['error'] = mpperr[i]
 
         if not shh:
-            print "Fit status: ",mp.status
-            print "Fit message: ",mpfit_messages[mp.status]
-            print "Fit error message: ",mp.errmsg
-            print "Final fit values: "
+            log.info("Fit status: {0}".format(mp.status))
+            log.info("Fit message: {0}".format(mpfit_messages[mp.status]))
+            log.info("Fit error message: {0}".format(mp.errmsg))
+            log.info("Final fit values: ")
             for i,p in enumerate(mpp):
-                print parinfo[i]['parname'],p," +/- ",mpperr[i]
-            print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
+                log.info(" ".join((parinfo[i]['parname'],p," +/- ",mpperr[i])))
+            log.info(" ".join("Chi2: ",mp.fnorm," Reduced Chi2: ",
+                              mp.fnorm/len(data)," DOF:",len(data)-len(mpp)))
 
         self.mp = mp
 
@@ -559,7 +560,7 @@ class ammonia_model(model.SpectralModel):
                      ):
 
         if not quiet:
-            print("Creating a 'parinfo' from guesses.")
+            log.info("Creating a 'parinfo' from guesses.")
         self.npars = len(params) / npeaks
 
         if len(params) != npeaks and (len(params) / self.npars) > npeaks:
@@ -594,7 +595,7 @@ class ammonia_model(model.SpectralModel):
                     partype_dict[partype] *= npeaks 
                 elif len(parlist) > self.npars:
                     # DANGER:  THIS SHOULD NOT HAPPEN!
-                    print "WARNING!  Input parameters were longer than allowed for variable ",parlist
+                    log.warn("WARNING!  Input parameters were longer than allowed for variable {0}".format(parlist))
                     partype_dict[partype] = partype_dict[partype][:self.npars]
                 elif parlist==params: # this instance shouldn't really be possible
                     partype_dict[partype] = [20,20,1e10,1.0,0.0,0.5] * npeaks
@@ -617,7 +618,7 @@ class ammonia_model(model.SpectralModel):
                                              for t in tied
                                              for ii in range(self.npeaks)]
 
-        if len(parnames) != len(partype_dict['params'])*npeaks:
+        if len(parnames) != len(partype_dict['params']):
             raise ValueError("Wrong array lengths AFTER fixing them")
 
         # used in components.  Is this just a hack?
