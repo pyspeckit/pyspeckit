@@ -115,12 +115,7 @@ class SpectralModel(fitter.SimpleFitter):
         use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
         if use_lmfit:
             return self.lmfitter(*args,**kwargs)
-        if self.multisingle == 'single':
-            # Generate a variable-height version of the model
-            # not used func = fitter.vheightmodel(self.modelfunc)
-            return self.fitter(*args, **kwargs)
-        elif self.multisingle == 'multi':
-            return self.fitter(*args,**kwargs)
+        return self.fitter(*args,**kwargs)
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
                       parlimits=None, parlimited=None, parfixed=None,
