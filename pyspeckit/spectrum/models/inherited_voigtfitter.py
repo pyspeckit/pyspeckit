@@ -79,7 +79,7 @@ def voigt_fwhm(sigma, gamma):
     """
     return 0.5346 * 2 * gamma + np.sqrt(0.2166*(2*gamma)**2 + sigma**2*8*np.log(2))
 
-def voigt_fitter(multisingle='multi'):
+def voigt_fitter():
     """
     Generator for voigt fitter class
     """
@@ -89,7 +89,6 @@ def voigt_fitter(multisingle='multi'):
             parlimited=[(False,False),(False,False),(True,False),(True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma_G',r'\sigma_L'),
-            multisingle=multisingle,
             centroid_par='shift',
             fwhm_func=voigt_fwhm,
             fwhm_pars=['gwidth','lwidth'],

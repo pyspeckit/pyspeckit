@@ -68,7 +68,7 @@ print "Best fit: ", sp.specfit.modelpars
 
 # Run the ammonia spec fitter with a reasonable guess 
 sp.specfit(fittype='ammonia_tau',
-        multifit=True,guesses=[5.9,4.45,4.5,0.84,96.2,0.43],quiet=False)
+        multifit=None,guesses=[5.9,4.45,4.5,0.84,96.2,0.43],quiet=False)
 
 # plot up the residuals in a different window.  The residuals strongly suggest
 # the presence of a second velocity component.
@@ -86,7 +86,7 @@ sp.specfit.plot_fit()
 sp.plotter.figure.savefig('nh3_ammonia_fit_vtau_zoom.png')
 
 # refit with two components
-sp.specfit(fittype='ammonia_tau',multifit=True,
+sp.specfit(fittype='ammonia_tau',multifit=None,
         guesses=[4,3.5,4.5,0.68,97.3,0.5]+[15,4.2,4.5,0.52,95.8,0.35],
         quiet=False)
 sp.specfit.plotresiduals()

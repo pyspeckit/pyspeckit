@@ -65,7 +65,7 @@ def _integral_modelpars(modelpars=None):
     sigma = modelpars[2]
     return gaussian_integral(amplitude,sigma)
 
-def gaussian_fitter(multisingle='multi'):
+def gaussian_fitter():
     """
     Generator for Gaussian fitter class
     """
@@ -75,7 +75,6 @@ def gaussian_fitter(multisingle='multi'):
             parlimited=[(False,False),(False,False),(True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma'),
-            multisingle=multisingle,
             centroid_par='shift',
             fwhm_func=gaussian_fwhm,
             fwhm_pars=['width'],
@@ -85,7 +84,7 @@ def gaussian_fitter(multisingle='multi'):
     
     return myclass
 
-def gaussian_vheight_fitter(multisingle='multi'):
+def gaussian_vheight_fitter():
     """
     Generator for Gaussian fitter class
     """
@@ -96,7 +95,6 @@ def gaussian_vheight_fitter(multisingle='multi'):
             parlimited=[(False,False),(False,False),(False,False),(True,False)], 
             parlimits=[(0,0),(0,0), (0,0), (0,0)],
             shortvarnames=('B','A',r'\Delta x',r'\sigma'),
-            multisingle=multisingle,
             centroid_par='shift',
             fwhm_func=gaussian_fwhm,
             fwhm_pars=['width'],

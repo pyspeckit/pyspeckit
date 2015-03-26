@@ -20,7 +20,7 @@ spc = pyspeckit.Cube('n2hp_cube.fit')
 # 'multi' indicates that it is possible to fit multiple components and a
 # background will not automatically be fit 4 is the number of parameters in the
 # model (excitation temperature, optical depth, line center, and line width)
-spc.Registry.add_fitter('n2hp_vtau',pyspeckit.models.n2hp.n2hp_vtau_fitter,4,multisingle='multi')
+spc.Registry.add_fitter('n2hp_vtau',pyspeckit.models.n2hp.n2hp_vtau_fitter,4)
 
 # Run the fitter
 spc.fiteach(fittype='n2hp_vtau', multifit=True,

@@ -22,7 +22,7 @@ def polymodel(x, *pars, **kwargs):
 
 polymodel.__doc__ += numpy.polyval.__doc__
 
-def poly_fitter(order=1, multisingle='multi'):
+def poly_fitter(order=1):
     """
     Generator for polynomial fitter class
     """
@@ -31,8 +31,7 @@ def poly_fitter(order=1, multisingle='multi'):
             parnames=['coeff%i' % ii for ii in xrange(order+1)], 
             parlimited=[(False,False) for ii in xrange(order+1)], 
             parlimits=[(0,0) for ii in xrange(order+1)], 
-            shortvarnames=['C%i' % ii for ii in xrange(order+1)],
-            multisingle=multisingle,
+            shortvarnames=['C%i' % ii for ii in xrange(order+1)]
             )
     myclass.__name__ = "polymodel"
     

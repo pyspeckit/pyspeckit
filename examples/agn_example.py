@@ -40,7 +40,7 @@ smallamp = np.max(spec.data[spec.specfit.xmin:spec.specfit.xmax])
 
 spec.specfit(guesses = [smallamp, SIIa, narrow, smallamp, SIIb, narrow],
         tied=['', '', 'p[-1]', '', 'p[1] + {0}'.format(SIIb_off), ''],
-        negamp=False, quiet=True, multifit=True, show_components=True)
+        negamp=False, quiet=True, multifit=None, show_components=True)
     
 ampSIIa, lamSIIa, sigmaSII, ampSIIb, lamSIIb, sigmaSII = spec.specfit.modelpars
 

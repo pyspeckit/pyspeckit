@@ -23,20 +23,13 @@ class gaussian_fitter(model.SpectralModel):
     most components of, :mod:`model.SpectralModel`
     """
 
-    def __init__(self,multisingle='multi'):
+    def __init__(self):
         self.npars = 3
         self.npeaks = 1
         self.onepeakgaussfit = self._fourparfitter(self.onepeakgaussian)
-        if multisingle in ('multi','single'):
-            self.multisingle = multisingle
-        else:
-            raise Exception("multisingle must be multi or single")
 
     def __call__(self,*args,**kwargs):
-        if self.multisingle == 'single':
-            return self.onepeakgaussfit(*args,**kwargs)
-        elif self.multisingle == 'multi':
-            return self.multigaussfit(*args,**kwargs)
+        return self.multigaussfit(*args,**kwargs)
 
     def onepeakgaussian(self, x,H,A,dx,w):
         """

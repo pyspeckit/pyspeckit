@@ -60,8 +60,7 @@ def template_fitter(template_spectrum, xshift_units='km/s'):
     >>> dataspec = pyspeckit.Spectrum("DataSpectrum.fits")
     >>> template_fitter = pyspeckit.models.template_fitter(template,
     ...                                                    xshift_units='angstroms')
-    >>> dataspec.Registry.add_fitter('template',template_fitter, 2,
-    ...                              multisingle='multi')
+    >>> dataspec.Registry.add_fitter('template',template_fitter, 2)
     >>> dataspec.specfit(fittype='template',guesses=[1,0])
     >>> print dataspec.specfit.parinfo
     """

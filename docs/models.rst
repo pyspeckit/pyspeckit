@@ -25,9 +25,7 @@ Here are some examples of how to make your own fitters::
             parnames=['amplitude','shift','width'], 
             parlimited=[(False,False),(False,False),(True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
-            shortvarnames=('A',r'\Delta x',r'\sigma'),
-            multisingle=multisingle,
-            )
+            shortvarnames=('A',r'\Delta x',r'\sigma'))
 
 Then you can `register <registration.html>`_ these fitters.
 

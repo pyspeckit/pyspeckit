@@ -19,91 +19,15 @@ import fitter
 import matplotlib.cbook as mpcb
 import copy
 import model
+from astropy import log
+from . import mpfit_messages
 
-
-line_names = ['oneone','twotwo','threethree','fourfour', "fivefive", "sixsix",
-              "sevenseven", "eighteight",]
-              #'ninenine']
-
-freq_dict = { 
-    'oneone':     23.694506e9,
-    'twotwo':     23.722633335e9,
-    'threethree': 23.8701296e9,
-    'fourfour':   24.1394169e9,
-    # fivefive - eighteight come from TopModel on splatalogue
-    'fivefive': 24.53299e9,
-    'sixsix': 25.05603e9,
-    'sevenseven': 25.71518e9,
-    'eighteight': 26.51898e9,
-    #'ninenine': 27.47794,
-    }
-aval_dict = {
-    'oneone':     1.712e-7,  #64*!pi**4/(3*h*c**3)*nu11**3*mu0**2*(1/2.)
-    'twotwo':     2.291e-7,  #64*!pi**4/(3*h*c**3)*nu22**3*mu0**2*(2/3.)
-    'threethree': 2.625e-7,  #64*!pi**4/(3*h*c**3)*nu33**3*mu0**2*(3/4.)
-    'fourfour':   3.167e-7,  #64*!pi**4/(3*h*c**3)*nu44**3*mu0**2*(4/5.)
-    'fivefive': 3.099109e-07,
-    'sixsix': 3.395797e-07,
-    'sevenseven': 3.747560e-07,
-    'eighteight': 4.175308e-07,
-    #'ninenine': xxx,
-    }
-ortho_dict = {
-    'oneone':     False,
-    'twotwo':     False,
-    'threethree': True,
-    'fourfour':   False,
-    'fivefive':   False,
-    'sixsix':   True,
-    'sevenseven':   False,
-    'eighteight':   False,
-    #'ninenine':   True,
-    }
-#n_ortho = np.arange(0,28,3) # 0..3..27
-#n_para = np.array([x for x in range(28) if x % 3 != 0])
-
-voff_lines_dict = {
-    'oneone': [19.8513, 19.3159, 7.88669, 7.46967, 7.35132, 0.460409, 0.322042,
-        -0.0751680, -0.213003, 0.311034, 0.192266, -0.132382, -0.250923, -7.23349,
-        -7.37280, -7.81526, -19.4117, -19.5500],
-    'twotwo':[26.5263, 26.0111, 25.9505, 16.3917, 16.3793, 15.8642, 0.562503,
-        0.528408, 0.523745, 0.0132820, -0.00379100, -0.0132820, -0.501831,
-        -0.531340, -0.589080, -15.8547, -16.3698, -16.3822, -25.9505, -26.0111,
-        -26.5263],
-    'threethree':[29.195098, 29.044147, 28.941877, 28.911408, 21.234827,
-        21.214619, 21.136387, 21.087456, 1.005122, 0.806082, 0.778062,
-        0.628569, 0.016754, -0.005589, -0.013401, -0.639734, -0.744554,
-        -1.031924, -21.125222, -21.203441, -21.223649, -21.076291, -28.908067,
-        -28.938523, -29.040794, -29.191744],
-    'fourfour':[  0.        , -30.49783692,  30.49783692,   0., 24.25907811,
-        -24.25907811,   0.        ],
-    'fivefive': [31.4053287863, 26.0285409785, 0.0, 0.0, 0.0, -25.9063412556, -31.2831290633],
-    'sixsix': [31.5872901302, 27.0406347326, 0.0, 0.0, 0.0, -26.9209859064, -31.4676413039],
-    'sevenseven': [31.3605314845, 27.3967468359, 0.0, 0.0, 0.0, -27.5133287373, -31.477113386],
-    'eighteight': [30.9752235915, 27.4707274918, 0.0, 0.0, 0.0, -27.5837757531, -30.9752235915],
-                      }
-
-tau_wts_dict = {
-    'oneone': [0.0740740, 0.148148, 0.0925930, 0.166667, 0.0185190, 0.0370370,
-        0.0185190, 0.0185190, 0.0925930, 0.0333330, 0.300000, 0.466667,
-        0.0333330, 0.0925930, 0.0185190, 0.166667, 0.0740740, 0.148148],
-    'twotwo': [0.00418600, 0.0376740, 0.0209300, 0.0372090, 0.0260470,
-        0.00186000, 0.0209300, 0.0116280, 0.0106310, 0.267442, 0.499668,
-        0.146512, 0.0116280, 0.0106310, 0.0209300, 0.00186000, 0.0260470,
-        0.0372090, 0.0209300, 0.0376740, 0.00418600],
-    'threethree': [0.012263, 0.008409, 0.003434, 0.005494, 0.006652, 0.008852,
-        0.004967, 0.011589, 0.019228, 0.010387, 0.010820, 0.009482, 0.293302,
-        0.459109, 0.177372, 0.009482, 0.010820, 0.019228, 0.004967, 0.008852,
-        0.006652, 0.011589, 0.005494, 0.003434, 0.008409, 0.012263],
-    'fourfour': [0.2431, 0.0162, 0.0162, 0.3008, 0.0163, 0.0163, 0.3911],
-    'fivefive': [0.0109080940831, 0.0109433143618, 0.311493418617, 0.261847767275, 0.382955997218, 0.0109433143618, 0.0109080940831],
-    'sixsix': [0.0078350431801, 0.00784948916416, 0.317644539734, 0.274246689798, 0.376739705779, 0.00784948916416, 0.0078350431801],
-    'sevenseven': [0.00589524944656, 0.00590204051181, 0.371879455317, 0.321515700951, 0.283010263815, 0.00590204051181, 0.00589524944656],
-    'eighteight': [0.00459516014524, 0.00459939439378, 0.324116135075, 0.289534720829, 0.367960035019, 0.00459939439378, 0.00459516014524],
-}
+from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
+                               voff_lines_dict, tau_wts_dict)
 
 def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
+            background_tb=2.7315,
             thin=False, verbose=False, return_components=False, debug=False):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
@@ -146,6 +70,8 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
     return_components: bool
         Return a list of arrays, one for each hyperfine component, instead of
         just one array
+    background_tb : float
+        The background brightness temperature.  Defaults to TCMB.
     verbose: bool
         More messages
     debug: bool
@@ -166,9 +92,10 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
     xarr = xarr.as_unit('GHz')
 
     if tex is not None:
-        if tex > tkin: # cannot have Tex > Tkin
-            tex = tkin 
-        elif thin: # tex is not used in this case
+        # Yes, you certainly can have nonthermal excitation, tex>tkin.
+        #if tex > tkin: # cannot have Tex > Tkin
+        #    tex = tkin 
+        if thin: # tex is not used in this case
             tex = tkin
     else:
         tex = tkin
@@ -307,10 +234,10 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
         if tau is not None and thin:
             #runspec = tauprof+runspec
             # is there ever a case where you want to ignore the optical depth function? I think no
-            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
+            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-tauprof))+runspec
         else:
-            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-tauprof))+runspec
-        if runspec.min() < 0:
+            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-tauprof))+runspec
+        if runspec.min() < 0 and background_tb == 2.7315:
             raise ValueError("Model dropped below zero.  That is not possible normally.  Here are the input values: "+
                     ("tex: %f " % tex) + 
                     ("tkin: %f " % tkin) + 
@@ -321,22 +248,25 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
                     )
 
     if verbose or debug:
-        print "tkin: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (tkin,tex,ntot,width,xoff_v,fortho,fillingfraction)
+        log.info("tkin: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (tkin,tex,ntot,width,xoff_v,fortho,fillingfraction))
 
     if return_components:
-        return (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/2.73)-1))*(1-np.exp(-1*np.array(components)))
+        return (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-1*np.array(components)))
 
     if return_tau:
         return tau_dict
   
     return runspec
 
+
 class ammonia_model(model.SpectralModel):
 
-    def __init__(self,npeaks=1,npars=6,multisingle='multi',**kwargs):
+    def __init__(self,npeaks=1,npars=6,
+                 parnames=['tkin','tex','ntot','width','xoff_v','fortho'],
+                 **kwargs):
         self.npeaks = npeaks
         self.npars = npars
-        self._default_parnames = ['tkin','tex','ntot','width','xoff_v','fortho']
+        self._default_parnames = parnames
         self.parnames = copy.copy(self._default_parnames)
 
         # all fitters must have declared modelfuncs, which should take the fitted pars...
@@ -346,11 +276,6 @@ class ammonia_model(model.SpectralModel):
         # for fitting ammonia simultaneously with a flat background
         self.onepeakammonia = fitter.vheightmodel(ammonia)
         #self.onepeakammoniafit = self._fourparfitter(self.onepeakammonia)
-
-        if multisingle in ('multi','single'):
-            self.multisingle = multisingle
-        else:
-            raise Exception("multisingle must be multi or single")
 
         self.default_parinfo = None
         self.default_parinfo, kwargs = self._make_parinfo(**kwargs)
@@ -389,14 +314,7 @@ class ammonia_model(model.SpectralModel):
         self.fitunits = 'GHz'
 
     def __call__(self,*args,**kwargs):
-        #if 'use_lmfit' in kwargs: kwargs.pop('use_lmfit')
-        use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
-        if use_lmfit:
-            return self.lmfitter(*args,**kwargs)
-        if self.multisingle == 'single':
-            return self.onepeakammoniafit(*args,**kwargs)
-        elif self.multisingle == 'multi':
-            return self.multinh3fit(*args,**kwargs)
+        return self.multinh3fit(*args,**kwargs)
 
     def n_ammonia(self, pars=None, parnames=None, **kwargs):
         """
@@ -437,7 +355,6 @@ class ammonia_model(model.SpectralModel):
         else:
             npars = len(parvals) / self.npeaks
 
-
         self._components = []
         def L(x):
             v = np.zeros(len(x))
@@ -450,7 +367,7 @@ class ammonia_model(model.SpectralModel):
             return v
         return L
 
-    def components(self, xarr, pars, hyperfine=False):
+    def components(self, xarr, pars, hyperfine=False, **kwargs):
         """
         Ammonia components don't follow the default, since in Galactic astronomy the hyperfine components should be well-separated.
         If you want to see the individual components overlaid, you'll need to pass hyperfine to the plot_fit call
@@ -470,15 +387,12 @@ class ammonia_model(model.SpectralModel):
         return modelcomponents
 
 
-    def multinh3fit(self, xax, data, npeaks=1, err=None,
-                    params=(20,20,14,1.0,0.0,0.5), parnames=None,
-                    fixed=(False,False,False,False,False,False),
-                    limitedmin=(True,True,True,True,False,True),
-                    limitedmax=(False,False,False,False,False,True),
-                    minpars=(2.73,2.73,0,0,0,0), parinfo=None,
-                    maxpars=(0,0,0,0,0,1),
-                    tied=('',)*6,
+    def multinh3fit(self, xax, data, err=None,
+                    parinfo=None,
                     quiet=True, shh=True,
+                    debug=False,
+                    maxiter=200,
+                    use_lmfit=False,
                     veryverbose=False, **kwargs):
         """
         Fit multiple nh3 profiles (multiple can be 1)
@@ -509,120 +423,61 @@ class ammonia_model(model.SpectralModel):
         """
 
         if parinfo is None:
-            self.npars = len(params) / npeaks
-
-            if len(params) != npeaks and (len(params) / self.npars) > npeaks:
-                npeaks = len(params) / self.npars 
-            self.npeaks = npeaks
-
-            if isinstance(params,np.ndarray): params=params.tolist()
-            # this is actually a hack, even though it's decently elegant
-            # somehow, parnames was being changed WITHOUT being passed as a variable
-            # this doesn't make sense - at all - but it happened.
-            # (it is possible for self.parnames to have npars*npeaks elements where
-            # npeaks > 1 coming into this function even though only 6 pars are specified;
-            # _default_parnames is the workaround)
-            if parnames is None: parnames = copy.copy(self._default_parnames)
-
-            partype_dict = dict(zip(['params', 'parnames', 'fixed',
-                                     'limitedmin', 'limitedmax', 'minpars',
-                                     'maxpars', 'tied'], 
-                                    [params, parnames, fixed, limitedmin,
-                                     limitedmax, minpars, maxpars, tied]))
-
-            # make sure all various things are the right length; if they're
-            # not, fix them using the defaults
-            # (you can put in guesses of length 12 but leave the rest length 6;
-            # this code then doubles the length of everything else)
-            for partype,parlist in partype_dict.iteritems():
-                if len(parlist) != self.npars*self.npeaks:
-                    # if you leave the defaults, or enter something that can be
-                    # multiplied by npars to get to the right number of
-                    # gaussians, it will just replicate
-                    if len(parlist) == self.npars: 
-                        partype_dict[partype] *= npeaks 
-                    elif len(parlist) > self.npars:
-                        # DANGER:  THIS SHOULD NOT HAPPEN!
-                        print "WARNING!  Input parameters were longer than allowed for variable ",parlist
-                        partype_dict[partype] = partype_dict[partype][:self.npars]
-                    elif parlist==params: # this instance shouldn't really be possible
-                        partype_dict[partype] = [20,20,1e10,1.0,0.0,0.5] * npeaks
-                    elif parlist==fixed:
-                        partype_dict[partype] = [False] * len(params)
-                    elif parlist==limitedmax: # only fortho, fillingfraction have upper limits
-                        partype_dict[partype] = (np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')
-                    elif parlist==limitedmin: # no physical values can be negative except velocity
-                        partype_dict[partype] = (np.array(parnames) != 'xoff_v')
-                    elif parlist==minpars:
-                        # all have minima of zero except kinetic temperature, which can't be below CMB.
-                        # Excitation temperature technically can be, but not in this model
-                        partype_dict[partype] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * 2.73
-                    elif parlist==maxpars: # fractions have upper limits of 1.0
-                        partype_dict[partype] = ((np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')).astype('float')
-                    elif parlist==parnames: # assumes the right number of parnames (essential)
-                        partype_dict[partype] = list(parnames) * self.npeaks 
-                    elif parlist==tied:
-                        partype_dict[partype] = [_increment_string_number(t, ii*self.npars)
-                                                 for t in tied
-                                                 for ii in range(self.npeaks)]
-
-            if len(parnames) != len(partype_dict['params']):
-                raise ValueError("Wrong array lengths AFTER fixing them")
-
-            # used in components.  Is this just a hack?
-            self.parnames = partype_dict['parnames']
-
-            parinfo = [ {'n':ii, 'value':partype_dict['params'][ii],
-                         'limits':[partype_dict['minpars'][ii],partype_dict['maxpars'][ii]],
-                         'limited':[partype_dict['limitedmin'][ii],partype_dict['limitedmax'][ii]], 'fixed':partype_dict['fixed'][ii],
-                         'parname':partype_dict['parnames'][ii]+str(ii/self.npars),
-                         'tied':partype_dict['tied'][ii],
-                         'mpmaxstep':float(partype_dict['parnames'][ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
-                         'error': 0} 
-                for ii in xrange(len(partype_dict['params'])) ]
-
-            # hack: remove 'fixed' pars
-            parinfo_with_fixed = parinfo
-            parinfo = [p for p in parinfo_with_fixed if not p['fixed']]
-            fixed_kwargs = dict((p['parname'].strip("0123456789").lower(),p['value']) for p in parinfo_with_fixed if p['fixed'])
-            # don't do this - it breaks the NEXT call because npars != len(parnames) self.parnames = [p['parname'] for p in parinfo]
-            # this is OK - not a permanent change
-            parnames = [p['parname'] for p in parinfo]
-            # not OK self.npars = len(parinfo)/self.npeaks
-            parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True)
-            #import pdb; pdb.set_trace()
+            parinfo = self.parinfo = self.make_parinfo(**kwargs)
         else: 
-            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True) 
-            parinfo_with_fixed = None
-            fixed_kwargs = {}
+            if isinstance(parinfo, ParinfoList):
+                if not quiet:
+                    log.info("Using user-specified parinfo.")
+                self.parinfo = parinfo
+            else:
+                if not quiet:
+                    log.info("Using something like a user-specified parinfo, but not.")
+                self.parinfo = ParinfoList([p if isinstance(p,Parinfo) else Parinfo(p)
+                                            for p in parinfo],
+                                           preserve_order=True) 
 
-        fitfun_kwargs = dict(kwargs.items()+fixed_kwargs.items())
+        fitfun_kwargs = dict((x,y) for (x,y) in kwargs.items()
+                             if x not in ('npeaks', 'params', 'parnames',
+                                          'fixed', 'limitedmin', 'limitedmax',
+                                          'minpars', 'maxpars', 'tied',
+                                          'max_tem_step'))
+        if 'use_lmfit' in fitfun_kwargs:
+            raise KeyError("use_lmfit was specified in a location where it "
+                           "is unacceptable")
 
         npars = len(parinfo)/self.npeaks
 
-        # (fortho0 is not fortho)
-        # this doesn't work if parinfo_with_fixed is not None:
-        # this doesn't work     for p in parinfo_with_fixed:
-        # this doesn't work         # users can change the defaults while holding them fixed 
-        # this doesn't work         if p['fixed']:
-        # this doesn't work             kwargs.update({p['parname']:p['value']})
-
         def mpfitfun(x,y,err):
             if err is None:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=parinfo.parnames, **fitfun_kwargs)(x))]
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p,
+                                                                parnames=parinfo.parnames,
+                                                                **fitfun_kwargs)(x))]
             else:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p, parnames=parinfo.parnames, **fitfun_kwargs)(x))/err]
+                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p,
+                                                                parnames=parinfo.parnames,
+                                                                **fitfun_kwargs)(x))/err]
             return f
 
         if veryverbose:
-            print "GUESSES: "
-            print "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
+            log.info("GUESSES: ")
+            log.info(str(parinfo))
+            #log.info "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
 
-        mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet)
-        mpp = mp.params
-        if mp.perror is not None: mpperr = mp.perror
-        else: mpperr = mpp*0
-        chi2 = mp.fnorm
+        if use_lmfit:
+            return self.lmfitter(xax, data, err=err,
+                                 parinfo=parinfo,
+                                 quiet=quiet,
+                                 debug=debug)
+        else:
+            mp = mpfit(mpfitfun(xax,data,err),
+                       parinfo=parinfo,
+                       maxiter=maxiter,
+                       quiet=quiet,
+                       debug=debug)
+            mpp = mp.params
+            if mp.perror is not None: mpperr = mp.perror
+            else: mpperr = mpp*0
+            chi2 = mp.fnorm
 
         if mp.status == 0:
             raise Exception(mp.errmsg)
@@ -632,51 +487,27 @@ class ammonia_model(model.SpectralModel):
             parinfo[i]['error'] = mpperr[i]
 
         if not shh:
-            print "Fit status: ",mp.status
-            print "Fit message: ",mp.errmsg
-            print "Final fit values: "
+            log.info("Fit status: {0}".format(mp.status))
+            log.info("Fit message: {0}".format(mpfit_messages[mp.status]))
+            log.info("Fit error message: {0}".format(mp.errmsg))
+            log.info("Final fit values: ")
             for i,p in enumerate(mpp):
-                print parinfo[i]['parname'],p," +/- ",mpperr[i]
-            print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
+                log.info(" ".join((parinfo[i]['parname'],p," +/- ",mpperr[i])))
+            log.info(" ".join("Chi2: ",mp.fnorm," Reduced Chi2: ",
+                              mp.fnorm/len(data)," DOF:",len(data)-len(mpp)))
 
-        if any(['tex' in s for s in parnames]) and any(['tkin' in s for s in parnames]):
-            texnum = (i for i,s in enumerate(parnames) if 'tex' in s)
-            tkinnum = (i for i,s in enumerate(parnames) if 'tkin' in s)
-            for txn,tkn in zip(texnum,tkinnum):
-                if mpp[txn] > mpp[tkn]: mpp[txn] = mpp[tkn]  # force Tex>Tkin to Tex=Tkin (already done in n_ammonia)
         self.mp = mp
 
-        if parinfo_with_fixed is not None:
-            # self self.parinfo preserving the 'fixed' parameters 
-            # ORDER MATTERS!
-            for p in parinfo:
-                parinfo_with_fixed[p['n']] = p
-            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo_with_fixed], preserve_order=True)
-        else:
-            self.parinfo = parinfo
-            self.parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True)
-
-        # I don't THINK these are necessary?
-        #self.parinfo = parinfo
-        #self.parinfo = ParinfoList([Parinfo(p) for p in self.parinfo])
-
-        # need to restore the fixed parameters....
-        # though the above commented out section indicates that I've done and undone this dozens of times now
-        # (a test has been added to test_nh3.py)
-        # this was NEVER included or tested because it breaks the order
-        #for par in parinfo_with_fixed:
-        #    if par.parname not in self.parinfo.keys():
-        #        self.parinfo.append(par)
+        self.parinfo = parinfo
 
         self.mpp = self.parinfo.values
         self.mpperr = self.parinfo.errors
         self.mppnames = self.parinfo.names
-        self.model = self.n_ammonia(pars=self.mpp, parnames=self.mppnames, **kwargs)(xax)
-        #if self.model.sum() == 0:
-        #    print "DON'T FORGET TO REMOVE THIS ERROR!"
-        #    raise ValueError("Model is zeros.")
+        self.model = self.n_ammonia(pars=self.mpp, parnames=self.mppnames,
+                                    **fitfun_kwargs)(xax)
 
-        indiv_parinfo = [self.parinfo[jj*self.npars:(jj+1)*self.npars] for jj in xrange(len(self.parinfo)/self.npars)]
+        indiv_parinfo = [self.parinfo[jj*self.npars:(jj+1)*self.npars]
+                         for jj in xrange(len(self.parinfo)/self.npars)]
         modelkwargs = [
                 dict([(p['parname'].strip("0123456789").lower(),p['value']) for p in pi])
                 for pi in indiv_parinfo]
@@ -694,7 +525,9 @@ class ammonia_model(model.SpectralModel):
 
     def annotations(self):
         from decimal import Decimal # for formatting
-        tex_key = {'tkin':'T_K','tex':'T_{ex}','ntot':'N','fortho':'F_o','width':'\\sigma','xoff_v':'v','fillingfraction':'FF','tau':'\\tau_{1-1}'}
+        tex_key = {'tkin':'T_K', 'tex':'T_{ex}', 'ntot':'N', 'fortho':'F_o',
+                   'width':'\\sigma', 'xoff_v':'v', 'fillingfraction':'FF',
+                   'tau':'\\tau_{1-1}'}
         # small hack below: don't quantize if error > value.  We want to see the values.
         label_list = []
         for pinfo in self.parinfo:
@@ -713,10 +546,110 @@ class ammonia_model(model.SpectralModel):
         labels = tuple(mpcb.flatten(label_list))
         return labels
 
+    def make_parinfo(self, quiet=True,
+                     npeaks=1,
+                     params=(20,20,14,1.0,0.0,0.5), parnames=None,
+                     fixed=(False,False,False,False,False,False),
+                     limitedmin=(True,True,True,True,False,True),
+                     limitedmax=(False,False,False,False,False,True),
+                     minpars=(2.73,2.73,0,0,0,0),
+                     maxpars=(0,0,0,0,0,1),
+                     tied=('',)*6,
+                     max_tem_step=1.,
+                     **kwargs
+                     ):
+
+        if not quiet:
+            log.info("Creating a 'parinfo' from guesses.")
+        self.npars = len(params) / npeaks
+
+        if len(params) != npeaks and (len(params) / self.npars) > npeaks:
+            npeaks = len(params) / self.npars 
+        self.npeaks = npeaks
+
+        if isinstance(params,np.ndarray): params=params.tolist()
+        # this is actually a hack, even though it's decently elegant
+        # somehow, parnames was being changed WITHOUT being passed as a variable
+        # this doesn't make sense - at all - but it happened.
+        # (it is possible for self.parnames to have npars*npeaks elements where
+        # npeaks > 1 coming into this function even though only 6 pars are specified;
+        # _default_parnames is the workaround)
+        if parnames is None: parnames = copy.copy(self._default_parnames)
+
+        partype_dict = dict(zip(['params', 'parnames', 'fixed',
+                                 'limitedmin', 'limitedmax', 'minpars',
+                                 'maxpars', 'tied'], 
+                                [params, parnames, fixed, limitedmin,
+                                 limitedmax, minpars, maxpars, tied]))
+
+        # make sure all various things are the right length; if they're
+        # not, fix them using the defaults
+        # (you can put in guesses of length 12 but leave the rest length 6;
+        # this code then doubles the length of everything else)
+        for partype,parlist in partype_dict.iteritems():
+            if len(parlist) != self.npars*self.npeaks:
+                # if you leave the defaults, or enter something that can be
+                # multiplied by npars to get to the right number of
+                # gaussians, it will just replicate
+                if len(parlist) == self.npars: 
+                    partype_dict[partype] *= npeaks 
+                elif len(parlist) > self.npars:
+                    # DANGER:  THIS SHOULD NOT HAPPEN!
+                    log.warn("WARNING!  Input parameters were longer than allowed for variable {0}".format(parlist))
+                    partype_dict[partype] = partype_dict[partype][:self.npars]
+                elif parlist==params: # this instance shouldn't really be possible
+                    partype_dict[partype] = [20,20,1e10,1.0,0.0,0.5] * npeaks
+                elif parlist==fixed:
+                    partype_dict[partype] = [False] * len(params)
+                elif parlist==limitedmax: # only fortho, fillingfraction have upper limits
+                    partype_dict[partype] = (np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')
+                elif parlist==limitedmin: # no physical values can be negative except velocity
+                    partype_dict[partype] = (np.array(parnames) != 'xoff_v')
+                elif parlist==minpars:
+                    # all have minima of zero except kinetic temperature, which can't be below CMB.
+                    # Excitation temperature technically can be, but not in this model
+                    partype_dict[partype] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * 2.73
+                elif parlist==maxpars: # fractions have upper limits of 1.0
+                    partype_dict[partype] = ((np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')).astype('float')
+                elif parlist==parnames: # assumes the right number of parnames (essential)
+                    partype_dict[partype] = list(parnames) * self.npeaks 
+                elif parlist==tied:
+                    partype_dict[partype] = [_increment_string_number(t, ii*self.npars)
+                                             for t in tied
+                                             for ii in range(self.npeaks)]
+
+        if len(parnames) != len(partype_dict['params']):
+            raise ValueError("Wrong array lengths AFTER fixing them")
+
+        # used in components.  Is this just a hack?
+        self.parnames = partype_dict['parnames']
+
+        parinfo = [ {'n':ii, 'value':partype_dict['params'][ii],
+                     'limits':[partype_dict['minpars'][ii],partype_dict['maxpars'][ii]],
+                     'limited':[partype_dict['limitedmin'][ii],partype_dict['limitedmax'][ii]], 'fixed':partype_dict['fixed'][ii],
+                     'parname':partype_dict['parnames'][ii]+str(ii/self.npars),
+                     'tied':partype_dict['tied'][ii],
+                     'mpmaxstep':max_tem_step*float(partype_dict['parnames'][ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
+                     'error': 0} 
+            for ii in xrange(len(partype_dict['params'])) ]
+
+        # hack: remove 'fixed' pars
+        #parinfo_with_fixed = parinfo
+        #parinfo = [p for p in parinfo_with_fixed if not p['fixed']]
+        #fixed_kwargs = dict((p['parname'].strip("0123456789").lower(),
+        #                     p['value'])
+        #                    for p in parinfo_with_fixed if p['fixed'])
+        ## don't do this - it breaks the NEXT call because npars != len(parnames) self.parnames = [p['parname'] for p in parinfo]
+        ## this is OK - not a permanent change
+        #parnames = [p['parname'] for p in parinfo]
+        ## not OK self.npars = len(parinfo)/self.npeaks
+        parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True)
+        #import pdb; pdb.set_trace()
+        return parinfo
+
 class ammonia_model_vtau(ammonia_model):
     def __init__(self,**kwargs):
-        super(ammonia_model_vtau,self).__init__()
-        self.parnames = ['tkin','tex','tau','width','xoff_v','fortho']
+        super(ammonia_model_vtau,self).__init__(parnames=['tkin','tex','tau','width','xoff_v','fortho'])
 
     def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
         """
@@ -727,11 +660,94 @@ class ammonia_model_vtau(ammonia_model):
         return [20,10, 1, 1.0, 0.0, 1.0]
 
     def __call__(self,*args,**kwargs):
+        return self.multinh3fit(*args,**kwargs)
+
+
+class ammonia_model_background(ammonia_model):
+    def __init__(self,**kwargs):
+        super(ammonia_model_background,self).__init__(npars=7,
+                                                      parnames=['tkin', 'tex',
+                                                                'ntot',
+                                                                'width',
+                                                                'xoff_v',
+                                                                'fortho',
+                                                                'background_tb'])
+
+    def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
+        """
+        Returns a very simple and likely incorrect guess
+        """
+
+        # TKIN, TEX, ntot, width, center, ortho fraction
+        return [20,10, 1, 1.0, 0.0, 1.0, 2.73]
+
+    def __call__(self,*args,**kwargs):
         if self.multisingle == 'single':
             return self.onepeakammoniafit(*args,**kwargs)
         elif self.multisingle == 'multi':
+            # Why is tied 6 instead of 7?
             return self.multinh3fit(*args,**kwargs)
 
+    def make_parinfo(self, npeaks=1, err=None,
+                    params=(20,20,14,1.0,0.0,0.5,2.73), parnames=None,
+                    fixed=(False,False,False,False,False,False,True),
+                    limitedmin=(True,True,True,True,False,True,True),
+                    limitedmax=(False,False,False,False,False,True,True),
+                    minpars=(2.73,2.73,0,0,0,0,2.73), parinfo=None,
+                    maxpars=(0,0,0,0,0,1,2.73),
+                    tied=('',)*7,
+                    quiet=True, shh=True,
+                     veryverbose=False, **kwargs):
+        return super(ammonia_model_background,
+                     self).make_parinfo(npeaks=npeaks, err=err, params=params,
+                                        parnames=parnames, fixed=fixed,
+                                        limitedmin=limitedmin,
+                                        limitedmax=limitedmax, minpars=minpars,
+                                        parinfo=parinfo, maxpars=maxpars,
+                                        tied=tied, quiet=quiet, shh=shh,
+                                        veryverbose=veryverbose, **kwargs)
+
+    def multinh3fit(self, xax, data, npeaks=1, err=None,
+                    params=(20,20,14,1.0,0.0,0.5,2.73), parnames=None,
+                    fixed=(False,False,False,False,False,False,True),
+                    limitedmin=(True,True,True,True,False,True,True),
+                    limitedmax=(False,False,False,False,False,True,True),
+                    minpars=(2.73,2.73,0,0,0,0,2.73), parinfo=None,
+                    maxpars=(0,0,0,0,0,1,2.73),
+                    tied=('',)*7,
+                    quiet=True, shh=True,
+                    veryverbose=False, **kwargs):
+        return super(ammonia_model_background,
+                     self).multinh3fit(xax, data, npeaks=npeaks, err=err,
+                                       params=params, parnames=parnames,
+                                       fixed=fixed, limitedmin=limitedmin,
+                                       limitedmax=limitedmax, minpars=minpars,
+                                       parinfo=parinfo, maxpars=maxpars,
+                                       tied=tied, quiet=quiet, shh=shh,
+                                       veryverbose=veryverbose, **kwargs)
+
+    def annotations(self):
+        from decimal import Decimal # for formatting
+        tex_key = {'tkin':'T_K', 'tex':'T_{ex}', 'ntot':'N', 'fortho':'F_o',
+                   'width':'\\sigma', 'xoff_v':'v', 'fillingfraction':'FF',
+                   'tau':'\\tau_{1-1}', 'background_tb':'T_{BG}'}
+        # small hack below: don't quantize if error > value.  We want to see the values.
+        label_list = []
+        for pinfo in self.parinfo:
+            parname = tex_key[pinfo['parname'].strip("0123456789").lower()]
+            parnum = int(pinfo['parname'][-1])
+            if pinfo['fixed']:
+                formatted_value = "%s" % pinfo['value']
+                pm = ""
+                formatted_error=""
+            else:
+                formatted_value = Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value']))))
+                pm = "$\\pm$"
+                formatted_error = Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error']))
+            label =  "$%s(%i)$=%8s %s %8s" % (parname, parnum, formatted_value, pm, formatted_error)
+            label_list.append(label)
+        labels = tuple(mpcb.flatten(label_list))
+        return labels
 
 def _increment_string_number(st, count):
     """
@@ -740,6 +756,7 @@ def _increment_string_number(st, count):
     Expects input of the form: p[6]
     """
 
+    import re
     dig = re.compile('[0-9]+')
 
     if dig.search(st):

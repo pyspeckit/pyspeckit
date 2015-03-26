@@ -18,7 +18,7 @@ def test_template():
 
     template_fitter = pyspeckit.models.template_fitter(template,
                                                        xshift_units='km/s')
-    sp.Registry.add_fitter('template', template_fitter, 2, multisingle='multi')
+    sp.Registry.add_fitter('template', template_fitter, 2)
     sp.specfit(fittype='template', guesses=[1,0])
 
     np.testing.assert_almost_equal(sp.specfit.parinfo.SCALE0.value, 1.00, 2)
@@ -54,7 +54,7 @@ def test_template_withcont():
 
     template_fitter = pyspeckit.models.template_fitter(template,
                                                        xshift_units='km/s')
-    sp.Registry.add_fitter('template', template_fitter, 2, multisingle='multi')
+    sp.Registry.add_fitter('template', template_fitter, 2)
     sp.specfit(fittype='template', guesses=[scale,shift])
 
     np.testing.assert_almost_equal(sp.specfit.parinfo.SCALE0.value, scale, 2)

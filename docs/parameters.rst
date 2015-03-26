@@ -18,7 +18,7 @@ the `limits` and `limited` parameters.
 
     # define shorthand first:
     T,F = True,False
-    sp.specfit(fittype='gaussian', multisingle='multi', guesses=[-1,5,1,0.5,2,1],
+    sp.specfit(fittype='gaussian', guesses=[-1,5,1,0.5,2,1],
         limits=[(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
         limited=[(F,T), (F,F), (T,F), (T,F),  (F,F), (T,F)])
 
@@ -49,7 +49,7 @@ use `tied`:
 
 .. code-block:: python
 
-    sp.specfit(fittype='gaussian', multisingle='multi', guesses=[1,6716,1,0.5,6731,1],
+    sp.specfit(fittype='gaussian', guesses=[1,6716,1,0.5,6731,1],
         tied=['','','','','p[1]',''])
 
 If you use `lmfit-py` by specifying `use_lmfit=True`, you can use the more advanced `mathematical constraints
