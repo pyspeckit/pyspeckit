@@ -269,7 +269,7 @@ class Plotter(object):
                 errcolor = color
             if errstyle == 'fill':
                 order = -1 if self.Spectrum.xarr[-1] < self.Spectrum.xarr[0] else 1
-                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr[::order]+xoffset,isX=True),
+                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr.value[::order]+xoffset,isX=True),
                     steppify((self.Spectrum.data*self.plotscale+self.offset-self.Spectrum.error*self.plotscale)[::order]),
                     steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[::order]),
                     facecolor=errcolor, edgecolor=errcolor, alpha=erralpha, **kwargs)]
