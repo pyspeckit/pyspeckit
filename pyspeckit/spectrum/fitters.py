@@ -581,7 +581,6 @@ class Specfit(interactive.Interactive):
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
         self.model = model * scalefactor
-
         self.parinfo = self.fitter.parinfo
 
         self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]+np.sum(self.parinfo.fixed)
