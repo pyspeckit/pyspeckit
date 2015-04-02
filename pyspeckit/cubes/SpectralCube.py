@@ -654,8 +654,6 @@ class Cube(spectrum.Spectrum):
         # session that's just going to crash at the end.
         # try a first fit for exception-catching
         try0 = fit_a_pixel((0,valid_pixels[0][0],valid_pixels[0][1]))
-        print 'parcube:',self.parcube
-        print 'errcube:',self.errcube
         assert len(try0[1]) == len(guesses) == len(self.parcube) == len(self.errcube)
         assert len(try0[2]) == len(guesses) == len(self.parcube) == len(self.errcube)
 
@@ -735,7 +733,6 @@ class Cube(spectrum.Spectrum):
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 fit_a_pixel((ii,x,y))
-
 
         # March 27, 2014: This is EXTREMELY confusing.  This isn't in a loop...
         # make sure the fitter / fittype are set for the cube

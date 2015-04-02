@@ -373,6 +373,10 @@ class Plotter(object):
                 else:
                     self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin.value
 
+            print 'self.offset:',self.offset
+            print 'self.ymin:', type(self.ymin)
+            print 'self.ymin.unit:',self.ymin.unit
+
             self.ymin += u.Quantity(self.offset, self.ymin.unit)
             self.ymax += u.Quantity(self.offset, self.ymax.unit)
 
