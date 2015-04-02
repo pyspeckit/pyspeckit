@@ -312,6 +312,7 @@ class SpectroscopicAxis(u.Quantity):
         try:
             if unit is None or unit == 'unknown':
                 unit = u.dimensionless_unscaled
+            if unit == 'angstroms': unit = 'angstrom'
             subarr._unit = u.Unit(unit)
         except ValueError:
             if bad_unit_response=="pixel":
