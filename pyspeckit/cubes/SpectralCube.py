@@ -837,6 +837,15 @@ class Cube(spectrum.Spectrum):
         cubefile = pyfits.open(fitsfilename,ignore_missing_end=True)
         cube = cubefile[0].data
 
+        if cube.shape[0] != npars * npeaks * 2:
+            raise ValueError("The cube shape is not correct.  The cube has "
+                             "first dimension = {0}, but it should be {1}. "
+                             "The keyword npars = number of parameters per "
+                             "model component, and npeaks = number of "
+                             "independent peaks.  You gave npars={2} and "
+                             "npeaks={3}".format(cube.shape[0], npars*npeaks*2,
+                                                 npars, npeaks))
+
         # grab a spectrum and fit it however badly you want
         # this is just to __init__ the relevant data structures
         x,y = _temp_fit_loc
