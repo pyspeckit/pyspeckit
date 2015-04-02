@@ -516,6 +516,12 @@ class Specfit(interactive.Interactive):
         self.npeaks = len(guesses)/self.Registry.npars[self.fittype]
         self.fitter = self.Registry.multifitters[self.fittype]
         self.vheight = False
+        if self.fitter.vheight:
+            # Need to reset the parinfo if vheight has previously been set,
+            # otherwise npars will disagree, which causes problems if
+            # renormalization happens
+            self.fitter.vheight = False
+            self.fitter._make_parinfo()
 
         # add kwargs to fitkwargs
         self.fitkwargs.update(kwargs)
