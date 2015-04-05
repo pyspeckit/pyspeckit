@@ -40,18 +40,58 @@ from astropy import log
 
 class Cube(spectrum.Spectrum):
 
-    def __init__(self, filename=None, xarr=None, cube=None, errorcube=None,
-                 header=None, x0=0, y0=0, maskfilename=None, maskmap=None,
+    def __init__(self, filename=None, cube=None, xarr=None, xunit=None,
+                 errorcube=None, header=None, x0=0, y0=0,
+                 maskmap=None,
                  **kwargs):
         """
-        Initialize the Cube.  Accepts files in the following formats:
-            
-          * .fits
+        A pyspeckit Cube object.  Can be created from a FITS file on disk or
+        from an array or a `spectral_cube.SpectralCube` object.  If an array
+        is used to insantiate the cube, the `xarr` keyword must be given,
+        specifying the X-axis units
 
-        Alternatively, you can specify the *xarr*, *cube*, and *header* kwargs.
-        If nothing is specified, a blank :Cube: will be generated.
+        Parameters
+        ----------
+        filename : str, optional
+            The name of a FITS file to open and read from.  Must be 3D
+        cube : `np.ndarray`, `spectral_cube.SpectralCube`, or \
+               `astropy.units.Quantity`
+            The data from which to instantiate a Cube object.  If it is
+            an array or an astropy Quantity (which is an array with attached
+            units), the X-axis must be specified.  If this is given as a
+            SpectralCube object, the X-axis and units should be handled
+            automatically.
+        xarr : `np.ndarray` or `astropy.units.Quantity`, optional
+            The X-axis of the spectra from each cube.  This actually
+            corresponds to axis 0, or what we normally refer to as the Z-axis
+            of the cube, but it indicates the X-axis in a plot of intensity vs
+            wavelength.  The units for this array are specified in the `xunit`
+            keyword unless a `~astropy.units.Quantity` is given.
+        xunit : str, optional
+            The unit of the ``xarr`` array if ``xarr`` is given as a numpy
+            array
+        errorcube : `np.ndarray`, `spectral_cube.SpectralCube`,\
+                    or `~astropy.units.Quantity`, optional
+            A cube with the same shape as the input cube providing the 1-sigma
+            error for each voxel.  This can be specified more efficiently as an
+            error map for most use cases, but that approach has not yet been
+            implemented.  However, you can pass a 2D error map to `fiteach`.
+        header : `fits.Header` or dict, optional
+            The header associated with the data.  Only needed if the cube is
+            given as an array or a quantity.
+        x0, y0 : int
+            The initial spectrum to use.  The `Cube` object can be treated as
+            a `pyspeckit.Spectrum` object, with all the associated tools
+            (plotter, fitter) using the `set_spectrum` method to select a pixel
+            from the cube to plot and fit.  However, it is generally more sensible
+            to extract individual spectra and treat them separately using the
+            `get_spectrum` method, so these keywords MAY BE DEPRECATED in the
+            future.
+        maskmap : `np.ndarray`, optional
+            A boolean mask map, where ``True`` implies that the data are good.
+            This will be used for both plotting using `mapplot` and fitting
+            using `fiteach`.
 
-        x0,y0 - initial spectrum to use (defaults to lower-left corner)
         """
 
         if filename is not None:
@@ -87,7 +127,7 @@ class Cube(spectrum.Spectrum):
                 self.errorcube = errorcube.value
             else:
                 self.errorcube = errorcube
-            self.xarr = generate_xarr(xarr)
+            self.xarr = generate_xarr(xarr, unit=xunit)
             self.header = header
             self.error = None
             if self.cube is not None:
@@ -96,7 +136,7 @@ class Cube(spectrum.Spectrum):
         if self.header is not None:
             self.parse_header(self.header)
         else:
-            self.units = 'undefined'
+            self.unit = 'undefined'
             self.header = fits.Header()
 
         if maskmap is not None:
@@ -134,8 +174,8 @@ class Cube(spectrum.Spectrum):
 
     def __repr__(self):
         return r'<Cube object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s with shape %r at %s>' % \
-                (self.xarr.min(), self.xarr.max(), self.xarr.units,
-                        self.data.min(), self.data.max(), self.units,
+                (self.xarr.min(), self.xarr.max(), self.xarr.unit,
+                        self.data.min(), self.data.max(), self.unit,
                         self.cube.shape, str(hex(self.__hash__())))
 
 
@@ -165,21 +205,20 @@ class Cube(spectrum.Spectrum):
 
         return newcube
 
-    def slice(self, start=None, stop=None, units='pixel', preserve_fits=False, copy=True):
+    def slice(self, start=None, stop=None, unit='pixel', preserve_fits=False, copy=True):
         """Slicing the spectrum
         
         Parameters
         ----------
-        
-        *start* [ numpy.float or int ]
+        start : numpy.float or int
             start of slice
-        *stop*  [ numpy.float or int ]
+        stop : numpy.float or int
             stop of slice
-        *units* [ str ]
+        unit : str
             allowed values are any supported physical unit, 'pixel'
         """
         
-        x_in_units = self.xarr.as_unit(units)
+        x_in_units = self.xarr.as_unit(unit)
         start_ind = x_in_units.x_to_pix(start)
         stop_ind  = x_in_units.x_to_pix(stop)
         spectrum_slice = slice(start_ind,stop_ind)
@@ -494,7 +533,8 @@ class Cube(spectrum.Spectrum):
 
         """
         if 'multifit' in fitkwargs:
-            log.warn("The multifit keyword is no longer required.  All fits allow for multiple components.", log.DeprecationWarning)
+            log.warn("The multifit keyword is no longer required.  All fits "
+                     "allow for multiple components.", log.DeprecationWarning)
 
         if not hasattr(self.mapplot,'plane'):
             self.mapplot.makeplane()
@@ -966,7 +1006,7 @@ class CubeStack(Cube):
     spatial grid but different frequencies together
     """
 
-    def __init__(self, cubelist, xunits='GHz', x0=0, y0=0, maskmap=None, **kwargs):
+    def __init__(self, cubelist, xunit='GHz', x0=0, y0=0, maskmap=None, **kwargs):
         """
         Initialize the Cube.  Accepts FITS files.
 
@@ -979,9 +1019,9 @@ class CubeStack(Cube):
             if type(cube) is str:
                 cube = Cube(cube)
                 cubelist[ii] = cube
-            if cube.xarr.units != xunits:
-                # convert all inputs to same (non-velocity) units
-                cube.xarr.convert_to_unit(xunits, **kwargs)
+            if cube.xarr.unit != xunit:
+                # convert all inputs to same (non-velocity) unit
+                cube.xarr.convert_to_unit(xunit, **kwargs)
 
         self.cubelist = cubelist
 
@@ -1018,10 +1058,11 @@ class CubeStack(Cube):
         # TODO: Improve this!!!
         self.system = 'galactic' if 'GLON' in self.header['CTYPE1'] else 'celestial'
         
-        self.units = cubelist[0].units
+        self.unit = cubelist[0].unit
         for cube in cubelist: 
-            if cube.units != self.units: 
-                raise ValueError("Mismatched units")
+            if cube.unit != self.unit:
+                raise ValueError("Mismatched units "
+                                 "{0} and {1}".format(cube.unit, self.unit))
 
         self.fileprefix = cubelist[0].fileprefix # first is the best?
 
