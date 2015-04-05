@@ -123,7 +123,8 @@ default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4)
 class Specfit(interactive.Interactive):
 
     def __init__(self, Spectrum, Registry=None):
-        super(Specfit, self).__init__(Spectrum, interactive_help_message=Registry.interactive_help_message)
+        super(Specfit, self).__init__(Spectrum,
+                                      interactive_help_message=Registry.interactive_help_message)
         self.model = None
         self.parinfo = None
         self.modelpars = None
@@ -247,6 +248,11 @@ class Specfit(interactive.Interactive):
                               use_window_limits=use_window_limits, **kwargs)
         for arg in ['xmin','xmax','xtype','reset']:
             if arg in kwargs: kwargs.pop(arg)
+
+        if 'multifit' in kwargs:
+            kwargs.pop('multifit')
+            log.warn("The multifit keyword is no longer required.  All fits "
+                     "allow for multiple components.", DeprecationWarning)
 
         self.npeaks = 0
         self.fitkwargs = kwargs
@@ -1216,6 +1222,7 @@ class Specfit(interactive.Interactive):
         if hasattr(self,'fullmodel'):
             self.fullmodel = self.fullmodel[x1pix:x2pix]
         self.includemask = self.includemask[x1pix:x2pix]
+        self.setfitspec()
 
     def integral(self, analytic=False, direct=False, threshold='auto',
             integration_limits=None, integration_limit_units='pixels',
@@ -1426,7 +1433,8 @@ class Specfit(interactive.Interactive):
         fittype : None or str
             The registered fit type to use for moment computation
         """
-        fittype = fittype or self.fittype
+        if fittype is None:
+            fittype = self.fittype
         return self.Registry.multifitters[fittype].moments(
                 self.Spectrum.xarr[self.xmin:self.xmax],
                 self.spectofit[self.xmin:self.xmax],  **kwargs)
@@ -1618,7 +1626,8 @@ class Specfit(interactive.Interactive):
         >>> MCwithpriors.stats()['AMPLITUDE0']
         """
         if hasattr(self.fitter,'get_pymc'):
-            return self.fitter.get_pymc(self.Spectrum.xarr, self.spectofit, self.errspec, **kwargs)
+            return self.fitter.get_pymc(self.Spectrum.xarr, self.spectofit,
+                                        self.errspec, **kwargs)
         else:
             raise AttributeError("Fitter %r does not have pymc implemented." % self.fitter)
 
@@ -1648,7 +1657,9 @@ class Specfit(interactive.Interactive):
         """
         if hasattr(self.fitter,'get_emcee_ensemblesampler'):
             nwalkers = (self.fitter.npars * self.fitter.npeaks + self.fitter.vheight) * 2
-            emc = self.fitter.get_emcee_ensemblesampler(self.Spectrum.xarr, self.spectofit, self.errspec, nwalkers)
+            emc = self.fitter.get_emcee_ensemblesampler(self.Spectrum.xarr,
+                                                        self.spectofit,
+                                                        self.errspec, nwalkers)
             emc.nwalkers = nwalkers
             emc.p0 = np.array([self.parinfo.values] * emc.nwalkers)
             return emc

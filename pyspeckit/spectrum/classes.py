@@ -181,12 +181,14 @@ class Spectrum(object):
                 self.data = np.ma.masked_where(np.isnan(self.data) + np.isinf(self.data), self.data)
                 self.error = np.ma.masked_where(np.isnan(self.data) + np.isinf(self.data), self.error)
 
+        # it is very important that this be done BEFORE the spectofit is set!
+        self._sort()
+
         self.plotter = plotters.Plotter(self)
         self._register_fitters()
         self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         self.speclines = speclines
-        self._sort()
 
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
         self.plot_special = None
@@ -403,7 +405,8 @@ class Spectrum(object):
                 self.header['CRPIX1'] = self.header.get('CRPIX1') - x1pix
                 history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
-    def slice(self, start=None, stop=None, units='pixel', copy=True, preserve_fits=False):
+    def slice(self, start=None, stop=None, units='pixel', copy=True,
+              preserve_fits=False):
         """Slicing the spectrum
 
         .. WARNING:: this is the same as cropping right now, but it returns a
