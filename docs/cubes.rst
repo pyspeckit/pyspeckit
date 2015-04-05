@@ -29,16 +29,22 @@ or from arrays:
    >>> myxaxis = np.linspace(-100,100,250)
    >>> pcube = pyspeckit.Cube(cube=mycube, xarr=myxaxis, xunit='km/s')
 
-The most interesting features of the `Cube` object are the `fiteach` method,
-which fits a model spectrum to each element of the cube, and `mapplot`, which
-plots up various projections of the cube.
+The most interesting features of the
+:class:`~pyspeckit.cubes.SpectralCube.Cube` object are the
+:meth:`~pyspeckit.cubes.SpectralCube.Cube.fiteach` method, which fits a model
+spectrum to each element of the cube, and
+:class:`mapplot <pyspeckit.cubes.mapplot.MapPlotter>`, which plots up various
+projections of the cube.
 
-`~pyspeckit.cube.SpectralCube.mapplot` will create an interactive plot window.
+:class:`Cube.mapplot <pyspeckit.cubes.mapplot.MapPlotter>` will create an interactive plot window.
 You can click on any pixel shown in that window and pull up a second window
 showing the spectrum at that pixel.  If you've fitted the cube, the associated
 best-fit model will also be shown.
 This interactive setup can be a bit fragile, though, so please report bugs
 aggressively so we can weed them out!
+
+The interactive viewer has a few button interactions described :meth:`here
+<pyspeckit.cubes.mapplot.MapPlotter.mapplot>`.
 
 
 .. automodule:: pyspeckit.cubes.SpectralCube
