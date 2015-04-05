@@ -49,6 +49,9 @@ except ImportError:
 class MapPlotter(object):
     """
     Class to plot a spectrum
+
+    See `mapplot` for use documentation; this docstring is only for
+    initialization.
     """
 
     def __init__(self, Cube=None, figure=None, doplot=False, **kwargs):
@@ -92,10 +95,43 @@ class MapPlotter(object):
         The map to be plotted is selected using `makeplane`.
         The `estimator` keyword argument is passed to that function.
 
-        `kwargs` are passed to aplpy.show_colorscale or
-        matplotlib.pyplot.imshow (depending on whether aplpy is installed)
+        The plotted map, once shown, is interactive.  You can click on it with any 
+        of the three mouse buttons. 
 
-        .. todo: Allow mapplot in subfigure
+        Button 1 or keyboard '1':
+            Plot the selected pixel's spectrum in another window.  Mark the
+            clicked pixel with an 'x'
+        Button 2 or keyboard 'o':
+            Overplot a second (or third, fourth, fifth...) spectrum in the
+            external plot window
+        Button 3:
+            Disconnect the interactive viewer
+
+        You can also click-and-drag with button 1 to average over a circular
+        region.  This same effect can be achieved by using the 'c' key to
+        set the /c/enter of a circle and the 'r' key to set its /r/adius (i.e.,
+        hover over the center and press 'c', then hover some distance away and
+        press 'r').
+
+
+        Parameters
+        ----------
+        convention : 'calabretta' or 'griesen'
+            The default projection to assume for Galactic data when plotting
+            with aplpy.
+        colorbar : bool
+            Whether to show a colorbar
+        plotkwargs : dict, optional
+            A dictionary of keyword arguments to pass to aplpy.show_colorscale
+            or matplotlib.pyplot.imshow
+        useaplpy : bool
+            Use aplpy if a FITS header is available
+        vmin, vmax: float or None
+            Override values for the vmin/vmax values.  Will be automatically
+            determined if left as None
+
+        .. todo:
+            Allow mapplot in subfigure
         """
         if self.figure is None:
             self.figure = matplotlib.pyplot.figure()
@@ -159,11 +195,13 @@ class MapPlotter(object):
 
     def makeplane(self, estimator=np.mean):
         """
+        Create a "plane" view of the cube, either by slicing or projecting it
+        or by showing a slice from the best-fit model parameter cube.
 
         Parameters
         ----------
 
-        *estimator* [ function | 'max' | 'int' | FITS filename | integer | slice ]
+        estimator : [ function | 'max' | 'int' | FITS filename | integer | slice ]
             A non-pythonic, non-duck-typed variable.  If it's a function, apply that function
             along the cube's spectral axis to obtain an estimate (e.g., mean, min, max, etc.).
             'max' will do the same thing as passing np.max
