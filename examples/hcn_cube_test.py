@@ -6,8 +6,8 @@ except ImportError:
 import numpy as np
 
 # Load the spectrum
-sp = pyspeckit.Cube('region5_hcn_crop.fits',scale_keyword='ETAMB')
-errmap = pyfits.getdata('region5.hcn.errmap.fits')
+sp = pyspeckit.Cube('../pyspeckit/tests/data/region5_hcn_crop.fits',scale_keyword='ETAMB')
+errmap = pyfits.getdata('../pyspeckit/tests/data/region5.hcn.errmap.fits')
 
 # Register the fitter
 # The N2H+ fitter is 'built-in' but is not registered by default; this example
