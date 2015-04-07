@@ -291,14 +291,14 @@ class Spectrum(object):
         xtype = Table.data.dtype.names[Table.xaxcol]
         if xtype in units.xtype_dict.values():
             self.xarr.xtype = xtype
-            self.xarr._unit = Table.columns[xtype].unit
+            self.xarr._unit = u.Unit(Table.columns[xtype].unit)
         elif xtype in units.xtype_dict:
             self.xarr.xtype = units.xtype_dict[xtype]
             self.xarr.unit = Table.columns[xtype].unit
         else:
             warn( "Warning: Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels unless you set them manually (e.g., sp.xarr.unit='angstroms')")
             self.xarr.xtype = 'pixels'
-            self.xarr._unit = 'pix'
+            self.xarr._unit = u.pixel
             #raise ValueError("Invalid xtype in text header")
         self.ytype = Table.data.dtype.names[Table.datacol]
         try:
@@ -310,7 +310,7 @@ class Spectrum(object):
         self._update_header()
 
     def _update_header(self):
-        self.header['CUNIT1'] = self.xarr.unit
+        self.header['CUNIT1'] = self.xarr.unit.to_string()
         self.header['CTYPE1'] = self.xarr.xtype
         self.header['BUNIT'] = self.unit
         self.header['BTYPE'] = self.ytype
@@ -764,7 +764,7 @@ class Spectra(Spectrum):
 
         print "Concatenating data"
         self.xarr = units.SpectroscopicAxes([sp.xarr.as_unit(xunits) for sp in speclist])
-        self.xarr._unit = xunits 
+        self.xarr._unit = u.Unit(xunits)
         self.xarr.xtype = u.Unit(xunits)
         self.data = np.ma.concatenate([sp.data for sp in speclist])
         self.error = np.ma.concatenate([sp.error for sp in speclist])
