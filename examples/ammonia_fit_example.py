@@ -1,7 +1,7 @@
 import pyspeckit
 
 # Grab a .fits spectrum with a legitimate header
-sp = pyspeckit.Spectrum('../pyspeckit/tests/G031.947+00.076_nh3_11_Tastar.fits')
+sp = pyspeckit.Spectrum('G031.947+00.076_nh3_11_Tastar.fits')
 """ HEADER:
 SIMPLE  =                    T / Written by IDL:  Tue Aug 31 18:17:01 2010
 BITPIX  = -64
