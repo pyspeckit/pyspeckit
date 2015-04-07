@@ -171,7 +171,8 @@ class SpectralModel(fitter.SimpleFitter):
         # the height / parvalue popping needs to be done before the temp_pardict is set in order to make sure
         # that the height guess isn't assigned to the amplitude
         self.vheight = vheight
-        if vheight and len(self.parinfo) == self.default_npars and len(parvalues) == self.default_npars + 1:
+        if (vheight and len(self.parinfo) == self.default_npars and
+            len(parvalues) == self.default_npars + 1):
             # if the right number of parameters are passed, the first is the height
             self.parinfo = [ {'n':0, 'value':parvalues.pop(0), 'limits':(0,0),
                 'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
@@ -419,7 +420,7 @@ class SpectralModel(fitter.SimpleFitter):
         return self.mpp,self.model,self.mpperr,chi2
 
     def fitter(self, xax, data, err=None, quiet=True, veryverbose=False,
-            debug=False, parinfo=None, **kwargs):
+               debug=False, parinfo=None, **kwargs):
         """
         Run the fitter using mpfit.
         
