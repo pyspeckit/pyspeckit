@@ -5,6 +5,8 @@ Voigt Profile Fitter
 """
 import model
 import numpy as np
+from pyspeckit.spectrum.moments import moments
+import types
 try:
     import scipy.special
     scipyOK = True
@@ -79,6 +81,14 @@ def voigt_fwhm(sigma, gamma):
     """
     return 0.5346 * 2 * gamma + np.sqrt(0.2166*(2*gamma)**2 + sigma**2*8*np.log(2))
 
+def voigt_moments(self, *args, **kwargs):
+    """
+    Get the spectral moments from the moments package.  Use the gaussian width
+    for the lorentzian width (not a great guess!)
+    """
+    m = moments(*args,**kwargs)
+    return list(m) + [m[-1]]
+
 def voigt_fitter():
     """
     Generator for voigt fitter class
@@ -94,5 +104,7 @@ def voigt_fitter():
             fwhm_pars=['gwidth','lwidth'],
             )
     myclass.__name__ = "voigt"
+    myclass.moments = types.MethodType(voigt_moments, myclass,
+                                       myclass.__class__)
     
     return myclass
