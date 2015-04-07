@@ -375,9 +375,12 @@ class Interactive(object):
               startpoint and endpoint
             * None: No exclusion
         """
-        if debug or self._debug: print "selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset," xmin: ",xmin, " xmax: ",xmax
+        if debug or self._debug:
+            print "selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset," xmin: ",xmin, " xmax: ",xmax
+
         if xmin is not None and xmax is not None:
-            if verbose or debug or self._debug: print "Setting xmin,xmax from keywords %g,%g" % (xmin,xmax)
+            if verbose or debug or self._debug:
+                print "Setting xmin,xmax from keywords %g,%g" % (xmin,xmax)
             if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
                 self.xmin = numpy.floor(self.Spectrum.xarr.x_to_pix(xmin))
                 # End-inclusive!
@@ -417,11 +420,13 @@ class Interactive(object):
             self.xmin = 0
             # End-inclusive
             self.xmax = self.Spectrum.data.shape[0]
-            if debug or self._debug: print "Reset to full range because the endpoints were equal"
+            if debug or self._debug:
+                print "Reset to full range because the endpoints were equal"
         elif self.xmin>self.xmax: 
             # Swap endpoints if the axis has a negative delta-X
             self.xmin,self.xmax = self.xmax,self.xmin
-            if debug or self._debug: print "Swapped endpoints because the left end was greater than the right"
+            if debug or self._debug:
+                print "Swapped endpoints because the left end was greater than the right"
 
         self.includemask[:self.xmin] = False
         self.includemask[self.xmax:] = False

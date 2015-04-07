@@ -175,7 +175,7 @@ class Specfit(interactive.Interactive):
             [passed to fitting codes; defaults to gaussian]
             The model to use.  Model must be registered in self.Registry.
             gaussian, lorentzian, and voigt profiles are registered by default
-        guesses : list
+        guesses : list or 'moments'
             A list of guesses.  Guesses must have length = n*number of parameters
             in model.  Guesses are *required* for multifit fits (there is no
             automated guessing for most models)
@@ -183,6 +183,8 @@ class Specfit(interactive.Interactive):
             guesses = [height,amplitude,center,width]
             for multi-fit gaussian, it is
             [amplitude, center, width]
+            You can also pass the keyword string 'moments' to have the moments
+            be used to automatically determine the guesses for a *single* peak
         parinfo : `pyspeckit.spectrum.parinfo.ParinfoList`
             An alternative way to specify guesses.  Supercedes guesses.
         use_lmfit : boolean
@@ -498,6 +500,10 @@ class Specfit(interactive.Interactive):
             closer to 1 (scales by the median) so that the fit converges better
         parinfo : `~parinfo` structure
             Guess structure; supercedes ``guesses``
+        guesses : list or 'moments'
+            Either a list of guesses matching the number of parameters * the
+            number of peaks for the model, or 'moments' to fit a single
+            spectrum with the moments as guesses
 
         """
         if reset_fitspec:
@@ -512,6 +518,8 @@ class Specfit(interactive.Interactive):
 
         if guesses is None:
             guesses = self.guesses
+        elif guesses in ('moment','moments'):
+            guesses = self.moments(vheight=False, **kwargs)
 
         if parinfo is not None:
             guesses = parinfo.values
@@ -688,19 +696,25 @@ class Specfit(interactive.Interactive):
         elif usemoments: # this can be done within gaussfit but I want to save them
             # use this INDEPENDENT of fittype for now (voigt and gauss get same guesses)
             log.debug("Using moment-based guesses.")
-            self.guesses = self.Registry.peakbgfitters[self.fittype].moments(
-                    self.Spectrum.xarr[self.xmin:self.xmax],
-                    self.spectofit[self.xmin:self.xmax], vheight=vheight,
-                    negamp=negamp, nsigcut=nsigcut_moments, **kwargs)
-            #if vheight is False: self.guesses = [height]+self.guesses
+            moments_f = self.Registry.peakbgfitters[self.fittype].moments
+            self.guesses = moments_f(self.Spectrum.xarr[self.xmin:self.xmax],
+                                     self.spectofit[self.xmin:self.xmax],
+                                     vheight=vheight,
+                                     negamp=negamp,
+                                     nsigcut=nsigcut_moments,
+                                     **kwargs)
         else:
-            if negamp: self.guesses = [height,-1,0,1]
-            else:  self.guesses = [height,1,0,1]
+            if negamp:
+                self.guesses = [height,-1,0,1]
+            else:
+                self.guesses = [height,1,0,1]
 
         # If we're fitting anything but a simple Gaussian, we need the length
         # of guesses to be right so we pad with appended zeros
-        if NP > 3:
-            for ii in xrange(3,NP):
+        # BUT, if the guesses from the moments have the right number of
+        # parameters, we don't need to do this.
+        if NP > len(self.guesses):
+            for ii in xrange(len(self.guesses),NP):
                 self.guesses += [0.0]
 
         self.fitter = self.Registry.peakbgfitters[self.fittype]
@@ -1212,6 +1226,7 @@ class Specfit(interactive.Interactive):
             self.residuals = self.residuals[::factor]
         self.spectofit = self.spectofit[::factor]
         self.errspec = self.errspec[::factor]
+        self.includemask = self.includemask[::factor]
 
     def crop(self,x1pix,x2pix):
         """
