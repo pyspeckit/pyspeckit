@@ -1,5 +1,5 @@
 Optical fitting: The H\ |alpha|\ -[NII] complex of a type-I Seyfert galaxy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. include:: <isogrk3.txt>
 
 ::
@@ -42,7 +42,7 @@ Optical fitting: The H\ |alpha|\ -[NII] complex of a type-I Seyfert galaxy
         # If this line is not in our database of lines, don't try to annotate it
         if line not in spec.speclines.optical.lines.keys(): continue
 
-        x = spec.measurements.lines[line]['modelpars'][1]   # Location of the emission line 
+        x = spec.measurements.lines[line]['modelpars'][1]   # Location of the emission line
         spec.plotter.axis.plot([x]*2, [spec.plotter.ymin, spec.plotter.ymax], ls = '--', color = 'k')   # Draw dashed line to mark its position
         spec.plotter.axis.annotate(spec.speclines.optical.lines[line][-1], (x, y), rotation = 90, ha = 'right', va = 'center')  # Label it
 
@@ -56,7 +56,7 @@ Optical fitting: The H\ |alpha|\ -[NII] complex of a type-I Seyfert galaxy
     for line in spec.measurements.lines.keys():
         print line, spec.measurements.lines[line]['flux'], spec.measurements.lines[line]['amp'], spec.measurements.lines[line]['fwhm'], \
             spec.measurements.lines[line]['lum']
-            
+
     # Had we not supplied the objects redshift (or distance), the line
     # luminosities would not have been measured, but integrated fluxes would
     # still be derived.  Also, the measurements class separates the broad and

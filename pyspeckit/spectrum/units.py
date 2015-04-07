@@ -417,6 +417,8 @@ class SpectroscopicAxis(np.ndarray):
         else:
             subarr.velocity_convention = velocity_convention
 
+        subarr.unit = subarr.units
+
         return subarr
 
     def __array_finalize__(self,obj):
@@ -425,7 +427,7 @@ class SpectroscopicAxis(np.ndarray):
         around, e.g.:
         xarr = self[1:20]
         """
-        self.units = getattr(obj, 'units', None)
+        self.unit = self.units = getattr(obj, 'unit', None) or getattr(obj, 'units', None)
         self.frame = getattr(obj, 'frame', None)
         self.xtype = getattr(obj, 'xtype', None)
         self.refX = getattr(obj, 'refX', None)

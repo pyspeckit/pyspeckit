@@ -58,7 +58,9 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
         for sp in splist:
             sp.smooth(smooth)
 
-    spdict[guessline].specfit(fittype='gaussian', negamp=False, vheight=False)
+    height, amp, cen, width = spdict[guessline].specfit.moments(fittype='gaussian')
+    spdict[guessline].specfit(fittype='gaussian', negamp=False, vheight=False,
+                              guesses=[amp, cen, width])
     ampguess,vguess,widthguess = spdict[guessline].specfit.modelpars
     if widthguess < 0:
         raise ValueError("Width guess was < 0.  This is impossible.")
