@@ -512,6 +512,8 @@ class Specfit(interactive.Interactive):
 
         if guesses is None:
             guesses = self.guesses
+        elif guesses in ('moment','moments'):
+            guesses = self.moments(vheight=False)
 
         if parinfo is not None:
             guesses = parinfo.values
