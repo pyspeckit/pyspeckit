@@ -59,6 +59,7 @@ sp.plotter(xmin=-100,xmax=300)
 # picking up the centroid, bad at getting the width right)
 # negamp=False forces the fitter to search for a positive peak, not the
 # negatives created in this spectrum by frequency switching
+sp.specfit.selectregion(xmin=60,xmax=120,xtype='wcs')
 sp.specfit(negamp=False, guesses='moments')
 # Save the fit...
 sp.plotter.figure.savefig('nh3_gaussfit.png')
