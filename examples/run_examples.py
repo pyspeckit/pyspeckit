@@ -1,9 +1,25 @@
+# interactive=False
+# import subprocess
+# import os
+# import matplotlib
 
-execfile('ammonia_fit_example.py')
-execfile('ammonia_vtau_fit_example.py')
-execfile('doublet_example.py')
-execfile('hcn_cube_test.py')
-#execfile('hcn_example.py')
-execfile('n2hp_example.py')
-# DO NOT RUN THIS! It's a whole pipeline! execfile('reduce_class.py')
-execfile('voigt.py')
+# def test_everything(savedir=''):
+
+#     matplotlib.use('TkAgg')
+#     from matplotlib.pyplot import ion,ioff
+#     if interactive:
+#         ion()
+#     else:
+#         ioff()
+
+#     curpath = os.getcwd()
+
+#     dir_prefix = os.path.split(os.path.abspath(__file__))[0]
+#     os.chdir(dir_prefix)
+#     print 'curpath:',curpath
+#     print 'dir_prefix:',dir_prefix
+#     print "*****ammonia_fit_example.py*****"
+#     execfile(os.path.join(dir_prefix,'ammonia_fit_example.py'),{'interactive':interactive,'savedir':savedir})
+
+# 	print "Success!  Or at least, no exceptions..."
+#     os.chdir(curpath)
