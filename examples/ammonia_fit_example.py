@@ -59,8 +59,12 @@ sp.plotter(xmin=-100,xmax=300)
 # picking up the centroid, bad at getting the width right)
 # negamp=False forces the fitter to search for a positive peak, not the
 # negatives created in this spectrum by frequency switching
+<<<<<<< HEAD
 sp.specfit.selectregion(xmin=60,xmax=120,xtype='wcs')
 sp.specfit(negamp=False, guesses='moments')
+=======
+sp.specfit(negamp=False, guesses=[5.9,4.45,8.3e14,0.84,96.2,0.43])
+>>>>>>> https://app.asana.com/0/30991058806237/31014704217668
 # Save the fit...
 sp.plotter.figure.savefig('nh3_gaussfit.png')
 # and print some information to screen
@@ -69,9 +73,13 @@ print "Best fit: ", sp.specfit.modelpars
 
 # Run the ammonia spec fitter with a reasonable guess 
 # Parameters are Tkin, Tex, column, width, centroid, ortho fraction
+<<<<<<< HEAD
 sp.specfit(fittype='ammonia',
            guesses=[5.9,4.45,8.3e14,0.84,96.2,0.43],
            quiet=False)
+=======
+sp.specfit.peakbgfit(fittype='ammonia', guesses=[5.9,4.45,8.3e14,0.84,96.2,0.43],quiet=False)
+>>>>>>> https://app.asana.com/0/30991058806237/31014704217668
 
 # plot up the residuals in a different window.  The residuals strongly suggest
 # the presence of a second velocity component.
