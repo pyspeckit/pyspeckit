@@ -44,8 +44,10 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
     Given a dictionary of filenames and lines, fit them together
     e.g. {'oneone':'G000.000+00.000_nh3_11.fits'}
     """
-    spdict = dict([ (linename,pyspeckit.Spectrum(value, scale_keyword=scale_keyword)) 
-        if type(value) is str else (linename,value) for linename, value in input_dict.iteritems() ])
+    spdict = dict([ (linename,pyspeckit.Spectrum(value,
+                                                 scale_keyword=scale_keyword))
+                   if type(value) is str else (linename,value)
+                   for linename, value in input_dict.iteritems() ])
     splist = spdict.values()
 
     for sp in splist: # required for plotting, cropping
@@ -90,12 +92,20 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
 
     if tau is not None:
         if guesses is None:
-            guesses = [a for i in xrange(npeaks) for a in (tkin+random.random()*i,tex,tau+random.random()*i,widthguess+random.random()*i,vguess+random.random()*i,fortho)]
-        spectra.specfit(fittype='ammonia_tau',quiet=quiet,multifit=None,guesses=guesses, thin=thin, **kwargs)
+            guesses = [a for i in xrange(npeaks) for a in
+                       (tkin+random.random()*i, tex, tau+random.random()*i,
+                        widthguess+random.random()*i, vguess+random.random()*i,
+                        fortho)]
+        spectra.specfit(fittype='ammonia_tau',quiet=quiet,multifit=None,guesses=guesses,
+                        thin=thin, **kwargs)
     else:
         if guesses is None:
-            guesses = [a for i in xrange(npeaks) for a in (tkin+random.random()*i,tex,column+random.random()*i,widthguess+random.random()*i,vguess+random.random()*i,fortho)]
-        spectra.specfit(fittype='ammonia',quiet=quiet,multifit=None,guesses=guesses, thin=thin, **kwargs)
+            guesses = [a for i in xrange(npeaks) for a in
+                       (tkin+random.random()*i, tex, column+random.random()*i,
+                        widthguess+random.random()*i, vguess+random.random()*i,
+                        fortho)]
+        spectra.specfit(fittype='ammonia',quiet=quiet,multifit=None,guesses=guesses,
+                        thin=thin, **kwargs)
 
     if doplot:
         plot_nh3(spdict,spectra,fignum=fignum)
@@ -129,10 +139,23 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, *
     if len(splist) == 2:
         axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
     elif len(splist) == 3:
-        axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223), 'threethree':pyplot.subplot(224), 'fourfour':pyplot.subplot(224) }
+        axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223),
+                  'threethree':pyplot.subplot(224),
+                  'fourfour':pyplot.subplot(224) }
     elif len(splist) == 4:
-        axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
+        axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222),
+                  'threethree':pyplot.subplot(223),
+                  'fourfour':pyplot.subplot(224) }
+    else:
+        raise NotImplementedError("Plots with {0} subplots are not yet "
+                                  "implemented.  Pull requests are "
+                                  "welcome!".format(len(splist)))
+
     for linename,sp in spdict.iteritems():
+        if linename not in axdict:
+            raise NotImplementedError("Plot windows for {0} cannot "
+                                      "be automatically arranged (yet)."
+                                      .format(linename))
         sp.plotter.axis=axdict[linename] # permanent
         sp.plotter(axis=axdict[linename],title=title_dict[linename], **plotkwargs)
         sp.specfit.Spectrum.plotter = sp.plotter
