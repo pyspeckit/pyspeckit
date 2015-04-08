@@ -347,16 +347,12 @@ class Parinfo(dict):
 
     def __setattr__(self, key, value):
         # DEBUG print "Setting attribute %s = %s" % (key,value)
-
         self._check_OK(key,value)
-
         return super(Parinfo, self).__setattr__(key, value)
 
     def __setitem__(self, key, value):
         # DEBUG print "Setting item %s = %s" % (key,value)
-
         self._check_OK(key,value)
-
         return super(Parinfo, self).__setitem__(key, value)
 
     def _check_OK(self,key,value):

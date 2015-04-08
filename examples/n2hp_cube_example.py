@@ -23,7 +23,7 @@ spc = pyspeckit.Cube('n2hp_cube.fit')
 spc.Registry.add_fitter('n2hp_vtau',pyspeckit.models.n2hp.n2hp_vtau_fitter,4)
 
 # Get a measurement of the error per pixel
-errmap = spc.slice(20, 28, unit='km/s').cube.std(axis=0)
+errmap = spc.slice(20, 28, units='km/s').cube.std(axis=0)
 
 # A good way to write a cube fitter is to have it load from disk if the cube
 # fit was completed successfully in the past
@@ -71,5 +71,5 @@ spc.mapplot(estimator=None)
 
 # running in script mode, the figures won't show by default on some systems
 import pylab as pl
-pl.draw()
-pl.show()
+# pl.draw()
+# pl.show()

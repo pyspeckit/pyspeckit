@@ -68,7 +68,7 @@ def ccm_reddening(wave, ebv=None, a_v=None, r_v=3.1, model='ccm89'):
         raise ValueError('TEMPORARY: gcc09 currently does 2175A bump \
             incorrectly')
     
-    x = 1e4 / wave      # inverse microns
+    x = 1e4 / wave.value      # inverse microns
     
     if any(x < 0.3) or any(x > 11):
         raise ValueError('ccm_dered valid only for wavelengths from 910 A to '+

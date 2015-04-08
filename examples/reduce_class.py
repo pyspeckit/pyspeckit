@@ -1,4 +1,3 @@
-import spectrum
 from spectrum.readers.read_class import class_to_obsblocks
 from numpy import *
 import glob
