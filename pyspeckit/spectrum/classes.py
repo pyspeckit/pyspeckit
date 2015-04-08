@@ -288,13 +288,18 @@ class Spectrum(object):
         .txt or other atpy table type objects
         """
         self.Table = Table
+
         xtype = Table.data.dtype.names[Table.xaxcol]
         if xtype in units.xtype_dict.values():
             self.xarr.xtype = xtype
-            self.xarr._unit = u.Unit(Table.columns[xtype].unit)
+            unit = Table.columns[xtype].unit
+            if unit == 'angstroms' : unit = 'angstrom'
+            self.xarr._unit = u.Unit(unit)
         elif xtype in units.xtype_dict:
             self.xarr.xtype = units.xtype_dict[xtype]
-            self.xarr.unit = Table.columns[xtype].unit
+            unit = Table.columns[xtype].unit
+            if unit == 'angstroms' : unit = 'angstrom'
+            self.xarr._unit = u.Unit(unit)
         else:
             warn( "Warning: Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels unless you set them manually (e.g., sp.xarr.unit='angstroms')")
             self.xarr.xtype = 'pixels'

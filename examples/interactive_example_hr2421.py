@@ -1,6 +1,7 @@
 import pyspeckit
 # neet matplotlib so we can make mouse-click events from the script
 import matplotlib 
+import os
 # list of annotations so we can clear them
 annotations = []
 excesslines = []
@@ -32,11 +33,11 @@ annotations.append (sp.plotter.axis.annotate("", xy=(4714,9.54e-10),  xytext=(ev
         arrowprops=dict(arrowstyle="->", connectionstyle='arc,rad=0.5',
             color='green')) )
 annotations.append( sp.plotter.axis.annotate("(only the horizontal\n position matters)",xy=(event1.xdata+10,event1.ydata),xycoords='data') )
-excesslines.append( sp.plotter.axis.vlines(4714,sp.plotter.ymin,sp.plotter.ymax,linestyle='--',color='green') )
+excesslines.append( sp.plotter.axis.vlines(4714,sp.plotter.ymin.value,sp.plotter.ymax.value,linestyle='--',color='green') )
 sp.plotter.refresh()
-sp.plotter.savefig('figures/interactive_example_hr2421_baseline_firstclick.png', bbox_inches=None)
-
+sp.plotter.savefig('interactive_example_hr2421_baseline_firstclick.png', bbox_inches=None)
 event2 = matplotlib.backend_bases.MouseEvent('button_press_event', sp.plotter.axis.figure.canvas,850,280,button=1)
+# event2.xdata and .ydata is None here
 annotations.append( sp.plotter.axis.annotate("Second click\n(button 1)", xy=(event2.xdata,event2.ydata),  xytext=(event2.xdata-20,event2.ydata+2.5e-11),
         textcoords='data', xycoords='data', ha='center',
         va='bottom', arrowprops=dict(arrowstyle="->",

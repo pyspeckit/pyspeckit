@@ -1,7 +1,7 @@
 import pyspeckit
 
 # Grab a .fits spectrum with a legitimate header
-sp = pyspeckit.Spectrum('../pyspeckit/tests/G031.947+00.076_nh3_11_Tastar.fits')
+sp = pyspeckit.Spectrum('G031.947+00.076_nh3_11_Tastar.fits')
 """ HEADER:
 SIMPLE  =                    T / Written by IDL:  Tue Aug 31 18:17:01 2010
 BITPIX  = -64
@@ -68,6 +68,8 @@ print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
 # Run the ammonia spec fitter with a reasonable guess 
+import IPython
+IPython.embed()
 sp.specfit(fittype='ammonia_tau',
            guesses=[5.9,4.45,4.5,0.84,96.2,0.43],
            quiet=False)

@@ -1,6 +1,7 @@
 # Test measurements class on an SDSS AGN spectrum
 
 import pyspeckit
+import astropy.units as u
 import numpy as np
 
 # Some lines
@@ -28,7 +29,7 @@ broad = 30.
 # Initialize spectrum object
 spec = pyspeckit.Spectrum('sample_sdss.txt')
 spec.unit = 'erg s^{-1} cm^{-2} \\AA^{-1}'
-spec.xarr.unit='angstroms'
+spec.xarr._unit=u.Angstrom
 
 # H-alpha
 spec.specfit.selectregion(xmin = Halpha - 5, xmax = Halpha + 5)
@@ -117,7 +118,7 @@ spec.measure(z = 0.05, fluxnorm = 1e-17)
 y = spec.plotter.ymax * 0.85
 for i, line in enumerate(spec.measurements.lines.keys()):
     x = spec.measurements.lines[line]['modelpars'][1]
-    spec.plotter.axis.plot([x]*2, [spec.plotter.ymin, spec.plotter.ymax], ls = '--', color = 'k')
+    spec.plotter.axis.plot([x]*2, [spec.plotter.ymin.value, spec.plotter.ymax.value], ls = '--', color = 'k')
     try: spec.plotter.axis.annotate(spec.speclines.optical.lines[line][-1], 
         (x, y), rotation = 90, ha = 'right', va = 'center')
     except KeyError: pass

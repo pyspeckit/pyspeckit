@@ -6,7 +6,7 @@ except ImportError:
 import numpy as np
 
 # Load the spectrum
-sp = pyspeckit.Cube('../pyspeckit/tests/data/region5_hcn_crop.fits',)
+sp = pyspeckit.Cube('region5_hcn_crop.fits')
 errmap = pyfits.getdata('../pyspeckit/tests/data/region5.hcn.errmap.fits')
 
 # Register the fitter
