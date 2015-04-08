@@ -184,7 +184,8 @@ def flatten_header(header,delete=False):
 
     return newheader
 
-def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
+def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial',
+                   spectral_axis=3, celestial_axes=[1,2]):
     """
     Turn a cube header into a spectrum header, retaining RA/Dec vals where possible
     (speccen is like flatten; spec-ify would be better but, specify?  nah)
@@ -192,20 +193,26 @@ def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
     Assumes 3rd axis is velocity
     """
     newheader = header.copy()
-    newheader['CRVAL1'] = header.get('CRVAL3')
-    newheader['CRPIX1'] = header.get('CRPIX3')
-    if 'CD1_1' in header: newheader.rename_keyword('CD1_1','OLDCD1_1')
-    elif 'CDELT1' in header: newheader.rename_keyword('CDELT1','OLDCDEL1')
-    if 'CD3_3' in header: newheader['CDELT1'] = header.get('CD3_3')
-    elif 'CDELT3' in header: newheader['CDELT1'] = header.get('CDELT3')
-    newheader['CTYPE1'] = 'VRAD'
-    if header.get('CUNIT3'):
-        newheader['CUNIT1'] = header.get('CUNIT3')
+    new_spectral_axis = 1
+    newheader['CRVAL{0}'.format(new_spectral_axis)] = header.get('CRVAL{0}'.format(spectral_axis))
+    newheader['CRPIX{0}'.format(new_spectral_axis)] = header.get('CRPIX{0}'.format(spectral_axis))
+    if 'CD{0}_{0}'.format(new_spectral_axis) in header:
+        newheader.rename_keyword('CD{0}_{0}'.format(new_spectral_axis),
+                                 'OLDCD{0}_{0}'.format(new_spectral_axis))
+    elif 'CDELT{0}'.format(new_spectral_axis) in header:
+        newheader.rename_keyword('CDELT{0}'.format(new_spectral_axis),'OLDCDEL{0}'.format(new_spectral_axis))
+    if 'CD{0}_{0}'.format(spectral_axis) in header:
+        newheader['CDELT{0}'.format(new_spectral_axis)] = header.get('CD{0}_{0}'.format(spectral_axis))
+    elif 'CDELT{0}'.format(spectral_axis) in header:
+        newheader['CDELT{0}'.format(new_spectral_axis)] = header.get('CDELT{0}'.format(spectral_axis))
+    newheader['CTYPE{0}'.format(new_spectral_axis)] = 'VRAD'
+    if header.get('CUNIT{0}'.format(spectral_axis)):
+        newheader['CUNIT{0}'.format(new_spectral_axis)] = header.get('CUNIT{0}'.format(spectral_axis))
     else: 
         print "Assuming CUNIT3 is km/s in speccen_header"
-        newheader['CUNIT1'] = 'km/s'
+        newheader['CUNIT{0}'.format(new_spectral_axis)] = 'km/s'
     newheader['CRPIX2'] = 1
-    newheader['CRPIX3'] = 1
+    newheader['CRPIX{0}'.format(spectral_axis)] = 1
     if system == 'celestial':
         c2 = 'RA---'
         c3 = 'DEC--'
@@ -213,17 +220,18 @@ def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
         c2 = 'GLON-'
         c3 = 'GLAT-'
     newheader['CTYPE2'] = c2+proj
-    newheader['CTYPE3'] = c3+proj
+    newheader['CTYPE{0}'.format(spectral_axis)] = c3+proj
 
     if lon is not None:
         newheader['CRVAL2'] = lon
     if lat is not None:
-        newheader['CRVAL3'] = lat
+        newheader['CRVAL{0}'.format(spectral_axis)] = lat
 
     if 'CD2_2' in header:
         newheader.rename_keyword('CD2_2','OLDCD2_2')
-    if 'CD3_3' in header:
-        newheader.rename_keyword('CD3_3','OLDCD3_3')
+    if 'CD{0}_{0}'.format(spectral_axis) in header:
+        newheader.rename_keyword('CD{0}_{0}'.format(spectral_axis),
+                                 'OLDCD{0}_{0}'.format(spectral_axis))
     if 'CROTA2' in header:
         newheader.rename_keyword('CROTA2','OLDCROT2')
 
