@@ -20,6 +20,7 @@ import matplotlib.cbook as mpcb
 import copy
 import model
 from astropy import log
+import astropy.units as u
 from . import mpfit_messages
 
 from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
@@ -89,7 +90,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
     """
 
     # Convert X-units to frequency in GHz
-    xarr = xarr.as_unit('GHz')
+    xarr = xarr.as_unit('GHz') #, equivalencies=u.doppler_radio(xarr.center_frequency))
 
     if tex is not None:
         # Yes, you certainly can have nonthermal excitation, tex>tkin.

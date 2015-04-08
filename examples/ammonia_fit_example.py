@@ -1,4 +1,5 @@
 import pyspeckit
+import astropy.units as u
 
 # Grab a .fits spectrum with a legitimate header
 sp = pyspeckit.Spectrum('G031.947+00.076_nh3_11_Tastar.fits')
