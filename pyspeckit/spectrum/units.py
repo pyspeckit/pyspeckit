@@ -324,11 +324,11 @@ class SpectroscopicAxis(u.Quantity):
                                 % (unit, "raise", "pixel"))
 
         subarr.refX = refX
+        print 'subarr.refX:',subarr.refX
+
         if refX_units is None:
-            if subarr._unit in frequency_dict:
-                subarr.refX_units = subarr.unit
-            else:
-                subarr.refX_units = 'Hz'
+                refX_units = 'Hz'
+                subarr.refX_units = refX_units
         else:
             subarr.refX_units = refX_units
         subarr.redshift = redshift
@@ -669,9 +669,9 @@ class SpectroscopicAxis(u.Quantity):
         # equivalency finding
         if velocity_convention:
             new_equivalencies = velocity_conventions[velocity_convention](center_frequency)
-            return center_frequency, merge_equivalencies(equivalencies, new_equivalencies)
+            return center_frequency, merge_equivalencies(new_equivalencies, equivalencies)
         else:
-            return center_frequency, merge_equivalencies(u.spectral(), equivalencies)
+            return center_frequency, merge_equivalencies(equivalencies, u.spectral())
 
 def merge_equivalencies(old_equivalencies, new_equivalencies):
     """

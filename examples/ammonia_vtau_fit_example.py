@@ -68,8 +68,6 @@ print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
 # Run the ammonia spec fitter with a reasonable guess 
-import IPython
-IPython.embed()
 sp.specfit(fittype='ammonia_tau',
            guesses=[5.9,4.45,4.5,0.84,96.2,0.43],
            quiet=False)

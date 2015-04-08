@@ -10,7 +10,7 @@ sp = pyspeckit.Spectrum('n2hp_opha_example.fits')
 # background will not automatically be fit 4 is the number of parameters in the
 # model (excitation temperature, optical depth, line center, and line width)
 sp.Registry.add_fitter('n2hp_vtau',pyspeckit.models.n2hp.n2hp_vtau_fitter,4)
-
+sp.xarr.velocity_convention = 'radio'
 # Run the fitter
 sp.specfit(fittype='n2hp_vtau',multifit=None,guesses=[15,2,4,0.2])
 

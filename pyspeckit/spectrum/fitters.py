@@ -1067,7 +1067,7 @@ class Specfit(interactive.Interactive):
                                                    color=color, **kwargs)
         if zeroline or (zeroline is None and yoffset != 0):
             self.residualplot += self.residualaxis.plot(self.Spectrum.xarr,
-                                                        (np.zeros_like(self.Spectrum.xarr)
+                                                        (np.zeros_like(self.Spectrum.xarr.value)
                                                          + yoffset),
                                                         linestyle='--',
                                                         color='k',

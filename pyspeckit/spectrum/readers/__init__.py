@@ -3,9 +3,19 @@ import numpy as np
 import numpy.ma as ma
 import read_class
 from pyspeckit.specwarnings import warn
+import astropy.units as u
 
 readers = {}
 suffix_types = {}
+
+def _parse_velocity_convention(vc):
+    if vc in (u.doppler_radio, 'radio', 'RADIO', 'VRAD', 'F', 'FREQ'):
+        return 'radio'
+    elif vc in (u.doppler_optical, 'optical', 'OPTICAL', 'VOPT', 'W', 'WAVE'):
+        return 'optical'
+    elif vc in (u.doppler_relativistic, 'relativistic', 'RELATIVE', 'VREL',
+                'speed', 'V', 'VELO'):
+        return 'relativistic'
 
 def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True,
         **kwargs):
@@ -52,7 +62,7 @@ def make_axis(xarr,hdr,specname=None, wcstype='', specaxis="1", verbose=True,
         convention, frame = units.parse_veldef(hdr['VELDEF'])
         vframe = hdr.get('VFRAME') if hdr.get('VFRAME') is not None else 0.0
     else:
-        convention, frame = None,None
+        convention, frame = _parse_velocity_convention(hdr.get('CTYPE%s%s' % (specaxis,wcstype))), None
         vframe = 0.0
 
     XAxis = units.SpectroscopicAxis(xarr, xunits, refX=refX,
