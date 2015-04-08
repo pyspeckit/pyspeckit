@@ -29,7 +29,12 @@ import random
 title_dict = {'oneone':'NH$_3(1,1)$', 
 'twotwo':'NH$_3(2,2)$', 
 'threethree':'NH$_3(3,3)$', 
-'fourfour':'NH$_3(4,4)$', }
+'fourfour':'NH$_3(4,4)$',
+'fivefive':'NH$_3(5,5)$',
+'sixsix':'NH$_3(6,6)$',
+'sevenseven':'NH$_3(7,7)$',
+'eighteight':'NH$_3(8,8)$',
+             }
 
 def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guessline='twotwo',
         tex=15,tkin=20,column=15.0,fortho=0.66, tau=None, thin=False, quiet=False, doplot=True, fignum=1,
