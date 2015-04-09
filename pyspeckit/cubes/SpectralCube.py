@@ -31,6 +31,8 @@ from pyspeckit.spectrum import history
 from astropy.io import fits
 import cubes
 from astropy import log
+from astropy import wcs
+from astropy import units
 
 class Cube(spectrum.Spectrum):
 
@@ -89,21 +91,18 @@ class Cube(spectrum.Spectrum):
         """
 
         if filename is not None:
-            try:
-                self.cube,self.xarr,self.header,self.fitsfile = readers.open_3d_fits(filename, **kwargs)
-                self.errorcube = errorcube
-                self.data = self.cube[:,y0,x0]
-                self.error = None
-                self.cubeheader = self.header
-            except TypeError as inst:
-                log.exception("Failed to read fits file: wrong TYPE.")
-                log.exception(str(inst))
-                raise inst
+            self.load_fits(filename)
+            return
         else:
             if hasattr(cube, 'spectral_axis'):
                 # Load from a SpectralCube instance
                 self.cube = cube.hdu.data
-                self.unit = cube.unit
+                if (cube.unit in ('undefined', units.dimensionless_unscaled)
+                    and 'BUNIT' in cube._meta):
+                    self.unit = cube._meta['BUNIT']
+                else:
+                    self.unit = cube.unit
+                log.debug("Self.unit: {0}".format(self.unit))
                 if xarr is None:
                     xarr = cube.spectral_axis
                 if header is None:
@@ -127,11 +126,14 @@ class Cube(spectrum.Spectrum):
             if self.cube is not None:
                 self.data = self.cube[:,y0,x0]
 
+        log.debug("Self.unit before header: {0}".format(self.unit))
         if self.header is not None:
             self.parse_header(self.header)
         else:
+            log.debug("self.header is None: {0}".format(self.header))
             self.unit = 'undefined'
             self.header = fits.Header()
+        log.debug("Self.unit after header: {0}".format(self.unit))
 
         if maskmap is not None:
             self.maskmap = maskmap
@@ -158,13 +160,30 @@ class Cube(spectrum.Spectrum):
         self.plot_special_kwargs = {}
         self._modelcube = None
 
+        self.wcs = wcs.WCS(self.header)
+        self.wcs.wcs.fix()
+        self._spectral_axis_number = self.wcs.wcs.spec+1
+        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)
+
         # TODO: improve this!!!
         self.system = ('galactic'
-                       if ('CTYPE1' in self.header and 'GLON' in
-                           self.header['CTYPE1'])
+                       if ('CTYPE{0}'.format(self._first_cel_axis_num)
+                           in self.header and 'GLON' in
+                           self.header['CTYPE{0}'.format(self._first_cel_axis_num)])
                        else 'celestial')
 
         self.mapplot = mapplot.MapPlotter(self)
+
+    def load_fits(self, fitsfile):
+        from spectral_cube import SpectralCube
+        mycube = SpectralCube.read(fitsfile)
+        return self.load_spectral_cube(mycube)
+
+    def load_spectral_cube(self, cube):
+        """
+        Load the cube from a spectral_cube.SpectralCube object
+        """
+        self.__init__(cube=cube)
 
     def __repr__(self):
         return r'<Cube object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s with shape %r at %s>' % \
@@ -372,17 +391,19 @@ class Cube(spectrum.Spectrum):
         Returns a SpectroscopicAxis instance
         """
 
+        ct = 'CTYPE{0}'.format(self._first_cel_axis_num)
         header = cubes.speccen_header(fits.Header(cards=[(k,v) for k,v in
                                                          self.header.iteritems()
                                                          if k != 'HISTORY']),
                                       lon=x, lat=y, system=self.system,
-                                      proj=(self.header['CTYPE1'][-3:]
-                                            if 'CTYPE1' in self.header else
+                                      proj=(self.header[ct][-3:]
+                                            if ct in self.header else
                                             'CAR'))
 
-        sp = pyspeckit.Spectrum( xarr=self.xarr.copy(), data=self.cube[:,y,x],
-                header=header,
-                error=self.errorcube[:,y,x] if self.errorcube is not None else None)
+        sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=self.cube[:,y,x],
+                                header=header,
+                                error=(self.errorcube[:,y,x] if self.errorcube
+                                       is not None else None))
 
         sp.specfit = copy.copy(self.specfit)
         # explicitly re-do this (test)
@@ -446,13 +467,14 @@ class Cube(spectrum.Spectrum):
         else:
             error = None
 
+        ct = 'CTYPE{0}'.format(self._first_cel_axis_num)
         header = cubes.speccen_header(fits.Header(cards=[(k,v) for k,v in
                                                          self.header.iteritems()
                                                          if k != 'HISTORY']),
                                       lon=aperture[0],
                                       lat=aperture[1],
                                       system=self.system,
-                                      proj=self.header['CTYPE1'][-3:])
+                                      proj=self.header[ct][-3:])
         if len(aperture) == 3:
             header['APRADIUS'] = aperture[2]
         if len(aperture) == 5:
@@ -478,9 +500,13 @@ class Cube(spectrum.Spectrum):
 
         import cubes
         if coordsys is not None:
-            self.data = cubes.extract_aperture( self.cube, aperture , coordsys=coordsys , wcs=self.mapplot.wcs, method=method )
+            self.data = cubes.extract_aperture( self.cube, aperture,
+                                               coordsys=coordsys,
+                                               wcs=self.mapplot.wcs,
+                                               method=method )
         else:
-            self.data = cubes.extract_aperture( self.cube, aperture , coordsys=None, method=method)
+            self.data = cubes.extract_aperture(self.cube, aperture,
+                                               coordsys=None, method=method)
 
     def get_modelcube(self, update=False):
         if self._modelcube is None or update:
@@ -643,7 +669,8 @@ class Cube(spectrum.Spectrum):
             sp.specfit.Registry = self.Registry # copy over fitter registry
             
             if use_nearest_as_guess and self.has_fit.sum() > 0:
-                if verbose_level > 1 and ii == 0 or verbose_level > 4: log.info("Using nearest fit as guess")
+                if verbose_level > 1 and ii == 0 or verbose_level > 4:
+                    log.info("Using nearest fit as guess")
                 d = np.roll( np.roll( distance, x, 0), y, 1)
                 # If there's no fit, set its distance to be unreasonably large
                 nearest_ind = np.argmin(d+1e10*(True-self.has_fit))
@@ -664,7 +691,8 @@ class Cube(spectrum.Spectrum):
 
             if np.all(np.isfinite(gg)):
                 try:
-                    sp.specfit(guesses=gg, quiet=verbose_level<=3, verbose=verbose_level>3, **fitkwargs)
+                    sp.specfit(guesses=gg, quiet=verbose_level<=3,
+                               verbose=verbose_level>3, **fitkwargs)
                 except Exception as ex:
                     log.exception("Fit number %i at %i,%i failed on error %s" % (ii,x,y, str(ex)))
                     log.exception("Guesses were: {0}".format(str(gg)))
@@ -673,7 +701,9 @@ class Cube(spectrum.Spectrum):
                         raise ex
                 self.parcube[:,y,x] = sp.specfit.modelpars
                 self.errcube[:,y,x] = sp.specfit.modelerrs
-                if integral: self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,return_error=True)
+                if integral:
+                    self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,
+                                                                  return_error=True)
                 self.has_fit[y,x] = True
             else:
                 self.has_fit[y,x] = False
@@ -696,7 +726,8 @@ class Cube(spectrum.Spectrum):
                              (self._counter, npix, x, y, snmsg, time.time()-t0, pct))
 
             if integral:
-                return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs, self.integralmap[:,y,x])
+                return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs,
+                        self.integralmap[:,y,x])
             else:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs)
 
@@ -750,7 +781,8 @@ class Cube(spectrum.Spectrum):
             # individual result can be None (I guess?) but apparently (and this
             # part I don't believe) any individual *fit* result can be None as
             # well (apparently the x,y pairs can also be None?)
-            merged_result = [core_result for core_result in result if core_result is not None]
+            merged_result = [core_result for core_result in result if
+                             core_result is not None]
             # for some reason, every other time I run this code, merged_result
             # ends up with a different intrinsic shape.  This is an attempt to
             # force it to maintain a sensible shape.
@@ -761,7 +793,8 @@ class Cube(spectrum.Spectrum):
                     ((x,y), m1, m2) = merged_result[0]
             except ValueError:
                 if verbose > 1:
-                    log.exception("ERROR: merged_result[0] is {0} which has the wrong shape".format(merged_result[0]))
+                    log.exception("ERROR: merged_result[0] is {0} which has the"
+                                  " wrong shape".format(merged_result[0]))
                 merged_result = itertools.chain.from_iterable(merged_result)
             for TEMP in merged_result:
                 if TEMP is None:
@@ -782,7 +815,9 @@ class Cube(spectrum.Spectrum):
                     continue
                 if ((len(modelpars) != len(modelerrs)) or
                     (len(modelpars) != len(self.parcube))):
-                    raise ValueError("There was a serious problem; modelpar and error shape don't match that of the parameter cubes")
+                    raise ValueError("There was a serious problem; modelpar and"
+                                     " error shape don't match that of the "
+                                     "parameter cubes")
                 if np.any(np.isnan(modelpars)) or np.any(np.isnan(modelerrs)):
                     self.parcube[:,y,x] = np.nan
                     self.errcube[:,y,x] = np.nan
@@ -807,7 +842,8 @@ class Cube(spectrum.Spectrum):
         self.specfit.parinfo = sp.specfit.parinfo
 
         if verbose:
-            log.info("Finished final fit %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0))
+            log.info("Finished final fit %i.  "
+                     "Elapsed time was %0.1f seconds" % (ii, time.time()-t0))
 
 
     def momenteach(self, verbose=True, verbose_level=1, multicore=0, **kwargs):
@@ -843,14 +879,17 @@ class Cube(spectrum.Spectrum):
             self.momentcube[:,y,x] = sp.moments(**kwargs)
             if verbose:
                 if ii % 10**(3-verbose_level) == 0:
-                    log.info("Finished moment %i.  Elapsed time is %0.1f seconds" % (ii, time.time()-t0))
+                    log.info("Finished moment %i.  "
+                             "Elapsed time is %0.1f seconds" % (ii, time.time()-t0))
 
             return ((x,y), self.momentcube[:,y,x])
 
         if multicore > 0:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             result = parallel_map(moment_a_pixel, sequence, numcores=multicore)
-            merged_result = [core_result for core_result in result if core_result is not None]
+            merged_result = [core_result
+                             for core_result in result
+                             if core_result is not None]
             for mr in merged_result:
                 for TEMP in mr:
                     ((x,y), moments) = TEMP
@@ -860,7 +899,8 @@ class Cube(spectrum.Spectrum):
                 moment_a_pixel((ii,x,y))
 
         if verbose:
-            log.info("Finished final moment %i.  Elapsed time was %0.1f seconds" % (ii, time.time()-t0))
+            log.info("Finished final moment %i.  "
+                     "Elapsed time was %0.1f seconds" % (ii, time.time()-t0))
 
     def show_moment(self, momentnumber, **kwargs):
         """
@@ -1102,8 +1142,17 @@ class CubeStack(Cube):
             for key,value in cube.header.items():
                 self.header[key] = value
 
+        self.wcs = wcs.WCS(self.header)
+        self.wcs.wcs.fix()
+        self._spectral_axis_number = self.wcs.wcs.spec+1
+        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)+1
+
         # TODO: Improve this!!!
-        self.system = 'galactic' if 'GLON' in self.header['CTYPE1'] else 'celestial'
+        self.system = ('galactic'
+                       if ('CTYPE{0}'.format(self._first_cel_axis_num)
+                           in self.header and 'GLON' in
+                           self.header['CTYPE{0}'.format(self._first_cel_axis_num)])
+                       else 'celestial')
         
         self.unit = cubelist[0].unit
         for cube in cubelist: 
