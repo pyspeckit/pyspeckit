@@ -6,8 +6,8 @@ except ImportError:
 import numpy as np
 
 # Load the spectrum
-sp = pyspeckit.Cube('region5_hcn_crop.fits',scale_keyword='ETAMB')
-errmap = pyfits.getdata('region5.hcn.errmap.fits')
+sp = pyspeckit.Cube('../pyspeckit/tests/data/region5_hcn_crop.fits',)
+errmap = pyfits.getdata('../pyspeckit/tests/data/region5.hcn.errmap.fits')
 
 # Register the fitter
 # The N2H+ fitter is 'built-in' but is not registered by default; this example
@@ -25,8 +25,8 @@ sp.mapplot()
 #s.plotter()
 #s.Registry = sp.Registry
 #s.specfit.Registry = sp.Registry
-#s.specfit(fittype='hcn_amp',multifit=None,guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
-#s.specfit(fittype='hcn_amp',multifit=None,guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
+#s.specfit(fittype='hcn_amp',guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
+#s.specfit(fittype='hcn_amp',guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
 #sp.error = s.specfit.errspec
 
 
@@ -35,13 +35,13 @@ sp.mapplot()
 # there are bad pixels
 sp.momenteach(vheight=False, verbose=False)
 sp.momentcube[2,:,:] /= 2.5 # the HCN line profile makes the fitter assume a 2.5x too large line
-sp.fiteach(fittype='hcn_amp', errmap=errmap, multifit=None,
+sp.fiteach(fittype='hcn_amp', errmap=errmap,
         guesses=[1.0,-5.6,1.5], verbose_level=2, signal_cut=4,
         usemomentcube=True, blank_value=np.nan, verbose=False,
         direct=True, multicore=4)
 
 # steal the header from the error map
-f = pyfits.open('region5.hcn.errmap.fits')
+f = pyfits.open('../pyspeckit/tests/data/region5.hcn.errmap.fits')
 # start replacing components of the pyfits object
 f[0].data = np.concatenate([sp.parcube,sp.errcube,sp.integralmap])
 f[0].header.update('PLANE1','amplitude')

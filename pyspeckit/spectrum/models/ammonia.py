@@ -492,9 +492,11 @@ class ammonia_model(model.SpectralModel):
             log.info("Fit error message: {0}".format(mp.errmsg))
             log.info("Final fit values: ")
             for i,p in enumerate(mpp):
-                log.info(" ".join((parinfo[i]['parname'],p," +/- ",mpperr[i])))
-            log.info(" ".join("Chi2: ",mp.fnorm," Reduced Chi2: ",
-                              mp.fnorm/len(data)," DOF:",len(data)-len(mpp)))
+                log.info(" ".join((parinfo[i]['parname'], str(p), " +/- ",
+                                   str(mpperr[i]))))
+            log.info(" ".join(("Chi2: ", str(mp.fnorm)," Reduced Chi2: ",
+                               str(mp.fnorm/len(data)), " DOF:",
+                               str(len(data)-len(mpp)))))
 
         self.mp = mp
 
