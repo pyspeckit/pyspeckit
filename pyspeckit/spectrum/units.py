@@ -469,11 +469,32 @@ class SpectroscopicAxis(np.ndarray):
             selfstr += "Reference is %g %s" % (self.refX, self.refX_units)
         return selfstr
 
+    @property
+    def unit(self):
+        return self._unit
+
+    @unit.setter
+    def unit(self, value):
+        self._unit = value
+
+    @property
+    def units(self):
+        return self.unit
+
+    @units.setter
+    def units(self, value):
+        self.unit = value
+
+    def _plural_sanity_check(self):
+        if hasattr(self,'unit') and hasattr(self,'units'):
+            assert self.unit == self.units
+
     def _check_consistent_type(self):
         """
         Make sure self.xtype is unit_type_dict[units]
         if this is NOT true, can cause significant errors
         """
+        self._plural_sanity_check()
         if self.xtype is None:
             OK = False
         elif self.unit not in unit_type_dict:
@@ -968,8 +989,8 @@ class SpectroscopicAxis(np.ndarray):
         https://github.com/numpy/numpy/blob/master/numpy/ma/core.py)
         """
 
-        for attr in ('frame', 'redshift', 'refX', 'refX_units', 'units',
-                'velocity_convention', 'wcshead', 'xtype'):
+        for attr in ('frame', 'redshift', 'refX', 'refX_units', '_unit',
+                     'velocity_convention', 'wcshead', 'xtype'):
             self.__dict__[attr] = obj.__dict__[attr]
 
 
