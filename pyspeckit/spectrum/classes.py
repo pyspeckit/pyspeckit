@@ -347,7 +347,8 @@ class Spectrum(object):
 
         if hdr.get('BUNIT'):
             self.unit = hdr.get('BUNIT').strip()
-        else:
+        elif not hasattr(self, 'unit') or (hasattr(self,'unit') and self.unit
+                                           is None):
             self.unit = 'undefined'
             
         if hdr.get('BTYPE'):

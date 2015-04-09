@@ -476,11 +476,13 @@ class SpectroscopicAxis(np.ndarray):
         """
         if self.xtype is None:
             OK = False
+        elif self.unit not in unit_type_dict:
+            raise KeyError("Unit {0} is not recognized.".format(self.unit))
         else:
-            OK = self.xtype.lower() == unit_type_dict[self.units]
+            OK = self.xtype.lower() == unit_type_dict[self.unit]
 
         if not OK:
-            raise InconsistentTypeError("Units: %s Type[units]: %s in %r" % (self.units,unit_type_dict[self.units],self) )
+            raise InconsistentTypeError("Units: %s Type[units]: %s in %r" % (self.unit,unit_type_dict[self.unit],self) )
 
     def _fix_type(self):
         try:

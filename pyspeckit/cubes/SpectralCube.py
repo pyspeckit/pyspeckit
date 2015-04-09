@@ -32,6 +32,7 @@ from astropy.io import fits
 import cubes
 from astropy import log
 from astropy import wcs
+from astropy import units
 
 class Cube(spectrum.Spectrum):
 
@@ -90,22 +91,18 @@ class Cube(spectrum.Spectrum):
         """
 
         if filename is not None:
-            try:
-                self.cube,self.xarr,self.header,self.fitsfile =\
-                        readers.open_3d_fits(filename, **kwargs)
-                self.errorcube = errorcube
-                self.data = self.cube[:,y0,x0]
-                self.error = None
-                self.cubeheader = self.header
-            except TypeError as inst:
-                log.exception("Failed to read fits file: wrong TYPE.")
-                log.exception(str(inst))
-                raise inst
+            self.load_fits(filename)
+            return
         else:
             if hasattr(cube, 'spectral_axis'):
                 # Load from a SpectralCube instance
                 self.cube = cube.hdu.data
-                self.unit = cube.unit
+                if (cube.unit in ('undefined', units.dimensionless_unscaled)
+                    and 'BUNIT' in cube._meta):
+                    self.unit = cube._meta['BUNIT']
+                else:
+                    self.unit = cube.unit
+                log.debug("Self.unit: {0}".format(self.unit))
                 if xarr is None:
                     xarr = cube.spectral_axis
                 if header is None:
@@ -129,11 +126,14 @@ class Cube(spectrum.Spectrum):
             if self.cube is not None:
                 self.data = self.cube[:,y0,x0]
 
+        log.debug("Self.unit before header: {0}".format(self.unit))
         if self.header is not None:
             self.parse_header(self.header)
         else:
+            log.debug("self.header is None: {0}".format(self.header))
             self.unit = 'undefined'
             self.header = fits.Header()
+        log.debug("Self.unit after header: {0}".format(self.unit))
 
         if maskmap is not None:
             self.maskmap = maskmap
@@ -173,6 +173,17 @@ class Cube(spectrum.Spectrum):
                        else 'celestial')
 
         self.mapplot = mapplot.MapPlotter(self)
+
+    def load_fits(self, fitsfile):
+        from spectral_cube import SpectralCube
+        mycube = SpectralCube.read(fitsfile)
+        return self.load_spectral_cube(mycube)
+
+    def load_spectral_cube(self, cube):
+        """
+        Load the cube from a spectral_cube.SpectralCube object
+        """
+        self.__init__(cube=cube)
 
     def __repr__(self):
         return r'<Cube object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s with shape %r at %s>' % \
@@ -389,9 +400,10 @@ class Cube(spectrum.Spectrum):
                                             if ct in self.header else
                                             'CAR'))
 
-        sp = pyspeckit.Spectrum( xarr=self.xarr.copy(), data=self.cube[:,y,x],
-                header=header,
-                error=self.errorcube[:,y,x] if self.errorcube is not None else None)
+        sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=self.cube[:,y,x],
+                                header=header,
+                                error=(self.errorcube[:,y,x] if self.errorcube
+                                       is not None else None))
 
         sp.specfit = copy.copy(self.specfit)
         # explicitly re-do this (test)
@@ -1133,7 +1145,7 @@ class CubeStack(Cube):
         self.wcs = wcs.WCS(self.header)
         self.wcs.wcs.fix()
         self._spectral_axis_number = self.wcs.wcs.spec+1
-        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)
+        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)+1
 
         # TODO: Improve this!!!
         self.system = ('galactic'
