@@ -439,8 +439,6 @@ class Plotter(object):
 
     def refresh(self):
         if self.axis is not None:
-            print 'self.ylabel:',self.ylabel
-            print 'self.xlabel:',self.xlabel
             self.axis.figure.canvas.draw()
 
 
