@@ -6,7 +6,7 @@ import astropy.units as u
 # The data is from http://adsabs.harvard.edu/abs/1999A%26A...348..600P
 sp = pyspeckit.Spectrum('02232_plus_6138.txt')
 sp.xarr._unit=u.km/u.s
-sp.xarr.refX = 88.63184666e9
+sp.xarr.refX = 88.63184666e9 * u.Hz
 sp.xarr.velocity_convention = 'radio'
 sp.xarr.xtype='velocity'
 sp.units='$T_A^*$'

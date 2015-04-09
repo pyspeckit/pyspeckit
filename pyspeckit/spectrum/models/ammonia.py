@@ -90,7 +90,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
     """
 
     # Convert X-units to frequency in GHz
-    xarr = xarr.as_unit('GHz') #, equivalencies=u.doppler_radio(xarr.center_frequency))
+    xarr = xarr.as_unit('GHz')
 
     if tex is not None:
         # Yes, you certainly can have nonthermal excitation, tex>tkin.
