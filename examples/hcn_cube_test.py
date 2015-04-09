@@ -7,7 +7,7 @@ import numpy as np
 
 # Load the spectrum
 sp = pyspeckit.Cube('region5_hcn_crop.fits')
-errmap = pyfits.getdata('../pyspeckit/tests/data/region5.hcn.errmap.fits')
+errmap = pyfits.getdata('region5.hcn.errmap.fits')
 
 # Register the fitter
 # The N2H+ fitter is 'built-in' but is not registered by default; this example
@@ -41,7 +41,7 @@ sp.fiteach(fittype='hcn_amp', errmap=errmap,
         direct=True, multicore=4)
 
 # steal the header from the error map
-f = pyfits.open('../pyspeckit/tests/data/region5.hcn.errmap.fits')
+f = pyfits.open('region5.hcn.errmap.fits')
 # start replacing components of the pyfits object
 f[0].data = np.concatenate([sp.parcube,sp.errcube,sp.integralmap])
 f[0].header.update('PLANE1','amplitude')

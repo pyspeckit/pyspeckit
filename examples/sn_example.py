@@ -8,11 +8,12 @@ from astropy import units as u
 sp = pyspeckit.OpticalSpectrum('sn2009ip_halpha.fits')
 
 # start by plotting a small region around the H-alpha line
-xmin=u.Quantity(6100, sp.xarr.unit)
-xmax=u.Quantity(7000, sp.xarr.unit)
-ymin=u.Quantity(0, sp.xarr.unit)
-ymax=u.Quantity(2.23, sp.xarr.unit)
-sp.plotter(xmin=xmin,xmax=xmax,ymax=ymax,ymin=ymin)
+# xmin=u.Quantity(6100, sp.xarr.unit)
+# xmax=u.Quantity(7000, sp.xarr.unit)
+# ymin=u.Quantity(0, sp.unit)
+# ymax=u.Quantity(2.23, sp.unit)
+sp.plotter(xmin=6100*u.AA, xmax=7000*u.AA, ymax=2.23*u.dimensionless_unscaled, ymin=0*u.dimensionless_unscaled)
+# sp.plotter(xmin=xmin,xmax=xmax,ymax=ymax,ymin=ymin)
 
 # the baseline (continuum) fit will be 2nd order, and excludes "bad"
 # parts of the spectrum
