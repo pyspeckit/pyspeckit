@@ -309,20 +309,7 @@ class SpectroscopicAxis(u.Quantity):
         subarr = np.array(xarr,dtype=dtype)
         subarr = subarr.view(self)
 
-        try:
-            if unit is None or unit == 'unknown':
-                unit = u.dimensionless_unscaled
-            if unit == 'angstroms': unit = 'angstrom'
-            subarr._unit = u.Unit(unit)
-        except ValueError:
-            if bad_unit_response=="pixel":
-                subarr._unit="unknown"
-            elif bad_unit_response=="raise":
-                raise ValueError('Unit %s not recognized.' % unit)
-            else:
-                raise ValueError('Unit %s not recognized. Invalid bad_unit_response, valid options: [%s/%s]' 
-                                % (unit, "raise", "pixel"))
-
+        subarr._unit = self.validate_unit(unit)
         subarr.refX = refX
 
         if refX_units is None:
@@ -356,6 +343,22 @@ class SpectroscopicAxis(u.Quantity):
                                         subarr.center_frequency, 
                                         equivalencies)
         return subarr
+
+    def __repr__(self):
+        if self.shape is ():
+            rep = ("SpectroscopicAxis([%r], unit=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
+                (self.__array__(), self.unit, self.refX, self.refX_units, self.frame, self.redshift, self.xtype, self.velocity_convention))
+        else:
+            rep = ("SpectroscopicAxis([%r,...,%r], unit=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
+                (self[0], self[-1], self.unit, self.refX, self.refX_units, self.frame, self.redshift, self.xtype, self.velocity_convention))
+        return rep
+
+    def __str__(self):
+        selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
+                self.unit,self.umin().value,self.umax().value)
+        if self.refX is not None:
+            selfstr += "Reference is %g %s" % (self.refX, self.refX_units)
+        return selfstr
 
     def __array_finalize__(self,obj):
         """
@@ -392,22 +395,6 @@ class SpectroscopicAxis(u.Quantity):
             pass
         return ret
 
-    def __repr__(self):
-        if self.shape is ():
-            rep = ("SpectroscopicAxis([%r], unit=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self.__array__(), self.unit, self.refX, self.refX_units, self.frame, self.redshift, self.xtype, self.velocity_convention))
-        else:
-            rep = ("SpectroscopicAxis([%r,...,%r], unit=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self[0], self[-1], self.unit, self.refX, self.refX_units, self.frame, self.redshift, self.xtype, self.velocity_convention))
-        return rep
-
-    def __str__(self):
-        selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
-                self.unit,self.umin().value,self.umax().value)
-        if self.refX is not None:
-            selfstr += "Reference is %g %s" % (self.refX, self.refX_units)
-        return selfstr
-
     def _check_consistent_type(self):
         """
         Make sure self.xtype is unit_type_dict[unit]
@@ -426,6 +413,26 @@ class SpectroscopicAxis(u.Quantity):
             self._check_consistent_type()
         except InconsistentTypeError:
             self.xtype = unit_type_dict[self.unit]
+
+    @classmethod
+    def validate_unit(self, unit):
+        try:
+            if unit is None or unit == 'unknown':
+                unit = u.dimensionless_unscaled
+            if unit == 'angstroms': unit = 'angstrom'
+            unit = u.Unit(unit)
+        except ValueError:
+            if bad_unit_response=="pixel":
+                unit="unknown"
+            elif bad_unit_response=="raise":
+                raise ValueError('Unit %s not recognized.' % unit)
+            else:
+                raise ValueError('Unit %s not recognized. Invalid bad_unit_response, valid options: [%s/%s]' 
+                                % (unit, "raise", "pixel"))
+        return unit
+
+    def set_unit(self, unit):
+        self._unit = self.validate_unit(unit)
 
     def umax(self, unit=None):
         """
