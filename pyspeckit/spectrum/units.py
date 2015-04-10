@@ -293,10 +293,13 @@ class SpectroscopicAxis(u.Quantity):
             Reference frequency/wavelength
         refX_units : str | astropy.units.Unit
             Units of the reference frequency/wavelength
-        center_frequency : float | astropy.units.Quantity
-
-        center_frequency_unit : str | astropy.units.Unit
-
+        center_frequency: float
+            The reference frequency for determining a velocity. 
+            Required for conversions between frequency/wavelength/energy and velocity.
+        center_frequency_unit: string
+            If converting between velocity and any other spectroscopic type,
+            need to specify the central frequency around which that velocity is
+            calculated.
         equivalencies : list
             astropy equivalencies list containing tuples of the form:
             (from_unit, to_unit, forward, backward)
@@ -545,7 +548,8 @@ class SpectroscopicAxis(u.Quantity):
             frames we can come up with.  Right now the main holdup is finding a 
             nice python interface to an LSR velocity calculator... and motivation.
         center_frequency: float
-            Central frequency in units specified by...
+            The reference frequency for determining a velocity. 
+            Required for conversions between frequency/wavelength/energy and velocity.
         center_frequency_unit: string
             If converting between velocity and any other spectroscopic type,
             need to specify the central frequency around which that velocity is
@@ -675,7 +679,8 @@ class SpectroscopicAxis(u.Quantity):
         velocity_convention : str
             'optical', 'radio' or 'relativistic'
         center_frequency : float | astropy.units.Quantity 
-
+            The reference frequency for determining a velocity. 
+            Required for conversions between frequency/wavelength/energy and velocity.
         equivalencies : list
             astropy equivalencies list containing tuples of the form:
             (from_unit, to_unit, forward, backward)
