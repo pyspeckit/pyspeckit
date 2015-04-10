@@ -494,7 +494,7 @@ class Cube(spectrum.Spectrum):
 
         """
         if 'multifit' in fitkwargs:
-            log.warn("The multifit keyword is no longer required.  All fits allow for multiple components.", DeprecatedWarning)
+            log.warn("The multifit keyword is no longer required.  All fits allow for multiple components.", DeprecationWarning)
 
         if not hasattr(self.mapplot,'plane'):
             self.mapplot.makeplane()
