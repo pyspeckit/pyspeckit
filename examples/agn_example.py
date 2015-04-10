@@ -29,7 +29,7 @@ broad = 30.
 # Initialize spectrum object
 spec = pyspeckit.Spectrum('sample_sdss.txt')
 spec.unit = 'erg s^{-1} cm^{-2} \\AA^{-1}'
-spec.xarr._unit=u.Angstrom
+spec.xarr.set_unit=u.Angstrom
 
 # H-alpha
 spec.specfit.selectregion(xmin = Halpha - 5, xmax = Halpha + 5)
