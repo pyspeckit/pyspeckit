@@ -282,23 +282,26 @@ class SpectroscopicAxis(u.Quantity):
         Make a new spectroscopic axis instance
         Default units Hz
         
-        *xarr* [ np.ndarray ]
+        Parameters
+        ----------
+        xarr : np.ndarray
             An array of X-axis values in whatever unit specified
-
-        *unit* or *units* [ string ]
+        unit : str
             Any valid spectroscopic X-axis unit (km/s, Hz, angstroms, etc.).
             Spaces will be removed.
-
-        *xtype* [ string | None ]
-            irrelevant?
-
-        *refX* [ float ]
+        refX : float
             Reference frequency/wavelength
-
-        *refX_units* [ string ]
+        refX_units : str | astropy.units.Unit
             Units of the reference frequency/wavelength
+        center_frequency : float | astropy.units.Quantity
 
-        *bad_unit_response* [ 'raise', 'pixel' ]
+        center_frequency_unit : str | astropy.units.Unit
+
+        equivalencies : list
+            astropy equivalencies list containing tuples of the form:
+            (from_unit, to_unit, forward, backward)
+            forward and backward are functions that convert values between those units
+        bad_unit_response : 'raise' | 'pixel'
             What should pyspeckit do if the units are not recognized?  Default
             is to raise an exception.  Can make pixel units instead
         """        
@@ -309,7 +312,7 @@ class SpectroscopicAxis(u.Quantity):
         subarr = np.array(xarr,dtype=dtype)
         subarr = subarr.view(self)
 
-        subarr._unit = self.validate_unit(unit)
+        subarr._unit = self.validate_unit(unit, bad_unit_response)
         subarr.refX = refX
 
         if refX_units is None:
@@ -339,7 +342,6 @@ class SpectroscopicAxis(u.Quantity):
 
         subarr.center_frequency, subarr._equivalencies = \
                 self.find_equivalencies(subarr.velocity_convention,
-                                        subarr.refX, subarr.refX_units, 
                                         subarr.center_frequency, 
                                         equivalencies)
         return subarr
@@ -415,24 +417,24 @@ class SpectroscopicAxis(u.Quantity):
             self.xtype = unit_type_dict[self.unit]
 
     @classmethod
-    def validate_unit(self, unit):
+    def validate_unit(self, unit, bad_unit_response='raise'):
         try:
             if unit is None or unit == 'unknown':
                 unit = u.dimensionless_unscaled
             if unit == 'angstroms': unit = 'angstrom'
             unit = u.Unit(unit)
         except ValueError:
-            if bad_unit_response=="pixel":
-                unit="unknown"
-            elif bad_unit_response=="raise":
+            if bad_unit_response == "pixel":
+                unit = "unknown"
+            elif bad_unit_response == "raise":
                 raise ValueError('Unit %s not recognized.' % unit)
             else:
                 raise ValueError('Unit %s not recognized. Invalid bad_unit_response, valid options: [%s/%s]' 
                                 % (unit, "raise", "pixel"))
         return unit
 
-    def set_unit(self, unit):
-        self._unit = self.validate_unit(unit)
+    def set_unit(self, unit, bad_unit_response='raise'):
+        self._unit = self.validate_unit(unit, bad_unit_response)
 
     def umax(self, unit=None):
         """
@@ -512,13 +514,7 @@ class SpectroscopicAxis(u.Quantity):
         Uses as_unit for the conversion, but changes internal values rather
         than returning them.
         """
-        if unit is None:
-            unit = u.dimensionless_unscaled
-
-        try:
-            unit = u.Unit(unit)
-        except ValueError:
-            raise ValueError('Invalid unit')
+        unit = self.validate_unit(unit)
 
         try:
             self.flags.writeable=True
@@ -550,7 +546,7 @@ class SpectroscopicAxis(u.Quantity):
             nice python interface to an LSR velocity calculator... and motivation.
         center_frequency: float
             Central frequency in units specified by...
-        center_frequency_units: string
+        center_frequency_unit: string
             If converting between velocity and any other spectroscopic type,
             need to specify the central frequency around which that velocity is
             calculated.
@@ -580,7 +576,6 @@ class SpectroscopicAxis(u.Quantity):
 
         self.center_frequency, self._equivalencies = \
             self.find_equivalencies(velocity_convention, 
-                                    refX, refX_units,
                                     center_frequency,
                                     equivalencies)
         
@@ -594,7 +589,7 @@ class SpectroscopicAxis(u.Quantity):
 
         Parameters
         ----------
-        coordinate_location: [ 'left', 'center', 'right' ]
+        coordinate_location : [ 'left', 'center', 'right' ]
             Does the coordinate mark the left, center, or right edge of the
             pixel?  If 'center' or 'left', the *last* pixel will have the same
             dx as the second to last pixel.  If right, the *first* pixel will
@@ -669,13 +664,23 @@ class SpectroscopicAxis(u.Quantity):
             return True
 
     @classmethod
-    def find_equivalencies(self, velocity_convention=None, refX=None, refX_units=None,
+    def find_equivalencies(self, velocity_convention=None,
                            center_frequency=None, equivalencies=[]):
         """
         Utility function to add equivalencies from the velocity_convention 
         and the center_frequency
+
+        Parameters
+        ----------
+        velocity_convention : str
+            'optical', 'radio' or 'relativistic'
+        center_frequency : float | astropy.units.Quantity 
+
+        equivalencies : list
+            astropy equivalencies list containing tuples of the form:
+            (from_unit, to_unit, forward, backward)
+            forward and backward are functions that convert values between those units
         """
-        # equivalency finding
         if velocity_convention:
             new_equivalencies = velocity_conventions[velocity_convention](center_frequency)
             return center_frequency, merge_equivalencies(new_equivalencies, equivalencies)
