@@ -45,7 +45,7 @@ class write_fits(Writer):
                         header[k] = v
                     except ValueError:
                         try:
-                            #v is a SpectroscopicAxis
+                            #v is a Quantity
                             header[k] = v.value
                         except AttributeError:
                             #v is a Unit
