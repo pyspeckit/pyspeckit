@@ -17,7 +17,7 @@ The 'grunt work' is performed by the :py:mod:`cubes` module
 # import parent package
 import pyspeckit
 from pyspeckit import spectrum
-from ..spectrum.units import generate_xarr
+from ..spectrum.units import generate_xarr,SpectroscopicAxis
 # import local things
 import mapplot
 import readers
@@ -104,7 +104,9 @@ class Cube(spectrum.Spectrum):
                     self.unit = cube.unit
                 log.debug("Self.unit: {0}".format(self.unit))
                 if xarr is None:
-                    xarr = cube.spectral_axis
+                    xarr = SpectroscopicAxis(cube.spectral_axis,
+                                             unit=cube.spectral_axis.unit.to_string(), #TODO: accept astropy unit
+                                             refX=cube.wcs.wcs.restfrq, refX_units='Hz')
                 if header is None:
                     header = cube.header
             elif hasattr(cube, 'unit'):
@@ -136,6 +138,8 @@ class Cube(spectrum.Spectrum):
         log.debug("Self.unit after header: {0}".format(self.unit))
 
         if maskmap is not None:
+            if maskmap.ndim != 2:
+                raise ValueError("Mask map must be two-dimensional.")
             self.maskmap = maskmap
         else:
             self.maskmap = np.ones(self.cube.shape[1:],dtype='bool')
@@ -592,12 +596,14 @@ class Cube(spectrum.Spectrum):
                                start_from_point[1], 1)
         sort_distance = np.argsort(d_from_start.flat)
 
-        valid_pixels = zip(xx.flat[sort_distance][OK.flat[sort_distance]], 
+        valid_pixels = zip(xx.flat[sort_distance][OK.flat[sort_distance]],
                            yy.flat[sort_distance][OK.flat[sort_distance]])
 
         if len(valid_pixels) != len(set(valid_pixels)):
             raise ValueError("There are non-unique pixels in the 'valid pixel' list.  "
                              "This should not be possible and indicates a major error.")
+        elif len(valid_pixels) == 0:
+            raise ValueError("No valid pixels selected.")
 
         if verbose_level > 0:
             log.debug("Number of valid pixels: %i" % len(valid_pixels))
