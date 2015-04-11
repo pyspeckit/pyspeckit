@@ -163,7 +163,7 @@ class Cube(spectrum.Spectrum):
         self.wcs = wcs.WCS(self.header)
         self.wcs.wcs.fix()
         self._spectral_axis_number = self.wcs.wcs.spec+1
-        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)
+        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0] + 1
 
         # TODO: improve this!!!
         self.system = ('galactic'
@@ -1145,7 +1145,7 @@ class CubeStack(Cube):
         self.wcs = wcs.WCS(self.header)
         self.wcs.wcs.fix()
         self._spectral_axis_number = self.wcs.wcs.spec+1
-        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)+1
+        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0]+1
 
         # TODO: Improve this!!!
         self.system = ('galactic'
