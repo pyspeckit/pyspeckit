@@ -731,6 +731,9 @@ class Cube(spectrum.Spectrum):
                     log.info("Finished fit %6i of %6i at (%4i,%4i)%s. Elapsed time is %0.1f seconds.  %%%01.f" %
                              (self._counter, npix, x, y, snmsg, time.time()-t0, pct))
 
+            if sp.specfit.modelerrs is None:
+                raise TypeError("The fit never completed; something has gone wrong.")
+
             if integral:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs,
                         self.integralmap[:,y,x])
