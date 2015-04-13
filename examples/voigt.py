@@ -10,7 +10,7 @@ from pyspeckit.spectrum.models import inherited_voigtfitter
 xarr = pyspeckit.spectrum.units.SpectroscopicAxis(np.linspace(-100,100,500),
                                                   unit='km/s',
                                                   refX=1e9,
-                                                  refX_units='Hz')
+                                                  refX_unit='Hz')
 VF = inherited_voigtfitter.voigt_fitter()
 
 sp1 = pyspeckit.Spectrum(xarr=xarr,

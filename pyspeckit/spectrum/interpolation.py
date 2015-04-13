@@ -43,7 +43,7 @@ def interp_on_axes(spec1, xarr, left=0, right=0):
         See np.interp: values to replace out-of-range X items with
     """
 
-    xarr1 = spec1.xarr.as_unit(xarr.units)
+    xarr1 = spec1.xarr.as_unit(xarr.unit)
 
     newdata = _interp(xarr,xarr1,spec1.data, left=left, right=right)
 

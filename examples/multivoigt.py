@@ -7,7 +7,7 @@ from pyspeckit.spectrum.models import inherited_voigtfitter
 # in practice, however, you need to fit the background independently except for
 # gaussians.  I don't know why this is.
 
-xarr = pyspeckit.spectrum.units.SpectroscopicAxis(np.linspace(-100,100,500),unit='km/s',refX=1e9,refX_units='Hz')
+xarr = pyspeckit.spectrum.units.SpectroscopicAxis(np.linspace(-100,100,500),unit='km/s',refX=1e9,refX_unit='Hz')
 VF = inherited_voigtfitter.voigt_fitter()
 nvoigt = VF.n_modelfunc
 

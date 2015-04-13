@@ -1769,7 +1769,7 @@ class Specfit(interactive.Interactive):
         if interpolate_factor > 1:
             newxarr = units.SpectroscopicAxis(
                     np.arange(xarr.min().value-cd,xarr.max().value+cd,cd / float(interpolate_factor)),
-                    unit=xarr._unit,
+                    unit=xarr.unit,
                     equivalencies=xarr.equivalencies
                     )
             # load the metadata from xarr

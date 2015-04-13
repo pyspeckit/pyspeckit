@@ -167,7 +167,7 @@ cubes.mapplot(estimator=None,vmin=91,vmax=101)
 
 # Set the reference frequency to be the 1-1 line frequency
 cubes.xarr.refX = pyspeckit.spectrum.models.ammonia.freq_dict['oneone']
-cubes.xarr.refX_units='Hz'
+cubes.xarr.refX_unit='Hz'
 
 # If you wanted to view the spectra in velocity units, use this:
 #cubes.xarr.convert_to_unit('km/s')

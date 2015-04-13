@@ -29,6 +29,8 @@ you have initiated the fitter.
 'i' : individual components / show each fitted component
 """
 
+xlabel_table = {'speed': 'Velocity'}
+
 class Plotter(object):
     """
     Class to plot a spectrum
@@ -374,7 +376,7 @@ class Plotter(object):
                     self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin.value
 
             self.ymin += u.Quantity(self.offset, self.ymin.unit)
-            self.ymax += u.Quantity(self.offset, u.Unit(self.ymax.unit))
+            self.ymax += u.Quantity(self.offset, self.ymax.unit)
 
         self.axis.set_xlim(self.xmin.value,self.xmax.value)
         self.axis.set_ylim(self.ymin.value,self.ymax.value)
@@ -403,11 +405,15 @@ class Plotter(object):
         if xlabel is not None:
             self.xlabel = xlabel
         elif self._xunit:
-            self.xlabel += " ("+u.Unit(self._xunit).to_string()+")"
+            try:
+                self.xlabel += \
+                    " ("+"{0} ({1})".format(xlabel_table[self._xunit.physical_type.title()], self._xunit.to_string())+")"
+            except KeyError:
+                self.xlabel += \
+                    " ("+"{0} ({1})".format(self._xunit.physical_type.title(), self._xunit.to_string())+")"
             if verbose_label:
-                self.xlabel = "%s %s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
-                        # self.Spectrum.xarr.frame.title(),
-                        self.xlabel )
+                self.xlabel = "%s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
+                                          self.xlabel )
             
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
@@ -549,7 +555,7 @@ class Plotter(object):
         >>> import pyspeckit
         >>> sp = pyspeckit.Spectrum(
                 xarr=pyspeckit.units.SpectroscopicAxis(np.linspace(-50,50,101),
-                    units='km/s', refX=6562.8, refX_units='angstroms'),
+                    unit='km/s', refX=6562.8, refX_unit='angstroms'),
                 data=np.random.randn(101), error=np.ones(101))
         >>> sp.plotter()
         >>> sp.plotter.line_ids(['H$\\alpha$'],[6562.8],xval_units='angstroms')
@@ -594,7 +600,7 @@ class Plotter(object):
         >>> import pyspeckit
         >>> sp = pyspeckit.Spectrum(
                 xarr=pyspeckit.units.SpectroscopicAxis(np.linspace(-50,50,101),
-                    units='km/s', refX=6562.8, refX_units='angstroms'),
+                    units='km/s', refX=6562.8, refX_unit='angstroms'),
                 data=np.random.randn(101), error=np.ones(101))
         >>> sp.plotter()
         >>> sp.specfit(multifit=None, fittype='gaussian', guesses=[1,0,1]) # fitting noise....

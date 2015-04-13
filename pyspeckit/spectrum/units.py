@@ -21,6 +21,7 @@ What about for other fields (e.g., wavenumber?)
 import numpy as np
 import warnings
 from astropy import units as u
+from astropy import log
 
 # declare a case-insensitive dict class to return case-insensitive versions of each dictionary...
 # this is just a shortcut so that units can be specified as, e.g., Hz, hz, HZ, hZ, etc.  3 of those 4 are "legitimate".  
@@ -275,7 +276,7 @@ class SpectroscopicAxis(u.Quantity):
     a workaround is being sought but subclassing numpy arrays is harder than I thought
     """
     def __new__(self, xarr, unit='Hz', refX=None, redshift=None,
-                refX_units=None, velocity_convention=None, use128bits=False, 
+                refX_unit=None, velocity_convention=None, use128bits=False, 
                 bad_unit_response='raise', equivalencies=u.spectral(),
                 center_frequency=None, center_frequency_unit=None):
         """
@@ -291,7 +292,7 @@ class SpectroscopicAxis(u.Quantity):
             Spaces will be removed.
         refX : float
             Reference frequency/wavelength
-        refX_units : str | astropy.units.Unit
+        refX_unit : str | astropy.units.Unit
             Units of the reference frequency/wavelength
         center_frequency: float
             The reference frequency for determining a velocity. 
@@ -318,14 +319,14 @@ class SpectroscopicAxis(u.Quantity):
         subarr._unit = self.validate_unit(unit, bad_unit_response)
         subarr.refX = refX
 
-        if refX_units is None:
+        if refX_unit is None:
             if subarr._unit in frequency_dict:
-                refX_units = subarr.unit
+                refX_unit = subarr.unit
             else:
-                refX_units = 'Hz'
-            subarr.refX_units = refX_units
+                refX_unit = 'Hz'
+            subarr.refX_unit = refX_unit
         else:
-            subarr.refX_units = refX_units
+            subarr.refX_unit = refX_unit
         subarr.redshift = redshift
         subarr.wcshead = {}
         subarr.velocity_convention = velocity_convention
@@ -334,8 +335,8 @@ class SpectroscopicAxis(u.Quantity):
             if refX:
                 center_frequency = refX    
         if not center_frequency_unit:
-            if refX_units:
-                center_frequency_unit = refX_units
+            if refX_unit:
+                center_frequency_unit = refX_unit
             else:
                 center_frequency_unit = unit
         if center_frequency:
@@ -351,19 +352,39 @@ class SpectroscopicAxis(u.Quantity):
 
     def __repr__(self):
         if self.shape is ():
-            rep = ("SpectroscopicAxis([%r], unit=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self.__array__(), self.unit, self.refX, self.refX_units, self.frame, self.redshift, self.xtype, self.velocity_convention))
+            rep = ("SpectroscopicAxis([%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
+                (self.__array__(), self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
         else:
-            rep = ("SpectroscopicAxis([%r,...,%r], unit=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self[0], self[-1], self.unit, self.refX, self.refX_units, self.frame, self.redshift, self.xtype, self.velocity_convention))
+            rep = ("SpectroscopicAxis([%r,...,%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
+                (self[0], self[-1], self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
         return rep
 
     def __str__(self):
         selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
                 self.unit,self.umin().value,self.umax().value)
         if self.refX is not None:
-            selfstr += "Reference is %g %s" % (self.refX, self.refX_units)
+            selfstr += "Reference is %g %s" % (self.refX, self.refX_unit)
         return selfstr
+
+    @property
+    def units(self):
+        log.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        return self._unit
+
+    @units.setter
+    def units(self, value):
+        log.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        self.set_unit(value)
+
+    @property
+    def refX_units(self):
+        log.warn("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
+        return self.refX_unit
+
+    @refX_units.setter
+    def refX_units(self, value):
+        log.warn("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
+        self.refX_unit = value
 
     def __array_finalize__(self,obj):
         """
@@ -375,7 +396,7 @@ class SpectroscopicAxis(u.Quantity):
         self.frame = getattr(obj, 'frame', None)
         self.xtype = getattr(obj, 'xtype', None)
         self.refX = getattr(obj, 'refX', None)
-        self.refX_units = getattr(obj, 'refX_units', None)
+        self.refX_unit = getattr(obj, 'refX_unit', None)
         self.velocity_convention = getattr(obj, 'velocity_convention', None)
         self.redshift = getattr(obj, 'redshift', None)
         self.wcshead = getattr(obj, 'wcshead', None)
@@ -428,7 +449,7 @@ class SpectroscopicAxis(u.Quantity):
             unit = u.Unit(unit)
         except ValueError:
             if bad_unit_response == "pixel":
-                unit = "unknown"
+                unit = u.dimensionless_unscaled
             elif bad_unit_response == "raise":
                 raise ValueError('Unit %s not recognized.' % unit)
             else:
@@ -490,9 +511,9 @@ class SpectroscopicAxis(u.Quantity):
         """
         Given a wavelength/frequency/velocity, return the value in the SpectroscopicAxis's units
         e.g.:
-        xarr.units = 'km/s'
+        xarr.unit = 'km/s'
         xarr.refX = 5.0
-        xarr.refX_units = GHz
+        xarr.refX_unit = GHz
         xarr.x_to_coord(5.1,'GHz') == 6000 # km/s
         """
         if not hasattr(xval, 'unit'):
@@ -506,7 +527,7 @@ class SpectroscopicAxis(u.Quantity):
         e.g.:
         xarr.units = 'km/s'
         xarr.refX = 5.0 
-        xarr.refX_units = GHz
+        xarr.refX_unit = GHz
         xarr.coord_to_x(6000,'GHz') == 5.1 # GHz
         """
         return self.as_unit(xunit)
@@ -530,7 +551,7 @@ class SpectroscopicAxis(u.Quantity):
         self.make_dxarr()
 
     def as_unit(self, unit, equivalencies=[], velocity_convention=None, refX=None,
-                refX_units=None, center_frequency=None, center_frequency_unit=None,
+                refX_unit=None, center_frequency=None, center_frequency_unit=None,
                 **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
@@ -562,16 +583,16 @@ class SpectroscopicAxis(u.Quantity):
             equivalencies = kwargs.get('equivalencies', self.equivalencies)
         if not refX:
             refX = self.refX
-        if not refX_units:
-            refX_units = self.refX_units
+        if not refX_unit:
+            refX_unit = self.refX_unit
         if not center_frequency:
             if self.center_frequency:
                 center_frequency = self.center_frequency
             elif refX:
                 center_frequency = refX
         if not center_frequency_unit:
-            if refX_units:
-                center_frequency_unit = refX_units
+            if refX_unit:
+                center_frequency_unit = refX_unit
         try:
             if not hasattr(center_frequency, 'unit'):
                 center_frequency = u.Quantity(center_frequency, center_frequency_unit)
@@ -700,13 +721,12 @@ def merge_equivalencies(old_equivalencies, new_equivalencies):
     seen = {}
     result = []
     total_equivalencies = old_equivalencies+new_equivalencies
-    # print("len of total:", len(total_equivalencies))
+
     for equivalency in total_equivalencies:
         equivalency_id = equivalency[0].to_string()+equivalency[1].to_string()
         if equivalency_id in seen: continue
         seen[equivalency_id] = 1
         result.append(equivalency)
-    # print("# of final equivalencies:", len(result))
     return result
 
 
@@ -751,10 +771,10 @@ class SpectroscopicAxes(SpectroscopicAxis):
         refXs_diff = np.sum([axislist[0].refX != ax.refX for ax in axislist])
         if refXs_diff > 0:
             subarr.refX = None
-            subarr.refX_units = None
+            subarr.refX_unit = None
         else:
             subarr.refX = axislist[0].refX
-            subarr.refX_units = axislist[0].refX_units
+            subarr.refX_unit = axislist[0].refX_unit
 
         return subarr
 
@@ -799,10 +819,10 @@ class EchelleAxes(SpectroscopicAxis):
         refXs_diff = np.sum([axislist[0].refX != ax.refX for ax in axislist])
         if refXs_diff > 0:
             subarr.refX = None
-            subarr.refX_units = None
+            subarr.refX_unit = None
         else:
             subarr.refX = axislist[0].refX
-            subarr.refX_units = axislist[0].refX_units
+            subarr.refX_unit = axislist[0].refX_unit
 
         return subarr
 
