@@ -555,10 +555,10 @@ class Plotter(object):
         >>> import pyspeckit
         >>> sp = pyspeckit.Spectrum(
                 xarr=pyspeckit.units.SpectroscopicAxis(np.linspace(-50,50,101),
-                    unit='km/s', refX=6562.8, refX_unit='angstroms'),
+                    unit='km/s', refX=6562.8, refX_unit='angstrom'),
                 data=np.random.randn(101), error=np.ones(101))
         >>> sp.plotter()
-        >>> sp.plotter.line_ids(['H$\\alpha$'],[6562.8],xval_units='angstroms')
+        >>> sp.plotter.line_ids(['H$\\alpha$'],[6562.8],xval_units='angstrom')
         """
         import lineid_plot
 
