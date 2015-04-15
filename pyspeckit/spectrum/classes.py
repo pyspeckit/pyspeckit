@@ -296,11 +296,11 @@ class Spectrum(object):
         if xtype in units.xtype_dict.values():
             self.xarr.xtype = xtype
             unit = Table.columns[xtype].unit
-            self.xarr.set_unit(u.Unit(unit))
+            self.xarr.set_unit(unit)
         elif xtype in units.xtype_dict:
             self.xarr.xtype = units.xtype_dict[xtype]
             unit = Table.columns[xtype].unit
-            self.xarr.set_unit(u.Unit(unit))
+            self.xarr.set_unit(unit)
         else:
             warn( "Warning: Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels unless you set them manually (e.g., sp.xarr.unit='angstroms')")
             self.xarr.xtype = 'pixels'
