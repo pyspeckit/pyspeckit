@@ -4,7 +4,9 @@ CHANGES
 Release 0.1.16
 ~~~~~~~~~~~~~~
 
-    * None yet
+    * Major refactor: use astropy's Quantity and units to replace pyspeckit's
+      minimalist unit framework.  You may see deprecation warnings as a result!
+      (https://github.com/pyspeckit/pyspeckit/pull/26)
 
 Release 0.1.15 (2014-11-09)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
