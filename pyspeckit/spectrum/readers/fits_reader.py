@@ -136,7 +136,8 @@ will run into errors.""")
         # http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node84.html
         # F(n) = RESTFREQ + CRVALi + ( n - CRPIXi ) * CDELTi
         if verbose: print("Loading a CLASS .fits spectrum")
-        dv = -1*hdr.get('CDELT1')
+        # there is no reason to assume CDELT is wrong dv = -1*hdr.get('CDELT1')
+        dv = hdr.get('CDELT1')
         if hdr.get('RESTFREQ'):
             v0 = hdr.get('RESTFREQ') + hdr.get('CRVAL1')
         elif hdr.get('RESTF'):
