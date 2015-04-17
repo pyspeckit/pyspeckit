@@ -338,14 +338,17 @@ class SpectroscopicAxis(u.Quantity):
         subarr._unit = validate_unit(unit, bad_unit_response)
         subarr.refX = refX
 
+        if hasattr(refX, 'unit'):
+            if refX_unit != refX.unit:
+                raise ValueError("If refX is a Quantity then refX_unit must be None or the same as refX.unit")
+            refX_unit = refX.unit 
         if refX_unit is None:
             if subarr._unit in frequency_dict:
                 refX_unit = subarr.unit
             else:
                 refX_unit = 'Hz'
-            subarr.refX_unit = refX_unit
-        else:
-            subarr.refX_unit = refX_unit
+        subarr.refX_unit = refX_unit
+
         subarr.redshift = redshift
         subarr.wcshead = {}
         subarr.velocity_convention = velocity_convention
