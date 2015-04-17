@@ -11,6 +11,7 @@ import history
 import re
 import itertools
 from astropy import log
+from astropy import units as u
 
 class Registry(object):
     """
@@ -407,7 +408,7 @@ class Specfit(interactive.Interactive):
             if verbose:
                 print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
             self.EQW_plots.append(self.Spectrum.plotter.axis.fill_between(
-                [midpt-eqw/2.0,midpt+eqw/2.0], [0,0],
+                [midpt.value-eqw/2.0,midpt.value+eqw/2.0], [0,0],
                 [midpt_level,midpt_level], color=plotcolor, alpha=alpha,
                 label='EQW: %0.3g' % eqw))
             if annotate:
@@ -580,7 +581,6 @@ class Specfit(interactive.Interactive):
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
         self.model = model * scalefactor
-
         self.parinfo = self.fitter.parinfo
 
         self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]+np.sum(self.parinfo.fixed)
@@ -1067,20 +1067,19 @@ class Specfit(interactive.Interactive):
                                                    color=color, **kwargs)
         if zeroline or (zeroline is None and yoffset != 0):
             self.residualplot += self.residualaxis.plot(self.Spectrum.xarr,
-                                                        (np.zeros_like(self.Spectrum.xarr)
-                                                         + yoffset),
+                                                        (np.zeros_like(self.Spectrum.xarr.value)+yoffset),
                                                         linestyle='--',
                                                         color='k',
                                                         alpha=0.5)
         if set_limits:
             if ((self.Spectrum.plotter.xmin is not None) and
                 (self.Spectrum.plotter.xmax is not None)):
-                self.residualaxis.set_xlim(self.Spectrum.plotter.xmin,
-                                           self.Spectrum.plotter.xmax)
+                self.residualaxis.set_xlim(self.Spectrum.plotter.xmin.value,
+                                           self.Spectrum.plotter.xmax.value)
             if ((self.Spectrum.plotter.ymin is not None) and
                 (self.Spectrum.plotter.ymax is not None)):
-                self.residualaxis.set_ylim(self.Spectrum.plotter.ymin,
-                                           self.Spectrum.plotter.ymax)
+                self.residualaxis.set_ylim(self.Spectrum.plotter.ymin.value,
+                                           self.Spectrum.plotter.ymax.value)
         if label:
             self.residualaxis.set_xlabel(self.Spectrum.plotter.xlabel)
             self.residualaxis.set_ylabel(self.Spectrum.plotter.ylabel)
@@ -1108,10 +1107,15 @@ class Specfit(interactive.Interactive):
             raise Exception("Fitter %s has no annotations." % self.fitter)
 
         #xtypename = units.unit_type_dict[self.Spectrum.xarr.xtype]
-        xcharconv = units.SmartCaseNoSpaceDict({'frequency':'\\nu',
-                                                'wavelength':'\\lambda',
-                                                'velocity':'v', 'pixels':'x'})
-        xchar = xcharconv[self.Spectrum.xarr.xtype]
+        xcharconv = units.SmartCaseNoSpaceDict({u.Hz.physical_type:'\\nu',
+                                                u.m.physical_type:'\\lambda',
+                                                (u.km/u.s).physical_type:'v', 'pixels':'x'})
+        try:
+            xchar = xcharconv[self.Spectrum.xarr.unit.physical_type]
+        except AttributeError:
+            unit_key = self.Spectrum.xarr.unit
+            xchar = xcharconv[u.Unit(unit_key).physical_type]
+            
         self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for
                                    L in self._annotation_labels]
 
@@ -1764,9 +1768,12 @@ class Specfit(interactive.Interactive):
         
         if interpolate_factor > 1:
             newxarr = units.SpectroscopicAxis(
-                    np.arange(xarr.min()-cd,xarr.max()+cd,cd / float(interpolate_factor)))
+                    np.arange(xarr.min().value-cd,xarr.max().value+cd,cd / float(interpolate_factor)),
+                    unit=xarr.unit,
+                    equivalencies=xarr.equivalencies
+                    )
             # load the metadata from xarr
-            newxarr._update_from(xarr)
+            # newxarr._update_from(xarr)
             data = np.interp(newxarr,xarr,data[line_region])
             xarr = newxarr
         else:

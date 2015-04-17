@@ -105,8 +105,8 @@ class Cube(spectrum.Spectrum):
                 log.debug("Self.unit: {0}".format(self.unit))
                 if xarr is None:
                     xarr = SpectroscopicAxis(cube.spectral_axis,
-                                             unit=cube.spectral_axis.unit.to_string(), #TODO: accept astropy unit
-                                             refX=cube.wcs.wcs.restfrq, refX_units='Hz')
+                                             unit=cube.spectral_axis.unit,
+                                             refX=cube.wcs.wcs.restfrq, refX_unit='Hz')
                 if header is None:
                     header = cube.header
             elif hasattr(cube, 'unit'):

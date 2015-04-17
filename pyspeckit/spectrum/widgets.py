@@ -228,9 +228,12 @@ class FitterSliders(Widget):
                 vmax = max([value/4.0,value*4.0])
             else:
                 vmax = 1
-
-            self.sliders[name] = ModifiableSlider(ax, 
-                name, vmin, vmax, valinit=value)
+            try:
+                self.sliders[name] = ModifiableSlider(ax, 
+                    name, vmin, vmax, valinit=value)
+            except ValueError:
+                self.sliders[name] = ModifiableSlider(ax, 
+                    name, vmin.value, vmax.value, valinit=value)
 
             self.sliders[-1].on_changed(update)
 

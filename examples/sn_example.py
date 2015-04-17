@@ -3,11 +3,17 @@ Example demonstrating how to fit a complex H-alpha profile after subtracting off
 (in this case, He I 6678.151704)
 """
 import pyspeckit
+from astropy import units as u
 
 sp = pyspeckit.OpticalSpectrum('sn2009ip_halpha.fits')
 
 # start by plotting a small region around the H-alpha line
-sp.plotter(xmin=6100,xmax=7000,ymax=2.23,ymin=0)
+# xmin=u.Quantity(6100, sp.xarr.unit)
+# xmax=u.Quantity(7000, sp.xarr.unit)
+# ymin=u.Quantity(0, sp.unit)
+# ymax=u.Quantity(2.23, sp.unit)
+sp.plotter(xmin=6100*u.AA, xmax=7000*u.AA, ymax=2.23*u.dimensionless_unscaled, ymin=0*u.dimensionless_unscaled)
+# sp.plotter(xmin=xmin,xmax=xmax,ymax=ymax,ymin=ymin)
 
 # the baseline (continuum) fit will be 2nd order, and excludes "bad"
 # parts of the spectrum

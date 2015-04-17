@@ -20,6 +20,7 @@ import matplotlib.cbook as mpcb
 import copy
 import model
 from astropy import log
+import astropy.units as u
 from . import mpfit_messages
 
 from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
@@ -226,11 +227,11 @@ def ammonia(xarr, tkin=20, tex=None, ntot=1e14, width=1, xoff_v=0.0,
         tauprof = np.zeros(len(xarr))
         for kk,nuo in enumerate(nuoff):
             tauprof += (tau_dict[linename] * tau_wts[kk] *
-                    np.exp(-(xarr+nuo-lines[kk])**2 / (2.0*nuwidth[kk]**2)) *
+                    np.exp(-(xarr.value+nuo-lines[kk])**2 / (2.0*nuwidth[kk]**2)) *
                     fillingfraction)
             components.append( tauprof )
   
-        T0 = (h*xarr*1e9/kb) # "temperature" of wavelength
+        T0 = (h*xarr.value*1e9/kb) # "temperature" of wavelength
         if tau is not None and thin:
             #runspec = tauprof+runspec
             # is there ever a case where you want to ignore the optical depth function? I think no

@@ -1,7 +1,7 @@
 import pyspeckit
 
 # Read in J000002.09+155254.1 spectrum, a nice emission-line galaxy
-sp = pyspeckit.Spectrum('../pyspeckit/tests/SIIdoublet.fits')
+sp = pyspeckit.Spectrum('SIIdoublet.fits')
 
 # Read in rest wavelengths of SII lines.  If you didn't know the names already, 
 # you could do sp.speclines.optical.lines.keys() to see what is available.

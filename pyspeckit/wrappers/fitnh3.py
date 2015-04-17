@@ -215,7 +215,7 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
             spdict[linename] = sp.copy()
             spdict[linename].xarr.convert_to_unit('GHz')
             spdict[linename].xarr.refX = freq
-            spdict[linename].xarr.refX_units = 'Hz'
+            spdict[linename].xarr.refX_unit = 'Hz'
             #spdict[linename].baseline = copy.copy(sp.baseline)
             #spdict[linename].baseline.Spectrum = spdict[linename]
             #spdict[linename].specfit = copy.copy(sp.specfit)

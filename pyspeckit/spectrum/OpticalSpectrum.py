@@ -29,10 +29,10 @@ class OpticalSpectrum(classes.Spectrum):
     def _get_reddening(self,ebv=None,a_v=None,r_v=3.1,model='ccm89'):
 
         if model in ('ccm89','gcc09'):
-            dered = reddening.ccm_reddening(self.xarr.as_unit('angstroms'),
+            dered = reddening.ccm_reddening(self.xarr.as_unit('angstrom'),
                     ebv=ebv, a_v=a_v, r_v=r_v, model=model)
         elif model in ('f99','fm07'):
-            dered = reddening.fm_reddening(self.xarr.as_unit('angstroms'),
+            dered = reddening.fm_reddening(self.xarr.as_unit('angstrom'),
                     ebv=ebv, a_v=a_v, r_v=r_v, model=model)
 
         return dered

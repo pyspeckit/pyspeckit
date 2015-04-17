@@ -10,7 +10,6 @@ import pyspeckit
 import optparse
 import os
 import re
-import IPython
 
 if __name__ == "__main__":
 

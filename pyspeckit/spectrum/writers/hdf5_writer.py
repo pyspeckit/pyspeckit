@@ -36,8 +36,7 @@ class write_hdf5(Writer):
             error = f.create_dataset('error', data = self.Spectrum.error)
             
             # Add metadata to each dataset?
-            xarr.attrs.create('units', self.Spectrum.xarr.units)
-            xarr.attrs.create('type', self.Spectrum.xarr.xtype)
+            xarr.attrs.create('unit', str(self.Spectrum.xarr.unit.to_string()))
             data.attrs.create('units', self.Spectrum.units)
             data.attrs.create('type', self.Spectrum.ytype)
             

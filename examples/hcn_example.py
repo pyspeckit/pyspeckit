@@ -1,17 +1,18 @@
 import pyspeckit
 import pylab as pl
+import astropy.units as u
 
 # Load the spectrum & properly identify the units
 # The data is from http://adsabs.harvard.edu/abs/1999A%26A...348..600P
-sp = pyspeckit.Spectrum('02232+6138.txt')
-sp.xarr.units='km/s'
-sp.xarr.refX = 88.63184666e9
+sp = pyspeckit.Spectrum('02232_plus_6138.txt')
+sp.xarr.set_unit(u.km/u.s)
+sp.xarr.refX = 88.63184666e9 * u.Hz
+sp.xarr.velocity_convention = 'radio'
 sp.xarr.xtype='velocity'
 sp.units='$T_A^*$'
 
 # set the error array based on a signal-free part of the spectrum
 sp.error[:] = sp.stats((-35,-25))['std']
-
 # Register the fitter
 # The HCN fitter is 'built-in' but is not registered by default; this example
 # shows how to register a fitting procedure
@@ -26,13 +27,11 @@ sp.Registry.add_fitter('hcn_fixedhf',pyspeckit.models.hcn.hcn_amp,3)
 
 # Plot the results
 sp.plotter()
-
 # Run the fixed-ampltiude fitter and show the individual fit components
 sp.specfit(fittype='hcn_fixedhf',
            multifit=None,
            guesses=[1,-48,0.6],
            show_hyperfine_components=True)
-
 # Now plot the residuals offset below the original
 sp.specfit.plotresiduals(axis=sp.plotter.axis,clear=False,yoffset=-1,color='g',label=False)
 sp.plotter.reset_limits(ymin=-2)

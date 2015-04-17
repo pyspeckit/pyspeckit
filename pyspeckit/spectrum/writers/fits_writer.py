@@ -41,7 +41,16 @@ class write_fits(Writer):
         if self.Spectrum.xarr._make_header(tolerance=tolerance):
             for k,v in self.Spectrum.xarr.wcshead.iteritems():
                 if v is not None:
-                    header[k] = v
+                    try:
+                        header[k] = v
+                    except ValueError:
+                        try:
+                            #v is a Quantity
+                            header[k] = v.value
+                        except AttributeError:
+                            #v is a Unit
+                            header[k] = v.to_string()
+
             if write_error:
                 data = np.array( [self.Spectrum.data, self.Spectrum.error] )
             else:
