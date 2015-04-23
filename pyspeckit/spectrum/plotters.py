@@ -13,6 +13,7 @@ from ..config import *
 import numpy as np
 import astropy.units as u
 from pyspeckit.specwarnings import warn
+from pyspeckit.spectrum.units import validate_unit
 import copy
 import widgets
 import inspect
@@ -360,20 +361,21 @@ class Plotter(object):
                     yminval = np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
                 # Increase the range fractionally.  This means dividing a positive #, multiplying a negative #
                 if yminval < 0:
-                    self.ymin = float(yminval)*float(ypeakscale)
+                    self.ymin = u.Quantity(float(yminval)*float(ypeakscale), validate_unit(self.Spectrum.unit))
                 else:
-                    self.ymin = float(yminval)/float(ypeakscale)
+                    self.ymin = u.Quantity(float(yminval)/float(ypeakscale), validate_unit(self.Spectrum.unit))
 
             if ymax is not None: self.ymax = ymax
             elif self.ymax is None:
+                print type(self.ymin)
                 if hasattr(self.Spectrum.data, 'mask'):
                     ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin.value)
                 else:
                     ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin.value)
                 if ymaxval > 0:
-                    self.ymax = float(ymaxval) * float(ypeakscale) + self.ymin.value
+                    self.ymax = u.Quantity(float(ymaxval)*float(ypeakscale)+self.ymin.value, validate_unit(self.Spectrum.unit))
                 else:
-                    self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin.value
+                    self.ymax = u.Quantity(float(ymaxval)/float(ypeakscale)+self.ymin.value, validate_unit(self.Spectrum.unit))
 
             self.ymin += u.Quantity(self.offset, self.ymin.unit)
             self.ymax += u.Quantity(self.offset, self.ymax.unit)

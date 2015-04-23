@@ -264,6 +264,25 @@ def generate_xarr(input_array, unit=None):
     else:
         raise TypeError("Unrecognized input type")
 
+def validate_unit(unit, bad_unit_response='raise'):
+    try:
+        if unit is None or unit == 'unknown' or unit == 'undefined':
+            unit = u.dimensionless_unscaled
+        if type(unit) is str:
+            unit = unit.replace('angstroms', 'angstrom')
+            unit = unit.replace('ergs', 'erg')    
+        # if unit == 'angstroms': unit = 'angstrom'
+        unit = u.Unit(unit)
+    except ValueError:
+        if bad_unit_response == "pixel":
+            unit = u.dimensionless_unscaled
+        elif bad_unit_response == "raise":
+            raise ValueError('Unit %s not recognized.' % unit)
+        else:
+            raise ValueError('Unit %s not recognized. Invalid bad_unit_response, valid options: [%s/%s]' 
+                            % (unit, "raise", "pixel"))
+    return unit
+
 class SpectroscopicAxis(u.Quantity):
     """
     A Spectroscopic Axis object to store the current units of the spectrum and
@@ -316,7 +335,7 @@ class SpectroscopicAxis(u.Quantity):
         subarr = np.array(xarr,dtype=dtype)
         subarr = subarr.view(self)
 
-        subarr._unit = self.validate_unit(unit, bad_unit_response)
+        subarr._unit = validate_unit(unit, bad_unit_response)
         subarr.refX = refX
 
         if refX_unit is None:
@@ -440,25 +459,8 @@ class SpectroscopicAxis(u.Quantity):
         except InconsistentTypeError:
             self.xtype = unit_type_dict[self.unit]
 
-    @classmethod
-    def validate_unit(self, unit, bad_unit_response='raise'):
-        try:
-            if unit is None or unit == 'unknown':
-                unit = u.dimensionless_unscaled
-            if unit == 'angstroms': unit = 'angstrom'
-            unit = u.Unit(unit)
-        except ValueError:
-            if bad_unit_response == "pixel":
-                unit = u.dimensionless_unscaled
-            elif bad_unit_response == "raise":
-                raise ValueError('Unit %s not recognized.' % unit)
-            else:
-                raise ValueError('Unit %s not recognized. Invalid bad_unit_response, valid options: [%s/%s]' 
-                                % (unit, "raise", "pixel"))
-        return unit
-
     def set_unit(self, unit, bad_unit_response='raise'):
-        self._unit = self.validate_unit(unit, bad_unit_response)
+        self._unit = validate_unit(unit, bad_unit_response)
 
     def umax(self, unit=None):
         """
@@ -538,7 +540,7 @@ class SpectroscopicAxis(u.Quantity):
         Uses as_unit for the conversion, but changes internal values rather
         than returning them.
         """
-        unit = self.validate_unit(unit)
+        unit = validate_unit(unit)
 
         try:
             self.flags.writeable=True
