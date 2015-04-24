@@ -9,7 +9,7 @@ sp.xarr.set_unit(u.km/u.s)
 sp.xarr.refX = 88.63184666e9 * u.Hz
 sp.xarr.velocity_convention = 'radio'
 sp.xarr.xtype='velocity'
-sp.units='$T_A^*$'
+sp.unit='$T_A^*$'
 
 # set the error array based on a signal-free part of the spectrum
 sp.error[:] = sp.stats((-35,-25))['std']
