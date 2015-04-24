@@ -348,9 +348,9 @@ class SpectroscopicAxis(u.Quantity):
             if not refX_unit:
                 if subarr._unit in frequency_dict:
                     refX_unit = subarr.unit
-                else:
-                    raise ValueError("refX must be either an astropy.units.Quantity"+
-                                     " or a float with a respective refX_unit.")
+                # else:
+                    # raise ValueError("refX must be either an astropy.units.Quantity"+
+                                     # " or a float with a respective refX_unit.")
             subarr.refX = u.Quantity(refX, refX_unit)
             subarr.refX_unit = refX_unit
         else:
