@@ -271,6 +271,7 @@ def validate_unit(unit, bad_unit_response='raise'):
         if type(unit) is str:
             unit = unit.replace('angstroms', 'angstrom')
             unit = unit.replace('ergs', 'erg')    
+            unit = unit.replace('Counts', 'count')
         unit = u.Unit(unit)
     except ValueError:
         if bad_unit_response == "pixel":
@@ -336,8 +337,6 @@ class SpectroscopicAxis(u.Quantity):
 
         subarr._unit = validate_unit(unit, bad_unit_response)
 
-        print 'refX:', refX
-        print 'refX_unit:', refX_unit
         if hasattr(refX, 'unit'):
             if refX_unit and refX_unit != refX.unit:
                 raise ValueError("If refX is a Quantity then refX_unit must be"+
