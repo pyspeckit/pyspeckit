@@ -340,7 +340,8 @@ class SpectroscopicAxis(u.Quantity):
         print 'refX_unit:', refX_unit
         if hasattr(refX, 'unit'):
             if refX_unit and refX_unit != refX.unit:
-                raise ValueError("If refX is a Quantity then refX_unit must be None or the same as refX.unit.")
+                raise ValueError("If refX is a Quantity then refX_unit must be"+
+                                 " None or the same as refX.unit.")
             subarr.refX = refX
             refX_unit = refX.unit 
         if refX:
@@ -348,12 +349,14 @@ class SpectroscopicAxis(u.Quantity):
                 if subarr._unit in frequency_dict:
                     refX_unit = subarr.unit
                 else:
-                    raise ValueError("refX must be either an astropy.units.Quantity or a float with a respective refX_unit.")
+                    raise ValueError("refX must be either an astropy.units.Quantity"+
+                                     " or a float with a respective refX_unit.")
             subarr.refX = u.Quantity(refX, refX_unit)
             subarr.refX_unit = refX_unit
         else:
             if refX_unit:
-                raise ValueError("If you specify the refX_unit then you must specify the refX too.")
+                raise ValueError("If you specify the refX_unit then you must "+
+                                    "specify the refX too.")
 
         subarr.redshift = redshift
         subarr.wcshead = {}
