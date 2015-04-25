@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     sp = pyspeckit.readers.read_class.class_to_spectra('example_h2co_mm_spectrum.apex',apex=True)
     sp.data *= 1/0.75 # T_A* -> T_MB
-    sp.units = "$T_{MB}$"
+    sp.unit = "$T_{MB}$"
     # estimate the error from the data
     sp.error[:] = sp.stats((2.183e2,2.184e2))['std']
 

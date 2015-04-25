@@ -44,17 +44,17 @@ cube11 = pyspeckit.Cube('hotclump_11.cube_r0.5_rerun.image.fits', maskmap=mask)
 cube11.cube *= (13.6 * (300.0 /
     (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2 *
     1./cube11.header.get('BMAJ')/3600. * 1./cube11.header.get('BMIN')/3600. )
-cube11.units = "K"
+cube11.unit = "K"
 cube22 = pyspeckit.Cube('hotclump_22.cube_r0.5_contsub.image.fits', maskmap=mask)
 cube22.cube *= (13.6 * (300.0 /
         (pyspeckit.spectrum.models.ammonia.freq_dict['twotwo']/1e9))**2 *
         1./cube22.header.get('BMAJ')/3600. * 1./cube22.header.get('BMIN')/3600. )
-cube22.units = "K"
+cube22.unit = "K"
 cube44 = pyspeckit.Cube('hotclump_44.cube_r0.5_contsub.image.fits', maskmap=mask)
 cube44.cube *= (13.6 * (300.0 /
         (pyspeckit.spectrum.models.ammonia.freq_dict['fourfour']/1e9))**2 *
         1./cube44.header.get('BMAJ')/3600. * 1./cube44.header.get('BMIN')/3600. )
-cube44.units = "K"
+cube44.unit = "K"
 
 # Compute an error map.  We use the 1-1 errors for all 3 because they're
 # essentially the same, but you could use a different error map for each
@@ -73,7 +73,7 @@ errmap11[errmap11 != errmap11] = convolve_fft(errmap11,
 # Stack the cubes into one big cube.  The X-axis is no longer linear: there
 # will be jumps from 1-1 to 2-2 to 4-4.  
 cubes = pyspeckit.CubeStack([cube11,cube22,cube44], maskmap=mask)
-cubes.units = "K"
+cubes.unit = "K"
 
 # Make a "moment map" to contain the initial guesses
 # If you've already fit the cube, just re-load the saved version
