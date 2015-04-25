@@ -152,8 +152,6 @@ class Spectrum(object):
             # all 10 attributes required.
             if issubclass(type(xarr),units.SpectroscopicAxis):
                 self.xarr = xarr
-            elif u is not None and isinstance(xarr, u.Quantity):
-                self.xarr = units.SpectroscopicAxis.from_quantity(xarr)
             else:
                 self.xarr = units.SpectroscopicAxis(xarr, **xarrkwargs)
             self.data = data

@@ -275,7 +275,7 @@ class SpectroscopicAxis(u.Quantity):
     a SpectroscopicAxis without a dxarr attribute!  This can result in major problems;
     a workaround is being sought but subclassing numpy arrays is harder than I thought
     """
-    def __new__(self, xarr, unit='Hz', refX=None, redshift=None,
+    def __new__(self, xarr, unit=None, refX=None, redshift=None,
                 refX_unit=None, velocity_convention=None, use128bits=False, 
                 bad_unit_response='raise', equivalencies=u.spectral(),
                 center_frequency=None, center_frequency_unit=None):
@@ -313,14 +313,26 @@ class SpectroscopicAxis(u.Quantity):
             dtype='float128'
         else:
             dtype='float64'
-        subarr = np.array(xarr,dtype=dtype)
+
+        # Only need to convert xarr to array if it's not already one (e.g., if
+        # it's a list)
+        if not isinstance(xarr, np.ndarray):
+            subarr = np.array(xarr,dtype=dtype)
+        else:
+            subarr = xarr
         subarr = subarr.view(self)
 
-        subarr._unit = self.validate_unit(unit, bad_unit_response)
+        # Only need to set xarr's unit if it's not a quantity
+        # or if it is unitless
+        if not isinstance(xarr, u.Quantity) or xarr.unit == u.dimensionless_unscaled:
+            subarr._unit = self.validate_unit(unit, bad_unit_response)
+
         subarr.refX = refX
 
         if refX_unit is None:
-            if subarr._unit in frequency_dict:
+            if hasattr(refX, 'unit'):
+                subarr.refX_unit = refX.unit
+            elif subarr._unit in frequency_dict:
                 refX_unit = subarr.unit
             else:
                 refX_unit = 'Hz'

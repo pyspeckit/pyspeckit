@@ -685,11 +685,11 @@ class ammonia_model_background(ammonia_model):
         return [20,10, 1, 1.0, 0.0, 1.0, 2.73]
 
     def __call__(self,*args,**kwargs):
-        if self.multisingle == 'single':
-            return self.onepeakammoniafit(*args,**kwargs)
-        elif self.multisingle == 'multi':
-            # Why is tied 6 instead of 7?
-            return self.multinh3fit(*args,**kwargs)
+        #if self.multisingle == 'single':
+        #    return self.onepeakammoniafit(*args,**kwargs)
+        #elif self.multisingle == 'multi':
+        #    # Why is tied 6 instead of 7?
+        return self.multinh3fit(*args,**kwargs)
 
     def make_parinfo(self, npeaks=1, err=None,
                     params=(20,20,14,1.0,0.0,0.5,2.73), parnames=None,

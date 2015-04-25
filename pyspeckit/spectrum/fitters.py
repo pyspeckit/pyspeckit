@@ -54,8 +54,8 @@ The default is gaussian ('g'), all options are listed below:
         """
         self._make_interactive_help_message()
 
-    def add_fitter(self, name, function, npars,
-        override=False, key=None):
+    def add_fitter(self, name, function, npars, override=False, key=None,
+                   multisingle=None):
         ''' 
         Register a fitter function.
 
@@ -79,8 +79,12 @@ The default is gaussian ('g'), all options are listed below:
         key: char
             Key to select the fitter in interactive mode
         '''
+        if multisingle is not None:
+            warnings.warn("The 'multisingle' keyword is no longer required.",
+                          DeprecationWarning)
+
         if not name in self.peakbgfitters or override:
-                self.peakbgfitters[name] = function
+            self.peakbgfitters[name] = function
 
         if not name in self.multifitters or override:
             self.multifitters[name] = function
