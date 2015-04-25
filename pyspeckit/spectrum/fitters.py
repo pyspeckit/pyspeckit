@@ -1536,6 +1536,8 @@ class Specfit(interactive.Interactive):
         .. todo:: Add a button in the navbar that makes this window pop up
         http://stackoverflow.com/questions/4740988/add-new-navigate-modes-in-matplotlib
         """
+        log.warn("These are not unit-tested!  Use at your own risk.  Please"+
+                 " report issues, because we almost certainly don't know about them!")
         import widgets
 
         if parlimitdict is None:
