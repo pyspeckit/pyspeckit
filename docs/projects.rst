@@ -13,13 +13,13 @@ This project is at the core of both `pyspeckit` and `specutils
 The most important base functionality of a spectroscopic toolkit
 is to be able to convert between different spectroscopic systems,
 e.g. wavelength<->frequency<->velocity.  This can be achieved
-using `astropy <www.astropy.org>`_'s `unit equivalencies
+using astropy_'s `unit equivalencies
 <https://github.com/astropy/astropy/pull/1176>`_.  
 
 The X-axis unit changes will be straightforward project that should require
 about 2 weeks to complete.  The more complicated and interesting project is
 creating Y-axis units (i.e., flux units) that appropriately adjust with changes
-to the X-axis.  These would make use of other `astropy`_ unit equivalencies,
+to the X-axis.  These would make use of other astropy_ unit equivalencies,
 e.g.  the `spectral density
 <https://github.com/astropy/astropy/blob/master/astropy/units/equivalencies.py#L44>`_
 equivalency.
@@ -41,3 +41,10 @@ Details of this project need to be worked out, but will include:
  * refactoring pyspeckit.models to use astropy.models
  * building a graphical interface to astropy.models
 
+Expand the Unit Test suite
+--------------------------
+
+Pyspeckit is a complicated code suite, which has led to many bugs, particularly
+in the UI.  An improved unit test suite would help prevent or remove these
+bugs.  Such a project would start by breaking down the existing tests, which
+are really end-to-end tests, into their component units.

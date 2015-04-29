@@ -45,7 +45,7 @@ def read_alfalfa_source(savfile, sourcenumber=0):
         header['BUNIT'] = 'K'
 
         xarr = pyspeckit.spectrum.units.SpectroscopicAxis(spectra.velarr,
-                refX=header['RESTFRQ'], refX_units='MHz', unit='km/s')
+                refX=header['RESTFRQ'], refX_unit='MHz', unit='km/s')
 
         data = np.ma.masked_where(np.isnan(spectra.spec), spectra.spec)
 

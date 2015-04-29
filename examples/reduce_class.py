@@ -1,4 +1,3 @@
-import spectrum
 from spectrum.readers.read_class import class_to_obsblocks
 from numpy import *
 import glob
@@ -15,7 +14,7 @@ def fit_source(sp,debug=False,autorefresh=False,refit=False):
     sp.plotter(figure=1,title=sp.header.get('OBJECT'))
     sp.baseline(order=2)
     if debug: import pdb; pdb.set_trace()
-    sp.xarr.frequency_to_velocity(center_frequency=sp.header.get('RESTFREQ'),velocity_units='km/s')
+    sp.xarr.frequency_to_velocity(center_frequency=sp.header.get('RESTFREQ'),velocity_unit='km/s')
     sp.plotter(xmin=-100,xmax=150,figure=1)
     sp.specfit(negamp=False,limitedmin=[True,True,False,True])
     sp.specfit.seterrspec(usestd=True)

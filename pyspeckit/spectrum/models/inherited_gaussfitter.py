@@ -22,7 +22,7 @@ def gaussian(x,A,dx,w, return_components=False, normalized=False,
     Returns a 1-dimensional gaussian of form
     A*numpy.exp(-(x-dx)**2/(2*w**2))
 
-    Area is sqrt(2*pi)*sigma^2*amplitude - i.e., this is NOT a normalized
+    Area is sqrt(2*pi*sigma^2)*amplitude - i.e., this is NOT a normalized
     gaussian, unless normalized=True in which case A = Area
     
     Parameters
@@ -65,7 +65,7 @@ def _integral_modelpars(modelpars=None):
     sigma = modelpars[2]
     return gaussian_integral(amplitude,sigma)
 
-def gaussian_fitter(multisingle='multi'):
+def gaussian_fitter():
     """
     Generator for Gaussian fitter class
     """
@@ -75,7 +75,6 @@ def gaussian_fitter(multisingle='multi'):
             parlimited=[(False,False),(False,False),(True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma'),
-            multisingle=multisingle,
             centroid_par='shift',
             fwhm_func=gaussian_fwhm,
             fwhm_pars=['width'],
@@ -85,7 +84,7 @@ def gaussian_fitter(multisingle='multi'):
     
     return myclass
 
-def gaussian_vheight_fitter(multisingle='multi'):
+def gaussian_vheight_fitter():
     """
     Generator for Gaussian fitter class
     """
@@ -96,7 +95,6 @@ def gaussian_vheight_fitter(multisingle='multi'):
             parlimited=[(False,False),(False,False),(False,False),(True,False)], 
             parlimits=[(0,0),(0,0), (0,0), (0,0)],
             shortvarnames=('B','A',r'\Delta x',r'\sigma'),
-            multisingle=multisingle,
             centroid_par='shift',
             fwhm_func=gaussian_fwhm,
             fwhm_pars=['width'],

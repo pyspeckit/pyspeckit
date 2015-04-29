@@ -21,17 +21,90 @@ import tempfile
 import posang # agpy code
 import pyspeckit
 from astropy import coordinates
+from astropy import log
 from pyspeckit.specwarnings import warn
+from pyspeckit.parallel_map import parallel_map
 try:
     from AG_fft_tools import smooth
-    from pyspeckit.parallel_map import parallel_map
     smoothOK = True
 except ImportError:
     smoothOK = False
+try:
+    from scipy.interpolate import UnivariateSpline
+    scipyOK = True
+except ImportError:
+    scipyOK = False
 
 dtor = pi/180.0
 
-def baseline_cube(cube, polyorder, cubemask=None):
+
+def blfunc_generator(x=None, polyorder=None, splineorder=None,
+                     sampling=1):
+    """
+    Generate a function that will fit a baseline (polynomial or spline) to a
+    data set.  Either ``splineorder`` or ``polyorder`` must be set
+
+    Parameters
+    ----------
+    x : np.ndarray or None
+        The X-axis of the fitted array.  Will be set to
+        ``np.arange(len(data))`` if not specified
+    polyorder : None or int
+        The polynomial order.
+    splineorder : None or int
+    sampling : int
+        The sampling rate to use for the data.  Can set to higher numbers to
+        effectively downsample the data before fitting
+    """
+    def blfunc(args, x=x):
+        yfit,yreal = args
+        if hasattr(yfit,'mask'):
+            mask = True-yfit.mask
+        else:
+            mask = np.isfinite(yfit)
+
+        if x is None:
+            x = np.arange(yfit.size, dtype=yfit.dtype)
+
+        ngood = np.count_nonzero(mask)
+        if polyorder is not None:
+            if ngood < polyorder:
+                return yreal
+            else:
+                endpoint = ngood - (ngood % sampling)
+                y = np.mean([yfit[mask][ii:endpoint:sampling]
+                             for ii in range(sampling)], axis=0)
+                polypars = np.polyfit(x[mask][sampling/2:endpoint:sampling],
+                                      y, polyorder)
+                return yreal-np.polyval(polypars, x).astype(yreal.dtype)
+
+        elif splineorder is not None and scipyOK:
+            if splineorder < 1 or splineorder > 4:
+                raise ValueError("Spline order must be in {1,2,3,4}")
+            elif ngood <= splineorder:
+                return yreal
+            else:
+                log.debug("splinesampling: {0}  "
+                          "splineorder: {1}".format(sampling, splineorder))
+                endpoint = ngood - (ngood % sampling)
+                y = np.mean([yfit[mask][ii:endpoint:sampling]
+                             for ii in range(sampling)], axis=0)
+                if len(y) <= splineorder:
+                    raise ValueError("Sampling is too sparse.  Use finer sampling or "
+                                     "decrease the spline order.")
+                spl = UnivariateSpline(x[mask][sampling/2:endpoint:sampling],
+                                       y,
+                                       k=splineorder,
+                                       s=0)
+                return yreal-spl(x)
+        else:
+            raise ValueError("Must provide polyorder or splineorder")
+
+    return blfunc
+
+
+def baseline_cube(cube, polyorder=None, cubemask=None, splineorder=None,
+                  numcores=None, sampling=1):
     """
     Given a cube, fit a polynomial to each spectrum
 
@@ -44,37 +117,38 @@ def baseline_cube(cube, polyorder, cubemask=None):
     cubemask: boolean ndarray
         Mask to apply to cube.  Values that are True will be ignored when
         fitting.
+    numcores : None or int
+        Number of cores to use for parallelization.  If None, will be set to
+        the number of available cores.
     """
-    x = np.arange(cube.shape[0])
+    x = np.arange(cube.shape[0], dtype=cube.dtype)
     #polyfitfunc = lambda y: np.polyfit(x, y, polyorder)
-    def blfunc(args):
-        yfit,yreal = args
-        if hasattr(yfit,'mask'):
-            mask = True-yfit.mask
-        else:
-            mask = yfit==yfit
-
-        if mask.sum() < polyorder:
-            return x*0
-        else:
-            polypars = np.polyfit(x[mask], yfit[mask], polyorder)
-            return yreal-np.polyval(polypars, x)
+    blfunc = blfunc_generator(x=x,
+                              splineorder=splineorder,
+                              polyorder=polyorder,
+                              sampling=sampling)
 
     reshaped_cube = cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
 
     if cubemask is None:
+        log.debug("No mask defined.")
         fit_cube = reshaped_cube
     else:
         if cubemask.dtype != 'bool':
             raise TypeError("Cube mask *must* be a boolean array.")
+        if cubemask.shape != cube.shape:
+            raise ValueError("Mask shape does not match cube shape")
+        log.debug("Masking cube with shape {0} "
+                  "with mask of shape {1}".format(cube.shape, cubemask.shape))
         masked_cube = cube.copy()
         masked_cube[cubemask] = np.nan
         fit_cube = masked_cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
 
 
-    baselined = np.array(parallel_map(blfunc, zip(fit_cube,reshaped_cube)))
+    baselined = np.array(parallel_map(blfunc, zip(fit_cube,reshaped_cube), numcores=numcores))
     blcube = baselined.T.reshape(cube.shape)
     return blcube
+
 
 
 def flatten_header(header,delete=False):
@@ -110,7 +184,8 @@ def flatten_header(header,delete=False):
 
     return newheader
 
-def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
+def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial',
+                   spectral_axis=3, celestial_axes=[1,2]):
     """
     Turn a cube header into a spectrum header, retaining RA/Dec vals where possible
     (speccen is like flatten; spec-ify would be better but, specify?  nah)
@@ -118,20 +193,26 @@ def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
     Assumes 3rd axis is velocity
     """
     newheader = header.copy()
-    newheader['CRVAL1'] = header.get('CRVAL3')
-    newheader['CRPIX1'] = header.get('CRPIX3')
-    if 'CD1_1' in header: newheader.rename_keyword('CD1_1','OLDCD1_1')
-    elif 'CDELT1' in header: newheader.rename_keyword('CDELT1','OLDCDEL1')
-    if 'CD3_3' in header: newheader['CDELT1'] = header.get('CD3_3')
-    elif 'CDELT3' in header: newheader['CDELT1'] = header.get('CDELT3')
-    newheader['CTYPE1'] = 'VRAD'
-    if header.get('CUNIT3'):
-        newheader['CUNIT1'] = header.get('CUNIT3')
+    new_spectral_axis = 1
+    newheader['CRVAL{0}'.format(new_spectral_axis)] = header.get('CRVAL{0}'.format(spectral_axis))
+    newheader['CRPIX{0}'.format(new_spectral_axis)] = header.get('CRPIX{0}'.format(spectral_axis))
+    if 'CD{0}_{0}'.format(new_spectral_axis) in header:
+        newheader.rename_keyword('CD{0}_{0}'.format(new_spectral_axis),
+                                 'OLDCD{0}_{0}'.format(new_spectral_axis))
+    elif 'CDELT{0}'.format(new_spectral_axis) in header:
+        newheader.rename_keyword('CDELT{0}'.format(new_spectral_axis),'OLDCDEL{0}'.format(new_spectral_axis))
+    if 'CD{0}_{0}'.format(spectral_axis) in header:
+        newheader['CDELT{0}'.format(new_spectral_axis)] = header.get('CD{0}_{0}'.format(spectral_axis))
+    elif 'CDELT{0}'.format(spectral_axis) in header:
+        newheader['CDELT{0}'.format(new_spectral_axis)] = header.get('CDELT{0}'.format(spectral_axis))
+    newheader['CTYPE{0}'.format(new_spectral_axis)] = 'VRAD'
+    if header.get('CUNIT{0}'.format(spectral_axis)):
+        newheader['CUNIT{0}'.format(new_spectral_axis)] = header.get('CUNIT{0}'.format(spectral_axis))
     else: 
         print "Assuming CUNIT3 is km/s in speccen_header"
-        newheader['CUNIT1'] = 'km/s'
+        newheader['CUNIT{0}'.format(new_spectral_axis)] = 'km/s'
     newheader['CRPIX2'] = 1
-    newheader['CRPIX3'] = 1
+    newheader['CRPIX{0}'.format(spectral_axis)] = 1
     if system == 'celestial':
         c2 = 'RA---'
         c3 = 'DEC--'
@@ -139,17 +220,18 @@ def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial'):
         c2 = 'GLON-'
         c3 = 'GLAT-'
     newheader['CTYPE2'] = c2+proj
-    newheader['CTYPE3'] = c3+proj
+    newheader['CTYPE{0}'.format(spectral_axis)] = c3+proj
 
     if lon is not None:
         newheader['CRVAL2'] = lon
     if lat is not None:
-        newheader['CRVAL3'] = lat
+        newheader['CRVAL{0}'.format(spectral_axis)] = lat
 
     if 'CD2_2' in header:
         newheader.rename_keyword('CD2_2','OLDCD2_2')
-    if 'CD3_3' in header:
-        newheader.rename_keyword('CD3_3','OLDCD3_3')
+    if 'CD{0}_{0}'.format(spectral_axis) in header:
+        newheader.rename_keyword('CD{0}_{0}'.format(spectral_axis),
+                                 'OLDCD{0}_{0}'.format(spectral_axis))
     if 'CROTA2' in header:
         newheader.rename_keyword('CROTA2','OLDCROT2')
 
@@ -308,16 +390,20 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
     if header is None:
         return subim
     else:
-        crv1,crv2 = wcs.wcs_pix2world(xlo,ylo,0)
+        # Cannot set crval2 != 0 for Galactic coordinates: therefore, probably
+        # wrong approach in general
+        #crv1,crv2 = wcs.wcs_pix2world(xlo,ylo,0)
 
-        try:
-            flathead['CRVAL1'] = crv1[0]
-            flathead['CRVAL2'] = crv2[0]
-        except IndexError:
-            flathead['CRVAL1'] = crv1.item() # np 0-d arrays are not scalar
-            flathead['CRVAL2'] = crv2.item() # np 0-d arrays are not scalar
-        flathead['CRPIX1'] = 1
-        flathead['CRPIX2'] = 1
+        #try:
+        #    flathead['CRVAL1'] = crv1[0]
+        #    flathead['CRVAL2'] = crv2[0]
+        #except IndexError:
+        #    flathead['CRVAL1'] = crv1.item() # np 0-d arrays are not scalar
+        #    flathead['CRVAL2'] = crv2.item() # np 0-d arrays are not scalar
+
+        # xlo, ylo have been forced to integers already above
+        flathead['CRPIX1'] = flathead['CRPIX1'] + xlo
+        flathead['CRPIX2'] = flathead['CRPIX2'] + ylo
         
         if return_HDU:
             return fits.PrimaryHDU(data=subim,header=flathead)
@@ -416,9 +502,9 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
         raise Exception("WCS header has no CTYPE.")
 
     if coordsys.lower() == 'galactic':
-        pos = coordinates.Galactic(ap[0],ap[1],unit=('deg','deg'))
+        pos = coordinates.SkyCoord(ap[0],ap[1],unit=('deg','deg'), frame='galactic')
     elif coordsys.lower() in ('radec','fk5','icrs','celestial'):
-        pos = coordinates.ICRS(ap[0],ap[1],unit=('deg','deg'))
+        pos = coordinates.SkyCoord(ap[0],ap[1],unit=('deg','deg'), frame='fk5')
 
     if wcs.wcs.ctype[0][:2] == 'RA':
         ra,dec = pos.icrs.ra.deg,pos.icrs.dec.deg
@@ -738,9 +824,6 @@ try:
         #print "\n",outname
         #os.system('imhead %s | grep CDELT' % outname)
 
-        #print "\nnewheader2"
-        #print newheader2.ascard
-        #print
         
         return
 

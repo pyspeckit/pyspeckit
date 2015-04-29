@@ -80,17 +80,17 @@ if __name__ == "__main__":
 
     sp = pyspeckit.readers.read_class.class_to_spectra('example_h2co_mm_spectrum.apex',apex=True)
     sp.data *= 1/0.75 # T_A* -> T_MB
-    sp.units = "$T_{MB}$"
+    sp.unit = "$T_{MB}$"
     # estimate the error from the data
     sp.error[:] = sp.stats((2.183e2,2.184e2))['std']
 
     # register the fitters
     sp.Registry.add_fitter('formaldehyde_mm_radex',
-                           formaldehyde_radex_fitter,5,multisingle='multi')
+                           formaldehyde_radex_fitter,5)
     sp.Registry.add_fitter('formaldehyde_mm_radex_b',
-                           formaldehyde_radex_fitter_b,5,multisingle='multi')
+                           formaldehyde_radex_fitter_b,5)
     sp.Registry.add_fitter('formaldehyde_mm_radex_both',
-                           formaldehyde_radex_fitter_both,5,multisingle='multi')
+                           formaldehyde_radex_fitter_both,5)
 
     # make 3 copies so that we can view independent fits
     # This step isn't really necessary, but it's a nice way to compare the fits
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     sp1.plotter(figure=1)
     sp1.specfit(fittype='formaldehyde_mm_radex',
-                multifit=True,
+                multifit=None,
                 guesses=[100,13.2,4.5,0,7.0],
                 limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)],
                 limited=[(True,True)]*5,
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
     sp2.plotter(figure=2)
     sp2.specfit(fittype='formaldehyde_mm_radex_b',
-                multifit=True,
+                multifit=None,
                 guesses=[100,13.2,4.5,0,7.0],
                 limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)],
                 limited=[(True,True)]*5,
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     # Do two versions of the fit with different input guesses
     sp3.plotter(figure=3)
     sp3.specfit(fittype='formaldehyde_mm_radex_both',
-                multifit=True,
+                multifit=None,
                 guesses=[95,13.2,4.5,0,7.0],
                 limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)],
                 limited=[(True,True)]*5,
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     sp3.plotter(figure=4)
     sp3.specfit(fittype='formaldehyde_mm_radex_both',
-                multifit=True,
+                multifit=None,
                 guesses=[105,13.2,4.5,0,7.0],
                 limits=[(20,200),(11,15),(3,5.5),(-5,5),(2,15)],
                 limited=[(True,True)]*5,

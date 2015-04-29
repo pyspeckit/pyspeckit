@@ -5,6 +5,8 @@ Voigt Profile Fitter
 """
 import model
 import numpy as np
+from pyspeckit.spectrum.moments import moments
+import types
 try:
     import scipy.special
     scipyOK = True
@@ -49,7 +51,7 @@ def voigt(xarr,amp,xcen,sigma,gamma,normalized=False):
     """
 
     if scipyOK:
-        z = ((xarr-xcen) + 1j*gamma) / (sigma * np.sqrt(2))
+        z = ((xarr.value-xcen) + 1j*gamma) / (sigma * np.sqrt(2))
         V = amp * np.real(scipy.special.wofz(z)) 
         if normalized:
             return V / (sigma*np.sqrt(2*np.pi))
@@ -79,7 +81,15 @@ def voigt_fwhm(sigma, gamma):
     """
     return 0.5346 * 2 * gamma + np.sqrt(0.2166*(2*gamma)**2 + sigma**2*8*np.log(2))
 
-def voigt_fitter(multisingle='multi'):
+def voigt_moments(self, *args, **kwargs):
+    """
+    Get the spectral moments from the moments package.  Use the gaussian width
+    for the lorentzian width (not a great guess!)
+    """
+    m = moments(*args,**kwargs)
+    return list(m) + [m[-1]]
+
+def voigt_fitter():
     """
     Generator for voigt fitter class
     """
@@ -89,11 +99,12 @@ def voigt_fitter(multisingle='multi'):
             parlimited=[(False,False),(False,False),(True,False),(True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma_G',r'\sigma_L'),
-            multisingle=multisingle,
             centroid_par='shift',
             fwhm_func=voigt_fwhm,
             fwhm_pars=['gwidth','lwidth'],
             )
     myclass.__name__ = "voigt"
+    myclass.moments = types.MethodType(voigt_moments, myclass,
+                                       myclass.__class__)
     
     return myclass

@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..spectrum import Spectrum
+from .. import Spectrum
 
 
 def test_eqw():

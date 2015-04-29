@@ -144,7 +144,10 @@ will run into errors.""")
         hdr['CDELT%s' % specaxis] = dv
         if verbose: print "Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
     elif hdr.get(str('CDELT%s%s' % (specaxis,wcstype))):
-        dv = hdr['CDELT%s%s' % (specaxis,wcstype)]
+        if hdr.get(str('PC{0}_{0}'.format(specaxis))):
+            dv = hdr['CDELT%s%s' % (specaxis,wcstype)] * hdr.get(str('PC{0}_{0}'.format(specaxis)))
+        else:
+            dv = hdr['CDELT%s%s' % (specaxis,wcstype)]
         v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
         p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
         if verbose: print "Using the FITS CDELT value.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)

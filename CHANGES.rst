@@ -1,8 +1,15 @@
 CHANGES
 *******
 
-Release 0.1.15
+Release 0.1.16
 ~~~~~~~~~~~~~~
+
+    * Major refactor: use astropy's Quantity and units to replace pyspeckit's
+      minimalist unit framework.  You may see deprecation warnings as a result!
+      (https://github.com/pyspeckit/pyspeckit/pull/26)
+
+Release 0.1.15 (2014-11-09)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
     * Bugfix: write_fit is part of Cube, not CubeStack
     * Bugfix: excludefit must occur after selectregion if fit_plotted_area is True
     * API change: For the fitter & baseliner, data selection is end-inclusive
@@ -14,6 +21,10 @@ Release 0.1.15
       make masking and fitting independent processes
     * Added `astropy <http://astropy.org>`_ as a dependency
     * Converted to astropy-helper template for setup
+    * Changed 'units' -> 'unit' in Spectrum
+    * Baseline: add spline fitting
+    * Add Zenodo badge
+    * Allow `parinfo` to be used in place of `guesses` in specfit
 
 Release 0.1.14 (2013-09-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

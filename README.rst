@@ -1,6 +1,10 @@
 PySpecKit Spectroscopic Toolkit
 -------------------------------
 
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/pyspeckit/pyspeckit
+   :target: https://gitter.im/pyspeckit/pyspeckit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
  * Documentation: `<http://pyspeckit.readthedocs.org/en/latest/>`_
  * Homepage: `<pyspeckit.bitbucket.org>`_
  * Source pages: `<https://github.com/pyspeckit/pyspeckit>`_ and `<https://bitbucket.org/pyspeckit/pyspeckit>`_
@@ -37,7 +41,7 @@ Requirements:
 
 Preferably at least one of:
 `pyfits <http://www.stsci.edu/resources/software_hardware/pyfits/Download>`_
-`atpy <http://atpy.github.com/>`_
+`atpy <http://atpy.readthedocs.org/>`_
 `asciitable <http://cxc.harvard.edu/contrib/asciitable/>`_
 
 Optional:
@@ -51,6 +55,10 @@ Authors:
 (or both of us at pyspeckit@gmail.com)
 
 The PySpecKit logo uses the Voyager 1 image of Earth known as the "Pale Blue Dot"
-[ `original source <http://visibleearth.nasa.gov/view_rec.php?id=601>`_ |  `reprocessed image <http://instructors.cwrl.utexas.edu/mcginnis/sites/instructors.cwrl.utexas.edu.mcginnis/files/pale_blue_dot2.jpg>`_ ]
+[ `original source <http://visibleearth.nasa.gov/view_rec.php?id=601>`_ |  `reprocessed image <http://instructors.dwrl.utexas.edu/mcginnis/sites/instructors.cwrl.utexas.edu.mcginnis/files/pale_blue_dot2.jpg>`_ ]
+
+
+.. image:: https://zenodo.org/badge/6907/pyspeckit/pyspeckit.png
+    :target: http://dx.doi.org/10.5281/zenodo.12490
 
 

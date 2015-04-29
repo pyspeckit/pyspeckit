@@ -28,15 +28,29 @@ class write_fits(Writer):
 
         header = self.Spectrum.header
         header['ORIGIN'] = 'pyspeckit version %s' % pyspeckit.__version__
+        header['OBJECT'] = self.Spectrum.specname
+        unit = self.Spectrum.unit or self.Spectrum.header.get('BUNIT')
+        if unit is not None:
+            header['BUNIT'] = unit
 
-        if header.get('CD1_1'):
-            del header['CD1_1']
+        #header_nowcs = wcs_utils.strip_wcs_from_header(header)
+        #header.insert(2, pyfits.Card(keyword='NAXIS', value=1))
+        #header.insert(3, pyfits.Card(keyword='NAXIS1', value=len(self.Spectrum)))
 
         # Generate a WCS header from the X-array
         if self.Spectrum.xarr._make_header(tolerance=tolerance):
             for k,v in self.Spectrum.xarr.wcshead.iteritems():
                 if v is not None:
-                    header[k] = v
+                    try:
+                        header[k] = v
+                    except ValueError:
+                        try:
+                            #v is a Quantity
+                            header[k] = v.value
+                        except AttributeError:
+                            #v is a Unit
+                            header[k] = v.to_string()
+
             if write_error:
                 data = np.array( [self.Spectrum.data, self.Spectrum.error] )
             else:

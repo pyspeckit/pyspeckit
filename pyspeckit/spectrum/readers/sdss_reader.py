@@ -5,7 +5,7 @@ except ImportError:
     import pyfits
 
 def read_sdss(fitsfile, extension=1, data_keyword='flux', error_keyword='ivar', 
-        xarr_keyword='loglam', xarr_units='angstroms'):
+        xarr_keyword='loglam', xarr_units='angstrom'):
     """
     Given an SDSS pyfits hdu (read with pyfits.open or astropy.io.fits.open),
     read one of the binary table extensions into a Spectrum
