@@ -414,26 +414,26 @@ class Plotter(object):
         if ylabel is not None:
             self.ylabel=ylabel
             self.axis.set_ylabel(self.ylabel)
-        elif self.Spectrum.units in ['Ta*','Tastar','K']:
+        elif self.Spectrum.unit in ['Ta*','Tastar','K']:
             self.axis.set_ylabel("$T_A^*$ (K)")
-        elif self.Spectrum.units == 'mJy':
+        elif self.Spectrum.unit == 'mJy':
             self.axis.set_ylabel("$S_\\nu$ (mJy)")
-        elif self.Spectrum.units == 'Jy':
+        elif self.Spectrum.unit == 'Jy':
             self.axis.set_ylabel("$S_\\nu$ (Jy)")            
         else:
-            if "$" in self.Spectrum.units:
+            if "$" in self.Spectrum.unit:
                 # assume LaTeX already
-                self.axis.set_ylabel(self.Spectrum.units)
-            elif len(self.Spectrum.units.split()) > 1: 
-                if self.Spectrum.units.split()[1] in ['erg/cm^2/s/Ang',
+                self.axis.set_ylabel(self.Spectrum.unit)
+            elif len(self.Spectrum.unit.split()) > 1: 
+                if self.Spectrum.unit.split()[1] in ['erg/cm^2/s/Ang',
                         'erg/cm2/s/A', 'erg/cm2/s/Ang', 'erg/cm/s/Ang']:
-                    norm = parse_norm(self.Spectrum.units.split()[0])
+                    norm = parse_norm(self.Spectrum.unit.split()[0])
                     self.axis.set_ylabel("$%s \\mathrm{erg/s/cm^2/\\AA}$" % norm)
-                elif self.Spectrum.units.split()[1] in ['W/m^2/Hz','w/m^2/hz','W/m/hz','W/m/Hz']:
-                    norm = parse_norm(self.Spectrum.units.split()[0])
+                elif self.Spectrum.unit.split()[1] in ['W/m^2/Hz','w/m^2/hz','W/m/hz','W/m/Hz']:
+                    norm = parse_norm(self.Spectrum.unit.split()[0])
                     self.axis.set_ylabel("$%s \\mathrm{W/m^2/Hz}$" % norm)
             else:
-                label_units = parse_units(self.Spectrum.units)
+                label_units = parse_units(self.Spectrum.unit)
                 self.axis.set_ylabel(label_units)
 
     def refresh(self):
@@ -520,7 +520,7 @@ class Plotter(object):
         return newplotter
 
     def line_ids(self, line_names, line_xvals, xval_units=None, auto_yloc=True,
-            auto_yloc_fraction=0.9,  **kwargs):
+                 auto_yloc_fraction=0.9,  **kwargs):
         """
         Add line ID labels to a plot using lineid_plot
         http://oneau.wordpress.com/2011/10/01/line-id-plot/
