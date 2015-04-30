@@ -398,12 +398,14 @@ class Plotter(object):
         if xlabel is not None:
             self.xlabel = xlabel
         elif self._xunit:
+            # WAS: self.xlabel = self.Spectrum.xarr.xtype.title()
             try:
-                self.xlabel += \
-                    " ("+"{0} ({1})".format(xlabel_table[self._xunit.physical_type.title()], self._xunit.to_string())+")"
+                self.xlabel = xlabel_table[self._xunit.physical_type.lower()]
             except KeyError:
-                self.xlabel += \
-                    " ("+"{0} ({1})".format(self._xunit.physical_type.title(), self._xunit.to_string())+")"
+                self.xlabel = self._xunit.physical_type.title()
+            # WAS: self.xlabel += " ("+u.Unit(self._xunit).to_string()+")"
+            self.xlabel += " ({0})".format(self._xunit.to_string())
+
             if verbose_label:
                 self.xlabel = "%s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
                                           self.xlabel )
