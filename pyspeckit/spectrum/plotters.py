@@ -38,7 +38,7 @@ class Plotter(object):
 
 
     def __init__(self, Spectrum, autorefresh=True, title="", ylabel="",
-            xlabel="", silent=True, plotscale=1.0, **kwargs):
+                 xlabel="", silent=True, plotscale=1.0, **kwargs):
         self.figure = None
         self.axis = None
         self.Spectrum = Spectrum

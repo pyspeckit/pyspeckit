@@ -22,7 +22,9 @@ from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
                                voff_lines_dict, tau_wts_dict)
 
 
-nh3_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy)
+nh3_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict,
+                                    line_strength_dict,
+                                    relative_strength_total_degeneracy)
 nh3_vtau_fitter = nh3_vtau.fitter
 nh3_vtau_vheight_fitter = nh3_vtau.vheight_fitter
 
