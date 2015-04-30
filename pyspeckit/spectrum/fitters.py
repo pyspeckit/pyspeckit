@@ -1082,8 +1082,8 @@ class Specfit(interactive.Interactive):
                                            self.Spectrum.plotter.xmax.value)
             if ((self.Spectrum.plotter.ymin is not None) and
                 (self.Spectrum.plotter.ymax is not None)):
-                self.residualaxis.set_ylim(self.Spectrum.plotter.ymin.value,
-                                           self.Spectrum.plotter.ymax.value)
+                self.residualaxis.set_ylim(self.Spectrum.plotter.ymin,
+                                           self.Spectrum.plotter.ymax)
         if label:
             self.residualaxis.set_xlabel(self.Spectrum.plotter.xlabel)
             self.residualaxis.set_ylabel(self.Spectrum.plotter.ylabel)
