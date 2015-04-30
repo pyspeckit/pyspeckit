@@ -85,18 +85,8 @@ class Plotter(object):
                     return self._xlim[1]
             elif xy == 'y':
                 if minmax == 'min':
-                    if self._ylim[0] and self._xunit:
-                        try:
-                            self._ylim[0]._unit = self._xunit 
-                        except AttributeError:
-                            self._ylim[0] = u.Quantity(self._ylim[0], self._xunit)    
                     return self._ylim[0]
                 elif minmax == 'max':
-                    if self._ylim[1] and self._xunit:
-                        try:
-                            self._ylim[1]._unit = self._xunit 
-                        except AttributeError:
-                            self._ylim[1] = u.Quantity(self._ylim[1], self._xunit)    
                     return self._ylim[1]
         return getprop
 
