@@ -37,7 +37,7 @@ class Plotter(object):
     """
 
 
-    def __init__(self, Spectrum, autorefresh=True, title="", ylabel="",
+    def __init__(self, Spectrum, autorefresh=True, title="",
                  xlabel="", silent=True, plotscale=1.0, **kwargs):
         self.figure = None
         self.axis = None
@@ -47,7 +47,6 @@ class Plotter(object):
         self.offset = 0.0 # vertical offset
         self.autorefresh = autorefresh
         self.xlabel = xlabel
-        self.ylabel = ylabel
         self.title  = title
         self.errorplot = None
         self.plotkwargs = kwargs
@@ -85,18 +84,8 @@ class Plotter(object):
                     return self._xlim[1]
             elif xy == 'y':
                 if minmax == 'min':
-                    if self._ylim[0] and self._xunit:
-                        try:
-                            self._ylim[0]._unit = self._xunit 
-                        except AttributeError:
-                            self._ylim[0] = u.Quantity(self._ylim[0], self._xunit)    
                     return self._ylim[0]
                 elif minmax == 'max':
-                    if self._ylim[1] and self._xunit:
-                        try:
-                            self._ylim[1]._unit = self._xunit 
-                        except AttributeError:
-                            self._ylim[1] = u.Quantity(self._ylim[1], self._xunit)    
                     return self._ylim[1]
         return getprop
 
@@ -408,12 +397,14 @@ class Plotter(object):
         if xlabel is not None:
             self.xlabel = xlabel
         elif self._xunit:
+            # WAS: self.xlabel = self.Spectrum.xarr.xtype.title()
             try:
-                self.xlabel += \
-                    " ("+"{0} ({1})".format(xlabel_table[self._xunit.physical_type.title()], self._xunit.to_string())+")"
+                self.xlabel = xlabel_table[self._xunit.physical_type.lower()]
             except KeyError:
-                self.xlabel += \
-                    " ("+"{0} ({1})".format(self._xunit.physical_type.title(), self._xunit.to_string())+")"
+                self.xlabel = self._xunit.physical_type.title()
+            # WAS: self.xlabel += " ("+u.Unit(self._xunit).to_string()+")"
+            self.xlabel += " ({0})".format(self._xunit.to_string())
+
             if verbose_label:
                 self.xlabel = "%s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
                                           self.xlabel )
@@ -422,29 +413,32 @@ class Plotter(object):
             self.axis.set_xlabel(self.xlabel)
 
         if ylabel is not None:
-            self.ylabel=ylabel
-            self.axis.set_ylabel(self.ylabel)
-        elif self.Spectrum.units in ['Ta*','Tastar','K']:
+            self.axis.set_ylabel(ylabel)
+        elif self.Spectrum.unit in ['Ta*','Tastar','K']:
             self.axis.set_ylabel("$T_A^*$ (K)")
-        elif self.Spectrum.units == 'mJy':
+        elif self.Spectrum.unit == 'mJy':
             self.axis.set_ylabel("$S_\\nu$ (mJy)")
-        elif self.Spectrum.units == 'Jy':
+        elif self.Spectrum.unit == 'Jy':
             self.axis.set_ylabel("$S_\\nu$ (Jy)")            
         else:
-            if "$" in self.Spectrum.units:
+            if "$" in self.Spectrum.unit:
                 # assume LaTeX already
-                self.axis.set_ylabel(self.Spectrum.units)
-            elif len(self.Spectrum.units.split()) > 1: 
-                if self.Spectrum.units.split()[1] in ['erg/cm^2/s/Ang',
+                self.axis.set_ylabel(self.Spectrum.unit)
+            elif len(self.Spectrum.unit.split()) > 1: 
+                if self.Spectrum.unit.split()[1] in ['erg/cm^2/s/Ang',
                         'erg/cm2/s/A', 'erg/cm2/s/Ang', 'erg/cm/s/Ang']:
-                    norm = parse_norm(self.Spectrum.units.split()[0])
+                    norm = parse_norm(self.Spectrum.unit.split()[0])
                     self.axis.set_ylabel("$%s \\mathrm{erg/s/cm^2/\\AA}$" % norm)
-                elif self.Spectrum.units.split()[1] in ['W/m^2/Hz','w/m^2/hz','W/m/hz','W/m/Hz']:
-                    norm = parse_norm(self.Spectrum.units.split()[0])
+                elif self.Spectrum.unit.split()[1] in ['W/m^2/Hz','w/m^2/hz','W/m/hz','W/m/Hz']:
+                    norm = parse_norm(self.Spectrum.unit.split()[0])
                     self.axis.set_ylabel("$%s \\mathrm{W/m^2/Hz}$" % norm)
             else:
-                label_units = parse_units(self.Spectrum.units)
+                label_units = parse_units(self.Spectrum.unit)
                 self.axis.set_ylabel(label_units)
+
+    @property
+    def ylabel(self):
+        return self.axis.get_ylabel()
 
     def refresh(self):
         if self.axis is not None:
@@ -530,7 +524,7 @@ class Plotter(object):
         return newplotter
 
     def line_ids(self, line_names, line_xvals, xval_units=None, auto_yloc=True,
-            auto_yloc_fraction=0.9,  **kwargs):
+                 auto_yloc_fraction=0.9,  **kwargs):
         """
         Add line ID labels to a plot using lineid_plot
         http://oneau.wordpress.com/2011/10/01/line-id-plot/
