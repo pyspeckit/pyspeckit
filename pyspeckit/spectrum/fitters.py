@@ -490,16 +490,18 @@ class Specfit(interactive.Interactive):
 
     @property
     def mask(self):
+        """ Mask: True means "exclude" """
         if (hasattr(self.spectofit, 'mask') and
             self.spectofit.shape==self.spectofit.mask.shape):
             mask = self.spectofit.mask
         else:
-            mask = np.zeros(self.spectofit, dtype='bool')
+            mask = np.zeros_like(self.spectofit, dtype='bool')
 
         return mask
 
     @property
     def mask_sliced(self):
+        """ Sliced (subset) Mask: True means "exclude" """
         return self.mask[self.xmin:self.xmax]
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
@@ -582,9 +584,9 @@ class Specfit(interactive.Interactive):
                     if par.scaleable:
                         guesses[jj] /= scalefactor
 
-        xtofit = self.Spectrum.xarr[self.xmin:self.xmax][self.mask_sliced]
-        spectofit = self.spectofit[self.xmin:self.xmax][self.mask_sliced]
-        err = self.errspec[self.xmin:self.xmax][self.mask_sliced]
+        xtofit = self.Spectrum.xarr[self.xmin:self.xmax][~self.mask_sliced]
+        spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced]
+        err = self.errspec[self.xmin:self.xmax][~self.mask_sliced]
 
         mpp,model,mpperr,chi2 = self.fitter(xtofit, spectofit, err=err,
                                             npeaks=self.npeaks,
