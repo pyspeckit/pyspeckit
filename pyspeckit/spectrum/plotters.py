@@ -414,8 +414,7 @@ class Plotter(object):
             self.axis.set_xlabel(self.xlabel)
 
         if ylabel is not None:
-            self.ylabel=ylabel
-            self.axis.set_ylabel(self.ylabel)
+            self.axis.set_ylabel(ylabel)
         elif self.Spectrum.unit in ['Ta*','Tastar','K']:
             self.axis.set_ylabel("$T_A^*$ (K)")
         elif self.Spectrum.unit == 'mJy':
@@ -437,6 +436,10 @@ class Plotter(object):
             else:
                 label_units = parse_units(self.Spectrum.unit)
                 self.axis.set_ylabel(label_units)
+
+    @property
+    def ylabel(self):
+        return self.axis.get_ylabel()
 
     def refresh(self):
         if self.axis is not None:
