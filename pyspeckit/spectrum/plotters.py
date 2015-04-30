@@ -346,7 +346,8 @@ class Plotter(object):
                 return
             
             if self.ymin and self.ymax:
-                if (self.Spectrum.xarr.max() < self.ymin or self.Spectrum.xarr.min() > self.ymax
+                # this is utter nonsense....
+                if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
                         or reset_ylimits):
                     if not self.silent and not reset_ylimits: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
                     self.ymin = None
@@ -364,22 +365,24 @@ class Plotter(object):
                 else:
                     self.ymin = float(yminval)/float(ypeakscale)
 
-            if ymax is not None: self.ymax = ymax
+            if ymax is not None:
+                self.ymax = ymax
             elif self.ymax is None:
                 if hasattr(self.Spectrum.data, 'mask'):
-                    ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin.value)
+                    ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin)
                 else:
-                    ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin.value)
+                    ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin)
                 if ymaxval > 0:
-                    self.ymax = float(ymaxval) * float(ypeakscale) + self.ymin.value
+                    self.ymax = float(ymaxval) * float(ypeakscale) + self.ymin
                 else:
-                    self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin.value
+                    self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin
 
-            self.ymin += u.Quantity(self.offset, self.ymin.unit)
-            self.ymax += u.Quantity(self.offset, self.ymax.unit)
+            self.ymin += self.offset
+            self.ymax += self.offset
 
-        self.axis.set_xlim(self.xmin.value,self.xmax.value)
-        self.axis.set_ylim(self.ymin.value,self.ymax.value)
+        self.axis.set_xlim(self.xmin.value if hasattr(self.xmin, 'value') else self.xmin,
+                           self.xmax.value if hasattr(self.xmax, 'value') else self.xmax)
+        self.axis.set_ylim(self.ymin, self.ymax)
         
 
     def label(self, title=None, xlabel=None, ylabel=None, verbose_label=False,
