@@ -488,6 +488,22 @@ class Specfit(interactive.Interactive):
         if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
             self.errspec[~self.includemask] = 1e10*self.errspec.max()
 
+    @property
+    def mask(self):
+        """ Mask: True means "exclude" """
+        if (hasattr(self.spectofit, 'mask') and
+            self.spectofit.shape==self.spectofit.mask.shape):
+            mask = self.spectofit.mask
+        else:
+            mask = np.zeros_like(self.spectofit, dtype='bool')
+
+        return mask
+
+    @property
+    def mask_sliced(self):
+        """ Sliced (subset) Mask: True means "exclude" """
+        return self.mask[self.xmin:self.xmax]
+
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
                  show_components=None, verbose=True, color=None,
                  guesses=None, parinfo=None, reset_fitspec=True,
@@ -568,12 +584,16 @@ class Specfit(interactive.Interactive):
                     if par.scaleable:
                         guesses[jj] /= scalefactor
 
-        mpp,model,mpperr,chi2 = self.fitter(
-            self.Spectrum.xarr[self.xmin:self.xmax],
-            self.spectofit[self.xmin:self.xmax],
-            err=self.errspec[self.xmin:self.xmax], npeaks=self.npeaks,
-            parinfo=parinfo, # the user MUST be allowed to override parinfo.
-            params=guesses, use_lmfit=use_lmfit, **self.fitkwargs)
+        xtofit = self.Spectrum.xarr[self.xmin:self.xmax][~self.mask_sliced]
+        spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced]
+        err = self.errspec[self.xmin:self.xmax][~self.mask_sliced]
+
+        mpp,model,mpperr,chi2 = self.fitter(xtofit, spectofit, err=err,
+                                            npeaks=self.npeaks,
+                                            parinfo=parinfo, # the user MUST be allowed to override parinfo.
+                                            params=guesses,
+                                            use_lmfit=use_lmfit,
+                                            **self.fitkwargs)
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
@@ -1113,7 +1133,11 @@ class Specfit(interactive.Interactive):
         #xtypename = units.unit_type_dict[self.Spectrum.xarr.xtype]
         xcharconv = units.SmartCaseNoSpaceDict({u.Hz.physical_type:'\\nu',
                                                 u.m.physical_type:'\\lambda',
-                                                (u.km/u.s).physical_type:'v', 'pixels':'x'})
+                                                (u.km/u.s).physical_type:'v',
+                                                'pixels':'x',
+                                                u.dimensionless_unscaled:'x',
+                                                'dimensionless':'x',
+                                               })
         try:
             xchar = xcharconv[self.Spectrum.xarr.unit.physical_type]
         except AttributeError:

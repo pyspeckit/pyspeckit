@@ -660,7 +660,7 @@ class ammonia_model_vtau(ammonia_model):
         """
 
         # TKIN, TEX, ntot, width, center, ortho fraction
-        return [20,10, 1, 1.0, 0.0, 1.0]
+        return [20, 10, 1, 1.0, 0.0, 1.0]
 
     def __call__(self,*args,**kwargs):
         return self.multinh3fit(*args,**kwargs)
