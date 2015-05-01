@@ -1,10 +1,7 @@
 """
-========================================
-Ammonia inversion transition TKIN fitter
-========================================
-
-Ammonia inversion transition TKIN fitter translated from Erik Rosolowsky's
-http://svn.ok.ubc.ca/svn/signals/nh3fit/
+===================================================
+Ammonia inversion transition: Hyperfine-only fitter
+===================================================
 
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 
@@ -96,15 +93,3 @@ def nh3_vtau_multimodel_generator(linenames):
             fitunits='Hz')
 
     return mod
-
-# nh3_vtau_fitter = nh3_vtau.fitter
-# nh3_vtau_vheight_fitter = nh3_vtau.vheight_fitter
-
-#nh3_radex = radex_modelgrid.radex_model(xarr, density=4, column=13, xoff_v=0.0,
-#                                        width=1.0, grid_vwidth=1.0,
-#                                        grid_vwidth_scale=False, texgrid=None,
-#                                        taugrid=None, hdr=None,
-#                                        path_to_texgrid='', path_to_taugrid='',
-#                                        temperature_gridnumber=3,
-#                                        modelfunc=nh3_vtau, debug=False,
-#                                        verbose=False)
