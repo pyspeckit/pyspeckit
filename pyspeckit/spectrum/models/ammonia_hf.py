@@ -35,6 +35,7 @@ relative_strength_total_degeneracy = collections.defaultdict(lambda: 1)
 for linename in line_names:
     assert len(voff_lines_dict[linename]) == len(tau_wts_dict[linename])
 
+# For each individual inversion line, create a Hyperfine model
 nh3_vtau = {linename:
             hyperfine.hyperfinemodel({lineid:lineid for lineid,name in
                                       enumerate(voff_lines_dict[linename])},
@@ -51,6 +52,23 @@ nh3_vtau = {linename:
             for linename in line_names}
 
 def nh3_vtau_multimodel_generator(linenames):
+    """
+    If you want to use multiple hyperfines for the same spectrum, use this
+    generator.
+    It is useful if you want N independent tau/tex values but the same velocity
+    and linewidth
+
+    Parameters
+    ----------
+    linenames : list
+        A list of line names from the set ('oneone', ..., 'eighteight')
+
+    Returns
+    -------
+    model : `model.SpectralModel`
+        A SpectralModel class build from N different metastable inversion
+        hyperfine models
+    """
     nlines = len(linenames)
 
     def nh3_vtau_multimodel(xarr, velocity, width, *args):
