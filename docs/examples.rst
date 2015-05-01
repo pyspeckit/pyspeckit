@@ -27,6 +27,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    Radio H2CO mm lines <example_h2co_mm>
    Radio NH3: shows hyperfine fitting with fixed amplitude, width <example_nh3>
    Radio NH3 cube <example_nh3_cube>
+   Radio NH3 - fit N hyperfines with no temperature <nh3_tau>
    Radio N2H+ <example_n2hp>
    Radio N2H+ cube <example_n2hp_cube>
    Radio HCN: shows hyperfine with varying amplitude & width <example_hcn>
