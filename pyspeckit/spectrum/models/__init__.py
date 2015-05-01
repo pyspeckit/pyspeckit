@@ -22,23 +22,23 @@ for ii in xrange(-15,0):
        terminate the fitting process.  Values from -15 to -1 are reserved
        for the user functions and will not clash with MPFIT."""
 
-import ammonia_hf
-from ammonia import ammonia_model,ammonia_model_vtau
+from . import ammonia_hf
+from .ammonia import ammonia_model,ammonia_model_vtau
 # old way from gaussfitter import gaussian_fitter
-from inherited_gaussfitter import gaussian_fitter,gaussian_vheight_fitter
-from inherited_lorentzian import lorentzian_fitter
-from inherited_voigtfitter import voigt_fitter
-import formaldehyde
-from formaldehyde import formaldehyde_fitter,formaldehyde_vheight_fitter
-import formaldehyde_mm
-import h2co_mm
-import n2hp
-from n2hp import n2hp_vtau_fitter,n2hp_vtau
-import hcn
-import hyperfine,fitter,model,redshiftedgroup
-import hill5infall
-import radex_modelgrid
-import hydrogen
-from polynomial_continuum import poly_fitter
-from powerlaw_continuum import powerlaw_fitter
-from template import template_fitter
+from .inherited_gaussfitter import gaussian_fitter,gaussian_vheight_fitter
+from .inherited_lorentzian import lorentzian_fitter
+from .inherited_voigtfitter import voigt_fitter
+from . import formaldehyde
+from .formaldehyde import formaldehyde_fitter,formaldehyde_vheight_fitter
+from . import formaldehyde_mm
+from . import h2co_mm
+from . import n2hp
+from .n2hp import n2hp_vtau_fitter,n2hp_vtau
+from . import hcn
+from . import hyperfine,fitter,model,redshiftedgroup
+from . import hill5infall
+from . import radex_modelgrid
+from . import hydrogen
+from .polynomial_continuum import poly_fitter
+from .powerlaw_continuum import powerlaw_fitter
+from .template import template_fitter
