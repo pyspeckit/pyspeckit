@@ -257,8 +257,8 @@ class hyperfinemodel(object):
                     tau_line = tau[linename]
                 else:
                     # the total optical depth, which is being fitted, should be the sum of the components
-                    tau_line = (tau * self.line_strength_dict[linename]/
-                                self.relative_strength_total_degeneracy[linename])
+                    tau_line = (tau * np.array(self.line_strength_dict[linename])/
+                                np.array(self.relative_strength_total_degeneracy[linename]))
           
                 tau_nu = np.array(tau_line * 
                                   np.exp(-(xarr+nuoff-self.freq_dict[linename])**2 /
