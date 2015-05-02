@@ -1,6 +1,15 @@
 line_names = ['oneone','twotwo','threethree','fourfour', "fivefive", "sixsix",
               "sevenseven", "eighteight",]
               #'ninenine']
+line_labels = {'oneone': '1-1',
+               'twotwo': '2-2',
+               'threethree': '3-3',
+               'fourfour': '4-4',
+               'fivefive': '5-5',
+               'sixsix': '6-6',
+               'sevenseven': '7-7',
+               'eighteight': '8-8',
+              }
 
 freq_dict = { 
     'oneone':     23.694506e9,
