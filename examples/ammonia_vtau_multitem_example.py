@@ -3,7 +3,7 @@ import pyspeckit
 from astropy import units as u
 from pyspeckit.spectrum.models import ammonia_constants, ammonia, ammonia_hf
 from pyspeckit.spectrum.models.ammonia_constants import freq_dict
-from pyspeckit.units import SpectroscopicAxis, SpectroscopicAxes
+from pyspeckit.spectrum.units import SpectroscopicAxis, SpectroscopicAxes
 
 # Step 1. Generate a synthetic spectrum.  Already have a real spectrum?  Skip
 # to step 2!
