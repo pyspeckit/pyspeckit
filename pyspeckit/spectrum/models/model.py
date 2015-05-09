@@ -505,8 +505,11 @@ class SpectralModel(fitter.SimpleFitter):
             log.info("Fit error message: {0}".format(mp.errmsg))
             log.info("Fit message: {0}".format(mpfit_messages[mp.status]))
             for i,p in enumerate(mpp):
-                log.info(" ".join(self.parinfo[i]['parname'],p," +/- ",mpperr[i]))
-            log.info(" ".join("Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)))
+                log.info("{0}: {1} +/- {2}".format(self.parinfo[i]['parname'],
+                                                    p,mpperr[i]))
+                log.info("Chi2: {0} Reduced Chi2: {1}  DOF:{2}".format(mp.fnorm,
+                                                                       mp.fnorm/(len(data)-len(mpp)),
+                                                                       len(data)-len(mpp)))
 
         self.mp = mp
         self.mpp = self.parinfo.values
