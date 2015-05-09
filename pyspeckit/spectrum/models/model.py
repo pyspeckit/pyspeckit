@@ -116,6 +116,9 @@ class SpectralModel(fitter.SimpleFitter):
         if use_lmfit:
             return self.lmfitter(*args,**kwargs)
         return self.fitter(*args,**kwargs)
+
+    def make_parinfo(self, **kwargs):
+        return self._make_parinfo(**kwargs)[0]
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
                       parlimits=None, parlimited=None, parfixed=None,
