@@ -537,8 +537,10 @@ class Specfit(interactive.Interactive):
         #if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp') # We now do this in gaussfitter.py
         if fittype is not None:
             self.fittype = fittype
-        if 'fittype' in self.fitkwargs:
-            del self.fitkwargs['fittype']
+        bad_kws = ['fittype','plot']
+        for kw in bad_kws:
+            if kw in self.fitkwargs:
+                del self.fitkwargs[kw]
 
         if guesses is None:
             guesses = self.guesses

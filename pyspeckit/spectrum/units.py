@@ -367,7 +367,7 @@ class SpectroscopicAxis(u.Quantity):
                 (self.__array__(), self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
         else:
             rep = ("SpectroscopicAxis([%r,...,%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self[0], self[-1], self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
+                (self[0].__array__(), self[-1].__array__(), self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
         return rep
 
     def __str__(self):
