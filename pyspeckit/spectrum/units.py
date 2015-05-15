@@ -262,7 +262,8 @@ def generate_xarr(input_array, unit=None):
     elif isinstance(input_array, np.ndarray):
         return SpectroscopicAxis(input_array, unit=unit)
     else:
-        raise TypeError("Unrecognized input type")
+        raise TypeError("Unrecognized input type. Input array of type: {0}"+\
+            "is not a Quantity, SpectroscopicAxis or numpy.ndarray".format(type(input_array)))
 
 class SpectroscopicAxis(u.Quantity):
     """
