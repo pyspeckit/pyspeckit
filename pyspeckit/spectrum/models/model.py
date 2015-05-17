@@ -116,6 +116,9 @@ class SpectralModel(fitter.SimpleFitter):
         if use_lmfit:
             return self.lmfitter(*args,**kwargs)
         return self.fitter(*args,**kwargs)
+
+    def make_parinfo(self, **kwargs):
+        return self._make_parinfo(**kwargs)[0]
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
                       parlimits=None, parlimited=None, parfixed=None,
@@ -507,9 +510,9 @@ class SpectralModel(fitter.SimpleFitter):
             for i,p in enumerate(mpp):
                 log.info("{0}: {1} +/- {2}".format(self.parinfo[i]['parname'],
                                                     p,mpperr[i]))
-                log.info("Chi2: {0} Reduced Chi2: {1}  DOF:{2}".format(mp.fnorm,
-                                                                       mp.fnorm/(len(data)-len(mpp)),
-                                                                       len(data)-len(mpp)))
+            log.info("Chi2: {0} Reduced Chi2: {1}  DOF:{2}".format(mp.fnorm,
+                                                                   mp.fnorm/(len(data)-len(mpp)),
+                                                                   len(data)-len(mpp)))
 
         self.mp = mp
         self.mpp = self.parinfo.values

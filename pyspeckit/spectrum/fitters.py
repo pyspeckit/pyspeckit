@@ -475,6 +475,9 @@ class Specfit(interactive.Interactive):
             return
         # see https://github.com/numpy/numpy/issues/3474
         self.spectofit = np.ma.copy(self.Spectrum.data)
+        if hasattr(self.Spectrum.data, 'mask') and hasattr(self.spectofit,
+                                                           'mask'):
+            assert np.all(self.Spectrum.data.mask == self.spectofit.mask)
         self._valid = True
         if hasattr(self.Spectrum,'baseline'):
             if (self.Spectrum.baseline.subtracted is False 
@@ -482,9 +485,9 @@ class Specfit(interactive.Interactive):
                     and len(self.spectofit) == len(self.Spectrum.baseline.basespec)):
                 self.spectofit -= self.Spectrum.baseline.basespec
         OKmask = (self.spectofit==self.spectofit)
-        self.spectofit[(True-OKmask)] = 0
+        self.spectofit[~OKmask] = 0
         self.seterrspec()
-        self.errspec[(True-OKmask)] = 1e10
+        self.errspec[~OKmask] = 1e10
         if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
             self.errspec[~self.includemask] = 1e10*self.errspec.max()
 
@@ -609,7 +612,9 @@ class Specfit(interactive.Interactive):
         self.model = model * scalefactor
         self.parinfo = self.fitter.parinfo
 
-        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]+np.sum(self.parinfo.fixed)
+        self.dof = (self.includemask.sum() - self.mask.sum() - self.npeaks *
+                    self.Registry.npars[self.fittype] +
+                    np.sum(self.parinfo.fixed))
 
         # rescale any scaleable parameters
         for par in self.parinfo:
@@ -619,7 +624,7 @@ class Specfit(interactive.Interactive):
 
         self.modelpars = self.parinfo.values
         self.modelerrs = self.parinfo.errors
-        self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
+        self.residuals = spectofit - self.model
         if self.Spectrum.plotter.axis is not None and plot:
             if color is not None:
                 kwargs.update({'composite_fit_color':color})

@@ -50,25 +50,27 @@ class hyperfinemodel(object):
             parnames=['Tex','tau','center','width'],
             parlimited=[(False,False), (True,False), (False,False), (True,False)],
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
-            shortvarnames=("T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
+            # specify the parameter names (LaTeX is OK)
+            shortvarnames=("T_{ex}","\\tau","v","\\sigma"),
             fitunits='Hz' )
 
         self.nlines = len(line_names)
 
         self.varyhf_fitter = model.SpectralModel(self.hyperfine_varyhf,3+self.nlines,
             parnames=['Tex','center','width']+['tau%s' % k for k in self.line_names],
-            parlimited=[(False,False), (False,False), (True,False)] + [(True,False),]*self.nlines, 
+            parlimited=[(False,False), (False,False), (True,False)]
+                                                 + [(True,False),]*self.nlines, 
             parlimits=[(0,0), (0,0), (0,0)]+[(0,0),]*self.nlines,
-            shortvarnames=("T_{ex}","v","\\sigma") + tuple(("\\tau(\\mathrm{%s})" % k for k in self.line_names)),
-            # specify the parameter names (TeX is OK)
+            shortvarnames=("T_{ex}","v","\\sigma") +
+                           tuple(("\\tau(\\mathrm{%s})" % k for k in self.line_names)),
             fitunits='Hz')
 
         self.varyhf_amp_fitter = model.SpectralModel(self.hyperfine_varyhf_amp, 2+self.nlines,
             parnames=['center','width']+['amp%s' % k for k in self.line_names],
             parlimited=[(False,False), (True,False)] + [(True,False),]*self.nlines,
             parlimits=[(0,0), (0,0)]+[(0,0),]*self.nlines,
-            shortvarnames=("v","\\sigma") + tuple(("amp(\\mathrm{%s})" % k for k in self.line_names)),
-            # specify the parameter names (TeX is OK)
+            shortvarnames=("v","\\sigma") +
+                           tuple(("amp(\\mathrm{%s})" % k for k in self.line_names)),
             fitunits='Hz')
 
         self.varyhf_amp_width_fitter = model.SpectralModel(self.hyperfine_varyhf_amp_width,1+self.nlines*2,
@@ -89,6 +91,13 @@ class hyperfinemodel(object):
             fitunits='Hz' )
 
         self.background_fitter = model.SpectralModel(self.hyperfine_addbackground,5,
+            parnames=['Tbackground','Tex','tau','center','width'],
+            parlimited=[(True,False), (False,False), (False,False), (True,False), (False,False), (True,False)], 
+            parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
+            shortvarnames=('T_{BG}',"T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
+            fitunits='Hz')
+
+        self.background_contsub_fitter = model.SpectralModel(self.hyperfine_background,5,
             parnames=['Tbackground','Tex','tau','center','width'],
             parlimited=[(True,False), (False,False), (False,False), (True,False), (False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
@@ -190,12 +199,26 @@ class hyperfinemodel(object):
                                **kwargs)
                 + Tbackground)
 
+    def hyperfine_background(self, xarr, Tbackground=2.73, Tex=5.0, tau=0.1,
+                                xoff_v=0.0, width=1.0, return_tau=False,
+                                **kwargs):
+        """
+        Identical to hyperfine, but with Tbackground free.  Assumes already
+        background-subtracted
+        """
+        if return_tau:
+            raise ValueError("Cannot return tau when adding a continuum background.")
+        return self.hyperfine(xarr, Tbackground=Tbackground, Tex=Tex, tau=tau,
+                              xoff_v=xoff_v, width=width, return_tau=False,
+                              **kwargs)
+
     def hyperfine(self, xarr, Tex=5.0, tau=0.1, xoff_v=0.0, width=1.0,
                   return_hyperfine_components=False, Tbackground=2.73, amp=None,
                   return_tau=False, tau_total=None, vary_hyperfine_tau=False,
                   vary_hyperfine_width=False):
         """
-        Generate a model spectrum given an excitation temperature, optical depth, offset velocity, and velocity width.
+        Generate a model spectrum given an excitation temperature, optical
+        depth, offset velocity, and velocity width.
 
         Parameters
         ----------
@@ -210,7 +233,10 @@ class hyperfinemodel(object):
         """
 
         # Convert X-units to frequency in Hz
-        xarr = xarr.as_unit('Hz').value
+        try:
+            xarr = xarr.as_unit('Hz').value
+        except AttributeError:
+            xarr = xarr.to('Hz').value
 
         # Ensure parameters are scalar / have no extra dims
         if not np.isscalar(Tex): Tex = Tex.squeeze()
