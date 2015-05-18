@@ -10,14 +10,8 @@ Open Questions: Are there other FITS-valid projection types, unit types, etc.
 that should be included?
 What about for other fields (e.g., wavenumber?)
 
-.. todo:: Incorporate astropy's Quantity array objects when they are ready
-
 """
-#.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
-#Affiliation: University of Colorado at Boulder
-#Created on March 9th, 2011
-
-
+from __future__ import print_function
 import numpy as np
 import warnings
 from astropy import units as u
@@ -317,9 +311,10 @@ class SpectroscopicAxis(u.Quantity):
         # Only need to convert xarr to array if it's not already one (e.g., if
         # it's a list)
         if not isinstance(xarr, np.ndarray):
-            subarr = np.array(xarr,dtype=dtype)
+            subarr = np.array(xarr, dtype=dtype)
         else:
             subarr = xarr
+        
         subarr = subarr.view(self)
 
         # Only need to set xarr's unit if it's not a quantity
@@ -551,13 +546,18 @@ class SpectroscopicAxis(u.Quantity):
         """
         unit = self.validate_unit(unit)
 
-        try:
-            self.flags.writeable=True
-        except ValueError:
-            self = self.copy()
-            self.flags.writeable=True
+        self.flags.writeable=True
 
-        self[:] = self.as_unit(unit, **kwargs)
+        # Hack:
+        # You can only set self[:] to a quantity
+        # The quantity will automatically be converted to present units
+        # Therefore, get the new array to set the *values* correctly,
+        # then input the values and let the unit conversion take care of the
+        # numerical changes, THEN set the unit.
+        new_values = self.as_unit(unit, **kwargs)
+        self[:] = new_values.value * self.unit
+        self.set_unit(unit)
+
         self.flags.writeable=False
         self.make_dxarr()
 
@@ -864,7 +864,7 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
 
     """
     if input_units in frequency_dict:
-        #print "Already in frequency units (%s)" % input_units
+        #print("Already in frequency units (%s)" % input_units)
         return velocities
     if center_frequency is None:
         raise ValueError("Cannot convert velocity to frequency without specifying a central frequency.")
@@ -896,7 +896,7 @@ def frequency_to_velocity(frequencies, input_units, center_frequency=None,
      * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c)
     """
     if input_units in velocity_dict:
-        print "Already in velocity units (%s)" % input_units
+        print("Already in velocity units (%s)" % input_units)
         return frequencies
     if center_frequency is None:
         raise ValueError("Cannot convert frequency to velocity without specifying a central frequency.")
@@ -927,7 +927,7 @@ def frequency_to_wavelength(frequencies, input_units, wavelength_units='um'):
     lambda = c / nu
     """
     if input_units in wavelength_dict:
-        print "Already in wavelength units (%s)" % input_units
+        print("Already in wavelength units (%s)" % input_units)
         return
     if wavelength_units not in length_dict:
         raise ValueError("Wavelength units %s not valid" % wavelength_units)
@@ -970,7 +970,7 @@ def velocity_to_wavelength(velocities, input_units, center_wavelength=None,
      * Relativistic 	V = c ((c/l0)^2 - (c/l)^2)/((c/l0)^2 + (c/l)^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c)
     """
     if input_units in wavelength_dict:
-        print "Already in wavelength units (%s)" % input_units
+        print("Already in wavelength units (%s)" % input_units)
         return velocities
     if center_wavelength is None:
         raise ValueError("Cannot convert velocity to wavelength without specifying a central wavelength.")
@@ -1003,7 +1003,7 @@ def wavelength_to_velocity(wavelengths, input_units, center_wavelength=None,
      * Relativistic 	V = c ((c/l0)^2 - f^2)/((c/l0)^2 + f^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c)
     """
     if input_units in velocity_dict:
-        print "Already in velocity units (%s)" % input_units
+        print("Already in velocity units (%s)" % input_units)
         return wavelengths
     if center_wavelength is None:
         raise ValueError("Cannot convert wavelength to velocity without specifying a central wavelength.")
