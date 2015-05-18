@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 from . import Writer
 import pyspeckit
@@ -55,7 +56,7 @@ class write_fits(Writer):
                 data = np.array( [self.Spectrum.data, self.Spectrum.error] )
             else:
                 data = self.Spectrum.data
-            print "Writing a FITS-standard (linear-x-axis) spectrum to %s" % (fn)
+            print("Writing a FITS-standard (linear-x-axis) spectrum to %s" % (fn))
         else:
             # if no header, overwrite header parameters that would be deceptive
             for k,v in self.Spectrum.xarr.wcshead.iteritems():
@@ -72,8 +73,11 @@ class write_fits(Writer):
         try:
             HDU = pyfits.PrimaryHDU(data=data, header=header)
         except AttributeError:
-            print "Strange header error. Attempting workaround."
-            HDU = pyfits.PrimaryHDU(data=data, header=pyfits.Header([pyfits.card.Card(k,v)  for k,v in header.iteritems()]))
+            print("Strange header error. Attempting workaround.")
+            HDU = pyfits.PrimaryHDU(data=data,
+                                    header=pyfits.Header([pyfits.card.Card(k,v)
+                                                          for k,v in
+                                                          header.iteritems()]))
         
         HDU.verify('fix')
         HDU.writeto(fn, clobber=clobber, output_verify='fix', **kwargs)
