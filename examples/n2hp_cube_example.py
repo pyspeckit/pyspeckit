@@ -33,7 +33,7 @@ if os.path.exists('n2hp_fitted_parameters.fits'):
 else:
     # Run the fitter
     # Estimated time to completion ~ 2 minutes
-    spc.xarr.refX = 23*u.Hz
+    spc.xarr.refX = 93176265000.0*u.Hz
     spc.xarr.velocity_convention = 'radio'
     spc.fiteach(fittype='n2hp_vtau', multifit=True,
                 guesses=[5,0.5,3,1], # Tex=5K, tau=0.5, v_center=12, width=1 km/s
