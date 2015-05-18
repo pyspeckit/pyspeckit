@@ -255,22 +255,26 @@ class Plotter(object):
 
         if use_window_limits: self._stash_window_limits()
 
+        # for filled errorbars, order matters.
+        inds = np.argsort(self.Spectrum.xarr)
+
         if errstyle is not None:
             if errcolor is None:
                 errcolor = color
             if errstyle == 'fill':
-                order = -1 if self.Spectrum.xarr[-1] < self.Spectrum.xarr[0] else 1
-                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr.value[::order]+xoffset,isX=True),
-                    steppify((self.Spectrum.data*self.plotscale+self.offset-self.Spectrum.error*self.plotscale)[::order]),
-                    steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[::order]),
+                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr.value[inds]+xoffset, isX=True),
+                    steppify((self.Spectrum.data*self.plotscale+self.offset-self.Spectrum.error*self.plotscale)[inds]),
+                    steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[inds]),
                     facecolor=errcolor, edgecolor=errcolor, alpha=erralpha, **kwargs)]
             elif errstyle == 'bars':
-                self.errorplot = self.axis.errorbar(self.Spectrum.xarr+xoffset, self.Spectrum.data*self.plotscale+self.offset,
-                        yerr=self.Spectrum.error*self.plotscale, ecolor=errcolor, fmt=None,
-                        **kwargs)
+                self.errorplot = self.axis.errorbar(self.Spectrum.xarr[inds]+xoffset,
+                                                    self.Spectrum.data[inds]*self.plotscale+self.offset,
+                                                    yerr=self.Spectrum.error*self.plotscale,
+                                                    ecolor=errcolor, fmt=None,
+                                                    **kwargs)
 
-        self._spectrumplot = self.axis.plot(self.Spectrum.xarr.value+xoffset,
-                self.Spectrum.data*self.plotscale+self.offset, color=color,
+        self._spectrumplot = self.axis.plot(self.Spectrum.xarr.value[inds]+xoffset,
+                self.Spectrum.data[inds]*self.plotscale+self.offset, color=color,
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
 
         if use_window_limits: self._reset_to_stashed_limits()
