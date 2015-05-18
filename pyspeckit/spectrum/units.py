@@ -375,7 +375,10 @@ class SpectroscopicAxis(u.Quantity):
         selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
                 self.unit,self.umin().value,self.umax().value)
         if self.refX is not None:
-            selfstr += "Reference is %g %s" % (self.refX, self.refX_unit)
+            if not hasattr(self.refX, 'unit'):
+                selfstr += "Reference is %g %s" % (self.refX, self.refX_unit)
+            else:
+                selfstr += "Reference is %s" % (self.refX)
         return selfstr
 
     @property
@@ -618,6 +621,7 @@ class SpectroscopicAxis(u.Quantity):
         
         if isinstance(self.unit, str):
             self._unit = u.Unit(self.unit)
+
         return self.to(unit, equivalencies=self.equivalencies)
 
     def make_dxarr(self, coordinate_location='center'):

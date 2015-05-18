@@ -1,5 +1,6 @@
 import pyspeckit
 import os
+import astropy.units as u
 
 if not os.path.exists('n2hp_cube.fit'):
     import astropy.utils.data as aud
@@ -36,7 +37,7 @@ else:
                 guesses=[5,0.5,3,1], # Tex=5K, tau=0.5, v_center=12, width=1 km/s
                 signal_cut=6, # minimize the # of pixels fit for the example
                 start_from_point=(16,13), # start at a pixel with signal
-                errmap=errmap,
+                errmap=errmap, velocity_convention="radio"
                 )
     # There are a huge number of parameters for the fiteach procedure.  See:
     # http://pyspeckit.readthedocs.org/en/latest/example_nh3_cube.html
