@@ -10,6 +10,8 @@ Release 0.1.16
     * The refactor led to many subsequent bugfixes: #61, #55, #51, and others
     * Removal of the `peakbgfit` default method: instead, the default is to treat
       all fits as multifits.  Changes came from #32, #25
+    * New ammonia models (#28, #50): absorption against a background source and
+      treating each line independently without a temperature connecting them
 
 Release 0.1.15 (2014-11-09)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
