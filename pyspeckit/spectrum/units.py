@@ -400,6 +400,12 @@ class SpectroscopicAxis(u.Quantity):
     def refX_units(self, value):
         log.warn("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
         self.refX_unit = value
+    
+    def __getattr__(self, name):
+        if name == 'refX_unit':
+            return self.refX.unit
+        else:
+            object.__getattribute__(self, name)
 
     def __array_finalize__(self,obj):
         """
