@@ -371,7 +371,10 @@ class SpectroscopicAxis(u.Quantity):
                 "indexing".format(cls=self.__class__.__name__))
 
         out = super(u.Quantity, self).__getitem__(key)
-        return u.Quantity(out, unit=self.unit)
+        if np.isscalar(out):
+            return u.Quantity(out, unit=self.unit)
+        else:
+            return self._new_view(out)
 
     def __repr__(self):
         if self.shape is ():
