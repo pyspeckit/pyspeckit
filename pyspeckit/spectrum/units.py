@@ -256,7 +256,8 @@ def generate_xarr(input_array, unit=None):
     elif isinstance(input_array, np.ndarray):
         return SpectroscopicAxis(input_array, unit=unit)
     else:
-        raise TypeError("Unrecognized input type")
+        raise TypeError("Unrecognized input type. Input array of type: {0}"+\
+            "is not a Quantity, SpectroscopicAxis or numpy.ndarray".format(type(input_array)))
 
 class SpectroscopicAxis(u.Quantity):
     """
@@ -356,20 +357,38 @@ class SpectroscopicAxis(u.Quantity):
                                         equivalencies)
         return subarr
 
+    def __getitem__(self, key):
+        """
+        We do *NOT* want to return a SpectroscopicAxis when indexed singly!
+        """
+        if self.isscalar:
+            raise TypeError(
+                "'{cls}' object with a scalar value does not support "
+                "indexing".format(cls=self.__class__.__name__))
+
+        out = super(u.Quantity, self).__getitem__(key)
+        if np.isscalar(out):
+            return u.Quantity(out, unit=self.unit)
+        else:
+            return self._new_view(out)
+
     def __repr__(self):
         if self.shape is ():
             rep = ("SpectroscopicAxis([%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self.__array__(), self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
+                (self.value, self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
         else:
             rep = ("SpectroscopicAxis([%r,...,%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self[0].__array__(), self[-1].__array__(), self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
+                (self[0].value, self[-1].value, self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
         return rep
 
     def __str__(self):
         selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
                 self.unit,self.umin().value,self.umax().value)
         if self.refX is not None:
-            selfstr += "Reference is %g %s" % (self.refX, self.refX_unit)
+            if not hasattr(self.refX, 'unit'):
+                selfstr += "Reference is %g %s" % (self.refX, self.refX_unit)
+            else:
+                selfstr += "Reference is %s" % (self.refX)
         return selfstr
 
     @property
@@ -617,6 +636,7 @@ class SpectroscopicAxis(u.Quantity):
         
         if isinstance(self.unit, str):
             self._unit = u.Unit(self.unit)
+
         return self.to(unit, equivalencies=self.equivalencies)
 
     def make_dxarr(self, coordinate_location='center'):

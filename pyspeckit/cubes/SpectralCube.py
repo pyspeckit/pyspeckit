@@ -191,7 +191,7 @@ class Cube(spectrum.Spectrum):
 
     def __repr__(self):
         return r'<Cube object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s with shape %r at %s>' % \
-                (self.xarr.min(), self.xarr.max(), self.xarr.unit,
+                (self.xarr.min().value, self.xarr.max().value, self.xarr.unit,
                         self.data.min(), self.data.max(), self.unit,
                         self.cube.shape, str(hex(self.__hash__())))
 
