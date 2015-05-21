@@ -328,6 +328,8 @@ class Plotter(object):
             xpixmax = np.argmin(np.abs(self.Spectrum.xarr.value-self.xmax.value))
             if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
             elif xpixmin == xpixmax:
+                if reset_xlimits:
+                    raise Exception("Infinite recursion error.  Maybe there are no valid data?")
                 if not self.silent: warn( "ERROR: the X axis limits specified were invalid.  Resetting." )
                 self.reset_limits(reset_xlimits=True, ymin=ymin, ymax=ymax,
                                   reset_ylimits=reset_ylimits,
