@@ -361,13 +361,25 @@ class SpectroscopicAxis(u.Quantity):
                                         equivalencies)
         return subarr
 
+    def __getitem__(self, key):
+        """
+        We do *NOT* want to return a SpectroscopicAxis when indexed singly!
+        """
+        if self.isscalar:
+            raise TypeError(
+                "'{cls}' object with a scalar value does not support "
+                "indexing".format(cls=self.__class__.__name__))
+
+        out = super(u.Quantity, self).__getitem__(key)
+        return u.Quantity(out, unit=self.unit)
+
     def __repr__(self):
         if self.shape is ():
             rep = ("SpectroscopicAxis([%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self.__array__(), self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
+                (self.value, self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
         else:
             rep = ("SpectroscopicAxis([%r,...,%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self[0].__array__(), self[-1].__array__(), self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
+                (self[0].value, self[-1].value, self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
         return rep
 
     def __str__(self):
