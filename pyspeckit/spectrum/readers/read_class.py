@@ -1299,7 +1299,7 @@ class ClassObject(object):
 
     def read_observations(self, observation_indices, progressbar=True):
         self._spectra.load(observation_indices, progressbar=progressbar)
-        return [self._spectra[ii] for ii in selected_indices]
+        return [self._spectra[ii] for ii in observation_indices]
 
 
 @print_timing
