@@ -405,6 +405,7 @@ class SpectroscopicAxis(u.Quantity):
         if name == 'refX_unit':
             return self.refX.unit
         else:
+            # can't use getattr because it triggers infinite recursion
             object.__getattribute__(self, name)
 
     def __array_finalize__(self,obj):
