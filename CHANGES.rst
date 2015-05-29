@@ -1,12 +1,22 @@
 CHANGES
 *******
 
-Release 0.1.16
+Version 0.1.17
 ~~~~~~~~~~~~~~
+
+ * None yet
+
+Release 0.1.16 (2015-05-21)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     * Major refactor: use astropy's Quantity and units to replace pyspeckit's
       minimalist unit framework.  You may see deprecation warnings as a result!
       (https://github.com/pyspeckit/pyspeckit/pull/26)
+    * The refactor led to many subsequent bugfixes: #61, #55, #51, and others
+    * Removal of the `peakbgfit` default method: instead, the default is to treat
+      all fits as multifits.  Changes came from #32, #25
+    * New ammonia models (#28, #50): absorption against a background source and
+      treating each line independently without a temperature connecting them
 
 Release 0.1.15 (2014-11-09)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

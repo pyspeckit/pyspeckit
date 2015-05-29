@@ -116,6 +116,9 @@ class SpectralModel(fitter.SimpleFitter):
         if use_lmfit:
             return self.lmfitter(*args,**kwargs)
         return self.fitter(*args,**kwargs)
+
+    def make_parinfo(self, **kwargs):
+        return self._make_parinfo(**kwargs)[0]
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
                       parlimits=None, parlimited=None, parfixed=None,
@@ -284,10 +287,12 @@ class SpectralModel(fitter.SimpleFitter):
             parvals = [p.value for p in parvals]
         else:
             parvals = list(pars)
-        if debug: log.debug("pars to n_modelfunc: {0}".format(pars))
+        if debug:
+            log.debug("pars to n_modelfunc: {0}, parvals:{1}".format(pars, parvals))
         def L(x):
             v = np.zeros(len(x))
-            if self.vheight: v += parvals[0]
+            if self.vheight:
+                v += parvals[0]
             # use len(pars) instead of self.npeaks because we want this to work
             # independent of the current best fit
             for jj in xrange((len(parvals)-self.vheight)/self.npars):
@@ -503,8 +508,11 @@ class SpectralModel(fitter.SimpleFitter):
             log.info("Fit error message: {0}".format(mp.errmsg))
             log.info("Fit message: {0}".format(mpfit_messages[mp.status]))
             for i,p in enumerate(mpp):
-                log.info(" ".join(self.parinfo[i]['parname'],p," +/- ",mpperr[i]))
-            log.info(" ".join("Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)))
+                log.info("{0}: {1} +/- {2}".format(self.parinfo[i]['parname'],
+                                                    p,mpperr[i]))
+            log.info("Chi2: {0} Reduced Chi2: {1}  DOF:{2}".format(mp.fnorm,
+                                                                   mp.fnorm/(len(data)-len(mpp)),
+                                                                   len(data)-len(mpp)))
 
         self.mp = mp
         self.mpp = self.parinfo.values
@@ -708,10 +716,18 @@ class SpectralModel(fitter.SimpleFitter):
 
     def logp(self, xarr, data, error, pars=None):
         """
-        Return the log probability of the model
+        Return the log probability of the model.  If the parameter is out of
+        range, return -inf
         """
         if pars is None:
             pars = self.parinfo
+        else:
+            parinfo = copy.copy(self.parinfo)
+            for value,parameter in zip(pars,parinfo):
+                try:
+                    parameter.value = value
+                except ValueError:
+                    return -np.inf
         model = self.n_modelfunc(pars, **self.modelfunc_kwargs)(xarr)
 
         difference = np.abs(data-model)
@@ -795,7 +811,9 @@ class SpectralModel(fitter.SimpleFitter):
         def probfunc(pars):
             return self.logp(xarr, data, error, pars=pars)
 
-        sampler = emcee.EnsembleSampler(nwalkers, self.npars*self.npeaks+self.vheight, probfunc, **kwargs)
+        sampler = emcee.EnsembleSampler(nwalkers,
+                                        self.npars*self.npeaks+self.vheight,
+                                        probfunc, **kwargs)
 
         return sampler
 

@@ -475,6 +475,9 @@ class Specfit(interactive.Interactive):
             return
         # see https://github.com/numpy/numpy/issues/3474
         self.spectofit = np.ma.copy(self.Spectrum.data)
+        if hasattr(self.Spectrum.data, 'mask') and hasattr(self.spectofit,
+                                                           'mask'):
+            assert np.all(self.Spectrum.data.mask == self.spectofit.mask)
         self._valid = True
         if hasattr(self.Spectrum,'baseline'):
             if (self.Spectrum.baseline.subtracted is False 
@@ -482,11 +485,27 @@ class Specfit(interactive.Interactive):
                     and len(self.spectofit) == len(self.Spectrum.baseline.basespec)):
                 self.spectofit -= self.Spectrum.baseline.basespec
         OKmask = (self.spectofit==self.spectofit)
-        self.spectofit[(True-OKmask)] = 0
+        self.spectofit[~OKmask] = 0
         self.seterrspec()
-        self.errspec[(True-OKmask)] = 1e10
+        self.errspec[~OKmask] = 1e10
         if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
             self.errspec[~self.includemask] = 1e10*self.errspec.max()
+
+    @property
+    def mask(self):
+        """ Mask: True means "exclude" """
+        if (hasattr(self.spectofit, 'mask') and
+            self.spectofit.shape==self.spectofit.mask.shape):
+            mask = self.spectofit.mask
+        else:
+            mask = np.zeros_like(self.spectofit, dtype='bool')
+
+        return mask
+
+    @property
+    def mask_sliced(self):
+        """ Sliced (subset) Mask: True means "exclude" """
+        return self.mask[self.xmin:self.xmax]
 
     def multifit(self, fittype=None, renormalize='auto', annotate=None,
                  show_components=None, verbose=True, color=None,
@@ -518,8 +537,10 @@ class Specfit(interactive.Interactive):
         #if self.fitkwargs.has_key('negamp'): self.fitkwargs.pop('negamp') # We now do this in gaussfitter.py
         if fittype is not None:
             self.fittype = fittype
-        if 'fittype' in self.fitkwargs:
-            del self.fitkwargs['fittype']
+        bad_kws = ['fittype','plot']
+        for kw in bad_kws:
+            if kw in self.fitkwargs:
+                del self.fitkwargs[kw]
 
         if guesses is None:
             guesses = self.guesses
@@ -568,12 +589,16 @@ class Specfit(interactive.Interactive):
                     if par.scaleable:
                         guesses[jj] /= scalefactor
 
-        mpp,model,mpperr,chi2 = self.fitter(
-            self.Spectrum.xarr[self.xmin:self.xmax],
-            self.spectofit[self.xmin:self.xmax],
-            err=self.errspec[self.xmin:self.xmax], npeaks=self.npeaks,
-            parinfo=parinfo, # the user MUST be allowed to override parinfo.
-            params=guesses, use_lmfit=use_lmfit, **self.fitkwargs)
+        xtofit = self.Spectrum.xarr[self.xmin:self.xmax][~self.mask_sliced]
+        spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced]
+        err = self.errspec[self.xmin:self.xmax][~self.mask_sliced]
+
+        mpp,model,mpperr,chi2 = self.fitter(xtofit, spectofit, err=err,
+                                            npeaks=self.npeaks,
+                                            parinfo=parinfo, # the user MUST be allowed to override parinfo.
+                                            params=guesses,
+                                            use_lmfit=use_lmfit,
+                                            **self.fitkwargs)
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
@@ -587,7 +612,9 @@ class Specfit(interactive.Interactive):
         self.model = model * scalefactor
         self.parinfo = self.fitter.parinfo
 
-        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]+np.sum(self.parinfo.fixed)
+        self.dof = (self.includemask.sum() - self.mask.sum() - self.npeaks *
+                    self.Registry.npars[self.fittype] +
+                    np.sum(self.parinfo.fixed))
 
         # rescale any scaleable parameters
         for par in self.parinfo:
@@ -597,7 +624,7 @@ class Specfit(interactive.Interactive):
 
         self.modelpars = self.parinfo.values
         self.modelerrs = self.parinfo.errors
-        self.residuals = self.spectofit[self.xmin:self.xmax] - self.model
+        self.residuals = spectofit - self.model
         if self.Spectrum.plotter.axis is not None and plot:
             if color is not None:
                 kwargs.update({'composite_fit_color':color})
@@ -1082,8 +1109,8 @@ class Specfit(interactive.Interactive):
                                            self.Spectrum.plotter.xmax.value)
             if ((self.Spectrum.plotter.ymin is not None) and
                 (self.Spectrum.plotter.ymax is not None)):
-                self.residualaxis.set_ylim(self.Spectrum.plotter.ymin.value,
-                                           self.Spectrum.plotter.ymax.value)
+                self.residualaxis.set_ylim(self.Spectrum.plotter.ymin,
+                                           self.Spectrum.plotter.ymax)
         if label:
             self.residualaxis.set_xlabel(self.Spectrum.plotter.xlabel)
             self.residualaxis.set_ylabel(self.Spectrum.plotter.ylabel)
@@ -1113,7 +1140,11 @@ class Specfit(interactive.Interactive):
         #xtypename = units.unit_type_dict[self.Spectrum.xarr.xtype]
         xcharconv = units.SmartCaseNoSpaceDict({u.Hz.physical_type:'\\nu',
                                                 u.m.physical_type:'\\lambda',
-                                                (u.km/u.s).physical_type:'v', 'pixels':'x'})
+                                                (u.km/u.s).physical_type:'v',
+                                                'pixels':'x',
+                                                u.dimensionless_unscaled:'x',
+                                                'dimensionless':'x',
+                                               })
         try:
             xchar = xcharconv[self.Spectrum.xarr.unit.physical_type]
         except AttributeError:

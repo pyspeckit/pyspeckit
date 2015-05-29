@@ -37,8 +37,8 @@ class Plotter(object):
     """
 
 
-    def __init__(self, Spectrum, autorefresh=True, title="", ylabel="",
-            xlabel="", silent=True, plotscale=1.0, **kwargs):
+    def __init__(self, Spectrum, autorefresh=True, title="",
+                 xlabel="", silent=True, plotscale=1.0, **kwargs):
         self.figure = None
         self.axis = None
         self.Spectrum = Spectrum
@@ -47,7 +47,6 @@ class Plotter(object):
         self.offset = 0.0 # vertical offset
         self.autorefresh = autorefresh
         self.xlabel = xlabel
-        self.ylabel = ylabel
         self.title  = title
         self.errorplot = None
         self.plotkwargs = kwargs
@@ -85,18 +84,8 @@ class Plotter(object):
                     return self._xlim[1]
             elif xy == 'y':
                 if minmax == 'min':
-                    if self._ylim[0] and self._xunit:
-                        try:
-                            self._ylim[0]._unit = self._xunit 
-                        except AttributeError:
-                            self._ylim[0] = u.Quantity(self._ylim[0], self._xunit)    
                     return self._ylim[0]
                 elif minmax == 'max':
-                    if self._ylim[1] and self._xunit:
-                        try:
-                            self._ylim[1]._unit = self._xunit 
-                        except AttributeError:
-                            self._ylim[1] = u.Quantity(self._ylim[1], self._xunit)    
                     return self._ylim[1]
         return getprop
 
@@ -266,22 +255,26 @@ class Plotter(object):
 
         if use_window_limits: self._stash_window_limits()
 
+        # for filled errorbars, order matters.
+        inds = np.argsort(self.Spectrum.xarr)
+
         if errstyle is not None:
             if errcolor is None:
                 errcolor = color
             if errstyle == 'fill':
-                order = -1 if self.Spectrum.xarr[-1] < self.Spectrum.xarr[0] else 1
-                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr.value[::order]+xoffset,isX=True),
-                    steppify((self.Spectrum.data*self.plotscale+self.offset-self.Spectrum.error*self.plotscale)[::order]),
-                    steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[::order]),
+                self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr.value[inds]+xoffset, isX=True),
+                    steppify((self.Spectrum.data*self.plotscale+self.offset-self.Spectrum.error*self.plotscale)[inds]),
+                    steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[inds]),
                     facecolor=errcolor, edgecolor=errcolor, alpha=erralpha, **kwargs)]
             elif errstyle == 'bars':
-                self.errorplot = self.axis.errorbar(self.Spectrum.xarr+xoffset, self.Spectrum.data*self.plotscale+self.offset,
-                        yerr=self.Spectrum.error*self.plotscale, ecolor=errcolor, fmt=None,
-                        **kwargs)
+                self.errorplot = self.axis.errorbar(self.Spectrum.xarr[inds]+xoffset,
+                                                    self.Spectrum.data[inds]*self.plotscale+self.offset,
+                                                    yerr=self.Spectrum.error*self.plotscale,
+                                                    ecolor=errcolor, fmt=None,
+                                                    **kwargs)
 
-        self._spectrumplot = self.axis.plot(self.Spectrum.xarr.value+xoffset,
-                self.Spectrum.data*self.plotscale+self.offset, color=color,
+        self._spectrumplot = self.axis.plot(self.Spectrum.xarr.value[inds]+xoffset,
+                self.Spectrum.data[inds]*self.plotscale+self.offset, color=color,
                 linestyle=linestyle, linewidth=linewidth, **kwargs)
 
         if use_window_limits: self._reset_to_stashed_limits()
@@ -339,6 +332,8 @@ class Plotter(object):
             xpixmax = np.argmin(np.abs(self.Spectrum.xarr.value-self.xmax.value))
             if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
             elif xpixmin == xpixmax:
+                if reset_xlimits:
+                    raise Exception("Infinite recursion error.  Maybe there are no valid data?")
                 if not self.silent: warn( "ERROR: the X axis limits specified were invalid.  Resetting." )
                 self.reset_limits(reset_xlimits=True, ymin=ymin, ymax=ymax,
                                   reset_ylimits=reset_ylimits,
@@ -346,7 +341,8 @@ class Plotter(object):
                 return
             
             if self.ymin and self.ymax:
-                if (self.Spectrum.xarr.max() < self.ymin or self.Spectrum.xarr.min() > self.ymax
+                # this is utter nonsense....
+                if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
                         or reset_ylimits):
                     if not self.silent and not reset_ylimits: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
                     self.ymin = None
@@ -364,22 +360,24 @@ class Plotter(object):
                 else:
                     self.ymin = float(yminval)/float(ypeakscale)
 
-            if ymax is not None: self.ymax = ymax
+            if ymax is not None:
+                self.ymax = ymax
             elif self.ymax is None:
                 if hasattr(self.Spectrum.data, 'mask'):
-                    ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin.value)
+                    ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin)
                 else:
-                    ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin.value)
+                    ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin)
                 if ymaxval > 0:
-                    self.ymax = float(ymaxval) * float(ypeakscale) + self.ymin.value
+                    self.ymax = float(ymaxval) * float(ypeakscale) + self.ymin
                 else:
-                    self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin.value
+                    self.ymax = float(ymaxval) / float(ypeakscale) + self.ymin
 
-            self.ymin += u.Quantity(self.offset, self.ymin.unit)
-            self.ymax += u.Quantity(self.offset, self.ymax.unit)
+            self.ymin += self.offset
+            self.ymax += self.offset
 
-        self.axis.set_xlim(self.xmin.value,self.xmax.value)
-        self.axis.set_ylim(self.ymin.value,self.ymax.value)
+        self.axis.set_xlim(self.xmin.value if hasattr(self.xmin, 'value') else self.xmin,
+                           self.xmax.value if hasattr(self.xmax, 'value') else self.xmax)
+        self.axis.set_ylim(self.ymin, self.ymax)
         
 
     def label(self, title=None, xlabel=None, ylabel=None, verbose_label=False,
@@ -405,12 +403,14 @@ class Plotter(object):
         if xlabel is not None:
             self.xlabel = xlabel
         elif self._xunit:
+            # WAS: self.xlabel = self.Spectrum.xarr.xtype.title()
             try:
-                self.xlabel += \
-                    " ("+"{0} ({1})".format(xlabel_table[self._xunit.physical_type.title()], self._xunit.to_string())+")"
+                self.xlabel = xlabel_table[self._xunit.physical_type.lower()]
             except KeyError:
-                self.xlabel += \
-                    " ("+"{0} ({1})".format(self._xunit.physical_type.title(), self._xunit.to_string())+")"
+                self.xlabel = self._xunit.physical_type.title()
+            # WAS: self.xlabel += " ("+u.Unit(self._xunit).to_string()+")"
+            self.xlabel += " ({0})".format(self._xunit.to_string())
+
             if verbose_label:
                 self.xlabel = "%s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
                                           self.xlabel )
@@ -419,29 +419,32 @@ class Plotter(object):
             self.axis.set_xlabel(self.xlabel)
 
         if ylabel is not None:
-            self.ylabel=ylabel
-            self.axis.set_ylabel(self.ylabel)
-        elif self.Spectrum.units in ['Ta*','Tastar','K']:
+            self.axis.set_ylabel(ylabel)
+        elif self.Spectrum.unit in ['Ta*','Tastar','K']:
             self.axis.set_ylabel("$T_A^*$ (K)")
-        elif self.Spectrum.units == 'mJy':
+        elif self.Spectrum.unit == 'mJy':
             self.axis.set_ylabel("$S_\\nu$ (mJy)")
-        elif self.Spectrum.units == 'Jy':
+        elif self.Spectrum.unit == 'Jy':
             self.axis.set_ylabel("$S_\\nu$ (Jy)")            
         else:
-            if "$" in self.Spectrum.units:
+            if "$" in self.Spectrum.unit:
                 # assume LaTeX already
-                self.axis.set_ylabel(self.Spectrum.units)
-            elif len(self.Spectrum.units.split()) > 1: 
-                if self.Spectrum.units.split()[1] in ['erg/cm^2/s/Ang',
+                self.axis.set_ylabel(self.Spectrum.unit)
+            elif len(self.Spectrum.unit.split()) > 1: 
+                if self.Spectrum.unit.split()[1] in ['erg/cm^2/s/Ang',
                         'erg/cm2/s/A', 'erg/cm2/s/Ang', 'erg/cm/s/Ang']:
-                    norm = parse_norm(self.Spectrum.units.split()[0])
+                    norm = parse_norm(self.Spectrum.unit.split()[0])
                     self.axis.set_ylabel("$%s \\mathrm{erg/s/cm^2/\\AA}$" % norm)
-                elif self.Spectrum.units.split()[1] in ['W/m^2/Hz','w/m^2/hz','W/m/hz','W/m/Hz']:
-                    norm = parse_norm(self.Spectrum.units.split()[0])
+                elif self.Spectrum.unit.split()[1] in ['W/m^2/Hz','w/m^2/hz','W/m/hz','W/m/Hz']:
+                    norm = parse_norm(self.Spectrum.unit.split()[0])
                     self.axis.set_ylabel("$%s \\mathrm{W/m^2/Hz}$" % norm)
             else:
-                label_units = parse_units(self.Spectrum.units)
+                label_units = parse_units(self.Spectrum.unit)
                 self.axis.set_ylabel(label_units)
+
+    @property
+    def ylabel(self):
+        return self.axis.get_ylabel()
 
     def refresh(self):
         if self.axis is not None:
@@ -527,7 +530,7 @@ class Plotter(object):
         return newplotter
 
     def line_ids(self, line_names, line_xvals, xval_units=None, auto_yloc=True,
-            auto_yloc_fraction=0.9,  **kwargs):
+                 auto_yloc_fraction=0.9,  **kwargs):
         """
         Add line ID labels to a plot using lineid_plot
         http://oneau.wordpress.com/2011/10/01/line-id-plot/
