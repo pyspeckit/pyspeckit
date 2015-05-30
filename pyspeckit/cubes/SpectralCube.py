@@ -33,7 +33,6 @@ import cubes
 from astropy import log
 from astropy import wcs
 from astropy import units
-import pdb
 class Cube(spectrum.Spectrum):
 
     def __init__(self, filename=None, cube=None, xarr=None, xunit=None,
