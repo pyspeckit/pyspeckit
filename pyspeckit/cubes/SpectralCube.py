@@ -33,7 +33,7 @@ import cubes
 from astropy import log
 from astropy import wcs
 from astropy import units
-
+import pdb
 class Cube(spectrum.Spectrum):
 
     def __init__(self, filename=None, cube=None, xarr=None, xunit=None,
@@ -525,7 +525,8 @@ class Cube(spectrum.Spectrum):
     def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
                 verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
                 blank_value=0, integral=True, direct=False, absorption=False,
-                use_nearest_as_guess=False, start_from_point=(0,0), multicore=0,
+                use_nearest_as_guess=False, use_neighbor_as_guess=False,
+                start_from_point=(0,0), multicore=0, position_order = None,
                 continuum_map=None, **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
@@ -539,9 +540,15 @@ class Cube(spectrum.Spectrum):
             Unless the fitted point is the first, it will find the nearest
             other point with a successful fit and use its best-fit parameters
             as the guess
+        use_neighbor_as_guess: bool
+            Set this keyword to use the average best-fit parameters from 
+            neighboring positions with successful fits as the guess
         start_from_point: tuple(int,int)
             Either start from the center or from a point defined by a tuple.
             Work outward from that starting point.  
+        position_order: ndarray[naxis=2] 
+            2D map of region with pixel values indicating the order in which 
+            to carry out the fitting.  Any type with increasing pixel values.
         guesses: tuple or ndarray[naxis=3]
             Either a tuple/list of guesses with len(guesses) = npars or a cube
             of guesses with shape [npars, ny, nx].
@@ -592,13 +599,18 @@ class Cube(spectrum.Spectrum):
         distance = ((xx)**2 + (yy)**2)**0.5
         if start_from_point == 'center':
             start_from_point = (xx.max()/2., yy.max/2.)
-        d_from_start = np.roll( np.roll( distance, start_from_point[0], 0),
-                               start_from_point[1], 1)
-        sort_distance = np.argsort(d_from_start.flat)
+        if hasattr(position_order,'shape') and position_order.shape == self.cube.shape[1:]:
+            sort_distance = np.argsort(position_order.flat)
+        else:
+            d_from_start = np.roll( np.roll( distance, start_from_point[0], 0),
+                                    start_from_point[1], 1)
+            sort_distance = np.argsort(d_from_start.flat)
 
+
+            
         valid_pixels = zip(xx.flat[sort_distance][OK.flat[sort_distance]],
                            yy.flat[sort_distance][OK.flat[sort_distance]])
-
+        
         if len(valid_pixels) != len(set(valid_pixels)):
             raise ValueError("There are non-unique pixels in the 'valid pixel' list.  "
                              "This should not be possible and indicates a major error.")
@@ -673,6 +685,11 @@ class Cube(spectrum.Spectrum):
             else:
                 max_sn = None
             sp.specfit.Registry = self.Registry # copy over fitter registry
+            # Do some homework for local fits
+            xpatch = [1,1,1,0,0,0,-1,-1,-1]
+            ypatch = [1,0,-1,1,0,-1,1,0,-1]
+            local_fits = self.has_fit[ypatch+y,xpatch+x]
+
             
             if use_nearest_as_guess and self.has_fit.sum() > 0:
                 if verbose_level > 1 and ii == 0 or verbose_level > 4:
@@ -682,6 +699,8 @@ class Cube(spectrum.Spectrum):
                 nearest_ind = np.argmin(d+1e10*(True-self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
                 gg = self.parcube[:,nearest_y,nearest_x]
+            elif use_neighbor_as_guess and np.any(local_fits):
+                gg = np.mean(self.parcube[:,(ypatch+y)[local_fits],(xpatch+x)[local_fits]],axis=1)
             elif usemomentcube:
                 if verbose_level > 1 and ii == 0: log.info("Using moment cube")
                 gg = self.momentcube[:,y,x]
@@ -739,7 +758,6 @@ class Cube(spectrum.Spectrum):
                         self.integralmap[:,y,x])
             else:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs)
-
         #### BEGIN TEST BLOCK ####
         # This test block is to make sure you don't run a 30 hour fitting
         # session that's just going to crash at the end.
