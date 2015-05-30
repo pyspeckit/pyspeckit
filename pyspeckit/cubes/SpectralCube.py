@@ -685,8 +685,8 @@ class Cube(spectrum.Spectrum):
                 max_sn = None
             sp.specfit.Registry = self.Registry # copy over fitter registry
             # Do some homework for local fits
-            xpatch = [1,1,1,0,0,0,-1,-1,-1]
-            ypatch = [1,0,-1,1,0,-1,1,0,-1]
+            xpatch = np.array([1,1,1,0,0,0,-1,-1,-1],dtype=np.int)
+            ypatch = np.array([1,0,-1,1,0,-1,1,0,-1],dtype=np.int)
             local_fits = self.has_fit[ypatch+y,xpatch+x]
 
             
@@ -699,6 +699,8 @@ class Cube(spectrum.Spectrum):
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
                 gg = self.parcube[:,nearest_y,nearest_x]
             elif use_neighbor_as_guess and np.any(local_fits):
+                # Array is N_guess X Nvalid_nbrs so averaging over 
+                # Axis=1 is the axis of all valid neighbors
                 gg = np.mean(self.parcube[:,(ypatch+y)[local_fits],(xpatch+x)[local_fits]],axis=1)
             elif usemomentcube:
                 if verbose_level > 1 and ii == 0: log.info("Using moment cube")
