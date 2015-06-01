@@ -127,6 +127,8 @@ class Cube(spectrum.Spectrum):
             if self.cube is not None:
                 self.data = self.cube[:,y0,x0]
 
+        if not hasattr(self, '_unit'):
+            self.unit = units.dimensionless_unscaled
         log.debug("Self.unit before header: {0}".format(self.unit))
         if self.header is not None:
             self.parse_header(self.header)
