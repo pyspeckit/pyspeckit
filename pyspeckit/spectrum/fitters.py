@@ -80,8 +80,8 @@ The default is gaussian ('g'), all options are listed below:
             Key to select the fitter in interactive mode
         '''
         if multisingle is not None:
-            warnings.warn("The 'multisingle' keyword is no longer required.",
-                          DeprecationWarning)
+            warn("The 'multisingle' keyword is no longer required.",
+                 DeprecationWarning)
 
         if not name in self.peakbgfitters or override:
             self.peakbgfitters[name] = function
@@ -647,7 +647,7 @@ class Specfit(interactive.Interactive):
                     if not varnames:
                         continue
                     elif len(varnames) > 1:
-                        warnings.warn("The 'tied' parameter {0} is not simple enough for error propagation".format(element))
+                        warn("The 'tied' parameter {0} is not simple enough for error propagation".format(element))
                         continue
                     else:
                         varname = varnames[0]

@@ -36,10 +36,11 @@ title_dict = {'oneone':'NH$_3(1,1)$',
 'eighteight':'NH$_3(8,8)$',
              }
 
-def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guessline='twotwo',
-        tex=15,tkin=20,column=15.0,fortho=0.66, tau=None, thin=False, quiet=False, doplot=True, fignum=1,
-        guessfignum=2, smooth=False, scale_keyword=None, rebase=False, npeaks=1, guesses=None,
-        **kwargs): 
+def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
+               guessline='twotwo', tex=15,tkin=20,column=15.0,fortho=0.66,
+               tau=None, thin=False, quiet=False, doplot=True, fignum=1,
+               guessfignum=2, smooth=False, scale_keyword=None, rebase=False,
+               npeaks=1, guesses=None, **kwargs): 
     """
     Given a dictionary of filenames and lines, fit them together
     e.g. {'oneone':'G000.000+00.000_nh3_11.fits'}
@@ -112,7 +113,9 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False, guess
 
     return spdict,spectra
 
-def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, **plotkwargs):
+def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
+             show_hyperfine_components=True,
+             **plotkwargs):
     """
     Plot the results from a multi-nh3 fit
 
@@ -161,7 +164,8 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None, *
         sp.specfit.Spectrum.plotter = sp.plotter
         sp.specfit.selectregion(reset=True)
         if sp.specfit.modelpars is not None:
-            sp.specfit.plot_fit(annotate=False, show_components=show_components)
+            sp.specfit.plot_fit(annotate=False, show_components=show_components,
+                                show_hyperfine_components=show_hyperfine_components)
     if spdict['oneone'].specfit.modelpars is not None:
         spdict['oneone'].specfit.annotate(labelspacing=0.05,prop={'size':'small','stretch':'extra-condensed'},frameon=False)
 
