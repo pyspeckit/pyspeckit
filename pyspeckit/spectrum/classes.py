@@ -193,8 +193,8 @@ class Spectrum(object):
 
         if unit is not None:
             self._unit = unit
-        # else:
-        #     self._unit = u.dimensionless_unscaled
+        else:
+            self._unit = u.dimensionless_unscaled
 
         if doplot: self.plotter(**plotkwargs)
 
