@@ -427,20 +427,8 @@ class Plotter(object):
         elif self.Spectrum.unit == 'Jy':
             self.axis.set_ylabel("$S_\\nu$ (Jy)")            
         else:
-            if "$" in self.Spectrum.unit.to_string():
-                # assume LaTeX already
-                self.axis.set_ylabel(self.Spectrum.unit)
-            elif len(self.Spectrum.unit.split()) > 1: 
-                if self.Spectrum.unit.split()[1] in ['erg/cm^2/s/Ang',
-                        'erg/cm2/s/A', 'erg/cm2/s/Ang', 'erg/cm/s/Ang']:
-                    norm = parse_norm(self.Spectrum.unit.split()[0])
-                    self.axis.set_ylabel("$%s \\mathrm{erg/s/cm^2/\\AA}$" % norm)
-                elif self.Spectrum.unit.split()[1] in ['W/m^2/Hz','w/m^2/hz','W/m/hz','W/m/Hz']:
-                    norm = parse_norm(self.Spectrum.unit.split()[0])
-                    self.axis.set_ylabel("$%s \\mathrm{W/m^2/Hz}$" % norm)
-            else:
-                label_units = parse_units(self.Spectrum.unit)
-                self.axis.set_ylabel(label_units)
+            label_units = self.Spectrum.unit.to_string(format='latex')
+            self.axis.set_ylabel(label_units)
 
     @property
     def ylabel(self):
