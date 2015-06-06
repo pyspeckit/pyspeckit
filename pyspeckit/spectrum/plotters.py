@@ -434,6 +434,8 @@ class Plotter(object):
                 self.axis.set_ylabel(self.Spectrum.unit)
             else:
                 label_units = self.Spectrum.unit.to_string(format='latex')
+                if 'mathring{A}' in label_units:
+                    label_units = label_units.replace('\mathring{A}', 'A')
                 self.axis.set_ylabel(label_units)
 
     @property
