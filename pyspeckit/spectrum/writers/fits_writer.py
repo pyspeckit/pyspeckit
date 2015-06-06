@@ -32,7 +32,10 @@ class write_fits(Writer):
         header['OBJECT'] = self.Spectrum.specname
         unit = self.Spectrum.unit or self.Spectrum.header.get('BUNIT')
         if unit is not None:
-            header['BUNIT'] = unit
+            try:
+                header['BUNIT'] = unit.to_string()
+            except AttributeError:
+                header['BUNIT'] = unit
 
         #header_nowcs = wcs_utils.strip_wcs_from_header(header)
         #header.insert(2, pyfits.Card(keyword='NAXIS', value=1))

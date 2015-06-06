@@ -37,7 +37,9 @@ class write_hdf5(Writer):
             
             # Add metadata to each dataset?
             xarr.attrs.create('unit', str(self.Spectrum.xarr.unit.to_string()))
-            data.attrs.create('units', self.Spectrum.units)
+            data.attrs.create('unit', self.Spectrum.unit.to_string().encode('utf-8')
+                              if hasattr(self.Spectrum.unit, 'to_string')
+                              else self.Spectrum.unit)
             data.attrs.create('type', self.Spectrum.ytype)
             
             if extras is not None:

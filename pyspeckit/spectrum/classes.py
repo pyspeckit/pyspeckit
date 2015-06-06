@@ -349,7 +349,10 @@ class Spectrum(object):
         """
 
         if hdr.get('BUNIT'):
-            self.unit = hdr.get('BUNIT').strip()
+            try:
+                self.unit = u.Unit(hdr.get('BUNIT').strip())
+            except u.UnitsError:
+                self.unit = hdr.get('BUNIT').strip()
         elif not hasattr(self, 'unit') or (hasattr(self,'unit') and self.unit
                                            is None):
             self.unit = 'undefined'
