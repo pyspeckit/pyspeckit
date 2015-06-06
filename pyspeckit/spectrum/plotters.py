@@ -427,8 +427,12 @@ class Plotter(object):
         elif self.Spectrum.unit == 'Jy':
             self.axis.set_ylabel("$S_\\nu$ (Jy)")            
         else:
-            label_units = self.Spectrum.unit.to_string(format='latex')
-            self.axis.set_ylabel(label_units)
+            if isinstance(self.Spectrum.unit, str) and "$" in self.Spectrum.unit:
+                # assume LaTeX already
+                self.axis.set_ylabel(self.Spectrum.unit)
+            else:
+                label_units = self.Spectrum.unit.to_string(format='latex')
+                self.axis.set_ylabel(label_units)
 
     @property
     def ylabel(self):
