@@ -351,7 +351,7 @@ class Spectrum(object):
         if hdr.get('BUNIT'):
             try:
                 self.unit = u.Unit(hdr.get('BUNIT').strip())
-            except u.UnitsError:
+            except (u.UnitsError, ValueError):
                 self.unit = hdr.get('BUNIT').strip()
         elif not hasattr(self, 'unit') or (hasattr(self,'unit') and self.unit
                                            is None):

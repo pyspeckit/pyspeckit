@@ -430,6 +430,8 @@ class Plotter(object):
             if isinstance(self.Spectrum.unit, str) and "$" in self.Spectrum.unit:
                 # assume LaTeX already
                 self.axis.set_ylabel(self.Spectrum.unit)
+            elif isinstance(self.Spectrum.unit, str):
+                self.axis.set_ylabel(self.Spectrum.unit)
             else:
                 label_units = self.Spectrum.unit.to_string(format='latex')
                 self.axis.set_ylabel(label_units)
