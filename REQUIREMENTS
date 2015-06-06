@@ -2,5 +2,5 @@ numpy
 numpydoc
 matplotlib
 ordereddict
-astropy
+astropy>=1.0
 spectral-cube
