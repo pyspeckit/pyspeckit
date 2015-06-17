@@ -36,6 +36,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    Optical Vega Echelle <example_vega_echelle>
    Optical INTERACTIVE <interactive>
    Optical Supernova (?) H-alpha multi-component voigt <example_sn>
+   Optical MUSE Spectral Cube <example_MUSE>
    Template Fitting <example_template>
    Monte Carlo <example_pymc>
 
