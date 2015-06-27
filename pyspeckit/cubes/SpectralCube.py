@@ -527,7 +527,7 @@ class Cube(spectrum.Spectrum):
                 verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
                 blank_value=0, integral=True, direct=False, absorption=False,
                 use_nearest_as_guess=False, use_neighbor_as_guess=False,
-                start_from_point=(0,0), multicore=0, position_order = None,
+                start_from_point=(0,0), multicore=1, position_order = None,
                 continuum_map=None, **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
@@ -572,7 +572,7 @@ class Cube(spectrum.Spectrum):
             3 - print out messages when fitting pixels
             4 - specfit will be verbose 
         multicore: int
-            if >0, try to use multiprocessing via parallel_map to run on multiple cores
+            if >1, try to use multiprocessing via parallel_map to run on multiple cores
         continuum_map: np.ndarray
             Same shape as error map.  Subtract this from data before estimating noise.
 
@@ -749,9 +749,9 @@ class Cube(spectrum.Spectrum):
                 if ii % (min(10**(3-verbose_level),1)) == 0:
                     snmsg = " s/n=%5.1f" % (max_sn) if max_sn is not None else ""
                     npix = len(valid_pixels)
-                    pct = 100 * self._counter/float(npix) * multicore
+                    pct = 100 * (ii+1.0)/float(npix)
                     log.info("Finished fit %6i of %6i at (%4i,%4i)%s. Elapsed time is %0.1f seconds.  %%%01.f" %
-                             (self._counter, npix, x, y, snmsg, time.time()-t0, pct))
+                             (ii+1, npix, x, y, snmsg, time.time()-t0, pct))
 
             if sp.specfit.modelerrs is None:
                 raise TypeError("The fit never completed; something has gone wrong.")
@@ -802,7 +802,7 @@ class Cube(spectrum.Spectrum):
         #### END TEST BLOCK ####
 
 
-        if multicore > 0:
+        if multicore > 1:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             result = parallel_map(fit_a_pixel, sequence, numcores=multicore)
             self._result = result # backup - don't want to lose data in the case of a failure
@@ -873,17 +873,17 @@ class Cube(spectrum.Spectrum):
 
         if verbose:
             log.info("Finished final fit %i.  "
-                     "Elapsed time was %0.1f seconds" % (ii, time.time()-t0))
+                     "Elapsed time was %0.1f seconds" % (ii+1, time.time()-t0))
 
 
-    def momenteach(self, verbose=True, verbose_level=1, multicore=0, **kwargs):
+    def momenteach(self, verbose=True, verbose_level=1, multicore=1, **kwargs):
         """
         Return a cube of the moments of each pixel
 
         Parameters
         ----------
         multicore: int
-            if >0, try to use multiprocessing via parallel_map to run on multiple cores
+            if >1, try to use multiprocessing via parallel_map to run on multiple cores
         """
 
         if not hasattr(self.mapplot,'plane'):
@@ -914,7 +914,7 @@ class Cube(spectrum.Spectrum):
 
             return ((x,y), self.momentcube[:,y,x])
 
-        if multicore > 0:
+        if multicore > 1:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             result = parallel_map(moment_a_pixel, sequence, numcores=multicore)
             merged_result = [core_result
@@ -930,7 +930,7 @@ class Cube(spectrum.Spectrum):
 
         if verbose:
             log.info("Finished final moment %i.  "
-                     "Elapsed time was %0.1f seconds" % (ii, time.time()-t0))
+                     "Elapsed time was %0.1f seconds" % (ii+1, time.time()-t0))
 
     def show_moment(self, momentnumber, **kwargs):
         """
