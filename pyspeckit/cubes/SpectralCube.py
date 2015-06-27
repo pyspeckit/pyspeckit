@@ -686,9 +686,10 @@ class Cube(spectrum.Spectrum):
             else:
                 max_sn = None
             sp.specfit.Registry = self.Registry # copy over fitter registry
+
             # Do some homework for local fits
-            xpatch = np.array([1,1,1,0,0,0,-1,-1,-1],dtype=np.int)
-            ypatch = np.array([1,0,-1,1,0,-1,1,0,-1],dtype=np.int)
+            # Exclude out of bounds points
+            xpatch, ypatch = get_neighbors(x,y,self.has_fit.shape)
             local_fits = self.has_fit[ypatch+y,xpatch+x]
 
             
@@ -1222,3 +1223,30 @@ class CubeStack(Cube):
         self.cube = self.cube[indices,:,:]
         if self.errorcube is not None:
             self.errorcube = self.errorcube[indices,:,:]
+
+def get_neighbors(x, y, shape):
+    """
+    Find the 9 nearest neighbors, excluding self and any out of bounds points
+    """
+    xpyp = [(ii,jj) 
+            for ii,jj in itertools.product((-1,0,1),
+                                           (-1,0,1))
+            if (jj+x < shape[1]) and (jj+x >= 0)
+            and  (ii+y < shape[0]) and (ii+y >= 0)
+            and not (ii==0 and jj==0)]
+    xpatch, ypatch = zip(*xpyp)
+
+    return np.array(xpatch, dtype='int'), np.array(ypatch, dtype='int')
+
+def test_get_neighbors():
+    xp,yp = get_neighbors(0,0,[10,10])
+    assert np.all(xp == [0,1,1])
+    assert np.all(yp == [1,0,1])
+
+    xp,yp = get_neighbors(0,1,[10,10])
+    assert np.all(xp == [-1,-1,0,1,1])
+    assert np.all(yp == [ 0, 1,1,0,1])
+
+    xp,yp = get_neighbors(9,9,[10,10])
+    assert np.all(xp == [-1,-1, 0,])
+    assert np.all(yp == [-1, 0,-1,])
