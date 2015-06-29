@@ -8,6 +8,7 @@ import numpy as np
 from pyspeckit.mpfit import mpfit,mpfitException
 from pyspeckit.spectrum.parinfo import ParinfoList,Parinfo
 import copy
+from astropy import log
 import matplotlib.cbook as mpcb
 import fitter
 from . import mpfit_messages
@@ -30,13 +31,15 @@ class SpectralModel(fitter.SimpleFitter):
     """
 
     def __init__(self, modelfunc, npars, 
-            shortvarnames=("A","\\Delta x","\\sigma"), multisingle='multi',
-            fitunits=None,
-            centroid_par=None,
-            fwhm_func=None,
-            fwhm_pars=None,
-            use_lmfit=False, **kwargs):
-        """Spectral Model Initialization
+                 shortvarnames=("A","\\Delta x","\\sigma"),
+                 fitunits=None,
+                 centroid_par=None,
+                 fwhm_func=None,
+                 fwhm_pars=None,
+                 integral_func=None,
+                 use_lmfit=False, **kwargs):
+        """
+        Spectral Model Initialization
 
         Create a Spectral Model class for data fitting
 
@@ -62,7 +65,7 @@ class SpectralModel(fitter.SimpleFitter):
             not the past tense of party.  Can declare, via text, that
             some parameters are tied to each other.  Defaults to zeros like the
             others, but it's not clear if that's a sensible default
-        fitunits : list (optional)
+        fitunits : str (optional)
             convert X-axis to these units before passing to model
         parsteps : list (optional)
             minimum step size for each paremeter          (defaults to ZEROS)
@@ -70,9 +73,6 @@ class SpectralModel(fitter.SimpleFitter):
             default number of peaks to assume when fitting (can be overridden)
         shortvarnames : list (optional)
             TeX names of the variables to use when annotating
-        multisingle : list (optional)
-            Are there multiple peaks (no background will be fit) or
-            just a single peak (a background may/will be fit)
 
         Returns
         -------
@@ -83,11 +83,10 @@ class SpectralModel(fitter.SimpleFitter):
         self.modelfunc = modelfunc
         if self.__doc__ is None:
             self.__doc__ = modelfunc.__doc__
-        else:
+        elif modelfunc.__doc__ is not None:
             self.__doc__ += modelfunc.__doc__
-        self.npars = npars 
+        self.npars = npars
         self.default_npars = npars
-        self.multisingle = multisingle
         self.fitunits = fitunits
         
         # this needs to be set once only
@@ -107,19 +106,28 @@ class SpectralModel(fitter.SimpleFitter):
         # FWHM function and parameters
         self.fwhm_func = fwhm_func
         self.fwhm_pars = fwhm_pars 
+
+        # analytic integral function
+        self.integral_func = integral_func
+
+    def __call__(self, *args, **kwargs):
+        
+        use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
+        if use_lmfit:
+            return self.lmfitter(*args,**kwargs)
+        return self.fitter(*args,**kwargs)
+
+    def make_parinfo(self, **kwargs):
+        return self._make_parinfo(**kwargs)[0]
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
-            parlimits=None, parlimited=None, parfixed=None, parerror=None,
-            partied=None, fitunits=None, parsteps=None, npeaks=1,
-            parinfo=None,
-            names=None, values=None, limits=None,
-            limited=None, fixed=None, error=None, tied=None, steps=None,
-            negamp=None,
-            limitedmin=None, limitedmax=None,
-            minpars=None, maxpars=None,
-            vheight=False,
-            debug=False,
-            **kwargs):
+                      parlimits=None, parlimited=None, parfixed=None,
+                      parerror=None, partied=None, fitunits=None,
+                      parsteps=None, npeaks=1, parinfo=None, names=None,
+                      values=None, limits=None, limited=None, fixed=None,
+                      error=None, tied=None, steps=None, negamp=None,
+                      limitedmin=None, limitedmax=None, minpars=None,
+                      maxpars=None, vheight=False, debug=False, **kwargs):
         """
         Generate a `ParinfoList` that matches the inputs
 
@@ -168,13 +176,13 @@ class SpectralModel(fitter.SimpleFitter):
         elif self.default_parinfo is not None and parlimits is None:
             parlimits = [p['limits'] for p in self.default_parinfo]
 
-        self.fitunits = fitunits
         self.npeaks = npeaks
 
         # the height / parvalue popping needs to be done before the temp_pardict is set in order to make sure
         # that the height guess isn't assigned to the amplitude
         self.vheight = vheight
-        if vheight and len(self.parinfo) == self.default_npars and len(parvalues) == self.default_npars + 1:
+        if (vheight and len(self.parinfo) == self.default_npars and
+            len(parvalues) == self.default_npars + 1):
             # if the right number of parameters are passed, the first is the height
             self.parinfo = [ {'n':0, 'value':parvalues.pop(0), 'limits':(0,0),
                 'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
@@ -197,7 +205,7 @@ class SpectralModel(fitter.SimpleFitter):
         else:
             self.parinfo = []
 
-        if debug: print "After VHEIGHT parse len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight)
+        if debug: log.debug("After VHEIGHT parse len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight))
 
 
         # this is a clever way to turn the parameter lists into a dict of lists
@@ -226,7 +234,7 @@ class SpectralModel(fitter.SimpleFitter):
             for jj in xrange(self.npeaks)
             for ii in xrange(self.npars) ] # order matters!
 
-        if debug: print "After Generation step len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight)
+        if debug: log.debug("After Generation step len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight))
 
         if debug > True: import pdb; pdb.set_trace()
 
@@ -268,7 +276,7 @@ class SpectralModel(fitter.SimpleFitter):
                 pars = partemp
             except AttributeError:
                 if debug: 
-                    print "Reading pars as LMPar failed."
+                    log.debug("Reading pars as LMPar failed.")
                     if debug > 1:
                         import pdb; pdb.set_trace()
                 pass
@@ -279,10 +287,12 @@ class SpectralModel(fitter.SimpleFitter):
             parvals = [p.value for p in parvals]
         else:
             parvals = list(pars)
-        if debug: print "pars to n_modelfunc: ",pars
+        if debug:
+            log.debug("pars to n_modelfunc: {0}, parvals:{1}".format(pars, parvals))
         def L(x):
             v = np.zeros(len(x))
-            if self.vheight: v += parvals[0]
+            if self.vheight:
+                v += parvals[0]
             # use len(pars) instead of self.npeaks because we want this to work
             # independent of the current best fit
             for jj in xrange((len(parvals)-self.vheight)/self.npars):
@@ -297,22 +307,14 @@ class SpectralModel(fitter.SimpleFitter):
         Wrapper function to compute the fit residuals in an mpfit-friendly format
         """
         if err is None:
-            def f(p,fjac=None): return [0,(y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))]
+            def f(p,fjac=None):
+                residuals = (y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))
+                return [0,residuals]
         else:
-            def f(p,fjac=None): return [0,(y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))/err]
+            def f(p,fjac=None):
+                residuals = (y-self.n_modelfunc(p, **self.modelfunc_kwargs)(x))/err
+                return [0,residuals]
         return f
-
-    def __call__(self, *args, **kwargs):
-        
-        use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
-        if use_lmfit:
-            return self.lmfitter(*args,**kwargs)
-        if self.multisingle == 'single':
-            # Generate a variable-height version of the model
-            # not used func = fitter.vheightmodel(self.modelfunc)
-            return self.fitter(*args, **kwargs)
-        elif self.multisingle == 'multi':
-            return self.fitter(*args,**kwargs)
 
     def lmfitfun(self,x,y,err=None,debug=False):
         """
@@ -323,7 +325,7 @@ class SpectralModel(fitter.SimpleFitter):
             kwargs = {}
             kwargs.update(self.modelfunc_kwargs)
 
-            if debug: print p,kwargs.keys()
+            if debug: log.debug("Pars, kwarg keys: {0},{1}".format(p,kwargs.keys()))
             if err is None:
                 return (y-self.n_modelfunc(p,**kwargs)(x))
             else:
@@ -355,37 +357,50 @@ class SpectralModel(fitter.SimpleFitter):
             raise ImportError( "Could not import lmfit, try using mpfit instead." )
 
         self.xax = xax # the 'stored' xax is just a link to the original
-        if hasattr(xax,'convert_to_unit') and hasattr(self,'fitunits') and self.fitunits is not None:
+        if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
             # some models will depend on the input units.  For these, pass in an X-axis in those units
             # (gaussian, voigt, lorentz profiles should not depend on units.  Ammonia, formaldehyde,
             # H-alpha, etc. should)
             xax = copy.copy(xax)
             xax.convert_to_unit(self.fitunits, quiet=quiet)
+        elif self.fitunits is not None:
+            raise TypeError("X axis does not have a convert method")
 
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
             err[np.isnan(data) + np.isinf(data)] = np.inf
             data[np.isnan(data) + np.isinf(data)] = 0
+        if np.any(np.isnan(err)):
+            raise ValueError("One or more of the error values is NaN."
+                             "  This is not allowed.  Errors can be infinite "
+                             "(which is equivalent to giving zero weight to "
+                             "a data point), but otherwise they must be positive "
+                             "floats.")
+        elif np.any(err<0):
+            raise ValueError("At least one error value is negative, which is "
+                             "not allowed as negative errors are not "
+                             "meaningful in the optimization process.")
+
 
         if parinfo is None:
             parinfo, kwargs = self._make_parinfo(debug=debug, **kwargs)
             if debug:
-                print parinfo
+                log.debug(parinfo)
 
         LMParams = parinfo.as_Parameters()
         if debug:
-            print "LMParams: ","\n".join([repr(p) for p in LMParams.values()])
-            print "parinfo:  ",parinfo
+            log.debug("LMParams: "+"\n".join([repr(p) for p in LMParams.values()]))
+            log.debug("parinfo:  {0}".format(parinfo))
         minimizer = lmfit.minimize(self.lmfitfun(xax,np.array(data),err,debug=debug),LMParams,**kwargs)
         if not quiet:
-            print "There were %i function evaluations" % (minimizer.nfev)
+            log.info("There were %i function evaluations" % (minimizer.nfev))
         #modelpars = [p.value for p in parinfo.values()]
         #modelerrs = [p.stderr for p in parinfo.values() if p.stderr is not None else 0]
 
         self.LMParams = LMParams
         self.parinfo._from_Parameters(LMParams)
         if debug:
-            print LMParams
-            print parinfo
+            log.debug(LMParams)
+            log.debug(parinfo)
 
         self.mp = minimizer
         self.mpp = self.parinfo.values
@@ -405,13 +420,12 @@ class SpectralModel(fitter.SimpleFitter):
             warn( "Warning: chi^2 is nan" )
     
         if hasattr(self.mp,'ier') and self.mp.ier not in [1,2,3,4]:
-            print "Fitter failed: %s, %s" % (self.mp.message, self.mp.lmdif_message)
+            log.warning("Fitter failed: %s, %s" % (self.mp.message, self.mp.lmdif_message))
 
         return self.mpp,self.model,self.mpperr,chi2
 
-
     def fitter(self, xax, data, err=None, quiet=True, veryverbose=False,
-            debug=False, parinfo=None, **kwargs):
+               debug=False, parinfo=None, **kwargs):
         """
         Run the fitter using mpfit.
         
@@ -440,25 +454,39 @@ class SpectralModel(fitter.SimpleFitter):
         if parinfo is None:
             parinfo, kwargs = self._make_parinfo(debug=debug, **kwargs)
         else:
-            if debug: print "Using user-specified parinfo dict"
+            if debug: log.debug("Using user-specified parinfo dict")
             # clean out disallowed kwargs (don't want to pass them to mpfit)
-            throwaway, kwargs = self._make_parinfo(debug=debug, **kwargs)
+            #throwaway, kwargs = self._make_parinfo(debug=debug, **kwargs)
 
         self.xax = xax # the 'stored' xax is just a link to the original
-        if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
+        if hasattr(xax,'as_unit') and self.fitunits is not None:
             # some models will depend on the input units.  For these, pass in an X-axis in those units
             # (gaussian, voigt, lorentz profiles should not depend on units.  Ammonia, formaldehyde,
             # H-alpha, etc. should)
             xax = copy.copy(xax)
-            xax.convert_to_unit(self.fitunits, quiet=quiet)
+            # xax.convert_to_unit(self.fitunits, quiet=quiet)
+            xax = xax.as_unit(self.fitunits, quiet=quiet, **kwargs)
+        elif self.fitunits is not None:
+            raise TypeError("X axis does not have a convert method")
 
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
             err[np.isnan(data) + np.isinf(data)] = np.inf
             data[np.isnan(data) + np.isinf(data)] = 0
 
+        if np.any(np.isnan(err)):
+            raise ValueError("One or more of the error values is NaN."
+                             "  This is not allowed.  Errors can be infinite "
+                             "(which is equivalent to giving zero weight to "
+                             "a data point), but otherwise they must be positive "
+                             "floats.")
+        elif np.any(err<0):
+            raise ValueError("At least one error value is negative, which is "
+                             "not allowed as negative errors are not "
+                             "meaningful in the optimization process.")
+
         if debug:
-            for p in parinfo: print p
-            print "\n".join(["%s %i: tied: %s value: %s" % (p['parname'],p['n'],p['tied'],p['value']) for p in parinfo])
+            for p in parinfo: log.debug( p )
+            log.debug( "\n".join(["%s %i: tied: %s value: %s" % (p['parname'],p['n'],p['tied'],p['value']) for p in parinfo]) )
 
         mp = mpfit(self.mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
         mpp = mp.params
@@ -468,7 +496,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         if mp.status == 0:
             if "parameters are not within PARINFO limits" in mp.errmsg:
-                print parinfo
+                log.warn( parinfo )
             raise mpfitException(mp.errmsg)
 
         for i,(p,e) in enumerate(zip(mpp,mpperr)):
@@ -476,12 +504,15 @@ class SpectralModel(fitter.SimpleFitter):
             self.parinfo[i]['error'] = e
 
         if veryverbose:
-            print "Fit status: ",mp.status
-            print "Fit error message: ",mp.errmsg
-            print "Fit message: ",mpfit_messages[mp.status]
+            log.info("Fit status: {0}".format(mp.status))
+            log.info("Fit error message: {0}".format(mp.errmsg))
+            log.info("Fit message: {0}".format(mpfit_messages[mp.status]))
             for i,p in enumerate(mpp):
-                print self.parinfo[i]['parname'],p," +/- ",mpperr[i]
-            print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
+                log.info("{0}: {1} +/- {2}".format(self.parinfo[i]['parname'],
+                                                    p,mpperr[i]))
+            log.info("Chi2: {0} Reduced Chi2: {1}  DOF:{2}".format(mp.fnorm,
+                                                                   mp.fnorm/(len(data)-len(mpp)),
+                                                                   len(data)-len(mpp)))
 
         self.mp = mp
         self.mpp = self.parinfo.values
@@ -489,12 +520,12 @@ class SpectralModel(fitter.SimpleFitter):
         self.mppnames = self.parinfo.names
         self.model = self.n_modelfunc(self.parinfo,**self.modelfunc_kwargs)(xax)
         if debug:
-            print "Modelpars: ",self.mpp
+            log.debug("Modelpars: {0}".format(self.mpp))
         if np.isnan(chi2):
             if debug:
                 raise ValueError("Error: chi^2 is nan")
             else:
-                print "Warning: chi^2 is nan"
+                log.warn("Warning: chi^2 is nan")
         return mpp,self.model,mpperr,chi2
 
     def slope(self, xinp):
@@ -548,7 +579,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         label_list = []
         for (value, error, varname, fixed, varnumber) in loop_list:
-            if debug: print(value, error, varname, fixed, varnumber)
+            if debug: log.debug("".join(value, error, varname, fixed, varnumber))
             if fixed or error==0:
                 label = ("$%s(%i)$=%8s" % (varname,varnumber,
                         Decimal("%g" % value).quantize( Decimal("%0.6g" % (value)) )))
@@ -589,6 +620,25 @@ class SpectralModel(fitter.SimpleFitter):
             return (self.model*dx).sum()
         else:
             return self.model.sum()
+
+    def analytic_integral(self, modelpars=None, npeaks=None, npars=None):
+        """
+        Placeholder for analyic integrals; these must be defined for individual models
+        """
+        if self.integral_func is None:
+            raise NotImplementedError("Analytic integrals must be implemented independently for each model type")
+
+        # all of these parameters are allowed to be overwritten
+        if modelpars is None:
+            modelpars = self.parinfo.values
+        if npeaks is None:
+            npeaks = self.npeaks
+        if npars is None:
+            npars = self.npars
+
+        return np.sum([
+            self.integral_func(modelpars[npars*ii:npars*(1+ii)])
+            for ii in xrange(npeaks)])
 
     def component_integrals(self, xarr, dx=None):
         """
@@ -666,10 +716,18 @@ class SpectralModel(fitter.SimpleFitter):
 
     def logp(self, xarr, data, error, pars=None):
         """
-        Return the log probability of the model
+        Return the log probability of the model.  If the parameter is out of
+        range, return -inf
         """
         if pars is None:
             pars = self.parinfo
+        else:
+            parinfo = copy.copy(self.parinfo)
+            for value,parameter in zip(pars,parinfo):
+                try:
+                    parameter.value = value
+                except ValueError:
+                    return -np.inf
         model = self.n_modelfunc(pars, **self.modelfunc_kwargs)(xarr)
 
         difference = np.abs(data-model)
@@ -753,11 +811,14 @@ class SpectralModel(fitter.SimpleFitter):
         def probfunc(pars):
             return self.logp(xarr, data, error, pars=pars)
 
-        sampler = emcee.EnsembleSampler(nwalkers, self.npars*self.npeaks+self.vheight, probfunc, **kwargs)
+        sampler = emcee.EnsembleSampler(nwalkers,
+                                        self.npars*self.npeaks+self.vheight,
+                                        probfunc, **kwargs)
 
         return sampler
 
-    def get_pymc(self, xarr, data, error, use_fitted_values=False, inf=np.inf, **kwargs):
+    def get_pymc(self, xarr, data, error, use_fitted_values=False, inf=np.inf,
+            use_adaptive=False, return_dict=False, **kwargs):
         """
         Create a pymc MCMC sampler.  Defaults to 'uninformative' priors
 
@@ -787,12 +848,12 @@ class SpectralModel(fitter.SimpleFitter):
         >>> MCwithpriors.stats()['AMPLITUDE0']
         
         """
+        old_errsettings = np.geterr()
         try:
-            old_errsettings = np.geterr()
-            import pymc # pymc breaks error settings
+            import pymc
+        finally:
+            # pymc breaks error settings
             np.seterr(**old_errsettings)
-        except ImportError:
-            return
 
         #def lowerlimit_like(x,lolim):
         #    "lower limit (log likelihood - set very positive for unacceptable values)"
@@ -804,7 +865,9 @@ class SpectralModel(fitter.SimpleFitter):
         #UpLim = pymc.distributions.stochastic_from_dist('uplim', logp=upperlimit_like, dtype=np.float, mv=False)
 
         funcdict = {}
-        for par in self.parinfo:
+        # very, very worrisome: pymc changes the values of parinfo
+        parcopy = copy.deepcopy(self.parinfo)
+        for par in parcopy:
             lolim = par.limits[0] if par.limited[0] else -inf
             uplim = par.limits[1] if par.limited[1] else  inf
             if par.fixed:
@@ -820,7 +883,10 @@ class SpectralModel(fitter.SimpleFitter):
                     else:
                         funcdict[par.parname] = pymc.distributions.Normal(par.parname, par.value, 1./par.error**2)
                 else:
-                    funcdict[par.parname] = pymc.distributions.Uninformative(par.parname, value=par.value)
+                    if any(par.limited):
+                        funcdict[par.parname] = pymc.distributions.Uniform(par.parname, lolim, uplim, value=par.value)
+                    else:
+                        funcdict[par.parname] = pymc.distributions.Uninformative(par.parname, value=par.value)
             elif any(par.limited):
                 lolim = par.limits[0] if par.limited[0] else -1e10
                 uplim = par.limits[1] if par.limited[1] else  1e10
@@ -830,7 +896,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         d = dict(funcdict)
 
-        def modelfunc(xarr, pars=self.parinfo, **kwargs):
+        def modelfunc(xarr, pars=parcopy, **kwargs):
             for k,v in kwargs.iteritems():
                 if k in pars.keys():
                     pars[k].value = v
@@ -843,6 +909,104 @@ class SpectralModel(fitter.SimpleFitter):
 
         datamodel = pymc.distributions.Normal('data',mu=funcdet,tau=1/np.asarray(error)**2,observed=True,value=np.asarray(data))
         d['data']=datamodel
+
+        if return_dict:
+            return d
         
-        return pymc.MCMC(d)
+        mc = pymc.MCMC(d)
+        if use_adaptive:
+            mc.use_step_method(pymc.AdaptiveMetropolis,[d[p] for p in self.parinfo.names])
+
+        return mc
     
+class AstropyModel(SpectralModel):
+
+    def __init__(self, model, shortvarnames=None, **kwargs):
+        """
+        Override the SpectralModel initialization
+        """
+        if hasattr(self,__doc__): # how do you extend a docstring really?
+            self.__doc__ += SpectralModel.__doc__
+
+        if shortvarnames is None:
+            shortvarnames = model.param_names
+
+        super(AstropyModel,self).__init__(model, len(model.parameters),
+            shortvarnames=shortvarnames,
+            model=model,
+            **kwargs)
+
+        self.mp = None
+        self.vheight = False
+        self.npeaks = 1
+        
+
+    def _make_parinfo(self, model=None):
+
+        self.parinfo = ParinfoList([
+            Parinfo(parname=name,value=value) 
+            for name,value in zip(model.param_names,model.parameters)])
+
+        return self.parinfo, {}
+
+    def _parse_parinfo(self, parinfo):
+        """
+        Parse a ParinfoList into astropy.models parameters
+        """
+        if len(parinfo) > self.npars:
+            if len(parinfo) % self.npars != 0:
+                raise ValueError("Need to have an integer number of models")
+            else:
+                self.modelfunc.param_names = parinfo.names
+                self.modelfunc.parameters = parinfo.values
+        else:
+            self.modelfunc.param_names = parinfo.names
+            self.modelfunc.parameters = parinfo.values
+
+    def fitter(self, xax, data, err=None, quiet=True, veryverbose=False,
+            debug=False, parinfo=None, params=None, npeaks=None, **kwargs):
+
+        import astropy.models as models
+
+        if npeaks is not None and npeaks > 1:
+            raise NotImplementedError("Astropy models cannot be used to fit multiple peaks yet")
+
+        if parinfo is not None:
+            self._parse_parinfo(parinfo)
+        if params is not None:
+            self.modelfunc.parameters = params
+
+        self.astropy_fitter = models.fitting.NonLinearLSQFitter(self.modelfunc)
+        
+        if err is None:
+            self.astropy_fitter(xax, data, **kwargs)
+        else:
+            self.astropy_fitter(xax, data, weights=1./err**2, **kwargs)
+
+        mpp = self.astropy_fitter.fitpars
+        cov = self.astropy_fitter.covar
+        if cov is None:
+            mpperr = np.zeros(len(mpp))
+        else:
+            mpperr = cov.diagonal()
+        self.model = self.astropy_fitter.model(xax)
+        if err is None:
+            chi2 = ((data-self.model)**2).sum()
+        else:
+            chi2 = ((data-self.model)**2/err**2).sum()
+
+        # update object paramters
+        self.modelfunc.parameters = mpp
+        self._make_parinfo(self.modelfunc)
+
+        return mpp,self.model,mpperr,chi2
+
+    def n_modelfunc(self, pars=None, debug=False, **kwargs):
+        """
+        Only deals with single-peak functions
+        """
+        try:
+            self._parse_parinfo(pars)
+        except AttributeError:
+            self.modelfunc.parameters = pars
+        return self.modelfunc

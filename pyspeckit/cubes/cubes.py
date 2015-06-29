@@ -7,53 +7,160 @@ From `agpy <http://code.google.com/p/agpy/source/browse/trunk/agpy/cubes.py>`_,
 contains functions to perform various transformations on data cubes and their
 headers.  
 
-########
 
 """
-from numpy import sqrt,repeat,indices,newaxis,pi,cos,sin,array,mean,sum,nansum
+from numpy import sqrt,repeat,indices,newaxis,pi,cos,sin,array,mean,nansum
 from math import acos,atan2,tan
 import numpy
+import numpy as np
 import copy
 import os
+import astropy.io.fits as fits
+import astropy.wcs as pywcs
 import tempfile
 import posang # agpy code
 import pyspeckit
+from astropy import coordinates
+from astropy import log
 from pyspeckit.specwarnings import warn
+from pyspeckit.parallel_map import parallel_map
 try:
-    from AG_fft_tools.convolve import smooth
-    from pyspeckit.parallel_map import parallel_map
+    from AG_fft_tools import smooth
     smoothOK = True
 except ImportError:
     smoothOK = False
 try:
-    import coords
-    coordsOK = True
+    from scipy.interpolate import UnivariateSpline
+    scipyOK = True
 except ImportError:
-    coordsOK = False
-try: # pywcs + pyfits OR astropy, no mixing!
-    import astropy.io.fits as pyfits
-    import astropy.wcs as pywcs
-    wcsOK = True
-except ImportError:
-    import pyfits
-    try:
-        import pywcs
-        wcsOK = True
-    except ImportError:
-        wcsOK = False
+    scipyOK = False
 
 dtor = pi/180.0
+
+
+def blfunc_generator(x=None, polyorder=None, splineorder=None,
+                     sampling=1):
+    """
+    Generate a function that will fit a baseline (polynomial or spline) to a
+    data set.  Either ``splineorder`` or ``polyorder`` must be set
+
+    Parameters
+    ----------
+    x : np.ndarray or None
+        The X-axis of the fitted array.  Will be set to
+        ``np.arange(len(data))`` if not specified
+    polyorder : None or int
+        The polynomial order.
+    splineorder : None or int
+    sampling : int
+        The sampling rate to use for the data.  Can set to higher numbers to
+        effectively downsample the data before fitting
+    """
+    def blfunc(args, x=x):
+        yfit,yreal = args
+        if hasattr(yfit,'mask'):
+            mask = True-yfit.mask
+        else:
+            mask = np.isfinite(yfit)
+
+        if x is None:
+            x = np.arange(yfit.size, dtype=yfit.dtype)
+
+        ngood = np.count_nonzero(mask)
+        if polyorder is not None:
+            if ngood < polyorder:
+                return yreal
+            else:
+                endpoint = ngood - (ngood % sampling)
+                y = np.mean([yfit[mask][ii:endpoint:sampling]
+                             for ii in range(sampling)], axis=0)
+                polypars = np.polyfit(x[mask][sampling/2:endpoint:sampling],
+                                      y, polyorder)
+                return yreal-np.polyval(polypars, x).astype(yreal.dtype)
+
+        elif splineorder is not None and scipyOK:
+            if splineorder < 1 or splineorder > 4:
+                raise ValueError("Spline order must be in {1,2,3,4}")
+            elif ngood <= splineorder:
+                return yreal
+            else:
+                log.debug("splinesampling: {0}  "
+                          "splineorder: {1}".format(sampling, splineorder))
+                endpoint = ngood - (ngood % sampling)
+                y = np.mean([yfit[mask][ii:endpoint:sampling]
+                             for ii in range(sampling)], axis=0)
+                if len(y) <= splineorder:
+                    raise ValueError("Sampling is too sparse.  Use finer sampling or "
+                                     "decrease the spline order.")
+                spl = UnivariateSpline(x[mask][sampling/2:endpoint:sampling],
+                                       y,
+                                       k=splineorder,
+                                       s=0)
+                return yreal-spl(x)
+        else:
+            raise ValueError("Must provide polyorder or splineorder")
+
+    return blfunc
+
+
+def baseline_cube(cube, polyorder=None, cubemask=None, splineorder=None,
+                  numcores=None, sampling=1):
+    """
+    Given a cube, fit a polynomial to each spectrum
+
+    Parameters
+    ----------
+    cube: np.ndarray
+        An ndarray with ndim = 3, and the first dimension is the spectral axis
+    polyorder: int
+        Order of the polynomial to fit and subtract
+    cubemask: boolean ndarray
+        Mask to apply to cube.  Values that are True will be ignored when
+        fitting.
+    numcores : None or int
+        Number of cores to use for parallelization.  If None, will be set to
+        the number of available cores.
+    """
+    x = np.arange(cube.shape[0], dtype=cube.dtype)
+    #polyfitfunc = lambda y: np.polyfit(x, y, polyorder)
+    blfunc = blfunc_generator(x=x,
+                              splineorder=splineorder,
+                              polyorder=polyorder,
+                              sampling=sampling)
+
+    reshaped_cube = cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
+
+    if cubemask is None:
+        log.debug("No mask defined.")
+        fit_cube = reshaped_cube
+    else:
+        if cubemask.dtype != 'bool':
+            raise TypeError("Cube mask *must* be a boolean array.")
+        if cubemask.shape != cube.shape:
+            raise ValueError("Mask shape does not match cube shape")
+        log.debug("Masking cube with shape {0} "
+                  "with mask of shape {1}".format(cube.shape, cubemask.shape))
+        masked_cube = cube.copy()
+        masked_cube[cubemask] = np.nan
+        fit_cube = masked_cube.reshape(cube.shape[0], cube.shape[1]*cube.shape[2]).T
+
+
+    baselined = np.array(parallel_map(blfunc, zip(fit_cube,reshaped_cube), numcores=numcores))
+    blcube = baselined.T.reshape(cube.shape)
+    return blcube
+
+
 
 def flatten_header(header,delete=False):
     """
     Attempt to turn an N-dimensional fits header into a 2-dimensional header
     Turns all CRPIX[>2] etc. into new keywords with suffix 'A'
 
-    header must be a pyfits.Header instance
+    header must be a fits.Header instance
     """
 
-    if not isinstance(header,pyfits.Header):
-        raise Exception("flatten_header requires a pyfits.Header instance")
+    if not isinstance(header,fits.Header):
+        raise Exception("flatten_header requires a fits.Header instance")
 
     newheader = header.copy()
 
@@ -61,9 +168,9 @@ def flatten_header(header,delete=False):
         try:
             if delete and int(key[-1]) >= 3 and key[:2] in ['CD','CR','CT','CU','NA']:
                 newheader.pop(key)
-            elif int(key[-1]) >= 3 and key[:2] in ['CD','CR','CT','CU','NA','PC']:
-                newheader.rename_key(key,'A'+key,force=True)
-            if delete and (int(key[4]) >= 3 or int(key[7]) >= 3) and key[:2]=='PC':
+            elif (int(key[-1]) >= 3 or int(key[2])>=3) and key[:2] in ['CD','CR','CT','CU','NA','PC']:
+                newheader.rename_keyword(key,'A'+key,force=True)
+            if delete and (int(key[4]) >= 3 or int(key[7]) >= 3) and key[:2]=='PC' and key in newheader:
                 newheader.pop(key)
         except ValueError:
             # if key[-1] is not an int
@@ -71,11 +178,14 @@ def flatten_header(header,delete=False):
         except IndexError:
             # if len(key) < 2
             pass
-    newheader.update('NAXIS',2)
+    newheader['NAXIS'] = 2
+    if header.get('WCSAXES'):
+        newheader['WCSAXES'] = 2
 
     return newheader
 
-def speccen_header(header,lon=None,lat=None):
+def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial',
+                   spectral_axis=3, celestial_axes=[1,2]):
     """
     Turn a cube header into a spectrum header, retaining RA/Dec vals where possible
     (speccen is like flatten; spec-ify would be better but, specify?  nah)
@@ -83,55 +193,85 @@ def speccen_header(header,lon=None,lat=None):
     Assumes 3rd axis is velocity
     """
     newheader = header.copy()
-    newheader.update('CRVAL1',header.get('CRVAL3'))
-    newheader.update('CRPIX1',header.get('CRPIX3'))
-    if 'CD1_1' in header: newheader.rename_key('CD1_1','OLDCD1_1')
-    elif 'CDELT1' in header: newheader.rename_key('CDELT1','OLDCDEL1')
-    if 'CD3_3' in header: newheader.update('CDELT1',header.get('CD3_3'))
-    elif 'CDELT3' in header: newheader.update('CDELT1',header.get('CDELT3'))
-    newheader.update('CTYPE1','VRAD')
-    if header.get('CUNIT3'): newheader.update('CUNIT1',header.get('CUNIT3'))
+    new_spectral_axis = 1
+    newheader['CRVAL{0}'.format(new_spectral_axis)] = header.get('CRVAL{0}'.format(spectral_axis))
+    newheader['CRPIX{0}'.format(new_spectral_axis)] = header.get('CRPIX{0}'.format(spectral_axis))
+    if 'CD{0}_{0}'.format(new_spectral_axis) in header:
+        newheader.rename_keyword('CD{0}_{0}'.format(new_spectral_axis),
+                                 'OLDCD{0}_{0}'.format(new_spectral_axis))
+    elif 'CDELT{0}'.format(new_spectral_axis) in header:
+        newheader.rename_keyword('CDELT{0}'.format(new_spectral_axis),'OLDCDEL{0}'.format(new_spectral_axis))
+    if 'CD{0}_{0}'.format(spectral_axis) in header:
+        newheader['CDELT{0}'.format(new_spectral_axis)] = header.get('CD{0}_{0}'.format(spectral_axis))
+    elif 'CDELT{0}'.format(spectral_axis) in header:
+        newheader['CDELT{0}'.format(new_spectral_axis)] = header.get('CDELT{0}'.format(spectral_axis))
+    newheader['CTYPE{0}'.format(new_spectral_axis)] = 'VRAD'
+    if header.get('CUNIT{0}'.format(spectral_axis)):
+        newheader['CUNIT{0}'.format(new_spectral_axis)] = header.get('CUNIT{0}'.format(spectral_axis))
     else: 
         print "Assuming CUNIT3 is km/s in speccen_header"
-        newheader.update('CUNIT1','km/s')
-    newheader.update('CRPIX2',1)
-    newheader.update('CTYPE2','RA---TAN')
-    newheader.update('CRPIX3',1)
-    newheader.update('CTYPE3','DEC--TAN')
+        newheader['CUNIT{0}'.format(new_spectral_axis)] = 'km/s'
+    newheader['CRPIX2'] = 1
+    newheader['CRPIX{0}'.format(spectral_axis)] = 1
+    if system == 'celestial':
+        c2 = 'RA---'
+        c3 = 'DEC--'
+    elif system == 'galactic':
+        c2 = 'GLON-'
+        c3 = 'GLAT-'
+    newheader['CTYPE2'] = c2+proj
+    newheader['CTYPE{0}'.format(spectral_axis)] = c3+proj
 
-    if lon is not None: newheader.update('CRVAL2',lon)
-    if lat is not None: newheader.update('CRVAL3',lat)
+    if lon is not None:
+        newheader['CRVAL2'] = lon
+    if lat is not None:
+        newheader['CRVAL{0}'.format(spectral_axis)] = lat
 
-    if 'CD2_2' in header: newheader.rename_key('CD2_2','OLDCD2_2')
-    if 'CD3_3' in header: newheader.rename_key('CD3_3','OLDCD3_3')
+    if 'CD2_2' in header:
+        newheader.rename_keyword('CD2_2','OLDCD2_2')
+    if 'CD{0}_{0}'.format(spectral_axis) in header:
+        newheader.rename_keyword('CD{0}_{0}'.format(spectral_axis),
+                                 'OLDCD{0}_{0}'.format(spectral_axis))
+    if 'CROTA2' in header:
+        newheader.rename_keyword('CROTA2','OLDCROT2')
 
     return newheader
 
-def extract_aperture(cube,ap,r_mask=False,wcs=None,coordsys='galactic',wunit='arcsec',debug=False):
+def extract_aperture(cube, ap, r_mask=False, wcs=None,
+                     coordsys='galactic', wunit='arcsec', debug=False,
+                     method='mean'):
     """
     Extract an aperture from a data cube.  E.g. to acquire a spectrum
     of an outflow that is extended.
 
     Cube should have shape [z,y,x], e.g. 
-    cube = pyfits.getdata('datacube.fits')
+    cube = fits.getdata('datacube.fits')
 
     Apertures are specified in PIXEL units with an origin of 0,0 (NOT the 1,1
     fits standard!) unless wcs and coordsys are specified
     
-    INPUTS:
-        wcs - a pywcs.WCS instance associated with the data cube
-        coordsys - the coordinate system the aperture is specified in.
-            Options are 'celestial' and 'galactic'.  Default is 'galactic'
-        wunit - units of width/height.  default 'arcsec', options 'arcmin' and 'degree'
+    Parameters
+    ----------
+    ap : list
+        For a circular aperture, len(ap)=3:
+            ap = [xcen,ycen,radius]
+        For an elliptical aperture, len(ap)=5:
+            ap = [xcen,ycen,height,width,PA]
+    wcs : wcs
+        a pywcs.WCS instance associated with the data cube
+    coordsys : str
+        the coordinate system the aperture is specified in.
+        Options are 'celestial' and 'galactic'.  Default is 'galactic'
+    wunit : str
+        units of width/height.  default 'arcsec', options 'arcmin' and 'degree'
+    method : str
+        'mean' or 'sum' (average over spectra, or sum them)
+        or 'error' for sqrt(sum-of-squares / n)
 
-    For a circular aperture, len(ap)=3:
-        ap = [xcen,ycen,radius]
-
-    For an elliptical aperture, len(ap)=5:
-        ap = [xcen,ycen,height,width,PA]
-
-    Optional inputs:
-        r_mask - return mask in addition to spectrum (for error checking?)
+    Other Parameters
+    ----------------
+    r_mask : bool
+    return mask in addition to spectrum (for error checking?)
     """
 
     if wcs is not None and coordsys is not None:
@@ -147,18 +287,25 @@ def extract_aperture(cube,ap,r_mask=False,wcs=None,coordsys='galactic',wunit='ar
     elif len(ap) == 5:
         yinds,xinds = indices(cube.shape[1:3])
         th = (ap[4])*dtor
-        xindr = (xinds-ap[0])*cos(th)  + (yinds-ap[1])*sin(th)
+        xindr = (xinds-ap[0])*cos(th) + (yinds-ap[1])*sin(th)
         yindr = (xinds-ap[0])*-sin(th) + (yinds-ap[1])*cos(th)
         ratio = max(ap[2:4])/min(ap[2:4])
-        mask = sqrt( (xindr*ratio)**2 + yindr**2) < max(ap[2:4])
+        mask = ((xindr*ratio)**2 + yindr**2)**0.5 < max(ap[2:4])
     else:
-        raise Exception("Wrong number of parameters.  Need either 3 parameters "+
-                "for a circular aperture or 5 parameters for an elliptical "+ 
-                "aperture.")
+        raise Exception("Wrong number of parameters.  Need either 3 parameters "
+                        "for a circular aperture or 5 parameters for an "
+                        "elliptical aperture.")
 
     npixinmask = mask.sum()
     mask3d = repeat(mask[newaxis,:,:],cube.shape[0],axis=0)
-    spec = nansum(nansum((cube*mask3d),axis=2),axis=1) / npixinmask
+    if method == 'mean':
+        specsum = nansum(nansum((cube*mask3d),axis=2),axis=1)
+        spec = specsum / npixinmask
+    elif method == 'error':
+        specsum = nansum(nansum((cube*mask3d)**2,axis=2),axis=1)
+        spec = (specsum)**0.5 / npixinmask
+    else:
+        spec = nansum(nansum((cube*mask3d),axis=2),axis=1)
 
     if r_mask:
         return spec,mask
@@ -169,22 +316,22 @@ def integ(file,vrange,xcen=None,xwidth=None,ycen=None,ywidth=None,**kwargs):
     """
     wrapper of subimage_integ that defaults to using the full image
     """
-    if isinstance(file,pyfits.PrimaryHDU):
+    if isinstance(file,fits.PrimaryHDU):
         header = file.header
         cube = file.data
-    elif isinstance(file,pyfits.HDUList):
+    elif isinstance(file,fits.HDUList):
         header = file[0].header
         cube = file[0].data
     else:
-        file = pyfits.open(file)
+        file = fits.open(file)
         header = file[0].header
         cube = file[0].data
 
     if None in [xcen,xwidth,ycen,ywidth]:
         xcen = header['NAXIS1'] / 2
-        xwidth = xcen
+        xwidth = xcen + header['NAXIS1'] % 2
         ycen = header['NAXIS2'] / 2
-        ywidth = ycen
+        ywidth = ycen + header['NAXIS2'] % 2
 
     return subimage_integ(cube,xcen,xwidth,ycen,ywidth,vrange,header=header,**kwargs)
 
@@ -200,7 +347,7 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
 
     xwidth and ywidth are "radius" values, i.e. half the length that will be extracted
 
-    if dvmult is set, multiple the average by DV (this is useful if you set
+    if dvmult is set, multiply the average by DV (this is useful if you set
     average=sum and dvmul=True to get an integrated value)
 
     """
@@ -243,15 +390,23 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
     if header is None:
         return subim
     else:
-        crv1,crv2 = wcs.wcs_pix2world(xlo,ylo,0)
+        # Cannot set crval2 != 0 for Galactic coordinates: therefore, probably
+        # wrong approach in general
+        #crv1,crv2 = wcs.wcs_pix2world(xlo,ylo,0)
 
-        flathead['CRVAL1'] = crv1[0]
-        flathead['CRVAL2'] = crv2[0]
-        flathead['CRPIX1'] = 1
-        flathead['CRPIX2'] = 1
+        #try:
+        #    flathead['CRVAL1'] = crv1[0]
+        #    flathead['CRVAL2'] = crv2[0]
+        #except IndexError:
+        #    flathead['CRVAL1'] = crv1.item() # np 0-d arrays are not scalar
+        #    flathead['CRVAL2'] = crv2.item() # np 0-d arrays are not scalar
+
+        # xlo, ylo have been forced to integers already above
+        flathead['CRPIX1'] = flathead['CRPIX1'] + xlo
+        flathead['CRPIX2'] = flathead['CRPIX2'] + ylo
         
         if return_HDU:
-            return pyfits.PrimaryHDU(data=subim,header=flathead)
+            return fits.PrimaryHDU(data=subim,header=flathead)
         else:
             return subim,flathead
 
@@ -310,12 +465,16 @@ def subcube(cube, xcen, xwidth, ycen, ywidth, header=None,
 
         xmid_sky,ymid_sky = wcs.wcs_pix2world(xlo+xwidth,ylo+ywidth,0)
 
-        newheader.update('CRVAL1',xmid_sky[0])
-        newheader.update('CRVAL2',ymid_sky[0])
-        newheader.update('CRPIX1',1+xwidth)
-        newheader.update('CRPIX2',1+ywidth)
+        try:
+            newheader['CRVAL1'] = xmid_sky[0]
+            newheader['CRVAL2'] = ymid_sky[0]
+        except IndexError:
+            newheader['CRVAL1'] = float(xmid_sky)
+            newheader['CRVAL2'] = float(ymid_sky)
+        newheader['CRPIX1'] = 1+xwidth
+        newheader['CRPIX2'] = 1+ywidth
         
-        newHDU =  pyfits.PrimaryHDU(data=subim,header=newheader)
+        newHDU =  fits.PrimaryHDU(data=subim,header=newheader)
         if newHDU.header.get('NAXIS1') == 0 or newHDU.header.get('NAXIS2') == 0:
             raise Exception("Cube has been cropped to 0 in one dimension")
 
@@ -331,9 +490,6 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
 
 
     """
-    if not coordsOK:
-        raise ImportError( "cubes.py requires coords for aper_world2pix and coords_in_image" )
-
     convopt = {'arcsec':3600.0,'arcmin':60.0,'degree':1.0}
     try:
         conv = convopt[wunit]
@@ -342,14 +498,21 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
 
     if len(wcs.wcs.cdelt) != 2:
         raise Exception("WCS header is not strictly 2-dimensional.  Look for 3D keywords.")
-    pos = coords.Position((ap[0],ap[1]),system=coordsys)
+    if '' in wcs.wcs.ctype:
+        raise Exception("WCS header has no CTYPE.")
+
+    if coordsys.lower() == 'galactic':
+        pos = coordinates.SkyCoord(ap[0],ap[1],unit=('deg','deg'), frame='galactic')
+    elif coordsys.lower() in ('radec','fk5','icrs','celestial'):
+        pos = coordinates.SkyCoord(ap[0],ap[1],unit=('deg','deg'), frame='fk5')
+
     if wcs.wcs.ctype[0][:2] == 'RA':
-        ra,dec = pos.j2000()
-        corrfactor = cos(dec*dtor)
+        ra,dec = pos.icrs.ra.deg,pos.icrs.dec.deg
     elif wcs.wcs.ctype[0][:4] == 'GLON':
-        ra,dec = pos.galactic()
-        corrfactor=1
-    # workaround for a broken wcs.wcs_world2pix
+        ra,dec = pos.galactic.l.deg,pos.galactic.b.deg
+    else:
+        raise Exception("WCS CTYPE has no match.")
+    # workaround for a broken wcs.wcs_sky2pix
     try:
         radif = (wcs.wcs.crval[0]-ra)*dtor
         gamma = acos(cos(dec*dtor)*cos(wcs.wcs.crval[1]*dtor)*cos(radif)+sin(dec*dtor)*sin(wcs.wcs.crval[1]*dtor)) / dtor
@@ -373,16 +536,19 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
     except:
         pass
     # cd is default, cdelt is backup
-    if len(ap) == 5:
+    if len(ap) > 3:
         try:
             width  = ap[2] / conv / abs(wcs.wcs.cd[0,0])  # first is width, second is height in DS9 PA convention
             height = ap[3] / conv / abs(wcs.wcs.cd[0,0])
         except:
             width  = ap[2] / conv / abs(wcs.wcs.cdelt[0])  # first is width, second is height in DS9 PA convention
             height = ap[3] / conv / abs(wcs.wcs.cdelt[0])
-        PA = ap[4] 
         apold = copy.copy(ap)
-        ap = [x,y,width,height,PA]
+        if len(ap) == 5:
+            PA = ap[4] 
+            ap = [x,y,width,height,PA]
+        else:
+            ap = [x,y,width,height]
     elif len(ap) == 3:
         try:
             width  = ap[2] / conv / abs(wcs.wcs.cd[0,0])  # first is width, second is height in DS9 PA convention
@@ -390,6 +556,8 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
             width  = ap[2] / conv / abs(wcs.wcs.cdelt[0])  # first is width, second is height in DS9 PA convention
         apold = copy.copy(ap)
         ap = [x,y,width]
+    else:
+        raise TypeError("Aperture length is incorrect.")
 
     return ap
 
@@ -399,12 +567,15 @@ def getspec(lon,lat,rad,cube,header,r_fits=True,inherit=True,wunit='arcsec'):
     Given a longitude, latitude, aperture radius (arcsec), and a cube file,
     return a .fits file or a spectrum.
     
-    lon,lat - longitude and latitude center of a circular aperture in WCS coordinates
-                must be in coordinate system of the file
-    rad     - radius (default degrees) of aperture
+    Parameters
+    ----------
+    lon: float
+    lat: float
+        longitude and latitude center of a circular aperture in WCS coordinates
+        must be in coordinate system of the file
+    rad: float
+        radius (default degrees) of aperture
     """
-    if not wcsOK:
-        raise ImportError( "cubes.py requires astropy.wcs or pywcs for some subimage_integ,aper_wordl2pix,getspec, and coords_in_image" )
 
     convopt = {'arcsec':1.0,'arcmin':60.0,'degree':3600.0}
 
@@ -425,27 +596,27 @@ def getspec(lon,lat,rad,cube,header,r_fits=True,inherit=True,wunit='arcsec'):
         if inherit:
             newhead = header.copy()
         else:
-            newhead = pyfits.Header()
+            newhead = fits.Header()
         try:
-            newhead.update('CD1_1',header['CD3_3'])
+            newhead['CD1_1'] = header['CD3_3']
         except KeyError:
-            newhead.update('CD1_1',header['CDELT3'])
-        newhead.update('CRPIX1',header['CRPIX3'])
-        newhead.update('CRVAL1',header['CRVAL3'])
+            newhead['CD1_1'] = header['CDELT3']
+        newhead['CRPIX1'] = header['CRPIX3']
+        newhead['CRVAL1'] = header['CRVAL3']
         try:
-            newhead.update('CTYPE1',header['CTYPE3'])
+            newhead['CTYPE1'] = header['CTYPE3']
         except KeyError:
-            newhead.update('CTYPE1',"VRAD")
+            newhead['CTYPE1'] = "VRAD"
         try:
-            newhead.update('CUNIT1',header['CUNIT3'])
+            newhead['CUNIT1'] = header['CUNIT3']
         except KeyError:
             print "Header did not contain CUNIT3 keyword.  Defaulting to km/s"
-            newhead.update('CUNIT1',"km/s")
-        newhead.update('BUNIT',header['BUNIT'])
-        newhead.update('APGLON',lon)
-        newhead.update('APGLAT',lat)
-        newhead.update('APRAD',rad*convopt[wunit],comment='arcseconds') # radius in arcsec
-        newfile = pyfits.PrimaryHDU(data=spec,header=newhead)
+            newhead['CUNIT1'] = "km/s"
+        newhead['BUNIT'] = header['BUNIT']
+        newhead['APGLON'] = lon
+        newhead['APGLAT'] = lat
+        newhead['APRAD'] = (rad*convopt[wunit],'arcseconds') # radius in arcsec
+        newfile = fits.PrimaryHDU(data=spec,header=newhead)
         return newfile
     else:
         return spec
@@ -457,7 +628,7 @@ def getspec_reg(cubefilename,region,**kwargs):
     The region must be in the same coordinate system as the cube header
 
     .. warning:: The second argument of getspec_reg requires a pyregion region list, 
-        and therefore this code depends on `pyregion <http://leejjoon.github.com/pyregion/>`_.
+        and therefore this code depends on `pyregion`_.
     """
 
     ds9tocoords = {'fk5':'celestial','galactic':'galactic','icrs':'celestial'}
@@ -467,10 +638,10 @@ def getspec_reg(cubefilename,region,**kwargs):
 
     l,b,r = region.coord_list
     #pos = coords.Position([l,b],system=ds9tocoords[region.coord_format])
-    if isinstance(cubefilename,pyfits.HDUList):
+    if isinstance(cubefilename,fits.HDUList):
         cubefile = cubefilename
     else:
-        cubefile = pyfits.open(cubefilename)
+        cubefile = fits.open(cubefilename)
     header = cubefile[0].header
     cube = cubefile[0].data
     if len(cube.shape) == 4: cube = cube[0,:,:,:]
@@ -483,12 +654,8 @@ def coords_in_image(fitsfile,lon,lat,system='galactic'):
     """
     Determine whether the coordinates are inside the image
     """
-    if not coordsOK:
-        raise ImportError( "cubes.py requires coords for aper_world2pix and coords_in_image" )
-    if not wcsOK:
-        raise ImportError( "cubes.py requires astropy.wcs or pywcs for some subimage_integ,aper_wordl2pix,getspec, and coords_in_image" )
-    if not isinstance(fitsfile,pyfits.HDUList):
-        fitsfile = pyfits.open(fitsfile)
+    if not isinstance(fitsfile,fits.HDUList):
+        fitsfile = fits.open(fitsfile)
 
     wcs = pywcs.WCS(flatten_header(fitsfile[0].header))
 
@@ -506,19 +673,32 @@ def coords_in_image(fitsfile,lon,lat,system='galactic'):
     else:
         return False
 
-def spectral_smooth(cube, smooth_factor, downsample=True, **kwargs):
+def spectral_smooth(cube, smooth_factor, downsample=True, parallel=True,
+                    numcores=None, **kwargs):
     """
     Smooth the cube along the spectral direction
     """
 
-    newcube = numpy.empty(cube.shape)
-    if downsample:
-        newcube = newcube[::smooth_factor,:,:]
     yy,xx = numpy.indices(cube.shape[1:])
 
-    for (x,y) in zip(xx.flat,yy.flat):
-        newcube[:,y,x] = pyspeckit.smooth.smooth(cube[:,y,x], smooth_factor,
-                downsample=downsample, **kwargs)
+    if downsample:
+        newshape = cube[::smooth_factor,:,:].shape
+    else:
+        newshape = cube.shape
+    
+    # need to make the cube "flat" along dims 1&2 for iteration in the "map"
+    flatshape = (cube.shape[0],cube.shape[1]*cube.shape[2])
+
+    Ssmooth = lambda x: pyspeckit.smooth.smooth(x, smooth_factor, downsample=downsample, **kwargs)
+    if parallel:
+        newcube = numpy.array(parallel_map(Ssmooth, cube.reshape(flatshape).T, numcores=numcores)).T.reshape(newshape)
+    else:
+        newcube = numpy.array(map(Ssmooth, cube.reshape(flatshape).T)).T.reshape(newshape)
+
+    #naive, non-optimal version
+    # for (x,y) in zip(xx.flat,yy.flat):
+    #     newcube[:,y,x] = pyspeckit.smooth.smooth(cube[:,y,x], smooth_factor,
+    #             downsample=downsample, **kwargs)
 
     return newcube
 
@@ -526,9 +706,12 @@ def plane_smooth(cube,cubedim=0,parallel=True,numcores=None,**kwargs):
     """
     parallel-map the smooth function
 
-    parallel - defaults True.  Set to false if you want serial (for debug
-        purposes?)
-    numcores - pass to parallel_map (None = use all available)
+    Parameters
+    ----------
+    parallel: bool
+        defaults True.  Set to false if you want serial (for debug purposes?)
+    numcores: int
+        pass to parallel_map (None = use all available)
     """
     if not smoothOK:
         return
@@ -552,74 +735,86 @@ def plane_smooth(cube,cubedim=0,parallel=True,numcores=None,**kwargs):
 
 
 try:
-    import montage 
+    import montage
 
     def rotcrop_cube(x1, y1, x2, y2, cubename, outname, xwidth=25, ywidth=25,
-            in_system='galactic',  out_system='equatorial', clobber=True):
+                     in_system='galactic',  out_system='equatorial',
+                     clobber=True, newheader=None, xcen=None, ycen=None):
         """
         Crop a data cube and then rotate it with montage
 
         """
 
-        cubefile = pyfits.open(cubename)
+        cubefile = fits.open(cubename)
 
-        if not coordsOK:
-            raise ImportError( "cubes.py requires coords for rotcrop_cube" )
-        pos1 = coords.Position([x1,y1],system=in_system)
-        pos2 = coords.Position([x2,y2],system=in_system)
+        if xcen is None and ycen is None:
+            pos1 = coords.Position([x1,y1],system=in_system)
+            pos2 = coords.Position([x2,y2],system=in_system)
 
-        if cubefile[0].header.get('CTYPE1')[:2] == 'RA':
-            x1,y1 = pos1.j2000()
-            x2,y2 = pos2.j2000()
-            coord_system = 'celestial'
-        elif  cubefile[0].header.get('CTYPE1')[:2] == 'GLON':
-            x1,y1 = pos1.galactic()
-            x2,y2 = pos2.galactic()
-            coord_system = 'galactic'
+            if cubefile[0].header.get('CTYPE1')[:2] == 'RA':
+                x1,y1 = pos1.j2000()
+                x2,y2 = pos2.j2000()
+                coord_system = 'celestial'
+            elif  cubefile[0].header.get('CTYPE1')[:4] == 'GLON':
+                x1,y1 = pos1.galactic()
+                x2,y2 = pos2.galactic()
+                coord_system = 'galactic'
 
-        xcen = (x1+x2)/2.0
-        ycen = (y1+y2)/2.0
+            xcen = (x1+x2)/2.0
+            ycen = (y1+y2)/2.0
+            print xcen,ycen,xwidth,ywidth,coord_system
+        else:
+            coord_system = in_system
 
         sc = subcube(cubefile[0].data, xcen, xwidth, ycen, ywidth, 
                 widthunits='pixels', units="wcs", header=cubefile[0].header,
                 return_HDU=True)
-        # note: there should be no security risk here because pyfits' writeto
+        # note: there should be no security risk here because fits' writeto
         # will not overwrite by default
         tempcube = tempfile.mktemp(suffix='.fits')
         sc.writeto(tempcube)
         
         pa = posang.posang(x1,y1,x2,y2,system=coord_system) - 90
 
-        newheader = sc.header.copy()
-        cd11 = newheader.get('CDELT1') if newheader.get('CDELT1') else newheader.get('CD1_1')
-        cd22 = newheader.get('CDELT2') if newheader.get('CDELT2') else newheader.get('CD2_2')
-        cd12 = newheader.get('CD1_2') if newheader.get('CD1_2') else 0.0
-        cd21 = newheader.get('CD2_1') if newheader.get('CD2_1') else 0.0
-        cdelt = numpy.sqrt(cd11**2+cd12**2)
+        if newheader is None:
+            newheader = sc.header.copy()
+            cd11 = newheader.get('CDELT1') if newheader.get('CDELT1') else newheader.get('CD1_1')
+            cd22 = newheader.get('CDELT2') if newheader.get('CDELT2') else newheader.get('CD2_2')
+            cd12 = newheader.get('CD1_2') if newheader.get('CD1_2') else 0.0
+            cd21 = newheader.get('CD2_1') if newheader.get('CD2_1') else 0.0
+            cdelt = numpy.sqrt(cd11**2+cd12**2)
 
-        tempheader = tempfile.mktemp(suffix='.hdr')
-        ycensign = "+" if numpy.sign(ycen) >= 0 else "-"
-        montage.mHdr("%s %1s%s" % (xcen, ycensign, numpy.abs(ycen)), xwidth*cdelt,
-                tempheader, system=out_system, height=ywidth*cdelt,
-                pix_size=cdelt*3600.0, rotation=pa)
-        os.system("sed -i bck '/END/d' %s" % (tempheader))
-        newheader2 = pyfits.Header()
-        newheader2.fromTxtFile(tempheader)
-        for key in ('CRPIX3','CRVAL3','CDELT3','CD3_3','CUNIT3','WCSTYPE3','CTYPE3'):
-            if newheader.get(key):
-                newheader2.update(key,newheader.get(key))
-        if newheader.get('CD3_3') and newheader2.get('CDELT3') is None:
-            newheader2.update('CDELT3',newheader.get('CD3_3'))
-        newheader2.toTxtFile(tempheader,clobber=True)
-        #if newheader2.get('CDELT3') is None:
-        #    raise Exception("No CD3_3 or CDELT3 in header.")
+            tempheader = tempfile.mktemp(suffix='.hdr')
+            ycensign = "+" if numpy.sign(ycen) >= 0 else "-"
+            montage.mHdr("%s %1s%s" % (xcen, ycensign, numpy.abs(ycen)), xwidth*cdelt,
+                    tempheader, system=out_system, height=ywidth*cdelt,
+                    pix_size=cdelt*3600.0, rotation=pa)
+            os.system("sed -i bck '/END/d' %s" % (tempheader))
+            newheader2 = fits.Header()
+            newheader2.fromTxtFile(tempheader)
+            #newheader2.fromtextfile(tempheader)
+            for key in ('CRPIX3','CRVAL3','CDELT3','CD3_3','CUNIT3','WCSTYPE3','CTYPE3'):
+                if newheader.get(key):
+                    newheader2[key] = newheader.get(key)
+            if newheader.get('CD3_3') and newheader2.get('CDELT3') is None:
+                newheader2['CDELT3'] = newheader.get('CD3_3')
+            newheader2.toTxtFile(tempheader,clobber=True)
+            #if newheader2.get('CDELT3') is None:
+            #    raise Exception("No CD3_3 or CDELT3 in header.")
+        else:
+            if isinstance(newheader,str):
+                newheader2 = fits.Header()
+                newheader2.fromTxtFile(newheader)
+            tempheader = tempfile.mktemp(suffix='.hdr')
+            newheader2.toTxtFile(tempheader,clobber=True)
+
 
         montage.wrappers.reproject_cube(tempcube,outname,header=tempheader,clobber=clobber)
         #print "\n",outname
         #os.system('imhead %s | grep CDELT' % outname)
 
         # AWFUL hack because montage removes CDELT3
-        tempcube = pyfits.open(outname)
+        tempcube = fits.open(outname)
         tempcube.header = newheader2
         #if tempcube.header.get('CDELT3') is None:
         #    raise Exception("No CD3_3 or CDELT3 in header.")
@@ -629,11 +824,11 @@ try:
         #print "\n",outname
         #os.system('imhead %s | grep CDELT' % outname)
 
-        #print "\nnewheader2"
-        #print newheader2.ascard
-        #print
         
         return
+
+    def resample_cube(cubefilename, header):
+        inhdr = fits.getheader(cubefilename)
 
 except:
     pass

@@ -1,7 +1,7 @@
 import pyspeckit
 
 # Read in J000002.09+155254.1 spectrum, a nice emission-line galaxy
-sp = pyspeckit.Spectrum('../tests/SIIdoublet.fits')
+sp = pyspeckit.Spectrum('SIIdoublet.fits')
 
 # Read in rest wavelengths of SII lines.  If you didn't know the names already, 
 # you could do sp.speclines.optical.lines.keys() to see what is available.
@@ -14,12 +14,12 @@ offset = SIIb - SIIa
 # Let's have a look at the spectrum
 sp.plotter()
 
-raw_input('Let\'s do a simple continuum subtraction (continue)')
+# raw_input('Let\'s do a simple continuum subtraction (continue)')
 
 # Plot the baseline fit
 sp.baseline(subtract = False)
 
-raw_input('Let\'s zoom in on the SII doublet (continue)')
+# raw_input('Let\'s zoom in on the SII doublet (continue)')
 
 # Subtract the baseline fit and save
 sp.baseline(subtract = True)
@@ -40,7 +40,7 @@ tied = ['', '', '', '', 'p[1] + %g' % offset, '']
 sp.specfit(guesses = guesses, tied = tied, quiet = False)
 sp.plotter.savefig('doublet_example_SII.png')
               
-raw_input('Hooray! The doublet has been fit. ')
+# raw_input('Hooray! The doublet has been fit. ')
 
 SIIb_obs = sp.specfit.modelpars[-2]
 

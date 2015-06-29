@@ -1,6 +1,7 @@
 import pyspeckit
 # neet matplotlib so we can make mouse-click events from the script
 import matplotlib 
+import os
 # list of annotations so we can clear them
 annotations = []
 excesslines = []
@@ -32,11 +33,13 @@ annotations.append (sp.plotter.axis.annotate("", xy=(4714,9.54e-10),  xytext=(ev
         arrowprops=dict(arrowstyle="->", connectionstyle='arc,rad=0.5',
             color='green')) )
 annotations.append( sp.plotter.axis.annotate("(only the horizontal\n position matters)",xy=(event1.xdata+10,event1.ydata),xycoords='data') )
-excesslines.append( sp.plotter.axis.vlines(4714,sp.plotter.ymin,sp.plotter.ymax,linestyle='--',color='green') )
+excesslines.append( sp.plotter.axis.vlines(4714,sp.plotter.ymin.value,sp.plotter.ymax.value,linestyle='--',color='green') )
 sp.plotter.refresh()
-sp.plotter.savefig('figures/interactive_example_hr2421_baseline_firstclick.png', bbox_inches=None)
-
+sp.plotter.savefig('interactive_example_hr2421_baseline_firstclick.png', bbox_inches=None)
 event2 = matplotlib.backend_bases.MouseEvent('button_press_event', sp.plotter.axis.figure.canvas,850,280,button=1)
+# event2.xdata and .ydata is None here
+event2.xdata = 850
+event2.ydata = 850
 annotations.append( sp.plotter.axis.annotate("Second click\n(button 1)", xy=(event2.xdata,event2.ydata),  xytext=(event2.xdata-20,event2.ydata+2.5e-11),
         textcoords='data', xycoords='data', ha='center',
         va='bottom', arrowprops=dict(arrowstyle="->",
@@ -45,13 +48,13 @@ annotations.append( sp.plotter.axis.annotate("", xy=(event2.xdata,8.0e-10),  xyt
         textcoords='data', xycoords='data', ha='center', va='bottom',
         arrowprops=dict(arrowstyle="->", connectionstyle='arc,rad=0.5',
             color='green')) )
-excesslines.append( sp.plotter.axis.vlines(event2.xdata,sp.plotter.ymin,sp.plotter.ymax,linestyle='--',color='green'))
+excesslines.append( sp.plotter.axis.vlines(event2.xdata,sp.plotter.ymin.value,sp.plotter.ymax.value,linestyle='--',color='green'))
 sp.plotter.refresh()
-sp.plotter.savefig('figures/interactive_example_hr2421_baseline_secondclick.png', bbox_inches=None)
+sp.plotter.savefig('interactive_example_hr2421_baseline_secondclick.png', bbox_inches=None)
 
 sp.baseline.event_manager(event1)
 sp.baseline.event_manager(event2)
-sp.plotter.savefig('figures/interactive_example_hr2421_baseline_secondclick_highlight.png', bbox_inches=None)
+sp.plotter.savefig('interactive_example_hr2421_baseline_secondclick_highlight.png', bbox_inches=None)
 
 event3 = matplotlib.backend_bases.KeyEvent('button_press_event', sp.plotter.axis.figure.canvas,x=425,y=316,key='x')
 annotations.append( sp.plotter.axis.annotate("Third click\n(key 'x')", xy=(event3.xdata,event3.ydata),  xytext=(event3.xdata-20,event3.ydata+5e-11),
@@ -63,11 +66,13 @@ annotations.append (sp.plotter.axis.annotate("", xy=(4825,8.67e-10),  xytext=(ev
         arrowprops=dict(arrowstyle="->", connectionstyle='arc,rad=0.5',
             color='red')) )
 annotations.append( sp.plotter.axis.annotate("(to exclude the line\nfrom the baseline fit)",xy=(event3.xdata-55,event3.ydata-5e-11),xycoords='data',color='red') )
-excesslines.append( sp.plotter.axis.vlines(4825,sp.plotter.ymin,sp.plotter.ymax,linestyle='--',color='red') )
+excesslines.append( sp.plotter.axis.vlines(4825,sp.plotter.ymin.value,sp.plotter.ymax.value,linestyle='--',color='red') )
 sp.plotter.refresh()
-sp.plotter.savefig('figures/interactive_example_hr2421_baseline_thirdclick.png', bbox_inches=None)
+sp.plotter.savefig('interactive_example_hr2421_baseline_thirdclick.png', bbox_inches=None)
 
 event4 = matplotlib.backend_bases.KeyEvent('button_press_event', sp.plotter.axis.figure.canvas,x=645,y=280,key='x')
+event4.xdata = 900
+event4.ydata = 900
 annotations.append( sp.plotter.axis.annotate("Fourth click\n(key 'x')", xy=(event4.xdata,event4.ydata),  xytext=(event4.xdata+20,event4.ydata+2.5e-11),
         textcoords='data', xycoords='data', ha='center',
         va='bottom', arrowprops=dict(arrowstyle="->",
@@ -76,20 +81,20 @@ annotations.append( sp.plotter.axis.annotate("", xy=(4905,8.0e-10),  xytext=(eve
         textcoords='data', xycoords='data', ha='center', va='bottom',
         arrowprops=dict(arrowstyle="->", connectionstyle='arc,rad=0.5',
             color='red')) )
-excesslines.append( sp.plotter.axis.vlines(4905,sp.plotter.ymin,sp.plotter.ymax,linestyle='--',color='red'))
+excesslines.append( sp.plotter.axis.vlines(4905,sp.plotter.ymin.value,sp.plotter.ymax.value,linestyle='--',color='red'))
 sp.plotter.refresh()
-sp.plotter.savefig('figures/interactive_example_hr2421_baseline_fourthclick.png', bbox_inches=None)
+sp.plotter.savefig('interactive_example_hr2421_baseline_fourthclick.png', bbox_inches=None)
 
 sp.baseline.event_manager(event3)
 sp.baseline.event_manager(event4)
-sp.plotter.savefig('figures/interactive_example_hr2421_baseline_fourthclick_highlight.png', bbox_inches=None)
+sp.plotter.savefig('interactive_example_hr2421_baseline_fourthclick_highlight.png', bbox_inches=None)
 
 annotations.append( sp.plotter.axis.annotate("Fifth click - perform the fit\n(button 3;\nbutton 2 will subtract)", 
     xy=(4865, 1e-9),  xytext=(4865, 1e-9), textcoords='data',
     xycoords='data', ha='center', va='bottom') )
 event5 = matplotlib.backend_bases.MouseEvent('button_press_event', sp.plotter.axis.figure.canvas,787,223,button=3)
 sp.baseline.event_manager(event5)
-sp.plotter.savefig('figures/interactive_example_hr2421_baseline_fifthclick_fit.png', bbox_inches=None)
+sp.plotter.savefig('interactive_example_hr2421_baseline_fifthclick_fit.png', bbox_inches=None)
 
 for LC in excesslines:
     if LC in sp.plotter.axis.collections:

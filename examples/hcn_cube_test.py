@@ -1,9 +1,12 @@
 import pyspeckit
-import pyfits
+try:
+    from astropy.io import fits as pyfits
+except ImportError:
+    import pyfits
 import numpy as np
 
 # Load the spectrum
-sp = pyspeckit.Cube('region5_hcn_crop.fits',scale_keyword='ETAMB')
+sp = pyspeckit.Cube('region5_hcn_crop.fits')
 errmap = pyfits.getdata('region5.hcn.errmap.fits')
 
 # Register the fitter
@@ -11,7 +14,7 @@ errmap = pyfits.getdata('region5.hcn.errmap.fits')
 # shows how to register a fitting procedure
 # 'multi' indicates that it is possible to fit multiple components and a background will not automatically be fit
 # 4 is the number of parameters in the model (excitation temperature, optical depth, line center, and line width)
-sp.Registry.add_fitter('hcn_amp',pyspeckit.models.hcn.hcn_amp,3,multisingle='multi')
+sp.Registry.add_fitter('hcn_amp',pyspeckit.models.hcn.hcn_amp,3)
 
 # Run the fitter
 sp.mapplot()
@@ -22,8 +25,8 @@ sp.mapplot()
 #s.plotter()
 #s.Registry = sp.Registry
 #s.specfit.Registry = sp.Registry
-#s.specfit(fittype='hcn_amp',multifit=True,guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
-#s.specfit(fittype='hcn_amp',multifit=True,guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
+#s.specfit(fittype='hcn_amp',guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
+#s.specfit(fittype='hcn_amp',guesses=[2.5,-5.6,1.5],show_components=True,debug=True,quiet=False)
 #sp.error = s.specfit.errspec
 
 
@@ -32,7 +35,7 @@ sp.mapplot()
 # there are bad pixels
 sp.momenteach(vheight=False, verbose=False)
 sp.momentcube[2,:,:] /= 2.5 # the HCN line profile makes the fitter assume a 2.5x too large line
-sp.fiteach(fittype='hcn_amp', errmap=errmap, multifit=True,
+sp.fiteach(fittype='hcn_amp', errmap=errmap,
         guesses=[1.0,-5.6,1.5], verbose_level=2, signal_cut=4,
         usemomentcube=True, blank_value=np.nan, verbose=False,
         direct=True, multicore=4)

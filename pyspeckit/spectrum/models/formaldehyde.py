@@ -15,13 +15,10 @@ import matplotlib.cbook as mpcb
 import copy
 import hyperfine
 from pyspeckit.specwarnings import warn
-pyfitsOK = True
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-except ImportError:
-    pyfitsOK = False
 try:
     import scipy.interpolate
     import scipy.ndimage
@@ -30,7 +27,10 @@ except ImportError:
     scipyOK=False
 
 line_names = ['oneone','twotwo','threethree']
-line_names = ['oneone_f10','oneone_f01','oneone_f22','oneone_f21','oneone_f12','oneone_f11','twotwo_f11','twotwo_f12','twotwo_f21','twotwo_f32','twotwo_f33','twotwo_f22','twotwo_f23']
+line_names = ['oneone_f10', 'oneone_f01', 'oneone_f22', 'oneone_f21',
+              'oneone_f12', 'oneone_f11', 'twotwo_f11', 'twotwo_f12',
+              'twotwo_f21', 'twotwo_f32', 'twotwo_f33', 'twotwo_f22',
+              'twotwo_f23']
 
 # http://adsabs.harvard.edu/abs/1971ApJ...169..429T has the most accurate freqs
 # http://adsabs.harvard.edu/abs/1972ApJ...174..463T [twotwo]
@@ -150,22 +150,18 @@ voff_lines_dict={ # opposite signs of freq offset
         }
 
 
-formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy)
+formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
+                                             freq_dict, line_strength_dict,
+                                             relative_strength_total_degeneracy)
 formaldehyde_vtau_fitter = formaldehyde_vtau.fitter
 formaldehyde_vtau_vheight_fitter = formaldehyde_vtau.vheight_fitter
+formaldehyde_vtau_tbg_fitter = formaldehyde_vtau.background_fitter
 
-def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0, 
-        grid_vwidth=1.0,
-        grid_vwidth_scale=False,
-        texgrid=None,
-        taugrid=None,
-        hdr=None,
-        path_to_texgrid='',
-        path_to_taugrid='',
-        temperature_gridnumber=3,
-        debug=False,
-        verbose=False,
-        **kwargs):
+def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
+                       grid_vwidth=1.0, grid_vwidth_scale=False, texgrid=None,
+                       taugrid=None, hdr=None, path_to_texgrid='',
+                       path_to_taugrid='', temperature_gridnumber=3,
+                       debug=False, verbose=False, **kwargs):
     """
     Use a grid of RADEX-computed models to make a model line spectrum
 
@@ -177,8 +173,8 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     xoff_v, width are both in km/s
 
     grid_vwidth is the velocity assumed when computing the grid in km/s
-        this is important because tau = modeltau / width (see, e.g., 
-        Draine 2011 textbook pgs 219-230)
+    this is important because tau = modeltau / width (see, e.g., 
+    Draine 2011 textbook pgs 219-230)
     grid_vwidth_scale is True or False: False for LVG, True for Sphere
     """
 
@@ -234,20 +230,17 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
   
     return spec
 
-def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13, 
-        orthopara=1.0,
-        temperature=15.0,
-        xoff_v=0.0, width=1.0, 
-        grid_vwidth=1.0,
-        grid_vwidth_scale=False,
-        texgrid=None,
-        taugrid=None,
-        hdr=None,
-        path_to_texgrid='',
-        path_to_taugrid='',
-        debug=False,
-        verbose=False,
-        **kwargs):
+def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
+                                      orthopara=1.0, temperature=15.0,
+                                      xoff_v=0.0, width=1.0,
+                                      Tbackground1=2.73,
+                                      Tbackground2=2.73,
+                                      grid_vwidth=1.0,
+                                      grid_vwidth_scale=False, texgrid=None,
+                                      taugrid=None, hdr=None,
+                                      path_to_texgrid='', path_to_taugrid='',
+                                      debug=False, verbose=False,
+                                      getpars=False, **kwargs):
     """
     Use a grid of RADEX-computed models to make a model line spectrum
 
@@ -259,8 +252,8 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
     xoff_v, width are both in km/s
 
     grid_vwidth is the velocity assumed when computing the grid in km/s
-        this is important because tau = modeltau / width (see, e.g., 
-        Draine 2011 textbook pgs 219-230)
+    this is important because tau = modeltau / width (see, e.g.,
+    Draine 2011 textbook pgs 219-230)
     grid_vwidth_scale is True or False: False for LVG, True for Sphere
     """
 
@@ -281,11 +274,9 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
 
     densityarr = (np.arange(taugrid[0].shape[3])+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
     columnarr  = (np.arange(taugrid[0].shape[2])+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
-    temparr  = (np.arange(taugrid[0].shape[1])+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # temperature
-    oprarr  = (np.arange(taugrid[0].shape[0])+hdr['CRPIX4']-1)*hdr['CDELT4']+hdr['CRVAL4'] # log ortho/para ratio
+    temparr    = (np.arange(taugrid[0].shape[1])+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # temperature
+    oprarr     = (np.arange(taugrid[0].shape[0])+hdr['CRPIX4']-1)*hdr['CDELT4']+hdr['CRVAL4'] # log ortho/para ratio
     
-    tau_nu_cumul = np.zeros(len(xarr))
-
     gridval1 = np.interp(density,     densityarr,  np.arange(len(densityarr)))
     gridval2 = np.interp(column,      columnarr,   np.arange(len(columnarr)))
     gridval3 = np.interp(temperature, temparr,     np.arange(len(temparr)))
@@ -294,42 +285,68 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
         raise ValueError("Invalid column/density")
 
     if scipyOK:
-        slices = [slice(int(np.floor(gv)),int(np.floor(gv)+2)) for gv in (gridval4,gridval3,gridval2,gridval1)]
-        tau = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval4%1],[gridval3%1],[gridval2%1],[gridval1%1]]),order=1,prefilter=False) for tg in taugrid]
-        tex = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval4%1],[gridval3%1],[gridval2%1],[gridval1%1]]),order=1,prefilter=False) for tg in texgrid]
+        slices = [slice(int(np.floor(gv)),int(np.floor(gv)+2))
+                  for gv in (gridval4,gridval3,gridval2,gridval1)]
+        tau = [scipy.ndimage.map_coordinates(tg[slices],
+                                             np.array([[gridval4 % 1],
+                                                       [gridval3 % 1],
+                                                       [gridval2 % 1],
+                                                       [gridval1 % 1]]),
+                                             order=1, prefilter=False)
+               for tg in taugrid]
+        tex = [scipy.ndimage.map_coordinates(tg[slices],
+                                             np.array([[gridval4 % 1],
+                                                       [gridval3 % 1],
+                                                       [gridval2 % 1],
+                                                       [gridval1 % 1]]),
+                                             order=1,prefilter=False)
+               for tg in texgrid]
     else:
         raise ImportError("Couldn't import scipy, therefore cannot interpolate")
     #tau = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,taugrid[temperature_gridnumber,:,:])
     #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
 
+    # there can be different background temperatures at each frequency
+    tbg = [Tbackground1,Tbackground2]
+
     if verbose:
         print "density %20.12g   column: %20.12g   temperature: %20.12g   opr: %20.12g   xoff_v: %20.12g   width: %20.12g" % (density, column, temperature, orthopara, xoff_v, width)
         print "tau: ",tau," tex: ",tex
         print "minfreq: ",minfreq," maxfreq: ",maxfreq
+        print "tbg: ",tbg
 
     if debug > 1:
         import pdb; pdb.set_trace()
 
-    spec = np.sum([(formaldehyde_vtau(xarr.as_unit('Hz',quiet=True),Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)
-                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
-                axis=0)
+    if getpars:
+        return tau,tex
+
+    spec = np.sum([(formaldehyde_vtau(xarr.as_unit('Hz', quiet=True),
+                                      Tex=float(tex[ii]), tau=float(tau[ii]),
+                                      Tbackground=tbg[ii], xoff_v=xoff_v,
+                                      width=width, **kwargs)
+                    * (xarr.as_unit('GHz')>minfreq[ii])
+                    * (xarr.as_unit('GHz')<maxfreq[ii]))
+                   for ii in xrange(len(tex))],
+                  axis=0)
   
     return spec
 
 
 def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
-        return_hyperfine_components=False ):
+        return_hyperfine_components=False, texscale=0.01, tau=0.01, **kwargs):
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters
 
-    the "amplitude" is an essentially arbitrary parameter; we therefore define it to be Tex given tau=0.01 when
-    passing to the fitter
+    the "amplitude" is an essentially arbitrary parameter; we therefore define
+    it to be Tex given tau=0.01 when passing to the fitter
     The final spectrum is then rescaled to that value
     """
 
-    mdl = formaldehyde_vtau(xarr, Tex=amp*0.01, tau=0.01, xoff_v=xoff_v,
+    mdl = formaldehyde_vtau(xarr, Tex=amp*texscale, tau=tau, xoff_v=xoff_v,
             width=width,
-            return_hyperfine_components=return_hyperfine_components)
+            return_tau=True,
+            return_hyperfine_components=return_hyperfine_components, **kwargs)
     if return_hyperfine_components:
         mdlpeak = np.abs(mdl).squeeze().sum(axis=0).max()
     else:
@@ -339,12 +356,49 @@ def formaldehyde(xarr, amp=1.0, xoff_v=0.0, width=1.0,
 
     return mdl
 
+def formaldehyde_pyradex(xarr, density=4, column=13, temperature=20,
+                         xoff_v=0.0, opr=1.0, width=1.0, tbackground=2.73,
+                         grid_vwidth=1.0, debug=False, verbose=False,
+                         **kwargs):
+    """
+    Use a grid of RADEX-computed models to make a model line spectrum
+
+    The RADEX models have to be available somewhere.
+    OR they can be passed as arrays.  If as arrays, the form should be:
+    texgrid = ((minfreq1,maxfreq1,texgrid1),(minfreq2,maxfreq2,texgrid2))
+
+    xarr must be a SpectroscopicAxis instance
+    xoff_v, width are both in km/s
+
+    grid_vwidth is the velocity assumed when computing the grid in km/s
+    this is important because tau = modeltau / width (see, e.g.,
+    Draine 2011 textbook pgs 219-230)
+    """
+
+    raise NotImplementedError("Not done yet.")
+    import pyradex
+    
+    # Convert X-units to frequency in GHz
+    xarr = xarr.as_unit('Hz', quiet=True)
+
+    tb_nu_cumul = np.zeros(len(xarr))
+
+    R = pyradex.Radex(molecule='oh2co-h2', column=column,
+                      temperature=temperature, density=10**density,
+                      tbackground=tbackground,)
+
+    spec = np.sum([(formaldehyde_vtau(xarr,Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)
+                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
+                axis=0)
+  
+    return spec
 
 class formaldehyde_model(model.SpectralModel):
     def formaldehyde_integral(self, modelpars, linename='oneone'):
         """
         Return the integral of the individual components (ignoring height)
         """
+        raise NotImplementedError("Not implemented, but the integral is just amplitude * width * sqrt(2*pi)")
         # produced by directly computing the integral of gaussians and formaldehydeians as a function of 
         # line width and then fitting that with a broken logarithmic power law
         # The errors are <0.5% for all widths
@@ -395,8 +449,9 @@ def formaldehyde_radex_tau(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
         **kwargs):
     """
     Use a grid of RADEX-computed models to make a model line spectrum
-    -uses hyperfine components
-    -assumes *tau* varies but *tex* does not!
+
+     * uses hyperfine components
+     * assumes *tau* varies but *tex* does not!
 
     The RADEX models have to be available somewhere.
     OR they can be passed as arrays.  If as arrays, the form should be:
@@ -406,8 +461,8 @@ def formaldehyde_radex_tau(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     xoff_v, width are both in km/s
 
     grid_vwidth is the velocity assumed when computing the grid in km/s
-        this is important because tau = modeltau / width (see, e.g., 
-        Draine 2011 textbook pgs 219-230)
+    this is important because tau = modeltau / width (see, e.g., 
+    Draine 2011 textbook pgs 219-230)
     grid_vwidth_scale is True or False: False for LVG, True for Sphere
     """
 

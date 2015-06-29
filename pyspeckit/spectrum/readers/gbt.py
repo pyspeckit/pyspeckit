@@ -82,10 +82,10 @@ def read_gbt_scan(sdfitsfile, obsnumber=0):
     for par in bintable.data.dtype.names:
         if par not in ('DATA',):
             try:
-                header.update(par[:8], bintable.data[obsnumber][par])
+                header[par[:8]] = bintable.data[obsnumber][par]
             except ValueError:
-                header.update(par[:8], str(bintable.data[obsnumber][par]))
-    header.update('CUNIT1','Hz')
+                header[par[:8]] = str(bintable.data[obsnumber][par])
+    header['CUNIT1'] = 'Hz'
 
     HDU = pyfits.PrimaryHDU(data=data,header=header)
 
@@ -96,7 +96,7 @@ def read_gbt_scan(sdfitsfile, obsnumber=0):
     # Convert xarr to LSR units
     #sp.xarr.convert_to_unit('m/s')
     obsfreq = header['OBSFREQ']
-    centerfreq = pyspeckit.spectrum.units.SpectroscopicAxis(np.float(obsfreq),'Hz',refX=obsfreq,refX_units='Hz')
+    centerfreq = pyspeckit.spectrum.units.SpectroscopicAxis(np.float(obsfreq),'Hz',refX=obsfreq,refX_unit='Hz')
     delta_freq = (centerfreq.as_unit('m/s') + header['VFRAME']).as_unit(centerfreq.units) - centerfreq
     sp.xarr -= delta_freq
 
@@ -148,22 +148,28 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
 
     return blocks
 
-def reduce_gbt_target(sdfitsfile, objectname, verbose=False):
+def reduce_gbt_target(sdfitsfile, objectname, nbeams, verbose=False):
     """
     Wrapper - read an SDFITS file, get an object, reduce it (assuming nodded) and return it
     """
     # for efficiency, this should be stored - how?
     blocks = read_gbt_target(sdfitsfile, objectname, verbose=verbose)
 
-    reduced_nods = reduce_blocks(blocks)
+    reduced_nods = reduce_nod(blocks, nbeams)
 
     return reduced_nods
 
-def reduce_blocks(blocks, verbose=False, average=True, fd0=1, fd1=2):
+def reduce_nod(blocks, verbose=False, average=True, fdid=(1,2)):
     """
     Do a nodded on/off observation given a dict of observation blocks as
     produced by read_gbt_target
+
+    Parameters
+    ----------
+    fdid : 2-tuple
     """
+
+    fd0,fd1 = fdid
 
     # strip off trailing digit to define pairs
     nodpairs = uniq([s[:-1].replace("ON","").replace("OFF","") for s in blocks])
@@ -211,6 +217,43 @@ def reduce_blocks(blocks, verbose=False, average=True, fd0=1, fd1=2):
         reduced_nods[sampname] = nod
 
     return reduced_nods
+
+def reduce_totalpower(blocks, verbose=False, average=True, fdid=1):
+    """
+    Reduce a total power observation
+    """
+
+    # strip off trailing digit to define pairs
+    ids = uniq([s[:-1].replace("ON","").replace("OFF","") for s in blocks])
+
+    reduced_tps = {}
+
+    # for each pair...
+    for sampname in ids:
+        on1 = sampname+"ON1"
+        off1 = sampname+"OFF1"
+
+        feednumber = blocks[on1].header.get('FEED')
+        # don't need this - if feednumber is 1, ref feed should be 2, and vice-versa
+        reference_feednumber = blocks[on1].header.get('SRFEED')
+        
+        on1avg = blocks[on1].average()
+        off1avg = blocks[off1].average()
+
+        # first find TSYS
+        tsys1 = dcmeantsys(on1avg,off1avg,on1avg.header.get('TCAL'))
+        if verbose:
+            print "TP: %s (feed %i) has tsys1=%f" % (sampname, feednumber, tsys1)
+
+        # then get the total power
+        if average:
+            tp1 = totalpower(on1avg, off1avg, average=False)
+        else:
+            tp1 = totalpower(blocks[on1], blocks[off1], average=False)
+
+        reduced_tps[sampname] = tp1
+
+    return reduced_tps
 
 def _get_bintable(sdfitsfile):
     """
@@ -449,6 +492,24 @@ class GBTSession(object):
             "Bandwidth: %s" % self.bintable.data[0]['BANDWID'],
             "Date: %s" % self.bintable.data[0]['DATE-OBS']) )
 
+    @property
+    def nbeams(self):
+        # caching:
+        if hasattr(self,'_nbeams'):
+            return self._nbeams
+        else:
+            self._beams = np.unique(self.bintable.data['FEED'])
+            self._nbeams = len(self._beams)
+            return self._nbeams
+
+    @property
+    def beams(self):
+        if hasattr(self,'_beams'):
+            return self._beams
+        else:
+            self._beams = np.unique(self.bintable.data['FEED'])
+            return self._beams
+
     def __repr__(self):
         self.instance_info = super(GBTSession,self).__repr__()
         if not hasattr(self,'StringDescription'):
@@ -467,7 +528,7 @@ class GBTSession(object):
         """
         Load a Target...
         """
-        self.targets[target] = GBTTarget(self, target)
+        self.targets[target] = GBTTarget(self, target, **kwargs)
         return self.targets[target]
 
     def reduce_target(self, target, **kwargs):
@@ -501,6 +562,14 @@ class GBTTarget(object):
         self.blocks = read_gbt_target(Session.bintable, target, **kwargs)
         self.spectra = {}
 
+    @property
+    def nbeams(self):
+        return self.Session.nbeams
+
+    @property
+    def beams(self):
+        return self.Session.beams
+
     def __getitem__(self, ind):
         return self.spectra[ind]
 
@@ -516,7 +585,13 @@ class GBTTarget(object):
         """
         Reduce nodded observations (they should have been read in __init__)
         """
-        self.reduced_scans = reduce_blocks(self.blocks, **kwargs)
+        if obstype == 'nod':
+            self.reduced_scans = reduce_nod(self.blocks, fdid=self.beams, **kwargs)
+        elif obstype == 'tp':
+            self.reduced_scans = reduce_totalpower(self.blocks, fdid=self.beams, **kwargs)
+        else:
+            raise NotImplementedError('Obstype {0} not implemented.'.format(obstype))
+
         self.spectra.update(self.reduced_scans)
 
     def average_pols(self):

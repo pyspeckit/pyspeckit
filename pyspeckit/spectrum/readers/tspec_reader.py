@@ -32,11 +32,11 @@ def tspec_reader(filename, merged=True, specnum=0, **kwargs):
             errspec.mask = (spec!=spec)+(errspec!=errspec)
             xunits = header.get('XUNITS')
             unit = header.get('YUNITS')
-            header.update('BUNIT',unit)
+            header['BUNIT'] = unit
             xtype = 'wavelength'
         elif header.get('INSTRUME') == 'tspec':
             dv,v0,p3 = header['CD1_1'],header['CRVAL1'],header['CRPIX1']
-            header.update('CDELT1',dv)
+            header['CDELT1'] = dv
             xconv = lambda v: ((v-p3+1)*dv+v0)
             spec = ma.array(data[1,:],dtype='float64')
             xarr = xconv(np.arange(len(spec)))
@@ -52,7 +52,7 @@ def tspec_reader(filename, merged=True, specnum=0, **kwargs):
             errspec.mask = (spec!=spec)+(errspec!=errspec)
             xunits = header.get('XUNITS')
             unit = header.get('YUNITS')
-            header.update('BUNIT',unit)
+            header['BUNIT'] = unit
             xtype = 'wavelength'
     else:
         xarr = np.array(data[specnum,0,:],dtype='float64')
@@ -62,7 +62,7 @@ def tspec_reader(filename, merged=True, specnum=0, **kwargs):
         errspec.mask = (spec!=spec)+(errspec!=errspec)
         xunits = header.get('XUNITS')
         unit = header.get('YUNITS')
-        header.update('BUNIT',unit)
+        header['BUNIT'] = unit
         xtype = 'wavelength'
         
     XAxis = units.SpectroscopicAxis(xarr,xunits,xtype=xtype)

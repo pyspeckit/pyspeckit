@@ -23,7 +23,7 @@ except ImportError:
     import pyfits
 import numpy as np
 import os
-import agpy
+from astropy.convolution import convolve_fft,Gaussian2DKernel
 
 # set up CASA-like shortcuts
 F=False; T=True
@@ -44,32 +44,36 @@ cube11 = pyspeckit.Cube('hotclump_11.cube_r0.5_rerun.image.fits', maskmap=mask)
 cube11.cube *= (13.6 * (300.0 /
     (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2 *
     1./cube11.header.get('BMAJ')/3600. * 1./cube11.header.get('BMIN')/3600. )
-cube11.units = "K"
+cube11.unit = "K"
 cube22 = pyspeckit.Cube('hotclump_22.cube_r0.5_contsub.image.fits', maskmap=mask)
 cube22.cube *= (13.6 * (300.0 /
         (pyspeckit.spectrum.models.ammonia.freq_dict['twotwo']/1e9))**2 *
         1./cube22.header.get('BMAJ')/3600. * 1./cube22.header.get('BMIN')/3600. )
-cube22.units = "K"
+cube22.unit = "K"
 cube44 = pyspeckit.Cube('hotclump_44.cube_r0.5_contsub.image.fits', maskmap=mask)
 cube44.cube *= (13.6 * (300.0 /
         (pyspeckit.spectrum.models.ammonia.freq_dict['fourfour']/1e9))**2 *
         1./cube44.header.get('BMAJ')/3600. * 1./cube44.header.get('BMIN')/3600. )
-cube44.units = "K"
+cube44.unit = "K"
 
 # Compute an error map.  We use the 1-1 errors for all 3 because they're
 # essentially the same, but you could use a different error map for each
 # frequency
-errmap11 = (pyfits.getdata('hotclump_11.cube_r0.5_rerun.image.moment_linefree.fits').squeeze()
-        * 13.6 * (300.0 /
-            (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2 *
-        1./cube11.header.get('BMAJ')/3600. * 1./cube11.header.get('BMIN')/3600.
-        )
-errmap11[errmap11 != errmap11] = agpy.smooth(errmap11, interp_nan=True)[errmap11 != errmap11]
+oneonemomentfn = 'hotclump_11.cube_r0.5_rerun.image.moment_linefree.fits'
+errmap11 = (pyfits.getdata(oneonemomentfn).squeeze() * 13.6 *
+            (300.0 /
+             (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2
+            * 1./cube11.header.get('BMAJ')/3600. *
+            1./cube11.header.get('BMIN')/3600.)
+# Interpolate errors across NaN pixels
+errmap11[errmap11 != errmap11] = convolve_fft(errmap11,
+                                              Gaussian2DKernel(3),
+                                              interpolate_nan=True)[errmap11 != errmap11]
 
 # Stack the cubes into one big cube.  The X-axis is no longer linear: there
 # will be jumps from 1-1 to 2-2 to 4-4.  
 cubes = pyspeckit.CubeStack([cube11,cube22,cube44], maskmap=mask)
-cubes.units = "K"
+cubes.unit = "K"
 
 # Make a "moment map" to contain the initial guesses
 # If you've already fit the cube, just re-load the saved version
@@ -120,7 +124,7 @@ if fitcube:
     # 12 parallel fitting processes will run), this actually means that EACH
     # core will have its own sub-set of the cube that it will search for good 
     # fits. So if you REALLY want consistency, you need to do the fit in serial.
-    cubes.fiteach(fittype='ammonia', multifit=True, guesses=guesses,
+    cubes.fiteach(fittype='ammonia', multifit=None, guesses=guesses,
             integral=False, verbose_level=3, fixed=[F,F,F,F,F,T], signal_cut=3,
             limitedmax=[F,F,F,F,T,T],
             maxpars=[0,0,0,0,101,1],
@@ -163,7 +167,7 @@ cubes.mapplot(estimator=None,vmin=91,vmax=101)
 
 # Set the reference frequency to be the 1-1 line frequency
 cubes.xarr.refX = pyspeckit.spectrum.models.ammonia.freq_dict['oneone']
-cubes.xarr.refX_units='Hz'
+cubes.xarr.refX_unit='Hz'
 
 # If you wanted to view the spectra in velocity units, use this:
 #cubes.xarr.convert_to_unit('km/s')

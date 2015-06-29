@@ -1,16 +1,24 @@
+"""
+Parellel Map snippet by Brian Refsdal
+
+http://www.astropython.org/snippet/2010/3/Parallel-map-using-multiprocessing
+"""
 import numpy
+import warnings
+from astropy import log
 _multi=False
 _ncpus=1
 
 try:
-  # May raise ImportError
-  import multiprocessing
-  _multi=True
-
-  # May raise NotImplementedError
-  _ncpus = multiprocessing.cpu_count()
-except:
-  pass
+    # May raise ImportError
+    import multiprocessing
+    _multi=True
+   
+    # May raise NotImplementedError
+    _ncpus = multiprocessing.cpu_count()
+except Exception as ex:
+    pmap_exception = ex
+    _multi=False
 
 
 __all__ = ('parallel_map',)
@@ -113,10 +121,13 @@ def parallel_map(function, sequence, numcores=None):
 
   size = len(sequence)
 
-  if not _multi or size == 1:
+  if not _multi or size == 1 or numcores == 1:
     return map(function, sequence)
 
-  if numcores is None:
+  if numcores is not None and numcores > _ncpus:
+      warnings.warn("Number of requested cores is greated than the "
+                    "number of available CPUs.")
+  elif numcores is None:
     numcores = _ncpus
 
   # Returns a started SyncManager object which can be used for sharing 
@@ -135,6 +146,7 @@ def parallel_map(function, sequence, numcores=None):
   # if sequence is less than numcores, only use len sequence number of 
   # processes
   if size < numcores:
+    log.info("Reduced number of cores to {0}".format(size))
     numcores = size 
 
   # group sequence into numcores-worth of chunks
@@ -179,6 +191,3 @@ if __name__ == "__main__":
   print 'serial map in %g secs' % (time.time()-tt)
 
   assert (numpy.asarray(result) == numpy.asarray(presult)).all()
-
-
-

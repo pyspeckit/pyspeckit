@@ -1,6 +1,9 @@
-from pylab import *;import numpy,scipy,matplotlib,pyfits;
+try:
+    from astropy.io import fits as pyfits
+except ImportError:
+    import pyfits
+from pylab import *;import numpy,scipy,matplotlib;
 import pyspeckit
-import pyfits
 from pyspeckit.spectrum.readers import gbt
 
 sdfitsfile = '/Users/adam/observations/gbt/h2co_pilot/AGBT09C_049_02.raw.acs.fits'

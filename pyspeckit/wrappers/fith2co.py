@@ -3,27 +3,29 @@
 H2CO fitter wrapper
 ===================
 
-Wrapper to fit formaldehyde spectra.  
+Wrapper to fit formaldehyde spectra.
 """
 import pyspeckit
-from matplotlib import pyplot 
+from matplotlib import pyplot
 import copy
-import random
 
-title_dict = {
-    'oneone':'H$_2$CO 1$_{11}$-1$_{10}$', 
-    'twotwo':'H$_2$CO 2$_{12}$-2$_{11}$',
-    'threethree':'H$_2$CO 3$_{23}$-3$_{22}$'
-    }
+title_dict = {'oneone':'H$_2$CO 1$_{11}$-1$_{10}$',
+              'twotwo':'H$_2$CO 2$_{12}$-2$_{11}$',
+              'threethree':'H$_2$CO 3$_{23}$-3$_{22}$'
+              }
 
-def plot_h2co(spdict,spectra, fignum=1, show_components=False,
-        show_hyperfine_components=False, residfignum=None, **plotkwargs):
+def plot_h2co(spdict, spectra, fignum=1, show_components=False,
+              show_hyperfine_components=False, residfignum=None, annotate=None,
+              clear=True, residkwargs={}, plot_fit_kwargs={}, residclear=True,
+              resid_overlay=False, resid_yoffsets=None,
+              **plotkwargs):
     """
     Plot the results from a multi-h2co fit
-    """ 
+    """
     spectra.plotter.figure = pyplot.figure(fignum)
     spectra.plotter.axis = spectra.plotter.figure.gca()
-    pyplot.clf()
+    if clear:
+        spectra.plotter.figure.clf()
     splist = spdict.values()
 
     for sp in splist:
@@ -34,37 +36,81 @@ def plot_h2co(spdict,spectra, fignum=1, show_components=False,
             sp.specfit.npeaks = spectra.specfit.npeaks
             sp.specfit.fitter.npeaks = spectra.specfit.npeaks
             if spectra.specfit.modelpars is not None:
-                sp.specfit.model = sp.specfit.fitter.n_modelfunc(pars=spectra.specfit.modelpars, **spectra.specfit.fitter.modelfunc_kwargs)(sp.xarr)
+                mf = sp.specfit.fitter.n_modelfunc
+                kw = spectra.specfit.fitter.modelfunc_kwargs
+                sp.specfit.model = mf(pars=spectra.specfit.modelpars,
+                                      **kw)(sp.xarr)
 
     if len(splist) == 2:
-        axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
+        axdict = {'oneone':pyplot.subplot(211),
+                  'twotwo':pyplot.subplot(212)}
     elif len(splist) == 3:
-        axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223), 'threethree':pyplot.subplot(224), 'fourfour':pyplot.subplot(224) }
+        axdict = {'oneone':pyplot.subplot(211),
+                  'twotwo':pyplot.subplot(223),
+                  'threethree':pyplot.subplot(224)}
     elif len(splist) == 4:
-        axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
+        axdict = {'oneone':pyplot.subplot(221),
+                  'twotwo':pyplot.subplot(222),
+                  'threethree':pyplot.subplot(223),
+                  'fourfour':pyplot.subplot(224)}
     for linename,sp in spdict.iteritems():
         sp.plotter.axis=axdict[linename] # permanent
-        sp.plotter(axis=axdict[linename],title=title_dict[linename], **plotkwargs)
+        sp.plotter(axis=axdict[linename],
+                   title=title_dict[linename],
+                   clear=clear,
+                   **plotkwargs)
         sp.specfit.Spectrum.plotter = sp.plotter
         #sp.specfit.selectregion(reset=True)
         if sp.specfit.modelpars is not None:
             sp.specfit.plot_fit(annotate=False,
-                    show_components=show_components,
-                    show_hyperfine_components=show_hyperfine_components)
-    if spdict['oneone'].specfit.modelpars is not None:
-        spdict['oneone'].specfit.annotate(labelspacing=0.05,prop={'size':'small','stretch':'extra-condensed'},frameon=False)
+                                show_components=show_components,
+                                show_hyperfine_components=show_hyperfine_components,
+                                **plot_fit_kwargs)
+        sp.plotter.reset_limits()
+    if spdict['oneone'].specfit.modelpars is not None and annotate:
+        spdict['oneone'].specfit.annotate(labelspacing=0.05,
+                                          prop={'size':'small',
+                                                'stretch':'extra-condensed'},
+                                          frameon=False)
 
+    residaxdict = None
     if residfignum is not None:
         pyplot.figure(residfignum)
-        pyplot.clf()
+        if residclear:
+            pyplot.clf()
         if len(splist) == 2:
-            axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
+            residaxdict = {'oneone':pyplot.subplot(211),
+                           'twotwo':pyplot.subplot(212)}
         elif len(splist) == 3:
-            axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223), 'threethree':pyplot.subplot(224), 'fourfour':pyplot.subplot(224) }
+            residaxdict = {'oneone':pyplot.subplot(211),
+                           'twotwo':pyplot.subplot(223),
+                           'threethree':pyplot.subplot(224),
+                           'fourfour':pyplot.subplot(224)}
         elif len(splist) == 4:
-            axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
+            residaxdict = {'oneone':pyplot.subplot(221),
+                           'twotwo':pyplot.subplot(222),
+                           'threethree':pyplot.subplot(223),
+                           'fourfour':pyplot.subplot(224)}
+    elif resid_overlay:
+        residaxdict = axdict
+        residclear = False # override defaults...
+        residfignum = fignum
+
+    if residaxdict is not None:
         for linename,sp in spdict.iteritems():
-            sp.specfit.plotresiduals(axis=axdict[linename])
+            sp.specfit.Spectrum.plotter = sp.plotter
+            try:
+                yoffset = resid_yoffsets[linename]
+            except TypeError:
+                yoffset = 0.0
+            sp.specfit.plotresiduals(axis=residaxdict[linename],
+                                     figure=residfignum,
+                                     clear=residclear,
+                                     set_limits=False,
+                                     label=False,
+                                     yoffset=yoffset,
+                                     **residkwargs)
+        spectra.residaxdict = residaxdict
 
     spectra.axisdict = axdict
     spectra.plotter.axis = axdict['oneone']
@@ -89,7 +135,7 @@ def BigSpectrum_to_H2COdict(sp, vrange=None):
             spdict[linename] = sp.copy()
             spdict[linename].xarr.convert_to_unit('GHz')
             spdict[linename].xarr.refX = freq
-            spdict[linename].xarr.refX_units = 'Hz'
+            spdict[linename].xarr.refX_unit = 'Hz'
             #spdict[linename].baseline = copy.copy(sp.baseline)
             #spdict[linename].baseline.Spectrum = spdict[linename]
             spdict[linename].specfit = sp.specfit.copy(parent=spdict[linename])
@@ -114,3 +160,5 @@ def plotter_override(sp, vrange=None, **kwargs):
         raise ValueError("Not enough lines; don't need to use the H2CO plot wrapper")
 
     plot_h2co(spdict, sp, **kwargs)
+
+    return spdict

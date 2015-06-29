@@ -6,17 +6,15 @@ Hydrogen Models
 Hydrogen in HII regions is typically assumed to follow Case B recombination
 theory.
 
-The values for the Case B recombination coefficients are given by [HummerStorey1987]_.  
-They are also computed in [Hummer1994]_ and tabulated at a [wiki]_.  I had to OCR and pull
-out by hand some of the coefficients.
+The values for the Case B recombination coefficients are given by `Hummer &
+Storey (1987)
+<http://adsabs.harvard.edu/cgi-bin/nph-bib_query?bibcode=1987MNRAS.224..801H&db_key=AST>`_.
+They are also computed in `Hummer (1994)
+<http://adsabs.harvard.edu/abs/1994MNRAS.268..109H>`_ and tabulated at a `wiki
+<http://wiki.hmet.net/index.php/HII_Case_B_Recombination_Coefficients>`_.  I
+had to OCR and pull out by hand some of the coefficients.
 
-.. [HummerStorey1987] : `Recombination-line intensities for hydrogenic ions.
-    I - Case B calculations for H I and He II
-    <http://adsabs.harvard.edu/cgi-bin/nph-bib_query?bibcode=1987MNRAS.224..801H&db_key=AST>`_
-
-.. [Hummer1994] : `<http://adsabs.harvard.edu/abs/1994MNRAS.268..109H>`_
-
-.. [wiki] :  `<http://wiki.hmet.net/index.php/HII_Case_B_Recombination_Coefficients>`_
+.. Hummer & Storey 1987: Recombination-line intensities for hydrogenic ions.  I - Case B calculations for H I and He II
 
 """
 import numpy as np
@@ -294,5 +292,5 @@ def add_to_registry(sp):
             fitunits='microns')
 
     sp.Registry.add_fitter('hydrogen', extincted_hydrogen_emission,
-            extincted_hydrogen_emission.npars, multisingle='multi')
+            extincted_hydrogen_emission.npars)
 

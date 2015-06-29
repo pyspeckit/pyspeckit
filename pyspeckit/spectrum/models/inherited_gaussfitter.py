@@ -12,14 +12,17 @@ class.
 
 """
 import model
-import numpy 
+import fitter
+import numpy
+import types
 
-def gaussian(x,A,dx,w, return_components=False, normalized=False):
+def gaussian(x,A,dx,w, return_components=False, normalized=False,
+             return_hyperfine_components=False):
     """
     Returns a 1-dimensional gaussian of form
     A*numpy.exp(-(x-dx)**2/(2*w**2))
 
-    Area is sqrt(2*pi)*sigma^2*amplitude - i.e., this is NOT a normalized
+    Area is sqrt(2*pi*sigma^2)*amplitude - i.e., this is NOT a normalized
     gaussian, unless normalized=True in which case A = Area
     
     Parameters
@@ -36,6 +39,9 @@ def gaussian(x,A,dx,w, return_components=False, normalized=False):
     return_components : bool
         dummy variable; return_components does nothing but is required by all
         fitters
+    return_hyperfine_components : bool
+        dummy variable; does nothing but is required by all
+        fitters
     normalized : bool
         Return a normalized Gaussian?
     """
@@ -49,7 +55,17 @@ def gaussian(x,A,dx,w, return_components=False, normalized=False):
 def gaussian_fwhm(sigma):
     return numpy.sqrt(8*numpy.log(2)) * sigma
 
-def gaussian_fitter(multisingle='multi'):
+def gaussian_integral(amplitude, sigma):
+    """ Integral of a Gaussian """
+    return amplitude * numpy.sqrt(2*numpy.pi*sigma**2)
+
+def _integral_modelpars(modelpars=None):
+    """ light wrapper to match requirements for model.analytic_integral """
+    amplitude = modelpars[0]
+    sigma = modelpars[2]
+    return gaussian_integral(amplitude,sigma)
+
+def gaussian_fitter():
     """
     Generator for Gaussian fitter class
     """
@@ -59,11 +75,30 @@ def gaussian_fitter(multisingle='multi'):
             parlimited=[(False,False),(False,False),(True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma'),
-            multisingle=multisingle,
+            centroid_par='shift',
+            fwhm_func=gaussian_fwhm,
+            fwhm_pars=['width'],
+            integral_func=_integral_modelpars,
+            )
+    myclass.__name__ = "gaussian"
+    
+    return myclass
+
+def gaussian_vheight_fitter():
+    """
+    Generator for Gaussian fitter class
+    """
+
+    vhg = fitter.vheightmodel(gaussian)
+    myclass =  model.SpectralModel(vhg, 4,
+            parnames=['height','amplitude','shift','width'], 
+            parlimited=[(False,False),(False,False),(False,False),(True,False)], 
+            parlimits=[(0,0),(0,0), (0,0), (0,0)],
+            shortvarnames=('B','A',r'\Delta x',r'\sigma'),
             centroid_par='shift',
             fwhm_func=gaussian_fwhm,
             fwhm_pars=['width'],
             )
-    myclass.__name__ = "gaussian"
+    myclass.__name__ = "vheightgaussian"
     
     return myclass

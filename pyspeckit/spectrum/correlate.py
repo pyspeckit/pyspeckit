@@ -43,7 +43,7 @@ def correlate(spectrum1, spectrum2, range=None, units=None, errorweight=False):
     xmax =  xrange/2.
     offset_values = np.linspace(xmin, xmax, len(xarr))
 
-    offset_xarr = units_module.SpectroscopicAxis(offset_values, unit=xarr.units) 
+    offset_xarr = units_module.SpectroscopicAxis(offset_values, unit=xarr.unit) 
 
     header = headers.intersection(spectrum1.header, spectrum2.header)
     header.update('CRPIX1',1)

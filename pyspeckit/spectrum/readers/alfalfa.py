@@ -39,13 +39,13 @@ def read_alfalfa_source(savfile, sourcenumber=0):
             try:
                 len(spectra[par])
             except TypeError:
-                header.update(par[:8],spectra[par])
+                header[par[:8]] = spectra[par]
 
         # assume ALFALFA spectra in Kelvin
-        header.update('BUNIT','K')
+        header['BUNIT'] = 'K'
 
         xarr = pyspeckit.spectrum.units.SpectroscopicAxis(spectra.velarr,
-                refX=header['RESTFRQ'], refX_units='MHz', unit='km/s')
+                refX=header['RESTFRQ'], refX_unit='MHz', unit='km/s')
 
         data = np.ma.masked_where(np.isnan(spectra.spec), spectra.spec)
 

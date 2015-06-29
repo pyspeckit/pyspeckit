@@ -1,10 +1,16 @@
 import numpy as np
 import interpolation
 
-def smooth(data,smooth,smoothtype='gaussian',downsample=True,downsample_factor=None,
-        convmode='same'):
+def smoothed(spectrum, **kwargs):
+    sp = spectrum.copy()
+    sp.smooth(**kwargs)
+    return sp
+
+def smooth(data, smooth, smoothtype='gaussian', downsample=True,
+           downsample_factor=None, convmode='same'):
     """
-    Smooth and downsample the data array
+    Smooth and downsample the data array.  NaN data points will be replaced
+    with interpolated values
 
     Parameters
     ----------

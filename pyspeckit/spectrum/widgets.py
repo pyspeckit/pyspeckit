@@ -1,6 +1,7 @@
 from matplotlib.widgets import Widget,Button,Slider
 from matplotlib import pyplot
 import matplotlib
+import warnings
 
 class dictlist(list):
     def __init__(self, *args):
@@ -100,7 +101,12 @@ class FitterSliders(Widget):
             matplotlib.rcParams['toolbar'] = 'None'
             self.toolfig = pyplot.figure(figsize=(6,3))
             if hasattr(targetfig.canvas.manager,'window'):
-                self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.title())
+                if hasattr(targetfig.canvas.manager.window, 'title'):
+                    self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.title())
+                elif hasattr(targetfig.canvas.manager.window, 'windowTitle'):
+                    self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.windowTitle())
+                else:
+                    warnings.warn("Only Qt4 and TkAgg support window titles (apparently)")
             self.toolfig.subplots_adjust(top=0.9,left=0.2,right=0.9)
             matplotlib.rcParams['toolbar'] = tbar
         else:
@@ -178,7 +184,9 @@ class FitterSliders(Widget):
             # update components too
             for ii,line in enumerate(self.specfit._plotted_components):
                 xdata = line.get_xdata()
-                modelcomponents = self.specfit.fitter.components(xdata, mpp, **self.specfit._component_kwargs)
+                modelcomponents = self.specfit.fitter.components(xdata,
+                                                                 mpp,
+                                                                 **self.specfit._component_kwargs)
                 for jj,data in enumerate(modelcomponents):
                     if ii % 2 == jj:
                         # can have multidimensional components
@@ -220,9 +228,12 @@ class FitterSliders(Widget):
                 vmax = max([value/4.0,value*4.0])
             else:
                 vmax = 1
-
-            self.sliders[name] = ModifiableSlider(ax, 
-                name, vmin, vmax, valinit=value)
+            try:
+                self.sliders[name] = ModifiableSlider(ax, 
+                    name, vmin, vmax, valinit=value)
+            except ValueError:
+                self.sliders[name] = ModifiableSlider(ax, 
+                    name, vmin.value, vmax.value, valinit=value)
 
             self.sliders[-1].on_changed(update)
 

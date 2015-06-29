@@ -3,20 +3,19 @@
 Units and SpectroscopicAxes
 ===========================
 
-Unit parsing and conversion tool.  
+Unit parsing and conversion tool.
 The SpectroscopicAxis class is meant to deal with unit conversion internally
 
 Open Questions: Are there other FITS-valid projection types, unit types, etc.
-    that should be included?
-    What about for other fields (e.g., wavenumber?)
+that should be included?
+What about for other fields (e.g., wavenumber?)
+
 """
-#.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
-#Affiliation: University of Colorado at Boulder
-#Created on March 9th, 2011
-
-
+from __future__ import print_function
 import numpy as np
 import warnings
+from astropy import units as u
+from astropy import log
 
 # declare a case-insensitive dict class to return case-insensitive versions of each dictionary...
 # this is just a shortcut so that units can be specified as, e.g., Hz, hz, HZ, hZ, etc.  3 of those 4 are "legitimate".  
@@ -24,7 +23,7 @@ import warnings
 # I changed this to a "SmartCase" dict, by analogy with VIM's smartcase, where anything with caps will
 # be case sensitive, BUT if there is no unit matching the exact case, will search for the lower version too
 # e.g., if you search for Mm, it will return Megameters.  If you search for mm or mM, it will get millimeters
-class SmartCaseDict(dict):
+class SmartCaseNoSpaceDict(dict):
     def __init__(self, inputdict=None):
         if inputdict:
             # Doesn't do keyword args
@@ -46,20 +45,20 @@ class SmartCaseDict(dict):
         try: 
             return dict.__getitem__(self,key)
         except KeyError:
-            return dict.__getitem__(self, key.lower())
+            return dict.__getitem__(self, key.lower().replace(" ",""))
 
     def __setitem__(self, key, value):
         dict.__setitem__(self,key,value)
         # only set lower-case version if there isn't one there already
         # prevents overwriting mm with Mm.lower()
         if hasattr(key,'lower'):
-            if key.lower() not in self:
-                self.__setitem__(key.lower(), value)
+            if key.lower().replace(" ","") not in self:
+                self.__setitem__(key.lower().replace(" ",""), value)
 
     def __contains__(self, key):
         cased = dict.__contains__(self,key)
         if hasattr(key,'lower') and cased is False:
-            return dict.__contains__(self, key.lower())
+            return dict.__contains__(self, key.lower().replace(" ",""))
         else:
             return cased
 
@@ -67,14 +66,14 @@ class SmartCaseDict(dict):
         """ This is deprecated, but we're keeping it around """
         cased = dict.has_key__(self,key)
         if hasattr(key,'lower') and cased is False:
-            return dict.has_key__(self, key.lower())
+            return dict.has_key__(self, key.lower().replace(" ",""))
         else:
             return cased
 
     def get(self, key, def_val=None):
         cased = dict.get(self,key)
         if hasattr(key,'lower') and cased is None:
-            return dict.get(self, key.lower(),def_val)
+            return dict.get(self, key.lower().replace(" ",""),def_val)
         else:
             return cased
 
@@ -85,7 +84,7 @@ class SmartCaseDict(dict):
         """
         cased = dict.setdefault(self,key)
         if hasattr(key,'lower') and cased is None:
-            return dict.setdefault(self, key.lower(),def_val)
+            return dict.setdefault(self, key.lower().replace(" ",""),def_val)
         else:
             return cased
 
@@ -103,7 +102,7 @@ class SmartCaseDict(dict):
     def pop(self, key, def_val=None):
         cased = dict.pop(self,key)
         if hasattr(key,'lower') and cased is None:
-            return dict.pop(self, key.lower(),def_val)
+            return dict.pop(self, key.lower().replace(" ",""),def_val)
         else:
             return cased
     
@@ -117,7 +116,7 @@ length_dict = {'meters':1.0,'m':1.0,
         'megameters':1e6,'Mm':1e6,
         'angstrom':1e-10,'angstroms':1e-10,'A':1e-10,
         }
-length_dict = SmartCaseDict(length_dict)
+length_dict = SmartCaseNoSpaceDict(length_dict)
 
 wavelength_dict = length_dict # synonym
 
@@ -128,17 +127,18 @@ frequency_dict = {
         'GHz':1e9,
         'THz':1e12,
         }
-frequency_dict = SmartCaseDict(frequency_dict)
+frequency_dict = SmartCaseNoSpaceDict(frequency_dict)
 
-velocity_dict = {'meters/second':1.0,'m/s':1.0,
-        'kilometers/second':1e3,'kilometers/s':1e3,'km/s':1e3,'kms':1e3,
-        'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
-        'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
+velocity_dict = {'meters/second':1.0,'m/s':1.0,'m s-1':1.0,'ms-1':1.0,
+                 'kilometers/second':1e3,'kilometers/s':1e3,'km/s':1e3,'kms':1e3,'km s-1':1e3,'kms-1':1e3,
+                'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
+                'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
         }
-velocity_dict = SmartCaseDict(velocity_dict)
+velocity_dict = SmartCaseNoSpaceDict(velocity_dict)
+velocity_conventions = {'optical': u.doppler_optical, 'radio': u.doppler_radio, 'relativistic': u.doppler_relativistic}
 
 pixel_dict = {'pixel':1,'pixels':1}
-pixel_dict = SmartCaseDict(pixel_dict)
+pixel_dict = SmartCaseNoSpaceDict(pixel_dict)
 
 conversion_dict = {
         'VELOCITY':velocity_dict,  'Velocity':velocity_dict,  'velocity':velocity_dict,  'velo': velocity_dict, 'VELO': velocity_dict,
@@ -147,33 +147,8 @@ conversion_dict = {
         'FREQUENCY':frequency_dict,'Frequency':frequency_dict,'frequency':frequency_dict, 'freq': frequency_dict, 'FREQ': frequency_dict,
         'pixels':pixel_dict,'PIXELS':pixel_dict,
         }
-conversion_dict = SmartCaseDict(conversion_dict)
+conversion_dict = SmartCaseNoSpaceDict(conversion_dict)
 
-unit_type_dict = {
-    'Hz' :'frequency', 'kHz':'frequency', 'MHz':'frequency', 'GHz':'frequency',
-    'HZ' :'frequency', 'KHZ':'frequency', 'MHZ':'frequency', 'GHZ':'frequency',
-    'hz' :'frequency', 'khz':'frequency', 'mhz':'frequency', 'ghz':'frequency',
-    'THz':'frequency', 
-    'meters/second':'velocity', 'm/s':'velocity', 'kilometers/s':'velocity',
-    'kilometers/second':'velocity',
-    'centimeters/second':'velocity',
-    'megameters/s':'velocity',
-    'megameters/second':'velocity','Mm/s':'velocity',
-    'km/s':'velocity', 'kms':'velocity', 'centimeters/s':'velocity',
-    'cm/s':'velocity', 'cms':'velocity', 
-    'meters':'wavelength','m':'wavelength',
-    'centimeters':'wavelength','cm':'wavelength',
-    'millimeters':'wavelength','mm':'wavelength',
-    'nanometers':'wavelength','nm':'wavelength',
-    'micrometers':'wavelength','micron':'wavelength','microns':'wavelength','um':'wavelength',
-    'kilometers':'wavelength','km':'wavelength',
-    'megameters':'wavelength','Mm':'wavelength',
-    'angstrom':'wavelength','angstroms':'wavelength','A':'wavelength',
-    'unknown':'pixels',
-    None: 'pixels',
-    }
-
-unit_type_dict = SmartCaseDict(unit_type_dict)
 
 # to-do
 # unit_prettyprint = dict([(a,a.replace('angstroms','\\AA')) for a in unit_type_dict.keys() if a is not None])
@@ -196,7 +171,7 @@ xtype_dict = {
         # cm^-1 ? 'wavenumber':'wavenumber',
         }
 
-frame_dict = SmartCaseDict({
+frame_dict = SmartCaseNoSpaceDict({
         'VLSR':'LSRK','VRAD':'LSRK','VELO':'LSRK',
         'VOPT':'LSRK',
         'VELO-LSR':'LSRK',
@@ -230,7 +205,8 @@ frame_type_dict = {'LSRK':'velocity','LSRD':'velocity','LSR':'velocity',
 fits_frame = {'rest':'REST','LSRK':'-LSR','heliocentric':'-HEL','geocentric':'-GEO'}
 fits_specsys = {'rest':'REST','LSRK':'LSRK','LSRD':'LSRD','heliocentric':'HEL','geocentric':'GEO'}
 fits_type = {'velocity':'VELO','frequency':'FREQ','wavelength':'WAVE','length':'WAVE','redshift':'REDS',
-        'Velocity':'VELO','Frequency':'FREQ','Wavelength':'WAVE','Length':'WAVE','Redshift':'REDS'}
+        'Velocity':'VELO','Frequency':'FREQ','Wavelength':'WAVE','Length':'WAVE','Redshift':'REDS',
+        u.Hz.physical_type:'FREQ', (u.km/u.s).physical_type:'VELO', u.m.physical_type:'WAVE'}
 convention_suffix = {'radio':'RAD','optical':'OPT','relativistic':'REL','redshift':'RED'}
 
 speedoflight_ms  = np.float64(2.99792458e8) # m/s
@@ -265,7 +241,25 @@ unitdict = {
         }
 
 
-class SpectroscopicAxis(np.ndarray):
+def generate_xarr(input_array, unit=None):
+    """
+    Create an 'xarr' from an array; can be a quantity
+
+    unit is ignored unless the input is a simple ndarray
+    """
+    from astropy import units as u
+    if hasattr(input_array, 'value') and hasattr(input_array, 'unit'):
+        return SpectroscopicAxis(input_array.value,
+                                 unit=input_array.unit.to_string())
+    elif isinstance(input_array, SpectroscopicAxis):
+        return input_array
+    elif isinstance(input_array, np.ndarray):
+        return SpectroscopicAxis(input_array, unit=unit)
+    else:
+        raise TypeError("Unrecognized input type. Input array of type: {0}"+\
+            "is not a Quantity, SpectroscopicAxis or numpy.ndarray".format(type(input_array)))
+
+class SpectroscopicAxis(u.Quantity):
     """
     A Spectroscopic Axis object to store the current units of the spectrum and
     allow conversion to other units and frames.  Typically, units are velocity,
@@ -276,119 +270,146 @@ class SpectroscopicAxis(np.ndarray):
     a SpectroscopicAxis without a dxarr attribute!  This can result in major problems;
     a workaround is being sought but subclassing numpy arrays is harder than I thought
     """
-
-    def __new__(self, xarr, unit="Hz", frame='rest', frame_offset=0.0,
-            frame_offset_units='Hz', xtype=None, refX=None, redshift=None,
-            refX_units=None, velocity_convention=None, use128bits=False,
-            units=None, bad_unit_response='raise'):
+    def __new__(self, xarr, unit=None, refX=None, redshift=None,
+                refX_unit=None, velocity_convention=None, use128bits=False, 
+                bad_unit_response='raise', equivalencies=u.spectral(),
+                center_frequency=None, center_frequency_unit=None):
         """
         Make a new spectroscopic axis instance
         Default units Hz
         
-        *xarr* [ np.ndarray ]
+        Parameters
+        ----------
+        xarr : np.ndarray
             An array of X-axis values in whatever unit specified
-
-        *unit* or *units* [ string ]
-            Any valid spectroscopic X-axis unit (km/s, Hz, angstroms, etc.)
-
-        *xtype* [ string | None ]
-            irrelevant?
-
-        *refX* [ float ]
+        unit : str
+            Any valid spectroscopic X-axis unit (km/s, Hz, angstroms, etc.).
+            Spaces will be removed.
+        refX : float
             Reference frequency/wavelength
-
-        *refX_units* [ string ]
+        refX_unit : str | astropy.units.Unit
             Units of the reference frequency/wavelength
-        
-        *frame* [ frame_dict key ]
-            **NOT IMPLEMENTED**
-            The frame of the axis, e.g. 
-                * Topocentric (observatory-center) [up to 0.5 km/s offset from Earth-center]
-                * Geocentric (earth-center) 
-                * Barycentric (Solar System center) 
-                * Heliocentric (Sun-center)
-                * Kinematic Local Standard of Rest (LSRK)
-                * Dynamic Local Standard of Rest (LSRD)
-                * Galactocentric
-                * Supergalactic
-                * CMB?
-                * "Rest" (relative to the rest frequency of the line)
-                * Redshifted
-            SOME tools for frame shifting are now incorporated into 
-            velocity_frames.py
-
-        *bad_unit_response* [ 'raise', 'pixel' ]
+        center_frequency: float
+            The reference frequency for determining a velocity. 
+            Required for conversions between frequency/wavelength/energy and velocity.
+        center_frequency_unit: string
+            If converting between velocity and any other spectroscopic type,
+            need to specify the central frequency around which that velocity is
+            calculated.
+        equivalencies : list
+            astropy equivalencies list containing tuples of the form:
+            (from_unit, to_unit, forward, backward)
+            forward and backward are functions that convert values between those units
+        bad_unit_response : 'raise' | 'pixel'
             What should pyspeckit do if the units are not recognized?  Default
             is to raise an exception.  Can make pixel units instead
-        """
+        """        
         if use128bits:
             dtype='float128'
         else:
             dtype='float64'
-        subarr = np.array(xarr,dtype=dtype)
+
+        # Only need to convert xarr to array if it's not already one (e.g., if
+        # it's a list)
+        if not isinstance(xarr, np.ndarray):
+            subarr = np.array(xarr, dtype=dtype)
+        else:
+            subarr = xarr
+        
         subarr = subarr.view(self)
 
-        # allow either plural or singular unit
-        if units is not None and units in unit_type_dict and unit=='Hz':
-            unit=units
-
-        if unit in unit_type_dict:
-            subarr.units = unit
-        else:
-            if bad_unit_response=='raise':
-                raise ValueError('Unit %s not recognized.' % unit)
-            elif bad_unit_response=="pixel":
-                subarr.units="unknown"
-            else:
-                raise ValueError("Invalied bad unit response.  Valid options are 'raise','pixel'")
-        if subarr.units is None:
-            subarr.units = 'none'
-        subarr.frame = frame
-
-        # not currently used / placeholder
-        subarr.frame_offset = frame_offset
-
-        if xtype in xtype_dict:
-            subarr.xtype = xtype_dict[xtype]
-            subarr.frame = frame_dict[xtype]
-        elif subarr.units in unit_type_dict:
-            subarr.xtype = unit_type_dict[subarr.units]
-        elif type(xtype) is str:
-            warnings.warn("Unknown X-axis type in header: %s" % xtype)
-            subarr.xtype = xtype
-        else:
-            if xtype is not None:
-                warnings.warn("WARNING: xtype has been specified but was not recognized as a string.")
-            subarr.xtype = 'unknown'
+        # Only need to set xarr's unit if it's not a quantity
+        # or if it is unitless
+        if not isinstance(xarr, u.Quantity) or xarr.unit == u.dimensionless_unscaled:
+            subarr._unit = self.validate_unit(unit, bad_unit_response)
 
         subarr.refX = refX
-        if refX_units is None:
-            if subarr.units in frequency_dict:
-                subarr.refX_units = subarr.units
+
+        if refX_unit is None:
+            if hasattr(refX, 'unit'):
+                refX_unit = refX.unit
+            elif subarr._unit in frequency_dict:
+                refX_unit = subarr.unit
             else:
-                subarr.refX_units = 'Hz'
-        else:
-            subarr.refX_units = refX_units
+                refX_unit = 'Hz'
+        subarr.refX_unit = refX_unit
+
         subarr.redshift = redshift
         subarr.wcshead = {}
-        if velocity_convention is None:
-            if subarr.xtype is not None:
-                if 'RAD' in subarr.xtype:
-                    subarr.velocity_convention = 'radio'
-                elif 'OPT' in subarr.xtype:
-                    subarr.velocity_convention = 'optical'
-                elif 'REL' in subarr.xtype:
-                    subarr.velocity_convention = 'relativistic'
-                elif subarr.xtype is 'unknown':
-                    subarr.velocity_convention = 'radio' # default
-                else:
-                    subarr.velocity_convention = 'radio' # default
-            else:
-                subarr.velocity_convention = 'radio' # default
-        else:
-            subarr.velocity_convention = velocity_convention
+        subarr.velocity_convention = velocity_convention
 
+        if not center_frequency:
+            if refX:
+                center_frequency = refX    
+        if not center_frequency_unit:
+            if refX_unit:
+                center_frequency_unit = refX_unit
+            else:
+                center_frequency_unit = unit
+        if center_frequency:
+            subarr.center_frequency = u.Quantity(center_frequency, center_frequency_unit)
+        else:
+            subarr.center_frequency = None
+
+        subarr.center_frequency, subarr._equivalencies = \
+                self.find_equivalencies(subarr.velocity_convention,
+                                        subarr.center_frequency, 
+                                        equivalencies)
         return subarr
+
+    def __getitem__(self, key):
+        """
+        We do *NOT* want to return a SpectroscopicAxis when indexed singly!
+        """
+        if self.isscalar:
+            raise TypeError(
+                "'{cls}' object with a scalar value does not support "
+                "indexing".format(cls=self.__class__.__name__))
+
+        out = super(u.Quantity, self).__getitem__(key)
+        if np.isscalar(out):
+            return u.Quantity(out, unit=self.unit)
+        else:
+            return self._new_view(out)
+
+    def __repr__(self):
+        if self.shape is ():
+            rep = ("SpectroscopicAxis([%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
+                (self.value, self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
+        else:
+            rep = ("SpectroscopicAxis([%r,...,%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
+                (self[0].value, self[-1].value, self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
+        return rep
+
+    def __str__(self):
+        selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
+                self.unit,self.umin().value,self.umax().value)
+        if self.refX is not None:
+            if not hasattr(self.refX, 'unit'):
+                selfstr += "Reference is %g %s" % (self.refX, self.refX_unit)
+            else:
+                selfstr += "Reference is %s" % (self.refX)
+        return selfstr
+
+    @property
+    def units(self):
+        log.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        return self._unit
+
+    @units.setter
+    def units(self, value):
+        log.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        self.set_unit(value)
+
+    @property
+    def refX_units(self):
+        log.warn("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
+        return self.refX_unit
+
+    @refX_units.setter
+    def refX_units(self, value):
+        log.warn("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
+        self.refX_unit = value
 
     def __array_finalize__(self,obj):
         """
@@ -396,14 +417,17 @@ class SpectroscopicAxis(np.ndarray):
         around, e.g.:
         xarr = self[1:20]
         """
-        self.units = getattr(obj, 'units', None)
+        self._unit = getattr(obj, 'unit', u.dimensionless_unscaled)
         self.frame = getattr(obj, 'frame', None)
         self.xtype = getattr(obj, 'xtype', None)
         self.refX = getattr(obj, 'refX', None)
-        self.refX_units = getattr(obj, 'refX_units', None)
+        self.refX_unit = getattr(obj, 'refX_unit', None)
         self.velocity_convention = getattr(obj, 'velocity_convention', None)
         self.redshift = getattr(obj, 'redshift', None)
         self.wcshead = getattr(obj, 'wcshead', None)
+        self.center_frequency = getattr(obj, 'center_frequency', None)
+        self.center_frequency_unit = getattr(obj, 'center_frequency_unit', None)
+        self._equivalencies = getattr(obj, 'equivalencies', [])
         # moved from __init__ - needs to be done whenever viewed
         # (this is slow, though - may be better not to do this)
         if self.shape: # check to make sure non-scalar
@@ -422,86 +446,85 @@ class SpectroscopicAxis(np.ndarray):
             pass
         return ret
 
-    def __repr__(self):
-        if self.shape is ():
-            rep = ("SpectroscopicAxis([%r], units=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self.__array__(), self.units, self.refX, self.refX_units, self.frame, self.redshift, self.xtype, self.velocity_convention))
-        else:
-            rep = ("SpectroscopicAxis([%r,...,%r], units=%r, refX=%r, refX_units=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self[0], self[-1], self.units, self.refX, self.refX_units, self.frame, self.redshift, self.xtype, self.velocity_convention))
-        return rep
-
-    def __str__(self):
-        selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
-                self.units,self.umin(),self.umax())
-        if self.refX is not None:
-            selfstr += "Reference is %g %s" % (self.refX, self.refX_units)
-        return selfstr
-
     def _check_consistent_type(self):
         """
-        Make sure self.xtype is unit_type_dict[units]
+        Make sure self.xtype is unit_type_dict[unit]
         if this is NOT true, can cause significant errors
         """
-        OK = self.xtype == unit_type_dict[self.units]
-        if not OK:
-            raise InconsistentTypeError("Units: %s Type[units]: %s in %r" % (self.units,unit_type_dict[self.units],self) )
-
-    """ OBSOLETE use convert_to_unit
-    def change_xtype(self,new_xtype,**kwargs):
-        if new_xtype not in conversion_dict:
-            raise ValueError("There is no X-axis type %s" % new_xtype)
-        if conversion_dict[self.xtype] is velocity_dict:
-            if conversion_dict[new_xtype] is frequency_dict:
-                self.velocity_to_frequency(**kwargs)
-            elif conversion_dict[new_xtype] is wavelength_dict:
-                self.velocity_to_frequency()
-                self.frequency_to_wavelength(**kwargs)
-        elif conversion_dict[self.xtype] is frequency_dict:
-            if conversion_dict[new_xtype] is velocity_dict:
-                self.frequency_to_velocity(**kwargs)
-            elif conversion_dict[new_xtype] is wavelength_dict:
-                self.frequency_to_wavelength(**kwargs)
-        elif conversion_dict[self.xtype] is wavelength_dict:
-            if conversion_dict[new_xtype] is velocity_dict:
-                self.wavelength_to_frequency()
-                self.frequency_to_velocity(**kwargs)
-            elif conversion_dict[new_xtype] is wavelength_dict:
-                self.wavelength_to_frequency(**kwargs)
+        if self.xtype is None:
+            OK = False
         else:
-            raise ValueError("Conversion to xtype %s was not recognized." % xtype)
-    """
+            OK = self.xtype.lower() == self.unit
 
-    def umax(self, units=None):
+        if not OK:
+            raise InconsistentTypeError("Unit: %s Type[unit]: %s in %r" % (self.unit,unit_type_dict[self.unit],self))
+
+    def _fix_type(self):
+        try:
+            self._check_consistent_type()
+        except InconsistentTypeError:
+            self.xtype = unit_type_dict[self.unit]
+
+    @classmethod
+    def validate_unit(self, unit, bad_unit_response='raise'):
+        try:
+            if unit is None or unit == 'unknown':
+                unit = u.dimensionless_unscaled
+            if unit == 'angstroms': unit = 'angstrom'
+            unit = u.Unit(unit)
+        except ValueError:
+            if bad_unit_response == "pixel":
+                unit = u.dimensionless_unscaled
+            elif bad_unit_response == "raise":
+                raise ValueError('Unit %s not recognized.' % unit)
+            else:
+                raise ValueError('Unit %s not recognized. Invalid bad_unit_response, valid options: [%s/%s]' 
+                                % (unit, "raise", "pixel"))
+        return unit
+
+    def set_unit(self, unit, bad_unit_response='raise'):
+        self._unit = self.validate_unit(unit, bad_unit_response)
+
+    def umax(self, unit=None):
         """
         Return the maximum value of the SpectroscopicAxis.  If units specified,
         convert to those units first
         """
 
-        if units is not None:
+        if unit is not None:
             # could be reversed
             return np.max([self.coord_to_x(self.max(), units),self.coord_to_x(self.min(),units)])
         else: 
             return self.max()
 
-    def umin(self, units=None):
+    def umin(self, unit=None):
         """
         Return the minimum value of the SpectroscopicAxis.  If units specified,
         convert to those units first
         """
 
-        if units is not None:
+        if unit is not None:
             # could be reversed
             return np.min([self.coord_to_x(self.max(), units),self.coord_to_x(self.min(),units)])
         else: 
             return self.min()
 
-    def x_to_pix(self, xval):
+    def x_to_pix(self, xval, xval_units=None):
         """
         Given an X coordinate in SpectroscopicAxis' units, return the corresponding pixel number
         """
-        nearest_pix = np.argmin(np.abs(self-xval))
-        return nearest_pix
+        if xval_units in pixel_dict:
+            return xval
+        else:
+            try:
+                if not xval_units:
+                    xval_units = xval.unit
+            except AttributeError:
+                xval_units = u.dimensionless_unscaled
+            xval = xval * u.Unit(xval_units)            
+            nearest_pix = np.argmin(np.abs(self.value-xval.value))
+            # nearest_pix = np.argmin(np.abs(self.value-xval))
+            return nearest_pix
 
     def in_range(self, xval):
         """
@@ -513,58 +536,14 @@ class SpectroscopicAxis(np.ndarray):
         """
         Given a wavelength/frequency/velocity, return the value in the SpectroscopicAxis's units
         e.g.:
-        xarr.units = 'km/s'
-        xarr.refX = 5.0 
-        xarr.refX_units = GHz
+        xarr.unit = 'km/s'
+        xarr.refX = 5.0
+        xarr.refX_unit = GHz
         xarr.x_to_coord(5.1,'GHz') == 6000 # km/s
         """
-        #if xunit in wavelength_dict: # shortcut - convert wavelength to freq
-        #    xval = wavelength_to_frequency(xval, xunit, 'Hz')
-        #    xunit = 'Hz'
-
-        if unit_type_dict[self.units] == unit_type_dict[xunit]:
-            if verbose: print "Input units of same type as output units."
-            return xval * conversion_dict[unit_type_dict[xunit]][xunit] / conversion_dict[unit_type_dict[self.units]][self.units]
-        elif xunit in velocity_dict:
-            if verbose: print "Requested units are Velocity"
-            if self.units in frequency_dict:
-                return velocity_to_frequency(xval, xunit,
-                        center_frequency=self.refX,
-                        center_frequency_units=self.refX_units,
-                        frequency_units=self.units,
-                        convention=self.velocity_convention)
-            elif self.units in wavelength_dict:
-                FREQ = velocity_to_frequency(xval, xunit,
-                        center_frequency=self.refX,
-                        center_frequency_units=self.refX_units,
-                        frequency_units='Hz',
-                        convention=self.velocity_convention)
-                return frequency_to_wavelength(FREQ, 'Hz',
-                        wavelength_units=self.units)
-        elif xunit in frequency_dict:
-            if verbose: print "Requested units are Frequency"
-            if self.units in velocity_dict:
-                return frequency_to_velocity(xval, xunit,
-                        center_frequency=self.refX,
-                        center_frequency_units=self.refX_units,
-                        velocity_units=self.units,
-                        convention=self.velocity_convention)
-            elif self.units in wavelength_dict:
-                return frequency_to_wavelength(xval, xunit,
-                        wavelength_units=self.units)
-        elif xunit in wavelength_dict:
-            if verbose: print "Requested units are Frequency"
-            if self.units in velocity_dict:
-                return wavelength_to_velocity(xval, xunit,
-                        center_wavelength=self.refX,
-                        center_wavelength_units=self.refX_units,
-                        velocity_units=self.units,
-                        convention=self.velocity_convention)
-            elif self.units in frequency_dict:
-                return wavelength_to_frequency(xval, xunit,
-                        frequency_units=self.units)
-        else:
-            raise ValueError("Units not recognized.")
+        if not hasattr(xval, 'unit'):
+             xval = xval * u.Unit(xunit)
+        return xval.to(self.unit, self.equivalencies)
 
     def coord_to_x(self, xval, xunit):
         """
@@ -573,48 +552,10 @@ class SpectroscopicAxis(np.ndarray):
         e.g.:
         xarr.units = 'km/s'
         xarr.refX = 5.0 
-        xarr.refX_units = GHz
+        xarr.refX_unit = GHz
         xarr.coord_to_x(6000,'GHz') == 5.1 # GHz
         """
-        if unit_type_dict[self.units] == unit_type_dict[xunit]:
-            return xval / conversion_dict[unit_type_dict[xunit]][xunit] * conversion_dict[unit_type_dict[self.units]][self.units]
-
-
-        if xunit in velocity_dict:
-            if self.units in frequency_dict:
-                return frequency_to_velocity(xval, self.units,
-                        center_frequency=self.refX,
-                        center_frequency_units=self.refX_units,
-                        velocity_units=xunit,
-                        convention=self.velocity_convention)
-            elif self.units in wavelength_dict:
-                FREQ = wavelength_to_frequency(xval, self.units, frequency_units='Hz')
-                return frequency_to_velocity(FREQ, 'Hz',
-                        center_frequency=self.refX,
-                        center_frequency_units=self.refX_units,
-                        velocity_units=xunit,
-                        convention=self.velocity_convention)
-        elif xunit in frequency_dict:
-            if self.units in velocity_dict:
-                return velocity_to_frequency(xval, self.units,
-                        center_frequency=self.refX,
-                        center_frequency_units=self.refX_units,
-                        frequency_units=xunit,
-                        convention=self.velocity_convention)
-            elif self.units in wavelength_dict:
-                return wavelength_to_frequency(xval, self.units, frequency_units=xunit)
-        elif xunit in wavelength_dict:
-            if self.units in velocity_dict:
-                FREQ = velocity_to_frequency(xval, self.units,
-                        center_frequency=self.refX,
-                        center_frequency_units=self.refX_units,
-                        frequency_units='Hz',
-                        convention=self.velocity_convention)
-                return frequency_to_wavelength(FREQ, 'Hz', wavelength_units=xunit)
-            elif self.units in frequency_dict:
-                return frequency_to_wavelength(xval, self.units, wavelength_units=xunit)
-        else:
-            raise ValueError("Units not recognized.")
+        return self.as_unit(xunit)
 
     def convert_to_unit(self, unit, **kwargs):
         """
@@ -622,203 +563,89 @@ class SpectroscopicAxis(np.ndarray):
         Uses as_unit for the conversion, but changes internal values rather
         than returning them.
         """
-        if unit not in unit_type_dict:
-            raise ValueError("Invalid unit; not in units.unit_type_dict.")
+        unit = self.validate_unit(unit)
 
-        self[:] = self.as_unit(unit, **kwargs)
-        
-        if unit in velocity_dict:
-            self.xtype = "Velocity"
-        elif unit in frequency_dict:
-            self.xtype = "Frequency"
-        elif unit in wavelength_dict:
-            self.xtype = "Wavelength"
+        self.flags.writeable=True
 
-        if unit in unit_type_dict and unit not in (None, 'unknown'):
-            self.units = unit
+        # Hack:
+        # You can only set self[:] to a quantity
+        # The quantity will automatically be converted to present units
+        # Therefore, get the new array to set the *values* correctly,
+        # then input the values and let the unit conversion take care of the
+        # numerical changes, THEN set the unit.
+        new_values = self.as_unit(unit, **kwargs)
+        self[:] = new_values.value * self.unit
+        self.set_unit(unit)
+
+        self.flags.writeable=False
         self.make_dxarr()
 
-    def as_unit(self, unit, frame=None, quiet=True, center_frequency=None,
-            center_frequency_units=None, debug=False, **kwargs):
+    def as_unit(self, unit, equivalencies=[], velocity_convention=None, refX=None,
+                refX_unit=None, center_frequency=None, center_frequency_unit=None,
+                **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
         to convert between frequency/velocity/wavelength and simply change the 
         units of the X axis.  Frame conversion is... not necessarily implemented.
 
-        *unit* [ string ] 
+        Parameters
+        ----------
+        unit : string
             What unit do you want to 'view' the array as?
             None returns the x-axis unchanged (NOT a copy!)
-
-        *frame* [ None ]
+        frame : string
             NOT IMPLEMENTED.  When it is, it will allow you to convert between
             LSR, topocentric, heliocentric, rest, redshifted, and whatever other
             frames we can come up with.  Right now the main holdup is finding a 
             nice python interface to an LSR velocity calculator... and motivation.
- 
-        *center_frequency* [ None | float ]
-        *center_frequency_units* [ None | string ]
+        center_frequency: float
+            The reference frequency for determining a velocity. 
+            Required for conversions between frequency/wavelength/energy and velocity.
+        center_frequency_unit: string
             If converting between velocity and any other spectroscopic type,
             need to specify the central frequency around which that velocity is
             calculated.
             I think this can also accept wavelengths....
         """
+        if not velocity_convention:
+            velocity_convention = self.velocity_convention
+        if not equivalencies:
+            equivalencies = kwargs.get('equivalencies', self.equivalencies)
+        if not refX:
+            refX = self.refX
+        if not refX_unit:
+            refX_unit = self.refX_unit
+        if not center_frequency:
+            if self.center_frequency:
+                center_frequency = self.center_frequency
+            elif refX:
+                center_frequency = refX
+        if not center_frequency_unit:
+            if refX_unit:
+                center_frequency_unit = refX_unit
+        try:
+            if not hasattr(center_frequency, 'unit'):
+                center_frequency = u.Quantity(center_frequency, center_frequency_unit)
+        except:
+            center_frequency = None
 
-        if unit in (None,'none'):
-            return self
-        elif unit in pixel_dict:
-            return np.arange(self.shape[0])
-        elif unit not in conversion_dict[self.xtype]:
-            change_xtype = True
-            change_units = True
-        elif unit != self.units: 
-            change_xtype = False
-            change_units = True
-        else: 
-            change_xtype = False
-            change_units = False
-        if frame is not None and frame != self.frame: change_frame = True
-        else: change_frame = False
-
-        if center_frequency is None:
-            center_frequency = self.refX
-        if center_frequency_units is None:
-            center_frequency_units = self.refX_units
-
-        # make sure "center frequency" is actually a frequency (required by later code!)
-        # (but you only need a center_frequency if one of the units is velocity)
-        if (center_frequency_units not in frequency_dict and 
-                (unit in velocity_dict or
-                 self.units in velocity_dict)):
-            if center_frequency_units in wavelength_dict:
-                center_frequency = wavelength_to_frequency(center_frequency, 
-                        center_frequency_units, frequency_units='GHz')
-                center_frequency_units='GHz'
-            else:
-                raise ValueError("ERROR: %s is not a valid reference unit." % center_frequency_units)
-
-        if change_xtype:
-            if unit in velocity_dict:
-                if debug: print "Converting to velocity"
-                if conversion_dict[self.xtype] is frequency_dict:
-                    if debug: print "Converting frequency to velocity"
-                    newxarr = frequency_to_velocity(self,self.units,
-                            center_frequency=center_frequency,
-                            center_frequency_units=center_frequency_units,
-                            velocity_units=unit, convention=self.velocity_convention)
-                    newxtype = "Velocity"
-                    newunit = unit
-                elif conversion_dict[self.xtype] is wavelength_dict:
-                    if debug: print "Converting wavelength to velocity"
-                    freqx = wavelength_to_frequency(self, self.units) 
-                    cf = wavelength_to_frequency(center_frequency, center_frequency_units)
-                    cfu = 'GHz'
-                    newxarr = frequency_to_velocity(freqx, 'GHz',
-                            center_frequency=cf,
-                            center_frequency_units=cfu,
-                            velocity_units=unit, convention=self.velocity_convention)
-                    newxtype = "Velocity"
-                    newunit = unit
-                else: 
-                    raise ValueError("Could not convert from %s to %s" % (self.units,unit))
-            elif unit in frequency_dict:
-                if debug: print "Converting to frequency"
-                if conversion_dict[self.xtype] is velocity_dict:
-                    if debug: print "Converting velocity to frequency"
-                    newxarr = velocity_to_frequency(self,self.units,
-                            center_frequency=center_frequency,
-                            center_frequency_units=center_frequency_units,
-                            frequency_units=unit, convention=self.velocity_convention)
-                    newxtype = "Frequency"
-                    newunit = unit
-                elif conversion_dict[self.xtype] is wavelength_dict:
-                    if debug: print "Converting wavelength to frequency"
-                    newxarr = wavelength_to_frequency(self, self.units,
-                            frequency_units=unit)
-                    newxtype = "Frequency"
-                    newunit = unit
-                else: 
-                    raise ValueError("Could not convert from %s to %s" % (self.units,unit))
-            elif unit in wavelength_dict:
-                if debug: print "Converting to wavelength"
-                if conversion_dict[self.xtype] is velocity_dict:
-                    if debug: print "Converting velocity to wavelength"
-                    if center_frequency_units in frequency_dict:
-                        freqx = velocity_to_frequency(self, self.units,
-                                center_frequency=center_frequency,
-                                center_frequency_units=center_frequency_units,
-                                frequency_units='Hz',
-                                convention=self.velocity_convention)
-                        newxarr = frequency_to_wavelength(freqx, 'Hz',
-                                wavelength_units=unit)
-                    elif center_frequency_units in wavelength_dict:
-                        newxarr = velocity_to_wavelength(self, self.units,
-                                center_wavelength=center_frequency,
-                                center_wavelength_units=center_frequency_units,
-                                wavelength_units=unit,
-                                convention=self.velocity_convention)
-                    newxtype = "Wavelength"
-                    newunit = unit
-                elif conversion_dict[self.xtype] is frequency_dict:
-                    if debug: print "Converting frequency to wavelength"
-                    newxarr = frequency_to_wavelength(self, self.units,
-                            wavelength_units=unit)
-                    newxtype = "Wavelength"
-                    newunit = unit
-                else: 
-                    raise ValueError("Could not convert from %s to %s" % (self.units,unit))
-            else:
-                warnings.warn("Could not convert from %s to %s" % (self.units,unit))
-        else:
-            newxtype = self.xtype
-            newxarr = self
-            newunit = self.units
-
-        if debug: 
-            print "Converted from %s:%s to %s:%s" % (self.xtype, self.units, newxtype, newunit)
-
-        # re-check whether units need to be changed; it is possible that change_xtype left you 
-        # with the correct units
-        if unit != newunit and change_units:
-            conversion_factor = conversion_dict[newxtype][newunit] / conversion_dict[newxtype][unit] 
-            if not quiet: print "Converting units from %s to %s" % (newunit,unit)
-            newxarr = newxarr*conversion_factor
-            newunit = unit
-
-        if change_frame and not quiet:
-            if not quiet: print "Conversion from frame %s to %s is not yet supported" % (self.frame,frame)
-
-        if not change_units and not change_xtype and not change_frame:
-            if not quiet: print "Already in desired units, X-type, and frame"
-
-        if not quiet:
-            print "Converted to %s (%s)" % (newxtype,newunit)
-
-        # this should be implemented but requires a callback to spectrum...
-        #if replot:
-        #    self.spectrum.plotter(reset_xlimits=True)
-
-        newxarr.units = newunit
-        newxarr.xtype = newxtype
-
-        return newxarr
-
-    def change_frame(self, frame):
-        """
-        Change velocity frame
-        """
-        if self.frame == frame:
-            return
+        self.center_frequency, self._equivalencies = \
+            self.find_equivalencies(velocity_convention, 
+                                    center_frequency,
+                                    equivalencies)
         
-        if frame in frame_type_dict:
-            self[:] = self.in_frame(frame)
-            self.make_dxarr()
-            self.frame = frame
+        if isinstance(self.unit, str):
+            self._unit = u.Unit(self.unit)
+
+        return self.to(unit, equivalencies=self.equivalencies)
 
     def make_dxarr(self, coordinate_location='center'):
         """
         Create a "delta-x" array corresponding to the X array.
 
-        *coordinate_location* [ 'left', 'center', 'right' ]
+        Parameters
+        ----------
+        coordinate_location : [ 'left', 'center', 'right' ]
             Does the coordinate mark the left, center, or right edge of the
             pixel?  If 'center' or 'left', the *last* pixel will have the same
             dx as the second to last pixel.  If right, the *first* pixel will
@@ -834,30 +661,6 @@ class SpectroscopicAxis(np.ndarray):
             self.dxarr = np.concatenate([dxarr[:1],dxarr])
         else:
             raise ValueError("Invalid coordinate location.")
-
-    def in_frame(self, frame):
-        """
-        Return a shifted xaxis
-        """
-        if self.frame in ('obs','observed') and frame in ('rest',):
-            if self.redshift is not None:
-                return self/(1.0+self.redshift)
-            else:
-                warnings.warn("WARNING: Redshift is not specified, so no shift will be done.")
-        elif self.frame in ('rest',) and frame in ('obs','observed'):
-            if self.redshift is not None:
-                return self*(1.0+self.redshift)
-            else:
-                warnings.warn("WARNING: Redshift is not specified, so no shift will be done.")
-        else:
-            print "Frame shift from %s to %s is not defined or implemented." % (self.frame, frame)
-            return self
-
-    def x_in_frame(self, xx, frame):
-        """
-        Return the value 'x' shifted to the target frame
-        """
-        return self.in_frame(frame)[self.x_to_pix(xx)]
 
     def cdelt(self, tolerance=1e-8, approx=False):
         """
@@ -887,13 +690,20 @@ class SpectroscopicAxis(np.ndarray):
         if self.wcshead is None:
             self.wcshead = {}
 
-        self.wcshead['CUNIT1'] = self.units
-        if fits_type[self.xtype] == 'VELO' and self.velocity_convention is not None:
+        self.wcshead['CUNIT1'] = self.unit
+        if fits_type[self.unit.physical_type] == 'VELO' and self.velocity_convention is not None:
             ctype = 'V'+convention_suffix[self.velocity_convention]
         else:
-            ctype = fits_type[self.xtype]
-        self.wcshead['CTYPE1'] = ctype+fits_frame[self.frame]
-        self.wcshead['SPECSYS'] = fits_specsys[self.frame]
+            ctype = fits_type[self.unit.physical_type]
+        #self.wcshead['CTYPE1'] = ctype+fits_frame[self.frame]
+        try:
+            from spectral_cube import spectral_axis
+            self.wcshead['CTYPE1'] = spectral_axis.determine_ctype_from_vconv(ctype,
+                                                                              self.unit,
+                                                                              self.velocity_convention)
+        except ImportError:
+            self.wcshead['CTYPE1'] = ctype
+        # not needed ? self.wcshead['SPECSYS'] = fits_specsys[self.frame]
         self.wcshead['RESTFRQ'] = self.refX
 
         # check to make sure the X-axis is linear
@@ -909,15 +719,46 @@ class SpectroscopicAxis(np.ndarray):
             self.wcshead['CRPIX1'] = 1.0
             return True
 
-    def _update_from(self, obj):
-        """Copies some attributes of obj to self.
-        (this code copied partly from numpy.ma.core:
-        https://github.com/numpy/numpy/blob/master/numpy/ma/core.py)
+    @classmethod
+    def find_equivalencies(self, velocity_convention=None,
+                           center_frequency=None, equivalencies=[]):
         """
+        Utility function to add equivalencies from the velocity_convention 
+        and the center_frequency
 
-        for attr in ('frame', 'redshift', 'refX', 'refX_units', 'units',
-                'velocity_convention', 'wcshead', 'xtype'):
-            self.__dict__[attr] = obj.__dict__[attr]
+        Parameters
+        ----------
+        velocity_convention : str
+            'optical', 'radio' or 'relativistic'
+        center_frequency : float | astropy.units.Quantity 
+            The reference frequency for determining a velocity. 
+            Required for conversions between frequency/wavelength/energy and velocity.
+        equivalencies : list
+            astropy equivalencies list containing tuples of the form:
+            (from_unit, to_unit, forward, backward)
+            forward and backward are functions that convert values between those units
+        """
+        if velocity_convention and center_frequency:
+            new_equivalencies = velocity_conventions[velocity_convention](center_frequency)
+            return center_frequency, merge_equivalencies(new_equivalencies, equivalencies)
+        else:
+            return center_frequency, merge_equivalencies(equivalencies, u.spectral())
+
+def merge_equivalencies(old_equivalencies, new_equivalencies):
+    """
+    Utility method to merge two equivalency lists
+    Uses a dict with concatenated units as keys
+    """
+    seen = {}
+    result = []
+    total_equivalencies = old_equivalencies+new_equivalencies
+
+    for equivalency in total_equivalencies:
+        equivalency_id = equivalency[0].to_string()+equivalency[1].to_string()
+        if equivalency_id in seen: continue
+        seen[equivalency_id] = 1
+        result.append(equivalency)
+    return result
 
 
 class SpectroscopicAxes(SpectroscopicAxis):
@@ -933,9 +774,8 @@ class SpectroscopicAxes(SpectroscopicAxis):
         if type(axislist) is not list:
             raise TypeError("SpectroscopicAxes must be initiated with a list of SpectroscopicAxis objects")
 
-        units = axislist[0].units
+        unit = axislist[0].unit
         xtype = axislist[0].xtype
-        frame = axislist[0].frame
         redshift = axislist[0].redshift
         velocity_convention = axislist[0].velocity_convention
         for ax in axislist:
@@ -944,17 +784,16 @@ class SpectroscopicAxes(SpectroscopicAxis):
                     ax.change_xtype(xtype)
                 except:
                     ValueError("Axis had wrong xtype and could not be converted.")
-            if ax.units != units or ax.frame != frame:
+            if ax.unit != unit:
                 try:
-                    ax.convert_to_unit(units,frame=frame)
+                    ax.convert_to_unit(unit)
                 except:
                     ValueError("Axis had wrong units and could not be converted.")
 
         subarr = np.concatenate([ax for ax in axislist])
         subarr = subarr.view(self)
-        subarr.units = units
+        subarr._unit = unit
         subarr.xtype = xtype
-        subarr.frame = frame
         subarr.redshift = redshift
         subarr.velocity_convention = velocity_convention
 
@@ -963,10 +802,10 @@ class SpectroscopicAxes(SpectroscopicAxis):
         refXs_diff = np.sum([axislist[0].refX != ax.refX for ax in axislist])
         if refXs_diff > 0:
             subarr.refX = None
-            subarr.refX_units = None
+            subarr.refX_unit = None
         else:
             subarr.refX = axislist[0].refX
-            subarr.refX_units = axislist[0].refX_units
+            subarr.refX_unit = axislist[0].refX_unit
 
         return subarr
 
@@ -983,9 +822,8 @@ class EchelleAxes(SpectroscopicAxis):
         if type(axislist) is not list:
             raise TypeError("SpectroscopicAxes must be initiated with a list of SpectroscopicAxis objects")
 
-        units = axislist[0].units
+        unit = axislist[0].unit
         xtype = axislist[0].xtype
-        frame = axislist[0].frame
         redshift = axislist[0].redshift
         velocity_convention = axislist[0].velocity_convention
         for ax in axislist:
@@ -994,17 +832,16 @@ class EchelleAxes(SpectroscopicAxis):
                     ax.change_xtype(xtype)
                 except:
                     ValueError("Axis had wrong xtype and could not be converted.")
-            if ax.units != units or ax.frame != frame:
+            if ax.unit != unit:
                 try:
-                    ax.convert_to_unit(units,frame=frame)
+                    ax.convert_to_unit(unit)
                 except:
                     ValueError("Axis had wrong units and could not be converted.")
 
         subarr = np.array(axislist)
         subarr = subarr.view(self)
-        subarr.units = units
+        subarr._unit = unit
         subarr.xtype = xtype
-        subarr.frame = frame
         subarr.redshift = redshift
         subarr.velocity_convention = velocity_convention
 
@@ -1013,10 +850,10 @@ class EchelleAxes(SpectroscopicAxis):
         refXs_diff = np.sum([axislist[0].refX != ax.refX for ax in axislist])
         if refXs_diff > 0:
             subarr.refX = None
-            subarr.refX_units = None
+            subarr.refX_unit = None
         else:
             subarr.refX = axislist[0].refX
-            subarr.refX_units = axislist[0].refX_units
+            subarr.refX_unit = axislist[0].refX_unit
 
         return subarr
 
@@ -1047,7 +884,7 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
 
     """
     if input_units in frequency_dict:
-        #print "Already in frequency units (%s)" % input_units
+        #print("Already in frequency units (%s)" % input_units)
         return velocities
     if center_frequency is None:
         raise ValueError("Cannot convert velocity to frequency without specifying a central frequency.")
@@ -1067,18 +904,19 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
     return frequencies
 
 def frequency_to_velocity(frequencies, input_units, center_frequency=None,
-        center_frequency_units=None, velocity_units='m/s',
-        convention='radio'):
+                          center_frequency_units=None, velocity_units='m/s',
+                          convention='radio'):
     """
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
-    * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
-    * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )-1
-    * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
-    * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
+     
+     * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
+     * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )-1
+     * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
+     * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c)
     """
     if input_units in velocity_dict:
-        print "Already in velocity units (%s)" % input_units
+        print("Already in velocity units (%s)" % input_units)
         return frequencies
     if center_frequency is None:
         raise ValueError("Cannot convert frequency to velocity without specifying a central frequency.")
@@ -1109,7 +947,7 @@ def frequency_to_wavelength(frequencies, input_units, wavelength_units='um'):
     lambda = c / nu
     """
     if input_units in wavelength_dict:
-        print "Already in wavelength units (%s)" % input_units
+        print("Already in wavelength units (%s)" % input_units)
         return
     if wavelength_units not in length_dict:
         raise ValueError("Wavelength units %s not valid" % wavelength_units)
@@ -1145,13 +983,14 @@ def velocity_to_wavelength(velocities, input_units, center_wavelength=None,
     """
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
-    * Radio 	V = c (c/l0 - c/l)/(c/l0) 	f(V) = (c/l0) ( 1 - V/c )
-    * Optical 	V = c ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + V/c )^-1
-    * Redshift 	z = ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + z )-1
-    * Relativistic 	V = c ((c/l0)^2 - (c/l)^2)/((c/l0)^2 + (c/l)^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c) 
+
+     * Radio 	V = c (c/l0 - c/l)/(c/l0) 	f(V) = (c/l0) ( 1 - V/c )
+     * Optical 	V = c ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + V/c )^-1
+     * Redshift 	z = ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + z )-1
+     * Relativistic 	V = c ((c/l0)^2 - (c/l)^2)/((c/l0)^2 + (c/l)^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c)
     """
     if input_units in wavelength_dict:
-        print "Already in wavelength units (%s)" % input_units
+        print("Already in wavelength units (%s)" % input_units)
         return velocities
     if center_wavelength is None:
         raise ValueError("Cannot convert velocity to wavelength without specifying a central wavelength.")
@@ -1177,13 +1016,14 @@ def wavelength_to_velocity(wavelengths, input_units, center_wavelength=None,
     """
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
-    * Radio 	V = c (c/l0 - c/l)/(c/l0) 	f(V) = (c/l0) ( 1 - V/c )
-    * Optical 	V = c ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + V/c )^-1
-    * Redshift 	z = ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + z )-1
-    * Relativistic 	V = c ((c/l0)^2 - f^2)/((c/l0)^2 + f^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c) 
+
+     * Radio 	V = c (c/l0 - c/l)/(c/l0) 	f(V) = (c/l0) ( 1 - V/c )
+     * Optical 	V = c ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + V/c )^-1
+     * Redshift 	z = ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + z )-1
+     * Relativistic 	V = c ((c/l0)^2 - f^2)/((c/l0)^2 + f^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c)
     """
     if input_units in velocity_dict:
-        print "Already in velocity units (%s)" % input_units
+        print("Already in velocity units (%s)" % input_units)
         return wavelengths
     if center_wavelength is None:
         raise ValueError("Cannot convert wavelength to velocity without specifying a central wavelength.")

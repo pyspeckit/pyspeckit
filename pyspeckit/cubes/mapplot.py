@@ -49,6 +49,9 @@ except ImportError:
 class MapPlotter(object):
     """
     Class to plot a spectrum
+
+    See `mapplot` for use documentation; this docstring is only for
+    initialization.
     """
 
     def __init__(self, Cube=None, figure=None, doplot=False, **kwargs):
@@ -71,7 +74,7 @@ class MapPlotter(object):
 
         self.overplot_colorcycle = itertools.cycle(['b', 'g', 'r', 'c', 'm', 'y'])
         self.overplot_linestyle = '-'
-
+ 
         self.Cube = Cube
         if self.Cube is not None:
             self.header = cubes.flatten_header(self.Cube.header, delete=True)
@@ -85,17 +88,50 @@ class MapPlotter(object):
         return self.mapplot(**kwargs)
 
     def mapplot(self, convention='calabretta', colorbar=True, useaplpy=True,
-            vmin=None, vmax=None, **kwargs):
+                vmin=None, vmax=None, cmap=None, plotkwargs={}, **kwargs):
         """
         Plot up a map based on an input data cube.
 
-        The map to be plotted is selected using :function:`makeplane`.
-        The :param:`estimator` keyword argument is passed to that function.
+        The map to be plotted is selected using `makeplane`.
+        The `estimator` keyword argument is passed to that function.
 
-        `kwargs` are passed to aplpy.show_colorscale or
-        matplotlib.pyplot.imshow (depending on whether aplpy is installed)
+        The plotted map, once shown, is interactive.  You can click on it with any 
+        of the three mouse buttons. 
 
-        TODO: Allow mapplot in subfigure
+        Button 1 or keyboard '1':
+            Plot the selected pixel's spectrum in another window.  Mark the
+            clicked pixel with an 'x'
+        Button 2 or keyboard 'o':
+            Overplot a second (or third, fourth, fifth...) spectrum in the
+            external plot window
+        Button 3:
+            Disconnect the interactive viewer
+
+        You can also click-and-drag with button 1 to average over a circular
+        region.  This same effect can be achieved by using the 'c' key to
+        set the /c/enter of a circle and the 'r' key to set its /r/adius (i.e.,
+        hover over the center and press 'c', then hover some distance away and
+        press 'r').
+
+
+        Parameters
+        ----------
+        convention : 'calabretta' or 'griesen'
+            The default projection to assume for Galactic data when plotting
+            with aplpy.
+        colorbar : bool
+            Whether to show a colorbar
+        plotkwargs : dict, optional
+            A dictionary of keyword arguments to pass to aplpy.show_colorscale
+            or matplotlib.pyplot.imshow
+        useaplpy : bool
+            Use aplpy if a FITS header is available
+        vmin, vmax: float or None
+            Override values for the vmin/vmax values.  Will be automatically
+            determined if left as None
+
+        .. todo:
+            Allow mapplot in subfigure
         """
         if self.figure is None:
             self.figure = matplotlib.pyplot.figure()
@@ -103,9 +139,14 @@ class MapPlotter(object):
             self._disconnect()
             self.figure.clf()
 
+        # this is where the map is created; everything below this is just plotting
         self.makeplane(**kwargs)
+
+        # have tot pop out estimator so that kwargs can be passed to imshow
         if 'estimator' in kwargs:
             kwargs.pop('estimator')
+
+        # Below here is all plotting stuff
 
         if vmin is None: vmin = self.plane[self.plane==self.plane].min()
         if vmax is None: vmax = self.plane[self.plane==self.plane].max()
@@ -113,7 +154,7 @@ class MapPlotter(object):
         if icanhasaplpy and useaplpy:
             self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=self.header)
             self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure,convention=convention)
-            self.FITSFigure.show_colorscale(vmin=vmin, vmax=vmax, **kwargs)
+            self.FITSFigure.show_colorscale(vmin=vmin, vmax=vmax, cmap=cmap, **plotkwargs)
             self.axis = self.FITSFigure._ax1
             if colorbar:
                 try:
@@ -127,7 +168,7 @@ class MapPlotter(object):
             if hasattr(self,'colorbar') and self.colorbar is not None:
                 if self.colorbar.ax in self.axis.figure.axes:
                     self.axis.figure.delaxes(self.colorbar.ax)
-            self.axis.imshow(self.plane, vmin=vmin, vmax=vmax, **kwargs)
+            self.axis.imshow(self.plane, vmin=vmin, vmax=vmax, cmap=cmap, **plotkwargs)
             if colorbar: 
                 try:
                     self.colorbar = matplotlib.pyplot.colorbar(self.axis.images[0])
@@ -154,14 +195,21 @@ class MapPlotter(object):
 
     def makeplane(self, estimator=np.mean):
         """
+        Create a "plane" view of the cube, either by slicing or projecting it
+        or by showing a slice from the best-fit model parameter cube.
 
-        *estimator* [ function | 'max' | 'int' | FITS filename | integer ]
+        Parameters
+        ----------
+
+        estimator : [ function | 'max' | 'int' | FITS filename | integer | slice ]
             A non-pythonic, non-duck-typed variable.  If it's a function, apply that function
             along the cube's spectral axis to obtain an estimate (e.g., mean, min, max, etc.).
             'max' will do the same thing as passing np.max
             'int' will attempt to integrate the image (which is why I didn't duck-type)
+            (integrate means sum and multiply by dx)
             a .fits filename will be read using pyfits (so you can make your own cover figure)
             an integer will get the n'th slice in the parcube if it exists
+            If it's a slice, slice the input data cube along the Z-axis with this slice
 
         """
         # THIS IS A HACK!!!  isinstance(a function, function) must be a thing...
@@ -179,20 +227,25 @@ class MapPlotter(object):
                 self.plane = (self.Cube.cube * dx[:,np.newaxis,np.newaxis]).sum(axis=0)
             elif estimator[-5:] == ".fits":
                 self.plane = pyfits.getdata(estimator)
+        elif type(estimator) is slice:
+            self.plane = self.Cube.cube[estimator,:,:]
         elif type(estimator) is int:
             if hasattr(self.Cube,'parcube'):
                 self.plane = self.Cube.parcube[estimator,:,:]
-
+        
         if self.plane is None:
             raise ValueError("Invalid estimator %s" % (str(estimator)))
+
+        if np.sum(np.isfinite(self.plane)) == 0:
+            raise ValueError("Map is all NaNs or infs.  Check your estimator or your input cube.")
 
     def click(self,event):
         """
         Record location of downclick
         """
         if event.inaxes:
-            self._clickX = event.xdata - self._origin
-            self._clickY = event.ydata - self._origin
+            self._clickX = np.round(event.xdata) - self._origin
+            self._clickY = np.round(event.ydata) - self._origin
 
     def plot_spectrum(self, event, plot_fit=True):
         """
@@ -200,8 +253,8 @@ class MapPlotter(object):
         """
         self.event = event
         if event.inaxes:
-            clickX = event.xdata - self._origin
-            clickY = event.ydata - self._origin
+            clickX = np.round(event.xdata) - self._origin
+            clickY = np.round(event.ydata) - self._origin
         
             # grab toolbar info so that we don't do anything if a tool is selected
             tb = self.canvas.toolbar
@@ -209,13 +262,23 @@ class MapPlotter(object):
                 return
             elif event.key is not None:
                 if event.key == 'c':
-                    self._center = (clickX,clickY)
+                    self._center = (clickX-1,clickY-1)
                     self._remove_circle()
                     self._add_click_mark(clickX,clickY,clear=True)
                 elif event.key == 'r':
                     x,y = self._center
                     self._add_circle(x,y,clickX,clickY)
-                    self.circle(x,y,clickX,clickY)
+                    self.circle(x,y,clickX-1,clickY-1)
+                elif event.key == 'o':
+                    clickX,clickY = round(clickX),round(clickY)
+                    print "OverPlotting spectrum from point %i,%i" % (clickX-1,clickY-1)
+                    color=self.overplot_colorcycle.next()
+                    self._add_click_mark(clickX,clickY,clear=False, color=color)
+                    self.Cube.plot_spectrum(clickX-1,clickY-1,clear=False, color=color, linestyle=self.overplot_linestyle)
+                elif event.key in ('1','2'):
+                    event.button = int(event.key)
+                    event.key = None
+                    self.plot_spectrum(event)
             elif (hasattr(event,'button') and event.button in (1,2) 
                     and not (self._clickX == clickX and self._clickY == clickY)):
                 if event.button == 1:
@@ -228,23 +291,23 @@ class MapPlotter(object):
                     linestyle = self.overplot_linestyle
                     clear=False
                 rad = ( (self._clickX-clickX)**2 + (self._clickY-clickY)**2 )**0.5
-                print "Plotting circle from point %i,%i to %i,%i (r=%f)" % (self._clickX,self._clickY,clickX,clickY,rad)
+                print "Plotting circle from point %i,%i to %i,%i (r=%f)" % (self._clickX-1,self._clickY-1,clickX-1,clickY-1,rad)
                 self._add_circle(self._clickX,self._clickY,clickX,clickY)
-                self.circle(self._clickX,self._clickY,clickX,clickY,clear=clear,linestyle=linestyle,color=color)
+                self.circle(self._clickX-1,self._clickY-1,clickX-1,clickY-1,clear=clear,linestyle=linestyle,color=color)
             elif hasattr(event,'button') and event.button is not None:
                 if event.button==1:
                     clickX,clickY = round(clickX),round(clickY)
-                    print "Plotting spectrum from point %i,%i" % (clickX,clickY)
+                    print "Plotting spectrum from point %i,%i" % (clickX-1,clickY-1)
                     self._remove_circle()
                     self._add_click_mark(clickX,clickY,clear=True)
-                    self.Cube.plot_spectrum(clickX,clickY,clear=True)
-                    if plot_fit: self.Cube.plot_fit(clickX, clickY, silent=True)
+                    self.Cube.plot_spectrum(clickX-1,clickY-1,clear=True)
+                    if plot_fit: self.Cube.plot_fit(clickX-1, clickY-1, silent=True)
                 elif event.button==2:
                     clickX,clickY = round(clickX),round(clickY)
-                    print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
+                    print "OverPlotting spectrum from point %i,%i" % (clickX-1,clickY-1)
                     color=self.overplot_colorcycle.next()
                     self._add_click_mark(clickX,clickY,clear=False, color=color)
-                    self.Cube.plot_spectrum(clickX,clickY,clear=False, color=color, linestyle=self.overplot_linestyle)
+                    self.Cube.plot_spectrum(clickX-1,clickY-1,clear=False, color=color, linestyle=self.overplot_linestyle)
                 elif event.button==3:
                     print "Disconnecting GAIA-like tool"
                     self._disconnect()

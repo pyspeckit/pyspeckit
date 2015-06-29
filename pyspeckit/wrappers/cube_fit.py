@@ -74,26 +74,26 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
     # This speeds up the process enormously, but can easily mess up the fits if
     # there are bad pixels
     sp.momenteach(vheight=vheight, verbose=verbose)
-    sp.fiteach(errmap=errmap, multifit=True, verbose_level=verbose_level,
-            signal_cut=signal_cut, usemomentcube=True, blank_value=np.nan,
-            verbose=verbose, **kwargs)
+    sp.fiteach(errmap=errmap, multifit=None, verbose_level=verbose_level,
+               signal_cut=signal_cut, usemomentcube=True, blank_value=np.nan,
+               verbose=verbose, **kwargs)
 
     # steal the header from the error map
     f = pyfits.open(cubefilename)
     # start replacing components of the pyfits object
     f[0].data = np.concatenate([sp.parcube,sp.errcube,sp.integralmap])
-    f[0].header.update('PLANE1','amplitude')
-    f[0].header.update('PLANE2','velocity')
-    f[0].header.update('PLANE3','sigma')
-    f[0].header.update('PLANE4','err_amplitude')
-    f[0].header.update('PLANE5','err_velocity')
-    f[0].header.update('PLANE6','err_sigma')
-    f[0].header.update('PLANE7','integral')
-    f[0].header.update('PLANE8','integral_error')
-    f[0].header.update('CDELT3',1)
-    f[0].header.update('CTYPE3','FITPAR')
-    f[0].header.update('CRVAL3',0)
-    f[0].header.update('CRPIX3',1)
+    f[0].header['PLANE1'] = 'amplitude'
+    f[0].header['PLANE2'] = 'velocity'
+    f[0].header['PLANE3'] = 'sigma'
+    f[0].header['PLANE4'] = 'err_amplitude'
+    f[0].header['PLANE5'] = 'err_velocity'
+    f[0].header['PLANE6'] = 'err_sigma'
+    f[0].header['PLANE7'] = 'integral'
+    f[0].header['PLANE8'] = 'integral_error'
+    f[0].header['CDELT3'] = 1
+    f[0].header['CTYPE3'] = 'FITPAR'
+    f[0].header['CRVAL3'] = 0
+    f[0].header['CRPIX3'] = 1
     # save your work
     f.writeto(outfilename, clobber=clobber)
 

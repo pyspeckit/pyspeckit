@@ -8,14 +8,11 @@ It is based entirely on RADEX models.
 """
 import numpy as np
 import hyperfine
-pyfitsOK = True
 from . import fitter,model#,modelgrid
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-except ImportError:
-    pyfitsOK = False
 try:
     import scipy.interpolate
     import scipy.ndimage
@@ -105,8 +102,14 @@ def formaldehyde_mm_radex(xarr,
             texgrid = [pyfits.getdata(path_to_texgrid)]
             hdr = pyfits.getheader(path_to_taugrid)
             zinds,yinds,xinds = np.indices(taugrid[0].shape)
-            densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
-            columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+            if 'CD1_1' in hdr:
+                cd11 = 'CD1_1'
+                cd22 = 'CD2_2'
+            else:
+                cd11 = 'CDELT1'
+                cd22 = 'CDELT2'
+            densityarr = (xinds+hdr['CRPIX1']-1)*hdr[cd11]+hdr['CRVAL1'] # log density
+            columnarr  = (yinds+hdr['CRPIX2']-1)*hdr[cd22]+hdr['CRVAL2'] # log column
             temparr    = (zinds+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # lin temperature
             minfreq = (218.,)
             maxfreq = (219.,)
@@ -114,8 +117,14 @@ def formaldehyde_mm_radex(xarr,
         minfreq,maxfreq,texgrid = zip(*texgrid)
         minfreq,maxfreq,taugrid = zip(*taugrid)
         zinds,yinds,xinds = np.indices(taugrid[0].shape)
-        densityarr = (xinds+hdr['CRPIX1']-1)*hdr['CD1_1']+hdr['CRVAL1'] # log density
-        columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
+        if 'CD1_1' in hdr:
+            cd11 = 'CD1_1'
+            cd22 = 'CD2_2'
+        else:
+            cd11 = 'CDELT1'
+            cd22 = 'CDELT2'
+        densityarr = (xinds+hdr['CRPIX1']-1)*hdr[cd11]+hdr['CRVAL1'] # log density
+        columnarr  = (yinds+hdr['CRPIX2']-1)*hdr[cd22]+hdr['CRVAL2'] # log column
         temparr    = (zinds+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # lin temperature
     else:
         raise Exception

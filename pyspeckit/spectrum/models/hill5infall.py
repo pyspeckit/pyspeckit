@@ -60,4 +60,4 @@ hill5_fitter = model.SpectralModel(hill5_model, 5,
         parlimited=[(True,False),(False,False),(True,False),(True,False), (True,False)], 
         parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
         shortvarnames=("\\tau","v_{lsr}","v_{infall}","\\sigma","T_{peak}"), # specify the parameter names (TeX is OK)
-        fitunits='Hz' )
+        fitunits='km/s' )
