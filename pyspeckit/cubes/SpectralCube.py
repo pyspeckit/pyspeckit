@@ -1228,11 +1228,12 @@ def get_neighbors(x, y, shape):
     """
     Find the 9 nearest neighbors, excluding self and any out of bounds points
     """
+    ysh, xsh = shape
     xpyp = [(ii,jj) 
             for ii,jj in itertools.product((-1,0,1),
                                            (-1,0,1))
-            if (jj+x < shape[1]) and (jj+x >= 0)
-            and  (ii+y < shape[0]) and (ii+y >= 0)
+            if (ii+x < xsh) and (ii+x >= 0)
+            and  (jj+y < ysh) and (jj+y >= 0)
             and not (ii==0 and jj==0)]
     xpatch, ypatch = zip(*xpyp)
 
@@ -1240,13 +1241,21 @@ def get_neighbors(x, y, shape):
 
 def test_get_neighbors():
     xp,yp = get_neighbors(0,0,[10,10])
-    assert np.all(xp == [0,1,1])
-    assert np.all(yp == [1,0,1])
+    assert set(xp) == {0,1}
+    assert set(yp) == {0,1}
 
     xp,yp = get_neighbors(0,1,[10,10])
-    assert np.all(xp == [-1,-1,0,1,1])
-    assert np.all(yp == [ 0, 1,1,0,1])
+    assert set(xp) == {0,1}
+    assert set(yp) == {-1,0,1}
+
+    xp,yp = get_neighbors(5,6,[10,10])
+    assert set(xp) == {-1,0,1}
+    assert set(yp) == {-1,0,1}
 
     xp,yp = get_neighbors(9,9,[10,10])
-    assert np.all(xp == [-1,-1, 0,])
-    assert np.all(yp == [-1, 0,-1,])
+    assert set(xp) == {0,-1}
+    assert set(yp) == {0,-1}
+
+    xp,yp = get_neighbors(9,8,[10,10])
+    assert set(xp) == {-1,0}
+    assert set(yp) == {-1,0,1}
