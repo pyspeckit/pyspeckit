@@ -180,7 +180,13 @@ class Cube(spectrum.Spectrum):
         self.mapplot = mapplot.MapPlotter(self)
 
     def load_fits(self, fitsfile):
-        from spectral_cube import SpectralCube
+        try:
+            from spectral_cube import SpectralCube
+        except ImportError:
+            raise ImportError("Could not import spectral_cube.  As of pyspeckit"
+                              " 0.17, spectral_cube is required for cube reading. "
+                              "It can be pip installed or acquired from "
+                              "spectral-cube.rtfd.org.")
         mycube = SpectralCube.read(fitsfile)
         return self.load_spectral_cube(mycube)
 
