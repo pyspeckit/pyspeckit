@@ -336,20 +336,44 @@ def integ(file,vrange,xcen=None,xwidth=None,ycen=None,ywidth=None,**kwargs):
     return subimage_integ(cube,xcen,xwidth,ycen,ywidth,vrange,header=header,**kwargs)
 
 def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
-        average=mean, dvmult=False, return_HDU=False, units="pixels",
-        zunits=None):
+                   average=mean, dvmult=False, return_HDU=False,
+                   units="pixels", zunits=None):
     """
     Returns a sub-image from a data cube integrated over the specified velocity range
 
-    All units assumed to be pixel units
+    Parameters
+    ----------
+    cube : np.ndarray
+        A 3-dimensional numpy array with dimensions (velocity, y, x)
+    xcen,ycen : float
+        The center in the X,Y-dimension.  See `units` below for unit information
+    xwidth,ywidth : float
+        The width in the X,Y-dimension.  See `units` below for unit information
+        xwidth and ywidth are "radius" values, i.e. half the length that will be extracted
+    vrange : (float,float)
+        The velocity range to integrate over.  See `zunits` below for unit information
+    header : `astropy.io.fits.Header` or None
+        If specified, will allow the use of WCS units
+    average : function
+        The function to apply when 'integrating' over the subcube
+    dvmult : bool
+        If dvmult is set, multiply the average by DV (this is useful if you set
+        average=sum and dvmul=True to get an integrated value, e.g. K km/s or
+        Jy km/s)
+    return_hdu : bool
+        If specified, will return an HDU object, otherwise will return the
+        array and header
+    units : 'pixels' or 'wcs'
+        If 'pixels', all units (xcen, ycen, xwidth, ywidth) will be in pixels.
+        If 'wcs', the values will be converted from WCS units to pixel units
+        using the WCS specified by the `header`
+    zunits : 'pixels' or 'wcs' or None
+        If None, will be set to be the same as `units`
 
-    cube has dimensions (velocity, y, x)
-
-    xwidth and ywidth are "radius" values, i.e. half the length that will be extracted
-
-    if dvmult is set, multiply the average by DV (this is useful if you set
-    average=sum and dvmul=True to get an integrated value)
-
+    Returns
+    -------
+    A tuple (integrated array, header) if return_hdu is False, or an HDU if it
+    is True
     """
 
     if header:
