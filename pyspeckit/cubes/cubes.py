@@ -341,6 +341,10 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
     """
     Returns a sub-image from a data cube integrated over the specified velocity range
 
+    NOTE: With `spectral_cube <spectral-cube.rtfd.org>`_, subcube features can
+    be easily applied with the `.subcube` method, and integration is handled
+    separately.
+
     Parameters
     ----------
     cube : np.ndarray
