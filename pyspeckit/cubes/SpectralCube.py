@@ -170,16 +170,16 @@ class Cube(spectrum.Spectrum):
             self.wcs.wcs.fix()
             self._spectral_axis_number = self.wcs.wcs.spec+1
             self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0][0]+1
+            
+            # TODO: Improve this!!!
+            self.system = ('galactic'
+                           if ('CTYPE{0}'.format(self._first_cel_axis_num)
+                               in self.header and 'GLON' in
+                               self.header['CTYPE{0}'.format(self._first_cel_axis_num)])
+                           else 'celestial')
         else:
             self._spectral_axis_number = 2
             self._first_cel_axis_num = 0
-
-        # TODO: improve this!!!
-        self.system = ('galactic'
-                       if ('CTYPE{0}'.format(self._first_cel_axis_num)
-                           in self.header and 'GLON' in
-                           self.header['CTYPE{0}'.format(self._first_cel_axis_num)])
-                       else 'celestial')
 
         self.mapplot = mapplot.MapPlotter(self)
 
@@ -1188,16 +1188,17 @@ class CubeStack(Cube):
             self.wcs.wcs.fix()
             self._spectral_axis_number = self.wcs.wcs.spec+1
             self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0][0]+1
+            
+            # TODO: Improve this!!!
+            self.system = ('galactic'
+                           if ('CTYPE{0}'.format(self._first_cel_axis_num)
+                               in self.header and 'GLON' in
+                               self.header['CTYPE{0}'.format(self._first_cel_axis_num)])
+                           else 'celestial')
         else:
-            self._spectral_axis_number = 2
-            self._first_cel_axis_num = 0
+            self._spectral_axis_number = 3
+            self._first_cel_axis_num = 1
 
-        # TODO: Improve this!!!
-        self.system = ('galactic'
-                       if ('CTYPE{0}'.format(self._first_cel_axis_num)
-                           in self.header and 'GLON' in
-                           self.header['CTYPE{0}'.format(self._first_cel_axis_num)])
-                       else 'celestial')
         
         self.unit = cubelist[0].unit
         for cube in cubelist: 
