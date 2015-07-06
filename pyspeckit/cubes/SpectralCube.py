@@ -165,10 +165,14 @@ class Cube(spectrum.Spectrum):
         self.plot_special_kwargs = {}
         self._modelcube = None
 
-        self.wcs = wcs.WCS(self.header)
-        self.wcs.wcs.fix()
-        self._spectral_axis_number = self.wcs.wcs.spec+1
-        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0][0]+1
+        if self.header:
+            self.wcs = wcs.WCS(self.header)
+            self.wcs.wcs.fix()
+            self._spectral_axis_number = self.wcs.wcs.spec+1
+            self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0][0]+1
+        else:
+            self._spectral_axis_number = 2
+            self._first_cel_axis_num = 0
 
         # TODO: improve this!!!
         self.system = ('galactic'
@@ -1179,10 +1183,14 @@ class CubeStack(Cube):
             for key,value in cube.header.items():
                 self.header[key] = value
 
-        self.wcs = wcs.WCS(self.header)
-        self.wcs.wcs.fix()
-        self._spectral_axis_number = self.wcs.wcs.spec+1
-        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0][0]+1
+        if self.header:
+            self.wcs = wcs.WCS(self.header)
+            self.wcs.wcs.fix()
+            self._spectral_axis_number = self.wcs.wcs.spec+1
+            self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0][0]+1
+        else:
+            self._spectral_axis_number = 2
+            self._first_cel_axis_num = 0
 
         # TODO: Improve this!!!
         self.system = ('galactic'
