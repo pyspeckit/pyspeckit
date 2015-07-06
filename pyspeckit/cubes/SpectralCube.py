@@ -180,6 +180,7 @@ class Cube(spectrum.Spectrum):
         else:
             self._spectral_axis_number = 2
             self._first_cel_axis_num = 0
+            self.system = 'PIXEL'
 
         self.mapplot = mapplot.MapPlotter(self)
 
@@ -1198,6 +1199,7 @@ class CubeStack(Cube):
         else:
             self._spectral_axis_number = 3
             self._first_cel_axis_num = 1
+            self.system = 'PIXEL'
 
         
         self.unit = cubelist[0].unit
