@@ -219,6 +219,9 @@ def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial',
     elif system == 'galactic':
         c2 = 'GLON-'
         c3 = 'GLAT-'
+    elif system == 'PIXEL':
+        c2 = 'PIX--'
+        c3 = 'PIX--'
     newheader['CTYPE2'] = c2+proj
     newheader['CTYPE{0}'.format(spectral_axis)] = c3+proj
 
