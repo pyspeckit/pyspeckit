@@ -108,4 +108,5 @@ if __name__ == "__main__":
     if options.fitnh3:
         pyspeckit.wrappers.fitnh3.fitnh3(sp)
 
+    import IPython
     IPython.embed()
