@@ -16,16 +16,24 @@ In short, we will do the following:
     # 3. Need to fit the continuum first
     sp.baseline(interactive=True, subtract=False)
 
+    # DO INTERACTIVE THINGS HERE
     # 4... (much work takes place interactively at this stage)
 
     # 5. Start up an interactive line-fitting session
-    sp.specfit(interactive=True)
+    # (do not run this line until *after* completing the baseline fitting)
+    #sp.specfit(interactive=True)
+
+
 
 .. note:: 
 
     If you don't see a plot window after step #2 above, make sure you're using
     matplotlib in interactive mode.  This may require starting ipython as
     ``ipython --pylab``
+
+You can also start the interactive fitter by pressing 'b' for baseline or 'f'
+for fit when a plot window is active, then press '?' to get help.  These
+commands will not work if you have the "zoom" or "pan" tools active, though!
 
 .. figure:: images/interactive_example_hr2421_baseline_firstclick.png
 	:alt: First click fitting a baseline
