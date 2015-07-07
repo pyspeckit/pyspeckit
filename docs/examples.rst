@@ -22,7 +22,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
 .. toctree::
    :maxdepth: 3
 
-   Build a spectrum from scratch <example_fromscratch>
+   Build a spectrum from scratch (and fit a gaussian) <example_fromscratch>
    Radio H2CO <example_h2co>
    Radio H2CO mm lines <example_h2co_mm>
    Radio NH3: shows hyperfine fitting with fixed amplitude, width <example_nh3>
