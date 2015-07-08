@@ -593,7 +593,7 @@ class Specfit(interactive.Interactive):
         spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced]
         err = self.errspec[self.xmin:self.xmax][~self.mask_sliced]
 
-        self._validate_parinfo(parinfo)
+        self._validate_parinfo(parinfo, mode='fix')
 
         mpp,model,mpperr,chi2 = self.fitter(xtofit, spectofit, err=err,
                                             npeaks=self.npeaks,
@@ -601,6 +601,12 @@ class Specfit(interactive.Interactive):
                                             params=guesses,
                                             use_lmfit=use_lmfit,
                                             **self.fitkwargs)
+
+        check = self._validate_parinfo(self.fitter.parinfo, mode='check')
+
+        if not check:
+            warn("The fitter returned values that are outside the "
+                 "parameter limits.  DEBUG INFO: {0}".format(check))
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
@@ -1838,19 +1844,48 @@ class Specfit(interactive.Interactive):
 
         return deltax
 
-    def _validate_parinfo(self, parinfo):
+    def _validate_parinfo(self, parinfo, mode='fix'):
+
+        assert mode in ('fix','raise','check')
+
+        check = []
 
         for param in self.parinfo:
-            if (param.limited[0] and (param.value < param.limits[0]) and
-                np.allclose(param.value, param.limits[0])):
-                # nextafter -> next representable float
-                warn("{0} is less than the lower limit {1}, but very close."
-                     " Converting to {1}+ULP".format(param.value,
-                                                     param.limits[0]))
-                param.value = np.nextafter(param.limits[0], param.limits[0]+1)
-            if (param.limited[1] and (param.value > param.limits[1]) and
-                np.allclose(param.value, param.limits[1])):
-                param.value = np.nextafter(param.limits[1], param.limits[1]-1)
-                warn("{0} is less than the lower limit {1}, but very close."
-                     " Converting to {1}-ULP".format(param.value,
-                                                     param.limits[1]))
+            if (param.limited[0] and (param.value < param.limits[0])):
+                if (np.allclose(param.value, param.limits[0])):
+                    # nextafter -> next representable float
+                    if mode == 'fix':
+                        warn("{0} is less than the lower limit {1}, but very close."
+                             " Converting to {1}+ULP".format(param.value,
+                                                             param.limits[0]))
+                        param.value = np.nextafter(param.limits[0], param.limits[0]+1)
+                    elif mode == 'raise':
+                        raise ValueError("{0} is less than the lower limit {1}, but very close."
+                                         .format(param.value, param.limits[1]))
+                    elif mode == 'check':
+                        check.append("lt:close",)
+                if mode == 'raise':
+                    raise ValueError("{0} is less than the lower limit {1}"
+                                     .format(param.value, param.limits[0]))
+                elif mode == 'check':
+                    check.append(False)
+
+            if (param.limited[1] and (param.value > param.limits[1])):
+                if (np.allclose(param.value, param.limits[1])):
+                    if mode =='fix':
+                        param.value = np.nextafter(param.limits[1], param.limits[1]-1)
+                        warn("{0} is greater than the upper limit {1}, but very close."
+                             " Converting to {1}-ULP".format(param.value,
+                                                             param.limits[1]))
+                    elif mode == 'raise':
+                        raise ValueError("{0} is greater than the upper limit {1}, but very close."
+                                         .format(param.value, param.limits[1]))
+                    elif mode == 'check':
+                        check.append("gt:close")
+                if mode == 'raise':
+                    raise ValueError("{0} is greater than the upper limit {1}"
+                                     .format(param.value, param.limits[0]))
+                elif mode == 'check':
+                    check.append(False)
+
+        return check

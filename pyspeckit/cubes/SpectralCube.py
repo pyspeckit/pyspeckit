@@ -719,7 +719,8 @@ class Cube(spectrum.Spectrum):
             elif use_neighbor_as_guess and np.any(local_fits):
                 # Array is N_guess X Nvalid_nbrs so averaging over 
                 # Axis=1 is the axis of all valid neighbors
-                gg = np.mean(self.parcube[:,(ypatch+y)[local_fits],(xpatch+x)[local_fits]],axis=1)
+                gg = np.mean(self.parcube[:, (ypatch+y)[local_fits],
+                                          (xpatch+x)[local_fits]], axis=1)
             elif usemomentcube:
                 if verbose_level > 1 and ii == 0: log.info("Using moment cube")
                 gg = self.momentcube[:,y,x]
