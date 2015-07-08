@@ -1,3 +1,4 @@
+from __future__ import print_function
 import matplotlib
 import numpy as np
 from ..config import mycfg
@@ -1202,10 +1203,10 @@ class Specfit(interactive.Interactive):
         """
 
         if self.Spectrum.baseline.baselinepars is not None and print_baseline:
-            print "Baseline: " + " + ".join(["%12g x^%i" % (x,i) for i,x in enumerate(self.Spectrum.baseline.baselinepars[::-1])])
+            print("Baseline: " + " + ".join(["%12g x^%i" % (x,i) for i,x in enumerate(self.Spectrum.baseline.baselinepars[::-1])]))
 
         for i,p in enumerate(self.parinfo):
-            print "%15s: %12g +/- %12g" % (p['parname'],p['value'],p['error'])
+            print("%15s: %12g +/- %12g" % (p['parname'],p['value'],p['error']))
 
     def clear(self, legend=True, components=True):
         """
@@ -1384,7 +1385,9 @@ class Specfit(interactive.Interactive):
                 dx = np.median(dx)
                 integ = self.fitter.integral(self.modelpars, dx=dx, **kwargs)
                 if return_error:
-                    if mycfg.WARN: print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."
+                    if mycfg.WARN: print("WARNING: The computation of the error "
+                                         "on the integral is not obviously "
+                                         "correct or robust... it's just a guess.")
                     OK = np.abs( fullmodel ) > threshold
                     error = np.sqrt((self.errspec[OK]**2).sum()) * dx
                     #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
@@ -1518,13 +1521,15 @@ class Specfit(interactive.Interactive):
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.keyclick)
         npars = 2+nwidths
         if self.npeaks > 0:
-            print len(self.guesses)/npars," Guesses: ",self.guesses," X channel range: ",self.xmin,self.xmax
+            log.info("{0} Guesses : {1}  X channel range: {2}-{3}"
+                     .format(len(self.guesses)/npars, self.guesses, self.xmin,
+                             self.xmax))
             if len(self.guesses) % npars == 0:
                 self.multifit(use_window_limits=True)
                 for p in self.button2plot + self.button1plot:
                     p.set_visible(False)
             else: 
-                print "error, wrong # of pars"
+                log.error("Wrong # of parameters")
 
         # disconnect interactive window (and more importantly, reconnect to
         # original interactive cmds)
