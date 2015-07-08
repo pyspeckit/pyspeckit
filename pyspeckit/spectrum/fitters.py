@@ -302,8 +302,7 @@ class Specfit(interactive.Interactive):
 
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
             components=False, annotate=False, alpha=0.5, loc='lower left',
-            xmin=None, xmax=None, xunits='pixel', continuum_as_baseline=False,
-            verbose=False):
+            xmin=None, xmax=None, xunits='pixel', continuum_as_baseline=False):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
@@ -409,8 +408,9 @@ class Specfit(interactive.Interactive):
                 midpt_level = continuum
             else:
                 midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
-            if verbose:
-                print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
+            log.debug("EQW plotting: midpt={0}, midpt_pixel={1}, "
+                      "midpt_level={2}, eqw={3}".format(midpt, midpt_pixel,
+                                                        midpt_level, eqw))
             self.EQW_plots.append(self.Spectrum.plotter.axis.fill_between(
                 [midpt.value-eqw/2.0,midpt.value+eqw/2.0], [0,0],
                 [midpt_level,midpt_level], color=plotcolor, alpha=alpha,
@@ -573,7 +573,8 @@ class Specfit(interactive.Interactive):
             datarange = self.spectofit[self.xmin:self.xmax].max() - self.spectofit[self.xmin:self.xmax].min()
             if abs(datarange) < 1e-9:
                 scalefactor = np.median(np.abs(self.spectofit))
-                if verbose: print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
+                log.info("Renormalizing data by factor %e to improve fitting procedure"
+                         % scalefactor)
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor
 
@@ -606,11 +607,11 @@ class Specfit(interactive.Interactive):
                                             use_lmfit=use_lmfit,
                                             **self.fitkwargs)
 
-        check = self._validate_parinfo(self.fitter.parinfo, mode='check')
+        any_out_of_range = self._validate_parinfo(self.fitter.parinfo, mode='check')
 
-        if not check:
+        if any(any_out_of_range):
             warn("The fitter returned values that are outside the "
-                 "parameter limits.  DEBUG INFO: {0}".format(check))
+                 "parameter limits.  DEBUG INFO: {0}".format(any_out_of_range))
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
@@ -770,13 +771,14 @@ class Specfit(interactive.Interactive):
             datarange = self.spectofit[self.xmin:self.xmax].max() - self.spectofit[self.xmin:self.xmax].min()
             if abs(datarange) < 1e-9:
                 scalefactor = np.median(np.abs(self.spectofit))
-                print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
+                log.info("Renormalizing data by factor %e to improve fitting procedure"
+                         % scalefactor)
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor
                 self.guesses[0] /= scalefactor
                 if vheight: self.guesses[1] /= scalefactor
 
-        if debug: print "Guesses before fit: ",self.guesses
+        log.debug("Guesses before fit: {0}".format(self.guesses))
 
         if 'debug' in self.fitkwargs:
             debug = self.fitkwargs['debug']
@@ -792,7 +794,7 @@ class Specfit(interactive.Interactive):
                 debug=debug,
                 use_lmfit=use_lmfit,
                 **self.fitkwargs)
-        if debug: print "1. Guesses, fits after: ",self.guesses, mpp
+        log.debug("1. Guesses, fits after: {0}, {1}".format(self.guesses, mpp))
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
@@ -836,7 +838,8 @@ class Specfit(interactive.Interactive):
         # make sure the full model is populated
         self._full_model(debug=debug)
 
-        if debug: print "2. Guesses, fits after vheight removal: ",self.guesses, mpp
+        log.debug("2. Guesses, fits after vheight removal: {0},{1}"
+                  .format(self.guesses, mpp))
         self.history_fitpars()
 
     def _full_model(self, debug=False, **kwargs):
@@ -1854,7 +1857,7 @@ class Specfit(interactive.Interactive):
 
         assert mode in ('fix','raise','check')
 
-        check = []
+        any_out_of_range = []
 
         for param in parinfo:
             if (param.limited[0] and (param.value < param.limits[0])):
@@ -1869,12 +1872,12 @@ class Specfit(interactive.Interactive):
                         raise ValueError("{0} is less than the lower limit {1}, but very close."
                                          .format(param.value, param.limits[1]))
                     elif mode == 'check':
-                        check.append("lt:close",)
+                        any_out_of_range.append("lt:close",)
                 if mode == 'raise':
                     raise ValueError("{0} is less than the lower limit {1}"
                                      .format(param.value, param.limits[0]))
                 elif mode == 'check':
-                    check.append(False)
+                    any_out_of_range.append(False)
 
             if (param.limited[1] and (param.value > param.limits[1])):
                 if (np.allclose(param.value, param.limits[1])):
@@ -1887,11 +1890,11 @@ class Specfit(interactive.Interactive):
                         raise ValueError("{0} is greater than the upper limit {1}, but very close."
                                          .format(param.value, param.limits[1]))
                     elif mode == 'check':
-                        check.append("gt:close")
+                        any_out_of_range.append("gt:close")
                 if mode == 'raise':
                     raise ValueError("{0} is greater than the upper limit {1}"
                                      .format(param.value, param.limits[0]))
                 elif mode == 'check':
-                    check.append(False)
+                    any_out_of_range.append(False)
 
-        return check
+        return any_out_of_range
