@@ -593,7 +593,11 @@ class Specfit(interactive.Interactive):
         spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced]
         err = self.errspec[self.xmin:self.xmax][~self.mask_sliced]
 
-        self._validate_parinfo(parinfo, mode='fix')
+        if parinfo is not None:
+            self._validate_parinfo(parinfo, mode='fix')
+        else:
+            pinf, _ = self.fitter._make_parinfo(**self.fitkwargs)
+            self._validate_parinfo(pinf, 'fix')
 
         mpp,model,mpperr,chi2 = self.fitter(xtofit, spectofit, err=err,
                                             npeaks=self.npeaks,
@@ -1588,9 +1592,11 @@ class Specfit(interactive.Interactive):
         for param in self.parinfo:
             if not param.parname in parlimitdict:
                 if any( (x in param['parname'].lower() for x in ('shift','xoff')) ):
-                    lower,upper = (self.Spectrum.xarr[self.includemask].min(),self.Spectrum.xarr[self.includemask].max())
+                    lower, upper = (self.Spectrum.xarr[self.includemask].min().value,
+                                    self.Spectrum.xarr[self.includemask].max().value)
                 elif any( (x in param['parname'].lower() for x in ('width','fwhm')) ):
-                    xvalrange = (self.Spectrum.xarr[self.includemask].max()-self.Spectrum.xarr[self.includemask].min())
+                    xvalrange = (self.Spectrum.xarr[self.includemask].max().value -
+                                 self.Spectrum.xarr[self.includemask].min().value)
                     lower,upper = (0,xvalrange)
                 elif any( (x in param['parname'].lower() for x in ('amp','peak','height')) ):
                     datarange = self.spectofit.max() - self.spectofit.min()
@@ -1850,7 +1856,7 @@ class Specfit(interactive.Interactive):
 
         check = []
 
-        for param in self.parinfo:
+        for param in parinfo:
             if (param.limited[0] and (param.value < param.limits[0])):
                 if (np.allclose(param.value, param.limits[0])):
                     # nextafter -> next representable float
