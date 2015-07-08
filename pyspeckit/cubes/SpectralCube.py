@@ -608,6 +608,7 @@ class Cube(spectrum.Spectrum):
             bad = np.isnan(guesses).sum(axis=0).astype('bool')
             OK &= (~bad)
 
+
         distance = ((xx)**2 + (yy)**2)**0.5
         if start_from_point == 'center':
             start_from_point = (xx.max()/2., yy.max/2.)
@@ -646,6 +647,9 @@ class Cube(spectrum.Spectrum):
         # newly needed as of March 27, 2012.  Don't know why.
         if 'fittype' in fitkwargs: self.specfit.fittype = fitkwargs['fittype']
         self.specfit.fitter = self.specfit.Registry.multifitters[self.specfit.fittype]
+
+        # TODO: VALIDATE THAT ALL GUESSES ARE WITHIN RANGE GIVEN THE 
+        # FITKWARG LIMITS
 
         # array to store whether pixels have fits
         self.has_fit = np.zeros(self.mapplot.plane.shape, dtype='bool')
