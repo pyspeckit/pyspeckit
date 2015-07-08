@@ -1629,7 +1629,7 @@ class Specfit(interactive.Interactive):
                                                       parlimitdict=parlimitdict,
                                                       **kwargs)
         else:
-            print "Must have a fitter instantiated before creating sliders"
+            log.error("Must have a fitter instantiated before creating sliders")
 
     def optimal_chi2(self, reduced=True, threshold='error', **kwargs):
         """
