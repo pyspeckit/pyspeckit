@@ -593,6 +593,8 @@ class Specfit(interactive.Interactive):
         spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced]
         err = self.errspec[self.xmin:self.xmax][~self.mask_sliced]
 
+        self._validate_parinfo(parinfo)
+
         mpp,model,mpperr,chi2 = self.fitter(xtofit, spectofit, err=err,
                                             npeaks=self.npeaks,
                                             parinfo=parinfo, # the user MUST be allowed to override parinfo.
@@ -1593,9 +1595,10 @@ class Specfit(interactive.Interactive):
 
                 # override guesses with limits
                 if param.limited[0]:
-                    lower = param.limits[0]
+                    # nextafter -> next representable float
+                    lower = np.nextafter(param.limits[0], param.limits[0]+1)
                 if param.limited[1]:
-                    upper = param.limits[1]
+                    upper = np.nextafter(param.limits[1], param.limits[1]-1)
 
                 parlimitdict[param.parname] = (lower,upper)
 
@@ -1835,3 +1838,19 @@ class Specfit(interactive.Interactive):
 
         return deltax
 
+    def _validate_parinfo(self, parinfo):
+
+        for param in self.parinfo:
+            if (param.limited[0] and (param.value < param.limits[0]) and
+                np.allclose(param.value, param.limits[0])):
+                # nextafter -> next representable float
+                warn("{0} is less than the lower limit {1}, but very close."
+                     " Converting to {1}+ULP".format(param.value,
+                                                     param.limits[0]))
+                param.value = np.nextafter(param.limits[0], param.limits[0]+1)
+            if (param.limited[1] and (param.value > param.limits[1]) and
+                np.allclose(param.value, param.limits[1])):
+                param.value = np.nextafter(param.limits[1], param.limits[1]-1)
+                warn("{0} is less than the lower limit {1}, but very close."
+                     " Converting to {1}-ULP".format(param.value,
+                                                     param.limits[1]))
