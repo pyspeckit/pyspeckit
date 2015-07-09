@@ -269,7 +269,7 @@ class Plotter(object):
             elif errstyle == 'bars':
                 self.errorplot = self.axis.errorbar(self.Spectrum.xarr[inds]+xoffset,
                                                     self.Spectrum.data[inds]*self.plotscale+self.offset,
-                                                    yerr=self.Spectrum.error*self.plotscale,
+                                                    yerr=self.Spectrum.error[inds]*self.plotscale,
                                                     ecolor=errcolor, fmt=None,
                                                     **kwargs)
 
