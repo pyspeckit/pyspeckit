@@ -80,7 +80,7 @@ class Interactive(object):
 
             if debug or self._debug:
                 log.debug("button: {0} x,y: {1},{2} " 
-                          " nclicks 1: {3:d}  2: {4:d}".format
+                          " nclicks 1: {3:f}  2: {4:f}".format
                           (self.nclicks_b1, self.nclicks_b2,
                           button, event.xdata, event.ydata,
                           ))
