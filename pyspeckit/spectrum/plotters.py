@@ -267,10 +267,10 @@ class Plotter(object):
                     steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[inds]),
                     facecolor=errcolor, edgecolor=errcolor, alpha=erralpha, **kwargs)]
             elif errstyle == 'bars':
-                self.errorplot = self.axis.errorbar(self.Spectrum.xarr[inds]+xoffset,
+                self.errorplot = self.axis.errorbar(self.Spectrum.xarr[inds].value+xoffset,
                                                     self.Spectrum.data[inds]*self.plotscale+self.offset,
-                                                    yerr=self.Spectrum.error*self.plotscale,
-                                                    ecolor=errcolor, fmt=None,
+                                                    yerr=self.Spectrum.error[inds]*self.plotscale,
+                                                    ecolor=errcolor, fmt='none',
                                                     **kwargs)
 
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr.value[inds]+xoffset,

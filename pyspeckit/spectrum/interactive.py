@@ -79,7 +79,11 @@ class Interactive(object):
                 return
 
             if debug or self._debug:
-                print "button: ",button," x,y: ",event.xdata,event.ydata," nclicks 1: %i  2: %i" % (self.nclicks_b1,self.nclicks_b2)
+                log.debug("button: {0} x,y: {1},{2} " 
+                          " nclicks 1: {3:f}  2: {4:f}".format
+                          (self.nclicks_b1, self.nclicks_b2,
+                          button, event.xdata, event.ydata,
+                          ))
 
             if button in ('p','P','1',1,'i','a'): # p for... parea?  a for area.  i for include
                 # button one is always region selection
@@ -92,19 +96,20 @@ class Interactive(object):
                 # exclude/delete/remove
                 self.selectregion_interactive(event, mark_include=False, debug=debug)
             elif button in ('m','M','2',2): # m for mark
-                if debug or self._debug: print "Button 2 action"
+                if debug or self._debug: log.debug("Button 2 action")
                 self.button2action(event,debug=debug,nwidths=nwidths)
             elif button in ('d','D','3',3): # d for done
-                if debug or self._debug: print "Button 3 action"
+                if debug or self._debug: log.debug("Button 3 action")
                 self.button3action(event,debug=debug,nwidths=nwidths)
             elif button in ('?'):
-                print self.interactive_help_message
+                # print statement: we really want this to go to the terminal
+                print(self.interactive_help_message)
             elif hasattr(self,'Registry') and button in self.Registry.fitkeys:
                 fittername = self.Registry.fitkeys[button]
                 if fittername in self.Registry.multifitters:
                     self.fitter = self.Registry.multifitters[fittername]
                     self.fittype = fittername
-                    print "Selected multi-fitter %s" % fittername
+                    print("Selected multi-fitter %s" % fittername)
                 else: 
                     print "ERROR: Did not find fitter %s" % fittername
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
@@ -332,7 +337,8 @@ class Interactive(object):
         """
         for p in self.button1plot:
             p.set_visible(False)
-            if p in self.Spectrum.plotter.axis.lines: self.Spectrum.plotter.axis.lines.remove(p)
+            if self.Spectrum.plotter.axis and p in self.Spectrum.plotter.axis.lines:
+                self.Spectrum.plotter.axis.lines.remove(p)
         self.button1plot=[] # I should be able to just remove from the list... but it breaks the loop...
         self.Spectrum.plotter.refresh()
 
@@ -413,26 +419,25 @@ class Interactive(object):
             if debug or self._debug: print "Including self.xmin:self.xmax = %f:%f (and excluding the rest)" % (self.xmin,self.xmax)
             self.includemask[self.xmin:self.xmax] = True
         else:
-            if verbose: print "Left region selection unchanged.  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax)
+            if verbose: log.info("Left region selection unchanged."
+                                 "  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax))
         
         if self.xmin == self.xmax:
             # Reset if there is no fitting region
             self.xmin = 0
             # End-inclusive
             self.xmax = self.Spectrum.data.shape[0]
-            if debug or self._debug:
-                print "Reset to full range because the endpoints were equal"
+            log.debug("Reset to full range because the endpoints were equal")
         elif self.xmin>self.xmax: 
             # Swap endpoints if the axis has a negative delta-X
             self.xmin,self.xmax = self.xmax,self.xmin
-            if debug or self._debug:
-                print "Swapped endpoints because the left end was greater than the right"
+            log.debug("Swapped endpoints because the left end was greater than the right")
 
         self.includemask[:self.xmin] = False
         self.includemask[self.xmax:] = False
 
         # Exclude keyword-specified excludes.  Assumes exclusion in current X array units
-        if debug or self._debug: print "Exclude: ",exclude
+        log.debug("Exclude: {0}".format(exclude))
         if exclude is not None and len(exclude) % 2 == 0:
             for x1,x2 in zip(exclude[::2],exclude[1::2]):
                 if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
@@ -440,6 +445,9 @@ class Interactive(object):
                     # WCS units should be end-inclusive
                     x2 = self.Spectrum.xarr.x_to_pix(x2)+1
                 self.includemask[x1:x2] = False
+        elif exclude is not None:
+            log.error("An 'exclude' keyword was specified with an odd number "
+                      "of parameters, which is not permitted.")
 
         if highlight:
             self.highlight_fitregion()
