@@ -303,7 +303,8 @@ class Specfit(interactive.Interactive):
 
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
             components=False, annotate=False, alpha=0.5, loc='lower left',
-            xmin=None, xmax=None, xunits='pixel', continuum_as_baseline=False):
+            xmin=None, xmax=None, xunits='pixel', continuum_as_baseline=False,
+            midpt_location='plot-center'):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
@@ -334,6 +335,9 @@ class Specfit(interactive.Interactive):
             The range over which to compute the EQW
         xunits : str
             The units of xmin/xmax
+        midpt_location : 'fitted', 'plot-center'
+            If 'plot' is set, this determines where the EQW will be drawn.  It
+            can be the fitted centroid or the plot-center, i.e. (xmin+xmax)/2
 
         Returns
         -------
@@ -358,6 +362,9 @@ class Specfit(interactive.Interactive):
             xmax = self.Spectrum.xarr.x_to_pix(xmax, xval_units=xunits)
 
         dx = np.abs(self.Spectrum.xarr[xmin:xmax].cdelt(approx=True))
+
+        log.debug("xmin={0} xmax={1} dx={2} continuum={3}"
+                  .format(xmin, xmax, dx, continuum))
 
         if components:
             centroids = self.fitter.analytic_centroids()
@@ -403,8 +410,19 @@ class Specfit(interactive.Interactive):
                 continuum = np.median(self.Spectrum.baseline.basespec)
             eqw = sumofspec / continuum
         if plot and self.Spectrum.plotter.axis:
-            midpt_pixel = np.round((xmin+xmax)/2.0)
-            midpt       = self.Spectrum.xarr[midpt_pixel]
+            if midpt_location == 'plot-center':
+                midpt_pixel = np.round((xmin+xmax)/2.0)
+                midpt       = self.Spectrum.xarr[midpt_pixel]
+            elif midpt_location == 'fitted':
+                try:
+                    midpt = sp.specfit.parinfo.SHIFT0.value
+                except AttributeError:
+                    raise AttributeError("Can only specify midpt_location="
+                                         "fitted if there is a SHIFT parameter"
+                                         "for the fitted model")
+            else:
+                raise ValueError("midpt_location must be 'plot-center' or "
+                                 "fitted")
             if continuum_as_baseline:
                 midpt_level = continuum
             else:
@@ -810,6 +828,7 @@ class Specfit(interactive.Interactive):
         self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight+np.sum(self.parinfo.fixed)
         self.vheight=vheight
         if vheight: 
+            self.Spectrum.baseline.order = 0
             self.Spectrum.baseline.baselinepars = [mpp[0]*scalefactor] # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]*scalefactor
             self.model = model*scalefactor - mpp[0]*scalefactor

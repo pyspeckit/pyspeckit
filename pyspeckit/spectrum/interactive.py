@@ -337,7 +337,8 @@ class Interactive(object):
         """
         for p in self.button1plot:
             p.set_visible(False)
-            if p in self.Spectrum.plotter.axis.lines: self.Spectrum.plotter.axis.lines.remove(p)
+            if self.Spectrum.plotter.axis and p in self.Spectrum.plotter.axis.lines:
+                self.Spectrum.plotter.axis.lines.remove(p)
         self.button1plot=[] # I should be able to just remove from the list... but it breaks the loop...
         self.Spectrum.plotter.refresh()
 
@@ -436,7 +437,7 @@ class Interactive(object):
         self.includemask[self.xmax:] = False
 
         # Exclude keyword-specified excludes.  Assumes exclusion in current X array units
-        if debug or self._debug: log.debug("Exclude: {0}".format(exclude))
+        log.debug("Exclude: {0}".format(exclude))
         if exclude is not None and len(exclude) % 2 == 0:
             for x1,x2 in zip(exclude[::2],exclude[1::2]):
                 if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
@@ -444,6 +445,9 @@ class Interactive(object):
                     # WCS units should be end-inclusive
                     x2 = self.Spectrum.xarr.x_to_pix(x2)+1
                 self.includemask[x1:x2] = False
+        elif exclude is not None:
+            log.error("An 'exclude' keyword was specified with an odd number "
+                      "of parameters, which is not permitted.")
 
         if highlight:
             self.highlight_fitregion()
