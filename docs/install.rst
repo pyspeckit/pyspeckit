@@ -2,7 +2,7 @@ Installation and Requirements
 =============================
 
 .. hint::
-    You can *easy_install* or *pip_install* pyspeckit: ::
+    You can *easy_install* or *pip_install* pyspeckit to get the latest release version: ::
 
 
         pip install pyspeckit
@@ -59,3 +59,6 @@ You can also check out the `source code <https://bitbucket.org/pyspeckit/pyspeck
     most likely get a SandboxViolation error.  You can get around this by using `python
     setup.py install` or `pip install pyspeckit`.
 
+.. note ::
+   pyspeckit is hosted on both bitbucket and github.  Both versions are kept up
+   to date, so it should not matter which one you choose to install.
