@@ -488,7 +488,7 @@ class SpectralModel(fitter.SimpleFitter):
             for p in parinfo: log.debug( p )
             log.debug( "\n".join(["%s %i: tied: %s value: %s" % (p['parname'],p['n'],p['tied'],p['value']) for p in parinfo]) )
 
-        mp = mpfit(self.mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
+        mp = mpfit(self.mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,debug=debug,**kwargs)
         mpp = mp.params
         if mp.perror is not None: mpperr = mp.perror
         else: mpperr = mpp*0
