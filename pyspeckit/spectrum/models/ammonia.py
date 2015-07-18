@@ -663,6 +663,7 @@ class ammonia_model(model.SpectralModel):
                            'ntot': [True, False],
                            'width': [True, False],
                            'xoff_v': [False, False],
+                           'tau': [False, False],
                            'fortho': [True, True]}
         required_limits = {'tkin': [0, None],
                            'ntot': [0, None],
