@@ -619,8 +619,8 @@ class Specfit(interactive.Interactive):
             pinf, _ = self.fitter._make_parinfo(parvalues=guesses, **self.fitkwargs)
             new_guesses = self._validate_parinfo(pinf, 'guesses')
             if any((x!=y) for x,y in zip(guesses, new_guesses)):
-                warnings.warn("Guesses have been changed from {0} to {1}"
-                              .format(guesses, new_guesses))
+                warn("Guesses have been changed from {0} to {1}"
+                     .format(guesses, new_guesses))
             guesses = new_guesses
 
         mpp,model,mpperr,chi2 = self.fitter(xtofit, spectofit, err=err,
@@ -1891,7 +1891,7 @@ class Specfit(interactive.Interactive):
             if (param.limited[0] and (param.value < param.limits[0])):
                 if (np.allclose(param.value, param.limits[0])):
                     # nextafter -> next representable float
-                    if mode == 'fix':
+                    if mode in ('fix', 'guesses'):
                         warn("{0} is less than the lower limit {1}, but very close."
                              " Converting to {1}+ULP".format(param.value,
                                                              param.limits[0]))
@@ -1901,15 +1901,15 @@ class Specfit(interactive.Interactive):
                                          .format(param.value, param.limits[1]))
                     elif mode == 'check':
                         any_out_of_range.append("lt:close",)
-                if mode == 'raise':
+                else:
                     raise ValueError("{0} is less than the lower limit {1}"
                                      .format(param.value, param.limits[0]))
-                elif mode == 'check':
-                    any_out_of_range.append(False)
+            elif mode == 'check':
+                any_out_of_range.append(False)
 
             if (param.limited[1] and (param.value > param.limits[1])):
                 if (np.allclose(param.value, param.limits[1])):
-                    if mode =='fix':
+                    if mode in ('fix', 'guesses'):
                         param.value = np.nextafter(param.limits[1], param.limits[1]-1)
                         warn("{0} is greater than the upper limit {1}, but very close."
                              " Converting to {1}-ULP".format(param.value,
@@ -1919,11 +1919,11 @@ class Specfit(interactive.Interactive):
                                          .format(param.value, param.limits[1]))
                     elif mode == 'check':
                         any_out_of_range.append("gt:close")
-                if mode == 'raise':
+                else:
                     raise ValueError("{0} is greater than the upper limit {1}"
                                      .format(param.value, param.limits[0]))
-                elif mode == 'check':
-                    any_out_of_range.append(False)
+            elif mode == 'check':
+                any_out_of_range.append(False)
 
         if mode == 'guesses':
             return parinfo.values
