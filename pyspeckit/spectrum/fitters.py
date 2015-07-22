@@ -616,8 +616,12 @@ class Specfit(interactive.Interactive):
         if parinfo is not None:
             self._validate_parinfo(parinfo, mode='fix')
         else:
-            pinf, _ = self.fitter._make_parinfo(**self.fitkwargs)
-            self._validate_parinfo(pinf, 'fix')
+            pinf, _ = self.fitter._make_parinfo(parvalues=guesses, **self.fitkwargs)
+            new_guesses = self._validate_parinfo(pinf, 'guesses')
+            if any(guesses != new_guesses):
+                warnings.warn("Guesses have been changed from {0} to {1}"
+                              .format(guesses, new_guesses))
+            guesses = new_guesses
 
         mpp,model,mpperr,chi2 = self.fitter(xtofit, spectofit, err=err,
                                             npeaks=self.npeaks,
@@ -1879,7 +1883,7 @@ class Specfit(interactive.Interactive):
 
     def _validate_parinfo(self, parinfo, mode='fix'):
 
-        assert mode in ('fix','raise','check')
+        assert mode in ('fix','raise','check','guesses')
 
         any_out_of_range = []
 
@@ -1921,4 +1925,6 @@ class Specfit(interactive.Interactive):
                 elif mode == 'check':
                     any_out_of_range.append(False)
 
+        if mode == 'guesses':
+            return parinfo.values
         return any_out_of_range
