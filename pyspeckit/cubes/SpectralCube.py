@@ -33,6 +33,8 @@ import cubes
 from astropy import log
 from astropy import wcs
 from astropy import units
+from astropy.utils.console import ProgressBar
+
 class Cube(spectrum.Spectrum):
 
     def __init__(self, filename=None, cube=None, xarr=None, xunit=None,
@@ -539,7 +541,7 @@ class Cube(spectrum.Spectrum):
                 blank_value=0, integral=True, direct=False, absorption=False,
                 use_nearest_as_guess=False, use_neighbor_as_guess=False,
                 start_from_point=(0,0), multicore=1, position_order = None,
-                continuum_map=None, **fitkwargs):
+                continuum_map=None, prevalidate_guesses=False, **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
 
@@ -586,6 +588,11 @@ class Cube(spectrum.Spectrum):
             if >1, try to use multiprocessing via parallel_map to run on multiple cores
         continuum_map: np.ndarray
             Same shape as error map.  Subtract this from data before estimating noise.
+        prevalidate_guesses: bool
+            An extra check before fitting is run to make sure the guesses are
+            all within the specified limits.  May be slow, so it is off by
+            default.  It also should not be necessary, since careful checking
+            is performed before each fit.
 
         """
         if 'multifit' in fitkwargs:
@@ -771,6 +778,9 @@ class Cube(spectrum.Spectrum):
                              (ii+1, npix, x, y, snmsg, time.time()-t0, pct))
 
             if sp.specfit.modelerrs is None:
+                log.exception("Fit number %i at %i,%i failed with no specific error.")
+                log.exception("Guesses were: {0}".format(str(gg)))
+                log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
                 raise TypeError("The fit never completed; something has gone wrong.")
 
             if integral:
@@ -816,6 +826,12 @@ class Cube(spectrum.Spectrum):
         # This is NOT in a try/except block because we want to raise the
         # exception here if an exception is going to happen
         sp.specfit(guesses=gg, **fitkwargs)
+
+        if prevalidate_guesses:
+            for ii,(x,y) in ProgressBar(tuple(enumerate(valid_pixels))):
+                pinf, _ = sp.specfit.fitter._make_parinfo(parvalues=guesses, **fitkwargs)
+                sp.specfit._validate_parinfo(pinf, 'raise')
+
         #### END TEST BLOCK ####
 
 
