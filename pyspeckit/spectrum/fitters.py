@@ -618,7 +618,7 @@ class Specfit(interactive.Interactive):
         else:
             pinf, _ = self.fitter._make_parinfo(parvalues=guesses, **self.fitkwargs)
             new_guesses = self._validate_parinfo(pinf, 'guesses')
-            if any(guesses != new_guesses):
+            if any((x!=y) for x,y in zip(guesses, new_guesses)):
                 warnings.warn("Guesses have been changed from {0} to {1}"
                               .format(guesses, new_guesses))
             guesses = new_guesses
