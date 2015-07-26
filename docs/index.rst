@@ -92,5 +92,6 @@ Features
    High-Level Wrappers <wrappers>
    Examples <examples>
    Interactive Use <interactive>
+   FAQ <faq>
 
 ..   Base Classes <classes>
