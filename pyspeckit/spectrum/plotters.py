@@ -423,7 +423,7 @@ class Plotter(object):
         elif self.Spectrum.unit in ['Ta*','Tastar']:
             self.axis.set_ylabel("$T_A^*$ (K)")
         elif self.Spectrum.unit in ['K']:
-            self.axis.set_ylabel("$T_{beam}$ (K)")
+            self.axis.set_ylabel("Brightness Temperature $T$ (K)")
         elif self.Spectrum.unit == 'mJy':
             self.axis.set_ylabel("$S_\\nu$ (mJy)")
         elif self.Spectrum.unit == 'Jy':
