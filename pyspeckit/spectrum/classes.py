@@ -170,6 +170,11 @@ class Spectrum(object):
                 self.header = pyfits.Header()
             self.parse_header(self.header)
 
+        if hasattr(self.data,'unit'):
+            # TODO: use the quantity more appropriately
+            self.unit = str(self.data.unit)
+            self.data = self.data.value
+
         if maskdata:
             if hasattr(self.data,'mask'):
                 self.data.mask += np.isnan(self.data) + np.isinf(self.data)
