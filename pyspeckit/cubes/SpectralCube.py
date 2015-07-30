@@ -34,6 +34,18 @@ from astropy import log
 from astropy import wcs
 from astropy import units
 from astropy.utils.console import ProgressBar
+from functools import wraps
+import warnings
+
+def not_for_cubes(func):
+
+    @wraps(func)
+    def wrapper(*args):
+        warnings.warn("This operation ({0}) operates on the spectrum selected "
+                      "from the cube, e.g. with `set_spectrum` or `set_apspec`"
+                      ", it does not operate on the whole cube.")
+        return func(*args)
+    return wrapper
 
 class Cube(spectrum.Spectrum):
 
