@@ -382,11 +382,11 @@ class Interactive(object):
             * None: No exclusion
         """
         if debug or self._debug:
-            print "selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset," xmin: ",xmin, " xmax: ",xmax
+            log.info(map(str, ("selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset," xmin: ",xmin, " xmax: ",xmax)))
 
         if xmin is not None and xmax is not None:
             if verbose or debug or self._debug:
-                print "Setting xmin,xmax from keywords %g,%g" % (xmin,xmax)
+                log.info("Setting xmin,xmax from keywords %g,%g" % (xmin,xmax))
             if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
                 self.xmin = numpy.floor(self.Spectrum.xarr.x_to_pix(xmin))
                 # End-inclusive!
@@ -415,12 +415,19 @@ class Interactive(object):
             # this feels sketchy to me, but if you don't do this the plot will not be edge-inclusive
             # that means you could do this reset operation N times to continuously shrink the plot
             self.xmax += 1
-            if debug or self._debug: print "Including all plotted area (as defined by [plotter.xmin=%f,plotter.xmax=%f]) for fit" % (self.Spectrum.plotter.xmin,self.Spectrum.plotter.xmax)
-            if debug or self._debug: print "Including self.xmin:self.xmax = %f:%f (and excluding the rest)" % (self.xmin,self.xmax)
+            if debug or self._debug:
+                log.debug("Including all plotted area (as defined by "
+                          "[plotter.xmin={0}, plotter.xmax={1}]) for "
+                          "fit".format(self.Spectrum.plotter.xmin,
+                                       self.Spectrum.plotter.xmax))
+                log.debug("Including self.xmin:self.xmax = {0}:{1}"
+                          " (and excluding the rest)".format(self.xmin,
+                                                             self.xmax))
             self.includemask[self.xmin:self.xmax] = True
         else:
-            if verbose: log.info("Left region selection unchanged."
-                                 "  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax))
+            if verbose:
+                log.info("Left region selection unchanged."
+                         "  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax))
         
         if self.xmin == self.xmax:
             # Reset if there is no fitting region
