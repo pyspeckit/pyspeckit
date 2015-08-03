@@ -146,6 +146,8 @@ class Baseline(interactive.Interactive):
                 # selectregion, but that may cause
                 # clashes [unclear; note added 2/12/2014]
                 self.includemask[:] = True
+                if exclude is not None:
+                    log.warn("`reset_selection` was set, so `exclude` is being ignored.")
             elif selectregion:
                 # must select region (i.e., exclude edges) AFTER setting 'positive'
                 # include region
