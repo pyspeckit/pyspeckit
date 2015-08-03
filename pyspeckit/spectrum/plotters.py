@@ -566,17 +566,22 @@ class Plotter(object):
         # convert line_xvals to current units
         xvals = [self.Spectrum.xarr.x_to_coord(c, xval_units) for c in line_xvals]
 
+        # xvals must not be quantities because matplotlib cannot handle these
+        def strip_qty(x):
+            return x.value if hasattr(x,'value') else x
+        xvals = map(strip_qty, xvals)
+
         if auto_yloc:
             yr = self.axis.get_ylim()
             kwargs['box_loc'] = (yr[1]-yr[0])*auto_yloc_fraction + yr[0]
             kwargs['arrow_tip'] = (yr[1]-yr[0])*(auto_yloc_fraction*0.9) + yr[0]
 
         lineid_plot.plot_line_ids(self.Spectrum.xarr,
-                self.Spectrum.data, 
-                xvals,
-                line_names,
-                ax=self.axis,
-                **kwargs)
+                                  self.Spectrum.data, 
+                                  xvals,
+                                  line_names,
+                                  ax=self.axis,
+                                  **kwargs)
 
     def line_ids_from_measurements(self, auto_yloc=True,
             auto_yloc_fraction=0.9, **kwargs):
