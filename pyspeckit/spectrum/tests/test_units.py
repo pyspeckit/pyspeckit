@@ -80,6 +80,14 @@ def test_convert_units2():
 
     assert np.all(velocity_arr.value==velocity_arr2.value)
 
+def test_in_range():
+    xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit='Hz')
+
+    assert not xarr.in_range(10*u.GHz)
+    assert xarr.in_range(5*u.Hz)
+
+    # TODO: make sure warning is raised
+    assert xarr.in_range(5)
 
 
 @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
