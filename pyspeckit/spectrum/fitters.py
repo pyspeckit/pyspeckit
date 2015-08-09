@@ -580,7 +580,8 @@ class Specfit(interactive.Interactive):
             # otherwise npars will disagree, which causes problems if
             # renormalization happens
             self.fitter.vheight = False
-            self.fitter._make_parinfo()
+            self.fitter.npeaks = self.npeaks
+            self.fitter._make_parinfo(npeaks=self.npeaks)
 
         # add kwargs to fitkwargs
         self.fitkwargs.update(kwargs)
@@ -616,7 +617,9 @@ class Specfit(interactive.Interactive):
         if parinfo is not None:
             self._validate_parinfo(parinfo, mode='fix')
         else:
-            pinf, _ = self.fitter._make_parinfo(parvalues=guesses, **self.fitkwargs)
+            pinf, _ = self.fitter._make_parinfo(parvalues=guesses,
+                                                npeaks=self.npeaks,
+                                                **self.fitkwargs)
             new_guesses = self._validate_parinfo(pinf, 'guesses')
             if any((x!=y) for x,y in zip(guesses, new_guesses)):
                 warn("Guesses have been changed from {0} to {1}"
