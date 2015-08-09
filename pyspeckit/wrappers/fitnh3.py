@@ -183,12 +183,12 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
 
 
 
-def fitnh3(spectrum, vrange=[-100,100], vrangeunits='km/s', quiet=False,
+def fitnh3(spectrum, vrange=[-100,100], vrangeunit='km/s', quiet=False,
         Tex=20,Tkin=15,column=1e15,fortho=1.0, tau=None): 
 
     if vrange:
         spectrum.xarr.convert_to_unit(vrangeunits)
-        spectrum.crop(*vrange, units=vrangeunits)
+        spectrum.crop(*vrange, unit=vrangeunit)
 
     spectrum.specfit(fittype='gaussian',negamp=False)
     ampguess,vguess,widthguess = spectrum.specfit.modelpars
@@ -229,7 +229,7 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
             spdict[linename].xarr.convert_to_unit('km/s')
             if vrange is not None:
                 try:
-                    spdict[linename].crop(*vrange, units='km/s')
+                    spdict[linename].crop(*vrange, unit='km/s')
                 except IndexError:
                     # if the freq in range, but there's no data in range, remove
                     spdict.pop(linename)

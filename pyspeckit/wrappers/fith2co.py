@@ -142,7 +142,7 @@ def BigSpectrum_to_H2COdict(sp, vrange=None):
             spdict[linename].xarr.convert_to_unit('km/s')
             if vrange is not None:
                 try:
-                    spdict[linename].crop(*vrange, units='km/s')
+                    spdict[linename].crop(*vrange, unit='km/s')
                 except IndexError:
                     # if the freq in range, but there's no data in range, remove
                     spdict.pop(linename)

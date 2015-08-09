@@ -10,7 +10,7 @@ def splat_1d(filename=None,vmin=None,vmax=None,button=None,dobaseline=False,
         vconv=None,vpars=None,spec=None,xtora=None,ytodec=None,
         specname=None,quiet=True,specnum=0,errspecnum=None,wcstype='',
         offset=0.0, continuum=0.0, annotatebaseline=False, plotspectrum=True,
-        smoothto=None, xunits=None, units=None, conversion_factor=None,
+        smoothto=None, xunit=None, unit=None, conversion_factor=None,
         smoothtype='gaussian',convmode='same',maskspecnum=None,
         fignum=1, axis=None, autorefresh=False, title=None, color=None,
         label=None,clear=False, negamp=None, plotscale=1.0, voff=0.0, **kwargs):
@@ -41,10 +41,10 @@ def splat_1d(filename=None,vmin=None,vmax=None,button=None,dobaseline=False,
     if smooth:
         sp.smooth(smooth, smoothtype=smoothtype, convmode=convmode)
 
-    if xunits:
-        sp.xarr.convert_to_unit(xunits)
-    if units:
-        sp.units = units
+    if xunit:
+        sp.xarr.convert_to_unit(xunit)
+    if unit:
+        sp.unit = unit
 
     if dobaseline:
         sp.baseline(order=order, exclude=exclude, annotate=annotatebaseline)
