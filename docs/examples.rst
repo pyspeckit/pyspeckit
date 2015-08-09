@@ -23,6 +23,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    :maxdepth: 3
 
    Build a spectrum from scratch (and fit a gaussian) <example_fromscratch>
+   Build a cube from scratch and fit many gaussians <example_cube_fromscratch>
    Radio H2CO <example_h2co>
    Radio H2CO mm lines <example_h2co_mm>
    Radio NH3: shows hyperfine fitting with fixed amplitude, width <example_nh3>
