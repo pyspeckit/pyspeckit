@@ -500,7 +500,8 @@ class SpectroscopicAxis(u.Quantity):
 
         if unit is not None:
             # could be reversed
-            return np.max([self.coord_to_x(self.max(), units),self.coord_to_x(self.min(),units)])
+            return np.max([self.coord_to_x(self.max(), units),
+                           self.coord_to_x(self.min(),units)])
         else: 
             return self.max()
 
@@ -512,7 +513,8 @@ class SpectroscopicAxis(u.Quantity):
 
         if unit is not None:
             # could be reversed
-            return np.min([self.coord_to_x(self.max(), units),self.coord_to_x(self.min(),units)])
+            return np.min([self.coord_to_x(self.max(), units),
+                           self.coord_to_x(self.min(),units)])
         else: 
             return self.min()
 
@@ -537,7 +539,14 @@ class SpectroscopicAxis(u.Quantity):
         """
         Given an X coordinate in SpectroscopicAxis' units, return whether the pixel is in range
         """
-        return bool((xval > self.min()) * (xval < self.max()))
+        if hasattr(xval, 'unit'):
+            return bool((xval > self.min()) * (xval < self.max()))
+        else:
+            warnings.warn("The xvalue being compared in "
+                          "SpectroscopicAxis.in_range has no unit.  "
+                          "Assuming the unit is the same as the current "
+                          "axis unit.")
+            return bool((xval > self.min().value) * (xval < self.max().value))
 
     def x_to_coord(self, xval, xunit, verbose=False):
         """
