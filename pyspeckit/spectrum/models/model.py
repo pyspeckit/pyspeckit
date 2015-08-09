@@ -148,6 +148,7 @@ class SpectralModel(fitter.SimpleFitter):
             raise ValueError("parvalues and params both specified; they're redundant so that's not allowed.")
         elif params is not None and parvalues is None:
             parvalues = params
+        log.debug("Parvalues = {0}, npeaks = {1}".format(parvalues, npeaks))
 
         if parnames is not None: 
             self.parnames = parnames
@@ -205,7 +206,7 @@ class SpectralModel(fitter.SimpleFitter):
         else:
             self.parinfo = []
 
-        if debug: log.debug("After VHEIGHT parse len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight))
+        log.debug("After VHEIGHT parse len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight))
 
 
         # this is a clever way to turn the parameter lists into a dict of lists
@@ -234,7 +235,7 @@ class SpectralModel(fitter.SimpleFitter):
             for jj in xrange(self.npeaks)
             for ii in xrange(self.npars) ] # order matters!
 
-        if debug: log.debug("After Generation step len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight))
+        log.debug("After Generation step len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight))
 
         if debug > True: import pdb; pdb.set_trace()
 
@@ -261,6 +262,8 @@ class SpectralModel(fitter.SimpleFitter):
             if par.parname.lower().strip('0123456789') in ('amplitude','amp'):
                 par.scaleable = True
 
+        log.debug("Parinfo has been set: {0}".format(self.parinfo))
+
         return self.parinfo, kwargs
 
     def n_modelfunc(self, pars=None, debug=False, **kwargs):
@@ -275,11 +278,9 @@ class SpectralModel(fitter.SimpleFitter):
                 partemp._from_Parameters(pars)
                 pars = partemp
             except AttributeError:
-                if debug: 
-                    log.debug("Reading pars as LMPar failed.")
-                    if debug > 1:
-                        import pdb; pdb.set_trace()
-                pass
+                log.log(5, "Reading pars {0} as LMPar failed.".format(pars))
+                if debug > 1:
+                    import pdb; pdb.set_trace()
         if hasattr(pars,'values'):
             # important to treat as Dictionary, since lmfit params & parinfo both have .items
             parnames,parvals = zip(*pars.items())
@@ -287,8 +288,8 @@ class SpectralModel(fitter.SimpleFitter):
             parvals = [p.value for p in parvals]
         else:
             parvals = list(pars)
-        if debug:
-            log.debug("pars to n_modelfunc: {0}, parvals:{1}".format(pars, parvals))
+
+        log.debug("pars to n_modelfunc: {0}, parvals:{1}".format(pars, parvals))
         def L(x):
             v = np.zeros(len(x))
             if self.vheight:
@@ -325,7 +326,7 @@ class SpectralModel(fitter.SimpleFitter):
             kwargs = {}
             kwargs.update(self.modelfunc_kwargs)
 
-            if debug: log.debug("Pars, kwarg keys: {0},{1}".format(p,kwargs.keys()))
+            log.debug("Pars, kwarg keys: {0},{1}".format(p,kwargs.keys()))
             if err is None:
                 return (y-self.n_modelfunc(p,**kwargs)(x))
             else:
@@ -383,13 +384,11 @@ class SpectralModel(fitter.SimpleFitter):
 
         if parinfo is None:
             parinfo, kwargs = self._make_parinfo(debug=debug, **kwargs)
-            if debug:
-                log.debug(parinfo)
+            log.debug("Parinfo created from _make_parinfo: {0}".format(parinfo))
 
         LMParams = parinfo.as_Parameters()
-        if debug:
-            log.debug("LMParams: "+"\n".join([repr(p) for p in LMParams.values()]))
-            log.debug("parinfo:  {0}".format(parinfo))
+        log.debug("LMParams: "+"\n".join([repr(p) for p in LMParams.values()]))
+        log.debug("parinfo:  {0}".format(parinfo))
         minimizer = lmfit.minimize(self.lmfitfun(xax,np.array(data),err,debug=debug),LMParams,**kwargs)
         if not quiet:
             log.info("There were %i function evaluations" % (minimizer.nfev))
@@ -398,9 +397,8 @@ class SpectralModel(fitter.SimpleFitter):
 
         self.LMParams = LMParams
         self.parinfo._from_Parameters(LMParams)
-        if debug:
-            log.debug(LMParams)
-            log.debug(parinfo)
+        log.debug("LMParams: {0}".format(LMParams))
+        log.debug("parinfo: {0}".format(parinfo))
 
         self.mp = minimizer
         self.mpp = self.parinfo.values
@@ -454,7 +452,7 @@ class SpectralModel(fitter.SimpleFitter):
         if parinfo is None:
             parinfo, kwargs = self._make_parinfo(debug=debug, **kwargs)
         else:
-            if debug: log.debug("Using user-specified parinfo dict")
+            log.debug("Using user-specified parinfo dict")
             # clean out disallowed kwargs (don't want to pass them to mpfit)
             #throwaway, kwargs = self._make_parinfo(debug=debug, **kwargs)
 
@@ -484,11 +482,10 @@ class SpectralModel(fitter.SimpleFitter):
                              "not allowed as negative errors are not "
                              "meaningful in the optimization process.")
 
-        if debug:
-            for p in parinfo: log.debug( p )
-            log.debug( "\n".join(["%s %i: tied: %s value: %s" % (p['parname'],p['n'],p['tied'],p['value']) for p in parinfo]) )
+        for p in parinfo: log.debug( p )
+        log.debug( "\n".join(["%s %i: tied: %s value: %s" % (p['parname'],p['n'],p['tied'],p['value']) for p in parinfo]) )
 
-        mp = mpfit(self.mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
+        mp = mpfit(self.mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,debug=debug,**kwargs)
         mpp = mp.params
         if mp.perror is not None: mpperr = mp.perror
         else: mpperr = mpp*0
@@ -519,8 +516,7 @@ class SpectralModel(fitter.SimpleFitter):
         self.mpperr = self.parinfo.errors
         self.mppnames = self.parinfo.names
         self.model = self.n_modelfunc(self.parinfo,**self.modelfunc_kwargs)(xax)
-        if debug:
-            log.debug("Modelpars: {0}".format(self.mpp))
+        log.debug("Modelpars: {0}".format(self.mpp))
         if np.isnan(chi2):
             if debug:
                 raise ValueError("Error: chi^2 is nan")
@@ -579,7 +575,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         label_list = []
         for (value, error, varname, fixed, varnumber) in loop_list:
-            if debug: log.debug("".join(value, error, varname, fixed, varnumber))
+            log.debug(", ".join([str(x) for x in (value, error, varname, fixed, varnumber)]))
             if fixed or error==0:
                 label = ("$%s(%i)$=%8s" % (varname,varnumber,
                         Decimal("%g" % value).quantize( Decimal("%0.6g" % (value)) )))

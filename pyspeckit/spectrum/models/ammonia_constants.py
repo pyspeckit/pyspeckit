@@ -23,7 +23,7 @@ line_labels = {'oneone': '1-1',
               }
 
 freq_dict = { 
-    'oneone':     23.694506e9,
+    'oneone':     23.6944955e9, # Issue 91: Erik's custom frequency
     'twotwo':     23.722633335e9,
     'threethree': 23.8701296e9,
     'fourfour':   24.1394169e9,

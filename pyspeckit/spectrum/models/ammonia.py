@@ -22,6 +22,8 @@ import model
 from astropy import log
 import astropy.units as u
 from . import mpfit_messages
+import operator
+import string
 
 from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
                                voff_lines_dict, tau_wts_dict)
@@ -448,6 +450,8 @@ class ammonia_model(model.SpectralModel):
 
         npars = len(parinfo)/self.npeaks
 
+        self._validate_parinfo()
+
         def mpfitfun(x,y,err):
             if err is None:
                 def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p,
@@ -649,6 +653,42 @@ class ammonia_model(model.SpectralModel):
         parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True)
         #import pdb; pdb.set_trace()
         return parinfo
+
+    def _validate_parinfo(self):
+        """
+        Make sure the input parameters are all legitimate
+        """
+        must_be_limited = {'tkin': [True,False],
+                           'tex': [False,False],
+                           'ntot': [True, False],
+                           'width': [True, False],
+                           'xoff_v': [False, False],
+                           'tau': [False, False],
+                           'fortho': [True, True]}
+        required_limits = {'tkin': [0, None],
+                           'ntot': [0, None],
+                           'width': [0, None],
+                           'fortho': [0,1]}
+        for par in self.parinfo:
+            limited = par.limited
+            parname = par.parname.strip(string.digits).lower()
+            mbl = must_be_limited[parname]
+
+            for a,b,ul in zip(limited, mbl, ('a lower','an upper')):
+                if b and not a:
+                    raise ValueError("Parameter {0} must have {1} limit "
+                                     "but no such limit is set.".format(
+                                         parname, ul))
+            if parname in required_limits:
+                limits = par.limits
+                rlimits = required_limits[parname]
+                for a,b,op,ul in zip(limits, rlimits, (operator.lt,
+                                                       operator.gt),
+                                  ('a lower','an upper')):
+                    if b is not None and op(a,b):
+                        raise ValueError("Parameter {0} must have {1} limit "
+                                         "at least {2} but it is set to {3}."
+                                         .format(parname, ul, b, a))
 
 class ammonia_model_vtau(ammonia_model):
     def __init__(self,**kwargs):

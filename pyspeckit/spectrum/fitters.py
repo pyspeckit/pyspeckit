@@ -1,3 +1,4 @@
+from __future__ import print_function
 import matplotlib
 import numpy as np
 from ..config import mycfg
@@ -303,7 +304,7 @@ class Specfit(interactive.Interactive):
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
             components=False, annotate=False, alpha=0.5, loc='lower left',
             xmin=None, xmax=None, xunits='pixel', continuum_as_baseline=False,
-            verbose=False):
+            midpt_location='plot-center'):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
@@ -334,6 +335,9 @@ class Specfit(interactive.Interactive):
             The range over which to compute the EQW
         xunits : str
             The units of xmin/xmax
+        midpt_location : 'fitted', 'plot-center'
+            If 'plot' is set, this determines where the EQW will be drawn.  It
+            can be the fitted centroid or the plot-center, i.e. (xmin+xmax)/2
 
         Returns
         -------
@@ -358,6 +362,9 @@ class Specfit(interactive.Interactive):
             xmax = self.Spectrum.xarr.x_to_pix(xmax, xval_units=xunits)
 
         dx = np.abs(self.Spectrum.xarr[xmin:xmax].cdelt(approx=True))
+
+        log.debug("xmin={0} xmax={1} dx={2} continuum={3}"
+                  .format(xmin, xmax, dx, continuum))
 
         if components:
             centroids = self.fitter.analytic_centroids()
@@ -403,14 +410,26 @@ class Specfit(interactive.Interactive):
                 continuum = np.median(self.Spectrum.baseline.basespec)
             eqw = sumofspec / continuum
         if plot and self.Spectrum.plotter.axis:
-            midpt_pixel = np.round((xmin+xmax)/2.0)
-            midpt       = self.Spectrum.xarr[midpt_pixel]
+            if midpt_location == 'plot-center':
+                midpt_pixel = np.round((xmin+xmax)/2.0)
+                midpt       = self.Spectrum.xarr[midpt_pixel]
+            elif midpt_location == 'fitted':
+                try:
+                    midpt = sp.specfit.parinfo.SHIFT0.value
+                except AttributeError:
+                    raise AttributeError("Can only specify midpt_location="
+                                         "fitted if there is a SHIFT parameter"
+                                         "for the fitted model")
+            else:
+                raise ValueError("midpt_location must be 'plot-center' or "
+                                 "fitted")
             if continuum_as_baseline:
                 midpt_level = continuum
             else:
                 midpt_level = self.Spectrum.baseline.basespec[midpt_pixel]
-            if verbose:
-                print "EQW plotting: ",midpt,midpt_pixel,midpt_level,eqw
+            log.debug("EQW plotting: midpt={0}, midpt_pixel={1}, "
+                      "midpt_level={2}, eqw={3}".format(midpt, midpt_pixel,
+                                                        midpt_level, eqw))
             self.EQW_plots.append(self.Spectrum.plotter.axis.fill_between(
                 [midpt.value-eqw/2.0,midpt.value+eqw/2.0], [0,0],
                 [midpt_level,midpt_level], color=plotcolor, alpha=alpha,
@@ -561,7 +580,8 @@ class Specfit(interactive.Interactive):
             # otherwise npars will disagree, which causes problems if
             # renormalization happens
             self.fitter.vheight = False
-            self.fitter._make_parinfo()
+            self.fitter.npeaks = self.npeaks
+            self.fitter._make_parinfo(npeaks=self.npeaks)
 
         # add kwargs to fitkwargs
         self.fitkwargs.update(kwargs)
@@ -573,7 +593,8 @@ class Specfit(interactive.Interactive):
             datarange = self.spectofit[self.xmin:self.xmax].max() - self.spectofit[self.xmin:self.xmax].min()
             if abs(datarange) < 1e-9:
                 scalefactor = np.median(np.abs(self.spectofit))
-                if verbose: print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
+                log.info("Renormalizing data by factor %e to improve fitting procedure"
+                         % scalefactor)
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor
 
@@ -593,12 +614,30 @@ class Specfit(interactive.Interactive):
         spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced]
         err = self.errspec[self.xmin:self.xmax][~self.mask_sliced]
 
+        if parinfo is not None:
+            self._validate_parinfo(parinfo, mode='fix')
+        else:
+            pinf, _ = self.fitter._make_parinfo(parvalues=guesses,
+                                                npeaks=self.npeaks,
+                                                **self.fitkwargs)
+            new_guesses = self._validate_parinfo(pinf, 'guesses')
+            if any((x!=y) for x,y in zip(guesses, new_guesses)):
+                warn("Guesses have been changed from {0} to {1}"
+                     .format(guesses, new_guesses))
+            guesses = new_guesses
+
         mpp,model,mpperr,chi2 = self.fitter(xtofit, spectofit, err=err,
                                             npeaks=self.npeaks,
                                             parinfo=parinfo, # the user MUST be allowed to override parinfo.
                                             params=guesses,
                                             use_lmfit=use_lmfit,
                                             **self.fitkwargs)
+
+        any_out_of_range = self._validate_parinfo(self.fitter.parinfo, mode='check')
+
+        if any(any_out_of_range):
+            warn("The fitter returned values that are outside the "
+                 "parameter limits.  DEBUG INFO: {0}".format(any_out_of_range))
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
@@ -758,13 +797,14 @@ class Specfit(interactive.Interactive):
             datarange = self.spectofit[self.xmin:self.xmax].max() - self.spectofit[self.xmin:self.xmax].min()
             if abs(datarange) < 1e-9:
                 scalefactor = np.median(np.abs(self.spectofit))
-                print "Renormalizing data by factor %e to improve fitting procedure" % scalefactor
+                log.info("Renormalizing data by factor %e to improve fitting procedure"
+                         % scalefactor)
                 self.spectofit /= scalefactor
                 self.errspec   /= scalefactor
                 self.guesses[0] /= scalefactor
                 if vheight: self.guesses[1] /= scalefactor
 
-        if debug: print "Guesses before fit: ",self.guesses
+        log.debug("Guesses before fit: {0}".format(self.guesses))
 
         if 'debug' in self.fitkwargs:
             debug = self.fitkwargs['debug']
@@ -780,7 +820,7 @@ class Specfit(interactive.Interactive):
                 debug=debug,
                 use_lmfit=use_lmfit,
                 **self.fitkwargs)
-        if debug: print "1. Guesses, fits after: ",self.guesses, mpp
+        log.debug("1. Guesses, fits after: {0}, {1}".format(self.guesses, mpp))
 
         self.spectofit *= scalefactor
         self.errspec   *= scalefactor
@@ -795,6 +835,7 @@ class Specfit(interactive.Interactive):
         self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight+np.sum(self.parinfo.fixed)
         self.vheight=vheight
         if vheight: 
+            self.Spectrum.baseline.order = 0
             self.Spectrum.baseline.baselinepars = [mpp[0]*scalefactor] # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]*scalefactor
             self.model = model*scalefactor - mpp[0]*scalefactor
@@ -824,7 +865,8 @@ class Specfit(interactive.Interactive):
         # make sure the full model is populated
         self._full_model(debug=debug)
 
-        if debug: print "2. Guesses, fits after vheight removal: ",self.guesses, mpp
+        log.debug("2. Guesses, fits after vheight removal: {0},{1}"
+                  .format(self.guesses, mpp))
         self.history_fitpars()
 
     def _full_model(self, debug=False, **kwargs):
@@ -1187,10 +1229,10 @@ class Specfit(interactive.Interactive):
         """
 
         if self.Spectrum.baseline.baselinepars is not None and print_baseline:
-            print "Baseline: " + " + ".join(["%12g x^%i" % (x,i) for i,x in enumerate(self.Spectrum.baseline.baselinepars[::-1])])
+            print("Baseline: " + " + ".join(["%12g x^%i" % (x,i) for i,x in enumerate(self.Spectrum.baseline.baselinepars[::-1])]))
 
         for i,p in enumerate(self.parinfo):
-            print "%15s: %12g +/- %12g" % (p['parname'],p['value'],p['error'])
+            print("%15s: %12g +/- %12g" % (p['parname'],p['value'],p['error']))
 
     def clear(self, legend=True, components=True):
         """
@@ -1369,7 +1411,9 @@ class Specfit(interactive.Interactive):
                 dx = np.median(dx)
                 integ = self.fitter.integral(self.modelpars, dx=dx, **kwargs)
                 if return_error:
-                    if mycfg.WARN: print "WARNING: The computation of the error on the integral is not obviously correct or robust... it's just a guess."
+                    if mycfg.WARN: print("WARNING: The computation of the error "
+                                         "on the integral is not obviously "
+                                         "correct or robust... it's just a guess.")
                     OK = np.abs( fullmodel ) > threshold
                     error = np.sqrt((self.errspec[OK]**2).sum()) * dx
                     #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
@@ -1503,13 +1547,15 @@ class Specfit(interactive.Interactive):
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.keyclick)
         npars = 2+nwidths
         if self.npeaks > 0:
-            print len(self.guesses)/npars," Guesses: ",self.guesses," X channel range: ",self.xmin,self.xmax
+            log.info("{0} Guesses : {1}  X channel range: {2}-{3}"
+                     .format(len(self.guesses)/npars, self.guesses, self.xmin,
+                             self.xmax))
             if len(self.guesses) % npars == 0:
                 self.multifit(use_window_limits=True)
                 for p in self.button2plot + self.button1plot:
                     p.set_visible(False)
             else: 
-                print "error, wrong # of pars"
+                log.error("Wrong # of parameters")
 
         # disconnect interactive window (and more importantly, reconnect to
         # original interactive cmds)
@@ -1580,9 +1626,11 @@ class Specfit(interactive.Interactive):
         for param in self.parinfo:
             if not param.parname in parlimitdict:
                 if any( (x in param['parname'].lower() for x in ('shift','xoff')) ):
-                    lower,upper = (self.Spectrum.xarr[self.includemask].min(),self.Spectrum.xarr[self.includemask].max())
+                    lower, upper = (self.Spectrum.xarr[self.includemask].min().value,
+                                    self.Spectrum.xarr[self.includemask].max().value)
                 elif any( (x in param['parname'].lower() for x in ('width','fwhm')) ):
-                    xvalrange = (self.Spectrum.xarr[self.includemask].max()-self.Spectrum.xarr[self.includemask].min())
+                    xvalrange = (self.Spectrum.xarr[self.includemask].max().value -
+                                 self.Spectrum.xarr[self.includemask].min().value)
                     lower,upper = (0,xvalrange)
                 elif any( (x in param['parname'].lower() for x in ('amp','peak','height')) ):
                     datarange = self.spectofit.max() - self.spectofit.min()
@@ -1593,9 +1641,10 @@ class Specfit(interactive.Interactive):
 
                 # override guesses with limits
                 if param.limited[0]:
-                    lower = param.limits[0]
+                    # nextafter -> next representable float
+                    lower = np.nextafter(param.limits[0], param.limits[0]+1)
                 if param.limited[1]:
-                    upper = param.limits[1]
+                    upper = np.nextafter(param.limits[1], param.limits[1]-1)
 
                 parlimitdict[param.parname] = (lower,upper)
 
@@ -1606,7 +1655,7 @@ class Specfit(interactive.Interactive):
                                                       parlimitdict=parlimitdict,
                                                       **kwargs)
         else:
-            print "Must have a fitter instantiated before creating sliders"
+            log.error("Must have a fitter instantiated before creating sliders")
 
     def optimal_chi2(self, reduced=True, threshold='error', **kwargs):
         """
@@ -1835,3 +1884,50 @@ class Specfit(interactive.Interactive):
 
         return deltax
 
+    def _validate_parinfo(self, parinfo, mode='fix'):
+
+        assert mode in ('fix','raise','check','guesses')
+
+        any_out_of_range = []
+
+        for param in parinfo:
+            if (param.limited[0] and (param.value < param.limits[0])):
+                if (np.allclose(param.value, param.limits[0])):
+                    # nextafter -> next representable float
+                    if mode in ('fix', 'guesses'):
+                        warn("{0} is less than the lower limit {1}, but very close."
+                             " Converting to {1}+ULP".format(param.value,
+                                                             param.limits[0]))
+                        param.value = np.nextafter(param.limits[0], param.limits[0]+1)
+                    elif mode == 'raise':
+                        raise ValueError("{0} is less than the lower limit {1}, but very close."
+                                         .format(param.value, param.limits[1]))
+                    elif mode == 'check':
+                        any_out_of_range.append("lt:close",)
+                else:
+                    raise ValueError("{0} is less than the lower limit {1}"
+                                     .format(param.value, param.limits[0]))
+            elif mode == 'check':
+                any_out_of_range.append(False)
+
+            if (param.limited[1] and (param.value > param.limits[1])):
+                if (np.allclose(param.value, param.limits[1])):
+                    if mode in ('fix', 'guesses'):
+                        param.value = np.nextafter(param.limits[1], param.limits[1]-1)
+                        warn("{0} is greater than the upper limit {1}, but very close."
+                             " Converting to {1}-ULP".format(param.value,
+                                                             param.limits[1]))
+                    elif mode == 'raise':
+                        raise ValueError("{0} is greater than the upper limit {1}, but very close."
+                                         .format(param.value, param.limits[1]))
+                    elif mode == 'check':
+                        any_out_of_range.append("gt:close")
+                else:
+                    raise ValueError("{0} is greater than the upper limit {1}"
+                                     .format(param.value, param.limits[0]))
+            elif mode == 'check':
+                any_out_of_range.append(False)
+
+        if mode == 'guesses':
+            return parinfo.values
+        return any_out_of_range

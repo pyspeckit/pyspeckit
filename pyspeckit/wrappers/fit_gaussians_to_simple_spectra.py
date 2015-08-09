@@ -5,9 +5,10 @@ Simple Gaussian Fitter
 """
 import pyspeckit
 
-def fit_gaussians_to_simple_spectra(filename, units='km/s', doplot=True,
-        baseline=True, plotresiduals=False, figuresavename=None,
-        croprange=None, savename=None, **kwargs):
+def fit_gaussians_to_simple_spectra(filename, unit='km/s', doplot=True,
+                                    baseline=True, plotresiduals=False,
+                                    figuresavename=None, croprange=None,
+                                    savename=None, **kwargs):
     """
     As stated in the name title, will fit Gaussians to simple spectra!
 
@@ -77,7 +78,7 @@ if __name__ == "__main__":
     croprange = [int(i) for i in options.crop.strip('[]').split(',')]
     if len(args) > 1: kwargs = args[1:]
 
-    fit_gaussians_to_simple_spectra(args[0],units=options.units,
+    fit_gaussians_to_simple_spectra(args[0],unit=options.units,
             doplot=bool(options.plot), baseline=options.baseline,
             plotresiduals=options.plotresiduals, figuresavename=options.plot,
             croprange=croprange, savename=options.savename, **kwargs)

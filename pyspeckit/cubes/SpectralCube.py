@@ -33,6 +33,20 @@ import cubes
 from astropy import log
 from astropy import wcs
 from astropy import units
+from astropy.utils.console import ProgressBar
+from functools import wraps
+import warnings
+
+def not_for_cubes(func):
+
+    @wraps(func)
+    def wrapper(*args):
+        warnings.warn("This operation ({0}) operates on the spectrum selected "
+                      "from the cube, e.g. with `set_spectrum` or `set_apspec`"
+                      ", it does not operate on the whole cube.")
+        return func(*args)
+    return wrapper
+
 class Cube(spectrum.Spectrum):
 
     def __init__(self, filename=None, cube=None, xarr=None, xunit=None,
@@ -165,22 +179,33 @@ class Cube(spectrum.Spectrum):
         self.plot_special_kwargs = {}
         self._modelcube = None
 
-        self.wcs = wcs.WCS(self.header)
-        self.wcs.wcs.fix()
-        self._spectral_axis_number = self.wcs.wcs.spec+1
-        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0][0]+1
-
-        # TODO: improve this!!!
-        self.system = ('galactic'
-                       if ('CTYPE{0}'.format(self._first_cel_axis_num)
-                           in self.header and 'GLON' in
-                           self.header['CTYPE{0}'.format(self._first_cel_axis_num)])
-                       else 'celestial')
+        if self.header:
+            self.wcs = wcs.WCS(self.header)
+            self.wcs.wcs.fix()
+            self._spectral_axis_number = self.wcs.wcs.spec+1
+            self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0][0]+1
+            
+            # TODO: Improve this!!!
+            self.system = ('galactic'
+                           if ('CTYPE{0}'.format(self._first_cel_axis_num)
+                               in self.header and 'GLON' in
+                               self.header['CTYPE{0}'.format(self._first_cel_axis_num)])
+                           else 'celestial')
+        else:
+            self._spectral_axis_number = 2
+            self._first_cel_axis_num = 0
+            self.system = 'PIXEL'
 
         self.mapplot = mapplot.MapPlotter(self)
 
     def load_fits(self, fitsfile):
-        from spectral_cube import SpectralCube
+        try:
+            from spectral_cube import SpectralCube
+        except ImportError:
+            raise ImportError("Could not import spectral_cube.  As of pyspeckit"
+                              " 0.17, spectral_cube is required for cube reading. "
+                              "It can be pip installed or acquired from "
+                              "spectral-cube.rtfd.org.")
         mycube = SpectralCube.read(fitsfile)
         return self.load_spectral_cube(mycube)
 
@@ -528,7 +553,7 @@ class Cube(spectrum.Spectrum):
                 blank_value=0, integral=True, direct=False, absorption=False,
                 use_nearest_as_guess=False, use_neighbor_as_guess=False,
                 start_from_point=(0,0), multicore=1, position_order = None,
-                continuum_map=None, **fitkwargs):
+                continuum_map=None, prevalidate_guesses=False, **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
 
@@ -575,6 +600,11 @@ class Cube(spectrum.Spectrum):
             if >1, try to use multiprocessing via parallel_map to run on multiple cores
         continuum_map: np.ndarray
             Same shape as error map.  Subtract this from data before estimating noise.
+        prevalidate_guesses: bool
+            An extra check before fitting is run to make sure the guesses are
+            all within the specified limits.  May be slow, so it is off by
+            default.  It also should not be necessary, since careful checking
+            is performed before each fit.
 
         """
         if 'multifit' in fitkwargs:
@@ -596,6 +626,7 @@ class Cube(spectrum.Spectrum):
         if hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
             bad = np.isnan(guesses).sum(axis=0).astype('bool')
             OK &= (~bad)
+
 
         distance = ((xx)**2 + (yy)**2)**0.5
         if start_from_point == 'center':
@@ -635,6 +666,9 @@ class Cube(spectrum.Spectrum):
         # newly needed as of March 27, 2012.  Don't know why.
         if 'fittype' in fitkwargs: self.specfit.fittype = fitkwargs['fittype']
         self.specfit.fitter = self.specfit.Registry.multifitters[self.specfit.fittype]
+
+        # TODO: VALIDATE THAT ALL GUESSES ARE WITHIN RANGE GIVEN THE 
+        # FITKWARG LIMITS
 
         # array to store whether pixels have fits
         self.has_fit = np.zeros(self.mapplot.plane.shape, dtype='bool')
@@ -686,9 +720,10 @@ class Cube(spectrum.Spectrum):
             else:
                 max_sn = None
             sp.specfit.Registry = self.Registry # copy over fitter registry
+
             # Do some homework for local fits
-            xpatch = np.array([1,1,1,0,0,0,-1,-1,-1],dtype=np.int)
-            ypatch = np.array([1,0,-1,1,0,-1,1,0,-1],dtype=np.int)
+            # Exclude out of bounds points
+            xpatch, ypatch = get_neighbors(x,y,self.has_fit.shape)
             local_fits = self.has_fit[ypatch+y,xpatch+x]
 
             
@@ -703,7 +738,8 @@ class Cube(spectrum.Spectrum):
             elif use_neighbor_as_guess and np.any(local_fits):
                 # Array is N_guess X Nvalid_nbrs so averaging over 
                 # Axis=1 is the axis of all valid neighbors
-                gg = np.mean(self.parcube[:,(ypatch+y)[local_fits],(xpatch+x)[local_fits]],axis=1)
+                gg = np.mean(self.parcube[:, (ypatch+y)[local_fits],
+                                          (xpatch+x)[local_fits]], axis=1)
             elif usemomentcube:
                 if verbose_level > 1 and ii == 0: log.info("Using moment cube")
                 gg = self.momentcube[:,y,x]
@@ -754,6 +790,9 @@ class Cube(spectrum.Spectrum):
                              (ii+1, npix, x, y, snmsg, time.time()-t0, pct))
 
             if sp.specfit.modelerrs is None:
+                log.exception("Fit number %i at %i,%i failed with no specific error.")
+                log.exception("Guesses were: {0}".format(str(gg)))
+                log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
                 raise TypeError("The fit never completed; something has gone wrong.")
 
             if integral:
@@ -799,6 +838,12 @@ class Cube(spectrum.Spectrum):
         # This is NOT in a try/except block because we want to raise the
         # exception here if an exception is going to happen
         sp.specfit(guesses=gg, **fitkwargs)
+
+        if prevalidate_guesses:
+            for ii,(x,y) in ProgressBar(tuple(enumerate(valid_pixels))):
+                pinf, _ = sp.specfit.fitter._make_parinfo(parvalues=guesses, **fitkwargs)
+                sp.specfit._validate_parinfo(pinf, 'raise')
+
         #### END TEST BLOCK ####
 
 
@@ -1172,17 +1217,23 @@ class CubeStack(Cube):
             for key,value in cube.header.items():
                 self.header[key] = value
 
-        self.wcs = wcs.WCS(self.header)
-        self.wcs.wcs.fix()
-        self._spectral_axis_number = self.wcs.wcs.spec+1
-        self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0][0]+1
+        if self.header:
+            self.wcs = wcs.WCS(self.header)
+            self.wcs.wcs.fix()
+            self._spectral_axis_number = self.wcs.wcs.spec+1
+            self._first_cel_axis_num = np.where(self.wcs.wcs.axis_types // 1000 == 2)[0][0]+1
+            
+            # TODO: Improve this!!!
+            self.system = ('galactic'
+                           if ('CTYPE{0}'.format(self._first_cel_axis_num)
+                               in self.header and 'GLON' in
+                               self.header['CTYPE{0}'.format(self._first_cel_axis_num)])
+                           else 'celestial')
+        else:
+            self._spectral_axis_number = 3
+            self._first_cel_axis_num = 1
+            self.system = 'PIXEL'
 
-        # TODO: Improve this!!!
-        self.system = ('galactic'
-                       if ('CTYPE{0}'.format(self._first_cel_axis_num)
-                           in self.header and 'GLON' in
-                           self.header['CTYPE{0}'.format(self._first_cel_axis_num)])
-                       else 'celestial')
         
         self.unit = cubelist[0].unit
         for cube in cubelist: 
@@ -1222,3 +1273,39 @@ class CubeStack(Cube):
         self.cube = self.cube[indices,:,:]
         if self.errorcube is not None:
             self.errorcube = self.errorcube[indices,:,:]
+
+def get_neighbors(x, y, shape):
+    """
+    Find the 9 nearest neighbors, excluding self and any out of bounds points
+    """
+    ysh, xsh = shape
+    xpyp = [(ii,jj) 
+            for ii,jj in itertools.product((-1,0,1),
+                                           (-1,0,1))
+            if (ii+x < xsh) and (ii+x >= 0)
+            and  (jj+y < ysh) and (jj+y >= 0)
+            and not (ii==0 and jj==0)]
+    xpatch, ypatch = zip(*xpyp)
+
+    return np.array(xpatch, dtype='int'), np.array(ypatch, dtype='int')
+
+def test_get_neighbors():
+    xp,yp = get_neighbors(0,0,[10,10])
+    assert set(xp) == {0,1}
+    assert set(yp) == {0,1}
+
+    xp,yp = get_neighbors(0,1,[10,10])
+    assert set(xp) == {0,1}
+    assert set(yp) == {-1,0,1}
+
+    xp,yp = get_neighbors(5,6,[10,10])
+    assert set(xp) == {-1,0,1}
+    assert set(yp) == {-1,0,1}
+
+    xp,yp = get_neighbors(9,9,[10,10])
+    assert set(xp) == {0,-1}
+    assert set(yp) == {0,-1}
+
+    xp,yp = get_neighbors(9,8,[10,10])
+    assert set(xp) == {-1,0}
+    assert set(yp) == {-1,0,1}

@@ -1,10 +1,12 @@
 CHANGES
 *******
 
-Version 0.1.17
-~~~~~~~~~~~~~~
+Version 0.1.17 (2015-07-14)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- * None yet
+    * Bugfixes: #67, #69, #71, #74, #75 related to fiteach
+    * Bugfix for error bar plotting (PR #76, issue #78)
+    * Documentation cleanup and enhancement (#77)
 
 Release 0.1.16 (2015-05-21)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

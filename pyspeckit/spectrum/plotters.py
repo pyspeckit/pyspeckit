@@ -267,10 +267,10 @@ class Plotter(object):
                     steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[inds]),
                     facecolor=errcolor, edgecolor=errcolor, alpha=erralpha, **kwargs)]
             elif errstyle == 'bars':
-                self.errorplot = self.axis.errorbar(self.Spectrum.xarr[inds]+xoffset,
+                self.errorplot = self.axis.errorbar(self.Spectrum.xarr[inds].value+xoffset,
                                                     self.Spectrum.data[inds]*self.plotscale+self.offset,
-                                                    yerr=self.Spectrum.error*self.plotscale,
-                                                    ecolor=errcolor, fmt=None,
+                                                    yerr=self.Spectrum.error[inds]*self.plotscale,
+                                                    ecolor=errcolor, fmt='none',
                                                     **kwargs)
 
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr.value[inds]+xoffset,
@@ -420,8 +420,10 @@ class Plotter(object):
 
         if ylabel is not None:
             self.axis.set_ylabel(ylabel)
-        elif self.Spectrum.unit in ['Ta*','Tastar','K']:
+        elif self.Spectrum.unit in ['Ta*','Tastar']:
             self.axis.set_ylabel("$T_A^*$ (K)")
+        elif self.Spectrum.unit in ['K']:
+            self.axis.set_ylabel("Brightness Temperature $T$ (K)")
         elif self.Spectrum.unit == 'mJy':
             self.axis.set_ylabel("$S_\\nu$ (mJy)")
         elif self.Spectrum.unit == 'Jy':
@@ -566,17 +568,22 @@ class Plotter(object):
         # convert line_xvals to current units
         xvals = [self.Spectrum.xarr.x_to_coord(c, xval_units) for c in line_xvals]
 
+        # xvals must not be quantities because matplotlib cannot handle these
+        def strip_qty(x):
+            return x.value if hasattr(x,'value') else x
+        xvals = map(strip_qty, xvals)
+
         if auto_yloc:
             yr = self.axis.get_ylim()
             kwargs['box_loc'] = (yr[1]-yr[0])*auto_yloc_fraction + yr[0]
             kwargs['arrow_tip'] = (yr[1]-yr[0])*(auto_yloc_fraction*0.9) + yr[0]
 
         lineid_plot.plot_line_ids(self.Spectrum.xarr,
-                self.Spectrum.data, 
-                xvals,
-                line_names,
-                ax=self.axis,
-                **kwargs)
+                                  self.Spectrum.data, 
+                                  xvals,
+                                  line_names,
+                                  ax=self.axis,
+                                  **kwargs)
 
     def line_ids_from_measurements(self, auto_yloc=True,
             auto_yloc_fraction=0.9, **kwargs):

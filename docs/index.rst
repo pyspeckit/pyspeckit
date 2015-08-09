@@ -28,6 +28,11 @@ Supported file types and their formats:
 
 Guides / Getting Started
 ========================
+
+If you're already a python user, go straight to the :doc:`examples page
+<examples>` to get a quick start.  For simple gaussian fitting, :doc:`this
+example <example_fromscratch>` is a good starting point.
+
 * :doc:`guide_class`
     A simple getting started guide aimed at Gildas-CLASS users
 
@@ -87,5 +92,6 @@ Features
    High-Level Wrappers <wrappers>
    Examples <examples>
    Interactive Use <interactive>
+   FAQ <faq>
 
 ..   Base Classes <classes>
