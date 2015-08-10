@@ -859,7 +859,7 @@ class Cube(spectrum.Spectrum):
 
         if prevalidate_guesses:
             for ii,(x,y) in ProgressBar(tuple(enumerate(valid_pixels))):
-                pinf, _ = sp.specfit.fitter._make_parinfo(parvalues=guesses, **fitkwargs)
+                pinf, _ = sp.specfit.fitter._make_parinfo(parvalues=guesses[:,y,x], **fitkwargs)
                 sp.specfit._validate_parinfo(pinf, 'raise')
 
         #### END TEST BLOCK ####
