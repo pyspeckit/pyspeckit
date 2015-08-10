@@ -313,7 +313,7 @@ class Cube(spectrum.Spectrum):
 
         return Cube(xarr=self.xarr.__getitem__(indx[0]), cube=self.cube[indx],
                     errorcube=self.errorcube[indx] if self.errorcube else None,
-                    maskmap=self.maskmap)
+                    maskmap=self.maskmap[indx[1:]] if self.maskmap is not None else None)
 
     def set_spectrum(self, x, y):
         self.data = self.cube[:,y,x]
