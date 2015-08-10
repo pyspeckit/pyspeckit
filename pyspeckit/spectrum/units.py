@@ -327,7 +327,12 @@ class SpectroscopicAxis(u.Quantity):
         if not isinstance(xarr, np.ndarray):
             subarr = np.array(xarr, dtype=dtype)
         else:
-            subarr = xarr
+            if not xarr.flags['OWNDATA']:
+                warnings.warn("The X array does not 'own' its data."
+                              "  It will therefore be copied.")
+                subarr = xarr.copy()
+            else:
+                subarr = xarr
         
         subarr = subarr.view(self)
 
