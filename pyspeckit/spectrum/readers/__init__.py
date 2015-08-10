@@ -58,10 +58,10 @@ def make_axis(xarr, hdr, specname=None, wcstype='', specaxis="1", verbose=True,
 
     if hdr.get('VELDEF'):
         convention, frame = units.parse_veldef(hdr['VELDEF'])
-    #    vframe = hdr.get('VFRAME') if hdr.get('VFRAME') is not None else 0.0
-    #else:
-    #    convention, frame = _parse_velocity_convention(hdr.get('CTYPE%s%s' % (specaxis,wcstype))), None
-    #    vframe = 0.0
+        # vframe = hdr.get('VFRAME') if hdr.get('VFRAME') is not None else 0.0
+    else:
+        convention, frame = _parse_velocity_convention(hdr.get('CTYPE%s%s' % (specaxis,wcstype))), None
+        # vframe = 0.0
 
     XAxis = units.SpectroscopicAxis(xarr, xunits, refX=refX,
                                     velocity_convention=convention, **kwargs)
