@@ -22,18 +22,17 @@ Example use:
 
 """
 import pyspeckit
-from matplotlib import pyplot 
+import numpy as np
+from matplotlib import pyplot
 import copy
 import random
+from astropy import log
+from astropy import units as u
 
-title_dict = {'oneone':'NH$_3(1,1)$', 
-'twotwo':'NH$_3(2,2)$', 
-'threethree':'NH$_3(3,3)$', 
-'fourfour':'NH$_3(4,4)$',
-'fivefive':'NH$_3(5,5)$',
-'sixsix':'NH$_3(6,6)$',
-'sevenseven':'NH$_3(7,7)$',
-'eighteight':'NH$_3(8,8)$',
+title_dict = {'oneone':'NH$_3(1,1)$', 'twotwo':'NH$_3(2,2)$',
+              'threethree':'NH$_3(3,3)$', 'fourfour':'NH$_3(4,4)$',
+              'fivefive':'NH$_3(5,5)$', 'sixsix':'NH$_3(6,6)$',
+              'sevenseven':'NH$_3(7,7)$', 'eighteight':'NH$_3(8,8)$',
              }
 
 def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
@@ -123,7 +122,7 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
         'oneone': spectrum,
         'twotwo': spectrum,
         etc.
-    """ 
+    """
     spectra.plotter.figure = pyplot.figure(fignum)
     spectra.plotter.axis = spectra.plotter.figure.gca()
     pyplot.clf()
@@ -167,27 +166,40 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
             sp.specfit.plot_fit(annotate=False, show_components=show_components,
                                 show_hyperfine_components=show_hyperfine_components)
     if spdict['oneone'].specfit.modelpars is not None:
-        spdict['oneone'].specfit.annotate(labelspacing=0.05,prop={'size':'small','stretch':'extra-condensed'},frameon=False)
+        spdict['oneone'].specfit.annotate(labelspacing=0.05,
+                                          prop={'size':'small',
+                                                'stretch':'extra-condensed'},
+                                          frameon=False)
 
     if residfignum is not None:
         pyplot.figure(residfignum)
         pyplot.clf()
         if len(splist) == 2:
-            axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
+            axdict = {'oneone':pyplot.subplot(211),
+                      'twotwo':pyplot.subplot(212)
+                     }
         elif len(splist) == 3:
-            axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223), 'threethree':pyplot.subplot(224), 'fourfour':pyplot.subplot(224) }
+            axdict = {'oneone':pyplot.subplot(211),
+                      'twotwo':pyplot.subplot(223),
+                      'threethree':pyplot.subplot(224),
+                      'fourfour':pyplot.subplot(224)
+                     }
         elif len(splist) == 4:
-            axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222), 'threethree':pyplot.subplot(223), 'fourfour':pyplot.subplot(224) }
+            axdict = {'oneone':pyplot.subplot(221),
+                      'twotwo':pyplot.subplot(222),
+                      'threethree':pyplot.subplot(223),
+                      'fourfour':pyplot.subplot(224)
+                     }
         for linename,sp in spdict.iteritems():
             sp.specfit.plotresiduals(axis=axdict[linename])
 
 
 
-def fitnh3(spectrum, vrange=[-100,100], vrangeunit='km/s', quiet=False,
-        Tex=20,Tkin=15,column=1e15,fortho=1.0, tau=None): 
+def fitnh3(spectrum, vrange=[-100,100], vrangeunit='km/s', quiet=False, Tex=20,
+           Tkin=15, column=1e15, fortho=1.0, tau=None): 
 
     if vrange:
-        spectrum.xarr.convert_to_unit(vrangeunits)
+        spectrum.xarr.convert_to_unit(vrangeunit)
         spectrum.crop(*vrange, unit=vrangeunit)
 
     spectrum.specfit(fittype='gaussian',negamp=False)
@@ -206,34 +218,44 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
     A rather complicated way to make the spdicts above given a spectrum...
     """
 
+    sp.xarr.convert_to_unit('GHz')
+
     spdict = {}
     for linename,freq in pyspeckit.spectrum.models.ammonia.freq_dict.iteritems():
+        if not hasattr(freq, 'unit'):
+            freq = freq*u.Hz
         if vrange is not None:
             freq_test_low  = freq - freq * vrange[0]/pyspeckit.units.speedoflight_kms
             freq_test_high = freq - freq * vrange[1]/pyspeckit.units.speedoflight_kms
         else:
             freq_test_low = freq_test_high = freq
 
+        log.debug("freq test low,high: {0}, {1}".format(freq_test_low, freq_test_high))
         if (sp.xarr.as_unit('Hz').in_range(freq_test_low) or
                 sp.xarr.as_unit('Hz').in_range(freq_test_high)):
-            spdict[linename] = sp.copy()
+            spdict[linename] = sp.copy(deep=True)
             spdict[linename].xarr.convert_to_unit('GHz')
+            assert np.all(np.array(spdict[linename].xarr == sp.xarr,
+                          dtype='bool'))
             spdict[linename].xarr.refX = freq
-            spdict[linename].xarr.refX_unit = 'Hz'
-            #spdict[linename].baseline = copy.copy(sp.baseline)
-            #spdict[linename].baseline.Spectrum = spdict[linename]
-            #spdict[linename].specfit = copy.copy(sp.specfit)
-            #spdict[linename].specfit.fitter = copy.copy(sp.specfit.fitter)
-            #spdict[linename].specfit.Spectrum = spdict[linename]
-            #spdict[linename].specfit._full_model()
             spdict[linename].xarr.convert_to_unit('km/s')
+            assert np.all(np.array(spdict[linename].xarr.as_unit('GHz') ==
+                                   sp.xarr, dtype='bool'))
+            log.debug("Line {0}={2}: {1}".format(linename, spdict[linename],
+                                                 freq))
             if vrange is not None:
                 try:
-                    spdict[linename].crop(*vrange, unit='km/s')
+                    spdict[linename] = spdict[linename].slice(start=vrange[0],
+                                                              stop=vrange[1],
+                                                              unit='km/s')
+                    log.debug("Successfully cropped {0} to {1}, freq = {2}, {3}"
+                              .format(linename, vrange, freq,
+                                      spdict[linename].xarr))
                 except IndexError:
                     # if the freq in range, but there's no data in range, remove
                     spdict.pop(linename)
 
+    log.debug(str(spdict))
     return spdict
                     
 def plotter_override(sp, vrange=None, **kwargs):
@@ -242,8 +264,13 @@ def plotter_override(sp, vrange=None, **kwargs):
     """
 
     spdict = BigSpectrum_to_NH3dict(sp, vrange=vrange)
+    log.debug("spdict: {0}".format(spdict))
 
+    if len(spdict) > 4:
+        raise ValueError("Too many lines ({0}) found.".format(len(spdict)))
     if len(spdict) not in (2,3,4):
         raise ValueError("Not enough lines; don't need to use the NH3 plot wrapper")
 
     plot_nh3(spdict, sp, **kwargs)
+
+    return spdict

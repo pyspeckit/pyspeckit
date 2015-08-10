@@ -402,11 +402,13 @@ class Spectrum(object):
         # do slice (this code is redundant... need to figure out how to fix that)
         x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(unit).value))
         x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(unit).value))
-        if x1pix > x2pix: x1pix,x2pix = x2pix,x1pix
-        if x1pix == x2pix:
+        if x1pix > x2pix:
+            x1pix,x2pix = x2pix,x1pix
+        elif x1pix == x2pix:
             raise IndexError("ERROR: Trying to crop to zero size.")
 
-        self = self.slice(x1pix, x2pix, unit='pixels', copy=False, **kwargs)
+        self = self.slice(x1pix, x2pix, unit='pixels', copy=False, xcopy=True,
+                          **kwargs)
         # a baseline spectrum is always defined, even if it is all zeros
         # this is needed to prevent size mismatches.  There may be a more
         # elegant way to do this...
@@ -422,8 +424,10 @@ class Spectrum(object):
                 self.header['CRPIX1'] = self.header.get('CRPIX1') - x1pix
                 history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
-    def slice(self, start=None, stop=None, unit='pixel', copy=True, preserve_fits=False):
-        """Slicing the spectrum
+    def slice(self, start=None, stop=None, unit='pixel', copy=True, xcopy=True,
+              preserve_fits=False):
+        """
+        Slicing the spectrum
 
         .. WARNING:: this is the same as cropping right now, but it returns a
             copy instead of cropping inplace
@@ -449,17 +453,28 @@ class Spectrum(object):
             x_in_units = self.xarr.as_unit(unit)
             start_ind = x_in_units.x_to_pix(start)
             stop_ind  = x_in_units.x_to_pix(stop)
-        if start_ind > stop_ind: start_ind,stop_ind = stop_ind,start_ind
+        if start_ind > stop_ind:
+            start_ind,stop_ind = stop_ind,start_ind
         spectrum_slice = slice(start_ind,stop_ind)
+
+        log.debug("Slicing from {start} to {stop} with unit {unit} and copy="
+                  "{copy}, xcopy={xcopy}, preserve_fits={preserve_fits}."
+                  "start_ind = {start_ind}, stop_ind= {stop_ind}"
+                  .format(start=start, stop=stop, unit=unit, copy=copy,
+                          xcopy=xcopy, preserve_fits=preserve_fits,
+                          start_ind=start_ind, stop_ind=stop_ind))
 
         if copy:
             sp = self.copy()
         else:
-            sp=self
+            sp = self
         sp.data = sp.data[spectrum_slice]
         if sp.error is not None:
             sp.error = sp.error[spectrum_slice]
-        sp.xarr = sp.xarr[spectrum_slice]
+        if copy or xcopy:
+            sp.xarr = sp.xarr[spectrum_slice].copy()
+        else:
+            sp.xarr = sp.xarr[spectrum_slice]
 
         if copy:
             # create new specfit / baseline instances (otherwise they'll be the wrong length)

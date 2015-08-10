@@ -17,10 +17,10 @@ The 'grunt work' is performed by the :py:mod:`cubes` module
 # import parent package
 import pyspeckit
 from pyspeckit import spectrum
-from ..spectrum.units import generate_xarr,SpectroscopicAxis
+from ..spectrum.units import (generate_xarr, SpectroscopicAxis,
+                              SpectroscopicAxes)
 # import local things
 import mapplot
-import readers
 import time
 import numpy as np
 from pyspeckit.parallel_map import parallel_map
@@ -117,9 +117,16 @@ class Cube(spectrum.Spectrum):
                     self.unit = cube.unit
                 log.debug("Self.unit: {0}".format(self.unit))
                 if xarr is None:
-                    xarr = SpectroscopicAxis(cube.spectral_axis,
-                                             unit=cube.spectral_axis.unit,
-                                             refX=cube.wcs.wcs.restfrq, refX_unit='Hz')
+                    if cube.spectral_axis.flags['OWNDATA']:
+                        xarr = SpectroscopicAxis(cube.spectral_axis,
+                                                 unit=cube.spectral_axis.unit,
+                                                 refX=cube.wcs.wcs.restfrq,
+                                                 refX_unit='Hz')
+                    else:
+                        xarr = SpectroscopicAxis(cube.spectral_axis.copy(),
+                                                 unit=cube.spectral_axis.unit,
+                                                 refX=cube.wcs.wcs.restfrq,
+                                                 refX_unit='Hz')
                 if header is None:
                     header = cube.header
             elif hasattr(cube, 'unit'):
@@ -135,7 +142,9 @@ class Cube(spectrum.Spectrum):
                 self.errorcube = errorcube.value
             else:
                 self.errorcube = errorcube
+            log.debug("XARR flags: {0}".format(xarr.flags))
             self.xarr = generate_xarr(xarr, unit=xunit)
+            log.debug("self.xarr flags: {0}".format(xarr.flags))
             self.header = header
             self.error = None
             if self.cube is not None:
@@ -849,7 +858,11 @@ class Cube(spectrum.Spectrum):
         sp.specfit(guesses=gg, **fitkwargs)
 
         if prevalidate_guesses:
-            for ii,(x,y) in ProgressBar(tuple(enumerate(valid_pixels))):
+            if guesses.ndim == 3:
+                for ii,(x,y) in ProgressBar(tuple(enumerate(valid_pixels))):
+                    pinf, _ = sp.specfit.fitter._make_parinfo(parvalues=guesses[:,y,x], **fitkwargs)
+                    sp.specfit._validate_parinfo(pinf, 'raise')
+            else:
                 pinf, _ = sp.specfit.fitter._make_parinfo(parvalues=guesses, **fitkwargs)
                 sp.specfit._validate_parinfo(pinf, 'raise')
 
@@ -1197,12 +1210,12 @@ class CubeStack(Cube):
         self.cubelist = cubelist
 
         log.info("Concatenating data")
-        self.xarr = spectrum.units.SpectroscopicAxes([sp.xarr for sp in cubelist])
-        self.cube = np.ma.concatenate([cube.cube for cube in cubelist])
+        self.xarr = SpectroscopicAxes([sp.xarr for sp in cubelist])
+        self.cube = np.ma.concatenate([icube.cube for icube in cubelist])
 
-        if any([cube.errorcube is not None for cube in cubelist]):
-            if all([cube.errorcube is not None for cube in cubelist]):
-                self.errorcube = np.ma.concatenate([cube.errorcube for cube in cubelist])
+        if any([icube.errorcube is not None for icube in cubelist]):
+            if all([icube.errorcube is not None for icube in cubelist]):
+                self.errorcube = np.ma.concatenate([icube.errorcube for icube in cubelist])
             else:
                 raise ValueError("Mismatched error cubes.")
         else:

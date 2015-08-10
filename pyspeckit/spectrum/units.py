@@ -18,7 +18,7 @@ from astropy import units as u
 from astropy import log
 
 # declare a case-insensitive dict class to return case-insensitive versions of each dictionary...
-# this is just a shortcut so that units can be specified as, e.g., Hz, hz, HZ, hZ, etc.  3 of those 4 are "legitimate".  
+# this is just a shortcut so that units can be specified as, e.g., Hz, hz, HZ, hZ, etc.  3 of those 4 are "legitimate".
 # the templates for this code were grabbed from a few StackOverflow.com threads
 # I changed this to a "SmartCase" dict, by analogy with VIM's smartcase, where anything with caps will
 # be case sensitive, BUT if there is no unit matching the exact case, will search for the lower version too
@@ -31,18 +31,12 @@ class SmartCaseNoSpaceDict(dict):
                 self.CaseDict = inputdict
                 for k,v in inputdict.items():
                     self[k] = v
-                    #dict.__setitem__(self, k, v)
-                    #if hasattr(k,'lower'):
-                    #    dict.__setitem__(self, k.lower(), v)
             else:
                 for k,v in inputdict:
                     self[k] = v
-                    #dict.__setitem__(self, k, v)
-                    #if hasattr(k,'lower'):
-                    #    dict.__setitem__(self, k.lower(), v)
 
     def __getitem__(self, key):
-        try: 
+        try:
             return dict.__getitem__(self,key)
         except KeyError:
             return dict.__getitem__(self, key.lower().replace(" ",""))
@@ -94,7 +88,7 @@ class SmartCaseNoSpaceDict(dict):
             self.__setitem__(self, k, v)
 
     def fromkeys(self, iterable, value=None):
-        d = SmartCaseDict()
+        d = SmartCaseNoSpaceDict()
         for k in iterable:
             self.__setitem__(d, k, value)
         return d
@@ -108,31 +102,30 @@ class SmartCaseNoSpaceDict(dict):
     
 
 length_dict = {'meters':1.0,'m':1.0,
-        'centimeters':1e-2,'cm':1e-2,
-        'millimeters':1e-3,'mm':1e-3,
-        'nanometers':1e-9,'nm':1e-9,
-        'micrometers':1e-6,'micron':1e-6,'microns':1e-6,'um':1e-6,
-        'kilometers':1e3,'km':1e3,
-        'megameters':1e6,'Mm':1e6,
-        'angstrom':1e-10,'angstroms':1e-10,'A':1e-10,
-        }
+               'centimeters':1e-2,'cm':1e-2,
+               'millimeters':1e-3,'mm':1e-3,
+               'nanometers':1e-9,'nm':1e-9,
+               'micrometers':1e-6,'micron':1e-6,'microns':1e-6,'um':1e-6,
+               'kilometers':1e3,'km':1e3,
+               'megameters':1e6,'Mm':1e6,
+               'angstrom':1e-10,'angstroms':1e-10,'A':1e-10,
+               }
 length_dict = SmartCaseNoSpaceDict(length_dict)
 
 wavelength_dict = length_dict # synonym
 
-frequency_dict = {
-        'Hz':1.0,
-        'kHz':1e3,
-        'MHz':1e6,
-        'GHz':1e9,
-        'THz':1e12,
-        }
+frequency_dict = {'Hz':1.0,
+                  'kHz':1e3,
+                  'MHz':1e6,
+                  'GHz':1e9,
+                  'THz':1e12,
+                  }
 frequency_dict = SmartCaseNoSpaceDict(frequency_dict)
 
 velocity_dict = {'meters/second':1.0,'m/s':1.0,'m s-1':1.0,'ms-1':1.0,
                  'kilometers/second':1e3,'kilometers/s':1e3,'km/s':1e3,'kms':1e3,'km s-1':1e3,'kms-1':1e3,
-                'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
-                'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
+                 'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
+                 'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
         }
 velocity_dict = SmartCaseNoSpaceDict(velocity_dict)
 velocity_conventions = {'optical': u.doppler_optical, 'radio': u.doppler_radio, 'relativistic': u.doppler_relativistic}
@@ -140,13 +133,25 @@ velocity_conventions = {'optical': u.doppler_optical, 'radio': u.doppler_radio, 
 pixel_dict = {'pixel':1,'pixels':1}
 pixel_dict = SmartCaseNoSpaceDict(pixel_dict)
 
-conversion_dict = {
-        'VELOCITY':velocity_dict,  'Velocity':velocity_dict,  'velocity':velocity_dict,  'velo': velocity_dict, 'VELO': velocity_dict,
-        'LENGTH':length_dict,      'Length':length_dict,      'length':length_dict, 
-        'WAVELENGTH':length_dict,      'WAVELength':length_dict,      'WAVElength':length_dict, 
-        'FREQUENCY':frequency_dict,'Frequency':frequency_dict,'frequency':frequency_dict, 'freq': frequency_dict, 'FREQ': frequency_dict,
-        'pixels':pixel_dict,'PIXELS':pixel_dict,
-        }
+conversion_dict = {'VELOCITY':velocity_dict,
+                   'Velocity':velocity_dict,
+                   'velocity':velocity_dict,
+                   'velo': velocity_dict,
+                   'VELO': velocity_dict,
+                   'LENGTH':length_dict,
+                   'Length':length_dict,
+                   'length':length_dict,
+                   'WAVELENGTH':length_dict,
+                   'WAVELength':length_dict,
+                   'WAVElength':length_dict,
+                   'FREQUENCY':frequency_dict,
+                   'Frequency':frequency_dict,
+                   'frequency':frequency_dict,
+                   'freq': frequency_dict,
+                   'FREQ': frequency_dict,
+                   'pixels':pixel_dict,
+                   'PIXELS':pixel_dict,
+}
 conversion_dict = SmartCaseNoSpaceDict(conversion_dict)
 
 
@@ -247,17 +252,25 @@ def generate_xarr(input_array, unit=None):
 
     unit is ignored unless the input is a simple ndarray
     """
-    from astropy import units as u
-    if hasattr(input_array, 'value') and hasattr(input_array, 'unit'):
-        return SpectroscopicAxis(input_array.value,
-                                 unit=input_array.unit.to_string())
-    elif isinstance(input_array, SpectroscopicAxis):
+    if isinstance(input_array, SpectroscopicAxis):
         return input_array
+    elif hasattr(input_array, 'value') and hasattr(input_array, 'unit'):
+        if hasattr(input_array, 'refX'):
+            return SpectroscopicAxis(input_array.value,
+                                     unit=input_array.unit.to_string(),
+                                     refX=input_array.refX,
+                                     refX_unit=input_array.refX_unit,
+                                     velocity_convention=input_array.velocity_convention,
+                                    )
+        else:
+            return SpectroscopicAxis(input_array.value,
+                                     unit=input_array.unit.to_string())
     elif isinstance(input_array, np.ndarray):
         return SpectroscopicAxis(input_array, unit=unit)
     else:
-        raise TypeError("Unrecognized input type. Input array of type: {0}"+\
-            "is not a Quantity, SpectroscopicAxis or numpy.ndarray".format(type(input_array)))
+        raise TypeError("Unrecognized input type. Input array of type: {0}"
+                        "is not a Quantity, SpectroscopicAxis or numpy.ndarray"
+                        .format(type(input_array)))
 
 class SpectroscopicAxis(u.Quantity):
     """
@@ -271,7 +284,7 @@ class SpectroscopicAxis(u.Quantity):
     a workaround is being sought but subclassing numpy arrays is harder than I thought
     """
     def __new__(self, xarr, unit=None, refX=None, redshift=None,
-                refX_unit=None, velocity_convention=None, use128bits=False, 
+                refX_unit=None, velocity_convention=None, use128bits=False,
                 bad_unit_response='raise', equivalencies=u.spectral(),
                 center_frequency=None, center_frequency_unit=None):
         """
@@ -290,7 +303,7 @@ class SpectroscopicAxis(u.Quantity):
         refX_unit : str | astropy.units.Unit
             Units of the reference frequency/wavelength
         center_frequency: float
-            The reference frequency for determining a velocity. 
+            The reference frequency for determining a velocity.
             Required for conversions between frequency/wavelength/energy and velocity.
         center_frequency_unit: string
             If converting between velocity and any other spectroscopic type,
@@ -303,7 +316,7 @@ class SpectroscopicAxis(u.Quantity):
         bad_unit_response : 'raise' | 'pixel'
             What should pyspeckit do if the units are not recognized?  Default
             is to raise an exception.  Can make pixel units instead
-        """        
+        """
         if use128bits:
             dtype='float128'
         else:
@@ -313,8 +326,17 @@ class SpectroscopicAxis(u.Quantity):
         # it's a list)
         if not isinstance(xarr, np.ndarray):
             subarr = np.array(xarr, dtype=dtype)
+            log.debug("Created subarr from a non-ndarray {0}".format(type(xarr)))
         else:
-            subarr = xarr
+            if not xarr.flags['OWNDATA']:
+                log.warning("The X array does not 'own' its data."
+                            "  It will therefore be copied.")
+                warnings.warn("The X array does not 'own' its data."
+                              "  It will therefore be copied.")
+                subarr = xarr.copy()
+            else:
+                log.debug("xarr owns its own data.  Continuing as normal.")
+                subarr = xarr
         
         subarr = subarr.view(self)
 
@@ -340,7 +362,7 @@ class SpectroscopicAxis(u.Quantity):
 
         if not center_frequency:
             if refX:
-                center_frequency = refX    
+                center_frequency = refX
         if not center_frequency_unit:
             if refX_unit:
                 center_frequency_unit = refX_unit
@@ -351,10 +373,11 @@ class SpectroscopicAxis(u.Quantity):
         else:
             subarr.center_frequency = None
 
-        subarr.center_frequency, subarr._equivalencies = \
-                self.find_equivalencies(subarr.velocity_convention,
-                                        subarr.center_frequency, 
-                                        equivalencies)
+        temp1, temp2 = self.find_equivalencies(subarr.velocity_convention,
+                                               subarr.center_frequency,
+                                               equivalencies)
+        subarr.center_frequency, subarr._equivalencies = temp1,temp2
+
         return subarr
 
     def __getitem__(self, key):
@@ -410,13 +433,48 @@ class SpectroscopicAxis(u.Quantity):
     def refX_units(self, value):
         log.warn("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
         self.refX_unit = value
+
+    @property
+    def refX_unit(self):
+        if hasattr(self.refX, 'unit'):
+            return self.refX.unit
+
+    @refX_unit.setter
+    def refX_unit(self, value):
+        if value is None or self.refX is None:
+            return
+        if hasattr(self.refX, 'unit'):
+            self.refX = u.Quantity(self.refX.value, value)
+        else:
+            self.refX = u.Quantity(self.refX, value)
+
+    @property
+    def refX(self):
+        if hasattr(self,'_refX'):
+            return self._refX
+
+    @refX.setter
+    def refX(self, value):
+        if value is None:
+            return
+
+        if hasattr(value, 'unit'):
+            self._refX = value
+        else:
+            self._refX = u.Quantity(value, unit=self.refX_unit)
+
+        if self._refX.unit not in (None, u.dimensionless_unscaled):
+            vc = (self.velocity_convention
+                  if hasattr(self, 'velocity_convention')
+                  else None)
+            temp1, temp2 = self.find_equivalencies(velocity_convention=vc,
+                                                   center_frequency=self.refX,
+                                                   equivalencies=u.spectral())
+            self.center_frequency, self._equivalencies = temp1,temp2
     
     def __getattr__(self, name):
-        if name == 'refX_unit':
-            return self.refX.unit
-        else:
-            # can't use getattr because it triggers infinite recursion
-            object.__getattribute__(self, name)
+        # can't use getattr because it triggers infinite recursion
+        object.__getattribute__(self, name)
 
     def __array_finalize__(self,obj):
         """
@@ -540,13 +598,16 @@ class SpectroscopicAxis(u.Quantity):
         Given an X coordinate in SpectroscopicAxis' units, return whether the pixel is in range
         """
         if hasattr(xval, 'unit'):
-            return bool((xval > self.min()) * (xval < self.max()))
+            # note that the .value's are outside: if you compare a Quantity, it
+            # will return an array of booleans, which always evaluates to True
+            # even if that 0-dimensional array (scalar) is False
+            return bool((xval > self.min()).value and (xval < self.max()).value)
         else:
             warnings.warn("The xvalue being compared in "
                           "SpectroscopicAxis.in_range has no unit.  "
                           "Assuming the unit is the same as the current "
                           "axis unit.")
-            return bool((xval > self.min().value) * (xval < self.max().value))
+            return bool((xval > self.min().value) and (xval < self.max().value))
 
     def x_to_coord(self, xval, xunit, verbose=False):
         """
@@ -739,15 +800,15 @@ class SpectroscopicAxis(u.Quantity):
     def find_equivalencies(self, velocity_convention=None,
                            center_frequency=None, equivalencies=[]):
         """
-        Utility function to add equivalencies from the velocity_convention 
+        Utility function to add equivalencies from the velocity_convention
         and the center_frequency
 
         Parameters
         ----------
         velocity_convention : str
             'optical', 'radio' or 'relativistic'
-        center_frequency : float | astropy.units.Quantity 
-            The reference frequency for determining a velocity. 
+        center_frequency : float | astropy.units.Quantity
+            The reference frequency for determining a velocity.
             Required for conversions between frequency/wavelength/energy and velocity.
         equivalencies : list
             astropy equivalencies list containing tuples of the form:
@@ -756,9 +817,11 @@ class SpectroscopicAxis(u.Quantity):
         """
         if velocity_convention and center_frequency:
             new_equivalencies = velocity_conventions[velocity_convention](center_frequency)
-            return center_frequency, merge_equivalencies(new_equivalencies, equivalencies)
+            return center_frequency, merge_equivalencies(new_equivalencies,
+                                                         equivalencies)
         else:
-            return center_frequency, merge_equivalencies(equivalencies, u.spectral())
+            return center_frequency, merge_equivalencies(equivalencies,
+                                                         u.spectral())
 
 def merge_equivalencies(old_equivalencies, new_equivalencies):
     """
@@ -785,7 +848,7 @@ class SpectroscopicAxes(SpectroscopicAxis):
     """
 
     def __new__(self, axislist, frame='rest', xtype=None, refX=None,
-            redshift=None):
+                redshift=None):
 
         if type(axislist) is not list:
             raise TypeError("SpectroscopicAxes must be initiated with a list of SpectroscopicAxis objects")
@@ -796,7 +859,7 @@ class SpectroscopicAxes(SpectroscopicAxis):
         velocity_convention = axislist[0].velocity_convention
         for ax in axislist:
             if ax.xtype != xtype:
-                try: 
+                try:
                     ax.change_xtype(xtype)
                 except:
                     ValueError("Axis had wrong xtype and could not be converted.")
@@ -823,6 +886,13 @@ class SpectroscopicAxes(SpectroscopicAxis):
             subarr.refX = axislist[0].refX
             subarr.refX_unit = axislist[0].refX_unit
 
+        wflag = subarr.flags.writeable
+        try:
+            subarr.flags.writeable = True
+            subarr.flags.writeable = wflag
+        except ValueError as ex:
+            raise ex
+
         return subarr
 
 class EchelleAxes(SpectroscopicAxis):
@@ -833,7 +903,7 @@ class EchelleAxes(SpectroscopicAxis):
     """
 
     def __new__(self, axislist, frame='rest', xtype=None, refX=None,
-            redshift=None):
+                redshift=None):
 
         if type(axislist) is not list:
             raise TypeError("SpectroscopicAxes must be initiated with a list of SpectroscopicAxis objects")
@@ -874,8 +944,8 @@ class EchelleAxes(SpectroscopicAxis):
         return subarr
 
 def velocity_to_frequency(velocities, input_units, center_frequency=None,
-        center_frequency_units=None, frequency_units='Hz',
-        convention='radio'):
+                          center_frequency_units=None, frequency_units='Hz',
+                          convention='radio'):
     """
 
     Parameters
@@ -994,8 +1064,8 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
     return frequencies
 
 def velocity_to_wavelength(velocities, input_units, center_wavelength=None,
-        center_wavelength_units=None, wavelength_units='meters',
-        convention='optical'):
+                           center_wavelength_units=None,
+                           wavelength_units='meters', convention='optical'):
     """
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
@@ -1083,4 +1153,3 @@ def parse_veldef(veldef):
     frame_type = frame_dict[frame]
 
     return velocity_convention,frame_type
-
