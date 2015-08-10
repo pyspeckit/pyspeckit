@@ -406,7 +406,8 @@ class Spectrum(object):
         if x1pix == x2pix:
             raise IndexError("ERROR: Trying to crop to zero size.")
 
-        self = self.slice(x1pix, x2pix, unit='pixels', copy=False, **kwargs)
+        self = self.slice(x1pix, x2pix, unit='pixels', copy=False, xcopy=True,
+                          **kwargs)
         # a baseline spectrum is always defined, even if it is all zeros
         # this is needed to prevent size mismatches.  There may be a more
         # elegant way to do this...
@@ -422,7 +423,8 @@ class Spectrum(object):
                 self.header['CRPIX1'] = self.header.get('CRPIX1') - x1pix
                 history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
-    def slice(self, start=None, stop=None, unit='pixel', copy=True, preserve_fits=False):
+    def slice(self, start=None, stop=None, unit='pixel', copy=True, xcopy=True,
+              preserve_fits=False):
         """Slicing the spectrum
 
         .. WARNING:: this is the same as cropping right now, but it returns a
@@ -459,7 +461,10 @@ class Spectrum(object):
         sp.data = sp.data[spectrum_slice]
         if sp.error is not None:
             sp.error = sp.error[spectrum_slice]
-        sp.xarr = sp.xarr[spectrum_slice]
+        if copy or xcopy:
+            sp.xarr = sp.xarr[spectrum_slice].copy()
+        else:
+            sp.xarr = sp.xarr[spectrum_slice]
 
         if copy:
             # create new specfit / baseline instances (otherwise they'll be the wrong length)

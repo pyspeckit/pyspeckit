@@ -819,7 +819,7 @@ class SpectroscopicAxes(SpectroscopicAxis):
         velocity_convention = axislist[0].velocity_convention
         for ax in axislist:
             if ax.xtype != xtype:
-                try: 
+                try:
                     ax.change_xtype(xtype)
                 except:
                     ValueError("Axis had wrong xtype and could not be converted.")
@@ -845,6 +845,13 @@ class SpectroscopicAxes(SpectroscopicAxis):
         else:
             subarr.refX = axislist[0].refX
             subarr.refX_unit = axislist[0].refX_unit
+
+        wflag = subarr.flags.writeable
+        try:
+            subarr.flags.writeable = True
+            subarr.flags.writeable = wflag
+        except ValueError as ex:
+            raise ex
 
         return subarr
 

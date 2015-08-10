@@ -22,18 +22,14 @@ Example use:
 
 """
 import pyspeckit
-from matplotlib import pyplot 
+from matplotlib import pyplot
 import copy
 import random
 
-title_dict = {'oneone':'NH$_3(1,1)$', 
-'twotwo':'NH$_3(2,2)$', 
-'threethree':'NH$_3(3,3)$', 
-'fourfour':'NH$_3(4,4)$',
-'fivefive':'NH$_3(5,5)$',
-'sixsix':'NH$_3(6,6)$',
-'sevenseven':'NH$_3(7,7)$',
-'eighteight':'NH$_3(8,8)$',
+title_dict = {'oneone':'NH$_3(1,1)$', 'twotwo':'NH$_3(2,2)$',
+              'threethree':'NH$_3(3,3)$', 'fourfour':'NH$_3(4,4)$',
+              'fivefive':'NH$_3(5,5)$', 'sixsix':'NH$_3(6,6)$',
+              'sevenseven':'NH$_3(7,7)$', 'eighteight':'NH$_3(8,8)$',
              }
 
 def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
@@ -247,3 +243,5 @@ def plotter_override(sp, vrange=None, **kwargs):
         raise ValueError("Not enough lines; don't need to use the NH3 plot wrapper")
 
     plot_nh3(spdict, sp, **kwargs)
+
+    return spdict
