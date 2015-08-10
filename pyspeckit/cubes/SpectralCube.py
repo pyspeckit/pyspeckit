@@ -117,10 +117,16 @@ class Cube(spectrum.Spectrum):
                     self.unit = cube.unit
                 log.debug("Self.unit: {0}".format(self.unit))
                 if xarr is None:
-                    xarr = SpectroscopicAxis(cube.spectral_axis,
-                                             unit=cube.spectral_axis.unit,
-                                             refX=cube.wcs.wcs.restfrq,
-                                             refX_unit='Hz')
+                    if cube.spectral_axis.flags['OWNDATA']:
+                        xarr = SpectroscopicAxis(cube.spectral_axis,
+                                                 unit=cube.spectral_axis.unit,
+                                                 refX=cube.wcs.wcs.restfrq,
+                                                 refX_unit='Hz')
+                    else:
+                        xarr = SpectroscopicAxis(cube.spectral_axis.copy(),
+                                                 unit=cube.spectral_axis.unit,
+                                                 refX=cube.wcs.wcs.restfrq,
+                                                 refX_unit='Hz')
                 if header is None:
                     header = cube.header
             elif hasattr(cube, 'unit'):
