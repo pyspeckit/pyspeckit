@@ -1,6 +1,22 @@
 CHANGES
 *******
 
+Version 0.1.18 (unreleased)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    * Bugfixes: #92, #93 related to fiteach, parameter validation,
+      spectroscopic axis array handling, in_range checks, and the ammonia fit
+      and plot wrapper.  Also includes an update to the versioning scheme such
+      that dev versions (like 0.1.18.dev) will include a git devstring when
+      possible.
+    * Bugfix #91: Offset of 0.13 km/s between ammonia frequency used and that
+      in the LOVAS catalog
+    * Bugfix #90: Allow fitting of multiple peaks interactively (again)
+    * Enhancement #89: Allow data to be passed to Spectrum as a quantity
+    * Bugfix #88: line_ids needed to handle quantities
+    * Enhancement #85: Remove hard-coded T_A* label
+    * Bugfix #82: Fix a loophole in which parameters were not checked for being
+      in bounds when passed as `guesses`
+
 Version 0.1.17 (2015-07-14)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
