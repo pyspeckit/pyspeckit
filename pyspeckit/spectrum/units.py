@@ -88,7 +88,7 @@ class SmartCaseNoSpaceDict(dict):
             self.__setitem__(self, k, v)
 
     def fromkeys(self, iterable, value=None):
-        d = SmartCaseDict()
+        d = SmartCaseNoSpaceDict()
         for k in iterable:
             self.__setitem__(d, k, value)
         return d
@@ -753,15 +753,15 @@ class SpectroscopicAxis(u.Quantity):
     def find_equivalencies(self, velocity_convention=None,
                            center_frequency=None, equivalencies=[]):
         """
-        Utility function to add equivalencies from the velocity_convention 
+        Utility function to add equivalencies from the velocity_convention
         and the center_frequency
 
         Parameters
         ----------
         velocity_convention : str
             'optical', 'radio' or 'relativistic'
-        center_frequency : float | astropy.units.Quantity 
-            The reference frequency for determining a velocity. 
+        center_frequency : float | astropy.units.Quantity
+            The reference frequency for determining a velocity.
             Required for conversions between frequency/wavelength/energy and velocity.
         equivalencies : list
             astropy equivalencies list containing tuples of the form:
@@ -799,7 +799,7 @@ class SpectroscopicAxes(SpectroscopicAxis):
     """
 
     def __new__(self, axislist, frame='rest', xtype=None, refX=None,
-            redshift=None):
+                redshift=None):
 
         if type(axislist) is not list:
             raise TypeError("SpectroscopicAxes must be initiated with a list of SpectroscopicAxis objects")
@@ -847,7 +847,7 @@ class EchelleAxes(SpectroscopicAxis):
     """
 
     def __new__(self, axislist, frame='rest', xtype=None, refX=None,
-            redshift=None):
+                redshift=None):
 
         if type(axislist) is not list:
             raise TypeError("SpectroscopicAxes must be initiated with a list of SpectroscopicAxis objects")
@@ -1008,8 +1008,8 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
     return frequencies
 
 def velocity_to_wavelength(velocities, input_units, center_wavelength=None,
-        center_wavelength_units=None, wavelength_units='meters',
-        convention='optical'):
+                           center_wavelength_units=None,
+                           wavelength_units='meters', convention='optical'):
     """
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
@@ -1097,4 +1097,3 @@ def parse_veldef(veldef):
     frame_type = frame_dict[frame]
 
     return velocity_convention,frame_type
-

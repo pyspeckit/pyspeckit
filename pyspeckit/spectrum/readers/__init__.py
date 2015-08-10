@@ -2,7 +2,6 @@ from __future__ import print_function
 from .. import units
 import numpy as np
 from pyspeckit.specwarnings import warn
-import astropy.units as u
 from astropy import units as u
 
 readers = {}
@@ -24,7 +23,7 @@ def make_axis(xarr, hdr, specname=None, wcstype='', specaxis="1", verbose=True,
     parameters
     """
 
-    #DEBUG if wcstype is not '': print "Loading file with WCSTYPE %s" % wcstype
+    # DEBUG if wcstype is not '': print "Loading file with WCSTYPE %s" % wcstype
 
     xunits = hdr.get('CUNIT%s%s' % (specaxis,wcstype))
     if hdr.get('ORIGIN') == 'CLASS-Grenoble' and xunits is None:
