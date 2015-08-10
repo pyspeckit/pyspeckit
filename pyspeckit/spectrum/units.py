@@ -18,7 +18,7 @@ from astropy import units as u
 from astropy import log
 
 # declare a case-insensitive dict class to return case-insensitive versions of each dictionary...
-# this is just a shortcut so that units can be specified as, e.g., Hz, hz, HZ, hZ, etc.  3 of those 4 are "legitimate".  
+# this is just a shortcut so that units can be specified as, e.g., Hz, hz, HZ, hZ, etc.  3 of those 4 are "legitimate".
 # the templates for this code were grabbed from a few StackOverflow.com threads
 # I changed this to a "SmartCase" dict, by analogy with VIM's smartcase, where anything with caps will
 # be case sensitive, BUT if there is no unit matching the exact case, will search for the lower version too
@@ -31,18 +31,12 @@ class SmartCaseNoSpaceDict(dict):
                 self.CaseDict = inputdict
                 for k,v in inputdict.items():
                     self[k] = v
-                    #dict.__setitem__(self, k, v)
-                    #if hasattr(k,'lower'):
-                    #    dict.__setitem__(self, k.lower(), v)
             else:
                 for k,v in inputdict:
                     self[k] = v
-                    #dict.__setitem__(self, k, v)
-                    #if hasattr(k,'lower'):
-                    #    dict.__setitem__(self, k.lower(), v)
 
     def __getitem__(self, key):
-        try: 
+        try:
             return dict.__getitem__(self,key)
         except KeyError:
             return dict.__getitem__(self, key.lower().replace(" ",""))
@@ -108,31 +102,30 @@ class SmartCaseNoSpaceDict(dict):
     
 
 length_dict = {'meters':1.0,'m':1.0,
-        'centimeters':1e-2,'cm':1e-2,
-        'millimeters':1e-3,'mm':1e-3,
-        'nanometers':1e-9,'nm':1e-9,
-        'micrometers':1e-6,'micron':1e-6,'microns':1e-6,'um':1e-6,
-        'kilometers':1e3,'km':1e3,
-        'megameters':1e6,'Mm':1e6,
-        'angstrom':1e-10,'angstroms':1e-10,'A':1e-10,
-        }
+               'centimeters':1e-2,'cm':1e-2,
+               'millimeters':1e-3,'mm':1e-3,
+               'nanometers':1e-9,'nm':1e-9,
+               'micrometers':1e-6,'micron':1e-6,'microns':1e-6,'um':1e-6,
+               'kilometers':1e3,'km':1e3,
+               'megameters':1e6,'Mm':1e6,
+               'angstrom':1e-10,'angstroms':1e-10,'A':1e-10,
+               }
 length_dict = SmartCaseNoSpaceDict(length_dict)
 
 wavelength_dict = length_dict # synonym
 
-frequency_dict = {
-        'Hz':1.0,
-        'kHz':1e3,
-        'MHz':1e6,
-        'GHz':1e9,
-        'THz':1e12,
-        }
+frequency_dict = {'Hz':1.0,
+                  'kHz':1e3,
+                  'MHz':1e6,
+                  'GHz':1e9,
+                  'THz':1e12,
+                  }
 frequency_dict = SmartCaseNoSpaceDict(frequency_dict)
 
 velocity_dict = {'meters/second':1.0,'m/s':1.0,'m s-1':1.0,'ms-1':1.0,
                  'kilometers/second':1e3,'kilometers/s':1e3,'km/s':1e3,'kms':1e3,'km s-1':1e3,'kms-1':1e3,
-                'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
-                'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
+                 'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
+                 'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
         }
 velocity_dict = SmartCaseNoSpaceDict(velocity_dict)
 velocity_conventions = {'optical': u.doppler_optical, 'radio': u.doppler_radio, 'relativistic': u.doppler_relativistic}
@@ -140,13 +133,25 @@ velocity_conventions = {'optical': u.doppler_optical, 'radio': u.doppler_radio, 
 pixel_dict = {'pixel':1,'pixels':1}
 pixel_dict = SmartCaseNoSpaceDict(pixel_dict)
 
-conversion_dict = {
-        'VELOCITY':velocity_dict,  'Velocity':velocity_dict,  'velocity':velocity_dict,  'velo': velocity_dict, 'VELO': velocity_dict,
-        'LENGTH':length_dict,      'Length':length_dict,      'length':length_dict, 
-        'WAVELENGTH':length_dict,      'WAVELength':length_dict,      'WAVElength':length_dict, 
-        'FREQUENCY':frequency_dict,'Frequency':frequency_dict,'frequency':frequency_dict, 'freq': frequency_dict, 'FREQ': frequency_dict,
-        'pixels':pixel_dict,'PIXELS':pixel_dict,
-        }
+conversion_dict = {'VELOCITY':velocity_dict,
+                   'Velocity':velocity_dict,
+                   'velocity':velocity_dict,
+                   'velo': velocity_dict,
+                   'VELO': velocity_dict,
+                   'LENGTH':length_dict,
+                   'Length':length_dict,
+                   'length':length_dict,
+                   'WAVELENGTH':length_dict,
+                   'WAVELength':length_dict,
+                   'WAVElength':length_dict,
+                   'FREQUENCY':frequency_dict,
+                   'Frequency':frequency_dict,
+                   'frequency':frequency_dict,
+                   'freq': frequency_dict,
+                   'FREQ': frequency_dict,
+                   'pixels':pixel_dict,
+                   'PIXELS':pixel_dict,
+}
 conversion_dict = SmartCaseNoSpaceDict(conversion_dict)
 
 
@@ -247,17 +252,25 @@ def generate_xarr(input_array, unit=None):
 
     unit is ignored unless the input is a simple ndarray
     """
-    from astropy import units as u
-    if hasattr(input_array, 'value') and hasattr(input_array, 'unit'):
-        return SpectroscopicAxis(input_array.value,
-                                 unit=input_array.unit.to_string())
-    elif isinstance(input_array, SpectroscopicAxis):
+    if isinstance(input_array, SpectroscopicAxis):
         return input_array
+    elif hasattr(input_array, 'value') and hasattr(input_array, 'unit'):
+        if hasattr(input_array, 'refX'):
+            return SpectroscopicAxis(input_array.value,
+                                     unit=input_array.unit.to_string(),
+                                     refX=input_array.refX,
+                                     refX_unit=input_array.refX_unit,
+                                     velocity_convention=input_array.velocity_convention,
+                                    )
+        else:
+            return SpectroscopicAxis(input_array.value,
+                                     unit=input_array.unit.to_string())
     elif isinstance(input_array, np.ndarray):
         return SpectroscopicAxis(input_array, unit=unit)
     else:
-        raise TypeError("Unrecognized input type. Input array of type: {0}"+\
-            "is not a Quantity, SpectroscopicAxis or numpy.ndarray".format(type(input_array)))
+        raise TypeError("Unrecognized input type. Input array of type: {0}"
+                        "is not a Quantity, SpectroscopicAxis or numpy.ndarray"
+                        .format(type(input_array)))
 
 class SpectroscopicAxis(u.Quantity):
     """
@@ -290,7 +303,7 @@ class SpectroscopicAxis(u.Quantity):
         refX_unit : str | astropy.units.Unit
             Units of the reference frequency/wavelength
         center_frequency: float
-            The reference frequency for determining a velocity. 
+            The reference frequency for determining a velocity.
             Required for conversions between frequency/wavelength/energy and velocity.
         center_frequency_unit: string
             If converting between velocity and any other spectroscopic type,
@@ -303,7 +316,7 @@ class SpectroscopicAxis(u.Quantity):
         bad_unit_response : 'raise' | 'pixel'
             What should pyspeckit do if the units are not recognized?  Default
             is to raise an exception.  Can make pixel units instead
-        """        
+        """
         if use128bits:
             dtype='float128'
         else:
@@ -351,10 +364,11 @@ class SpectroscopicAxis(u.Quantity):
         else:
             subarr.center_frequency = None
 
-        subarr.center_frequency, subarr._equivalencies = \
-                self.find_equivalencies(subarr.velocity_convention,
-                                        subarr.center_frequency, 
-                                        equivalencies)
+        temp1, temp2 = self.find_equivalencies(subarr.velocity_convention,
+                                               subarr.center_frequency,
+                                               equivalencies)
+        subarr.center_frequency, subarr._equivalencies = temp1,temp2
+
         return subarr
 
     def __getitem__(self, key):

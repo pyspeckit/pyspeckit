@@ -119,7 +119,8 @@ class Cube(spectrum.Spectrum):
                 if xarr is None:
                     xarr = SpectroscopicAxis(cube.spectral_axis,
                                              unit=cube.spectral_axis.unit,
-                                             refX=cube.wcs.wcs.restfrq, refX_unit='Hz')
+                                             refX=cube.wcs.wcs.restfrq,
+                                             refX_unit='Hz')
                 if header is None:
                     header = cube.header
             elif hasattr(cube, 'unit'):
