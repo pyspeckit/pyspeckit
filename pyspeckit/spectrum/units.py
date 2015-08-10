@@ -326,12 +326,16 @@ class SpectroscopicAxis(u.Quantity):
         # it's a list)
         if not isinstance(xarr, np.ndarray):
             subarr = np.array(xarr, dtype=dtype)
+            log.debug("Created subarr from a non-ndarray {0}".format(type(xarr)))
         else:
             if not xarr.flags['OWNDATA']:
+                log.warning("The X array does not 'own' its data."
+                            "  It will therefore be copied.")
                 warnings.warn("The X array does not 'own' its data."
                               "  It will therefore be copied.")
                 subarr = xarr.copy()
             else:
+                log.debug("xarr owns its own data.  Continuing as normal.")
                 subarr = xarr
         
         subarr = subarr.view(self)
@@ -358,7 +362,7 @@ class SpectroscopicAxis(u.Quantity):
 
         if not center_frequency:
             if refX:
-                center_frequency = refX    
+                center_frequency = refX
         if not center_frequency_unit:
             if refX_unit:
                 center_frequency_unit = refX_unit

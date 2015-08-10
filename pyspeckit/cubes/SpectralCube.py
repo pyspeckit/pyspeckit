@@ -142,7 +142,9 @@ class Cube(spectrum.Spectrum):
                 self.errorcube = errorcube.value
             else:
                 self.errorcube = errorcube
+            log.debug("XARR flags: {0}".format(xarr.flags))
             self.xarr = generate_xarr(xarr, unit=xunit)
+            log.debug("self.xarr flags: {0}".format(xarr.flags))
             self.header = header
             self.error = None
             if self.cube is not None:
@@ -1205,11 +1207,11 @@ class CubeStack(Cube):
 
         log.info("Concatenating data")
         self.xarr = SpectroscopicAxes([sp.xarr for sp in cubelist])
-        self.cube = np.ma.concatenate([cube.cube for cube in cubelist])
+        self.cube = np.ma.concatenate([icube.cube for icube in cubelist])
 
-        if any([cube.errorcube is not None for cube in cubelist]):
-            if all([cube.errorcube is not None for cube in cubelist]):
-                self.errorcube = np.ma.concatenate([cube.errorcube for cube in cubelist])
+        if any([icube.errorcube is not None for icube in cubelist]):
+            if all([icube.errorcube is not None for icube in cubelist]):
+                self.errorcube = np.ma.concatenate([icube.errorcube for icube in cubelist])
             else:
                 raise ValueError("Mismatched error cubes.")
         else:
