@@ -402,8 +402,9 @@ class Spectrum(object):
         # do slice (this code is redundant... need to figure out how to fix that)
         x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(unit).value))
         x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(unit).value))
-        if x1pix > x2pix: x1pix,x2pix = x2pix,x1pix
-        if x1pix == x2pix:
+        if x1pix > x2pix:
+            x1pix,x2pix = x2pix,x1pix
+        elif x1pix == x2pix:
             raise IndexError("ERROR: Trying to crop to zero size.")
 
         self = self.slice(x1pix, x2pix, unit='pixels', copy=False, xcopy=True,
@@ -425,7 +426,8 @@ class Spectrum(object):
 
     def slice(self, start=None, stop=None, unit='pixel', copy=True, xcopy=True,
               preserve_fits=False):
-        """Slicing the spectrum
+        """
+        Slicing the spectrum
 
         .. WARNING:: this is the same as cropping right now, but it returns a
             copy instead of cropping inplace
@@ -451,13 +453,21 @@ class Spectrum(object):
             x_in_units = self.xarr.as_unit(unit)
             start_ind = x_in_units.x_to_pix(start)
             stop_ind  = x_in_units.x_to_pix(stop)
-        if start_ind > stop_ind: start_ind,stop_ind = stop_ind,start_ind
+        if start_ind > stop_ind:
+            start_ind,stop_ind = stop_ind,start_ind
         spectrum_slice = slice(start_ind,stop_ind)
+
+        log.debug("Slicing from {start} to {stop} with unit {unit} and copy="
+                  "{copy}, xcopy={xcopy}, preserve_fits={preserve_fits}."
+                  "start_ind = {start_ind}, stop_ind= {stop_ind}"
+                  .format(start=start, stop=stop, unit=unit, copy=copy,
+                          xcopy=xcopy, preserve_fits=preserve_fits,
+                          start_ind=start_ind, stop_ind=stop_ind))
 
         if copy:
             sp = self.copy()
         else:
-            sp=self
+            sp = self
         sp.data = sp.data[spectrum_slice]
         if sp.error is not None:
             sp.error = sp.error[spectrum_slice]

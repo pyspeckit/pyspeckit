@@ -284,7 +284,7 @@ class SpectroscopicAxis(u.Quantity):
     a workaround is being sought but subclassing numpy arrays is harder than I thought
     """
     def __new__(self, xarr, unit=None, refX=None, redshift=None,
-                refX_unit=None, velocity_convention=None, use128bits=False, 
+                refX_unit=None, velocity_convention=None, use128bits=False,
                 bad_unit_response='raise', equivalencies=u.spectral(),
                 center_frequency=None, center_frequency_unit=None):
         """
@@ -433,13 +433,48 @@ class SpectroscopicAxis(u.Quantity):
     def refX_units(self, value):
         log.warn("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
         self.refX_unit = value
+
+    @property
+    def refX_unit(self):
+        if hasattr(self.refX, 'unit'):
+            return self.refX.unit
+
+    @refX_unit.setter
+    def refX_unit(self, value):
+        if value is None or self.refX is None:
+            return
+        if hasattr(self.refX, 'unit'):
+            self.refX = u.Quantity(self.refX.value, value)
+        else:
+            self.refX = u.Quantity(self.refX, value)
+
+    @property
+    def refX(self):
+        if hasattr(self,'_refX'):
+            return self._refX
+
+    @refX.setter
+    def refX(self, value):
+        if value is None:
+            return
+
+        if hasattr(value, 'unit'):
+            self._refX = value
+        else:
+            self._refX = u.Quantity(value, unit=self.refX_unit)
+
+        if self._refX.unit not in (None, u.dimensionless_unscaled):
+            vc = (self.velocity_convention
+                  if hasattr(self, 'velocity_convention')
+                  else None)
+            temp1, temp2 = self.find_equivalencies(velocity_convention=vc,
+                                                   center_frequency=self.refX,
+                                                   equivalencies=u.spectral())
+            self.center_frequency, self._equivalencies = temp1,temp2
     
     def __getattr__(self, name):
-        if name == 'refX_unit':
-            return self.refX.unit
-        else:
-            # can't use getattr because it triggers infinite recursion
-            object.__getattribute__(self, name)
+        # can't use getattr because it triggers infinite recursion
+        object.__getattribute__(self, name)
 
     def __array_finalize__(self,obj):
         """
@@ -563,13 +598,16 @@ class SpectroscopicAxis(u.Quantity):
         Given an X coordinate in SpectroscopicAxis' units, return whether the pixel is in range
         """
         if hasattr(xval, 'unit'):
-            return bool((xval > self.min()) * (xval < self.max()))
+            # note that the .value's are outside: if you compare a Quantity, it
+            # will return an array of booleans, which always evaluates to True
+            # even if that 0-dimensional array (scalar) is False
+            return bool((xval > self.min()).value and (xval < self.max()).value)
         else:
             warnings.warn("The xvalue being compared in "
                           "SpectroscopicAxis.in_range has no unit.  "
                           "Assuming the unit is the same as the current "
                           "axis unit.")
-            return bool((xval > self.min().value) * (xval < self.max().value))
+            return bool((xval > self.min().value) and (xval < self.max().value))
 
     def x_to_coord(self, xval, xunit, verbose=False):
         """
@@ -779,9 +817,11 @@ class SpectroscopicAxis(u.Quantity):
         """
         if velocity_convention and center_frequency:
             new_equivalencies = velocity_conventions[velocity_convention](center_frequency)
-            return center_frequency, merge_equivalencies(new_equivalencies, equivalencies)
+            return center_frequency, merge_equivalencies(new_equivalencies,
+                                                         equivalencies)
         else:
-            return center_frequency, merge_equivalencies(equivalencies, u.spectral())
+            return center_frequency, merge_equivalencies(equivalencies,
+                                                         u.spectral())
 
 def merge_equivalencies(old_equivalencies, new_equivalencies):
     """
@@ -904,8 +944,8 @@ class EchelleAxes(SpectroscopicAxis):
         return subarr
 
 def velocity_to_frequency(velocities, input_units, center_frequency=None,
-        center_frequency_units=None, frequency_units='Hz',
-        convention='radio'):
+                          center_frequency_units=None, frequency_units='Hz',
+                          convention='radio'):
     """
 
     Parameters
