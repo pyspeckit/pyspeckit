@@ -17,10 +17,10 @@ The 'grunt work' is performed by the :py:mod:`cubes` module
 # import parent package
 import pyspeckit
 from pyspeckit import spectrum
-from ..spectrum.units import generate_xarr,SpectroscopicAxis
+from ..spectrum.units import (generate_xarr, SpectroscopicAxis,
+                              SpectroscopicAxes)
 # import local things
 import mapplot
-import readers
 import time
 import numpy as np
 from pyspeckit.parallel_map import parallel_map
@@ -1204,7 +1204,7 @@ class CubeStack(Cube):
         self.cubelist = cubelist
 
         log.info("Concatenating data")
-        self.xarr = spectrum.units.SpectroscopicAxes([sp.xarr for sp in cubelist])
+        self.xarr = SpectroscopicAxes([sp.xarr for sp in cubelist])
         self.cube = np.ma.concatenate([cube.cube for cube in cubelist])
 
         if any([cube.errorcube is not None for cube in cubelist]):
