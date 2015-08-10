@@ -553,7 +553,8 @@ class Cube(spectrum.Spectrum):
                 blank_value=0, integral=True, direct=False, absorption=False,
                 use_nearest_as_guess=False, use_neighbor_as_guess=False,
                 start_from_point=(0,0), multicore=1, position_order = None,
-                continuum_map=None, prevalidate_guesses=False, **fitkwargs):
+                continuum_map=None, prevalidate_guesses=False, maskmap=None,
+                **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
 
@@ -605,6 +606,10 @@ class Cube(spectrum.Spectrum):
             all within the specified limits.  May be slow, so it is off by
             default.  It also should not be necessary, since careful checking
             is performed before each fit.
+        maskmap : `np.ndarray`, optional
+            A boolean mask map, where ``True`` implies that the data are good.
+            This will be used for both plotting using `mapplot` and fitting
+            using `fiteach`.  If ``None``, will use ``self.maskmap``.
 
         """
         if 'multifit' in fitkwargs:
@@ -614,13 +619,16 @@ class Cube(spectrum.Spectrum):
         if not hasattr(self.mapplot,'plane'):
             self.mapplot.makeplane()
 
+        if maskmap is None:
+            maskmap = self.maskmap
+
         yy,xx = np.indices(self.mapplot.plane.shape)
-        if isinstance(self.mapplot.plane, np.ma.core.MaskedArray): 
+        if isinstance(self.mapplot.plane, np.ma.core.MaskedArray):
             OK = ((~self.mapplot.plane.mask) &
-                  self.maskmap.astype('bool')).astype('bool')
+                  maskmap.astype('bool')).astype('bool')
         else:
             OK = (np.isfinite(self.mapplot.plane) &
-                  self.maskmap.astype('bool')).astype('bool')
+                  maskmap.astype('bool')).astype('bool')
 
         # NAN guesses rule out the model too
         if hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
@@ -634,8 +642,9 @@ class Cube(spectrum.Spectrum):
         if hasattr(position_order,'shape') and position_order.shape == self.cube.shape[1:]:
             sort_distance = np.argsort(position_order.flat)
         else:
-            d_from_start = np.roll( np.roll( distance, start_from_point[0], 0),
-                                    start_from_point[1], 1)
+            d_from_start = np.roll(np.roll(distance,
+                                           start_from_point[0], 0),
+                                   start_from_point[1], 1)
             sort_distance = np.argsort(d_from_start.flat)
 
 
