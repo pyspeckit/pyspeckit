@@ -858,8 +858,12 @@ class Cube(spectrum.Spectrum):
         sp.specfit(guesses=gg, **fitkwargs)
 
         if prevalidate_guesses:
-            for ii,(x,y) in ProgressBar(tuple(enumerate(valid_pixels))):
-                pinf, _ = sp.specfit.fitter._make_parinfo(parvalues=guesses[:,y,x], **fitkwargs)
+            if guesses.ndim == 3:
+                for ii,(x,y) in ProgressBar(tuple(enumerate(valid_pixels))):
+                    pinf, _ = sp.specfit.fitter._make_parinfo(parvalues=guesses[:,y,x], **fitkwargs)
+                    sp.specfit._validate_parinfo(pinf, 'raise')
+            else:
+                pinf, _ = sp.specfit.fitter._make_parinfo(parvalues=guesses, **fitkwargs)
                 sp.specfit._validate_parinfo(pinf, 'raise')
 
         #### END TEST BLOCK ####
