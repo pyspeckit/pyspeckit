@@ -12,8 +12,13 @@ if not os.path.exists('n2hp_cube.fit'):
             del ff[0].header[kw]
         ff.writeto('n2hp_cube.fit')
 
-# Load the spectral cube
-spc = pyspeckit.Cube('n2hp_cube.fit')
+# Load the spectral cube cropped in the middle for efficiency
+spc = pyspeckit.Cube('n2hp_cube.fit')[:,25:28,12:15]
+# Set the velocity convention: in the future, this may be read directly from
+# the file, but for now it cannot be.
+spc.xarr.refX = 93176265000.0*u.Hz
+spc.xarr.velocity_convention = 'radio'
+spc.xarr.convert_to_unit('km/s')
 
 # Register the fitter
 # The N2H+ fitter is 'built-in' but is not registered by default; this example
@@ -21,7 +26,7 @@ spc = pyspeckit.Cube('n2hp_cube.fit')
 # 'multi' indicates that it is possible to fit multiple components and a
 # background will not automatically be fit 4 is the number of parameters in the
 # model (excitation temperature, optical depth, line center, and line width)
-spc.Registry.add_fitter('n2hp_vtau',pyspeckit.models.n2hp.n2hp_vtau_fitter,4)
+spc.Registry.add_fitter('n2hp_vtau', pyspeckit.models.n2hp.n2hp_vtau_fitter, 4)
 
 # Get a measurement of the error per pixel
 errmap = spc.slice(20, 28, unit='km/s').cube.std(axis=0)
@@ -33,12 +38,10 @@ if os.path.exists('n2hp_fitted_parameters.fits'):
 else:
     # Run the fitter
     # Estimated time to completion ~ 2 minutes
-    spc.xarr.refX = 93176265000.0*u.Hz
-    spc.xarr.velocity_convention = 'radio'
     spc.fiteach(fittype='n2hp_vtau', multifit=True,
                 guesses=[5,0.5,3,1], # Tex=5K, tau=0.5, v_center=12, width=1 km/s
-                signal_cut=6, # minimize the # of pixels fit for the example
-                start_from_point=(16,13), # start at a pixel with signal
+                signal_cut=3, # minimize the # of pixels fit for the example
+                start_from_point=(2,2), # start at a pixel with signal
                 errmap=errmap,
                 )
     # There are a huge number of parameters for the fiteach procedure.  See:
@@ -58,7 +61,7 @@ spc.mapplot()
 # you can click on any pixel to see its spectrum & fit
 
 # plot one of the fitted spectra
-spc.plot_spectrum(14,27,plot_fit=True)
+spc.plot_spectrum(2, 2, plot_fit=True)
 # spc.parcube[:,27,14] = [ 14.82569198,   1.77055642,   3.15740051,   0.16035407]
 # Note that the optical depth is the "total" optical depth, which is
 # distributed among 15 hyperfine components.  You can see this in
