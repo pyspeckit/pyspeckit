@@ -1,3 +1,10 @@
+from __future__ import print_function
+try:
+    from lmfit import Parameters, Parameter
+    LMFIT_PARAMETERS_INSTALLED = True
+except ImportError:
+    LMFIT_PARAMETERS_INSTALLED = False
+
 class ParinfoList(list):
     """
     Store a list of model parameter values and their associated metadata (name,
@@ -15,26 +22,22 @@ class ParinfoList(list):
             Default to false, so par #'s will go from 0 to n(pars)-1
         """
 
-        try:
-            from lmfit import Parameters
+        if LMFIT_PARAMETERS_INSTALLED:
             list.__init__(self,[])
             if len(args) == 1 and isinstance(args[0],Parameters):
                 self._from_Parameters(args[0])
                 self._dict = dict([(pp['parname'],pp) for pp in self])
-                return
-        except ImportError:
-            pass
+        else:
+            list.__init__(self, *args)
 
-        list.__init__(self, *args)
+            preserve_order = kwargs.pop('preserve_order',False)
+            # re-order the parameters from 0 to n-1 unless told otherwise
+            if not preserve_order:
+                self._set_numbers()
 
-        preserve_order = kwargs.pop('preserve_order',False)
-        # re-order the parameters from 0 to n-1 unless told otherwise
-        if not preserve_order:
-            self._set_numbers()
-
-        self._check_names()
-        self._set_attributes()
-        self._dict = dict([(pp['parname'],pp) for pp in self])
+            self._check_names()
+            self._set_attributes()
+            self._dict = dict([(pp['parname'],pp) for pp in self])
 
     def _set_numbers(self):
         """ Set the parameters in order by their current order in the list """
@@ -147,22 +150,17 @@ class ParinfoList(list):
         """
         Convert a ParinfoList to an lmfit Parameters class
         """
-        try:
-            from lmfit import Parameters
-        except ImportError:
-            print "Cannot import lmfit."
-            return
+        if LMFIT_PARAMETERS_INSTALLED:
+            P = Parameters()
+            for par in self:
+                P.add(name=par.parname,
+                        value=par.value,
+                        vary=not(par.fixed),
+                        expr=par.tied if par.tied is not '' else None,
+                        min=par.limits[0] if par.limited[0] else None,
+                        max=par.limits[1] if par.limited[1] else None)
 
-        P = Parameters()
-        for par in self:
-            P.add(name=par.parname,
-                    value=par.value,
-                    vary=not(par.fixed),
-                    expr=par.tied if par.tied is not '' else None,
-                    min=par.limits[0] if par.limited[0] else None,
-                    max=par.limits[1] if par.limited[1] else None)
-
-        return P
+            return P
 
     def _from_Parameters(self, lmpars):
         """
@@ -199,14 +197,14 @@ class ParinfoList(list):
         strformat = "%" + str(item_length) + "s"
         fltformat = "%" + str(item_length) + "g"
 
-        print " ".join([strformat % name for name in stripped_names])
+        print(" ".join([strformat % name for name in stripped_names]))
         if numbered:
             for ii in xrange(nlines):
-                print " ".join([fltformat % (self[name+"%i" % ii].value)
-                    for name in stripped_names])
+                print(" ".join([fltformat % (self[name+"%i" % ii].value) for
+                                name in stripped_names]))
         else:
-            print " ".join([fltformat % (self[name].value)
-                for name in stripped_names])
+            print(" ".join([fltformat % (self[name].value) for name in
+                            stripped_names]))
 
 class Parinfo(dict):
     """
@@ -267,19 +265,16 @@ class Parinfo(dict):
                 'parname':'',
                 'shortparname':''}, **kwargs)
 
-        try:
-            from lmfit import Parameter
+        if LMFIT_PARAMETERS_INSTALLED:
             if isinstance(values,Parameter):
                 self._from_Parameter(values)
                 self.__dict__ = self
                 return
-        except ImportError:
-            pass
-
-        if values is not None:
-            self.update(values)
-        
-        self.__dict__ = self
+        else:
+            if values is not None:
+                self.update(values)
+            
+            self.__dict__ = self
 
     def __repr__(self):
         try:

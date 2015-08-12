@@ -111,19 +111,16 @@ The default is gaussian ('g'), all options are listed below:
 # Declare default registry built in for all spectra
 default_Registry = Registry()
 default_Registry.add_fitter('ammonia',models.ammonia_model(),6,key='a')
-default_Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(),6)
+#default_Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(),6)
 # not implemented default_Registry.add_fitter(Registry,'ammonia',models.ammonia_model( ),6, ,key='A')
 default_Registry.add_fitter('formaldehyde',models.formaldehyde_fitter,3,key='F') # CAN'T USE f!  reserved for fitting
-default_Registry.add_fitter('formaldehyde',models.formaldehyde_vheight_fitter,3)
+# do'nt override default_Registry.add_fitter('formaldehyde',models.formaldehyde_vheight_fitter,3)
 default_Registry.add_fitter('gaussian',models.gaussian_fitter(),3,key='g')
 default_Registry.add_fitter('vheightgaussian',models.gaussian_vheight_fitter(),4)
-default_Registry.add_fitter('gaussian',models.gaussian_fitter(),3)
 default_Registry.add_fitter('voigt',models.voigt_fitter(),4,key='v')
-default_Registry.add_fitter('voigt',models.voigt_fitter(),4)
 default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(),3,key='L')
-default_Registry.add_fitter('lorentzian',models.lorentzian_fitter(),3)
-default_Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5)
-default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4)
+#default_Registry.add_fitter('hill5',models.hill5infall.hill5_fitter,5)
+#default_Registry.add_fitter('hcn',models.hcn.hcn_vtau_fitter,4)
 
 
 class Specfit(interactive.Interactive):
