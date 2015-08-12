@@ -27,17 +27,18 @@ class ParinfoList(list):
             if len(args) == 1 and isinstance(args[0],Parameters):
                 self._from_Parameters(args[0])
                 self._dict = dict([(pp['parname'],pp) for pp in self])
-        else:
-            list.__init__(self, *args)
+                return
 
-            preserve_order = kwargs.pop('preserve_order',False)
-            # re-order the parameters from 0 to n-1 unless told otherwise
-            if not preserve_order:
-                self._set_numbers()
+        list.__init__(self, *args)
 
-            self._check_names()
-            self._set_attributes()
-            self._dict = dict([(pp['parname'],pp) for pp in self])
+        preserve_order = kwargs.pop('preserve_order',False)
+        # re-order the parameters from 0 to n-1 unless told otherwise
+        if not preserve_order:
+            self._set_numbers()
+
+        self._check_names()
+        self._set_attributes()
+        self._dict = dict([(pp['parname'],pp) for pp in self])
 
     def _set_numbers(self):
         """ Set the parameters in order by their current order in the list """
@@ -255,26 +256,21 @@ class Parinfo(dict):
     """
     def __init__(self, values=None, **kwargs):
 
-        dict.__init__(self, {'value':0.0, 'error':0.0,
-                'n':0, 'fixed':False,
-                'limits':(0.0,0.0),
-                'limited':(False,False),
-                'step':False,
-                'scaleable':False,
-                'tied':'',
-                'parname':'',
-                'shortparname':''}, **kwargs)
+        dict.__init__(self, {'value':0.0, 'error':0.0, 'n':0, 'fixed':False,
+                             'limits':(0.0,0.0), 'limited':(False,False),
+                             'step':False, 'scaleable':False, 'tied':'',
+                             'parname':'', 'shortparname':''}, **kwargs)
 
         if LMFIT_PARAMETERS_INSTALLED:
             if isinstance(values,Parameter):
                 self._from_Parameter(values)
                 self.__dict__ = self
                 return
-        else:
-            if values is not None:
-                self.update(values)
-            
-            self.__dict__ = self
+
+        if values is not None:
+            self.update(values)
+        
+        self.__dict__ = self
 
     def __repr__(self):
         try:

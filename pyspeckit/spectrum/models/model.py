@@ -211,8 +211,10 @@ class SpectralModel(fitter.SimpleFitter):
 
         # this is a clever way to turn the parameter lists into a dict of lists
         # clever = hard to read
-        temp_pardict = OrderedDict([(varname, np.zeros(self.npars*self.npeaks, dtype='bool'))
-            if locals()[varname] is None else (varname, list(locals()[varname]) )
+        temp_pardict = OrderedDict([(varname, np.zeros(self.npars*self.npeaks,
+                                                       dtype='bool'))
+                                    if locals()[varname] is None else
+                                    (varname, list(locals()[varname]))
             for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
         temp_pardict['parlimits'] = parlimits if parlimits is not None else [(0,0)] * (self.npars*self.npeaks)
         temp_pardict['parlimited'] = parlimited if parlimited is not None else [(False,False)] * (self.npars*self.npeaks)
@@ -235,9 +237,11 @@ class SpectralModel(fitter.SimpleFitter):
             for jj in xrange(self.npeaks)
             for ii in xrange(self.npars) ] # order matters!
 
-        log.debug("After Generation step len(parinfo): %i   vheight: %s" % (len(self.parinfo), vheight))
+        log.debug("After Generation step len(parinfo): %i   vheight: %s "
+                  "parinfo: %s" % (len(self.parinfo), vheight, self.parinfo))
 
-        if debug > True: import pdb; pdb.set_trace()
+        if debug > True:
+            import pdb; pdb.set_trace()
 
         # special keyword to specify emission/absorption lines
         if negamp is not None:
@@ -263,6 +267,8 @@ class SpectralModel(fitter.SimpleFitter):
                 par.scaleable = True
 
         log.debug("Parinfo has been set: {0}".format(self.parinfo))
+
+        assert self.parinfo != []
 
         return self.parinfo, kwargs
 
