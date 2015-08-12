@@ -5,11 +5,10 @@ Plotter
 
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
+from __future__ import print_function
 import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure
-import itertools
-from ..config import *
 import numpy as np
 import astropy.units as u
 from pyspeckit.specwarnings import warn
@@ -21,8 +20,8 @@ interactive_help_message = """
 Interactive key commands for plotter.  An additional help message may appear if
 you have initiated the fitter.
 '?' - bring up this message
-'f' - initiate the /f/itter 
-'b' - initiate the /b/aseliner 
+'f' - initiate the /f/itter
+'b' - initiate the /b/aseliner
 'B' - initiate the /b/aseliner (reset the selection too)
 'r' - re-attach matplotlib keys
 'R' - redraw the plot cleanly
@@ -71,14 +70,14 @@ class Plotter(object):
                 if minmax == 'min':
                     if self._xlim[0] and self._xunit:
                         try:
-                            self._xlim[0]._unit = self._xunit 
+                            self._xlim[0]._unit = self._xunit
                         except AttributeError:
                             self._xlim[0] = u.Quantity(self._xlim[0], self._xunit)
                     return self._xlim[0]
                 elif minmax == 'max':
                     if self._xlim[1] and self._xunit:
                         try:
-                            self._xlim[1]._unit = self._xunit 
+                            self._xlim[1]._unit = self._xunit
                         except AttributeError:
                             self._xlim[1] = u.Quantity(self._xlim[1], self._xunit)
                     return self._xlim[1]
@@ -91,9 +90,9 @@ class Plotter(object):
 
     def _set_prop(xy, minmax):
         def setprop(self, value):
-            if self.debug: 
+            if self.debug:
                 frm = inspect.stack()
-                print frm[1],"Setting %s%s to %s" % (xy,minmax,value)
+                print(frm[1],"Setting %s%s to %s" % (xy,minmax,value))
             if xy == 'x':
                 if minmax == 'min':
                     self._xlim[0] = value
@@ -117,8 +116,10 @@ class Plotter(object):
         Disconnected the matplotlib key-press callbacks
         """
         if self.figure is not None:
-            self._mpl_key_callbacks = dict([(k,self.figure.canvas.callbacks.callbacks['key_press_event'].pop(k)) 
-                    for k in self.figure.canvas.callbacks.callbacks['key_press_event'].keys()[0:1]])
+            cbs = self.figure.canvas.callbacks.callbacks
+            self._mpl_key_callbacks = dict([(k, cbs['key_press_event'].pop(k))
+                                            for k in
+                                            cbs['key_press_event'].keys()[0:1]])
 
     def _reconnect_matplotlib_keys(self):
         """
@@ -131,7 +132,7 @@ class Plotter(object):
                  plotscale=1.0, override_plotkwargs=False, **kwargs):
         """
         Plot a spectrum
-        
+
         Keywords:
         figure - either a matplotlib figure instance or a figure number
             to pass into pyplot.figure.
@@ -176,7 +177,8 @@ class Plotter(object):
             self.figure.add_axes(self.axis)
 
 
-        if clear and self.axis is not None: self.axis.clear()
+        if clear and self.axis is not None:
+            self.axis.clear()
 
         if autorefresh is not None:
             self.autorefresh = autorefresh
@@ -206,54 +208,70 @@ class Plotter(object):
         matplotlib.pyplot.rcParams['keymap.grid'] = 'ctrl+g'
 
     def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid',
-            linewidth=0.5, errstyle=None, erralpha=0.2, errcolor=None, silent=None,
-            reset=True, refresh=True, use_window_limits=None, **kwargs):
+             linewidth=0.5, errstyle=None, erralpha=0.2, errcolor=None,
+             silent=None, reset=True, refresh=True, use_window_limits=None,
+             useOffset=False, **kwargs):
         """
         Plot the spectrum!
 
-        Tries to automatically find a reasonable plotting range if one is not set.  
+        Tries to automatically find a reasonable plotting range if one is not
+        set.
 
-        offset - vertical offset to add to the spectrum before plotting.  Useful if you
-        want to overlay multiple spectra on a single plot
-
-        color - default to plotting spectrum in black
-
-        linestyle - histogram-style plotting
-        linewidth - narrow lines are helpful when histo-plotting
-        xmin/xmax/ymin/ymax - override defaults for plot range.  Once set, these parameters
-        are sticky (i.e., replotting will use the same ranges)
-
-        reset_[xy]limits - Reset the limits to "sensible defaults" 
-
-        ypeakscale - Scale up the Y maximum value.  Useful to keep the
-        annotations away from the data.
-
-        errstyle - can be "fill", which draws partially transparent boxes around the data to show
-            the error region, or "bars" which draws standard errorbars
-
-        *reset* [ bool ]
-            Reset the x/y axis limits?
+        Parameters
+        ----------
+        offset : float
+            vertical offset to add to the spectrum before plotting.  Useful if
+            you want to overlay multiple spectra on a single plot
+        xoffset: float
+            An x-axis shift.  I don't know why you'd want this...
+        color : str
+            default to plotting spectrum in black
+        linestyle : 'steps-mid' or str
+            'steps-mid' for histogram-style plotting.  See matplotlib's plot
+            for more information
+        linewidth : float
+            Line width in pixels.  Narrow lines are helpful when histo-plotting
+        errstyle : 'fill', 'bars', or None
+            can be "fill", which draws partially transparent boxes around the
+            data to show the error region, or "bars" which draws standard
+            errorbars.  ``None`` will display no errorbars
+        useOffset : bool
+            Use offset-style X/Y coordinates (e.g., 1 + 1.483e10)?  Defaults to
+            False because these are usually quite annoying.
+        xmin/xmax/ymin/ymax : float
+            override defaults for plot range.  Once set, these parameters are
+            sticky (i.e., replotting will use the same ranges).  Passed to
+            `reset_limits`
+        reset_[xy]limits : bool
+            Reset the limits to "sensible defaults".  Passed to `reset_limits`
+        ypeakscale : float
+            Scale up the Y maximum value.  Useful to keep the annotations away
+            from the data.  Passed to `reset_limits`
+        reset : bool
+            Reset the x/y axis limits? If set, `reset_limits` will be called.
         """
 
         if self.axis is None:
             raise Exception("You must call the Plotter class to initiate the canvas before plotting.")
 
-        # this was += 
-        # WHY?
         self.offset = offset
 
         self.label(**kwargs)
         for arg in ['title','xlabel','ylabel']:
-            if arg in kwargs: kwargs.pop(arg)
+            if arg in kwargs:
+                kwargs.pop(arg)
 
         reset_kwargs = {}
         for arg in ['xmin','xmax','ymin','ymax','reset_xlimits','reset_ylimits','ypeakscale']:
-            if arg in kwargs: reset_kwargs[arg] = kwargs.pop(arg)
+            if arg in kwargs:
+                reset_kwargs[arg] = kwargs.pop(arg)
 
-        if use_window_limits == None and any(k in reset_kwargs for k in ('xmin','xmax','reset_xlimits')):
+        if (use_window_limits is None and any(k in reset_kwargs for k in
+                                              ('xmin','xmax','reset_xlimits'))):
             use_window_limits = False
 
-        if use_window_limits: self._stash_window_limits()
+        if use_window_limits:
+            self._stash_window_limits()
 
         # for filled errorbars, order matters.
         inds = np.argsort(self.Spectrum.xarr)
@@ -263,9 +281,9 @@ class Plotter(object):
                 errcolor = color
             if errstyle == 'fill':
                 self.errorplot = [self.axis.fill_between(steppify(self.Spectrum.xarr.value[inds]+xoffset, isX=True),
-                    steppify((self.Spectrum.data*self.plotscale+self.offset-self.Spectrum.error*self.plotscale)[inds]),
-                    steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[inds]),
-                    facecolor=errcolor, edgecolor=errcolor, alpha=erralpha, **kwargs)]
+                                  steppify((self.Spectrum.data*self.plotscale+self.offset-self.Spectrum.error*self.plotscale)[inds]),
+                                  steppify((self.Spectrum.data*self.plotscale+self.offset+self.Spectrum.error*self.plotscale)[inds]),
+                                  facecolor=errcolor, edgecolor=errcolor, alpha=erralpha, **kwargs)]
             elif errstyle == 'bars':
                 self.errorplot = self.axis.errorbar(self.Spectrum.xarr[inds].value+xoffset,
                                                     self.Spectrum.data[inds]*self.plotscale+self.offset,
@@ -274,10 +292,15 @@ class Plotter(object):
                                                     **kwargs)
 
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr.value[inds]+xoffset,
-                self.Spectrum.data[inds]*self.plotscale+self.offset, color=color,
-                linestyle=linestyle, linewidth=linewidth, **kwargs)
+                                            self.Spectrum.data[inds]*self.plotscale+self.offset,
+                                            color=color,
+                                            linestyle=linestyle,
+                                            linewidth=linewidth, **kwargs)
 
-        if use_window_limits: self._reset_to_stashed_limits()
+        self.axis.ticklabel_format(useOffset=useOffset)
+
+        if use_window_limits:
+            self._reset_to_stashed_limits()
 
         if silent is not None:
             self.silent = silent
@@ -285,22 +308,25 @@ class Plotter(object):
         if reset:
             self.reset_limits(use_window_limits=use_window_limits, **reset_kwargs)
 
-        if self.autorefresh and refresh: self.refresh()
+        if self.autorefresh and refresh:
+            self.refresh()
 
     def _stash_window_limits(self):
         self._window_limits = self.axis.get_xlim(),self.axis.get_ylim()
-        if self.debug: print "Stashed window limits: ",self._window_limits
-    
+        if self.debug:
+            print("Stashed window limits: ",self._window_limits)
+
     def _reset_to_stashed_limits(self):
         self.axis.set_xlim(*self._window_limits[0])
         self.axis.set_ylim(*self._window_limits[1])
         self.xmin,self.xmax = self._window_limits[0]
         self.ymin,self.ymax = self._window_limits[1]
-        if self.debug: print "Recovered window limits: ",self._window_limits
-    
+        if self.debug:
+            print("Recovered window limits: ",self._window_limits)
+
     def reset_limits(self, xmin=None, xmax=None, ymin=None, ymax=None,
-            reset_xlimits=True, reset_ylimits=True, ypeakscale=1.2,
-            silent=None, use_window_limits=False, **kwargs):
+                     reset_xlimits=True, reset_ylimits=True, ypeakscale=1.2,
+                     silent=None, use_window_limits=False, **kwargs):
         """
         Automatically or manually reset the plot limits
         """
@@ -308,7 +334,7 @@ class Plotter(object):
         if self.debug:
             frame = inspect.currentframe()
             args, _, _, values = inspect.getargvalues(frame)
-            print zip(args,values)
+            print(zip(args,values))
 
         if use_window_limits:
             # this means DO NOT reset!
@@ -320,35 +346,44 @@ class Plotter(object):
 
             # if self.xmin and self.xmax:
             if (reset_xlimits or self.Spectrum.xarr.min().value < self.xmin or self.Spectrum.xarr.max().value > self.xmax):
-                if not self.silent: warn( "Resetting X-axis min/max because the plot is out of bounds." )
+                if not self.silent:
+                    warn("Resetting X-axis min/max because the plot is out of bounds.")
                 self.xmin = None
                 self.xmax = None
-            if xmin is not None: self.xmin = u.Quantity(xmin, self._xunit)
-            elif self.xmin is None: self.xmin = u.Quantity(self.Spectrum.xarr.min().value, self._xunit)
-            if xmax is not None: self.xmax = u.Quantity(xmax, self._xunit)
-            elif self.xmax is None: self.xmax = u.Quantity(self.Spectrum.xarr.max().value, self._xunit)
+            if xmin is not None:
+                self.xmin = u.Quantity(xmin, self._xunit)
+            elif self.xmin is None:
+                self.xmin = u.Quantity(self.Spectrum.xarr.min().value, self._xunit)
+            if xmax is not None:
+                self.xmax = u.Quantity(xmax, self._xunit)
+            elif self.xmax is None:
+                self.xmax = u.Quantity(self.Spectrum.xarr.max().value, self._xunit)
 
             xpixmin = np.argmin(np.abs(self.Spectrum.xarr.value-self.xmin.value))
             xpixmax = np.argmin(np.abs(self.Spectrum.xarr.value-self.xmax.value))
-            if xpixmin>xpixmax: xpixmin,xpixmax = xpixmax,xpixmin
+            if xpixmin>xpixmax:
+                xpixmin,xpixmax = xpixmax,xpixmin
             elif xpixmin == xpixmax:
                 if reset_xlimits:
                     raise Exception("Infinite recursion error.  Maybe there are no valid data?")
-                if not self.silent: warn( "ERROR: the X axis limits specified were invalid.  Resetting." )
+                if not self.silent:
+                    warn("ERROR: the X axis limits specified were invalid.  Resetting.")
                 self.reset_limits(reset_xlimits=True, ymin=ymin, ymax=ymax,
                                   reset_ylimits=reset_ylimits,
                                   ypeakscale=ypeakscale, **kwargs)
                 return
-            
+
             if self.ymin and self.ymax:
                 # this is utter nonsense....
                 if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
                         or reset_ylimits):
-                    if not self.silent and not reset_ylimits: warn( "Resetting Y-axis min/max because the plot is out of bounds." )
+                    if not self.silent and not reset_ylimits:
+                        warn("Resetting Y-axis min/max because the plot is out of bounds.")
                     self.ymin = None
                     self.ymax = None
 
-            if ymin is not None: self.ymin = ymin
+            if ymin is not None:
+                self.ymin = ymin
             elif self.ymin is None:
                 if hasattr(self.Spectrum.data, 'mask'):
                     yminval = self.Spectrum.data[xpixmin:xpixmax].min()
@@ -378,10 +413,10 @@ class Plotter(object):
         self.axis.set_xlim(self.xmin.value if hasattr(self.xmin, 'value') else self.xmin,
                            self.xmax.value if hasattr(self.xmax, 'value') else self.xmax)
         self.axis.set_ylim(self.ymin, self.ymax)
-        
+
 
     def label(self, title=None, xlabel=None, ylabel=None, verbose_label=False,
-            **kwargs):
+              **kwargs):
         """
         Label the plot, with an attempt to parse standard units into nice latex labels
 
@@ -392,7 +427,7 @@ class Plotter(object):
         ylabel : str
         verbose_label: bool
         """
-   
+
         if title is not None:
             self.title = title
         elif hasattr(self.Spectrum,'specname'):
@@ -412,9 +447,9 @@ class Plotter(object):
             self.xlabel += " ({0})".format(self._xunit.to_string())
 
             if verbose_label:
-                self.xlabel = "%s %s" % ( self.Spectrum.xarr.velocity_convention.title(),
-                                          self.xlabel )
-            
+                self.xlabel = "%s %s" % (self.Spectrum.xarr.velocity_convention.title(),
+                                         self.xlabel)
+
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
 
@@ -427,7 +462,7 @@ class Plotter(object):
         elif self.Spectrum.unit == 'mJy':
             self.axis.set_ylabel("$S_\\nu$ (mJy)")
         elif self.Spectrum.unit == 'Jy':
-            self.axis.set_ylabel("$S_\\nu$ (Jy)")            
+            self.axis.set_ylabel("$S_\\nu$ (Jy)")
         else:
             if isinstance(self.Spectrum.unit, str) and "$" in self.Spectrum.unit:
                 # assume LaTeX already
@@ -453,7 +488,7 @@ class Plotter(object):
 
     def savefig(self,fname,bbox_inches='tight',**kwargs):
         """
-        simple wrapper of maplotlib's savefig.  
+        simple wrapper of maplotlib's savefig.
         """
         self.axis.figure.savefig(fname,bbox_inches=bbox_inches,**kwargs)
 
@@ -463,9 +498,11 @@ class Plotter(object):
         """
         if hasattr(event,'key'):
             if event.key == '?':
-                print interactive_help_message
+                print(interactive_help_message)
             elif event.key == 'f':
-                print "\n\nFitter initiated from the interactive plotter."#  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
+                print("\n\nFitter initiated from the interactive plotter.")
+                # extra optional text:
+                #  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
                 self._disconnect_matplotlib_keys()
                 self.Spectrum.specfit(interactive=True)
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
@@ -474,10 +511,10 @@ class Plotter(object):
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
             elif event.key is not None and event.key.lower() == 'b':
                 if event.key == 'b':
-                    print "\n\nBaseline initiated from the interactive plotter"
+                    print("\n\nBaseline initiated from the interactive plotter")
                 elif event.key == 'B':
-                    print "\n\nBaseline initiated from the interactive plotter (with reset)"
-                print "Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
+                    print("\n\nBaseline initiated from the interactive plotter (with reset)")
+                print("Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'")
                 self._disconnect_matplotlib_keys()
                 self.Spectrum.baseline(interactive=True, reset_selection=(event.key=='B'))
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
@@ -485,7 +522,7 @@ class Plotter(object):
                 elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
             elif event.key == 'r':
-                #print "\n\nReconnected matplotlib shortcut keys."
+                # print("\n\nReconnected matplotlib shortcut keys.")
                 self._reconnect_matplotlib_keys()
             elif event.key == 'R':
                 self()
@@ -504,19 +541,19 @@ class Plotter(object):
         currently visible window (use this if you use the pan/zoom tools or
         manually change the limits) """
         if debug:
-            print "Changing x limits from %f,%f to %f,%f" % (self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1])
-            print "Changing y limits from %f,%f to %f,%f" % (self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1])
+            print("Changing x limits from %f,%f to %f,%f" % (self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1]))
+            print("Changing y limits from %f,%f to %f,%f" % (self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1]))
         self.xmin, self.xmax = self.axis.get_xlim()
         self.ymin, self.ymax = self.axis.get_ylim()
         if debug:
-            print "New x limits %f,%f == %f,%f" % (self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1])
-            print "New y limits %f,%f == %f,%f" % (self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1])
+            print("New x limits %f,%f == %f,%f" % (self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1]))
+            print("New y limits %f,%f == %f,%f" % (self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1]))
 
     def copy(self, parent=None):
         """
         Create a copy of the plotter with blank (uninitialized) axis & figure
 
-        [ parent ] 
+        [ parent ]
             A spectroscopic axis instance that is the parent of the specfit
             instance.  This needs to be specified at some point, but defaults
             to None to prevent overwriting a previous plot.
@@ -579,14 +616,14 @@ class Plotter(object):
             kwargs['arrow_tip'] = (yr[1]-yr[0])*(auto_yloc_fraction*0.9) + yr[0]
 
         lineid_plot.plot_line_ids(self.Spectrum.xarr,
-                                  self.Spectrum.data, 
+                                  self.Spectrum.data,
                                   xvals,
                                   line_names,
                                   ax=self.axis,
                                   **kwargs)
 
     def line_ids_from_measurements(self, auto_yloc=True,
-            auto_yloc_fraction=0.9, **kwargs):
+                                   auto_yloc_fraction=0.9, **kwargs):
         """
         Add line ID labels to a plot using lineid_plot
         http://oneau.wordpress.com/2011/10/01/line-id-plot/
@@ -615,7 +652,7 @@ class Plotter(object):
         >>> sp.measure()
         >>> sp.plotter.line_ids_from_measurements()
         """
-        import lineid_plot  
+        import lineid_plot
 
         if hasattr(self.Spectrum,'measurements'):
             measurements = self.Spectrum.measurements
@@ -625,12 +662,11 @@ class Plotter(object):
                 kwargs['box_loc'] = (yr[1]-yr[0])*auto_yloc_fraction + yr[0]
                 kwargs['arrow_tip'] = (yr[1]-yr[0])*(auto_yloc_fraction*0.9) + yr[0]
 
-            lineid_plot.plot_line_ids(self.Spectrum.xarr,
-                    self.Spectrum.data, 
-                    [v['pos'] for v in measurements.lines.values()],
-                    measurements.lines.keys(),
-                    ax=self.axis,
-                    **kwargs)
+            lineid_plot.plot_line_ids(self.Spectrum.xarr, self.Spectrum.data,
+                                      [v['pos'] for v in
+                                       measurements.lines.values()],
+                                      measurements.lines.keys(), ax=self.axis,
+                                      **kwargs)
         else:
             warn("Cannot add line IDs from measurements unless measurements have been made!")
 
@@ -643,13 +679,13 @@ def parse_units(labelstring):
     labelstring = re.sub("-3","$^{-3}$",labelstring)
     labelstring = re.sub("ergss","ergs s",labelstring)
     return labelstring
-    
+
 def parse_norm(norm):
     """
     Expected format: norm = 10E15
-    """    
-        
-    try: 
+    """
+
+    try:
         base, exp = norm.split('E')
     except ValueError:
         base, exp = norm.split('e')
@@ -657,10 +693,10 @@ def parse_norm(norm):
     if float(base) == 1.0:
         norm = '10'
     else:
-        norm = base    
-        
-    norm += '^{%s}' % exp    
-    
+        norm = base
+
+    norm += '^{%s}' % exp
+
     return norm
 
 def steppify(arr,isX=False):
@@ -675,4 +711,3 @@ def steppify(arr,isX=False):
     else:
         newarr = np.array(zip(arr,arr)).ravel()
     return newarr
-
