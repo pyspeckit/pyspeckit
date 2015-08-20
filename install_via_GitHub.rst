@@ -16,7 +16,6 @@ On the command line type
 To get the most up to date version, type 
   ``git pull upstream master``
 
-Then 
   ``git push origin master``
 and enter your username and password if it asks.
 
@@ -26,7 +25,7 @@ Still in the ``pyspeckit/`` directory, type
 You're good to go!
 
 To make changes and generate a Pull request:
-
+-------------------
 Create a new branch:
   ``git checkout -b name_of_your_new_branch``
 This will automatically switch you to this new branch.  Type 
@@ -38,8 +37,9 @@ After you make a change inside your local fork on your machine, type
   ``git add changed_file``
 where changed_file is the name of the file(s) you edited.
 
-Time to commit your change and add a little note about your change:
-  ``git commit -m details about the change(s) you made ``
+Time to commit your change and add a little note about your change
+  ``git commit -m details``
+``details`` should be a description of the changes you made, put inside quotes
 
 Push the change to GitHub:
   ``git push origin name_of_branch``
