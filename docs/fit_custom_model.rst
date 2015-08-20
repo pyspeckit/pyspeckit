@@ -1,7 +1,7 @@
 Fitting a user-defined model to a spectrum
 =============
 
-
+``damped_lya_profile`` is the function that generates the model and ``damped_lya_fitter`` creates the fitter class.
 
 .. code-block:: python
 
@@ -48,7 +48,7 @@ Fitting a user-defined model to a spectrum
     
     return myclass
 
-
+  ## Load the spectrum, register the fitter, and fit
   spec = pyspeckit.Spectrum(xarr=wave_to_fit,data=flux_to_fit*1e14,
                               error=error_to_fit*1e14,doplot=False,header=spec_header)
 
@@ -59,10 +59,8 @@ Fitting a user-defined model to a spectrum
                   h1_col,h1_b,h1_vel,d2h,resolution],quiet=False,fixed=[False,
                   False,False,False,False,False,False,False,False,True,True])
 
-  print spec.specfit.parinfo
+  ## Check out the results
+  spec.specfit.parinfo.values
+  spec.specfit.parinfo.errors
+  reduced_chi2 = spec.specfit.chi2/spec.specfit.dof
 
-  fit_parameters = spec.specfit.parinfo.values
-  fit_parameters_errors = spec.specfit.parinfo.errors
-  chi2 = spec.specfit.chi2
-  dof = spec.specfit.dof
-  reduced_chi2 = chi2/dof
