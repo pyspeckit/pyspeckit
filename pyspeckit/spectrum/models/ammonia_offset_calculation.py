@@ -52,22 +52,25 @@ for par in ('tau_wts','voff_lines','aval','freq'):
         tbl = tbls[line]
 
         degeneracyline = tbl['Upper State Degeneracy']
-        intensityline = 10**tbl['CDMS/JPL Intensity']
+        intensityline = 10**tbl['CDMSJPL_Intensity']
 
         main = np.argmax(intensityline)
 
         centerline = tbl['Freq'][main]
         voff_linesline = np.array((centerline-tbl['Freq'])/centerline) * constants.c
 
-        aval = (10**tbl['log10(Aij)']).sum()
+        aval = (10**tbl['log10_Aij']).sum()
         weightline = intensityline/intensityline.sum()
 
         if par == 'freq':
             print "'{n}{n}': {f},".format(n=numbers[line], f=centerline)
         elif par == 'voff_lines':
-            print "'{n}{n}': [{v}],".format(n=numbers[line], v=", ".join(str(x) for x in voff_linesline.to(u.km/u.s).value))
+            print "'{n}{n}': [{v}],".format(n=numbers[line],
+                                            v=", ".join(str(x)
+                                                        for x in voff_linesline.to(u.km/u.s).value))
         elif par == 'tau_wts':
             #print "'{n}{n}': {d},".format(n=numbers[line], d=np.array(degeneracyline))
-            print "'{n}{n}': [{d}],".format(n=numbers[line], d=", ".join(str(x) for x in weightline))
+            print "'{n}{n}': [{d}],".format(n=numbers[line],
+                                            d=", ".join(str(x) for x in weightline))
         elif par == 'aval':
             print "'{n}{n}': {d:e},".format(n=numbers[line], d=aval)
