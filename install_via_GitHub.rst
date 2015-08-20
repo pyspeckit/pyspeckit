@@ -3,13 +3,13 @@ Install pyspeckit via GitHub
 
 Logged into your github account, go to https://github.com/pyspeckit/pyspeckit and click “Fork” in upper right.  
 
-Copy the URL of your pyspeckit URL (https://github.com/yourusername/pyspeckit)
+Copy the URL of your pyspeckit fork https://github.com/*yourusername*/pyspeckit
 
 On the command line type 
   ``git clone https://github.com/yourusername/pyspeckit``
 (it will put it in a directory called pyspeckit in your working directory)
 
-  ``cd`` into ``pyspeckit/``
+  ``cd pyspeckit``
 
   ``git remote add upstream https://github.com/pyspeckit/pyspeckit``
 
@@ -39,7 +39,7 @@ After you make a change inside your local fork on your machine, type
 where changed_file is the name of the file(s) you edited.
 
 Time to commit your change and add a little note about your change:
-  ``git commit -m ‘details about the change(s) you made’ ``
+  ``git commit -m details about the change(s) you made ``
 
 Push the change to GitHub:
   ``git push origin name_of_branch``
