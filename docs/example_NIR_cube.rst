@@ -1,6 +1,8 @@
-
+Fitting H2 1-0 S(1) line in NIR data cube
+================================
 .. code-block:: python
-    import pyspeckit
+
+  import pyspeckit
   from pylab import *
   import numpy as np
   import astropy.io.fits as pyfits
