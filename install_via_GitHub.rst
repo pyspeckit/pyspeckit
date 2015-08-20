@@ -6,12 +6,12 @@ Logged into your github account, go to https://github.com/pyspeckit/pyspeckit an
 Copy the URL of your pyspeckit URL (https://github.com/yourusername/pyspeckit)
 
 On the command line type 
-``git clone https://github.com/_yourusername_/pyspeckit``
+  ``git clone https://github.com/yourusername/pyspeckit``
 (it will put it in a directory called pyspeckit in your working directory)
 
-``cd`` into ``pyspeckit/``
+  ``cd`` into ``pyspeckit/``
 
-``git remote add upstream https://github.com/pyspeckit/pyspeckit``
+  ``git remote add upstream https://github.com/pyspeckit/pyspeckit``
 
 To get the most up to date version, type 
   ``git pull upstream master``
@@ -25,9 +25,9 @@ Still in the ``pyspeckit/`` directory, type
 
 You're good to go!
 
-To make changes:
+To make changes and generate a Pull request:
 
-To create a new branch, type 
+Create a new branch:
   ``git checkout -b name_of_your_new_branch``
 This will automatically switch you to this new branch.  Type 
   ``git branch``
