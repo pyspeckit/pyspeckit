@@ -16,6 +16,7 @@ On the command line type
 To get the most up to date version, type 
   ``git pull upstream master``
 
+Update your personal "fork" to match ``upstream/master``
   ``git push origin master``
 and enter your username and password if it asks.
 
@@ -39,7 +40,7 @@ where changed_file is the name of the file(s) you edited.
 
 Time to commit your change and add a little note about your change
   ``git commit -m details``
-``details`` should be a description of the changes you made, put inside quotes
+``details`` should be a description of the changes you made, inside quotes
 
 Push the change to GitHub:
   ``git push origin name_of_branch``
