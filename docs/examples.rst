@@ -14,9 +14,16 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
      * :doc:`example_h2co`
      * :doc:`example_nh3`
      * :doc:`example_hcop`
+    Near IR
+    -------
+     * :doc:`example_NIR_cube`
     Optical
     -------
      * :doc:`example_sdss`
+    UV
+    --
+     * :doc:`fit_custom_model`
+     
 
 
 .. toctree::
