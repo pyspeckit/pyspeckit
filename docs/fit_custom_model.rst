@@ -1,14 +1,14 @@
 Fitting a user-defined model to a spectrum
-=============
+===========================================
 
 ``damped_lya_profile`` is the function that generates the model and ``damped_lya_fitter`` creates the fitter class.
 
 .. code-block:: python
 
     def damped_lya_profile(wave_to_fit,vs_n,am_n,fw_n,vs_b,am_b,fw_b,h1_col,h1_b,
-                       h1_vel,d2h,resolution,single_component_flux=False,
-                       return_components=False,
-                       return_hyperfine_components=False):
+                           h1_vel,d2h,resolution,single_component_flux=False,
+                           return_components=False,
+                           return_hyperfine_components=False):
 
     """
     Computes a damped Lyman-alpha profile (by calling the functions
