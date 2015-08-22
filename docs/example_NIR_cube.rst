@@ -1,5 +1,6 @@
 Fitting H2 1-0 S(1) line in NIR data cube
-================================
+=========================================
+
 .. code-block:: python
 
   import pyspeckit
@@ -46,17 +47,23 @@ Fitting H2 1-0 S(1) line in NIR data cube
   ## With the "fixed" keyword, I have held the 2nd gaussian's background level
   ## to zero, and the "signal_cut" keyword rejects fits for voxels below a 
   ## user-specified S/N threshold.
-  cube_h2.fiteach(use_nearest_as_guess=False, guesses=[3,1,2.1220e4,2,0,50,21232.,2],
-	  	fittype='vheightgaussian', integral=False, multicore=4,
-		  negamp=False,verbose_level=2,
+  cube_h2.fiteach(use_nearest_as_guess=False,
+                  guesses=[3,1,2.1220e4,2,0,50,21232.,2],
+                  fittype='vheightgaussian',
+                  integral=False,
+                  multicore=4,
+                  negamp=False,
+                  verbose_level=2,
                   errspec=np.ones(cube_h2.shape)*std,
-                  parlimited=[(False,False), (False,False), (True,True),(True,True),
-                              (False,False), (True,True), (True,True), (True,True)], 
+                  parlimited=[(False,False), (False,False), (True,True),
+                              (True,True), (False,False), (True,True),
+                              (True,True), (True,True)],
                   parlimits=[(0.9,1.4), (0,16), (21210,21225), (0.5,5),
                              (0.9,1.4), (0,100), (21227.,21236), (0.5,5)],
-                  fixed=[False,False,False,False,
-                         True,False,False,False],
-                  signal_cut=20,start_from_point=(100,100))
+                  fixed=[False, False, False, False, True, False, False,
+                         False], 
+                  signal_cut=20,
+                  start_from_point=(100,100))
 
   # plot the fits as images (you can click on background image to see the spectra + fits)
   amp_max = np.max(cube_h2.parcube[1,:,:])
@@ -84,8 +91,14 @@ Fitting H2 1-0 S(1) line in NIR data cube
   image = np.sqrt(2*np.pi)*h2_amplitude*h2_sigma
 
   # Clean up the header  
+  # (this is a bit of a hacky way to do it, but it works)
   cube_h2.header['NAXIS'] = 2
   del cube_h2.header['NAXIS3']
+  # a nicer way is to use WCS:
+  from astropy import wcs
+  newheader = wcs.WCS(cube_h2.header).sub([wcs.WCSSUB_CELESTIAL]).to_header()
+  cube2.header = newheader
+  # however, this approach may lose other important header keywords
 
 
   # Write the image to file
@@ -94,6 +107,7 @@ Fitting H2 1-0 S(1) line in NIR data cube
   h2fits.writeto(h2filename,clobber=True)
        
   # Write pyspeckit parcube and errcube to file
-  pyspeckit_fits_filename = input_filename.replace("cube.fits","pyspeckitfits_h2_1-0S1.fits")
+  pyspeckit_fits_filename = input_filename.replace("cube.fits",
+                                                   "pyspeckitfits_h2_1-0S1.fits")
   cube_h2.write_fit(pyspeckit_fits_filename,clobber=True)
 
