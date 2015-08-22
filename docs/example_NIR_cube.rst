@@ -3,7 +3,7 @@ Fitting H2 1-0 S(1) line in NIR data cube
 .. code-block:: python
 
   import pyspeckit
-  from pylab import *
+  import pylab as pl
   import numpy as np
   import astropy.io.fits as pyfits
 
@@ -24,11 +24,12 @@ Fitting H2 1-0 S(1) line in NIR data cube
   # at a pixel with good S/N
   cube_h2.plot_spectrum(100,100)
 
+  ### The following command is just for setup!  The actual fitting occurs below. ###
   # Here I'm fitting two gaussians with 4 parameters each (background offset, 
   # amplitude, wavelength centroid, linewidth).
   # I find that if I let both backgrounds be free parameters, pyspeckit returns
   # unrealistic values for both backgrounds, so I fix the 2nd gaussian's background
-  # level to 0.
+  # level to 0.  The actual command to fix the parameter comes in the fiteach call.
   cube_h2.specfit(fittype='vheightgaussian',guesses=[3,1,2.1220e4,2,0,50,21232.,2],quiet=False,save=False)
 
   # Get ready for the interactive plots that come up after fiteach finishes 
@@ -43,7 +44,8 @@ Fitting H2 1-0 S(1) line in NIR data cube
   ## With the "parlimited" and "parlimits" keywords, I have restricted
   ## the range for the wavelength centroid and linewidth parameters.
   ## With the "fixed" keyword, I have held the 2nd gaussian's background level
-  ## to zero.
+  ## to zero, and the "signal_cut" keyword rejects fits for voxels below a 
+  ## user-specified S/N threshold.
   cube_h2.fiteach(use_nearest_as_guess=False, guesses=[3,1,2.1220e4,2,0,50,21232.,2],
 	  	fittype='vheightgaussian', integral=False, multicore=4,
 		  negamp=False,verbose_level=2,
@@ -61,25 +63,25 @@ Fitting H2 1-0 S(1) line in NIR data cube
   cube_h2.mapplot(estimator=1,vmax=amp_max,vmin=0)
   cube_h2.mapplot.axis.set_title("Amplitude")
 
-  cube_h2.mapplot.figure=figure(5)
+  cube_h2.mapplot.figure=pl.figure(5)
   cube_h2.mapplot(estimator=3, vmax=5, vmin=0)
   cube_h2.mapplot.axis.set_title("Line Width")
 
-  cube_h2.mapplot.figure=figure(6)
+  cube_h2.mapplot.figure=pl.figure(6)
   cube_h2.mapplot(estimator=2,vmin=21215,vmax=21225)
   cube_h2.mapplot.axis.set_title("Line Center")
 
-  cube_h2.mapplot.figure=figure(7)
+  cube_h2.mapplot.figure=pl.figure(7)
   cube_h2.mapplot(estimator=0,vmax=100,vmin=0)
   cube_h2.mapplot.axis.set_title("Background")
-  show()
+  pl.show()
 
   ## Create the image
   background = (cube_h2.parcube[0,:,:] - 30.) / 1e17
   amplitude = cube_h2.parcube[1,:,:] / 1e17
   linecenter = cube_h2.parcube[2,:,:]
   sigma = cube_h2.parcube[3,:,:] / 3e5 * h2_linecenter
-  image = math.sqrt(2*math.pi)*h2_amplitude*h2_sigma
+  image = np.sqrt(2*np.pi)*h2_amplitude*h2_sigma
 
   # Clean up the header  
   cube_h2.header['NAXIS'] = 2
