@@ -412,14 +412,25 @@ class Specfit(interactive.Interactive):
         if plot and self.Spectrum.plotter.axis:
             if midpt_location == 'plot-center':
                 midpt_pixel = np.round((xmin+xmax)/2.0)
-                midpt       = self.Spectrum.xarr[midpt_pixel]
+                midpt       = self.Spectrum.xarr[midpt_pixel].value
             elif midpt_location == 'fitted':
                 try:
-                    midpt = sp.specfit.parinfo.SHIFT0.value
+                    PI_keys = self.Spectrum.specfit.parinfo.keys()
+                    shifts = [self.Spectrum.specfit.parinfo[PI_keys[x]].value for x in range(1, len(PI_keys), 3)]
                 except AttributeError:
                     raise AttributeError("Can only specify midpt_location="
                                          "fitted if there is a SHIFT parameter"
                                          "for the fitted model")
+                # We choose to display the eqw fit at the center of the fitted line set,
+                # closest to the passed window.
+                # Note that this has the potential to show a eqw "rectangle" centered
+                # on a fitted line other than the one measured for the eqw call, if
+                # there are more than one fitted lines within the window.
+                midpt_pixel = (xmin+xmax)/2
+                midval = self.Spectrum.xarr[midpt_pixel].value
+                shifts.sort(key=lambda s: abs(s-midval))
+                midpt = shifts[0]
+                midpt_pixel = self.Spectrum.xarr.x_to_pix(midpt)
             else:
                 raise ValueError("midpt_location must be 'plot-center' or "
                                  "fitted")
@@ -431,7 +442,7 @@ class Specfit(interactive.Interactive):
                       "midpt_level={2}, eqw={3}".format(midpt, midpt_pixel,
                                                         midpt_level, eqw))
             self.EQW_plots.append(self.Spectrum.plotter.axis.fill_between(
-                [midpt.value-eqw/2.0,midpt.value+eqw/2.0], [0,0],
+                [midpt-eqw/2.0,midpt+eqw/2.0], [0,0],
                 [midpt_level,midpt_level], color=plotcolor, alpha=alpha,
                 label='EQW: %0.3g' % eqw))
             if annotate:
