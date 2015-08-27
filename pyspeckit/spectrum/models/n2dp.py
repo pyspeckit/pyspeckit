@@ -4,9 +4,15 @@ N2D+ fitter
 ===========
 Reference for line params: 
 
-L. Dore, P. Caselli, S. Beninati, T. Bourke, P. C. Myers and G. Cazzoli A&A 413, 1177-1181 (2004) 
+Dore (priv. comm.) line frequencies in CDMS, 
+line strength can also be obtained from Splatalogue
 
+L. Dore, P. Caselli, S. Beninati, T. Bourke, P. C. Myers and G. Cazzoli A&A 413, 1177-1181 (2004) 
 http://adsabs.harvard.edu/abs/2004A%26A...413.1177D
+
+L. Pagani, F. Daniel, and M. L. Dubernet A\%A 494, 719-727 (2009) 
+DOI: 10.1051/0004-6361:200810570
+
 
 """
 import numpy as np
@@ -17,6 +23,7 @@ import matplotlib.cbook as mpcb
 import copy
 import hyperfine
 from pyspeckit.specwarnings import warn
+import astropy.units as u
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:
@@ -28,242 +35,231 @@ try:
 except ImportError:
     scipyOK=False
 
-# line_names = ['oneone_f10', 'oneone_f01', 'oneone_f22', 'oneone_f21',
-#               'oneone_f12', 'oneone_f11', 'twotwo_f11', 'twotwo_f12',
-#               'twotwo_f21', 'twotwo_f32', 'twotwo_f33', 'twotwo_f22',
-#               'twotwo_f23']
+# line_names = ['J1-0', 'J2-1', 'J3-2',]
+# line_names = ['J2-1', 'J3-2',]
 
-# Name is JN1-N2 - F'1,F1 -> F'2,F2
-freq_dict ={
-'J2-1_22_21':154214.845e6, 
-'J2-1_22_23':154215.040e6, 
-'J2-1_21_21':154215.168e6, 
-'J2-1_23_23':154215.288e6, 
-'J2-1_22_22':154215.331e6, 
-'J2-1_11_01':154215.425e6, 
-'J2-1_23_22':154215.579e6, 
-'J2-1_12_01':154215.628e6, 
-'J2-1_21_22':154215.653e6, 
-'J2-1_10_01':154215.888e6,
-'J2-1_22_11':154216.754e6, 
-'J2-1_33_23':154216.818e6, 
-'J2-1_22_12':154216.889e6, 
-'J2-1_21_11':154217.076e6, 
-'J2-1_33_22':154217.109e6, 
-'J2-1_32_21':154217.131e6, 
-'J2-1_23_12':154217.137e6, 
-'J2-1_34_23':154217.206e6, 
-'J2-1_21_10':154217.502e6, 
-'J2-1_32_22':154217.617e6, 
-'J2-1_12_23':154218.120e6, 
-'J2-1_11_11':154219.631e6, 
-'J2-1_11_12':154219.766e6, 
-'J2-1_12_11':154219.834e6, 
-'J2-1_12_12':154219.969e6, 
-'J2-1_11_10':154220.058e6, 
-'J2-1_10_11':154220.094e6, 
-'J3-2_32_32':231319.945e6, 
-'J3-2_34_34':231319.995e6, 
-'J3-2_33_33':231320.017e6, 
-'J3-2_22_12':231321.253e6, 
-'J3-2_22_11':231321.456e6, 
-'J3-2_21_10':231321.499e6, 
-'J3-2_44_34':231321.530e6, 
-'J3-2_33_23':231321.547e6, 
-'J3-2_23_12':231321.617e6, 
-'J3-2_33_22':231321.795e6, 
-'J3-2_32_21':231321.908e6, 
-'J3-2_34_23':231321.914e6, 
-'J3-2_44_33':231321.918e6, 
-'J3-2_43_32':231321.919e6, 
-'J3-2_21_11':231321.961e6,
-'J3-2_45_34':231321.966e6, 
-'J3-2_32_22':231322.231e6, 
-'J3-2_43_33':231322.426e6, 
-'J3-2_22_21':231324.012e6, 
-'J3-2_22_23':231324.086e6,
-'J3-2_22_22':231324.334e6,
-'J3-2_23_23':231324.450e6,
-'J3-2_21_21':231324.517e6, 
-'J3-2_23_22':231324.698e6,
-'J3-2_21_22':231324.839e6}
+freq_dict_cen ={ 
+    # 'J1-0':  77109.2697e6, 
+    'J2-1': 154217.1805e6, 
+    'J3-2': 231321.9119e6, 
+    } 
 
-line_strength_dict = { # effectively the degeneracy per rotation state...
-'J2-1_22_21':0.002, 
-'J2-1_22_23':0.004, 
-'J2-1_21_21':0.020, 
-'J2-1_23_23':0.039, 
-'J2-1_22_22':0.011, 
-'J2-1_11_01':0.036, 
-'J2-1_23_22':0.005, 
-'J2-1_12_01':0.062, 
-'J2-1_21_22':0.003, 
-'J2-1_10_01':0.013,
-'J2-1_22_11':0.066, 
-'J2-1_33_23':0.013, 
-'J2-1_22_12':0.027, 
-'J2-1_21_11':0.012, 
-'J2-1_33_22':0.143, 
-'J2-1_32_21':0.088, 
-'J2-1_23_12':0.112, 
-'J2-1_34_23':0.200, 
-'J2-1_21_10':0.031, 
-'J2-1_32_22':0.021, 
-'J2-1_12_23':0.003, 
-'J2-1_11_11':0.010, 
-'J2-1_11_12':0.013, 
-'J2-1_12_11':0.014, 
-'J2-1_12_12':0.031, 
-'J2-1_11_10':0.006, 
-'J2-1_10_11':0.008, 
-'J3-2_32_32':0.010, 
-'J3-2_34_34':0.017, 
-'J3-2_33_33':0.007, 
-'J3-2_22_12':0.015, 
-'J3-2_22_11':0.048, 
-'J3-2_21_10':0.022, 
-'J3-2_44_34':0.007, 
-'J3-2_33_23':0.014, 
-'J3-2_23_12':0.094, 
-'J3-2_33_22':0.089, 
-'J3-2_32_21':0.061, 
-'J3-2_34_23':0.125, 
-'J3-2_44_33':0.136, 
-'J3-2_43_32':0.101, 
-'J3-2_21_11':0.019,
-'J3-2_45_34':0.175, 
-'J3-2_32_22':0.007, 
-'J3-2_43_33':0.010, 
-'J3-2_22_21':0.002, 
-'J3-2_22_23':0.002,
-'J3-2_22_22':0.011,
-'J3-2_23_23':0.014,
-'J3-2_21_21':0.004, 
-'J3-2_23_22':0.002,
-'J3-2_21_22':0.002}
-
-line_names = freq_dict.keys()
-
-# http://adsabs.harvard.edu/abs/1971ApJ...169..429T has the most accurate freqs
-# http://adsabs.harvard.edu/abs/1972ApJ...174..463T [twotwo]
-central_freq_dict = { 
-    'J2-1': 154217.1805e6,
-    'J3-2': 231321.9119e6
+voff_lines_dict={
+    ####### J 2-1
+    'J2-1_01': -5.6031, 
+    'J2-1_02': -5.5332, 
+    'J2-1_03': -5.3617,
+    'J2-1_04': -5.0993,
+    'J2-1_05': -4.9677,
+    'J2-1_06': -4.7052,
+    'J2-1_07': -3.8195, 
+    'J2-1_08': -3.5571,
+    'J2-1_09': -2.8342,
+    'J2-1_10': -2.3388,
+    'J2-1_11': -1.9449,
+    'J2-1_12': -1.9002,
+    'J2-1_13': -1.7733,
+    'J2-1_14': -1.3965,
+    'J2-1_15': -1.0025, 
+    'J2-1_16': -0.7968,
+    'J2-1_17': -0.5740,
+    'J2-1_18': -0.2311,
+    'J2-1_19': -0.0085,
+    'J2-1_20': 0.0000,
+    'J2-1_21': 0.1351,
+    'J2-1_22': 0.1457,
+    'J2-1_23': 0.1886, 
+    'J2-1_24': 0.2538,
+    'J2-1_25': 0.6165,
+    'J2-1_26': 0.7541,
+    'J2-1_27': 0.8789,
+    'J2-1_28': 2.5594,
+    'J2-1_29': 3.0143,
+    'J2-1_30': 3.0632,
+    'J2-1_31': 3.1579,
+    'J2-1_32': 3.4572, 
+    'J2-1_33': 3.6394,
+    'J2-1_34': 3.7234,
+    'J2-1_35': 3.9567,
+    'J2-1_36': 4.2049,
+    'J2-1_37': 4.5817,
+    'J2-1_38': 4.6054,
+    'J2-1_39': 8.4164,
+    'J2-1_40': 9.0414,
+    ####### J 3-2
+    'J3-2_01': -3.7164,
+    'J3-2_02': -3.5339,
+    'J3-2_03': -3.2997,
+    'J3-2_04': -3.2130,
+    'J3-2_05': -3.0633,
+    'J3-2_06': -2.8958,
+    'J3-2_07': -2.7424, 
+    'J3-2_08': -2.6466,
+    'J3-2_09': -2.5748,
+    'J3-2_10': -1.9177,
+    'J3-2_11': -1.2333,
+    'J3-2_02': -0.7628,
+    'J3-2_13': -0.7590,
+    'J3-2_14': -0.7306,
+    'J3-2_15': -0.5953, 
+    'J3-2_16': -0.5765,
+    'J3-2_17': -0.3419,
+    'J3-2_18': -0.0925,
+    'J3-2_19': -0.0210,
+    'J3-2_20': 0.0000,
+    'J3-2_21': 0.0065,
+    'J3-2_22': 0.0616,
+    'J3-2_23': 0.0618, 
+    'J3-2_24': 0.0675,
+    'J3-2_25': 0.0748,
+    'J3-2_26': 0.2212,
+    'J3-2_27': 0.2691,
+    'J3-2_28': 0.4515,
+    'J3-2_29': 0.5422,
+    'J3-2_30': 0.5647,
+    'J3-2_31': 0.6050,
+    'J3-2_32': 0.6596, 
+    'J3-2_33': 0.9222,
+    'J3-2_34': 1.0897,
+    'J3-2_35': 1.9586,
+    'J3-2_36': 2.0471,
+    'J3-2_37': 2.5218,
+    'J3-2_38': 2.5500,
+    'J3-2_39': 2.6156,
+    'J3-2_40': 3.0245,
+    'J3-2_41': 3.1786, 
+    'J3-2_42': 3.3810,
+    'J3-2_43': 3.6436,
+    'J3-2_44': 4.2066,
     }
-line_strength_dict={
-        'oneone_f10':  4.,
-        'oneone_f01':  4.,
-        'oneone_f22': 15.,
-        'oneone_f21':  5.,
-        'oneone_f12':  5.,
-        'oneone_f11':  3.,
-        'twotwo_f11': 15.,
-        'twotwo_f12':  5.,
-        'twotwo_f21':  5.,
-        'twotwo_f32': 5.19,
-        'twotwo_f33': 41.48,
-        'twotwo_f22': 23.15,
-        'twotwo_f23': 5.19,
-        'threethree_f22':1,
-        'threethree_f44':1,
-        'threethree_f33':1,
-        }
-relative_strength_total_degeneracy={
-        'oneone_f10': 36.,
-        'oneone_f01': 36.,
-        'oneone_f22': 36.,
-        'oneone_f21': 36.,
-        'oneone_f12': 36.,
-        'oneone_f11': 36.,
-        'twotwo_f11': 100.01,
-        'twotwo_f12': 100.01,
-        'twotwo_f21': 100.01,
-        'twotwo_f32': 100.01,
-        'twotwo_f33': 100.01,
-        'twotwo_f22': 100.01,
-        'twotwo_f23': 100.01,
-        'threethree_f22':3.0,
-        'threethree_f44':3.0,
-        'threethree_f33':3.0,
-        }
-hf_freq_dict={
-        'oneone_f10':4.82965996e9 - 18.53e3,
-        'oneone_f01':4.82965996e9 - 1.34e3,
-        'oneone_f22':4.82965996e9 - 0.35e3,
-        'oneone_f21':4.82965996e9 + 4.05e3,
-        'oneone_f12':4.82965996e9 + 6.48e3,
-        'oneone_f11':4.82965996e9 + 11.08e3,
-        'twotwo_f11':14.48847881e9 - 19.97e3,
-        'twotwo_f12':14.48847881e9 -  7.03e3,
-        'twotwo_f21':14.48847881e9 -  2.20e3,
-        'twotwo_f32':14.48847881e9 +  0.12e3,
-        'twotwo_f33':14.48847881e9 +  0.89e3,
-        'twotwo_f22':14.48847881e9 + 10.74e3,
-        'twotwo_f23':14.48847881e9 + 11.51e3,
-        'threethree_f22':28.97478e9,
-        'threethree_f44':28.97480e9,
-        'threethree_f33':28.97481e9,
-        }
-freq_dict = dict(hf_freq_dict.items() + central_freq_dict.items())
-aval_dict = {
-    'oneone':     10**-8.44801,  #64*!pi**4/(3*h*c**3)*nu11**3*mu0**2*(1/2.)
-    'twotwo':     10**-7.49373,  #64*!pi**4/(3*h*c**3)*nu22**3*mu0**2*(2/3.)
-    'threethree': 10**-6.89179,  #64*!pi**4/(3*h*c**3)*nu33**3*mu0**2*(3/4.)
+
+line_strength_dict = {
+    ####### J 2-1
+    'J2-1_01': 0.008262,
+    'J2-1_02': 0.005907,
+    'J2-1_03': 0.031334,
+    'J2-1_04': 0.013833,
+    'J2-1_05': 0.013341,
+    'J2-1_06': 0.010384,
+    'J2-1_07': 0.000213, 
+    'J2-1_08': 0.000675,
+    'J2-1_09': 0.000150,
+    'J2-1_10': 0.001202,
+    'J2-1_11': 0.000963,
+    'J2-1_12': 0.000878,
+    'J2-1_13': 0.002533,
+    'J2-1_14': 0.000362, 
+    'J2-1_15': 0.000162,
+    'J2-1_16': 0.021268,
+    'J2-1_17': 0.031130,
+    'J2-1_18': 0.000578,
+    'J2-1_19': 0.001008,
+    'J2-1_20': 0.200000,
+    'J2-1_21': 0.111666, 
+    'J2-1_22': 0.088138,
+    'J2-1_23': 0.142511,
+    'J2-1_24': 0.011550,
+    'J2-1_25': 0.027472,
+    'J2-1_26': 0.012894,
+    'J2-1_27': 0.066406,
+    'J2-1_28': 0.013082, 
+    'J2-1_29': 0.003207,
+    'J2-1_30': 0.061847,
+    'J2-1_31': 0.004932,
+    'J2-1_32': 0.035910,
+    'J2-1_33': 0.011102,
+    'J2-1_34': 0.038958,
+    'J2-1_35': 0.019743, 
+    'J2-1_36': 0.004297,
+    'J2-1_37': 0.001830,
+    'J2-1_38': 0.000240,
+    'J2-1_39': 0.000029,
+    'J2-1_40': 0.000004, 
+    ####### J 3-2
+    'J3-2_01': 0.001842,
+    'J3-2_02': 0.001819,
+    'J3-2_03': 0.003544,
+    'J3-2_04': 0.014100,
+    'J3-2_05': 0.011404,
+    'J3-2_06': 0.000088,
+    'J3-2_07': 0.002201,
+    'J3-2_08': 0.002153,
+    'J3-2_09': 0.000059,
+    'J3-2_10': 0.000058,
+    'J3-2_11': 0.000203,
+    'J3-2_12': 0.000259,
+    'J3-2_13': 0.000248,
+    'J3-2_14': 0.000437, 
+    'J3-2_15': 0.010215,
+    'J3-2_16': 0.000073,
+    'J3-2_17': 0.007445,
+    'J3-2_18': 0.000155,
+    'J3-2_19': 0.000272,
+    'J3-2_20': 0.174603,
+    'J3-2_21': 0.018678, 
+    'J3-2_22': 0.100524,
+    'J3-2_23': 0.135563,
+    'J3-2_24': 0.124910,
+    'J3-2_25': 0.060970,
+    'J3-2_26': 0.088513,
+    'J3-2_27': 0.001085,
+    'J3-2_28': 0.094480, 
+    'J3-2_29': 0.013955,
+    'J3-2_30': 0.007236,
+    'J3-2_31': 0.022222,
+    'J3-2_32': 0.047921,
+    'J3-2_33': 0.015427,
+    'J3-2_34': 0.000070,
+    'J3-2_35': 0.000796, 
+    'J3-2_36': 0.001373,
+    'J3-2_37': 0.007147,
+    'J3-2_38': 0.016574,
+    'J3-2_39': 0.009776,
+    'J3-2_40': 0.000995,
+    'J3-2_41': 0.000491,
+    'J3-2_42': 0.000067, 
+    'J3-2_43': 0.000039,
+    'J3-2_44': 0.000010,
+}
+
+# freq_dict = {
+#     'J2-1': (voff_lines_dict['J2-1']*u.km/u.s).to(u.GHz, equivalencies=u.doppler_radio(freq_dict_cen['J2-1']*u.Hz)).value,
+#     'J3-2': (voff_lines_dict['J3-2']*u.km/u.s).to(u.GHz, equivalencies=u.doppler_radio(freq_dict_cen['J3-2']*u.Hz)).value,
+# }
+
+# Get frequency dictionary in Hz based on the offset velocity and rest frequency
+conv_J21=u.doppler_radio(freq_dict_cen['J2-1']*u.Hz)
+conv_J32=u.doppler_radio(freq_dict_cen['J3-2']*u.Hz)
+freq_dict = {
+    name: ((voff_lines_dict[name]*u.km/u.s).to(u.Hz, equivalencies=conv_J21).value) for name in voff_lines_dict.keys() if "J2-1" in name
     }
-hf_aval_dict={
-        'oneone_f10':10**-8.92509,
-        'oneone_f01':10**-8.44797,
-        'oneone_f22':10**-8.57294,
-        'oneone_f21':10**-9.05004,
-        'oneone_f12':10**-8.82819,
-        'oneone_f11':10**-9.05009,
-        'twotwo_f11':10**-7.61876,
-        'twotwo_f12':10**-8.09586,
-        'twotwo_f21':10**-8.31771,
-        'twotwo_f32':10**-8.44804,
-        'twotwo_f33':10**-7.54494,
-        'twotwo_f22':10**-7.65221,
-        'twotwo_f23':10**-8.30191,
-        'threethree_f22':10**-6.94294,
-        'threethree_f44':10**-6.91981,
-        'threethree_f33':10**-6.96736,
-        }
-ortho_dict = {
-    'oneone':     False,
-    'twotwo':     False,
-    'threethree': False,
+freq_dict.update({
+    name: ((voff_lines_dict[name]*u.km/u.s).to(u.Hz, equivalencies=conv_J32).value) for name in voff_lines_dict.keys() if "J3-2" in name
+    })
+
+# I don't know yet how to use this parameter... in CLASS it does not exist
+relative_strength_total_degeneracy = {
+    name : 1 for name  in voff_lines_dict.keys() if "J2-1" in name
     }
-n_ortho = np.arange(0,28,3) # 0..3..27
-n_para = np.array([x for x in range(28) if x % 3 != 0])
+relative_strength_total_degeneracy.update({
+    name : 1 for name  in voff_lines_dict.keys() if "J3-2" in name
+    })
 
-voff_lines_dict = {
-        'oneone': [(hf_freq_dict[f]-freq_dict['oneone'])/freq_dict['oneone']*units.speedoflight_ms for f in hf_freq_dict.keys() if "oneone" in f],
-        'twotwo': [(hf_freq_dict[f]-freq_dict['twotwo'])/freq_dict['twotwo']*units.speedoflight_ms for f in hf_freq_dict.keys() if "twotwo" in f],
-        'threethree': [(hf_freq_dict[f]-freq_dict['threethree'])/freq_dict['threethree']*units.speedoflight_ms for f in hf_freq_dict.keys() if "threethree" in f],
-        }
-voff_lines_dict={ # opposite signs of freq offset
-        'oneone_f10': + 18.53e3/freq_dict['oneone'] * units.speedoflight_ms / 1000.0,
-        'oneone_f01': + 1.34e3 /freq_dict['oneone'] * units.speedoflight_ms / 1000.0,
-        'oneone_f22': + 0.35e3 /freq_dict['oneone'] * units.speedoflight_ms / 1000.0,
-        'oneone_f21': - 4.05e3 /freq_dict['oneone'] * units.speedoflight_ms / 1000.0,
-        'oneone_f12': - 6.48e3 /freq_dict['oneone'] * units.speedoflight_ms / 1000.0,
-        'oneone_f11': - 11.08e3/freq_dict['oneone'] * units.speedoflight_ms / 1000.0,
-        'twotwo_f11': + 19.97e3/freq_dict['twotwo'] * units.speedoflight_ms / 1000.0,
-        'twotwo_f12': +  7.03e3/freq_dict['twotwo'] * units.speedoflight_ms / 1000.0,
-        'twotwo_f21': +  2.20e3/freq_dict['twotwo'] * units.speedoflight_ms / 1000.0,
-        'twotwo_f32': -  0.12e3/freq_dict['twotwo'] * units.speedoflight_ms / 1000.0,
-        'twotwo_f33': -  0.89e3/freq_dict['twotwo'] * units.speedoflight_ms / 1000.0,
-        'twotwo_f22': - 10.74e3/freq_dict['twotwo'] * units.speedoflight_ms / 1000.0,
-        'twotwo_f23': - 11.51e3/freq_dict['twotwo'] * units.speedoflight_ms / 1000.0,
-        'threethree_f22':28.97478e9,
-        'threethree_f44':28.97480e9,
-        'threethree_f33':28.97481e9,
-        }
+# Get the list of line names from the previous lists
+line_names = [name for name in voff_lines_dict.keys()]
 
+#     'J2-1': np.array([1]*len(voff_lines_dict['J2-1'])),
+#     'J3-2': np.array([1]*len(voff_lines_dict['J3-2'])),
+# }
+# aval_dict = {
+#     # 'J1-0': 10**(-4.90770), 
+#     'J2-1': 10**(-3.92220), 
+#     'J3-2': 10**(-3.35866), 
+# }
 
-formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
+n2dp_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
                                              freq_dict, line_strength_dict,
                                              relative_strength_total_degeneracy)
-formaldehyde_vtau_fitter = formaldehyde_vtau.fitter
-formaldehyde_vtau_vheight_fitter = formaldehyde_vtau.vheight_fitter
-formaldehyde_vtau_tbg_fitter = formaldehyde_vtau.background_fitter
+n2dp_vtau_fitter = n2dp_vtau.fitter
+n2dp_vtau_vheight_fitter = n2dp_vtau.vheight_fitter
+n2dp_vtau_tbg_fitter = n2dp_vtau.background_fitter
