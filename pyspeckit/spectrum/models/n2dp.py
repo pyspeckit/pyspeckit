@@ -221,11 +221,17 @@ freq_dict.update({
     })
 
 # I don't know yet how to use this parameter... in CLASS it does not exist
+# Note to Jaime: this is the sum of the degeneracy values for all hyperfines
+# for a given line; it gives the relative weights between the J=2-1 and J=3-2
+# lines, for example (the hyperfine weights are treated as normalized within
+# one rotational transition)
+w21 = sum(val for name,val in voff_lines_dict.items() if 'J2-1' in name)
+w32 = sum(val for name,val in voff_lines_dict.items() if 'J3-2' in name)
 relative_strength_total_degeneracy = {
-    name : 1 for name  in voff_lines_dict.keys() if "J2-1" in name
+    name : w21 for name  in voff_lines_dict.keys() if "J2-1" in name
     }
 relative_strength_total_degeneracy.update({
-    name : 1 for name  in voff_lines_dict.keys() if "J3-2" in name
+    name : w32 for name  in voff_lines_dict.keys() if "J3-2" in name
     })
 
 # Get the list of line names from the previous lists
