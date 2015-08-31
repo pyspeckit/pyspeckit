@@ -37,7 +37,7 @@ Or the most recent version::
 
     pip install https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz
 
-You can acquire the code with this clone command::
+You can acquire the code with this clone command (see also :doc:`install_via_GitHub`)::
 
     git clone git@bitbucket.org:pyspeckit/pyspeckit.git pyspeckit
     cd pyspeckit

@@ -16,6 +16,8 @@ Version 0.1.18 (unreleased)
     * Enhancement #85: Remove hard-coded T_A* label
     * Bugfix #82: Fix a loophole in which parameters were not checked for being
       in bounds when passed as `guesses`
+    * Addition #99: fiteach example with NIR data cubes, specfit example using
+      user-created model, and a guide to installing pyspeckit via GitHub.
 
 Version 0.1.17 (2015-07-14)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

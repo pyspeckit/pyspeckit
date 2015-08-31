@@ -21,7 +21,7 @@ import matplotlib.figure
 import numpy as np
 import copy
 import itertools
-from pyspeckit.specwarnings import warn
+from astropy.extern import six
 try:
     import astropy.wcs as pywcs
     import astropy.io.fits as pyfits
@@ -37,13 +37,8 @@ import cubes
 try:
     import aplpy
     icanhasaplpy = True
-except: # aplpy fails with generic exceptions instead of ImportError 
+except: # aplpy fails with generic exceptions instead of ImportError
     icanhasaplpy = False
-try:
-    import coords
-    icanhascoords = True
-except ImportError:
-    icanhascoords = False
 
 
 class MapPlotter(object):
@@ -193,7 +188,7 @@ class MapPlotter(object):
             self.canvas.mpl_disconnect(self.clickupid)
             self.canvas.mpl_disconnect(self.keyid)
 
-    def makeplane(self, estimator=np.mean):
+    def makeplane(self, estimator=np.nanmean):
         """
         Create a "plane" view of the cube, either by slicing or projecting it
         or by showing a slice from the best-fit model parameter cube.
@@ -218,7 +213,7 @@ class MapPlotter(object):
         # estimator is NOT duck-typed
         if type(estimator) is FUNCTION:
             self.plane = estimator(self.Cube.cube,axis=0)
-        elif type(estimator) is str:
+        elif isinstance(estimator, six.string_types):
             if estimator == 'max':
                 self.plane = self.Cube.cube.max(axis=0)
             elif estimator == 'int':
