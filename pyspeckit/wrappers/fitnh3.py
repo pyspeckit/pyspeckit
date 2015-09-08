@@ -84,8 +84,9 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
     for sp in splist:
         sp.error[:] = errguess
 
-    spdict[guessline].plotter(figure=guessfignum)
-    spdict[guessline].specfit.plot_fit()
+    if doplot:
+        spdict[guessline].plotter(figure=guessfignum)
+        spdict[guessline].specfit.plot_fit()
 
     spectra = pyspeckit.Spectra(splist)
     spectra.specfit.npeaks = npeaks
