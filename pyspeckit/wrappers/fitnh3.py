@@ -203,7 +203,7 @@ def fitnh3(spectrum, vrange=[-100,100], vrangeunit='km/s', quiet=False, Tex=20,
         spectrum.xarr.convert_to_unit(vrangeunit)
         spectrum.crop(*vrange, unit=vrangeunit)
 
-    spectrum.specfit(fittype='gaussian',negamp=False)
+    spectrum.specfit(fittype='gaussian', negamp=False, guesses='moments')
     ampguess,vguess,widthguess = spectrum.specfit.modelpars
 
     if tau is None:
