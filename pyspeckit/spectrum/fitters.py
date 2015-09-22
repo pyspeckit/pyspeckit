@@ -159,7 +159,7 @@ class Specfit(interactive.Interactive):
         
     @cfgdec
     def __call__(self, interactive=False, usemoments=True,
-                 clear_all_connections=True, debug=False, guesses=None,
+                 clear_all_connections=True, debug=False, guesses='moments',
                  parinfo=None, save=True, annotate=None, show_components=None,
                  use_lmfit=False, verbose=True, clear=True,
                  reset_selection=True,
