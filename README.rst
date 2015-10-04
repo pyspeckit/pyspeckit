@@ -22,6 +22,6 @@ For more information, see:
 Status reports for developers
 -----------------------------
 
-.. image:: https://travis-ci.org/astropy/package-template.png?branch=master
+.. image:: https://travis-ci.org/astropy/package-template.svg
     :target: https://travis-ci.org/astropy/package-template
-    :alt: Test Status
+    :alt: Travis Status
