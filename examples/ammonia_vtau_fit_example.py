@@ -44,6 +44,9 @@ COMMENT   1 blank line
 END
 """
 
+# Start by computing the error using a reasonably signal-free region
+sp.error[:] = sp.stats((-100, 50))['std']
+
 # Change the plot range to be a reasonable physical coverage (the default is to
 # plot the whole 8192 channel spectrum)
 sp.plotter(xmin=-100,xmax=300)
@@ -67,9 +70,14 @@ sp.plotter.figure.savefig('nh3_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
-# Run the ammonia spec fitter with a reasonable guess 
+# Run the ammonia spec fitter with a reasonable guess
+# Since we only have a single line (1-1), the kinetic temperature is
+# unconstrained: we'll fix it at 7 K.  Similarly, the ortho fraction
+# is fixed to 0.5
+T=True; F=False
 sp.specfit(fittype='ammonia_tau',
-           guesses=[5.9,4.45,4.5,0.84,96.2,0.43],
+           guesses=[7,4.45,4.5,0.84,96.2,0.43],
+           fixed=[T,F,F,F,F,T],
            quiet=False)
 
 # plot up the residuals in a different window.  The residuals strongly suggest
@@ -89,9 +97,18 @@ sp.plotter.figure.savefig('nh3_ammonia_fit_vtau_zoom.png')
 
 # refit with two components
 sp.specfit(fittype='ammonia_tau',
-        guesses=[4,3.5,4.5,0.68,97.3,0.5]+[15,4.2,4.5,0.52,95.8,0.35],
-        quiet=False)
+           guesses=[7,3.5,4.5,0.68,97.3,0.5]+[7,4.2,4.5,0.52,95.8,0.5],
+           fixed=[T,F,F,F,F,T]*2,
+           quiet=False)
 sp.specfit.plotresiduals()
 sp.plotter.figure.savefig('nh3_ammonia_multifit_vtau_zoom.png')
 
-
+# compare to the 'thin' version
+# In the thin version, Tex = Tk by force
+sp.specfit.Registry.add_fitter('ammonia_tau_thin', pyspeckit.spectrum.models.ammonia.ammonia_model_vtau_thin(), 5)
+sp.specfit(fittype='ammonia_tau_thin',
+           guesses=[7,4.5,0.68,97.3,0.5]+[7,4.5,0.52,95.8,0.5],
+           fixed=[F,F,F,F,T]*2,
+           quiet=False)
+sp.specfit.plotresiduals()
+sp.plotter.figure.savefig('nh3_ammonia_multifit_vtau_thin_zoom.png')
