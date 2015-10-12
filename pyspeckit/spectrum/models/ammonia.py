@@ -21,6 +21,7 @@ import copy
 import model
 from astropy import log
 import astropy.units as u
+from astropy import constants
 from . import mpfit_messages
 import operator
 import string
@@ -120,13 +121,18 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     if fillingfraction is None:
         fillingfraction = 1.0
 
-    ckms = 2.99792458e5
-    ccms = ckms*1e5
-    g1 = 1
-    g2 = 1
-    h = 6.6260693e-27
-    kb = 1.3806505e-16
-    mu0 = 1.476e-18               # Dipole Moment in cgs (1.476 Debeye)
+    #ckms = 2.99792458e5
+    ckms = constants.c.to(u.km/u.s).value
+    ccms = constants.c.to(u.cm/u.s).value
+    #Degeneracies
+    # g1 = 1
+    # g2 = 1
+    #h = 6.6260693e-27
+    h = constants.h.cgs.value
+    #kb = 1.3806505e-16
+    kb = constants.k_B.cgs.value
+    # Dipole Moment in cgs (1.476 Debeye)
+    #mu0 = 1.476e-18
 
     # Generate Partition Functions
     nlevs = 51
@@ -530,7 +536,7 @@ class ammonia_model(model.SpectralModel):
         """
 
         # TKIN, TEX, ntot, width, center, ortho fraction
-        return [20,10, 1e15, 1.0, 0.0, 1.0]
+        return [20,10, 15, 1.0, 0.0, 1.0]
 
     def annotations(self):
         from decimal import Decimal # for formatting
@@ -576,7 +582,8 @@ class ammonia_model(model.SpectralModel):
             npeaks = len(params) / self.npars
         self.npeaks = npeaks
 
-        if isinstance(params,np.ndarray): params=params.tolist()
+        if isinstance(params,np.ndarray):
+            params=params.tolist()
         # this is actually a hack, even though it's decently elegant
         # somehow, parnames was being changed WITHOUT being passed as a variable
         # this doesn't make sense - at all - but it happened.
@@ -702,7 +709,7 @@ class ammonia_model_vtau(ammonia_model):
         """
 
         # TKIN, TEX, ntot, width, center, ortho fraction
-        return [20, 10, 1, 1.0, 0.0, 1.0]
+        return [20, 10, 10, 1.0, 0.0, 1.0]
 
     def __call__(self,*args,**kwargs):
         return self.multinh3fit(*args,**kwargs)
@@ -762,7 +769,7 @@ class ammonia_model_background(ammonia_model):
         """
 
         # TKIN, TEX, ntot, width, center, ortho fraction
-        return [20,10, 1, 1.0, 0.0, 1.0, 2.73]
+        return [20,10, 10, 1.0, 0.0, 1.0, 2.73]
 
     def __call__(self,*args,**kwargs):
         #if self.multisingle == 'single':
