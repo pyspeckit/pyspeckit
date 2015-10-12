@@ -415,21 +415,23 @@ class Specfit(interactive.Interactive):
                 midpt       = self.Spectrum.xarr[midpt_pixel].value
             elif midpt_location == 'fitted':
                 try:
-                    PI_keys = self.Spectrum.specfit.parinfo.keys()
-                    shifts = [self.Spectrum.specfit.parinfo[PI_keys[x]].value for x in range(1, len(PI_keys), 3)]
+                    shifts = [self.Spectrum.specfit.parinfo[x].value
+                              for x in self.Spectrum.specfit.parinfo.keys()
+                              if 'SHIFT' in x]
                 except AttributeError:
                     raise AttributeError("Can only specify midpt_location="
                                          "fitted if there is a SHIFT parameter"
                                          "for the fitted model")
-                # We choose to display the eqw fit at the center of the fitted line set,
-                # closest to the passed window.
-                # Note that this has the potential to show a eqw "rectangle" centered
-                # on a fitted line other than the one measured for the eqw call, if
-                # there are more than one fitted lines within the window.
+                # We choose to display the eqw fit at the center of the fitted
+                # line set, closest to the passed window.
+                # Note that this has the potential to show a eqw "rectangle"
+                # centered on a fitted line other than the one measured for the
+                # eqw call, if there are more than one fitted lines within the
+                # window.
                 midpt_pixel = (xmin+xmax)/2
                 midval = self.Spectrum.xarr[midpt_pixel].value
-                shifts.sort(key=lambda s: abs(s-midval))
-                midpt = shifts[0]
+                midpt_index = np.argmin(np.abs(shifts-midval))
+                midpt = shifts[midpt_index]
                 midpt_pixel = self.Spectrum.xarr.x_to_pix(midpt)
             else:
                 raise ValueError("midpt_location must be 'plot-center' or "
