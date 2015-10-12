@@ -446,7 +446,9 @@ class Cube(spectrum.Spectrum):
         sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=self.cube[:,y,x],
                                 header=header,
                                 error=(self.errorcube[:,y,x] if self.errorcube
-                                       is not None else None))
+                                       is not None else None),
+                                unit=self.unit,
+                               )
 
         sp.specfit = copy.copy(self.specfit)
         # explicitly re-do this (test)
