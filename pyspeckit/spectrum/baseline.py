@@ -193,7 +193,7 @@ class Baseline(interactive.Interactive):
 
     def fit(self, powerlaw=None, order=None, includemask=None, spline=False,
             spline_sampling=10, spline_downsampler=np.median,
-            xarr_fit_unit=None, **kwargs):
+            xarr_fit_unit='pixels', **kwargs):
         """
         Run the fit and set `self.basespec`
         """
