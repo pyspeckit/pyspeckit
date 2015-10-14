@@ -402,6 +402,9 @@ class Spectrum(object):
         elif hasattr(x1, 'unit') and unit is not None:
             raise ValueError("If you give x1,x2 as quantities, don't specify "
                              "the X-axis unit (it must be equivalent, though).")
+        elif not hasattr(x1, 'unit') and unit is None:
+            x1pix = x1
+            x2pix = x2
         else:
             # Hack: something about the inheritance of xarr prevents equivalent
             # unit arithmetic
