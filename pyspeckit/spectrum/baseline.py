@@ -1,6 +1,6 @@
+from __future__ import print_function
 import numpy as np
 import matplotlib
-from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
 import interactive
 import copy
@@ -400,8 +400,10 @@ class Baseline(interactive.Interactive):
                     alpha=alpha,
                     **plotkwargs)
 
-        if annotate: self.annotate() # refreshes automatically
-        elif self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
+        if annotate:
+            self.annotate() # refreshes automatically
+        elif self.Spectrum.plotter.autorefresh:
+            self.Spectrum.plotter.refresh()
 
     def unsubtract(self, replot=True, preserve_limits=True):
         """
@@ -417,12 +419,12 @@ class Baseline(interactive.Interactive):
         if self.subtracted:
             self.Spectrum.data += self.basespec
             self.subtracted = False
-            if replot:
+            if replot and self.Spectrum.plotter.axis is not None:
                 kwargs = self.Spectrum.plotter.plotkwargs
                 kwargs.update({'use_window_limits':preserve_limits})
                 self.Spectrum.plotter(**kwargs)
         else:
-            print "Baseline wasn't subtracted; not unsubtracting."
+            print("Baseline wasn't subtracted; not unsubtracting.")
 
     def annotate(self,loc='upper left'):
         if self.powerlaw:

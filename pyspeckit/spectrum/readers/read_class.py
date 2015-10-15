@@ -14,9 +14,9 @@ import numpy
 import numpy as np
 from numpy import pi
 from astropy import log
-from astropy.time import Time
+# from astropy.time import Time
+from astropy import units as u
 import pyspeckit
-import os
 import sys
 import re
 try:
@@ -24,7 +24,6 @@ try:
 except ImportError:
     ProgressBar = lambda x: None
     ProgressBar.update = lambda x: None
-import string
 import struct
 
 import time
@@ -904,7 +903,7 @@ def read_observation(f, obsid, file_description=None, indices=None,
     hdr.update({'RAoff':hdr['LAMOF']/pi*180,'DECoff':hdr['BETOF']/pi*180})
     hdr.update({'OBJECT':hdr['SOURC'].strip()})
     hdr.update({'BUNIT':'Tastar'})
-    hdr.update({'EXPOSURE':hdr['TIME']})
+    hdr.update({'EXPOSURE':float(hdr['TIME'])})
     hdr['HDRSTART'] = obs_position
     hdr['DATASTART'] = datastart
     hdr.update(indices[obsid])
@@ -1399,10 +1398,10 @@ def make_axis(header,imagfreq=False):
 
     if not imagfreq:
         xarr =  rest_frequency + foff + (numpy.arange(1, nchan+1) - refchan) * fres
-        XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=rest_frequency)
+        XAxis = units.SpectroscopicAxis(xarr,unit='MHz',refX=rest_frequency*u.MHz)
     else:
         xarr = imfreq - (numpy.arange(1, nchan+1) - refchan) * fres
-        XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=imfreq)
+        XAxis = units.SpectroscopicAxis(xarr,unit='MHz',refX=imfreq*u.MHz)
 
     return XAxis
     
