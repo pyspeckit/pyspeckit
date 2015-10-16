@@ -225,10 +225,12 @@ class Cube(spectrum.Spectrum):
         self.__init__(cube=cube)
 
     def __repr__(self):
-        return r'<Cube object over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s with shape %r at %s>' % \
+        return (r'<Cube object over spectral range %6.5g :'
+                ' %6.5g %s and flux range = [%2.1f, %2.1f]'
+                ' %s with shape %r at %s>' %
                 (self.xarr.min().value, self.xarr.max().value, self.xarr.unit,
-                        self.data.min(), self.data.max(), self.unit,
-                        self.cube.shape, str(hex(self.__hash__())))
+                 self.data.min(), self.data.max(), self.unit, self.cube.shape,
+                 str(hex(self.__hash__()))))
 
 
     def copy(self,deep=True):
@@ -275,7 +277,7 @@ class Cube(spectrum.Spectrum):
 
         x_in_units = self.xarr.as_unit(unit)
         start_ind = x_in_units.x_to_pix(start)
-        stop_ind  = x_in_units.x_to_pix(stop)
+        stop_ind = x_in_units.x_to_pix(stop)
         if start_ind > stop_ind:
             start_ind, stop_ind = stop_ind, start_ind
         spectrum_slice = slice(start_ind,stop_ind)
@@ -360,9 +362,10 @@ class Cube(spectrum.Spectrum):
             numpy notation)
         """
         if not hasattr(self,'parcube'):
-            if not silent: log.info("Must run fiteach before plotting a fit.  "
-                                    "If you want to fit a single spectrum, "
-                                    "use plot_spectrum() and specfit() directly.")
+            if not silent:
+                log.info("Must run fiteach before plotting a fit.  "
+                         "If you want to fit a single spectrum, "
+                         "use plot_spectrum() and specfit() directly.")
             return
 
         if self.plot_special is not None:
@@ -545,15 +548,27 @@ class Cube(spectrum.Spectrum):
 
         import cubes
         if coordsys is not None:
-            self.data = cubes.extract_aperture( self.cube, aperture,
+            self.data = cubes.extract_aperture(self.cube, aperture,
                                                coordsys=coordsys,
                                                wcs=self.mapplot.wcs,
-                                               method=method )
+                                               method=method)
         else:
             self.data = cubes.extract_aperture(self.cube, aperture,
                                                coordsys=None, method=method)
 
     def get_modelcube(self, update=False):
+        """
+        Return or generate a "model cube", which will have the same shape as
+        the ``.cube`` but will have spectra generated from the fitted model.
+
+        If the model cube does not yet exist, one will be generated
+
+        Parameters
+        ----------
+        update : bool
+            If the cube has already been computed, set this to ``True`` to
+            recompute the model.
+        """
         if self._modelcube is None or update:
             yy,xx = np.indices(self.mapplot.plane.shape)
             self._modelcube = np.zeros_like(self.cube)
@@ -575,6 +590,16 @@ class Cube(spectrum.Spectrum):
 
         For guesses, priority is *use_nearest_as_guess*, *usemomentcube*,
         *guesses*, None
+
+        Once you have successfully run this function, the results will be
+        stored in the ``.parcube`` and ``.errcube`` attributes, which are each
+        cubes of shape ``[npars, ny, nx]``, where npars is the number of fitted
+        parameters and ``nx``, ``ny`` are the shape of the map.  ``errcube``
+        contains the errors on the fitted parameters (1-sigma, as returned from
+        the Levenberg-Marquardt fit's covariance matrix).  You can use the
+        attribute ``has_fit``, which is a map of shape ``[ny,nx]`` to find
+        which pixels have been successfully fit.
+
 
         Parameters
         ----------
@@ -613,9 +638,11 @@ class Cube(spectrum.Spectrum):
             3 - print out messages when fitting pixels
             4 - specfit will be verbose
         multicore: int
-            if >1, try to use multiprocessing via parallel_map to run on multiple cores
+            if >1, try to use multiprocessing via parallel_map to run on
+            multiple cores
         continuum_map: np.ndarray
-            Same shape as error map.  Subtract this from data before estimating noise.
+            Same shape as error map.  Subtract this from data before estimating
+            noise.
         prevalidate_guesses: bool
             An extra check before fitting is run to make sure the guesses are
             all within the specified limits.  May be slow, so it is off by
@@ -625,6 +652,9 @@ class Cube(spectrum.Spectrum):
             A boolean mask map, where ``True`` implies that the data are good.
             This will be used for both plotting using `mapplot` and fitting
             using `fiteach`.  If ``None``, will use ``self.maskmap``.
+        integral : bool
+            If set, the integral of each spectral fit will be computed and
+            stored in the attribute ``.integralmap``
 
         """
         if 'multifit' in fitkwargs:
@@ -685,10 +715,12 @@ class Cube(spectrum.Spectrum):
 
         self.parcube = np.zeros((npars,)+self.mapplot.plane.shape)
         self.errcube = np.zeros((npars,)+self.mapplot.plane.shape)
-        if integral: self.integralmap = np.zeros((2,)+self.mapplot.plane.shape)
+        if integral:
+            self.integralmap = np.zeros((2,)+self.mapplot.plane.shape)
 
         # newly needed as of March 27, 2012.  Don't know why.
-        if 'fittype' in fitkwargs: self.specfit.fittype = fitkwargs['fittype']
+        if 'fittype' in fitkwargs:
+            self.specfit.fittype = fitkwargs['fittype']
         self.specfit.fitter = self.specfit.Registry.multifitters[self.specfit.fittype]
 
         # TODO: VALIDATE THAT ALL GUESSES ARE WITHIN RANGE GIVEN THE
@@ -754,7 +786,7 @@ class Cube(spectrum.Spectrum):
             if use_nearest_as_guess and self.has_fit.sum() > 0:
                 if verbose_level > 1 and ii == 0 or verbose_level > 4:
                     log.info("Using nearest fit as guess")
-                d = np.roll( np.roll( distance, x, 0), y, 1)
+                d = np.roll(np.roll(distance, x, 0), y, 1)
                 # If there's no fit, set its distance to be unreasonably large
                 nearest_ind = np.argmin(d+1e10*(True-self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
@@ -765,16 +797,20 @@ class Cube(spectrum.Spectrum):
                 gg = np.mean(self.parcube[:, (ypatch+y)[local_fits],
                                           (xpatch+x)[local_fits]], axis=1)
             elif usemomentcube:
-                if verbose_level > 1 and ii == 0: log.info("Using moment cube")
+                if verbose_level > 1 and ii == 0:
+                    log.info("Using moment cube")
                 gg = self.momentcube[:,y,x]
             elif hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
-                if verbose_level > 1 and ii == 0: log.info("Using input guess cube")
+                if verbose_level > 1 and ii == 0:
+                    log.info("Using input guess cube")
                 gg = guesses[:,y,x]
             elif isinstance(guesses, dict):
-                if verbose_level > 1 and ii == 0: log.info("Using input guess dict")
+                if verbose_level > 1 and ii == 0:
+                    log.info("Using input guess dict")
                 gg = guesses[(y,x)]
             else:
-                if verbose_level > 1 and ii == 0: log.info("Using input guess")
+                if verbose_level > 1 and ii == 0:
+                    log.info("Using input guess")
                 gg = guesses
 
             if np.all(np.isfinite(gg)):
@@ -797,7 +833,8 @@ class Cube(spectrum.Spectrum):
                 self.has_fit[y,x] = False
                 self.parcube[:,y,x] = blank_value
                 self.errcube[:,y,x] = blank_value
-                if integral: self.integralmap[:,y,x] = blank_value
+                if integral:
+                    self.integralmap[:,y,x] = blank_value
 
 
             if blank_value != 0:
@@ -1168,12 +1205,12 @@ class Cube(spectrum.Spectrum):
             for ii,par in enumerate(self.specfit.parinfo):
                 kw = "PLANE%i" % ii
                 parname = par['parname'].strip('0123456789')
-                fitcubefile.header[kw] =  parname
+                fitcubefile.header[kw] = parname
             # set error parameters
             for jj,par in enumerate(self.specfit.parinfo):
                 kw = "PLANE%i" % (ii+jj)
                 parname = "e"+par['parname'].strip('0123456789')
-                fitcubefile.header[kw] =  parname
+                fitcubefile.header[kw] = parname
 
             # overwrite the WCS
             fitcubefile.header['CDELT3'] = 1
@@ -1311,7 +1348,7 @@ def get_neighbors(x, y, shape):
             for ii,jj in itertools.product((-1,0,1),
                                            (-1,0,1))
             if (ii+x < xsh) and (ii+x >= 0)
-            and  (jj+y < ysh) and (jj+y >= 0)
+            and (jj+y < ysh) and (jj+y >= 0)
             and not (ii==0 and jj==0)]
     xpatch, ypatch = zip(*xpyp)
 
