@@ -84,8 +84,9 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
     for sp in splist:
         sp.error[:] = errguess
 
-    spdict[guessline].plotter(figure=guessfignum)
-    spdict[guessline].specfit.plot_fit()
+    if doplot:
+        spdict[guessline].plotter(figure=guessfignum)
+        spdict[guessline].specfit.plot_fit()
 
     spectra = pyspeckit.Spectra(splist)
     spectra.specfit.npeaks = npeaks
@@ -202,7 +203,7 @@ def fitnh3(spectrum, vrange=[-100,100], vrangeunit='km/s', quiet=False, Tex=20,
         spectrum.xarr.convert_to_unit(vrangeunit)
         spectrum.crop(*vrange, unit=vrangeunit)
 
-    spectrum.specfit(fittype='gaussian',negamp=False)
+    spectrum.specfit(fittype='gaussian', negamp=False, guesses='moments')
     ampguess,vguess,widthguess = spectrum.specfit.modelpars
 
     if tau is None:

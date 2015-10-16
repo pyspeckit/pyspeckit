@@ -376,15 +376,19 @@ class Cube(spectrum.Spectrum):
                                                              **self.specfit.fitter.modelfunc_kwargs)(self.xarr)
 
         # set the parinfo values correctly for annotations
-        for pi,p,e in zip(self.specfit.parinfo,
-                          self.specfit.modelpars,
-                          self.errcube[:,y,x]):
-            try:
-                pi['value'] = p
-                pi['error'] = e
-            except ValueError:
-                # likely to happen for failed fits
-                pass
+        self.specfit.parinfo.values = self.parcube[:,y,x]
+        self.specfit.parinfo.errors = self.errcube[:,y,x]
+        self.specfit.fitter.parinfo.values = self.parcube[:,y,x]
+        self.specfit.fitter.parinfo.errors = self.errcube[:,y,x]
+        #for pi,p,e in zip(self.specfit.parinfo,
+        #                  self.specfit.modelpars,
+        #                  self.errcube[:,y,x]):
+        #    try:
+        #        pi['value'] = p
+        #        pi['error'] = e
+        #    except ValueError:
+        #        # likely to happen for failed fits
+        #        pass
 
         self.specfit.plot_fit(**kwargs)
 
@@ -442,7 +446,9 @@ class Cube(spectrum.Spectrum):
         sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=self.cube[:,y,x],
                                 header=header,
                                 error=(self.errorcube[:,y,x] if self.errorcube
-                                       is not None else None))
+                                       is not None else None),
+                                unit=self.unit,
+                               )
 
         sp.specfit = copy.copy(self.specfit)
         # explicitly re-do this (test)
