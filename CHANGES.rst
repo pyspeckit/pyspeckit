@@ -18,6 +18,10 @@ Version 0.1.18 (unreleased)
       in bounds when passed as `guesses`
     * Addition #99: fiteach example with NIR data cubes, specfit example using
       user-created model, and a guide to installing pyspeckit via GitHub.
+    * Enhancement #100: Display EQW highlighting at appropriate location
+    * Addition #102: New N2D+ model
+    * Bugfix #105: Ammonia thin works (though it is still not recommended)
+    * Bugfix #106: Baselines were dependent on the X-axis coordinate unit.
 
 Version 0.1.17 (2015-07-14)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

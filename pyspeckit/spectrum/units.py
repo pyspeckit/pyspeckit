@@ -305,10 +305,12 @@ class SpectroscopicAxis(u.Quantity):
         center_frequency: float
             The reference frequency for determining a velocity.
             Required for conversions between frequency/wavelength/energy and velocity.
+            (redundant with refX)
         center_frequency_unit: string
             If converting between velocity and any other spectroscopic type,
             need to specify the central frequency around which that velocity is
             calculated.
+            (redundant with refX_unit)
         equivalencies : list
             astropy equivalencies list containing tuples of the form:
             (from_unit, to_unit, forward, backward)
@@ -673,37 +675,35 @@ class SpectroscopicAxis(u.Quantity):
         frame : string
             NOT IMPLEMENTED.  When it is, it will allow you to convert between
             LSR, topocentric, heliocentric, rest, redshifted, and whatever other
-            frames we can come up with.  Right now the main holdup is finding a 
+            frames we can come up with.  Right now the main holdup is finding a
             nice python interface to an LSR velocity calculator... and motivation.
-        center_frequency: float
-            The reference frequency for determining a velocity. 
+        refX or center_frequency: float
+            The reference frequency for determining a velocity.
             Required for conversions between frequency/wavelength/energy and velocity.
-        center_frequency_unit: string
+        refX_unit or center_frequency_unit: string
             If converting between velocity and any other spectroscopic type,
             need to specify the central frequency around which that velocity is
             calculated.
             I think this can also accept wavelengths....
         """
-        if not velocity_convention:
+        if velocity_convention is None:
             velocity_convention = self.velocity_convention
-        if not equivalencies:
+        if equivalencies == []:
             equivalencies = kwargs.get('equivalencies', self.equivalencies)
-        if not refX:
-            refX = self.refX
-        if not refX_unit:
-            refX_unit = self.refX_unit
-        if not center_frequency:
-            if self.center_frequency:
-                center_frequency = self.center_frequency
-            elif refX:
-                center_frequency = refX
-        if not center_frequency_unit:
-            if refX_unit:
-                center_frequency_unit = refX_unit
-        try:
-            if not hasattr(center_frequency, 'unit'):
-                center_frequency = u.Quantity(center_frequency, center_frequency_unit)
-        except:
+        if refX is None:
+            if center_frequency is None:
+                refX = self.refX
+            else:
+                refX = center_frequency
+        if refX_unit is None and not hasattr(refX, 'unit'):
+            if center_frequency_unit is None:
+                refX_unit = center_frequency_unit
+            else:
+                refX_unit = self.refX_unit
+
+        if refX is not None:
+            center_frequency = u.Quantity(refX, unit=refX_unit)
+        else:
             center_frequency = None
 
         self.center_frequency, self._equivalencies = \

@@ -256,13 +256,16 @@ class Plotter(object):
 
         self.offset = offset
 
+        # there is a bug where this only seems to update the second time it is called
+        self.label(**kwargs)
         self.label(**kwargs)
         for arg in ['title','xlabel','ylabel']:
             if arg in kwargs:
                 kwargs.pop(arg)
 
         reset_kwargs = {}
-        for arg in ['xmin','xmax','ymin','ymax','reset_xlimits','reset_ylimits','ypeakscale']:
+        for arg in ['xmin', 'xmax', 'ymin', 'ymax', 'reset_xlimits',
+                    'reset_ylimits', 'ypeakscale']:
             if arg in kwargs:
                 reset_kwargs[arg] = kwargs.pop(arg)
 
@@ -567,6 +570,7 @@ class Plotter(object):
         return newplotter
 
     def line_ids(self, line_names, line_xvals, xval_units=None, auto_yloc=True,
+                 velocity_offset=None, velocity_convention='radio',
                  auto_yloc_fraction=0.9,  **kwargs):
         """
         Add line ID labels to a plot using lineid_plot
@@ -579,9 +583,15 @@ class Plotter(object):
         line_names : list
             A list of strings to label the specified x-axis values
         line_xvals : list
-            List of x-axis values (e.g., wavelengths) at which to label the lines
+            List of x-axis values (e.g., wavelengths) at which to label the lines.
+            Can be a list of quantities.
         xval_units : string
-            A valid unit to convert to.  If None, leaves units unchanged
+            The unit of the line_xvals if they are not given as quantities
+        velocity_offset : quantity
+            A velocity offset to apply to the inputs if they are in frequency
+            or wavelength units
+        velocity_convention : 'radio' or 'optical' or 'doppler'
+            Used if the velocity offset is given
         auto_yloc : bool
             If set, overrides box_loc and arrow_tip (the vertical position of
             the lineid labels) in kwargs to be `auto_yloc_fraction` of the plot
@@ -602,13 +612,26 @@ class Plotter(object):
         """
         import lineid_plot
 
-        # convert line_xvals to current units
-        xvals = [self.Spectrum.xarr.x_to_coord(c, xval_units) for c in line_xvals]
+        if velocity_offset is not None:
+            assert velocity_offset.unit.is_equivalent(u.km/u.s)
 
-        # xvals must not be quantities because matplotlib cannot handle these
-        def strip_qty(x):
-            return x.value if hasattr(x,'value') else x
-        xvals = map(strip_qty, xvals)
+        doppler = getattr(u, 'doppler_{0}'.format(velocity_convention))
+        equivalency = doppler(self.Spectrum.xarr.refX)
+
+        xvals = []
+        for xv in line_xvals:
+            if hasattr(xv, 'unit'):
+                pass
+            else:
+                xv = u.Quantity(xv, xval_units)
+
+            xv = xv.to(u.km/u.s,
+                       equivalencies=equivalency)
+            if velocity_offset is not None:
+                xv = xv + velocity_offset
+            xv = xv.to(self.Spectrum.xarr.unit, equivalencies=equivalency)
+
+            xvals.append(xv.value)
 
         if auto_yloc:
             yr = self.axis.get_ylim()

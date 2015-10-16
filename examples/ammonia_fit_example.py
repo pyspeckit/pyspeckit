@@ -1,4 +1,5 @@
 import pyspeckit
+import numpy as np
 
 # Grab a .fits spectrum with a legitimate header
 sp = pyspeckit.Spectrum('G031.947+00.076_nh3_11_Tastar.fits')
@@ -44,6 +45,9 @@ COMMENT   1 blank line
 END
 """
 
+# Start by computing the error using a reasonably signal-free region
+sp.error[:] = sp.stats((-100, 50))['std']
+
 # Change the plot range to be a reasonable physical coverage (the default is to
 # plot the whole 8192 channel spectrum)
 sp.plotter(xmin=-100,xmax=300)
@@ -68,10 +72,15 @@ sp.plotter.figure.savefig('nh3_gaussfit.png')
 print "Guesses: ", sp.specfit.guesses
 print "Best fit: ", sp.specfit.modelpars
 
-# Run the ammonia spec fitter with a reasonable guess 
+# Run the ammonia spec fitter with a reasonable guess
 # Parameters are Tkin, Tex, column, width, centroid, ortho fraction
+# Since we only have a single line (1-1), the kinetic temperature is
+# unconstrained: we'll fix it at 7 K.  Similarly, the ortho fraction
+# is fixed to 0.5
+T=True; F=False
 sp.specfit(fittype='ammonia',
-           guesses=[5.9,4.45,8.3e14,0.84,96.2,0.43],
+           guesses=[7,4.45,np.log10(8.3e14),0.84,96.2,0.5],
+           fixed=[T,F,F,F,F,T],
            quiet=False)
 # sp.specfit.peakbgfit(fittype='ammonia', guesses=[5.9,4.45,8.3e14,0.84,96.2,0.43],quiet=False)
 
@@ -92,9 +101,8 @@ sp.plotter.figure.savefig('nh3_ammonia_fit_zoom.png')
 
 # refit with two components
 sp.specfit(fittype='ammonia',
-        guesses=[4,3.5,5e14,0.68,97.3,0.5]+[15,4.2,7e14,0.52,95.8,0.35],
-        quiet=False)
+           guesses=[7,3.5,np.log10(5e14),0.68,97.3,0.5]+[7,4.2,np.log10(7e14),0.52,95.8,0.5],
+           fixed=[T,F,F,F,F,T]*2,
+           quiet=False)
 sp.specfit.plotresiduals()
 sp.plotter.figure.savefig('nh3_ammonia_multifit_zoom.png')
-
-

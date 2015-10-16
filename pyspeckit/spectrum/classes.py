@@ -394,14 +394,25 @@ class Spectrum(object):
         Fixes CRPIX1 and baseline and model spectra to match cropped data spectrum
 
         """
-        if self.xarr.unit and not unit:
-            unit = self.xarr.unit
-        elif not self.xarr.unit and not unit:
-            unit = u.dimensionless_unscaled
 
         # do slice (this code is redundant... need to figure out how to fix that)
-        x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(unit).value))
-        x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(unit).value))
+        if not hasattr(x1, 'unit') and unit is not None:
+            x1pix = np.argmin(np.abs(x1-self.xarr.as_unit(unit).value))
+            x2pix = np.argmin(np.abs(x2-self.xarr.as_unit(unit).value))
+        elif hasattr(x1, 'unit') and unit is not None:
+            raise ValueError("If you give x1,x2 as quantities, don't specify "
+                             "the X-axis unit (it must be equivalent, though).")
+        elif not hasattr(x1, 'unit') and unit is None:
+            x1pix = x1
+            x2pix = x2
+        else:
+            # Hack: something about the inheritance of xarr prevents equivalent
+            # unit arithmetic
+            x1pix = np.argmin(np.abs(x1-u.Quantity(self.xarr)))
+            x2pix = np.argmin(np.abs(x2-u.Quantity(self.xarr)))
+            x1 = x1.value
+            x2 = x2.value
+
         if x1pix > x2pix:
             x1pix,x2pix = x2pix,x1pix
         elif x1pix == x2pix:
@@ -418,11 +429,15 @@ class Spectrum(object):
             self.specfit._full_model()
 
         if hasattr(self,'header'):
-            history.write_history(self.header,"CROP: Cropped from %g to %g (pixel %i to %i)" % (x1,x2,x1pix,x2pix))
+            history.write_history(self.header,
+                                  "CROP: Cropped from %g to %g (pixel %i to %i)"
+                                  % (x1,x2,x1pix,x2pix))
 
             if self.header.get('CRPIX1'):
                 self.header['CRPIX1'] = self.header.get('CRPIX1') - x1pix
-                history.write_history(self.header,"CROP: Changed CRPIX1 from %f to %f" % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
+                history.write_history(self.header,
+                                      "CROP: Changed CRPIX1 from %f to %f"
+                                      % (self.header.get('CRPIX1')+x1pix,self.header.get('CRPIX1')))
 
     def slice(self, start=None, stop=None, unit='pixel', copy=True, xcopy=True,
               preserve_fits=False):
