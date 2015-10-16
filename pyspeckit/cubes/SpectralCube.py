@@ -1075,8 +1075,9 @@ class Cube(spectrum.Spectrum):
     def load_model_fit(self, fitsfilename, npars, npeaks=1, fittype=None,
                        _temp_fit_loc=(0,0)):
         """
-        Load a parameter + error cube into the .parcube and .errcube
-        attributes.
+        Load a parameter + error cube into the ``.parcube`` and ``.errcube``
+        attributes.  The models can then be examined and plotted using
+        ``.mapplot`` as if you had run ``.fiteach``.
 
         Parameters
         ----------
@@ -1183,7 +1184,18 @@ class Cube(spectrum.Spectrum):
 
     def write_fit(self, fitcubefilename, clobber=False):
         """
-        Write out a fit cube using the information in the fit's parinfo to set the header keywords
+        Write out a fit cube containing the ``.parcube`` and ``.errcube`` using
+        the information in the fit's parinfo to set the header keywords.  The
+        ``PLANE#`` keywords will be used to indicate the content of each plane
+        in the data cube written to the FITS file.  All of the fitted
+        parameters will be written first, followed by all of the errors on
+        those parameters.  So, for example, if you have fitted a single
+        gaussian to each pixel, the dimensions of the saved cube will be ``[6,
+        ny, nx]``, and they will be the amplitude, centroid, width, error on
+        amplitude, error on centroid, and error on width, respectively.
+
+        To load such a file back in for plotting purposes, see
+        `SpectralCube.load_model_fit`.
 
         Parameters
         ----------
