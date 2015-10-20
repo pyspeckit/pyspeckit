@@ -142,13 +142,13 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['matplotlib', 'matplotlib.pyplot', 'matplotlib.figure',
+MOCK_MODULES = {'matplotlib', 'matplotlib.pyplot', 'matplotlib.figure',
                 'matplotlib.widgets', 'matplotlib.cbook', 'pyfits', 'scipy',
-                'astropy']
-MOCK_MODULES = ['numpy', 'scipy', 'pyfits', 'astropy', 'pytest', 'astropy.wcs',
+                'astropy', 
+                'numpy', 'scipy', 'pyfits', 'astropy', 'pytest', 'astropy.wcs',
                 'astropy.io', 'astropy.io.fits', 'astropy.nddata',
                 'scipy.interpolate', 'scipy.ndimage', 'pywcs', 'matplotlib',
-                'matplotlib.pyplot', 'numpy.ma', 'h5py', 'atpy','progressbar']
+                'matplotlib.pyplot', 'numpy.ma', 'h5py', 'atpy','progressbar'}
 for mod_name in MOCK_MODULES:
     if mod_name not in sys.modules:
         sys.modules[mod_name] = Mock()
