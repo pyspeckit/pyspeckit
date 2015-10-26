@@ -211,10 +211,11 @@ class SpectralModel(fitter.SimpleFitter):
 
         # this is a clever way to turn the parameter lists into a dict of lists
         # clever = hard to read
+        locals_dict = locals() # in python3, locals() changes inside a list comprehension
         temp_pardict = OrderedDict([(varname, np.zeros(self.npars*self.npeaks,
                                                        dtype='bool'))
-                                    if locals().get(varname) is None else
-                                    (varname, list(locals().get(varname)))
+                                    if locals_dict.get(varname) is None else
+                                    (varname, list(locals_dict.get(varname)))
             for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
         temp_pardict['parlimits'] = parlimits if parlimits is not None else [(0,0)] * (self.npars*self.npeaks)
         temp_pardict['parlimited'] = parlimited if parlimited is not None else [(False,False)] * (self.npars*self.npeaks)
