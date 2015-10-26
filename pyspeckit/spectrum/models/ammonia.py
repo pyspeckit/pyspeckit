@@ -275,8 +275,8 @@ class ammonia_model(model.SpectralModel):
     def __init__(self,npeaks=1,npars=6,
                  parnames=['tkin','tex','ntot','width','xoff_v','fortho'],
                  **kwargs):
-        self.npeaks = npeaks
-        self.npars = npars
+        self.npeaks = int(npeaks)
+        npars = self.npars = int(npars)
         self._default_parnames = parnames
         self.parnames = copy.copy(self._default_parnames)
 
@@ -371,9 +371,9 @@ class ammonia_model(model.SpectralModel):
             v = np.zeros(len(x))
             for jj in xrange(self.npeaks):
                 modelkwargs = kwargs.copy()
-                for ii in xrange(npars):
-                    name = parnames[ii+jj*npars].strip('0123456789').lower()
-                    modelkwargs.update({name:parvals[ii+jj*npars]})
+                for ii in xrange(int(npars)):
+                    name = parnames[ii+jj*int(npars)].strip('0123456789').lower()
+                    modelkwargs.update({name:parvals[ii+jj*int(npars)]})
                 v += ammonia(x,**modelkwargs)
             return v
         return L
