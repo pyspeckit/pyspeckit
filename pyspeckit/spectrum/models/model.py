@@ -177,7 +177,7 @@ class SpectralModel(fitter.SimpleFitter):
         elif self.default_parinfo is not None and parlimits is None:
             parlimits = [p['limits'] for p in self.default_parinfo]
 
-        self.npeaks = npeaks
+        self.npeaks = int(npeaks)
 
         # the height / parvalue popping needs to be done before the temp_pardict is set in order to make sure
         # that the height guess isn't assigned to the amplitude
@@ -303,7 +303,7 @@ class SpectralModel(fitter.SimpleFitter):
                 v += parvals[0]
             # use len(pars) instead of self.npeaks because we want this to work
             # independent of the current best fit
-            for jj in range((len(parvals)-self.vheight)/self.npars):
+            for jj in range(int((len(parvals)-self.vheight)/self.npars)):
                 lower_parind = jj*self.npars+self.vheight
                 upper_parind = (jj+1)*self.npars+self.vheight
                 v += self.modelfunc(x, *parvals[lower_parind:upper_parind], **kwargs)

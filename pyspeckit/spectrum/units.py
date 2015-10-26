@@ -22,7 +22,7 @@ from astropy import log
 # the templates for this code were grabbed from a few StackOverflow.com threads
 # I changed this to a "SmartCase" dict, by analogy with VIM's smartcase, where anything with caps will
 # be case sensitive, BUT if there is no unit matching the exact case, will search for the lower version too
-# e.g., if you search for Mm, it will return Megameters.  If you search for mm or mM, it will get millimeters
+# e.g., if you search for Mm, it will return Megameter.  If you search for mm or mM, it will get millimeter
 class SmartCaseNoSpaceDict(dict):
     def __init__(self, inputdict=None):
         if inputdict:
@@ -101,13 +101,13 @@ class SmartCaseNoSpaceDict(dict):
             return cased
     
 
-length_dict = {'meters':1.0,'m':1.0,
-               'centimeters':1e-2,'cm':1e-2,
-               'millimeters':1e-3,'mm':1e-3,
-               'nanometers':1e-9,'nm':1e-9,
-               'micrometers':1e-6,'micron':1e-6,'microns':1e-6,'um':1e-6,
-               'kilometers':1e3,'km':1e3,
-               'megameters':1e6,'Mm':1e6,
+length_dict = {'meter':1.0,'m':1.0,
+               'centimeter':1e-2,'cm':1e-2,
+               'millimeter':1e-3,'mm':1e-3,
+               'nanometer':1e-9,'nm':1e-9,
+               'micrometer':1e-6,'micron':1e-6,'microns':1e-6,'um':1e-6,
+               'kilometer':1e3,'km':1e3,
+               'megameter':1e6,'Mm':1e6,
                'angstrom':1e-10,'angstroms':1e-10,'A':1e-10,
                }
 length_dict = SmartCaseNoSpaceDict(length_dict)
@@ -122,10 +122,10 @@ frequency_dict = {'Hz':1.0,
                   }
 frequency_dict = SmartCaseNoSpaceDict(frequency_dict)
 
-velocity_dict = {'meters/second':1.0,'m/s':1.0,'m s-1':1.0,'ms-1':1.0,
-                 'kilometers/second':1e3,'kilometers/s':1e3,'km/s':1e3,'kms':1e3,'km s-1':1e3,'kms-1':1e3,
-                 'centimeters/second':1e-2,'centimeters/s':1e-2,'cm/s':1e-2,'cms':1e-2,
-                 'megameters/second':1e6,'megameters/s':1e6,'Mm/s':1e6,'Mms':1e6,
+velocity_dict = {'meter/second':1.0,'m/s':1.0,'m s-1':1.0,'ms-1':1.0,
+                 'kilometer/second':1e3,'kilometer/s':1e3,'km/s':1e3,'kms':1e3,'km s-1':1e3,'kms-1':1e3,
+                 'centimeter/second':1e-2,'centimeter/s':1e-2,'cm/s':1e-2,'cms':1e-2,
+                 'megameter/second':1e6,'megameter/s':1e6,'Mm/s':1e6,'Mms':1e6,
         }
 velocity_dict = SmartCaseNoSpaceDict(velocity_dict)
 velocity_conventions = {'optical': u.doppler_optical, 'radio': u.doppler_radio, 'relativistic': u.doppler_relativistic}
@@ -291,7 +291,7 @@ class SpectroscopicAxis(u.Quantity):
         Make a new spectroscopic axis instance
         Default units Hz
         
-        Parameters
+        Parameter
         ----------
         xarr : np.ndarray
             An array of X-axis values in whatever unit specified
@@ -667,7 +667,7 @@ class SpectroscopicAxis(u.Quantity):
         to convert between frequency/velocity/wavelength and simply change the 
         units of the X axis.  Frame conversion is... not necessarily implemented.
 
-        Parameters
+        Parameter
         ----------
         unit : string
             What unit do you want to 'view' the array as?
@@ -720,7 +720,7 @@ class SpectroscopicAxis(u.Quantity):
         """
         Create a "delta-x" array corresponding to the X array.
 
-        Parameters
+        Parameter
         ----------
         coordinate_location : [ 'left', 'center', 'right' ]
             Does the coordinate mark the left, center, or right edge of the
@@ -743,7 +743,7 @@ class SpectroscopicAxis(u.Quantity):
         """
         Return the channel spacing if channels are linear
 
-        Parameters
+        Parameter
         ----------
         tolerance : float
             Tolerance in the difference between pixels that determines
@@ -760,7 +760,7 @@ class SpectroscopicAxis(u.Quantity):
 
     def _make_header(self, tolerance=1e-8):
         """
-        Generate a set of WCS parameters for the X-array
+        Generate a set of WCS parameter for the X-array
         """
         self.make_dxarr()
 
@@ -803,7 +803,7 @@ class SpectroscopicAxis(u.Quantity):
         Utility function to add equivalencies from the velocity_convention
         and the center_frequency
 
-        Parameters
+        Parameter
         ----------
         velocity_convention : str
             'optical', 'radio' or 'relativistic'
@@ -844,7 +844,7 @@ class SpectroscopicAxes(SpectroscopicAxis):
     """
     Counterpart to Spectra: takes a list of SpectroscopicAxis's and
     concatenates them while checking for consistency and maintaining
-    header parameters
+    header parameter
     """
 
     def __new__(self, axislist, frame='rest', xtype=None, refX=None,
@@ -899,7 +899,7 @@ class EchelleAxes(SpectroscopicAxis):
     """
     Counterpart to Spectra: takes a list of SpectroscopicAxis's and
     stacks them while checking for consistency and maintaining
-    header parameters
+    header parameter
     """
 
     def __new__(self, axislist, frame='rest', xtype=None, refX=None,
@@ -948,7 +948,7 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
                           convention='radio'):
     """
 
-    Parameters
+    Parameter
     ----------
     velocities : np.ndarray
         An array of velocity values
@@ -1065,7 +1065,7 @@ def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
 
 def velocity_to_wavelength(velocities, input_units, center_wavelength=None,
                            center_wavelength_units=None,
-                           wavelength_units='meters', convention='optical'):
+                           wavelength_units='meter', convention='optical'):
     """
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
@@ -1118,8 +1118,8 @@ def wavelength_to_velocity(wavelengths, input_units, center_wavelength=None,
     if velocity_units not in velocity_dict:
         raise ValueError("Bad velocity units: %s" % (velocity_units))
 
-    wavelength_m = wavelengths / wavelength_dict['meters'] * wavelength_dict[input_units]
-    center_wavelength_m = center_wavelength / wavelength_dict['meters'] * wavelength_dict[center_wavelength_units]
+    wavelength_m = wavelengths / wavelength_dict['meter'] * wavelength_dict[input_units]
+    center_wavelength_m = center_wavelength / wavelength_dict['meter'] * wavelength_dict[center_wavelength_units]
     frequency_hz = speedoflight_ms / wavelength_m
     center_frequency_hz = speedoflight_ms / center_wavelength_m
 
