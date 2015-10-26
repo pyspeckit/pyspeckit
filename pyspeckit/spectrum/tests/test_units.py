@@ -8,7 +8,7 @@ convention = ['optical','radio','relativistic']
 
 unit_type_dict = {
     'Hz' :'frequency', 'kHz':'frequency', 'MHz':'frequency', 'GHz':'frequency',
-    'hz' :'frequency', 'khz':'frequency', 'mhz':'frequency', 'ghz':'frequency',
+    # not permitted by astropy 'hz' :'frequency', 'khz':'frequency', 'mhz':'frequency', 'ghz':'frequency',
     'THz':'frequency', 
     'meter/second':'velocity', 'm/s':'velocity', 'kilometer/s':'velocity',
     'kilometer/second':'velocity',

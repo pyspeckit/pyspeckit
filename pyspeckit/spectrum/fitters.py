@@ -1424,7 +1424,7 @@ class Specfit(interactive.Interactive):
                     if mycfg.WARN: print("WARNING: The computation of the error "
                                          "on the integral is not obviously "
                                          "correct or robust... it's just a guess.")
-                    OK = np.abs( fullmodel ) > threshold
+                    OK = self.model_mask(threshold=threshold, add_baseline=False)
                     error = np.sqrt((self.errspec[OK]**2).sum()) * dx
                     #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
             else:
