@@ -359,7 +359,9 @@ class Measurements(object):
         """
 
         flux = 0
-        for i in xrange(len(pars) / 3):
+        niter = (len(pars) / 3)
+        assert niter == int(niter)
+        for i in xrange(int(niter)):
             flux += np.sqrt(2. * np.pi) * pars[3 * i] * abs(pars[2 + 3 * i])
 
         return flux * self.fluxnorm

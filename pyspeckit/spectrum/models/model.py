@@ -221,7 +221,12 @@ class SpectralModel(fitter.SimpleFitter):
         temp_pardict['parlimited'] = parlimited if parlimited is not None else [(False,False)] * (self.npars*self.npeaks)
         for k,v in temp_pardict.items():
             if (self.npars*self.npeaks) / len(v) > 1:
-                temp_pardict[k] = list(v) * ((self.npars*self.npeaks) / len(v))
+                n_components = ((self.npars*self.npeaks) / len(v))
+                if n_components != int(n_components):
+                    raise ValueError("The number of parameter values is not a "
+                                     "multiple of the number of allowed "
+                                     "parameters.")
+                temp_pardict[k] = list(v) * int(n_components)
 
         # generate the parinfo dict
         # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
