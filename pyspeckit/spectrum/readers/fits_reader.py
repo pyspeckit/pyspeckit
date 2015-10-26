@@ -62,7 +62,7 @@ def open_1d_pyfits(pyfits_hdu, specnum=0, wcstype='', specaxis="1",
     # 1 = 1D spectrum
     # 3 = "3D" spectrum with a single x,y point (e.g., JCMT smurf/makecube)
     if hdr.get('NAXIS') > 1:
-        for ii in xrange(1,hdr.get('NAXIS')+1):
+        for ii in range(1,hdr.get('NAXIS')+1):
             ctype = hdr.get('CTYPE%i'%ii)
             if ctype in units.xtype_dict:
                 specaxis="%i" % ii
@@ -103,7 +103,7 @@ will run into errors.""")
             # this is an IRAF .ms.fits file with a 'background' in the 3rd dimension
             spec = ma.array(data[specnum,apnum,:]).squeeze()
         else:
-            for ii in xrange(1,hdr.get('NAXIS')+1):
+            for ii in range(1,hdr.get('NAXIS')+1):
                 # only fail if extra axes have more than one row
                 if hdr.get('NAXIS%i' % ii) > 1 and (ii != int(specaxis)):
                     raise ValueError("Too many axes for open_1d_fits")
@@ -116,7 +116,7 @@ will run into errors.""")
 
     if scale_keyword is not None:
         try:
-            print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
+            print("Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action))
             scaleval = hdr[scale_keyword]
             spec = scale_action(spec,scaleval)
             errspec = scale_action(errspec,scaleval)
@@ -128,7 +128,7 @@ will run into errors.""")
         # Use the CLASS FITS definition (which is non-standard)
         # http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node84.html
         # F(n) = RESTFREQ + CRVALi + ( n - CRPIXi ) * CDELTi
-        if verbose: print "Loading a CLASS .fits spectrum"
+        if verbose: print("Loading a CLASS .fits spectrum")
         dv = -1*hdr.get('CDELT1')
         if hdr.get('RESTFREQ'):
             v0 = hdr.get('RESTFREQ') + hdr.get('CRVAL1')
@@ -142,7 +142,7 @@ will run into errors.""")
         v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
         p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
         hdr['CDELT%s' % specaxis] = dv
-        if verbose: print "Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
+        if verbose: print("Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv))
     elif hdr.get(str('CDELT%s%s' % (specaxis,wcstype))):
         if hdr.get(str('PC{0}_{0}'.format(specaxis))):
             dv = hdr['CDELT%s%s' % (specaxis,wcstype)] * hdr.get(str('PC{0}_{0}'.format(specaxis)))
@@ -150,9 +150,9 @@ will run into errors.""")
             dv = hdr['CDELT%s%s' % (specaxis,wcstype)]
         v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
         p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
-        if verbose: print "Using the FITS CDELT value.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
+        if verbose: print("Using the FITS CDELT value.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv))
     elif len(data.shape) > 1:
-        if verbose: print "No CDELT or CD in header.  Assuming 2D input with 1st line representing the spectral axis."
+        if verbose: print("No CDELT or CD in header.  Assuming 2D input with 1st line representing the spectral axis.")
         # try assuming first axis is X axis
         if hdr.get('CUNIT%s%s' % (specaxis,wcstype)):
             xarr = data[0,:]
@@ -279,7 +279,7 @@ def read_echelle(pyfits_hdu):
 
     x_axes = []
 
-    for specnum, axstring in specaxdict.iteritems():
+    for specnum, axstring in specaxdict.items():
         axsplit = axstring.replace('"','').split()
         if specnum != int(axsplit[0]):
             raise ValueError("Mismatch in IRAF Echelle specification")
@@ -290,7 +290,7 @@ def read_echelle(pyfits_hdu):
         elif hdr['CTYPE1'] == 'MULTISPE':
             xax,naxis,headerkws = make_multispec_axis(hdr, axsplit, WAT1_dict)
 
-        cards = [pyfits.Card(k,v) for (k,v) in headerkws.iteritems()]
+        cards = [pyfits.Card(k,v) for (k,v) in headerkws.items()]
         header = pyfits.Header(cards)
 
         xarr = make_axis(xax,header)
