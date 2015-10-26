@@ -2,6 +2,7 @@
 Example demonstrating how to fit a complex H-alpha profile after subtracting off a satellite line 
 (in this case, He I 6678.151704)
 """
+from __future__ import print_function
 import pyspeckit
 from astropy import units as u
 
@@ -46,14 +47,14 @@ sp.plotter.savefig("SN2009ip_UT121002_Halpha_voigt_zoom.png")
 
 # print the fit results in table form
 # This includes getting the equivalent width for each component using sp.specfit.EQW
-print " ".join(["%15s %15s" % (s,s+"err") for s in sp.specfit.parinfo.parnames])," ".join(["%15s" % ("EQW"+str(i)) for i,w in enumerate(sp.specfit.EQW(components=True))])
-print " ".join(["%15g %15g" % (par.value,par.error) for par in sp.specfit.parinfo])," ".join(["%15g" % w for w in sp.specfit.EQW(components=True)])
+print(" ".join(["%15s %15s" % (s,s+"err") for s in sp.specfit.parinfo.parnames])," ".join(["%15s" % ("EQW"+str(i)) for i,w in enumerate(sp.specfit.EQW(components=True))]))
+print(" ".join(["%15g %15g" % (par.value,par.error) for par in sp.specfit.parinfo])," ".join(["%15g" % w for w in sp.specfit.EQW(components=True)]))
 
 # here are some other fitted parameters that can be printed:
-print "Fitted EQW:", sp.specfit.EQW()
-print "Direct EQW:", sp.specfit.EQW(fitted=False)
-print "Approximate FWHM:", sp.specfit.measure_approximate_fwhm()
-print "Approximate FWHM (with interpolation):", sp.specfit.measure_approximate_fwhm(interpolate_factor=10)
+print("Fitted EQW:", sp.specfit.EQW())
+print("Direct EQW:", sp.specfit.EQW(fitted=False))
+print("Approximate FWHM:", sp.specfit.measure_approximate_fwhm())
+print("Approximate FWHM (with interpolation):", sp.specfit.measure_approximate_fwhm(interpolate_factor=10))
 
 # zoom in further for a detailed view of the profile fit
 sp.plotter.axis.set_xlim(6562-150,6562+150)
@@ -85,7 +86,8 @@ just_halpha.specfit(guesses=[2.4007096541802202, 6563.2307968382256, 3.565344615
                     xmin=6100,xmax=7000,
                     limitedmax=[False,False,True,True]*3,
                     limitedmin=[True,False,True,True]*3,
-                    limits=[(0,0),(0,0),(0,100),(0,100)]*3)
+                    limits=[(0,0),(0,0),(0,100),(0,100)]*3,
+                   )
 
 # overplot the components and residuals again
 just_halpha.specfit.plot_components(add_baseline=False,component_yoffset=-0.1)

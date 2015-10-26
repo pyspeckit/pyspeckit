@@ -174,6 +174,8 @@ class SpectralModel(fitter.SimpleFitter):
                 parlimits = list(zip(minpars,(False,)*len(parnames)))
         elif maxpars is not None:
             parlimits = list(zip((False,)*len(parnames),maxpars))
+        elif limits is not None:
+            parlimits = limits
         elif self.default_parinfo is not None and parlimits is None:
             parlimits = [p['limits'] for p in self.default_parinfo]
 
