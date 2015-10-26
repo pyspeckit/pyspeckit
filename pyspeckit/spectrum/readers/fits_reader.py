@@ -6,7 +6,7 @@ from .. import units
 import numpy.ma as ma
 import numpy as np
 from . import make_axis
-import operator
+from astropy.extern.six import operator
 from pyspeckit.specwarnings import warn
 
 def open_1d_fits(filename, hdu=0, **kwargs):
@@ -37,7 +37,7 @@ def open_1d_fits(filename, hdu=0, **kwargs):
 
 def open_1d_pyfits(pyfits_hdu, specnum=0, wcstype='', specaxis="1",
         errspecnum=None, autofix=True, scale_keyword=None,
-        scale_action=operator.div, verbose=False, apnum=0, **kwargs):
+        scale_action=operator.truediv, verbose=False, apnum=0, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
