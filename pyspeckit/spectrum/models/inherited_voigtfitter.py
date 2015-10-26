@@ -104,7 +104,11 @@ def voigt_fitter():
             fwhm_pars=['gwidth','lwidth'],
             )
     myclass.__name__ = "voigt"
-    myclass.moments = types.MethodType(voigt_moments, myclass,
-                                       myclass.__class__)
+    try:
+        myclass.moments = types.MethodType(voigt_moments, myclass,
+                                           myclass.__class__)
+    except TypeError: # indicates py3 is being used
+        # http://stackoverflow.com/questions/10729909/convert-builtin-function-type-to-method-type-in-python-3?lq=1
+        myclass.moments = voigt_moments.__get__(myclass)
     
     return myclass
