@@ -239,7 +239,7 @@ class SpectralModel(fitter.SimpleFitter):
             'limits':temp_pardict['parlimits'][ii+self.npars*jj],
             'limited':temp_pardict['parlimited'][ii+self.npars*jj],
             'fixed':temp_pardict['parfixed'][ii+self.npars*jj],
-            'parname':temp_pardict['parnames'][ii].upper()+"%0i" % jj,
+            'parname':temp_pardict['parnames'][ii].upper()+"%0i" % int(jj),
             'error':float(temp_pardict['parerror'][ii+self.npars*jj]),
             'tied':temp_pardict['partied'][ii+self.npars*jj] if temp_pardict['partied'][ii+self.npars*jj] else ""} 
             for jj in range(self.npeaks)
