@@ -178,9 +178,10 @@ class hyperfinemodel(object):
         if len(args) % 2 != 0:
             raise ValueError("Incorrect number of arguments for varying amplitude"
                              " and width.  Need N amplitudes, N widths.")
+        nargs = int(len(args)/2)
         return self.hyperfine(xarr, xoff_v=xoff_v,
-                              tau=dict(zip(self.line_names,args[:len(args)/2])),
-                              width=dict(zip(self.line_names,args[len(args)/2:])),
+                              tau=dict(zip(self.line_names,args[:nargs])),
+                              width=dict(zip(self.line_names,args[nargs:])),
                               vary_hyperfine_tau=True,
                               vary_hyperfine_width=True,
                               return_tau=True, **kwargs)
