@@ -699,8 +699,8 @@ class Cube(spectrum.Spectrum):
 
 
 
-        valid_pixels = zip(xx.flat[sort_distance][OK.flat[sort_distance]],
-                           yy.flat[sort_distance][OK.flat[sort_distance]])
+        valid_pixels = list(zip(xx.flat[sort_distance][OK.flat[sort_distance]],
+                                yy.flat[sort_distance][OK.flat[sort_distance]]))
 
         if len(valid_pixels) != len(set(valid_pixels)):
             raise ValueError("There are non-unique pixels in the 'valid pixel' list.  "
