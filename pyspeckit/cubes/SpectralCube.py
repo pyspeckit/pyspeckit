@@ -28,6 +28,7 @@ from astropy import log
 from astropy import wcs
 from astropy import units
 from astropy.utils.console import ProgressBar
+from astropy.extern.six import iteritems
 from functools import wraps
 
 # import parent package
@@ -444,7 +445,7 @@ class Cube(spectrum.Spectrum):
 
         ct = 'CTYPE{0}'.format(self._first_cel_axis_num)
         header = cubes.speccen_header(fits.Header(cards=[(k,v) for k,v in
-                                                         self.header.iteritems()
+                                                         iteritems(self.header)
                                                          if k != 'HISTORY']),
                                       lon=x, lat=y, system=self.system,
                                       proj=(self.header[ct][-3:]
@@ -521,7 +522,7 @@ class Cube(spectrum.Spectrum):
 
         ct = 'CTYPE{0}'.format(self._first_cel_axis_num)
         header = cubes.speccen_header(fits.Header(cards=[(k,v) for k,v in
-                                                         self.header.iteritems()
+                                                         iteritems(self.header)
                                                          if k != 'HISTORY']),
                                       lon=aperture[0],
                                       lat=aperture[1],

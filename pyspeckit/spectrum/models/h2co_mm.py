@@ -8,6 +8,7 @@ It is based entirely on RADEX models.
 
 This is the EWR fork of the fitter in pyspeckit.  
 """
+from __future__ import print_function
 import numpy as np
 from . import hyperfine
 from . import fitter,model#,modelgrid
@@ -120,7 +121,7 @@ def h2co_mm_radex(xarr,
 
     if verbose:
         for ta,tk in zip(tau,tex):
-            print "density %20.12g temperature %20.12g column %20.12g: tau %20.12g tex %20.12g" % (logDensity, Temperature, logColumn, ta, tk)
+            print("density %20.12g temperature %20.12g column %20.12g: tau %20.12g tex %20.12g" % (logDensity, Temperature, logColumn, ta, tk))
 
     if debug:
         import pdb; pdb.set_trace()

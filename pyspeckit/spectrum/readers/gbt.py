@@ -8,6 +8,7 @@ supported, frequency switching is not.
 
 """
 from __future__ import print_function
+from astropy.extern.six import iteritems
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -362,7 +363,7 @@ def find_matched_freqs(reduced_blocks, debug=False):
     # most annoying part of this whole process... (besides the obvious 1+1=23452342345 error...)
     # ifnumbers are approximately defined by the order things are written.... but only very approximately
     for ifnum,freq in enumerate(unique_frequencies):
-        IF_dict[ifnum] = [sampler for (sampler,rf) in round_frequencies.iteritems() if rf == freq]
+        IF_dict[ifnum] = [sampler for (sampler,rf) in iteritems(round_frequencies) if rf == freq]
         if debug: print(ifnum,freq,IF_dict[ifnum])
 
     return IF_dict
@@ -409,7 +410,7 @@ def identify_samplers(block):
             (name,
                 {'pol': pols[name],
                  'feed': feeds[name],
-                 'IF': [k for k,v in ifs.iteritems() if name in v][0]})
+                 'IF': [k for k,v in iteritems(ifs) if name in v][0]})
                 for name in block.keys()
                 )
 
@@ -427,12 +428,12 @@ def average_pols(block):
     feeddict = find_feeds(block)
     IDs = identify_samplers(block)
 
-    for ifnum,ifsampler in ifdict.iteritems():
-        for sampler,feednum in feeddict.iteritems():
+    for ifnum,ifsampler in iteritems(ifdict):
+        for sampler,feednum in iteritems(feeddict):
             if sampler not in ifsampler:
                 continue
             newname = "if%ifd%i" % (ifnum, feednum)
-            matched_samplers = [sampler_name for (sampler_name,ID) in IDs.iteritems()
+            matched_samplers = [sampler_name for (sampler_name,ID) in iteritems(IDs)
                     if ID['feed'] == feednum and ID['IF'] == ifnum]
             if len(matched_samplers) != 2:
                 raise ValueError("Too few/many matches: %s" % matched_samplers)
@@ -454,7 +455,7 @@ def average_IF(block, debug=False):
     ifdict = find_matched_freqs(block, debug=debug)
 
     import operator
-    for ifnum,ifsamplers in ifdict.iteritems():
+    for ifnum,ifsamplers in iteritems(ifdict):
         if debug: print("if%i: freq %g" % (ifnum, block[ifsamplers[0]].header['OBSFREQ']))
         averaged_dict["if%i" % ifnum] = reduce(operator.add,[block[name] for name in ifsamplers]) / len(ifsamplers)
 

@@ -9,6 +9,7 @@ end-user, though.
 """
 from __future__ import print_function
 from astropy.extern.six.moves import xrange
+from astropy.extern.six import iteritems
 import string,re,sys
 import numpy
 try:
@@ -168,7 +169,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
 
     if asdict or asStruct:
         mydict = dict(zip(nms,x.T))
-        for k,v in mydict.iteritems():
+        for k,v in iteritems(mydict):
             mydict[k] = get_autotype(v)
         if asdict:
             return mydict

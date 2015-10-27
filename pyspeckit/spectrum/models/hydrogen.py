@@ -18,6 +18,7 @@ had to OCR and pull out by hand some of the coefficients.
 
 """
 import numpy as np
+from astropy.extern.six import iteritems
 from .. import models
 from .. import units
 
@@ -165,7 +166,7 @@ for line in table14dot2['balmer']:
     r_to_hbeta["balmer"+line[0]] = np.array(line[2:])
     wavelength["balmer"+line[0]] = line[1]
 
-for series,values in table14dot2.iteritems():
+for series,values in iteritems(table14dot2):
     if series == 'balmer':
         continue
     for line in values:
@@ -187,7 +188,7 @@ def find_lines(xarr):
     Given a :class:`pyspeckit.units.SpectrosopicAxis` instance, finds all the
     lines that are in bounds.  Returns a list of line names.
     """
-    return [linename for (linename,lam) in wavelength.iteritems() if xarr.as_unit('microns').in_range(lam)]
+    return [linename for (linename,lam) in iteritems(wavelength) if xarr.as_unit('microns').in_range(lam)]
 
 def hydrogen_fitter(sp, temperature=10000, tiedwidth=False):
     """

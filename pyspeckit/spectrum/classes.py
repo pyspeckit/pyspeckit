@@ -16,6 +16,7 @@ different wavelengths/frequencies
 """
 from __future__ import print_function
 import numpy as np
+from astropy.extern.six import iteritems
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -254,7 +255,7 @@ class Spectrum(object):
         elif not isinstance(registry, fitters.Registry):
             raise TypeError("registry must be an instance of the fitters.Registry class")
 
-        for modelname, model in registry.multifitters.iteritems():
+        for modelname, model in iteritems(registry.multifitters):
             self.Registry.add_fitter(modelname, model,
                     registry.npars[modelname], key=registry.associated_keys.get(modelname))
 

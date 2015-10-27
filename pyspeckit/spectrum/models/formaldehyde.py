@@ -95,7 +95,8 @@ hf_freq_dict={
         'threethree_f44':28.97480e9,
         'threethree_f33':28.97481e9,
         }
-freq_dict = dict(hf_freq_dict.items() + central_freq_dict.items())
+freq_dict = copy.copy(hf_freq_dict)
+freq_dict.update(central_freq_dict)
 aval_dict = {
     'oneone':     10**-8.44801,  #64*!pi**4/(3*h*c**3)*nu11**3*mu0**2*(1/2.)
     'twotwo':     10**-7.49373,  #64*!pi**4/(3*h*c**3)*nu22**3*mu0**2*(2/3.)

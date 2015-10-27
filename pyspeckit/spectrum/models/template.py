@@ -1,6 +1,6 @@
 from ..interpolation import interp,_interp
 import numpy as np
-import model
+from . import model
 
 def spectral_template_generator(template_spectrum, xshift_units='km/s', left=0,
                                 right=0):

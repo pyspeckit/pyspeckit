@@ -5,9 +5,9 @@ HCN Hyperfine Fitter
 This is an HCN fitter...
 ref for line params: http://www.strw.leidenuniv.nl/~moldata/datafiles/hcn@hfs.dat
 """
+from __future__ import print_function
 import numpy as np
-from .. import units
-from . import fitter,model,modelgrid
+from astropy.extern.six import iteritems
 import matplotlib.cbook as mpcb
 import copy
 try:
@@ -20,7 +20,10 @@ try:
     scipyOK = True
 except ImportError:
     scipyOK=False
-import hyperfine
+
+from .. import units
+from . import fitter,model,modelgrid
+from . import hyperfine
 
 
 freq_dict={# splatalogue frequencies
@@ -60,7 +63,7 @@ relative_strength_total_degeneracy = {
 line_names = freq_dict.keys()
 
 ckms = units.speedoflight_ms / 1e3 #2.99792458e5
-voff_lines_dict = dict([(k,(v-88.6318470e9)/88.6318470e9*ckms) for k,v in freq_dict.iteritems()])
+voff_lines_dict = dict([(k,(v-88.6318470e9)/88.6318470e9*ckms) for k,v in iteritems(freq_dict)])
 
 hcn_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict, line_strength_dict, relative_strength_total_degeneracy)
 hcn_amp = hcn_vtau.ampfitter
@@ -139,7 +142,7 @@ def hcn_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
 
     if verbose:
-        print "density %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, column, tau, tex)
+        print("density %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, column, tau, tex))
 
     if debug:
         import pdb; pdb.set_trace()

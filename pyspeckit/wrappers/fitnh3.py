@@ -23,6 +23,7 @@ Example use:
 """
 from __future__ import print_function
 from astropy.extern.six.moves import xrange
+from astropy.extern.six import iteritems
 import pyspeckit
 from .. import spectrum
 from ..spectrum.classes import Spectrum, Spectra
@@ -51,7 +52,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
     """
     spdict = dict([ (linename,Spectrum(value, scale_keyword=scale_keyword))
                    if type(value) is str else (linename,value)
-                   for linename, value in input_dict.iteritems() ])
+                   for linename, value in iteritems(input_dict) ])
     splist = spdict.values()
 
     for sp in splist: # required for plotting, cropping
@@ -158,7 +159,7 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
                                   "implemented.  Pull requests are "
                                   "welcome!".format(len(splist)))
 
-    for linename,sp in spdict.iteritems():
+    for linename,sp in iteritems(spdict):
         if linename not in axdict:
             raise NotImplementedError("Plot windows for {0} cannot "
                                       "be automatically arranged (yet)."
@@ -195,7 +196,7 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
                       'threethree':pyplot.subplot(223),
                       'fourfour':pyplot.subplot(224)
                      }
-        for linename,sp in spdict.iteritems():
+        for linename,sp in iteritems(spdict):
             sp.specfit.plotresiduals(axis=axdict[linename])
 
 
@@ -226,7 +227,7 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
     sp.xarr.convert_to_unit('GHz')
 
     spdict = {}
-    for linename,freq in spectrum.models.ammonia.freq_dict.iteritems():
+    for linename,freq in iteritems(spectrum.models.ammonia.freq_dict):
         if not hasattr(freq, 'unit'):
             freq = freq*u.Hz
         if vrange is not None:
