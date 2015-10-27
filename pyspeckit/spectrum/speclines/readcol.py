@@ -7,6 +7,7 @@ For a modular ascii table reader, http://cxc.harvard.edu/contrib/asciitable/ is
 probably better.  This single-function code is probably more intuitive to an
 end-user, though.
 """
+from __future__ import print_function
 import string,re,sys
 import numpy
 try:

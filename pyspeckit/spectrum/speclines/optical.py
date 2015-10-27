@@ -1,6 +1,7 @@
 """
 Storage for optical spectral line information.
 """
+from __future__ import print_function
 
 import numpy as np
 
