@@ -1,5 +1,4 @@
 from __future__ import print_function
-irom __future__ import print_function
 import pyspeckit
 
 # Grab a .fits spectrum with a legitimate header
