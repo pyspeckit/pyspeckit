@@ -1,12 +1,13 @@
 from __future__ import print_function
 from astropy.extern.six.moves import xrange
-from .. import units
-from .. import classes
+
 try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
 import numpy as np
+
+from .. import units
 
 def read_galex(fitsfilename, orderselection='obj'):
     """
@@ -34,6 +35,7 @@ def read_galex(fitsfilename, orderselection='obj'):
     >>> spblock.plotter()
     >>> spavg.plotter()
     """
+    from .. import classes
 
     ff = pyfits.open(fitsfilename)
     bintable = ff[1].data
@@ -42,9 +44,9 @@ def read_galex(fitsfilename, orderselection='obj'):
     wavelength = bintable.zero + np.arange(len(bintable.disp)) * bintable.disp
     xaxis = units.SpectroscopicAxis(wavelength,units='angstroms')
 
-    splist = [classes.Spectrum(data=bintable[orderselection][:,ii], error=bintable[orderselection+"err"][:,ii], xarr=xaxis, header=ff[1].header)
+    splist = [Spectrum(data=bintable[orderselection][:,ii], error=bintable[orderselection+"err"][:,ii], xarr=xaxis, header=ff[1].header)
             for ii in xrange(bintable[orderselection].shape[1])]
 
-    galexblock = classes.ObsBlock(splist)
+    galexblock = ObsBlock(splist)
 
     return galexblock

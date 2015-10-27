@@ -19,7 +19,7 @@ had to OCR and pull out by hand some of the coefficients.
 """
 import numpy as np
 from astropy.extern.six import iteritems
-from .. import models
+from . import model
 from .. import units
 
 # log(temperature), alphaBalphaB = [[1.0,9.283],
@@ -286,7 +286,7 @@ def add_to_registry(sp):
     Add the Hydrogen model to the Spectrum's fitter registry
     """
     # can't have absorption in recombination case
-    extincted_hydrogen_emission = models.model.SpectralModel(hydrogen_model, 4, 
+    extincted_hydrogen_emission = model.SpectralModel(hydrogen_model, 4, 
             shortvarnames=('A','\\sigma','\\Delta x','A_K'),
             parnames=['amplitude','width','velocity','extinction'],
             parlimited=[(True,False),(True,False),(False,False), (True,False)], 
