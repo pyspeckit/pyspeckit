@@ -874,11 +874,11 @@ class mpfit:
         if parinfo is not None:
             if type(parinfo) is ParinfoList:
                 pass
-            elif type(parinfo) != types.ListType:
+            elif not isinstance(parinfo, list):
                 self.errmsg = 'ERROR: PARINFO must be a list of dictionaries.'
                 return
             else:
-                if type(parinfo[0]) != types.DictionaryType:
+                if not isinstance(parinfo[0], dict):
                     self.errmsg = 'ERROR: PARINFO must be a list of dictionaries.'
                     return
             if ((xall is not None) and (len(xall) != len(parinfo))):
@@ -1527,11 +1527,11 @@ class mpfit:
 
         # Convert to numeric arrays if possible
         test = default
-        if type(default) == types.ListType:
+        if isinstance(default, list):
             test=default[0]
-        if isinstance(test, types.IntType):
+        if isinstance(test, int):
             values = numpy.asarray(values, int)
-        elif isinstance(test, types.FloatType):
+        elif isinstance(test, float):
             values = numpy.asarray(values, float)
         return values
 

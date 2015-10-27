@@ -3,6 +3,7 @@ Parellel Map snippet by Brian Refsdal
 
 http://www.astropython.org/snippet/2010/3/Parallel-map-using-multiprocessing
 """
+from __future__ import print_function
 import numpy
 import warnings
 from astropy import log
@@ -179,15 +180,15 @@ if __name__ == "__main__":
 
   iterable = [vals]*numtasks
 
-  print ('Running numpy.linalg.eigvals %iX on matrix size [%i,%i]' %
-      (numtasks,size[0],size[1]))
+  print('Running numpy.linalg.eigvals %iX on matrix size [%i,%i]' %
+        (numtasks,size[0],size[1]))
 
   tt = time.time()
   presult = parallel_map(f, iterable)
-  print 'parallel map in %g secs' % (time.time()-tt)
+  print('parallel map in %g secs' % (time.time()-tt))
 
   tt = time.time()
   result = map(f, iterable)
-  print 'serial map in %g secs' % (time.time()-tt)
+  print('serial map in %g secs' % (time.time()-tt))
 
   assert (numpy.asarray(result) == numpy.asarray(presult)).all()

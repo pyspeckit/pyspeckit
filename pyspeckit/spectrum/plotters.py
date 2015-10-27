@@ -118,9 +118,11 @@ class Plotter(object):
         """
         if self.figure is not None:
             cbs = self.figure.canvas.callbacks.callbacks
+            # this may cause problems since the dict of key press events is a
+            # dict, i.e. not ordered, and we want to pop the first one...
             self._mpl_key_callbacks = dict([(k, cbs['key_press_event'].pop(k))
                                             for k in
-                                            cbs['key_press_event'].keys()[0:1]])
+                                            list(cbs['key_press_event'].keys())[0:1]])
 
     def _reconnect_matplotlib_keys(self):
         """

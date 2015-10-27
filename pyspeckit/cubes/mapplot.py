@@ -15,6 +15,7 @@ so it is possible to make publication-quality plots.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 """
+from __future__ import print_function
 import matplotlib
 import matplotlib.pyplot
 import matplotlib.figure
@@ -33,13 +34,13 @@ except ImportError:
         pywcsOK = True
     except ImportError:
         pywcsOK = False
-import cubes
 try:
     import aplpy
     icanhasaplpy = True
 except: # aplpy fails with generic exceptions instead of ImportError
     icanhasaplpy = False
 
+from . import cubes
 
 class MapPlotter(object):
     """
@@ -155,7 +156,7 @@ class MapPlotter(object):
                 try:
                     self.FITSFigure.add_colorbar()
                 except Exception as ex:
-                    print "ERROR: Could not create colorbar!  Error was %s" % str(ex)
+                    print("ERROR: Could not create colorbar!  Error was %s" % str(ex))
             self._origin = 0 # FITS convention
             # TODO: set _origin to 1 if using PIXEL units, not real wcs
         else:
@@ -168,7 +169,7 @@ class MapPlotter(object):
                 try:
                     self.colorbar = matplotlib.pyplot.colorbar(self.axis.images[0])
                 except Exception as ex:
-                    print "ERROR: Could not create colorbar!  Error was %s" % str(ex)
+                    print("ERROR: Could not create colorbar!  Error was %s" % str(ex))
             self._origin = 0 # normal convention 
 
         self.canvas = self.axis.figure.canvas
@@ -266,7 +267,7 @@ class MapPlotter(object):
                     self.circle(x,y,clickX-1,clickY-1)
                 elif event.key == 'o':
                     clickX,clickY = round(clickX),round(clickY)
-                    print "OverPlotting spectrum from point %i,%i" % (clickX-1,clickY-1)
+                    print("OverPlotting spectrum from point %i,%i" % (clickX-1,clickY-1))
                     color=self.overplot_colorcycle.next()
                     self._add_click_mark(clickX,clickY,clear=False, color=color)
                     self.Cube.plot_spectrum(clickX-1,clickY-1,clear=False, color=color, linestyle=self.overplot_linestyle)
@@ -286,29 +287,29 @@ class MapPlotter(object):
                     linestyle = self.overplot_linestyle
                     clear=False
                 rad = ( (self._clickX-clickX)**2 + (self._clickY-clickY)**2 )**0.5
-                print "Plotting circle from point %i,%i to %i,%i (r=%f)" % (self._clickX-1,self._clickY-1,clickX-1,clickY-1,rad)
+                print("Plotting circle from point %i,%i to %i,%i (r=%f)" % (self._clickX-1,self._clickY-1,clickX-1,clickY-1,rad))
                 self._add_circle(self._clickX,self._clickY,clickX,clickY)
                 self.circle(self._clickX-1,self._clickY-1,clickX-1,clickY-1,clear=clear,linestyle=linestyle,color=color)
             elif hasattr(event,'button') and event.button is not None:
                 if event.button==1:
                     clickX,clickY = round(clickX),round(clickY)
-                    print "Plotting spectrum from point %i,%i" % (clickX-1,clickY-1)
+                    print("Plotting spectrum from point %i,%i" % (clickX-1,clickY-1))
                     self._remove_circle()
                     self._add_click_mark(clickX,clickY,clear=True)
                     self.Cube.plot_spectrum(clickX-1,clickY-1,clear=True)
                     if plot_fit: self.Cube.plot_fit(clickX-1, clickY-1, silent=True)
                 elif event.button==2:
                     clickX,clickY = round(clickX),round(clickY)
-                    print "OverPlotting spectrum from point %i,%i" % (clickX-1,clickY-1)
+                    print("OverPlotting spectrum from point %i,%i" % (clickX-1,clickY-1))
                     color=self.overplot_colorcycle.next()
                     self._add_click_mark(clickX,clickY,clear=False, color=color)
                     self.Cube.plot_spectrum(clickX-1,clickY-1,clear=False, color=color, linestyle=self.overplot_linestyle)
                 elif event.button==3:
-                    print "Disconnecting GAIA-like tool"
+                    print("Disconnecting GAIA-like tool")
                     self._disconnect()
             else:
-                print "Call failed for some reason: "
-                print "event: ",event
+                print("Call failed for some reason: ")
+                print("event: ",event)
         else:
             pass
             # never really needed... warn("Click outside of axes")
