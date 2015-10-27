@@ -113,7 +113,7 @@ three for JF1F  011, and one for JF1F  010. Thus, the sum over all 15
 transitions gives the total spin degeneracy
 """
 
-line_names = freq_dict.keys()
+line_names = tuple(freq_dict.keys())
 
 ckms = units.speedoflight_ms / 1e3 #2.99792458e5
 voff_lines_dict = dict([(k,(v-93.176261e9)/93.176261e9*ckms) for k,v in iteritems(freq_dict)])
