@@ -58,6 +58,19 @@ The default is gaussian ('g'), all options are listed below:
         """
         self._make_interactive_help_message()
 
+    def copy(self, deep=False):
+        if deep:
+            # this doesn't work in py3?
+            cp = copy.deepcopy
+        else:
+            cp = copy.copy
+        new_registry = Registry()
+        new_registry.multifitters = cp(self.multifitters)
+        new_registry.peakbgfitters = cp(self.peakbgfitters)
+        new_registry.fitkeys = cp(self.fitkeys)
+        new_registry.associatedkeys = cp(self.associatedkeys)
+        return new_registry
+
     def add_fitter(self, name, function, npars, override=False, key=None,
                    multisingle=None):
         ''' 
@@ -1585,7 +1598,7 @@ class Specfit(interactive.Interactive):
             to None to prevent overwriting a previous plot.
         """
 
-        newspecfit = Specfit(parent, copy.deepcopy(self.Registry))
+        newspecfit = Specfit(parent, self.Registry.copy())
         newspecfit.parinfo = copy.deepcopy(self.parinfo)
         if newspecfit.parinfo is None:
             newspecfit.modelpars = None
