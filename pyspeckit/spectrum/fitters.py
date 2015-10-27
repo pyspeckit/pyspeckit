@@ -15,6 +15,7 @@ from . import models
 from ..specwarnings import warn
 from . import interactive
 from . import history
+from . import widgets
 
 class Registry(object):
     """
@@ -1629,7 +1630,6 @@ class Specfit(interactive.Interactive):
         .. todo:: Add a button in the navbar that makes this window pop up
         http://stackoverflow.com/questions/4740988/add-new-navigate-modes-in-matplotlib
         """
-        import widgets
 
         if parlimitdict is None:
             # try to create a reasonable parlimit dict
