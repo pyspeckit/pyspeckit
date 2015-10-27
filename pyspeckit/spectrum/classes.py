@@ -59,7 +59,7 @@ class Spectrum(object):
     formats.
     """
 
-    from interpolation import interpnans
+    from .interpolation import interpnans
 
     def __init__(self, filename=None, filetype=None, xarr=None, data=None,
                  error=None, header=None, doplot=False, maskdata=True,

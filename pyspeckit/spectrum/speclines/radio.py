@@ -12,7 +12,7 @@ try:
     import atpy
     atpyOK = True
 except ImportError:
-    import readcol
+    from ..readers import readcol
     atpyOK = False
 
 try:
