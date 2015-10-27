@@ -32,6 +32,7 @@ from functools import wraps
 
 # import parent package
 from .. import spectrum
+from ..spectrum import smooth
 from ..spectrum.units import (generate_xarr, SpectroscopicAxis,
                               SpectroscopicAxes)
 from ..parallel_map import parallel_map
@@ -450,12 +451,11 @@ class Cube(spectrum.Spectrum):
                                             if ct in self.header else
                                             'CAR'))
 
-        sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=self.cube[:,y,x],
-                                header=header,
-                                error=(self.errorcube[:,y,x] if self.errorcube
-                                       is not None else None),
-                                unit=self.unit,
-                               )
+        sp = spectrum.Spectrum(xarr=self.xarr.copy(), data=self.cube[:,y,x],
+                               header=header, error=(self.errorcube[:,y,x] if
+                                                     self.errorcube is not None
+                                                     else None),
+                               unit=self.unit,)
 
         sp.specfit = copy.copy(self.specfit)
         # explicitly re-do this (test)
@@ -535,10 +535,10 @@ class Cube(spectrum.Spectrum):
             header['APREFF'] = (aperture[2]*aperture[3])**0.5
             header['APPA'] = aperture[4]
 
-        sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
-                                data=data,
-                                error=error,
-                                header=header)
+        sp = spectrum.Spectrum(xarr=self.xarr.copy(),
+                               data=data,
+                               error=error,
+                               header=header)
 
         sp.specfit = self.specfit.copy(parent=sp)
 
@@ -1161,7 +1161,7 @@ class Cube(spectrum.Spectrum):
             self.cube = cubes.spectral_smooth(self.cube,smooth,**kwargs)
             self.xarr = self.xarr[::smooth]
             if hasattr(self,'data'):
-                self.data = pyspeckit.smooth.smooth(self.data,smooth,**kwargs)
+                self.data = smooth.smooth(self.data,smooth,**kwargs)
             if len(self.xarr) != self.cube.shape[0]:
                 raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
             if self.errorcube is not None:
