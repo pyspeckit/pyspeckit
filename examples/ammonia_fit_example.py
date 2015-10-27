@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pyspeckit
 import numpy as np
 
@@ -69,8 +70,8 @@ sp.specfit(negamp=False, guesses='moments')
 # Save the fit...
 sp.plotter.figure.savefig('nh3_gaussfit.png')
 # and print some information to screen
-print "Guesses: ", sp.specfit.guesses
-print "Best fit: ", sp.specfit.modelpars
+print("Guesses: ", sp.specfit.guesses)
+print("Best fit: ", sp.specfit.modelpars)
 
 # Run the ammonia spec fitter with a reasonable guess
 # Parameters are Tkin, Tex, column, width, centroid, ortho fraction
@@ -89,8 +90,8 @@ sp.specfit(fittype='ammonia',
 sp.specfit.plotresiduals()
 
 sp.plotter.figure.savefig('nh3_ammonia_fit.png')
-print "Guesses: ", sp.specfit.guesses
-print "Best fit: ", sp.specfit.modelpars
+print("Guesses: ", sp.specfit.guesses)
+print("Best fit: ", sp.specfit.modelpars)
 
 
 # re-plot zoomed in

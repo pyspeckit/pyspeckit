@@ -58,18 +58,20 @@ The default is gaussian ('g'), all options are listed below:
         """
         self._make_interactive_help_message()
 
-    def copy(self, deep=False):
-        if deep:
-            # this doesn't work in py3?
-            cp = copy.deepcopy
-        else:
-            cp = copy.copy
-        new_registry = Registry()
-        new_registry.multifitters = cp(self.multifitters)
-        new_registry.peakbgfitters = cp(self.peakbgfitters)
-        new_registry.fitkeys = cp(self.fitkeys)
-        new_registry.associatedkeys = cp(self.associatedkeys)
-        return new_registry
+    def __copy__(self):
+        # http://stackoverflow.com/questions/1500718/what-is-the-right-way-to-override-the-copy-deepcopy-operations-on-an-object-in-p
+        cls = self.__class__
+        result = cls.__new__(cls)
+        result.__dict__.update(self.__dict__)
+        return result
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
 
     def add_fitter(self, name, function, npars, override=False, key=None,
                    multisingle=None):
@@ -1598,7 +1600,7 @@ class Specfit(interactive.Interactive):
             to None to prevent overwriting a previous plot.
         """
 
-        newspecfit = Specfit(parent, self.Registry.copy())
+        newspecfit = Specfit(parent, copy.deepcopy(self.Registry))
         newspecfit.parinfo = copy.deepcopy(self.parinfo)
         if newspecfit.parinfo is None:
             newspecfit.modelpars = None

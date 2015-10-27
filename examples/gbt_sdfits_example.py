@@ -1,3 +1,4 @@
+from __future__ import print_function
 try:
     from astropy.io import fits as pyfits
 except ImportError:
@@ -25,17 +26,17 @@ av2.plotter(axis=av1.plotter.axis,clear=False,color='b')
 
 calonA9 = blocks['A9ON1'].average()
 caloffA9 = blocks['A9OFF1'].average()
-print "tsys: ",gbt.dcmeantsys(calonA9, caloffA9, calonA9.header['TCAL'])
+print("tsys: ",gbt.dcmeantsys(calonA9, caloffA9, calonA9.header['TCAL']))
 
 G32 = reduced_nods = A049.reduce_target(objectname, verbose=True)
-print G32
+print(G32)
 
 G32.average_IFs(debug=True)
 G32.average_pols()
 G32.spectra['if0'].plotter()
 
 G37 = A049.reduce_target('G37.87-0.40')
-print G37
+print(G37)
 G37.average_IFs(debug=True)
 G37.spectra['if0'].plotter()
 
@@ -44,7 +45,7 @@ num = '1'
 av2 = blocks[name+'OFF'+num].average(debug=True)
 #while av2.data.mean() > 0.01:
 #    av2 = blocks[name+'OFF'+num].average(debug=True)
-#    print av2
+#    print(av2)
 
 colors = ['k','b','r','g']
 for fd,col in zip(['A9','A13','C25','C29'],colors):
