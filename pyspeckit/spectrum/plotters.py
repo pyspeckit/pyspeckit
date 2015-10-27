@@ -14,7 +14,7 @@ import astropy.units as u
 import copy
 import inspect
 
-from import widgets
+from . import widgets
 from ..specwarnings import warn
 
 interactive_help_message = """

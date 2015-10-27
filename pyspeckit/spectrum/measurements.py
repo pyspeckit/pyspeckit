@@ -226,9 +226,9 @@ class Measurements(object):
         refname = refname[condition]
 
         if len(refpos) == 0:
-            print 'WARNING: No reference lines in this wavelength regime.'
+            print('WARNING: No reference lines in this wavelength regime.')
         elif len(refpos) < self.Nlines:
-            print 'WARNING: More observed lines than reference lines in this band.'
+            print('WARNING: More observed lines than reference lines in this band.')
 
         # Construct all possible (N-element) combos of reference lines
         combos = itertools.combinations(refpos, min(self.Nlines, len(refpos)))
@@ -291,7 +291,7 @@ class Measurements(object):
 
             # If we've know a-priori which lines the unmatched lines are likely to be, use that information
             else:
-                print self.miscline
+                print(self.miscline)
                 for i, miscline in enumerate(self.miscline):
                     for j, x in enumerate(zip(*mpars)[1]):
                         if abs(x - miscline['wavelength']) < self.misctol:
@@ -312,7 +312,7 @@ class Measurements(object):
 
         for line in self.lines.keys():
             if self.debug:
-                print "Computing parameters for line %s" % line
+                print("Computing parameters for line %s" % line)
 
             self.lines[line]['fwhm'] = self.compute_fwhm(self.lines[line]['modelpars'])
             self.lines[line]['flux'] = self.compute_flux(self.lines[line]['modelpars'])

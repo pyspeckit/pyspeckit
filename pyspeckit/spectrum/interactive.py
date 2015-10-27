@@ -112,10 +112,10 @@ class Interactive(object):
                     self.fittype = fittername
                     print("Selected multi-fitter %s" % fittername)
                 else: 
-                    print "ERROR: Did not find fitter %s" % fittername
+                    print("ERROR: Did not find fitter %s" % fittername)
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
         elif debug or self._debug:
-            print "Button press not acknowledged",event
+            print("Button press not acknowledged",event)
 
 
     def selectregion_interactive(self, event, mark_include=True, debug=False, **kwargs):
@@ -131,7 +131,7 @@ class Interactive(object):
             self.nclicks_b1 = 1
             self._xclick1 = xpix
             self.xclicks.append(xpix)
-            if debug or self._debug: print "Click 1: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax)
+            if debug or self._debug: print("Click 1: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax))
         elif self.nclicks_b1 == 1:
             self._xclick2 = xpix
             self.nclicks_b1 = 0
@@ -158,7 +158,7 @@ class Interactive(object):
                     highlight_line.set_ydata(hly)
                 self.Spectrum.plotter.refresh()
 
-            if debug or self._debug: print "Click 2: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax)
+            if debug or self._debug: print("Click 2: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax))
 
         self._update_xminmax()
 
@@ -206,7 +206,7 @@ class Interactive(object):
         Width is assumed to be half-width-half-max
         """
         modnum = 1+nwidths
-        if debug or self._debug: print "nclicks: %i nwidths: %i modnum: %i" % (self.nclicks_b2,nwidths,modnum)
+        if debug or self._debug: print("nclicks: %i nwidths: %i modnum: %i" % (self.nclicks_b2,nwidths,modnum))
         if self.nclicks_b2 == 0:
             self.firstclick_guess()
         if self.nclicks_b2 % modnum == 0:
@@ -218,7 +218,7 @@ class Interactive(object):
             self.guesses += [peakguess,event.xdata] + [1]*nwidths
             self.npeaks += 1
             self.nclicks_b2 += 1
-            if debug or self._debug: print "Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata)
+            if debug or self._debug: print("Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata))
             self.button2plot += [self.Spectrum.plotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
             #self.Spectrum.plotter.refresh() #plot(**self.Spectrum.plotter.plotkwargs)
         elif self.nclicks_b2 % modnum >= 1:
@@ -226,18 +226,18 @@ class Interactive(object):
             whichwidth = self.nclicks_b2 % modnum
             self.guesses[-whichwidth] = (abs(event.xdata-self.guesses[-1-nwidths]) /
                     numpy.sqrt(2*numpy.log(2)))
-            if debug or self._debug: print "Width %i whichwidth %i click %i at x,y %g,%g width: %g" % (self.npeaks,whichwidth,self.nclicks_b2,event.xdata,event.ydata,self.guesses[-whichwidth])
+            if debug or self._debug: print("Width %i whichwidth %i click %i at x,y %g,%g width: %g" % (self.npeaks,whichwidth,self.nclicks_b2,event.xdata,event.ydata,self.guesses[-whichwidth]))
             self.button2plot += self.Spectrum.plotter.axis.plot([event.xdata,
                 2*self.guesses[-1-nwidths]-event.xdata],[event.ydata]*2,
                 color='r')
             #self.Spectrum.plotter.refresh() #plot(**self.Spectrum.plotter.plotkwargs)
             if self.nclicks_b2 / (1+nwidths) > self.npeaks:
-                print "There have been %i middle-clicks but there are only %i features" % (self.nclicks_b2,self.npeaks)
+                print("There have been %i middle-clicks but there are only %i features" % (self.nclicks_b2,self.npeaks))
                 self.npeaks += 1
             self.nclicks_b2 += 1
         else:
             raise ValueError("Bug in guesspeakwidth: somehow, the number of clicks doesn't make sense.")
-        if debug or self._debug: print "Guesses: ",self.guesses
+        if debug or self._debug: print("Guesses: ",self.guesses)
 
     def firstclick_guess(self):
         """
@@ -258,13 +258,13 @@ class Interactive(object):
         cids_to_remove = []
         if not hasattr(self.Spectrum.plotter.figure,'canvas'):
             # just quit out; saves a tab...
-            if debug or self._debug: print "Didn't find a canvas, quitting."
+            if debug or self._debug: print("Didn't find a canvas, quitting.")
             return
         for eventtype in ('button_press_event','key_press_event'):
             for key,val in self.Spectrum.plotter.figure.canvas.callbacks.callbacks[eventtype].iteritems():
                 if "event_manager" in val.func.__name__:
                     cids_to_remove.append(key)
-                    if debug or self._debug: print "Removing CID #%i with attached function %s" % (key,val.func.__name__)
+                    if debug or self._debug: print("Removing CID #%i with attached function %s" % (key,val.func.__name__))
         for cid in cids_to_remove:
             self.Spectrum.plotter.figure.canvas.mpl_disconnect(cid)
 
@@ -296,7 +296,7 @@ class Interactive(object):
         if reset_selection:
             self.includemask[:] = False
         if print_message: 
-            print self.interactive_help_message
+            print(self.interactive_help_message)
         if clear_all_connections: 
             self.clear_all_connections()
             self.Spectrum.plotter._disconnect_matplotlib_keys()
@@ -326,9 +326,9 @@ class Interactive(object):
         if self.keyclick == self.click:
             OKkey = False
         if not OKkey:
-            print "Interactive session failed to connect keyboard.  Key presses will not be accepted."
+            print("Interactive session failed to connect keyboard.  Key presses will not be accepted.")
         if not OKclick:
-            print "Interactive session failed to connect mouse.  Mouse clicks will not be accepted."
+            print("Interactive session failed to connect mouse.  Mouse clicks will not be accepted.")
 
 
     def clear_highlights(self):
@@ -398,7 +398,7 @@ class Interactive(object):
                 self.xmax = xmax
             self.includemask[self.xmin:self.xmax] = True
         elif reset:
-            if verbose or debug or self._debug: print "Resetting xmin/xmax to full limits of data"
+            if verbose or debug or self._debug: print("Resetting xmin/xmax to full limits of data")
             self.xmin = 0
             # End-inclusive!
             self.xmax = self.Spectrum.data.shape[0]
@@ -406,7 +406,7 @@ class Interactive(object):
             #raise ValueError("Need to input xmin and xmax, or have them set by plotter, for selectregion.")
         elif self.Spectrum.plotter.xmin is not None and self.Spectrum.plotter.xmax is not None and fit_plotted_area:
             if use_window_limits or (use_window_limits is None and self.use_window_limits):
-                if debug or self._debug: print "Resetting plotter xmin,xmax and ymin,ymax to the currently visible region"
+                if debug or self._debug: print("Resetting plotter xmin,xmax and ymin,ymax to the currently visible region")
                 self.Spectrum.plotter.set_limits_from_visible_window(debug=debug)
             self.xmin = numpy.floor(self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmin))
             self.xmax = numpy.ceil(self.Spectrum.xarr.x_to_pix(self.Spectrum.plotter.xmax))

@@ -2,11 +2,11 @@ from __future__ import print_function
 import numpy as np
 import matplotlib
 from ..config import ConfigDescriptor as cfgdec
+from .. import specwarnings
+from .. import mpfit
 from . import interactive
 from . import history
 from . import models
-from .. import specwarnings
-from . import mpfit
 from astropy import log
 import copy
 

@@ -11,9 +11,8 @@ from . import units
 from . import utils
 from . import readers
 from . import writers
+from . import logger
 from .. import config
-
-import logger
 
 def register_reader(filetype, function, suffix, default=False):
     ''' 
