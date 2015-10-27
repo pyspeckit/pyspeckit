@@ -15,17 +15,23 @@ unit_type_dict = {
     'centimeter/second':'velocity',
     'megameter/s':'velocity',
     'megameter/second':'velocity','Mm/s':'velocity',
-    'km/s':'velocity', 'kms':'velocity', 'centimeter/s':'velocity',
-    'kms-1':'velocity', 'km s-1':'velocity', 'm s-1':'velocity',  'ms-1':'velocity',
+    'km/s':'velocity',
+    #'kms':'velocity',
+    'centimeter/s':'velocity',
+    #'kms-1':'velocity',
+    'km s-1':'velocity', 'm s-1':'velocity',
+    #'ms-1':'velocity',
     'cm/s':'velocity', #'cms':'velocity', 
     'meter':'wavelength','m':'wavelength',
     'centimeter':'wavelength','cm':'wavelength',
     'millimeter':'wavelength','mm':'wavelength',
     'nanometer':'wavelength','nm':'wavelength',
-    'micrometer':'wavelength','micron':'wavelength','microns':'wavelength','um':'wavelength',
+    'micrometer':'wavelength','micron':'wavelength',
+    'um':'wavelength',
     'kilometer':'wavelength','km':'wavelength',
     'megameter':'wavelength','Mm':'wavelength',
-    'angstrom':'wavelength','angstroms':'wavelength','A':'wavelength',
+    'angstrom':'wavelength',#'angstroms':'wavelength',
+    'AA':'wavelength',
     'unknown':'pixels',
     None: 'pixels',
 }
@@ -34,7 +40,6 @@ params = [(a,b,c,d) for a in unit_type_dict if a not in ('unknown',None)
                   for b in unit_type_dict if b not in ('unknown',None)
                   for c in convention
                   for d in ['GHz','cm']]
-params = params[:5]
 
 @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
 def test_convert_to(unit_from, unit_to, convention, ref_unit):
@@ -63,9 +68,12 @@ def test_initialize_units():
     assert xarr.unit == u.m
 
 @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
-def test_convert_units(unit_from,unit_to,convention,ref_unit):
-    xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=unit_from,refX=5,refX_unit=ref_unit)
-    xarr.convert_to_unit(unit_to,convention=convention)
+def test_convert_units(unit_from, unit_to, convention, ref_unit):
+    xarr = units.SpectroscopicAxis(np.linspace(1, 10, 10), unit=unit_from,
+                                   refX=5, refX_unit=ref_unit,
+                                   velocity_convention=convention,
+                                  )
+    xarr.convert_to_unit(unit_to)
     assert xarr.unit == unit_to
 
 def test_convert_units2():
