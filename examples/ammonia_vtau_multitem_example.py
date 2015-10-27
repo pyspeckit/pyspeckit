@@ -60,7 +60,7 @@ spectrum.specfit(fittype='nh3_vtau_123', guesses=guesses)
 
 # display the correct and fitted answers
 print("Low column version:")
-def printthings(ammonia=ammonia.ammonia):
+def printthings(ammonia=ammonia.ammonia, xarr=xarr):
     print("Real optical depths of component 1: ",[ammonia(xarr, tkin=20,
                                                           ntot=15, fortho=0.5,
                                                           xoff_v=0.0,
@@ -93,7 +93,7 @@ spectrum2.specfit(fittype='nh3_vtau_123', guesses=guesses)
 
 # We can also examine what tau really should have been... kinda.
 print("High column version:")
-def printthings(ammonia=ammonia.ammonia):
+def printthings(ammonia=ammonia.ammonia, xarr=xarr):
     print("Real optical depths of component 1: ",[ammonia(xarr, tkin=20,
                                                           ntot=16, fortho=0.5,
                                                           xoff_v=0.0,
