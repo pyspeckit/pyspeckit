@@ -10,6 +10,7 @@ headers.
 
 """
 from __future__ import print_function
+from astropy.extern.six.moves import xrange
 from numpy import sqrt,repeat,indices,newaxis,pi,cos,sin,array,mean,nansum
 from math import acos,atan2,tan
 import numpy

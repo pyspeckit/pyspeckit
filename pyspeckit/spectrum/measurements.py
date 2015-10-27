@@ -1,5 +1,6 @@
 from __future__ import print_function
 import numpy as np
+from astropy.extern.six.moves import xrange
 import itertools
 from . import cosmology
 from collections import OrderedDict

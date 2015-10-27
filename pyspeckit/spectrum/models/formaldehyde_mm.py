@@ -7,8 +7,9 @@ This is a formaldehyde 3_03-2_02 / 3_22-221 and 3_03-2_02/3_21-2_20 fitter.
 It is based entirely on RADEX models.
 """
 import numpy as np
-import hyperfine
+from . import hyperfine
 from . import fitter,model#,modelgrid
+from astropy.extern.six.moves import xrange
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:

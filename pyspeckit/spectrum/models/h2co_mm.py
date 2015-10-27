@@ -9,7 +9,7 @@ It is based entirely on RADEX models.
 This is the EWR fork of the fitter in pyspeckit.  
 """
 import numpy as np
-import hyperfine
+from . import hyperfine
 from . import fitter,model#,modelgrid
 try: # for model grid reading
     import astropy.io.fits as pyfits
@@ -21,6 +21,7 @@ try:
     scipyOK = True
 except ImportError:
     scipyOK=False
+from astropy.extern.six.moves import xrange
 
 # h2co_mm_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
 #         freq_dict, line_strength_dict, relative_strength_total_degeneracy)

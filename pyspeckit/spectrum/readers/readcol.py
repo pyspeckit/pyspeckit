@@ -8,6 +8,7 @@ probably better.  This single-function code is probably more intuitive to an
 end-user, though.
 """
 from __future__ import print_function
+from astropy.extern.six.moves import xrange
 import string,re,sys
 import numpy
 try:

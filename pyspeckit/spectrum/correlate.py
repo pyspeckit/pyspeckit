@@ -4,6 +4,7 @@ try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
+from astropy.extern.six.moves import xrange
 from . import interpolation
 from . import units as units_module
 from . import classes

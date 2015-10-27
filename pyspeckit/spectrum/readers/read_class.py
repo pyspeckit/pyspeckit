@@ -6,6 +6,7 @@ GILDAS CLASS file reader
 Read a CLASS file into an :class:`pyspeckit.spectrum.ObsBlock`
 """
 from __future__ import print_function
+from astropy.extern.six.moves import xrange
 try:
     import astropy.io.fits as pyfits
 except ImportError:

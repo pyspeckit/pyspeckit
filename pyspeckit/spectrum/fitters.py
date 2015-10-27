@@ -6,6 +6,7 @@ import re
 import itertools
 from astropy import log
 from astropy import units as u
+from astropy.extern.six.moves import xrange
 
 from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec

@@ -5,7 +5,7 @@ import os
 try:
     from agpy import print_timing
 except:
-    print_timing = lambda(x): x
+    print_timing = lambda x: x
 
 @print_timing
 def fit_source(sp,debug=False,autorefresh=False,refit=False):

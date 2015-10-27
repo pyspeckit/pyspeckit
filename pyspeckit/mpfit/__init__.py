@@ -1,1 +1,1 @@
-from mpfit import mpfit,mpfitException
+from .mpfit import mpfit,mpfitException

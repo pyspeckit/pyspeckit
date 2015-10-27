@@ -10,6 +10,7 @@ from __future__ import print_function
 import numpy
 from . import units
 from astropy import log
+from astropy.extern.six.moves import xrange
 
 class Interactive(object):
 
@@ -300,8 +301,8 @@ class Interactive(object):
         if clear_all_connections: 
             self.clear_all_connections()
             self.Spectrum.plotter._disconnect_matplotlib_keys()
-        key_manager = lambda(x): self.event_manager(x, debug=debug, **kwargs)
-        click_manager = lambda(x): self.event_manager(x, debug=debug, **kwargs)
+        key_manager = lambda x: self.event_manager(x, debug=debug, **kwargs)
+        click_manager = lambda x: self.event_manager(x, debug=debug, **kwargs)
         key_manager.__name__ = "event_manager"
         click_manager.__name__ = "event_manager"
 

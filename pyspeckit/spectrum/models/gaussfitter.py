@@ -16,6 +16,7 @@ from pyspeckit.mpfit import mpfit
 import matplotlib.cbook as mpcb
 from . import mpfit_messages
 from . import model
+from astropy.extern.six.moves import xrange
 
 class gaussian_fitter(model.SpectralModel):
     """

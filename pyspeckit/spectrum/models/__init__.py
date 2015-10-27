@@ -1,3 +1,5 @@
+from astropy.extern.six.moves import xrange
+
 mpfit_messages={
 -16:"""A parameter or function value has become infinite or an undefined
    number.  This is usually a consequence of numerical overflow in the

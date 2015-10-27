@@ -8,7 +8,8 @@ You can access this same model through baseline, but it's here in case the
 continuum is what you're really trying to measure.
 
 """
-import model
+from astropy.extern.six.moves import xrange
+from . import model
 import numpy 
 
 def polymodel(x, *pars, **kwargs):

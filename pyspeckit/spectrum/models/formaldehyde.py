@@ -8,13 +8,14 @@ components of the formaldehyde lines and has both LTE and RADEX LVG based
 models
 """
 import numpy as np
-from pyspeckit.mpfit import mpfit
+from ...mpfit import mpfit
 from .. import units
 from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb
 import copy
-import hyperfine
-from pyspeckit.specwarnings import warn
+from . import hyperfine
+from ..specwarnings import warn
+from astropy.extern.six.moves import xrange
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:

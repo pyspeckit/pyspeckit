@@ -22,6 +22,7 @@ Example use:
 
 """
 from __future__ import print_function
+from astropy.extern.six.moves import xrange
 import pyspeckit
 from .. import spectrum
 from ..spectrum.classes import Spectrum, Spectra
