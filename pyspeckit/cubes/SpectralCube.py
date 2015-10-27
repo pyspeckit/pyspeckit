@@ -14,28 +14,32 @@ The 'grunt work' is performed by the :py:mod:`cubes` module
 
 
 """
-# import parent package
-import pyspeckit
-from pyspeckit import spectrum
-from ..spectrum.units import (generate_xarr, SpectroscopicAxis,
-                              SpectroscopicAxes)
-# import local things
-import mapplot
+from __future__ import print_function
+
 import time
 import numpy as np
-from pyspeckit.parallel_map import parallel_map
 import types
 import copy
 import itertools
-from pyspeckit.spectrum import history
+import warnings
+
 from astropy.io import fits
-import cubes
 from astropy import log
 from astropy import wcs
 from astropy import units
 from astropy.utils.console import ProgressBar
 from functools import wraps
-import warnings
+
+# import parent package
+from .. import spectrum
+from ..spectrum.units import (generate_xarr, SpectroscopicAxis,
+                              SpectroscopicAxes)
+from ..parallel_map import parallel_map
+from ..spectrum import history
+
+# import local things
+from . import mapplot
+from . import cubes
 
 def not_for_cubes(func):
 

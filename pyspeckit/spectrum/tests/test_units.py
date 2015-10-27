@@ -41,80 +41,87 @@ params = [(a,b,c,d) for a in unit_type_dict if a not in ('unknown',None)
                   for c in convention
                   for d in ['GHz','cm']]
 
-@pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
-def test_convert_to(unit_from, unit_to, convention, ref_unit):
-    x = units.SpectroscopicAxis(np.arange(5), unit=u.angstrom, velocity_convention='optical', equivalencies=u.doppler_optical(3*u.AA))
-    x.convert_to_unit(unit_to,convention=convention)
+class TestUnits(object):
+
+    def __init__(self):
+        self.x = units.SpectroscopicAxis(np.arange(5), unit=u.angstrom, velocity_convention='optical', equivalencies=u.doppler_optical(3*u.AA))
+        self.length = units.SpectroscopicAxis(np.arange(5), unit=u.nm)
+        self.frequency = units.SpectroscopicAxis(np.arange(5), unit=u.GHz)
+        self.speed =  units.SpectroscopicAxis(np.arange(5), unit=u.km/u.s)
 
 
-def test_equivalencies_1():
-    x = units.SpectroscopicAxis(np.arange(5), unit=u.angstrom, velocity_convention='optical', equivalencies=u.doppler_optical(3*u.AA))
-    assert x.equivalencies is not None # == u.doppler_optical(3*u.AA)
+    @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
+    def test_convert_to(self, unit_from, unit_to, convention, ref_unit):
+        x.convert_to_unit(unit_to,convention=convention, make_dxarr=False)
+        assert x.unit == u.Unit(unit_to)
 
-@pytest.mark.parametrize(('velocity_convention'), convention)
-def test_equivalencies_2(velocity_convention):
-    x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, refX=3*u.AA, velocity_convention=velocity_convention)
-    assert x.equivalencies == u.doppler_optical(3*u.AA)
+    def test_equivalencies_1(self, ):
+        assert self.x.equivalencies is not None # == u.doppler_optical(3*u.AA)
 
-@pytest.mark.parametrize(('velocity_convention'), convention)
-def test_equivalencies_3(velocity_convention):
-    x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, refX=3, refX_unit='angstrom', velocity_convention=velocity_convention)
-    assert x.equivalencies == u.doppler_optical(3*u.AA)
+    @pytest.mark.parametrize(('velocity_convention'), convention)
+    def test_equivalencies_2(self, velocity_convention):
+        x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, refX=3*u.AA, velocity_convention=velocity_convention)
+        assert x.equivalencies == u.doppler_optical(3*u.AA)
 
-def test_initialize_units():
-    xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=u.dimensionless_unscaled)
-    assert xarr.unit == u.dimensionless_unscaled
-    xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=u.m)
-    assert xarr.unit == u.m
+    @pytest.mark.parametrize(('velocity_convention'), convention)
+    def test_equivalencies_3(self, velocity_convention):
+        x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, refX=3, refX_unit='angstrom', velocity_convention=velocity_convention)
+        assert x.equivalencies == u.get('doppler_{0}'.format(velocity_convention))(3*u.AA)
 
-@pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
-def test_convert_units(unit_from, unit_to, convention, ref_unit):
-    xarr = units.SpectroscopicAxis(np.linspace(1, 10, 10), unit=unit_from,
-                                   refX=5, refX_unit=ref_unit,
-                                   velocity_convention=convention,
-                                  )
-    xarr.convert_to_unit(unit_to)
-    assert xarr.unit == unit_to
+    def test_initialize_units(self, ):
+        xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=u.dimensionless_unscaled)
+        assert xarr.unit == u.dimensionless_unscaled
+        xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=u.m)
+        assert xarr.unit == u.m
 
-def test_convert_units2():
-    xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit='Hz')
+    @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
+    def test_convert_units(self, unit_from, unit_to, convention, ref_unit):
+        xarr = units.SpectroscopicAxis(np.linspace(1, 10, 3), unit=unit_from,
+                                       refX=5, refX_unit=ref_unit,
+                                       velocity_convention=convention,
+                                      )
+        xarr.convert_to_unit(unit_to, make_dxarr=False)
+        assert xarr.unit == unit_to
 
-    velocity_arr = xarr.as_unit('km/s', velocity_convention='optical', refX=5*u.GHz)
+    def test_convert_units2(self, ):
+        xarr = units.SpectroscopicAxis(np.linspace(1,10,3),unit='Hz')
 
-    xarr2 = units.SpectroscopicAxis(np.linspace(1,10,10),unit='Hz',
-                                    velocity_convention='optical',
-                                    refX=5*u.GHz)
-    velocity_arr2 = xarr2.to(u.km/u.s)
+        velocity_arr = xarr.as_unit('km/s', velocity_convention='optical', refX=5*u.GHz)
 
-    assert np.all(velocity_arr.value==velocity_arr2.value)
+        xarr2 = units.SpectroscopicAxis(np.linspace(1,10,3),unit='Hz',
+                                        velocity_convention='optical',
+                                        refX=5*u.GHz)
+        velocity_arr2 = xarr2.to(u.km/u.s)
 
-def test_in_range():
-    xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit='Hz')
+        assert np.all(velocity_arr.value==velocity_arr2.value)
 
-    assert not xarr.in_range(10*u.GHz)
-    assert xarr.in_range(5*u.Hz)
+    def test_in_range(self, ):
+        xarr = units.SpectroscopicAxis(np.linspace(1,10,3),unit='Hz')
 
-    # TODO: make sure warning is raised
-    assert xarr.in_range(5)
+        assert not xarr.in_range(10*u.GHz)
+        assert xarr.in_range(5*u.Hz)
+
+        # TODO: make sure warning is raised
+        assert xarr.in_range(5)
 
 
-@pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
-def test_convert_back(unit_from, unit_to,convention,ref_unit):
-    if unit_from in ('cms','cm/s') or unit_to in ('cms','cm/s'):
-        xvals = np.linspace(1000,10000,10)
-        threshold = 1e-6
-    else:
-        xvals = np.linspace(1,10,10)
-        threshold = 1e-15
-    # all conversions include a * or / by speedoflight_ms
-    threshold = np.spacing(units.speedoflight_ms) * 100
-    if 'megameter' in unit_from or 'Mm' in unit_from:
-        threshold *= 10
-    xarr = units.SpectroscopicAxis(xvals,unit=unit_from,refX=5,refX_unit=ref_unit,velocity_convention=convention)
-    xarr.convert_to_unit(unit_to,convention=convention)
-    xarr.convert_to_unit(unit_from,convention=convention)
-    assert all(np.abs((xarr.value - xvals)/xvals) < threshold)
-    assert xarr.unit == unit_from
+    @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
+    def test_convert_back(self, unit_from, unit_to,convention,ref_unit):
+        if unit_from in ('cms','cm/s') or unit_to in ('cms','cm/s'):
+            xvals = np.linspace(1000,10000,3)
+            threshold = 1e-6
+        else:
+            xvals = np.linspace(1,10,3)
+            threshold = 1e-15
+        # all conversions include a * or / by speedoflight_ms
+        threshold = np.spacing(units.speedoflight_ms) * 100
+        if 'megameter' in unit_from or 'Mm' in unit_from:
+            threshold *= 10
+        xarr = units.SpectroscopicAxis(xvals,unit=unit_from,refX=5,refX_unit=ref_unit,velocity_convention=convention)
+        xarr.convert_to_unit(unit_to,convention=convention, make_dxarr=False)
+        xarr.convert_to_unit(unit_from,convention=convention, make_dxarr=False)
+        assert all(np.abs((xarr.value - xvals)/xvals) < threshold)
+        assert xarr.unit == unit_from
 
 
 if __name__=="__main__":
