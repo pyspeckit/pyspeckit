@@ -138,7 +138,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     nlevs = 51
     jv=np.arange(nlevs)
     ortho = jv % 3 == 0
-    para = True-ortho
+    para = ~ortho
     Jpara = jv[para]
     Jortho = jv[ortho]
     Brot = 298117.06e6

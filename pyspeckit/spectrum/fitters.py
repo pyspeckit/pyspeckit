@@ -978,7 +978,7 @@ class Specfit(interactive.Interactive):
         """
         #if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
         #    # don't display baseline if it's included in the fit
-        #    plot_offset = self.Spectrum.plotter.offset+(self.Spectrum.baseline.basespec * (True-self.vheight))
+        #    plot_offset = self.Spectrum.plotter.offset+(self.Spectrum.baseline.basespec * (~self.vheight))
         #else:
         if offset is None:
             plot_offset = self.Spectrum.plotter.offset

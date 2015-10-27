@@ -59,7 +59,7 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
     def blfunc(args, x=x):
         yfit,yreal = args
         if hasattr(yfit,'mask'):
-            mask = True-yfit.mask
+            mask = ~yfit.mask
         else:
             mask = np.isfinite(yfit)
 

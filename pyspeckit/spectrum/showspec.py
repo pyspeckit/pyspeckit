@@ -356,7 +356,7 @@ class FFT:
     def setspec(self):
         self.spectofft = copy(self.specplotter.spectrum)
         OKmask = (self.spectofft==self.spectofft)
-        self.spectofft[(True-OKmask)] = 0
+        self.spectofft[(~OKmask)] = 0
 
     def clear(self):
         if self.fftplot is not None:
@@ -465,7 +465,7 @@ class Baseline:
                 self.spectofit,
                 xarr=self.specplotter.vind,
                 order=self.order, exclude=None, 
-                mask=(True-self.OKmask)+self.excludemask,
+                mask=(~self.OKmask)+self.excludemask,
                 **kwargs)
         self.basespec = poly1d(self.baselinepars)(self.specplotter.vind)
         if self.specplotter.spectrumplot is not None: 
@@ -615,9 +615,9 @@ class Specfit:
     def setfitspec(self):
         self.spectofit = copy(self.specplotter.spectrum)
         OKmask = (self.spectofit==self.spectofit)
-        self.spectofit[(True-OKmask)] = 0
+        self.spectofit[(~OKmask)] = 0
         self.seterrspec()
-        self.errspec[(True-OKmask)] = 1e10
+        self.errspec[(~OKmask)] = 1e10
 
     def multifit(self):
         self.ngauss = len(self.guesses)/3

@@ -788,7 +788,7 @@ class Cube(spectrum.Spectrum):
                     log.info("Using nearest fit as guess")
                 d = np.roll(np.roll(distance, x, 0), y, 1)
                 # If there's no fit, set its distance to be unreasonably large
-                nearest_ind = np.argmin(d+1e10*(True-self.has_fit))
+                nearest_ind = np.argmin(d+1e10*(~self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
                 gg = self.parcube[:,nearest_y,nearest_x]
             elif use_neighbor_as_guess and np.any(local_fits):
@@ -1001,7 +1001,7 @@ class Cube(spectrum.Spectrum):
 
         yy,xx = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray):
-            OK = (True-self.mapplot.plane.mask) * self.maskmap
+            OK = (~self.mapplot.plane.mask) * self.maskmap
         else:
             OK = np.isfinite(self.mapplot.plane) * self.maskmap
         valid_pixels = zip(xx[OK],yy[OK])
