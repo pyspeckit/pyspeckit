@@ -21,7 +21,11 @@ Example use:
      
 
 """
+from __future__ import print_function
 import pyspeckit
+from .. import spectrum
+from ..spectrum.classes import Spectrum, Spectra
+from ..spectrum import units
 import numpy as np
 from matplotlib import pyplot
 import copy
@@ -44,8 +48,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
     Given a dictionary of filenames and lines, fit them together
     e.g. {'oneone':'G000.000+00.000_nh3_11.fits'}
     """
-    spdict = dict([ (linename,pyspeckit.Spectrum(value,
-                                                 scale_keyword=scale_keyword))
+    spdict = dict([ (linename,Spectrum(value, scale_keyword=scale_keyword))
                    if type(value) is str else (linename,value)
                    for linename, value in input_dict.iteritems() ])
     splist = spdict.values()
@@ -88,7 +91,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
         spdict[guessline].plotter(figure=guessfignum)
         spdict[guessline].specfit.plot_fit()
 
-    spectra = pyspeckit.Spectra(splist)
+    spectra = Spectra(splist)
     spectra.specfit.npeaks = npeaks
 
     if tau is not None:
@@ -222,12 +225,12 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
     sp.xarr.convert_to_unit('GHz')
 
     spdict = {}
-    for linename,freq in pyspeckit.spectrum.models.ammonia.freq_dict.iteritems():
+    for linename,freq in spectrum.models.ammonia.freq_dict.iteritems():
         if not hasattr(freq, 'unit'):
             freq = freq*u.Hz
         if vrange is not None:
-            freq_test_low  = freq - freq * vrange[0]/pyspeckit.units.speedoflight_kms
-            freq_test_high = freq - freq * vrange[1]/pyspeckit.units.speedoflight_kms
+            freq_test_low  = freq - freq * vrange[0]/units.speedoflight_kms
+            freq_test_high = freq - freq * vrange[1]/units.speedoflight_kms
         else:
             freq_test_low = freq_test_high = freq
 

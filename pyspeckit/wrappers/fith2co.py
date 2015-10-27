@@ -5,7 +5,9 @@ H2CO fitter wrapper
 
 Wrapper to fit formaldehyde spectra.
 """
-import pyspeckit
+from __future__ import print_function
+from .. import spectrum
+from ..spectrum import units
 from matplotlib import pyplot
 import copy
 from astropy import units as u
@@ -124,10 +126,10 @@ def BigSpectrum_to_H2COdict(sp, vrange=None):
     """
 
     spdict = {}
-    for linename,freq in pyspeckit.spectrum.models.formaldehyde.central_freq_dict.iteritems():
+    for linename,freq in spectrum.models.formaldehyde.central_freq_dict.iteritems():
         if vrange is not None:
-            freq_test_low  = freq - freq * vrange[0]/pyspeckit.units.speedoflight_kms
-            freq_test_high = freq - freq * vrange[1]/pyspeckit.units.speedoflight_kms
+            freq_test_low  = freq - freq * vrange[0]/units.speedoflight_kms
+            freq_test_high = freq - freq * vrange[1]/units.speedoflight_kms
         else:
             freq_test_low = freq_test_high = freq
 
