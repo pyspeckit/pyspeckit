@@ -2,12 +2,13 @@ from __future__ import print_function
 import numpy as np
 import matplotlib
 from ..config import ConfigDescriptor as cfgdec
-import interactive
-import copy
-import history
+from . import interactive
+from . import history
 from . import models
 from .. import specwarnings
+from . import mpfit
 from astropy import log
+import copy
 
 interactive_help_message = """
 (1) Left-click or press 1 (one) at two positions to select or add to the baseline fitting range - it will be
@@ -562,8 +563,6 @@ class Baseline(interactive.Interactive):
                              "report it as an Issue: "
                              "https://github.com/pyspeckit/pyspeckit/issues")
 
-
-        import pyspeckit.mpfit as mpfit
         mp = mpfit.mpfit(mpfitfun(spectrum[OK], err[OK]), xall=pguess,
                          quiet=quiet)
         if np.isnan(mp.fnorm):

@@ -1,12 +1,13 @@
+from __future__ import print_function
 import numpy as np
-import interpolation
-import units as units_module
-import classes
 try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-import headers
+from . import interpolation
+from . import units as units_module
+from . import classes
+from . import headers
 
 def correlate(spectrum1, spectrum2, range=None, units=None, errorweight=False):
     """

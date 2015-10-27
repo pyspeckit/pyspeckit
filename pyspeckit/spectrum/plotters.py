@@ -11,10 +11,11 @@ import matplotlib.pyplot
 import matplotlib.figure
 import numpy as np
 import astropy.units as u
-from pyspeckit.specwarnings import warn
 import copy
-import widgets
 import inspect
+
+from import widgets
+from ..specwarnings import warn
 
 interactive_help_message = """
 Interactive key commands for plotter.  An additional help message may appear if

@@ -1,18 +1,19 @@
 from __future__ import print_function
 import matplotlib
 import numpy as np
-from ..config import mycfg
-from ..config import ConfigDescriptor as cfgdec
-import units
-import models
-from pyspeckit.specwarnings import warn
-import interactive
 import copy
-import history
 import re
 import itertools
 from astropy import log
 from astropy import units as u
+
+from ..config import mycfg
+from ..config import ConfigDescriptor as cfgdec
+from . import units
+from . import models
+from ..specwarnings import warn
+from . import interactive
+from . import history
 
 class Registry(object):
     """

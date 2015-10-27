@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 
 def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,

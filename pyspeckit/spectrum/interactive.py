@@ -6,8 +6,9 @@ Window Interaction
 A general module for selecting regions and inputting guesses via the
 interactive window.
 """
+from __future__ import print_function
 import numpy
-import pyspeckit
+from . import units
 from astropy import log
 
 class Interactive(object):
@@ -387,7 +388,7 @@ class Interactive(object):
         if xmin is not None and xmax is not None:
             if verbose or debug or self._debug:
                 log.info("Setting xmin,xmax from keywords %g,%g" % (xmin,xmax))
-            if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
+            if xtype.lower() in ('wcs',) or xtype in units.xtype_dict:
                 self.xmin = numpy.floor(self.Spectrum.xarr.x_to_pix(xmin))
                 # End-inclusive!
                 self.xmax = numpy.ceil(self.Spectrum.xarr.x_to_pix(xmax))+1
@@ -447,7 +448,7 @@ class Interactive(object):
         log.debug("Exclude: {0}".format(exclude))
         if exclude is not None and len(exclude) % 2 == 0:
             for x1,x2 in zip(exclude[::2],exclude[1::2]):
-                if xtype.lower() in ('wcs',) or xtype in pyspeckit.spectrum.units.xtype_dict:
+                if xtype.lower() in ('wcs',) or xtype in units.xtype_dict:
                     x1 = self.Spectrum.xarr.x_to_pix(x1)
                     # WCS units should be end-inclusive
                     x2 = self.Spectrum.xarr.x_to_pix(x2)+1

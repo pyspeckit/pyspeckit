@@ -1,5 +1,6 @@
+from __future__ import print_function
 import numpy as np
-import interpolation
+from . import interpolation
 
 def smoothed(spectrum, **kwargs):
     sp = spectrum.copy()

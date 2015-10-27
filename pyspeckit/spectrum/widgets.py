@@ -1,3 +1,4 @@
+from __future__ import print_function
 from matplotlib.widgets import Widget,Button,Slider
 from matplotlib import pyplot
 import matplotlib

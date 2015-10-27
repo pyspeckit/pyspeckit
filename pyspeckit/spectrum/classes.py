@@ -14,26 +14,27 @@ different wavelengths/frequencies
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 .. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
 """
+from __future__ import print_function
 import numpy as np
-import smooth as sm
 try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-import readers
-import plotters
-import writers
-import baseline
-import units
-import measurements
-import speclines
-import interpolation
-import moments as moments_module
-import fitters
-import history
+from . import smooth as sm
+from . import readers
+from . import plotters
+from . import writers
+from . import baseline
+from . import units
+from . import measurements
+from . import speclines
+from . import interpolation
+from . import moments as moments_module
+from . import fitters
+from . import history
 import copy
 from astropy import log
-from pyspeckit.specwarnings import warn
+from ..specwarnings import warn
 try:
     import atpy
     atpyOK = True

@@ -1,4 +1,4 @@
-import classes
+from . import classes
 from .utils import reddening
 
 class OpticalSpectrum(classes.Spectrum):

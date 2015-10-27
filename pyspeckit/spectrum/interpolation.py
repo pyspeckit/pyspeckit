@@ -3,6 +3,7 @@ Spectrum Arithmetic
 
 e.g., interpolate one spectrum onto anothers' axes
 """
+from __future__ import print_function
 
 import numpy as np
 
