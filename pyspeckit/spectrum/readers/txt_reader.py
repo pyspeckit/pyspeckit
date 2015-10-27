@@ -115,7 +115,7 @@ def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, skiplines=0, **kwargs)
                 except ValueError:
                     coldata[-1][j] = str(element)
 
-    coldata = zip(*coldata)
+    coldata = list(zip(*coldata))
 
     if not colunits:
         colunits = ['unknown'] * len(coldata)
