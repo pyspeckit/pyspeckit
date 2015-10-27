@@ -1,18 +1,21 @@
 from __future__ import print_function
 import matplotlib
 import numpy as np
-from ..config import mycfg
-from ..config import ConfigDescriptor as cfgdec
-import units
-import models
-from pyspeckit.specwarnings import warn
-import interactive
 import copy
-import history
 import re
 import itertools
 from astropy import log
 from astropy import units as u
+from astropy.extern.six.moves import xrange
+
+from ..config import mycfg
+from ..config import ConfigDescriptor as cfgdec
+from . import units
+from . import models
+from ..specwarnings import warn
+from . import interactive
+from . import history
+from . import widgets
 
 class Registry(object):
     """
@@ -54,6 +57,21 @@ You can select different fitters to use with the interactive fitting routine.
 The default is gaussian ('g'), all options are listed below:
         """
         self._make_interactive_help_message()
+
+    def __copy__(self):
+        # http://stackoverflow.com/questions/1500718/what-is-the-right-way-to-override-the-copy-deepcopy-operations-on-an-object-in-p
+        cls = self.__class__
+        result = cls.__new__(cls)
+        result.__dict__.update(self.__dict__)
+        return result
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
 
     def add_fitter(self, name, function, npars, override=False, key=None,
                    multisingle=None):
@@ -1627,7 +1645,6 @@ class Specfit(interactive.Interactive):
         .. todo:: Add a button in the navbar that makes this window pop up
         http://stackoverflow.com/questions/4740988/add-new-navigate-modes-in-matplotlib
         """
-        import widgets
 
         if parlimitdict is None:
             # try to create a reasonable parlimit dict

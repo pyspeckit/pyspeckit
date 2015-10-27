@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pyspeckit
 import pylab as pl
 import astropy.units as u
@@ -71,7 +72,7 @@ sp.specfit(fittype='hcn_varyhf_width',
            clear=True)
 
 # print the fitted parameters:
-print sp.specfit.parinfo
+print(sp.specfit.parinfo)
 # Param #0      CENTER0 =      -51.865 +/-       0.0525058
 # Param #1    AMP10-010 =      1.83238 +/-       0.0773993   Range:   [0,inf)
 # Param #2    AMP12-010 =      5.26566 +/-       0.0835981   Range:   [0,inf)

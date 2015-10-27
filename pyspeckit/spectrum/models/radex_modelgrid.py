@@ -1,8 +1,9 @@
 """
 Fit a line based on parameters output from a grid of RADEX models
 """
+from __future__ import print_function
 import numpy as np
-from pyspeckit.mpfit import mpfit
+from ...mpfit import mpfit
 from .. import units
 from . import fitter,model
 import matplotlib.cbook as mpcb
@@ -95,7 +96,7 @@ class radex_model(object):
             raise ImportError("Couldn't import scipy, therefore cannot interpolate")
 
         if verbose:
-            print "density %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, column, tau, tex)
+            print("density %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, column, tau, tex))
         if debug:
             import pdb; pdb.set_trace()
 

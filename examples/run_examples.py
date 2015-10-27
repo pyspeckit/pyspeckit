@@ -1,3 +1,4 @@
+#from __future__ import print_function
 ################################################
 # Sample run_examples.py file to be used later #
 ################################################

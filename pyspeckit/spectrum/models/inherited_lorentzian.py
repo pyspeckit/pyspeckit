@@ -8,7 +8,7 @@ gaussfitter.py code.  Now, this is a great example of how to make your own
 model!
 
 """
-import model
+from . import model
 import numpy 
 
 def lorentzian(x,A,dx,w, return_components=False):

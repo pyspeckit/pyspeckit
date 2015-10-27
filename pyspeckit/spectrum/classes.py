@@ -14,26 +14,28 @@ different wavelengths/frequencies
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 .. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
 """
+from __future__ import print_function
 import numpy as np
-import smooth as sm
+from astropy.extern.six import iteritems
 try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-import readers
-import plotters
-import writers
-import baseline
-import units
-import measurements
-import speclines
-import interpolation
-import moments as moments_module
-import fitters
-import history
+from . import smooth as sm
+from . import readers
+from . import plotters
+from . import writers
+from . import baseline
+from . import units
+from . import measurements
+from . import speclines
+from . import interpolation
+from . import moments as moments_module
+from . import fitters
+from . import history
 import copy
 from astropy import log
-from pyspeckit.specwarnings import warn
+from ..specwarnings import warn
 try:
     import atpy
     atpyOK = True
@@ -57,7 +59,7 @@ class Spectrum(object):
     formats.
     """
 
-    from interpolation import interpnans
+    from .interpolation import interpnans
 
     def __init__(self, filename=None, filetype=None, xarr=None, data=None,
                  error=None, header=None, doplot=False, maskdata=True,
@@ -253,7 +255,7 @@ class Spectrum(object):
         elif not isinstance(registry, fitters.Registry):
             raise TypeError("registry must be an instance of the fitters.Registry class")
 
-        for modelname, model in registry.multifitters.iteritems():
+        for modelname, model in iteritems(registry.multifitters):
             self.Registry.add_fitter(modelname, model,
                     registry.npars[modelname], key=registry.associated_keys.get(modelname))
 
@@ -797,7 +799,9 @@ class Spectra(Spectrum):
     """
 
     def __init__(self, speclist, xunit='GHz', **kwargs):
-        print "Creating spectra"
+        """
+        """
+        print("Creating spectra")
         speclist = list(speclist)
         for ii,spec in enumerate(speclist):
             if type(spec) is str:
@@ -806,7 +810,7 @@ class Spectra(Spectrum):
 
         self.speclist = speclist
 
-        print "Concatenating data"
+        print("Concatenating data")
         self.xarr = units.SpectroscopicAxes([sp.xarr.as_unit(xunit) for sp in speclist])
         self.xarr.set_unit(u.Unit(xunit))
         self.xarr.xtype = u.Unit(xunit)
@@ -1016,11 +1020,11 @@ class ObsBlock(Spectra):
             # wtarr.sum(axis=1) randomly - say, one out of every 10-100 occurrences - fills with 
             # nonsense values (1e-20, 1e-55, whatever).  There is no pattern to this; it occurs in
             # while loops, but ONLY IN THIS FUNCTION.  This is unreproduceable anywhere else.
-            print "selfdata    min: %10g max: %10g" % (self.data.min(), self.data.max())
-            print "nonandata   min: %10g max: %10g" % (data_nonan.min(), data_nonan.max())
-            print "avgdata     min: %10g max: %10g" % (avgdata.min(), avgdata.max())
-            print "weight      sum: %10g" % (wtarr.sum())
-            print "data*weight sum: %10g" % ((data_nonan*wtarr).sum())
+            print("selfdata    min: %10g max: %10g" % (self.data.min(), self.data.max()))
+            print("nonandata   min: %10g max: %10g" % (data_nonan.min(), data_nonan.max()))
+            print("avgdata     min: %10g max: %10g" % (avgdata.min(), avgdata.max()))
+            print("weight      sum: %10g" % (wtarr.sum()))
+            print("data*weight sum: %10g" % ((data_nonan*wtarr).sum()))
             if np.abs(data_nonan.min()/avgdata.min()) > 1e10:
                 import pdb; pdb.set_trace()
 

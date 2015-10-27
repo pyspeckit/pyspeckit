@@ -15,12 +15,13 @@ class TestFitter(object):
         self.sp = Spectrum(xarr=x, data=y)
 
     def test_fitter(self):
-        self.sp.specfit(fittype='gaussian', guesses=(-1, 0, 0.5))
+        self.sp.specfit(fittype='gaussian', guesses=(-1, 0, 0.5),
+                        limitedmin=(False,False,True), minvals=(0,0,1e-10))
 
     def test_invalid_guess(self):
         with pytest.raises(ValueError) as ex:
             self.sp.specfit(fittype='gaussian', guesses=(-1, 0, 0.5),
-                       limitedmin=(True,True,True), minvals=(0,0,0))
+                       limitedmin=(True,True,True), minvals=(0,0,1e-10))
         assert str(ex.value) == '-1.0 is less than the lower limit 0'
 
     def test_almost_invalid_guess(self):

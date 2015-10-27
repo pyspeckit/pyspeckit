@@ -8,14 +8,15 @@ Wrapper to fit N2H+ using RADEX models.  This is meant to be used from the comma
 
 and therefore has no independently defined functions.
 """
-import pyspeckit
+from __future__ import print_function
 import numpy as np
 try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-from pyspeckit.spectrum import models
-from pyspeckit.spectrum.models import n2hp
+from ..spectrum import models
+from ..spectrum.classes import Spectrum
+from ..spectrum.models import n2hp
 
 def make_n2hp_fitter(path_to_radex='/Users/adam/work/n2hp/',
         fileprefix='1-2_T=5to55_lvg'):
@@ -78,13 +79,13 @@ if __name__ == "__main__":
     if len(args) == 1:
         fn = args[0]
     else:
-        print "Couldn't load a file!  Crash time!"
+        print("Couldn't load a file!  Crash time!")
 
     # define n2hp fitter
     n2hp_radex_fitter = make_n2hp_fitter(path_to_radex=options.radexpath,
             fileprefix=options.radexprefix)
 
-    sp = pyspeckit.Spectrum(fn,scale_keyword=options.scalekeyword)
+    sp = Spectrum(fn,scale_keyword=options.scalekeyword)
 
     sp.xarr.convert_to_unit('km/s')
     sp.crop(options.vmin,options.vmax)

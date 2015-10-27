@@ -13,21 +13,22 @@ Module API
 
 """
 import numpy as np
-from pyspeckit.mpfit import mpfit
-from pyspeckit.spectrum.parinfo import ParinfoList,Parinfo
-import fitter
+from ...mpfit import mpfit
+from ...spectrum.parinfo import ParinfoList,Parinfo
+from . import fitter
+from . import model
 import matplotlib.cbook as mpcb
 import copy
-import model
 from astropy import log
 import astropy.units as u
 from astropy import constants
+from astropy.extern.six import iteritems
 from . import mpfit_messages
 import operator
 import string
 
-from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
-                               voff_lines_dict, tau_wts_dict)
+from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
+                                voff_lines_dict, tau_wts_dict)
 
 def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
@@ -220,7 +221,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         tau11_temp = tau_dict['oneone']
         # re-scale all optical depths so that tau is as specified, but the relative taus
         # are sest by the kinetic temperature and partition functions
-        for linename,t in tau_dict.iteritems():
+        for linename,t in iteritems(tau_dict):
             tau_dict[linename] = t * tau/tau11_temp
 
     components =[]
@@ -602,7 +603,7 @@ class ammonia_model(model.SpectralModel):
         # not, fix them using the defaults
         # (you can put in guesses of length 12 but leave the rest length 6;
         # this code then doubles the length of everything else)
-        for partype,parlist in partype_dict.iteritems():
+        for partype,parlist in iteritems(partype_dict):
             if len(parlist) != self.npars*self.npeaks:
                 # if you leave the defaults, or enter something that can be
                 # multiplied by npars to get to the right number of

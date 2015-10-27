@@ -7,14 +7,16 @@ This is a formaldehyde 1_11-1_10 / 2_12-2_11 fitter.  It includes hyperfine
 components of the formaldehyde lines and has both LTE and RADEX LVG based
 models
 """
+from __future__ import print_function
 import numpy as np
-from pyspeckit.mpfit import mpfit
+from ...mpfit import mpfit
 from .. import units
 from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb
 import copy
-import hyperfine
-from pyspeckit.specwarnings import warn
+from . import hyperfine
+from ...specwarnings import warn
+from astropy.extern.six.moves import xrange
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:
@@ -93,7 +95,8 @@ hf_freq_dict={
         'threethree_f44':28.97480e9,
         'threethree_f33':28.97481e9,
         }
-freq_dict = dict(hf_freq_dict.items() + central_freq_dict.items())
+freq_dict = copy.copy(hf_freq_dict)
+freq_dict.update(central_freq_dict)
 aval_dict = {
     'oneone':     10**-8.44801,  #64*!pi**4/(3*h*c**3)*nu11**3*mu0**2*(1/2.)
     'twotwo':     10**-7.49373,  #64*!pi**4/(3*h*c**3)*nu22**3*mu0**2*(2/3.)
@@ -219,7 +222,7 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
 
     if verbose:
-        print "density %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, column, tau, tex)
+        print("density %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, column, tau, tex))
 
     if debug:
         import pdb; pdb.set_trace()
@@ -310,10 +313,10 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
     tbg = [Tbackground1,Tbackground2]
 
     if verbose:
-        print "density %20.12g   column: %20.12g   temperature: %20.12g   opr: %20.12g   xoff_v: %20.12g   width: %20.12g" % (density, column, temperature, orthopara, xoff_v, width)
-        print "tau: ",tau," tex: ",tex
-        print "minfreq: ",minfreq," maxfreq: ",maxfreq
-        print "tbg: ",tbg
+        print("density %20.12g   column: %20.12g   temperature: %20.12g   opr: %20.12g   xoff_v: %20.12g   width: %20.12g" % (density, column, temperature, orthopara, xoff_v, width))
+        print("tau: ",tau," tex: ",tex)
+        print("minfreq: ",minfreq," maxfreq: ",maxfreq)
+        print("tbg: ",tbg)
 
     if debug > 1:
         import pdb; pdb.set_trace()
@@ -416,7 +419,7 @@ class formaldehyde_model(model.SpectralModel):
                 gaussint = amp*width*np.sqrt(2.0*np.pi)
                 cftype = "gt0.1_"+linename if width > 0.1 else "lt0.1_"+linename
                 correction_factor = 10**np.polyval(formaldehyde_to_gaussian_ratio_coefs[cftype], np.log10(width) )
-                # debug statement print "Two components of the integral: amp %g, width %g, gaussint %g, correction_factor %g " % (amp,width,gaussint,correction_factor)
+                # debug statement print("Two components of the integral: amp %g, width %g, gaussint %g, correction_factor %g " % (amp,width,gaussint,correction_factor))
                 integ += gaussint*correction_factor
 
         return integ
@@ -467,7 +470,7 @@ def formaldehyde_radex_tau(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     """
 
     if verbose:
-        print "Parameters: dens=%f, column=%f, xoff=%f, width=%f" % (density, column, xoff_v, width)
+        print("Parameters: dens=%f, column=%f, xoff=%f, width=%f" % (density, column, xoff_v, width))
 
     if taugrid is None:
         if path_to_taugrid=='':

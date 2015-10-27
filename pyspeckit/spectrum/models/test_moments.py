@@ -1,10 +1,10 @@
 import pkgutil
 import os
 import importlib
-from pyspeckit.spectrum.models.inherited_gaussfitter import gaussian_fitter
-from pyspeckit.spectrum.units import SpectroscopicAxis
+from ..models.inherited_gaussfitter import gaussian_fitter
+from ..units import SpectroscopicAxis
 import numpy as np
-import pyspeckit.spectrum.models as models
+from . import models
 
 models_path = os.path.dirname(models.__file__)
 xarr = np.linspace(-100,100,200)

@@ -2,21 +2,23 @@
 Tests for template fitter
 """
 
-import pyspeckit
+from .... import spectrum
+from ...classes import Spectrum
+from ... import models
 import numpy as np
 
 def test_template():
-    xarr = pyspeckit.spectrum.units.SpectroscopicAxis(np.linspace(-5,5,100),
+    xarr = spectrum.units.SpectroscopicAxis(np.linspace(-5,5,100),
                                                       unit='km/s')
     gauss = np.exp(-xarr.value**2/(2.*1.**2))
     gauss2 = np.exp(-(xarr.value-1)**2/(2.*1.**2))
     np.random.seed(0)
     noise = np.random.randn(xarr.size) / 100.
 
-    sp = pyspeckit.Spectrum(xarr=xarr, data=gauss2+noise, header={})
-    template = pyspeckit.Spectrum(xarr=xarr, data=gauss, header={})
+    sp = Spectrum(xarr=xarr, data=gauss2+noise, header={})
+    template = Spectrum(xarr=xarr, data=gauss, header={})
 
-    template_fitter = pyspeckit.models.template_fitter(template,
+    template_fitter = models.template_fitter(template,
                                                        xshift_units='km/s')
     sp.Registry.add_fitter('template', template_fitter, 2)
     sp.specfit(fittype='template', guesses=[1,0])
@@ -27,7 +29,7 @@ def test_template():
     return sp
 
 def test_template_withcont():
-    xarr = pyspeckit.spectrum.units.SpectroscopicAxis(np.linspace(-5,5,100),
+    xarr = spectrum.units.SpectroscopicAxis(np.linspace(-5,5,100),
                                                       unit='km/s')
 
     scale = 0.5
@@ -49,10 +51,10 @@ def test_template_withcont():
     np.random.seed(0)
     noise = np.random.randn(xarr.size) / 100.
 
-    sp = pyspeckit.Spectrum(xarr=xarr, data=(gauss2+contshift+noise)*scale, header={})
-    template = pyspeckit.Spectrum(xarr=xarr, data=gauss+cont, header={})
+    sp = Spectrum(xarr=xarr, data=(gauss2+contshift+noise)*scale, header={})
+    template = Spectrum(xarr=xarr, data=gauss+cont, header={})
 
-    template_fitter = pyspeckit.models.template_fitter(template,
+    template_fitter = models.template_fitter(template,
                                                        xshift_units='km/s')
     sp.Registry.add_fitter('template', template_fitter, 2)
     sp.specfit(fittype='template', guesses=[scale,shift])

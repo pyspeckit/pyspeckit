@@ -1,4 +1,5 @@
 from __future__ import print_function
+from astropy.extern.six.moves import xrange
 try:
     from lmfit import Parameters, Parameter
     LMFIT_PARAMETERS_INSTALLED = True

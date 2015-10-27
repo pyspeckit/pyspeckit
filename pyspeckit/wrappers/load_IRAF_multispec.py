@@ -1,9 +1,11 @@
+from __future__ import print_function
+from astropy.extern.six.moves import xrange
 try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-import pyspeckit
-from pyspeckit.spectrum.readers.fits_reader import read_echelle
+from ..spectrum.readers.fits_reader import read_echelle
+from ..spectrum.classes import Spectrum
 
 
 def load_IRAF_multispec(fitsfilename):
@@ -19,7 +21,7 @@ def load_IRAF_multispec(fitsfilename):
 
     data, err, xax, header = read_echelle(fitsfile[0])
 
-    speclist = [pyspeckit.Spectrum(data=data[ii,:], 
+    speclist = [Spectrum(data=data[ii,:], 
             error=err[ii,:],
             xarr=xax[ii,:], 
             header=header) 

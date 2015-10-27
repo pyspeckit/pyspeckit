@@ -14,28 +14,34 @@ The 'grunt work' is performed by the :py:mod:`cubes` module
 
 
 """
-# import parent package
-import pyspeckit
-from pyspeckit import spectrum
-from ..spectrum.units import (generate_xarr, SpectroscopicAxis,
-                              SpectroscopicAxes)
-# import local things
-import mapplot
+from __future__ import print_function
+
 import time
 import numpy as np
-from pyspeckit.parallel_map import parallel_map
 import types
 import copy
 import itertools
-from pyspeckit.spectrum import history
+import warnings
+
 from astropy.io import fits
-import cubes
 from astropy import log
 from astropy import wcs
 from astropy import units
 from astropy.utils.console import ProgressBar
+from astropy.extern.six import iteritems
 from functools import wraps
-import warnings
+
+# import parent package
+from .. import spectrum
+from ..spectrum import smooth
+from ..spectrum.units import (generate_xarr, SpectroscopicAxis,
+                              SpectroscopicAxes)
+from ..parallel_map import parallel_map
+from ..spectrum import history
+
+# import local things
+from . import mapplot
+from . import cubes
 
 def not_for_cubes(func):
 
@@ -439,19 +445,18 @@ class Cube(spectrum.Spectrum):
 
         ct = 'CTYPE{0}'.format(self._first_cel_axis_num)
         header = cubes.speccen_header(fits.Header(cards=[(k,v) for k,v in
-                                                         self.header.iteritems()
+                                                         iteritems(self.header)
                                                          if k != 'HISTORY']),
                                       lon=x, lat=y, system=self.system,
                                       proj=(self.header[ct][-3:]
                                             if ct in self.header else
                                             'CAR'))
 
-        sp = pyspeckit.Spectrum(xarr=self.xarr.copy(), data=self.cube[:,y,x],
-                                header=header,
-                                error=(self.errorcube[:,y,x] if self.errorcube
-                                       is not None else None),
-                                unit=self.unit,
-                               )
+        sp = spectrum.Spectrum(xarr=self.xarr.copy(), data=self.cube[:,y,x],
+                               header=header, error=(self.errorcube[:,y,x] if
+                                                     self.errorcube is not None
+                                                     else None),
+                               unit=self.unit,)
 
         sp.specfit = copy.copy(self.specfit)
         # explicitly re-do this (test)
@@ -517,7 +522,7 @@ class Cube(spectrum.Spectrum):
 
         ct = 'CTYPE{0}'.format(self._first_cel_axis_num)
         header = cubes.speccen_header(fits.Header(cards=[(k,v) for k,v in
-                                                         self.header.iteritems()
+                                                         iteritems(self.header)
                                                          if k != 'HISTORY']),
                                       lon=aperture[0],
                                       lat=aperture[1],
@@ -531,10 +536,10 @@ class Cube(spectrum.Spectrum):
             header['APREFF'] = (aperture[2]*aperture[3])**0.5
             header['APPA'] = aperture[4]
 
-        sp = pyspeckit.Spectrum(xarr=self.xarr.copy(),
-                                data=data,
-                                error=error,
-                                header=header)
+        sp = spectrum.Spectrum(xarr=self.xarr.copy(),
+                               data=data,
+                               error=error,
+                               header=header)
 
         sp.specfit = self.specfit.copy(parent=sp)
 
@@ -694,8 +699,8 @@ class Cube(spectrum.Spectrum):
 
 
 
-        valid_pixels = zip(xx.flat[sort_distance][OK.flat[sort_distance]],
-                           yy.flat[sort_distance][OK.flat[sort_distance]])
+        valid_pixels = list(zip(xx.flat[sort_distance][OK.flat[sort_distance]],
+                                yy.flat[sort_distance][OK.flat[sort_distance]]))
 
         if len(valid_pixels) != len(set(valid_pixels)):
             raise ValueError("There are non-unique pixels in the 'valid pixel' list.  "
@@ -1157,7 +1162,7 @@ class Cube(spectrum.Spectrum):
             self.cube = cubes.spectral_smooth(self.cube,smooth,**kwargs)
             self.xarr = self.xarr[::smooth]
             if hasattr(self,'data'):
-                self.data = pyspeckit.smooth.smooth(self.data,smooth,**kwargs)
+                self.data = smooth.smooth(self.data,smooth,**kwargs)
             if len(self.xarr) != self.cube.shape[0]:
                 raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
             if self.errorcube is not None:

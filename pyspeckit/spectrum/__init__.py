@@ -1,18 +1,19 @@
 """
 """
-from classes import Spectrum,Spectra,ObsBlock
-from OpticalSpectrum import OpticalSpectrum
-import fitters,plotters,baseline,units
-import smooth
-import correlate
-import headers
-import logger
+from .classes import Spectrum,Spectra,ObsBlock
+from .OpticalSpectrum import OpticalSpectrum
+from . import fitters,plotters,baseline,units
+from . import smooth
+from . import correlate
+from . import headers
+from . import moments
+from . import units
+from . import utils
+from . import readers
+from . import writers
+from . import logger
 from .. import config
-import moments
-import units
-import utils
 
-import readers
 def register_reader(filetype, function, suffix, default=False):
     ''' 
     Register a reader function.
@@ -49,7 +50,6 @@ register_reader('txt',readers.open_1d_txt,'dat')
 register_reader('tspec',readers.tspec_reader,'fits')
 register_reader('hdf5',readers.open_hdf5,'hdf5')
 
-import writers
 def register_writer(filetype, function, suffix, default=False):
     ''' 
     Register a writer function.

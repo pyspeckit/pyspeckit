@@ -6,6 +6,8 @@ GILDAS CLASS file reader
 Read a CLASS file into an :class:`pyspeckit.spectrum.ObsBlock`
 """
 from __future__ import print_function
+from astropy.extern.six.moves import xrange
+from astropy.extern.six import iteritems
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -890,7 +892,7 @@ def read_observation(f, obsid, file_description=None, indices=None,
     header = obshead
 
     datastart = 0
-    for section_id,section_address in sections.iteritems():
+    for section_id,section_address in iteritems(sections):
         # Section addresses are 1-indexed byte addresses
         # in the current "block"
         sec_position = obs_position + (section_address-1)*4
@@ -999,7 +1001,7 @@ class ClassObject(object):
 
     def __repr__(self):
         s = "\n".join(["{k}: {v}".format(k=k,v=v)
-                       for k,v in self.getinfo().iteritems()])
+                       for k,v in iteritems(self.getinfo())])
         return "ClassObject({id}) with {nspec} entries\n".format(id=id(self),
                                                                  nspec=len(self.allind)) + s
 
@@ -1443,7 +1445,7 @@ def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
         hdr.update(ind)
         # this is slow but necessary...
         H = pyfits.Header()
-        for k,v in hdr.iteritems():
+        for k,v in iteritems(hdr):
             if hasattr(v,"__len__") and not isinstance(v,str):
                 if len(v) > 1:
                     for ii,vv in enumerate(v):

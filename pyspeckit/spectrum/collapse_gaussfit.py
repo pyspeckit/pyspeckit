@@ -7,6 +7,7 @@ except ImportError:
     print "Scipy cold not be loaded.  Collapse_gaussfit may fail"
 import numpy
 from numpy import vectorize,zeros,exp,median,where,asarray,array,nonzero,ma,arange,square
+from astropy.extern.six.moves import xrange
 import matplotlib
 #matplotlib.use('Agg')
 from pylab import indices,figure,clf,savefig,plot,legend,text,axes,title

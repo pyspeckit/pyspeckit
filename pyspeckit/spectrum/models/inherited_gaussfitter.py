@@ -11,10 +11,10 @@ model!  Just make a function like gaussian and plug it into the SpectralModel
 class.
 
 """
-import model
-import fitter
 import numpy
 import types
+from . import model
+from . import fitter
 
 def gaussian(x,A,dx,w, return_components=False, normalized=False,
              return_hyperfine_components=False):

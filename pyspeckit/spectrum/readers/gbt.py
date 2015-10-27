@@ -7,6 +7,8 @@ pyspeckit.  Additional documentation is needed.  Nodding reduction is
 supported, frequency switching is not.
 
 """
+from __future__ import print_function
+from astropy.extern.six import iteritems
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -64,7 +66,7 @@ def list_targets(sdfitsfile, doprint=True):
         strings.append( "%18s  %10f %10f %26s%8i %9g %9g %9i" % (objectname,midRA,midDEC,sexagesimal, npointings, exptime, duration, n_ints) )
 
     if doprint:
-        print "\n".join(strings)
+        print("\n".join(strings))
 
     return strings
 
@@ -111,7 +113,7 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
 
     whobject = bintable.data['OBJECT'] == objectname
     if verbose:
-        print "Number of individual scans for Object %s: %i" % (objectname,whobject.sum())
+        print("Number of individual scans for Object %s: %i" % (objectname,whobject.sum()))
 
     calON = bintable.data['CAL'] == 'T'
     # HACK: apparently bintable.data can sometimes treat itself as scalar...
@@ -132,7 +134,7 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
                 if whOK.sum() == 0:
                     continue
                 if verbose:
-                    print "Number of spectra for sampler %s, nod %i, cal%s: %i" % (sampler,nod,onoff,whOK.sum())
+                    print("Number of spectra for sampler %s, nod %i, cal%s: %i" % (sampler,nod,onoff,whOK.sum()))
                 crvals = bintable.data[whOK]['CRVAL1']
                 if len(crvals) > 1:
                     maxdiff = np.diff(crvals).max()
@@ -144,7 +146,7 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
                     blocks[sampler+onoff+str(nod)] = pyspeckit.ObsBlock(splist,force=True)
                     blocks[sampler+onoff+str(nod)]._arithmetic_threshold = np.diff(blocks[sampler+onoff+str(nod)].xarr).min() / 5.
                 else:
-                    print "Maximum frequency difference > frequency resolution: %f > %f" % (maxdiff, freqres)
+                    print("Maximum frequency difference > frequency resolution: %f > %f" % (maxdiff, freqres))
 
     return blocks
 
@@ -196,7 +198,7 @@ def reduce_nod(blocks, verbose=False, average=True, fdid=(1,2)):
         tsys1 = dcmeantsys(on1avg,off1avg,on1avg.header.get('TCAL'))
         tsys2 = dcmeantsys(on2avg,off2avg,on2avg.header.get('TCAL'))
         if verbose:
-            print "Nod Pair %s (feed %i) has tsys1=%f tsys2=%f" % (sampname, feednumber, tsys1, tsys2)
+            print("Nod Pair %s (feed %i) has tsys1=%f tsys2=%f" % (sampname, feednumber, tsys1, tsys2))
 
         # then get the total power
         if average:
@@ -243,7 +245,7 @@ def reduce_totalpower(blocks, verbose=False, average=True, fdid=1):
         # first find TSYS
         tsys1 = dcmeantsys(on1avg,off1avg,on1avg.header.get('TCAL'))
         if verbose:
-            print "TP: %s (feed %i) has tsys1=%f" % (sampname, feednumber, tsys1)
+            print("TP: %s (feed %i) has tsys1=%f" % (sampname, feednumber, tsys1))
 
         # then get the total power
         if average:
@@ -288,11 +290,11 @@ def dcmeantsys(calon,caloff,tcal,debug=False):
 
     meanTsys = ( meanoff / meandiff * tcal + tcal/2.0 )
     if debug:
-        print caloff
-        print caloff.slice(pct10,pct90,units='pixels')
-        print calon
-        print calon.slice(pct10,pct90,units='pixels')
-        print "pct10: %i  pct90: %i mean1: %f mean2: %f tcal: %f tsys: %f" % (pct10,pct90,meanoff,meandiff,tcal,meanTsys)
+        print(caloff)
+        print(caloff.slice(pct10,pct90,units='pixels'))
+        print(calon)
+        print(calon.slice(pct10,pct90,units='pixels'))
+        print("pct10: %i  pct90: %i mean1: %f mean2: %f tcal: %f tsys: %f" % (pct10,pct90,meanoff,meandiff,tcal,meanTsys))
 
     return meanTsys
 
@@ -343,26 +345,26 @@ def find_matched_freqs(reduced_blocks, debug=False):
 
     # how many IFs?
     frequencies = dict((name,reduced_blocks[name].header.get('OBSFREQ')) for name in sorted_names)
-    if debug: print frequencies
+    if debug: print(frequencies)
     round_frequencies = dict((name,
         round_to_resolution(reduced_blocks[name].header.get('OBSFREQ'),
                             reduced_blocks[name].header.get('FREQRES')))
                  for name in sorted_names)
-    if debug: print round_frequencies
+    if debug: print(round_frequencies)
     unique_frequencies = uniq(round_frequencies.values()) # uniq is an order-preserving function
-    if debug: print unique_frequencies
+    if debug: print(unique_frequencies)
     nIFs = len(unique_frequencies)
     if debug:
-        print frequencies.keys()
-        print round_frequencies.keys()
-        print unique_frequencies
+        print(frequencies.keys())
+        print(round_frequencies.keys())
+        print(unique_frequencies)
 
     IF_dict = {}
     # most annoying part of this whole process... (besides the obvious 1+1=23452342345 error...)
     # ifnumbers are approximately defined by the order things are written.... but only very approximately
     for ifnum,freq in enumerate(unique_frequencies):
-        IF_dict[ifnum] = [sampler for (sampler,rf) in round_frequencies.iteritems() if rf == freq]
-        if debug: print ifnum,freq,IF_dict[ifnum]
+        IF_dict[ifnum] = [sampler for (sampler,rf) in iteritems(round_frequencies) if rf == freq]
+        if debug: print(ifnum,freq,IF_dict[ifnum])
 
     return IF_dict
 
@@ -408,7 +410,7 @@ def identify_samplers(block):
             (name,
                 {'pol': pols[name],
                  'feed': feeds[name],
-                 'IF': [k for k,v in ifs.iteritems() if name in v][0]})
+                 'IF': [k for k,v in iteritems(ifs) if name in v][0]})
                 for name in block.keys()
                 )
 
@@ -426,12 +428,12 @@ def average_pols(block):
     feeddict = find_feeds(block)
     IDs = identify_samplers(block)
 
-    for ifnum,ifsampler in ifdict.iteritems():
-        for sampler,feednum in feeddict.iteritems():
+    for ifnum,ifsampler in iteritems(ifdict):
+        for sampler,feednum in iteritems(feeddict):
             if sampler not in ifsampler:
                 continue
             newname = "if%ifd%i" % (ifnum, feednum)
-            matched_samplers = [sampler_name for (sampler_name,ID) in IDs.iteritems()
+            matched_samplers = [sampler_name for (sampler_name,ID) in iteritems(IDs)
                     if ID['feed'] == feednum and ID['IF'] == ifnum]
             if len(matched_samplers) != 2:
                 raise ValueError("Too few/many matches: %s" % matched_samplers)
@@ -453,8 +455,8 @@ def average_IF(block, debug=False):
     ifdict = find_matched_freqs(block, debug=debug)
 
     import operator
-    for ifnum,ifsamplers in ifdict.iteritems():
-        if debug: print "if%i: freq %g" % (ifnum, block[ifsamplers[0]].header['OBSFREQ'])
+    for ifnum,ifsamplers in iteritems(ifdict):
+        if debug: print("if%i: freq %g" % (ifnum, block[ifsamplers[0]].header['OBSFREQ']))
         averaged_dict["if%i" % ifnum] = reduce(operator.add,[block[name] for name in ifsamplers]) / len(ifsamplers)
 
     return averaged_dict

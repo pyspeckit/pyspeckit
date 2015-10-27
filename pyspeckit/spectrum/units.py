@@ -534,10 +534,15 @@ class SpectroscopicAxis(u.Quantity):
 
     @classmethod
     def validate_unit(self, unit, bad_unit_response='raise'):
+        if isinstance(unit, u.UnitBase):
+            return unit
         try:
-            if unit is None or unit == 'unknown':
+            if unit is None:
                 unit = u.dimensionless_unscaled
-            if unit == 'angstroms': unit = 'angstrom'
+            elif unit == 'unknown':
+                unit = u.dimensionless_unscaled
+            elif unit == 'angstroms':
+                unit = 'angstrom'
             unit = u.Unit(unit)
         except ValueError:
             if bad_unit_response == "pixel":
@@ -636,7 +641,7 @@ class SpectroscopicAxis(u.Quantity):
         """
         return self.as_unit(xunit)
 
-    def convert_to_unit(self, unit, **kwargs):
+    def convert_to_unit(self, unit, make_dxarr=True, **kwargs):
         """
         Return the X-array in the specified units without changing it
         Uses as_unit for the conversion, but changes internal values rather
@@ -657,7 +662,12 @@ class SpectroscopicAxis(u.Quantity):
         self.set_unit(unit)
 
         self.flags.writeable=False
-        self.make_dxarr()
+        if make_dxarr:
+            self.make_dxarr()
+        elif hasattr(self, 'dxarr'):
+            # remove the old, wrong one
+            del self.dxarr
+
 
     def as_unit(self, unit, equivalencies=[], velocity_convention=None, refX=None,
                 refX_unit=None, center_frequency=None, center_frequency_unit=None,

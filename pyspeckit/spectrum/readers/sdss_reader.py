@@ -1,3 +1,4 @@
+from __future__ import print_function
 from .. import units
 try:
     import astropy.io.fits as pyfits

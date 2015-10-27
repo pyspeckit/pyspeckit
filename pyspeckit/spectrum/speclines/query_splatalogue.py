@@ -1,3 +1,4 @@
+from __future__ import print_function
 import atpy
 import urllib,urllib2
 import tempfile
@@ -55,8 +56,8 @@ def query_splatalogue(minwav=0.00260,maxwav=0.00261,
     tf = tempfile.NamedTemporaryFile()
     #for line in R:
     #    print >>tf,line.strip()
-    print >>tf,R
-    print tf.name
+    print(R, file=tf)
+    print(tf.name)
     tf.file.flush()
     t = atpy.Table(tf.name,type='vo')
 

@@ -1,11 +1,11 @@
+from __future__ import print_function
 import numpy as np
-import pyspeckit
 try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-from pyspeckit.spectrum import models
-from pyspeckit.wrappers import fith2co
+from ..spectrum import models
+from . import fith2co
 
 path_to_data = "/Users/adam/work/h2co/radex/troscompt_grid_March2012"
 

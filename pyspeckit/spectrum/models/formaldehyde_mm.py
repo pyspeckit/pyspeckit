@@ -6,9 +6,11 @@ Formaldehyde mm-line fitter
 This is a formaldehyde 3_03-2_02 / 3_22-221 and 3_03-2_02/3_21-2_20 fitter.  
 It is based entirely on RADEX models.
 """
+from __future__ import print_function
 import numpy as np
-import hyperfine
+from . import hyperfine
 from . import fitter,model#,modelgrid
+from astropy.extern.six.moves import xrange
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:
@@ -159,7 +161,7 @@ def formaldehyde_mm_radex(xarr,
 
     if verbose:
         for ta,tk in zip(tau,tex):
-            print "density %20.12g temperature %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, temperature, column, ta, tk)
+            print("density %20.12g temperature %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, temperature, column, ta, tk))
 
     if debug:
         import pdb; pdb.set_trace()

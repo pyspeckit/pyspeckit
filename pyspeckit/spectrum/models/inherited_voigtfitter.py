@@ -3,9 +3,9 @@
 Voigt Profile Fitter
 ====================
 """
-import model
+from . import model
 import numpy as np
-from pyspeckit.spectrum.moments import moments
+from ...spectrum.moments import moments
 import types
 try:
     import scipy.special

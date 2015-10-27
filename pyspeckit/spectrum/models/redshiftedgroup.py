@@ -5,7 +5,7 @@ Generalized redshifted line group fitter
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
 import numpy as np
-import model,fitter
+from . import model,fitter
 
 ckms = 2.99792458e5
 

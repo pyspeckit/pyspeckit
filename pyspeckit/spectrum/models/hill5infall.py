@@ -11,7 +11,7 @@ Original source:
 http://adsabs.harvard.edu/abs/2005ApJ...620..800D
 """
 import numpy as np
-import model
+from . import model
 
 def hill5_model( xarr, tau, v_lsr,  v_infall,  sigma,  tpeak, TBG=2.73):
     """
