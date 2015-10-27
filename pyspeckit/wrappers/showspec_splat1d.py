@@ -27,9 +27,9 @@ def splat_1d(filename=None,vmin=None,vmax=None,button=None,dobaseline=False,
         sp.crop(vmin,vmax)
 
     if button != None:
-        print "button keyword doesn't do anything"
+        print("button keyword doesn't do anything")
     if maskspecnum:
-        print "maskspecnum doesn't do anything [not implemented]"
+        print("maskspecnum doesn't do anything [not implemented]")
 
     if specname:
         sp.plotter.title = specname

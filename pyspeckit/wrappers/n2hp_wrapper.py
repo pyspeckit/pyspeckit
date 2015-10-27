@@ -78,7 +78,7 @@ if __name__ == "__main__":
     if len(args) == 1:
         fn = args[0]
     else:
-        print "Couldn't load a file!  Crash time!"
+        print("Couldn't load a file!  Crash time!")
 
     # define n2hp fitter
     n2hp_radex_fitter = make_n2hp_fitter(path_to_radex=options.radexpath,
