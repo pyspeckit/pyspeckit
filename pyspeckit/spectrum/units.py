@@ -534,12 +534,15 @@ class SpectroscopicAxis(u.Quantity):
 
     @classmethod
     def validate_unit(self, unit, bad_unit_response='raise'):
-        if isinstance(unit, u.Unit):
+        if isinstance(unit, u.UnitBase):
             return unit
         try:
-            if unit is None or unit == 'unknown':
+            if unit is None:
                 unit = u.dimensionless_unscaled
-            if unit == 'angstroms': unit = 'angstrom'
+            elif unit == 'unknown':
+                unit = u.dimensionless_unscaled
+            elif unit == 'angstroms':
+                unit = 'angstrom'
             unit = u.Unit(unit)
         except ValueError:
             if bad_unit_response == "pixel":
@@ -661,7 +664,7 @@ class SpectroscopicAxis(u.Quantity):
         self.flags.writeable=False
         if make_dxarr:
             self.make_dxarr()
-        else:
+        elif hasattr(self, 'dxarr'):
             # remove the old, wrong one
             del self.dxarr
 

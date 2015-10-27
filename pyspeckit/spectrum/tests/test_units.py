@@ -107,17 +107,20 @@ class TestUnits(object):
 
     @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
     def test_convert_back(self, unit_from, unit_to,convention,ref_unit):
-        if unit_from in ('cms','cm/s') or unit_to in ('cms','cm/s'):
+        if unit_from in ('cms','cm/s','centimeter/second') or unit_to in ('cms','cm/s','centimeter/second'):
             xvals = np.linspace(1000,10000,3)
-            threshold = 1e-6
         else:
             xvals = np.linspace(1,10,3)
-            threshold = 1e-15
+        assert not np.any(xvals==0.0)
         # all conversions include a * or / by speedoflight_ms
         threshold = np.spacing(units.speedoflight_ms) * 100
         if 'megameter' in unit_from or 'Mm' in unit_from:
             threshold *= 10
-        xarr = units.SpectroscopicAxis(xvals,unit=unit_from,refX=5,refX_unit=ref_unit,velocity_convention=convention)
+        if 'centimeter' in unit_from or 'cm' in unit_from:
+            threshold /= 10
+        xarr = units.SpectroscopicAxis(np.copy(xvals), unit=unit_from, refX=5,
+                                       refX_unit=ref_unit,
+                                       velocity_convention=convention)
         xarr.convert_to_unit(unit_to,convention=convention, make_dxarr=False)
         xarr.convert_to_unit(unit_from,convention=convention, make_dxarr=False)
         assert all(np.abs((xarr.value - xvals)/xvals) < threshold)
