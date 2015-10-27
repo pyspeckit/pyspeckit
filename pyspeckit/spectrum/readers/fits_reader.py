@@ -58,7 +58,12 @@ def open_1d_pyfits(pyfits_hdu, specnum=0, wcstype='', specaxis="1",
                 else: card.verify('silentfix')
             except pyfits.VerifyError:
                 hdr.__delitem__(card.key)
+
     data = pyfits_hdu.data
+
+    with np.errstate(invalid='ignore'):
+        # silently turn signalling nans into quiet nans
+        data[np.isnan(data)] = np.nan
 
     # search for the correct axis (may be 1 or 3, unlikely to be 2 or others)
     # 1 = 1D spectrum
@@ -264,7 +269,9 @@ def make_multispec_axis(hdr, axsplit, WAT1_dict):
         # Data is not dispersion coords
     else: raise ValueError("Unrecognized MULTISPE dispersion in IRAF Echelle specification")
     
-    headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt, 'NAXIS1':naxis, 'NAXIS':1, 'REDSHIFT':z, 'CTYPE1':'wavelength', 'CUNIT1':WAT1_dict['units']}
+    headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt, 'NAXIS1':naxis,
+                 'NAXIS':1, 'REDSHIFT':z, 'CTYPE1':'wavelength',
+                 'CUNIT1':WAT1_dict['units']}
     
     return xax, naxis, headerkws
 
@@ -297,5 +304,9 @@ def read_echelle(pyfits_hdu):
 
         xarr = make_axis(xax,header)
         x_axes.append(xarr)
+
+    data = pyfits_hdu.data
+    with np.errstate(invalid='ignore'):
+        data[np.isnan(data)] = np.nan
     
-    return pyfits_hdu.data, pyfits_hdu.data*0, units.EchelleAxes(x_axes), hdr
+    return data, np.zeros_like(data), units.EchelleAxes(x_axes), hdr
