@@ -865,6 +865,7 @@ def read_observation(f, obsid, file_description=None, indices=None,
                      my_memmap=None, memmap=True):
     if isinstance(f, str):
         f = open(f,'rb')
+        opened = True
         if memmap:
             my_memmap = numpy.memmap(filename, offset=0, dtype='float32',
                                      mode='r')
@@ -872,6 +873,8 @@ def read_observation(f, obsid, file_description=None, indices=None,
             my_memmap = None
     elif my_memmap is None and memmap:
         raise ValueError("Must pass in a memmap object if passing in a file object.")
+    else:
+        opened = False
 
     if file_description is None:
         file_description = _read_first_record(f)
@@ -927,6 +930,9 @@ def read_observation(f, obsid, file_description=None, indices=None,
     f.seek(datastart-1)
     spec = _read_spectrum(f, position=datastart-1, nchan=nchan,
                           memmap=memmap, my_memmap=my_memmap)
+
+    if opened:
+        f.close()
 
     return spec, hdr
 
