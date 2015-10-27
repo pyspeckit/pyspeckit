@@ -1,5 +1,6 @@
 import numpy as np
-import itertools, cosmology
+import itertools
+from . import cosmology
 from collections import OrderedDict
 
 """
@@ -358,7 +359,9 @@ class Measurements(object):
         """
 
         flux = 0
-        for i in xrange(len(pars) / 3):
+        niter = (len(pars) / 3)
+        assert niter == int(niter)
+        for i in xrange(int(niter)):
             flux += np.sqrt(2. * np.pi) * pars[3 * i] * abs(pars[2 + 3 * i])
 
         return flux * self.fluxnorm
@@ -370,7 +373,8 @@ class Measurements(object):
         """
 
         amp = 0
-        for i in xrange(len(pars) / 3):
+        niter = (len(pars) / 3)
+        for i in xrange(int(niter)):
             amp += pars[3 * i]
         return amp * self.fluxnorm
 
@@ -380,7 +384,8 @@ class Measurements(object):
         """
 
         lum = 0
-        for i in xrange(len(pars) / 3):
+        niter = (len(pars) / 3)
+        for i in xrange(int(niter)):
             lum += self.compute_flux(pars) * 4. * np.pi * self.d**2
         return lum
 
@@ -394,7 +399,8 @@ class Measurements(object):
             return 2. * np.sqrt(2. * np.log(2.)) * abs(pars[2])
         else:
             atol = 1e-4
-            pars2d = np.reshape(pars, (len(pars) / 3, 3))
+            niter = (len(pars) / 3)
+            pars2d = np.reshape(pars, (int(niter), 3))
             start = zip(*pars2d)[1][0]                    # start at central wavelength of first component
 
             # If the centroids are exactly the same for all components, we know the peak, and peak position

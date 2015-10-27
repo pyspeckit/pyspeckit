@@ -87,7 +87,8 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
     contain data.  If you have scipy and columns of varying length, readcol will
     read in all of the rows with length=mode(row lengths).
     """
-    f=open(filename,'r').readlines()
+    with open(filename,'r') as ff:
+        f = ff.readlines()
     
     null=[f.pop(0) for i in range(skipline)]
 

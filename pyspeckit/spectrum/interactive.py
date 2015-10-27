@@ -173,7 +173,7 @@ class Interactive(object):
             self.clear_highlights()
 
         bad = self.Spectrum.data*0
-        bad[True-self.includemask] = numpy.nan
+        bad[~self.includemask] = numpy.nan
 
         self.button1plot += self.Spectrum.plotter.axis.plot(
                 self.Spectrum.xarr,

@@ -90,7 +90,7 @@ class ParinfoList(list):
     tied = property(fget=_getter('tied'), fset=_setter('tied'))
 
     def __getitem__(self, key):
-        if type(key) is int:
+        if type(key) in (int, slice):
             return super(ParinfoList,self).__getitem__(key)
         else:
             return self._dict[key]

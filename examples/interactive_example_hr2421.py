@@ -9,9 +9,8 @@ excesslines = []
 # get the data from http://cdsarc.u-strasbg.fr/ftp/cats/II/179/sp/hr2421.fit
 import urllib2
 url = urllib2.urlopen('http://cdsarc.u-strasbg.fr/ftp/cats/II/179/sp/hr2421.fit')
-outfile = open('hr2421.fit','wb')
-outfile.write(url.read())
-outfile.close()
+with open('hr2421.fit','wb') as outfile:
+    outfile.write(url.read())
 
 # Load the spectrum
 sp = pyspeckit.Spectrum('hr2421.fit')

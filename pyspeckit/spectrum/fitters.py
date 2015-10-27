@@ -978,7 +978,7 @@ class Specfit(interactive.Interactive):
         """
         #if self.Spectrum.baseline.subtracted is False and self.Spectrum.baseline.basespec is not None:
         #    # don't display baseline if it's included in the fit
-        #    plot_offset = self.Spectrum.plotter.offset+(self.Spectrum.baseline.basespec * (True-self.vheight))
+        #    plot_offset = self.Spectrum.plotter.offset+(self.Spectrum.baseline.basespec * (~self.vheight))
         #else:
         if offset is None:
             plot_offset = self.Spectrum.plotter.offset
@@ -1424,7 +1424,7 @@ class Specfit(interactive.Interactive):
                     if mycfg.WARN: print("WARNING: The computation of the error "
                                          "on the integral is not obviously "
                                          "correct or robust... it's just a guess.")
-                    OK = np.abs( fullmodel ) > threshold
+                    OK = self.model_mask(threshold=threshold, add_baseline=False)
                     error = np.sqrt((self.errspec[OK]**2).sum()) * dx
                     #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
             else:
