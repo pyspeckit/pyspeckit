@@ -18,7 +18,8 @@ had to OCR and pull out by hand some of the coefficients.
 
 """
 import numpy as np
-import pyspeckit
+from .. import models
+from .. import units
 
 # log(temperature), alphaBalphaB = [[1.0,9.283],
 alphaB=[[1.2,8.823],
@@ -261,13 +262,13 @@ def hydrogen_model(xarr, amplitude=1.0, width=0.0, velocity=0.0, a_k=0.0, temper
     xarr = xarr.as_unit('microns')
 
 
-    lw = width / pyspeckit.units.speedoflight_kms * wavelength[reference_line]
+    lw = width / units.speedoflight_kms * wavelength[reference_line]
     center = wavelength[reference_line]
     model += amplitude * np.exp(-(xarr-center)**2 / (2.0*lw)**2)
 
     for line in lines[1:]:
         relamp = (r_to_hbeta[line][tnum]/r_to_hbeta[reference_line][tnum]) 
-        lw = width / pyspeckit.units.speedoflight_kms * wavelength[line]
+        lw = width / units.speedoflight_kms * wavelength[line]
         center = wavelength[line]
     
         model += amplitude * relamp * np.exp(-(xarr-center)**2 / (2.0*lw)**2)
@@ -284,7 +285,7 @@ def add_to_registry(sp):
     Add the Hydrogen model to the Spectrum's fitter registry
     """
     # can't have absorption in recombination case
-    extincted_hydrogen_emission = pyspeckit.models.model.SpectralModel(hydrogen_model, 4, 
+    extincted_hydrogen_emission = models.model.SpectralModel(hydrogen_model, 4, 
             shortvarnames=('A','\\sigma','\\Delta x','A_K'),
             parnames=['amplitude','width','velocity','extinction'],
             parlimited=[(True,False),(True,False),(False,False), (True,False)], 

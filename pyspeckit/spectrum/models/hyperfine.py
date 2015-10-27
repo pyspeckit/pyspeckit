@@ -5,8 +5,8 @@ Generalized hyperfine component fitter
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
 import numpy as np
-import model
-import fitter
+from . import model
+from . import fitter
 from astropy import units as u
 
 # should be imported in the future

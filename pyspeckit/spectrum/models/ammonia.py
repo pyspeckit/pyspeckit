@@ -13,12 +13,12 @@ Module API
 
 """
 import numpy as np
-from pyspeckit.mpfit import mpfit
-from pyspeckit.spectrum.parinfo import ParinfoList,Parinfo
-import fitter
+from ...mpfit import mpfit
+from ...spectrum.parinfo import ParinfoList,Parinfo
+from . import fitter
+from . import model
 import matplotlib.cbook as mpcb
 import copy
-import model
 from astropy import log
 import astropy.units as u
 from astropy import constants
@@ -26,8 +26,8 @@ from . import mpfit_messages
 import operator
 import string
 
-from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
-                               voff_lines_dict, tau_wts_dict)
+from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
+                                voff_lines_dict, tau_wts_dict)
 
 def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,

@@ -1,8 +1,7 @@
 from __future__ import print_function
 from astropy.extern.six.moves import xrange
-import pyspeckit
-from ..classes import Spectrum,ObsBlock
 from .. import units
+from .. import classes
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -43,9 +42,9 @@ def read_galex(fitsfilename, orderselection='obj'):
     wavelength = bintable.zero + np.arange(len(bintable.disp)) * bintable.disp
     xaxis = units.SpectroscopicAxis(wavelength,units='angstroms')
 
-    splist = [Spectrum(data=bintable[orderselection][:,ii], error=bintable[orderselection+"err"][:,ii], xarr=xaxis, header=ff[1].header)
+    splist = [classes.Spectrum(data=bintable[orderselection][:,ii], error=bintable[orderselection+"err"][:,ii], xarr=xaxis, header=ff[1].header)
             for ii in xrange(bintable[orderselection].shape[1])]
 
-    galexblock = ObsBlock(splist)
+    galexblock = classes.ObsBlock(splist)
 
     return galexblock
