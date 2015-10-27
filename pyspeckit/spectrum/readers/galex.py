@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pyspeckit
 try:
     import astropy.io.fits as pyfits

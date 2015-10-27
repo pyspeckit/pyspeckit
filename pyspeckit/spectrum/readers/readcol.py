@@ -7,16 +7,15 @@ For a modular ascii table reader, http://cxc.harvard.edu/contrib/asciitable/ is
 probably better.  This single-function code is probably more intuitive to an
 end-user, though.
 """
+from __future__ import print_function
 import string,re,sys
 import numpy
 try:
     from scipy.stats import mode
     hasmode = True
 except ImportError:
-    #print "scipy could not be imported.  Your table must have full rows."
     hasmode = False
 except ValueError:
-    #print "error"
     hasmode = False
 
 def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
@@ -125,7 +124,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
     null=[f.pop(0) for i in range(skipafter)]
     
     if fixedformat:
-        myreadff = lambda(x): readff(x,fixedformat)
+        myreadff = lambda x: readff(x,fixedformat)
         splitarr = map(myreadff,f)
         splitarr = filter(commentfilter,splitarr)
     else:
@@ -145,8 +144,8 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
             ncols,nrows = mode(nperline)
             if nrows != len(splitarr):
                 if verbose:
-                    print "Removing %i rows that don't match most common length %i.  \
-                     \n%i rows read into array." % (len(splitarr) - nrows,ncols,nrows)
+                    print(("Removing %i rows that don't match most common length %i.  "
+                          "\n%i rows read into array." % (len(splitarr) - nrows,ncols,nrows)))
                 for i in xrange(len(splitarr)-1,-1,-1):  # need to go backwards
                     if nperline[i] != ncols:
                         splitarr.pop(i)
@@ -155,7 +154,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
         x = numpy.asarray( splitarr , dtype='float')
     except ValueError:
         if verbose: 
-            print "WARNING: reading as string array because %s array failed" % 'float'
+            print(("WARNING: reading as string array because %s array failed" % 'float'))
         try:
             x = numpy.asarray( splitarr , dtype='S')
         except ValueError:
@@ -247,5 +246,5 @@ def make_commentfilter(comment):
             except: return -1
         return commentfilter
     else: # always return false 
-        return lambda(x): -1
+        return lambda x: -1
 

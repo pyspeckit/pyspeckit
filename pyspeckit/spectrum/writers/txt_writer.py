@@ -1,3 +1,4 @@
+from __future__ import print_function
 try:
     import atpy
     atpyOK = True
@@ -25,12 +26,12 @@ class write_txt(object):
         with open(fn, 'w') as f:
             
             # Print header
-            print >> f, "# Column 1: {0}".format("x-values")
-            print >> f, "# Column 2: {0}".format("model spectrum")
+            print("# Column 1: {0}".format("x-values"), file=f)
+            print("# Column 2: {0}".format("model spectrum"), file=f)
             for i, element in enumerate(self.Spectrum.specfit.modelcomponents):
-                print >> f, "# Column {0}: model spectrum component {1}".format(i + 3, i + 1)        
-            print >> f, "# Column {0}: residuals".format(i + 4)
-            print >> f, ""    
+                print("# Column {0}: model spectrum component {1}".format(i + 3, i + 1), file=f)        
+            print("# Column {0}: residuals".format(i + 4), file=f)
+            print("", file=f)    
                     
             components = zip(*self.Spectrum.specfit.modelcomponents)        
             for i, element in enumerate(self.Spectrum.specfit.model):
@@ -39,6 +40,6 @@ class write_txt(object):
                 for j, component in enumerate(components[i]): line += "{0:10}".format(round(component, 5))    
                 line += "{0:10}".format(round(self.Spectrum.specfit.residuals[i], 5))       
                     
-                print >> f, line
+                print(line, file=f)
                 
-            print >> f, ""
+            print("", file=f)

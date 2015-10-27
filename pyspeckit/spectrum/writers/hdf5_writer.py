@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 from . import Writer
 
@@ -17,7 +18,7 @@ class write_hdf5(Writer):
         To do: leave option of writing to groups (for model components especially?)
         """
         
-        if not h5check: print "Cannot write to hdf5 - h5py import failed."
+        if not h5check: print("Cannot write to hdf5 - h5py import failed.")
         
         else: 
             if filename is None: fn = "{0}_{1}.hdf5".format(self.Spectrum.fileprefix, newsuffix)

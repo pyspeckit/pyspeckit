@@ -1,13 +1,15 @@
+from __future__ import print_function
 try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-from .. import units
 import numpy.ma as ma
 import numpy as np
-from . import make_axis
 from astropy.extern.six import operator
-from pyspeckit.specwarnings import warn
+
+from .. import units
+from . import make_axis
+from ...specwarnings import warn
 
 def open_1d_fits(filename, hdu=0, **kwargs):
     """
@@ -116,7 +118,7 @@ will run into errors.""")
 
     if scale_keyword is not None:
         try:
-            print("Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action))
+            print(("Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)))
             scaleval = hdr[scale_keyword]
             spec = scale_action(spec,scaleval)
             errspec = scale_action(errspec,scaleval)
@@ -142,7 +144,7 @@ will run into errors.""")
         v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
         p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
         hdr['CDELT%s' % specaxis] = dv
-        if verbose: print("Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv))
+        if verbose: print(("Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)))
     elif hdr.get(str('CDELT%s%s' % (specaxis,wcstype))):
         if hdr.get(str('PC{0}_{0}'.format(specaxis))):
             dv = hdr['CDELT%s%s' % (specaxis,wcstype)] * hdr.get(str('PC{0}_{0}'.format(specaxis)))
@@ -150,7 +152,7 @@ will run into errors.""")
             dv = hdr['CDELT%s%s' % (specaxis,wcstype)]
         v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
         p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
-        if verbose: print("Using the FITS CDELT value.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv))
+        if verbose: print(("Using the FITS CDELT value.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)))
     elif len(data.shape) > 1:
         if verbose: print("No CDELT or CD in header.  Assuming 2D input with 1st line representing the spectral axis.")
         # try assuming first axis is X axis

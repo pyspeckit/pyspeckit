@@ -9,11 +9,13 @@ will use a very simple routine for reading in the data.
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 .. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
 """
+from __future__ import print_function
 from astropy.io import ascii
-from .. import units
 import numpy as np
-from pyspeckit.specwarnings import warn
-import readcol
+
+from ...specwarnings import warn
+from . import readcol
+from .. import units
 
 def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2,
                 text_reader='simple', format=None, **kwargs):
