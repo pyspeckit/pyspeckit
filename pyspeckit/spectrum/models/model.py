@@ -298,7 +298,7 @@ class SpectralModel(fitter.SimpleFitter):
                 for p in self.parinfo:
                     if 'AMP' in p['parname']:
                         p['limited'] = (True, p['limited'][1])
-                        p['limits']  = (0, p['limits'][1])   
+                        p['limits']  = (0, p['limits'][1])
 
         # This is effectively an override of all that junk above (3/11/2012)
         # Much of it is probably unnecessary, but it was easier to do this than
