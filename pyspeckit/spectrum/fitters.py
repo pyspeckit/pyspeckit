@@ -1828,7 +1828,7 @@ class Specfit(interactive.Interactive):
             of the line.  This threshold is applied to the *model*.  If it is
             'noise', self.error will be used.
         emission : bool
-            Is the line absorption or emission?  
+            Is the line absorption or emission?
         interpolate_factor : integer
             Magnification factor for determining sub-pixel FWHM.  If used,
             "zooms-in" by using linear interpolation within the line region
@@ -1856,6 +1856,9 @@ class Specfit(interactive.Interactive):
             data = self.Spectrum.data * 1
 
         model = self.get_full_model(add_baseline=False)
+        if np.count_nonzero(model) == 0:
+            raise ValueError("The model is all zeros.  No FWHM can be "
+                             "computed.")
 
         # can modify inplace because data is a copy of self.Spectrum.data
         if not emission:
@@ -1866,9 +1869,15 @@ class Specfit(interactive.Interactive):
         if line_region.sum() == 0:
             raise ValueError("No valid data included in FWHM computation")
         if line_region.sum() <= 2:
+            # if fewer than 2 points included, expand by 1 pixel in each
+            # direction.  This is a bit of a hack.
             line_region[line_region.argmax()-1:line_region.argmax()+1] = True
             reverse_argmax = len(line_region) - line_region.argmax() - 1
             line_region[reverse_argmax-1:reverse_argmax+1] = True
+            log.warn("Only two pixels were identified as part of the fit.  "
+                     "To enable statistical measurements, the range has been"
+                     " expanded by 2 pixels including some regions below the"
+                     " threshold.")
 
         # determine peak (because data is neg if absorption, always use max)
         peak = data[line_region].max()
@@ -1878,11 +1887,14 @@ class Specfit(interactive.Interactive):
         cd = xarr.dxarr.min()
         
         if interpolate_factor > 1:
-            newxarr = units.SpectroscopicAxis(
-                    np.arange(xarr.min().value-cd,xarr.max().value+cd,cd / float(interpolate_factor)),
-                    unit=xarr.unit,
-                    equivalencies=xarr.equivalencies
-                    )
+            newxarr = units.SpectroscopicAxis(np.arange(xarr.min().value-cd,
+                                                        xarr.max().value+cd,
+                                                        cd /
+                                                        float(interpolate_factor)
+                                                       ),
+                                              unit=xarr.unit,
+                                              equivalencies=xarr.equivalencies
+                                             )
             # load the metadata from xarr
             # newxarr._update_from(xarr)
             data = np.interp(newxarr,xarr,data[line_region])
@@ -1893,15 +1905,17 @@ class Specfit(interactive.Interactive):
         # need the peak location so we can find left/right half-max locations
         peakloc = data.argmax()
 
-        hm_left  = np.argmin( np.abs( data[:peakloc]-peak/2. ))
-        hm_right = np.argmin( np.abs( data[peakloc:]-peak/2. )) + peakloc
+        hm_left = np.argmin(np.abs(data[:peakloc]-peak/2.))
+        hm_right = np.argmin(np.abs(data[peakloc:]-peak/2.)) + peakloc
         
         deltax = xarr[hm_right]-xarr[hm_left]
 
         if plot:
-            self.Spectrum.plotter.axis.plot([xarr[hm_right],xarr[hm_left]],
-                    np.array([peak/2.,peak/2.])+self.Spectrum.plotter.offset,
-                    **kwargs)
+            self.Spectrum.plotter.axis.plot([xarr[hm_right],
+                                             xarr[hm_left]],
+                                            np.array([peak/2.,peak/2.]) +
+                                            self.Spectrum.plotter.offset,
+                                            **kwargs)
             self.Spectrum.plotter.refresh()
 
         # debug print hm_left,hm_right,"FWHM: ",deltax
