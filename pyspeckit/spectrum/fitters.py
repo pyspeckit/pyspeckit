@@ -1909,9 +1909,11 @@ class Specfit(interactive.Interactive):
         deltax = xarr[hm_right]-xarr[hm_left]
 
         if plot:
+            # for plotting, use a negative if absorption
+            sign = 1 if emission else -1
             self.Spectrum.plotter.axis.plot([xarr[hm_right].value,
                                              xarr[hm_left].value],
-                                            np.array([peak/2.,peak/2.]) +
+                                            sign*np.array([peak/2.,peak/2.]) +
                                             self.Spectrum.plotter.offset,
                                             **kwargs)
             self.Spectrum.plotter.refresh()
