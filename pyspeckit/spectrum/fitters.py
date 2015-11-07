@@ -1868,16 +1868,14 @@ class Specfit(interactive.Interactive):
         line_region = model > threshold
         if line_region.sum() == 0:
             raise ValueError("No valid data included in FWHM computation")
-        if line_region.sum() <= 2:
-            # if fewer than 2 points included, expand by 1 pixel in each
-            # direction.  This is a bit of a hack.
+        if line_region.sum() <= grow_threshold:
             line_region[line_region.argmax()-1:line_region.argmax()+1] = True
             reverse_argmax = len(line_region) - line_region.argmax() - 1
             line_region[reverse_argmax-1:reverse_argmax+1] = True
-            log.warn("Only two pixels were identified as part of the fit.  "
-                     "To enable statistical measurements, the range has been"
+            log.warn("Fewer than {0} pixels were identified as part of the fit."
+                     " To enable statistical measurements, the range has been"
                      " expanded by 2 pixels including some regions below the"
-                     " threshold.")
+                     " threshold.".format(grow_threshold))
 
         # determine peak (because data is neg if absorption, always use max)
         peak = data[line_region].max()
@@ -1911,8 +1909,8 @@ class Specfit(interactive.Interactive):
         deltax = xarr[hm_right]-xarr[hm_left]
 
         if plot:
-            self.Spectrum.plotter.axis.plot([xarr[hm_right],
-                                             xarr[hm_left]],
+            self.Spectrum.plotter.axis.plot([xarr[hm_right].value,
+                                             xarr[hm_left].value],
                                             np.array([peak/2.,peak/2.]) +
                                             self.Spectrum.plotter.offset,
                                             **kwargs)
