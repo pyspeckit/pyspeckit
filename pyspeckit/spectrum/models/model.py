@@ -311,6 +311,7 @@ class SpectralModel(fitter.SimpleFitter):
                 par.scaleable = True
 
         log.debug("Parinfo has been set: {0}".format(self.parinfo))
+        log.debug("kwargs {0} were passed.".format(kwargs))
 
         assert self.parinfo != []
 
