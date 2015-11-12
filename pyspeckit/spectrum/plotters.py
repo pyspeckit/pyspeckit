@@ -732,8 +732,8 @@ def steppify(arr,isX=False):
     """
     if isX:
         interval = abs(arr[1:]-arr[:-1]) / 2.0
-        newarr = np.array(zip(arr[:-1]-interval,arr[:-1]+interval)).ravel()
+        newarr = np.array(list(zip(arr[:-1]-interval,arr[:-1]+interval))).ravel()
         newarr = np.concatenate([newarr,2*[newarr[-1]+interval[-1]]])
     else:
-        newarr = np.array(zip(arr,arr)).ravel()
+        newarr = np.array(list(zip(arr,arr))).ravel()
     return newarr
