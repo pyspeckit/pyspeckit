@@ -1919,8 +1919,8 @@ class Specfit(interactive.Interactive):
 
             self.Spectrum.plotter.axis.plot([xarr[hm_right].value,
                                              xarr[hm_left].value],
-                                            sign*np.array([peak/2.,peak/2.]) +
-                                            yoffset,
+                                            sign*np.array([peak/2.+yoffset,
+                                                           peak/2.+yoffset]),
                                             **kwargs)
             self.Spectrum.plotter.refresh()
 
