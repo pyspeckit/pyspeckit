@@ -1911,10 +1911,16 @@ class Specfit(interactive.Interactive):
         if plot:
             # for plotting, use a negative if absorption
             sign = 1 if emission else -1
+
+            # shift with baseline if baseline is plotted
+            yoffset = self.Spectrum.plotter.offset
+            if not self.Spectrum.baseline.subtracted:
+                yoffset = yoffset + self.Spectrum.baseline.basespec
+
             self.Spectrum.plotter.axis.plot([xarr[hm_right].value,
                                              xarr[hm_left].value],
                                             sign*np.array([peak/2.,peak/2.]) +
-                                            self.Spectrum.plotter.offset,
+                                            yoffset,
                                             **kwargs)
             self.Spectrum.plotter.refresh()
 
