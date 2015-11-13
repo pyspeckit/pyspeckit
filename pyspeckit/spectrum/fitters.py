@@ -1915,8 +1915,8 @@ class Specfit(interactive.Interactive):
             # shift with baseline if baseline is plotted
             if not self.Spectrum.baseline.subtracted:
                 basespec = self.Spectrum.baseline.get_model(xarr)
-                yoffleft = self.Spectrum.plotter.offset + basespec
-                yoffright = self.Spectrum.plotter.offset + basespec
+                yoffleft = self.Spectrum.plotter.offset + basespec[hm_left]
+                yoffright = self.Spectrum.plotter.offset + basespec[hm_right]
             else:
                 yoffleft = yoffright = self.Spectrum.plotter.offset
 
