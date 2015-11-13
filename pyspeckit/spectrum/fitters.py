@@ -1920,10 +1920,13 @@ class Specfit(interactive.Interactive):
             else:
                 yoffleft = yoffright = self.Spectrum.plotter.offset
 
+            log.debug("peak={2} yoffleft={0} yoffright={1}".format(yoffleft, yoffright, peak))
+            log.debug("hm_left={0} hm_right={1} xarr[hm_left]={2} xarr[hm_right]={3}".format(hm_left, hm_right, xarr[hm_left], xarr[hm_right]))
+
             self.Spectrum.plotter.axis.plot([xarr[hm_right].value,
                                              xarr[hm_left].value],
-                                            sign*np.array([peak/2.+yoffleft,
-                                                           peak/2.+yoffright]),
+                                            np.array([sign*peak/2.+yoffleft,
+                                                      sign*peak/2.+yoffright]),
                                             **kwargs)
             self.Spectrum.plotter.refresh()
 
