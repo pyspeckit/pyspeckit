@@ -1913,14 +1913,16 @@ class Specfit(interactive.Interactive):
             sign = 1 if emission else -1
 
             # shift with baseline if baseline is plotted
-            yoffset = self.Spectrum.plotter.offset
             if not self.Spectrum.baseline.subtracted:
-                yoffset = yoffset + self.Spectrum.baseline.basespec
+                yoffleft = self.Spectrum.plotter.offset + self.Spectrum.baseline.basespec[hm_left]
+                yoffright = self.Spectrum.plotter.offset + self.Spectrum.baseline.basespec[hm_right]
+            else:
+                yoffleft = yoffright = self.Spectrum.plotter.offset
 
             self.Spectrum.plotter.axis.plot([xarr[hm_right].value,
                                              xarr[hm_left].value],
-                                            sign*np.array([peak/2.+yoffset,
-                                                           peak/2.+yoffset]),
+                                            sign*np.array([peak/2.+yoffleft,
+                                                           peak/2.+yoffright]),
                                             **kwargs)
             self.Spectrum.plotter.refresh()
 
