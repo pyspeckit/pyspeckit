@@ -439,8 +439,8 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
         #    flathead['CRVAL2'] = crv2.item() # np 0-d arrays are not scalar
 
         # xlo, ylo have been forced to integers already above
-        flathead['CRPIX1'] = flathead['CRPIX1'] + xlo
-        flathead['CRPIX2'] = flathead['CRPIX2'] + ylo
+        flathead['CRPIX1'] = flathead['CRPIX1'] - xlo
+        flathead['CRPIX2'] = flathead['CRPIX2'] - ylo
 
         if return_HDU:
             return fits.PrimaryHDU(data=subim,header=flathead)
