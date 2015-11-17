@@ -20,6 +20,7 @@ import os
 import astropy.io.fits as fits
 import astropy.wcs as pywcs
 import tempfile
+import warnings
 from astropy import coordinates
 from astropy import log
 try:
@@ -278,6 +279,8 @@ def extract_aperture(cube, ap, r_mask=False, wcs=None,
     r_mask : bool
     return mask in addition to spectrum (for error checking?)
     """
+    warnings.warn("SpectralCube can do what subimage_integ does much more easily!",
+                  DeprecationWarning)
 
     if wcs is not None and coordsys is not None:
         if debug:
