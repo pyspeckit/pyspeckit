@@ -120,9 +120,13 @@ class Plotter(object):
             cbs = self.figure.canvas.callbacks.callbacks
             # this may cause problems since the dict of key press events is a
             # dict, i.e. not ordered, and we want to pop the first one...
-            self._mpl_key_callbacks = dict([(k, cbs['key_press_event'].pop(k))
-                                            for k in
-                                            list(cbs['key_press_event'].keys())[0:1]])
+            mpl_keypress_hander = self.figure.canvas.manager.key_press_handler_id
+            try:
+                self._mpl_key_callbacks = {mpl_keypress_hander:
+                                           cbs['key_press_event'].pop(mpl_keypress_hander)}
+            except KeyError:
+                self._mpl_key_callbacks = {mpl_keypress_hander:
+                                           self.figure.canvas.manager.key_press}
 
     def _reconnect_matplotlib_keys(self):
         """
@@ -130,6 +134,9 @@ class Plotter(object):
         """
         if self.figure is not None and hasattr(self,'_mpl_key_callbacks'):
             self.figure.canvas.callbacks.callbacks['key_press_event'].update(self._mpl_key_callbacks)
+        elif self.figure is not None:
+            self.figure.canvas.callbacks.callbacks['key_press_event'].update({mpl_keypress_hander:
+                                                                              self.figure.canvas.manager.key_press})
 
     def __call__(self, figure=None, axis=None, clear=True, autorefresh=None,
                  plotscale=1.0, override_plotkwargs=False, **kwargs):
