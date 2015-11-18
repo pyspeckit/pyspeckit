@@ -9,9 +9,9 @@ class Writer(object):
         self.write_data(**kwargs)
 
     def write_data(self):
-        print "This is a dummy function intended to be overloaded."
+        print("This is a dummy function intended to be overloaded.")
 
-import hdf5_writer
+from . import hdf5_writer
 write_hdf5 = hdf5_writer.write_hdf5
-import fits_writer
+from . import fits_writer
 write_fits = fits_writer.write_fits

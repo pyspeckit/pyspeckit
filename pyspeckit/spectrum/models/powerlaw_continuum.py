@@ -8,7 +8,7 @@ You can access this same model through baseline, but it's here in case the
 continuum is what you're really trying to measure.
 
 """
-import model
+from . import model
 import numpy 
 
 def powerlaw(x, scale, power, return_components=False):

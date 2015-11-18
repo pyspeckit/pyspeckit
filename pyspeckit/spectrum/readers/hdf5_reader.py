@@ -31,19 +31,19 @@ def open_hdf5(filename, xaxkey = 'xarr', datakey = 'data', errkey = 'error'):
     """
     
     if not h5OK: 
-        print "WARNING: h5py not installed; cannot read hdf5 files."
+        print("WARNING: h5py not installed; cannot read hdf5 files.")
     else:
         f = h5py.File(filename, 'r')
         
         try: xarr = f[xaxkey].value
-        except KeyError: print 'Dataset \'%s\' not found.' % xaxkey
+        except KeyError: print('Dataset \'%s\' not found.' % xaxkey)
         
         try: data = f[datakey].value
-        except KeyError: print 'Dataset \'%s\' not found.' % datakey
+        except KeyError: print('Dataset \'%s\' not found.' % datakey)
     
         try: error = f[errkey].value
         except KeyError: 
-            print 'Dataset \'%s\' not found.  Assuming uniform errors.' % errkey
+            print('Dataset \'%s\' not found.  Assuming uniform errors.' % errkey)
             error = np.ones_like(data)
             
         try: 

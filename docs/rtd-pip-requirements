@@ -3,3 +3,5 @@ matplotlib
 Cython
 astropy-helpers
 astropy
+ordereddict
+spectral-cube

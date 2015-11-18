@@ -12,12 +12,11 @@ http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D
 Does not yet implement: http://adsabs.harvard.edu/abs/2010ApJ...716.1315K
 
 """
+from __future__ import print_function
 import numpy as np
-from pyspeckit.mpfit import mpfit
-from .. import units
-from . import fitter,model,modelgrid
 import matplotlib.cbook as mpcb
 import copy
+from astropy.extern.six import iteritems
 try:
     from astropy.io import fits as pyfits
 except ImportError:
@@ -28,7 +27,11 @@ try:
     scipyOK = True
 except ImportError:
     scipyOK=False
-import hyperfine
+
+from ...mpfit import mpfit
+from .. import units
+from . import fitter,model,modelgrid
+from . import hyperfine
 
 
 freq_dict={
@@ -110,10 +113,10 @@ three for JF1F  011, and one for JF1F  010. Thus, the sum over all 15
 transitions gives the total spin degeneracy
 """
 
-line_names = freq_dict.keys()
+line_names = tuple(freq_dict.keys())
 
 ckms = units.speedoflight_ms / 1e3 #2.99792458e5
-voff_lines_dict = dict([(k,(v-93.176261e9)/93.176261e9*ckms) for k,v in freq_dict.iteritems()])
+voff_lines_dict = dict([(k,(v-93.176261e9)/93.176261e9*ckms) for k,v in iteritems(freq_dict)])
 
 n2hp_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict,
                                      line_strength_dict, relative_strength_total_degeneracy)
@@ -193,7 +196,7 @@ def n2hp_radex(xarr,
     #tex = modelgrid.line_params_2D(gridval1,gridval2,densityarr,columnarr,texgrid[temperature_gridnumber,:,:])
 
     if verbose:
-        print "density %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, column, tau, tex)
+        print("density %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, column, tau, tex))
 
     if debug:
         import pdb; pdb.set_trace()

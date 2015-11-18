@@ -1,13 +1,14 @@
+from __future__ import print_function
 import numpy as np
 import matplotlib
-from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
-import interactive
-import copy
-import history
-from . import models
 from .. import specwarnings
+from .. import mpfit
+from . import interactive
+from . import history
+from . import models
 from astropy import log
+import copy
 
 interactive_help_message = """
 (1) Left-click or press 1 (one) at two positions to select or add to the baseline fitting range - it will be
@@ -400,8 +401,10 @@ class Baseline(interactive.Interactive):
                     alpha=alpha,
                     **plotkwargs)
 
-        if annotate: self.annotate() # refreshes automatically
-        elif self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
+        if annotate:
+            self.annotate() # refreshes automatically
+        elif self.Spectrum.plotter.autorefresh:
+            self.Spectrum.plotter.refresh()
 
     def unsubtract(self, replot=True, preserve_limits=True):
         """
@@ -417,12 +420,12 @@ class Baseline(interactive.Interactive):
         if self.subtracted:
             self.Spectrum.data += self.basespec
             self.subtracted = False
-            if replot:
+            if replot and self.Spectrum.plotter.axis is not None:
                 kwargs = self.Spectrum.plotter.plotkwargs
                 kwargs.update({'use_window_limits':preserve_limits})
                 self.Spectrum.plotter(**kwargs)
         else:
-            print "Baseline wasn't subtracted; not unsubtracting."
+            print("Baseline wasn't subtracted; not unsubtracting.")
 
     def annotate(self,loc='upper left'):
         if self.powerlaw:
@@ -560,8 +563,6 @@ class Baseline(interactive.Interactive):
                              "report it as an Issue: "
                              "https://github.com/pyspeckit/pyspeckit/issues")
 
-
-        import pyspeckit.mpfit as mpfit
         mp = mpfit.mpfit(mpfitfun(spectrum[OK], err[OK]), xall=pguess,
                          quiet=quiet)
         if np.isnan(mp.fnorm):

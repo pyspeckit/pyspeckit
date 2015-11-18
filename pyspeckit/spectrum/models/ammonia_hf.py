@@ -10,17 +10,17 @@ Module API
 
 """
 import numpy as np
-from pyspeckit.mpfit import mpfit
-import fitter
 import matplotlib.cbook as mpcb
 import copy
 import collections
 
+from ...mpfit import mpfit
+from . import fitter
 from . import hyperfine
 from . import radex_modelgrid
 from . import model
-from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
-                               voff_lines_dict, tau_wts_dict, line_labels)
+from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
+                                voff_lines_dict, tau_wts_dict, line_labels)
 
 from astropy import constants
 from astropy import units as u

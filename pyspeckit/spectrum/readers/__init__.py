@@ -1,8 +1,9 @@
 from __future__ import print_function
-from .. import units
 import numpy as np
-from pyspeckit.specwarnings import warn
 from astropy import units as u
+
+from .. import units
+from ...specwarnings import warn
 
 readers = {}
 suffix_types = {}
@@ -84,15 +85,15 @@ def check_reader(func):
         return returns
     return reader
 
-import fits_reader
+from . import fits_reader
 open_1d_fits = check_reader(fits_reader.open_1d_fits)
 open_1d_pyfits = check_reader(fits_reader.open_1d_pyfits)
-import tspec_reader
+from . import tspec_reader
 tspec_reader = check_reader(tspec_reader.tspec_reader)
-import txt_reader
+from . import txt_reader
 open_1d_txt = check_reader(txt_reader.open_1d_txt)
-import hdf5_reader
+from . import hdf5_reader
 open_hdf5 = check_reader(hdf5_reader.open_hdf5)
-from galex import read_galex
-from gbt import GBTSession
-from sdss_reader import read_sdss
+from .gbt import GBTSession
+from .sdss_reader import read_sdss
+from .galex import read_galex

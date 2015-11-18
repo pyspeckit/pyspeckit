@@ -1,5 +1,6 @@
 import re, inspect, textwrap, pydoc
 from docscrape import NumpyDocString, FunctionDoc, ClassDoc
+from astropy.extern.six import iteritems
 
 class SphinxDocString(NumpyDocString):
     # string conversion routines
@@ -73,7 +74,7 @@ class SphinxDocString(NumpyDocString):
             return out
 
         out += ['.. index:: %s' % idx.get('default','')]
-        for section, references in idx.iteritems():
+        for section, references in iteritems(idx):
             if section == 'default':
                 continue
             elif section == 'refguide':

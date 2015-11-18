@@ -37,7 +37,7 @@ class dotdictify(dict):
             for key in value:
                 self.__setitem__(key, value[key])
         else:
-            raise TypeError, 'expected dict'
+            raise TypeError('expected dict')
 
     def __setitem__(self, key, value):
         if isinstance(value, dict) and not isinstance(value, dotdictify):
@@ -91,11 +91,11 @@ class ConfigParser:
                 elif thisline[2] == 'None': return_dict[thisline[0]] = None
                 elif thisline[2].isalpha(): return_dict[thisline[0]] = str(thisline[2])
                 else: return_dict[thisline[0]] = float(thisline[2])
-    	            	        
-    	    self.cfg = dotdictify(return_dict)
-    	else: 
-    	    self.cfg = dotdictify(cfgDefaults)
-            	    	
+                                
+            self.cfg = dotdictify(return_dict)
+        else: 
+            self.cfg = dotdictify(cfgDefaults)
+                        
 __fn = os.path.expanduser("~/.pyspeckit/config")
 if os.path.exists(__fn): 
     mycfg = dotdictify(ConfigParser(__fn).cfg)

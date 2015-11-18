@@ -9,11 +9,13 @@ will use a very simple routine for reading in the data.
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 .. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
 """
+from __future__ import print_function
 from astropy.io import ascii
-from .. import units
 import numpy as np
-from pyspeckit.specwarnings import warn
-import readcol
+
+from ...specwarnings import warn
+from . import readcol
+from .. import units
 
 def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2,
                 text_reader='simple', format=None, **kwargs):
@@ -82,40 +84,38 @@ def simple_txt(filename, xaxcol=0, datacol=1, errorcol=2, skiplines=0, **kwargs)
     Very simple method for reading columns from ASCII file.
     """
 
-    f = open(filename, 'r')
+    with open(filename, 'r') as f:
 
-    hdr = None
-    colunits = []
-    coldata = []
-    for ii, line in enumerate(f):
+        hdr = None
+        colunits = []
+        coldata = []
+        for ii, line in enumerate(f):
 
-        # Ignore blank lines
-        if not line.strip():
-            continue
+            # Ignore blank lines
+            if not line.strip():
+                continue
 
-        # Possibly read in header
-        if line.split()[0][0] == '#':
-            if (ii) == (0+skiplines):
-                hdr = line[1:].split()
-            if (ii) == (1+skiplines):
-                colunits = line[1:].split()
+            # Possibly read in header
+            if line.split()[0][0] == '#':
+                if (ii) == (0+skiplines):
+                    hdr = line[1:].split()
+                if (ii) == (1+skiplines):
+                    colunits = line[1:].split()
 
-            continue
+                continue
 
-        if ii < skiplines:
-            continue
+            if ii < skiplines:
+                continue
 
-        coldata.append(line.split())
+            coldata.append(line.split())
 
-        for j, element in enumerate(coldata[-1]):
-            try:
-                coldata[-1][j] = float(element)
-            except ValueError:
-                coldata[-1][j] = str(element)
+            for j, element in enumerate(coldata[-1]):
+                try:
+                    coldata[-1][j] = float(element)
+                except ValueError:
+                    coldata[-1][j] = str(element)
 
-    f.close()
-
-    coldata = zip(*coldata)
+    coldata = list(zip(*coldata))
 
     if not colunits:
         colunits = ['unknown'] * len(coldata)

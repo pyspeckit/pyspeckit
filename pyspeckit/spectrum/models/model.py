@@ -10,7 +10,7 @@ from pyspeckit.spectrum.parinfo import ParinfoList,Parinfo
 import copy
 from astropy import log
 import matplotlib.cbook as mpcb
-import fitter
+from . import fitter
 from . import mpfit_messages
 from pyspeckit.specwarnings import warn
 try:
@@ -110,6 +110,21 @@ class SpectralModel(fitter.SimpleFitter):
         # analytic integral function
         self.integral_func = integral_func
 
+    def __copy__(self):
+        # http://stackoverflow.com/questions/1500718/what-is-the-right-way-to-override-the-copy-deepcopy-operations-on-an-object-in-p
+        cls = self.__class__
+        result = cls.__new__(cls)
+        result.__dict__.update(self.__dict__)
+        return result
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
+
     def __call__(self, *args, **kwargs):
         
         use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
@@ -138,56 +153,80 @@ class SpectralModel(fitter.SimpleFitter):
         """
 
         # for backwards compatibility - partied = tied, etc.
+        locals_dict = locals()
         for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",","):
             shortvarname = varname.replace("par","")
-            if locals()[shortvarname] is not None:
-                # HACK!  locals() failed for unclear reasons...
-                exec("%s = %s" % (varname,shortvarname))
+            if locals_dict.get(shortvarname) is not None and locals_dict.get(varname) is not None:
+                raise ValueError("Cannot specify both {0} and {1}".format(varname, shortvarname))
+
+        input_pardict = {k: locals_dict.get(k)
+                         for k in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")}
+        _tip = {'par'+k: locals_dict.get(k)
+                for k in str.split("names,values,steps,limits,limited,fixed,error,tied",",")
+                if locals_dict.get(k)
+               }
+        input_pardict.update(_tip)
 
         if params is not None and parvalues is not None:
             raise ValueError("parvalues and params both specified; they're redundant so that's not allowed.")
         elif params is not None and parvalues is None:
-            parvalues = params
-        log.debug("Parvalues = {0}, npeaks = {1}".format(parvalues, npeaks))
+            input_pardict['parvalues'] = params
+        log.debug("Parvalues = {0}, npeaks = {1}".format(input_pardict['parvalues'], npeaks))
 
-        if parnames is not None: 
+        # this is used too many damned times to keep referencing a dict.
+        parnames = input_pardict['parnames']
+        parlimited = input_pardict['parlimited']
+        parlimits = input_pardict['parlimits']
+        parvalues = input_pardict['parvalues']
+
+        if parnames is not None:
             self.parnames = parnames
-        elif parnames is None and self.parnames is not None:
+        elif parnames is None and hasattr(self,'parnames') and self.parnames is not None:
             parnames = self.parnames
         elif self.default_parinfo is not None and parnames is None:
             parnames = [p['parname'] for p in self.default_parinfo]
 
+        input_pardict['parnames'] = parnames
+
+        assert input_pardict['parnames'] is not None
+
         if limitedmin is not None:
             if limitedmax is not None:
-                parlimited = zip(limitedmin,limitedmax)
+                parlimited = list(zip(limitedmin,limitedmax))
             else:
-                parlimited = zip(limitedmin,(False,)*len(parnames))
+                parlimited = list(zip(limitedmin,(False,)*len(parnames)))
         elif limitedmax is not None:
-            parlimited = zip((False,)*len(parnames),limitedmax)
+            parlimited = list(zip((False,)*len(parnames),limitedmax))
         elif self.default_parinfo is not None and parlimited is None:
             parlimited = [p['limited'] for p in self.default_parinfo]
 
+        input_pardict['parlimited'] = parlimited
+
         if minpars is not None:
             if maxpars is not None:
-                parlimits = zip(minpars,maxpars)
+                parlimits = list(zip(minpars,maxpars))
             else:
-                parlimits = zip(minpars,(False,)*len(parnames))
+                parlimits = list(zip(minpars,(False,)*len(parnames)))
         elif maxpars is not None:
-            parlimits = zip((False,)*len(parnames),maxpars)
+            parlimits = list(zip((False,)*len(parnames),maxpars))
+        elif limits is not None:
+            parlimits = limits
         elif self.default_parinfo is not None and parlimits is None:
             parlimits = [p['limits'] for p in self.default_parinfo]
 
-        self.npeaks = npeaks
+        input_pardict['parlimits'] = parlimits
+
+        self.npeaks = int(npeaks)
 
         # the height / parvalue popping needs to be done before the temp_pardict is set in order to make sure
         # that the height guess isn't assigned to the amplitude
         self.vheight = vheight
-        if (vheight and len(self.parinfo) == self.default_npars and
-            len(parvalues) == self.default_npars + 1):
+        if ((vheight and len(self.parinfo) == self.default_npars and
+             len(parvalues) == self.default_npars + 1)):
             # if the right number of parameters are passed, the first is the height
-            self.parinfo = [ {'n':0, 'value':parvalues.pop(0), 'limits':(0,0),
-                'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
-                'error': 0, 'tied':"" } ]
+            self.parinfo = [{'n':0, 'value':parvalues.pop(0), 'limits':(0,0),
+                             'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
+                             'error': 0, 'tied':""}]
         elif vheight and len(self.parinfo) == self.default_npars and len(parvalues) == self.default_npars:
             # if you're one par short, guess zero
             self.parinfo = [ {'n':0, 'value': 0, 'limits':(0,0),
@@ -213,14 +252,19 @@ class SpectralModel(fitter.SimpleFitter):
         # clever = hard to read
         temp_pardict = OrderedDict([(varname, np.zeros(self.npars*self.npeaks,
                                                        dtype='bool'))
-                                    if locals()[varname] is None else
-                                    (varname, list(locals()[varname]))
+                                    if input_pardict.get(varname) is None else
+                                    (varname, list(input_pardict.get(varname)))
             for varname in str.split("parnames,parvalues,parsteps,parlimits,parlimited,parfixed,parerror,partied",",")])
         temp_pardict['parlimits'] = parlimits if parlimits is not None else [(0,0)] * (self.npars*self.npeaks)
         temp_pardict['parlimited'] = parlimited if parlimited is not None else [(False,False)] * (self.npars*self.npeaks)
-        for k,v in temp_pardict.iteritems():
+        for k,v in temp_pardict.items():
             if (self.npars*self.npeaks) / len(v) > 1:
-                temp_pardict[k] = list(v) * ((self.npars*self.npeaks) / len(v))
+                n_components = ((self.npars*self.npeaks) / len(v))
+                if n_components != int(n_components):
+                    raise ValueError("The number of parameter values is not a "
+                                     "multiple of the number of allowed "
+                                     "parameters.")
+                temp_pardict[k] = list(v) * int(n_components)
 
         # generate the parinfo dict
         # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
@@ -231,11 +275,11 @@ class SpectralModel(fitter.SimpleFitter):
             'limits':temp_pardict['parlimits'][ii+self.npars*jj],
             'limited':temp_pardict['parlimited'][ii+self.npars*jj],
             'fixed':temp_pardict['parfixed'][ii+self.npars*jj],
-            'parname':temp_pardict['parnames'][ii].upper()+"%0i" % jj,
+            'parname':temp_pardict['parnames'][ii].upper()+"%0i" % int(jj),
             'error':float(temp_pardict['parerror'][ii+self.npars*jj]),
             'tied':temp_pardict['partied'][ii+self.npars*jj] if temp_pardict['partied'][ii+self.npars*jj] else ""} 
-            for jj in xrange(self.npeaks)
-            for ii in xrange(self.npars) ] # order matters!
+            for jj in range(self.npeaks)
+            for ii in range(self.npars) ] # order matters!
 
         log.debug("After Generation step len(parinfo): %i   vheight: %s "
                   "parinfo: %s" % (len(self.parinfo), vheight, self.parinfo))
@@ -254,7 +298,7 @@ class SpectralModel(fitter.SimpleFitter):
                 for p in self.parinfo:
                     if 'AMP' in p['parname']:
                         p['limited'] = (True, p['limited'][1])
-                        p['limits']  = (0, p['limits'][1])   
+                        p['limits']  = (0, p['limits'][1])
 
         # This is effectively an override of all that junk above (3/11/2012)
         # Much of it is probably unnecessary, but it was easier to do this than
@@ -267,6 +311,7 @@ class SpectralModel(fitter.SimpleFitter):
                 par.scaleable = True
 
         log.debug("Parinfo has been set: {0}".format(self.parinfo))
+        log.debug("kwargs {0} were passed.".format(kwargs))
 
         assert self.parinfo != []
 
@@ -289,7 +334,7 @@ class SpectralModel(fitter.SimpleFitter):
                     import pdb; pdb.set_trace()
         if hasattr(pars,'values'):
             # important to treat as Dictionary, since lmfit params & parinfo both have .items
-            parnames,parvals = zip(*pars.items())
+            parnames,parvals = list(zip(*list(pars.items())))
             parnames = [p.lower() for p in parnames]
             parvals = [p.value for p in parvals]
         else:
@@ -302,7 +347,7 @@ class SpectralModel(fitter.SimpleFitter):
                 v += parvals[0]
             # use len(pars) instead of self.npeaks because we want this to work
             # independent of the current best fit
-            for jj in xrange((len(parvals)-self.vheight)/self.npars):
+            for jj in range(int((len(parvals)-self.vheight)/self.npars)):
                 lower_parind = jj*self.npars+self.vheight
                 upper_parind = (jj+1)*self.npars+self.vheight
                 v += self.modelfunc(x, *parvals[lower_parind:upper_parind], **kwargs)
@@ -332,7 +377,7 @@ class SpectralModel(fitter.SimpleFitter):
             kwargs = {}
             kwargs.update(self.modelfunc_kwargs)
 
-            log.debug("Pars, kwarg keys: {0},{1}".format(p,kwargs.keys()))
+            log.debug("Pars, kwarg keys: {0},{1}".format(p,list(kwargs.keys())))
             if err is None:
                 return (y-self.n_modelfunc(p,**kwargs)(x))
             else:
@@ -393,7 +438,7 @@ class SpectralModel(fitter.SimpleFitter):
             log.debug("Parinfo created from _make_parinfo: {0}".format(parinfo))
 
         LMParams = parinfo.as_Parameters()
-        log.debug("LMParams: "+"\n".join([repr(p) for p in LMParams.values()]))
+        log.debug("LMParams: "+"\n".join([repr(p) for p in list(LMParams.values())]))
         log.debug("parinfo:  {0}".format(parinfo))
         minimizer = lmfit.minimize(self.lmfitfun(xax,np.array(data),err,debug=debug),LMParams,**kwargs)
         if not quiet:
@@ -603,7 +648,7 @@ class SpectralModel(fitter.SimpleFitter):
         modelcomponents = np.array(
             [self.modelfunc(xarr,
                 *pars[i*self.npars:(i+1)*self.npars],
-                **dict(self.modelfunc_kwargs.items()+kwargs.items()))
+                **dict(list(self.modelfunc_kwargs.items())+list(kwargs.items())))
             for i in range(self.npeaks)])
 
         if len(modelcomponents.shape) == 3:
@@ -640,7 +685,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         return np.sum([
             self.integral_func(modelpars[npars*ii:npars*(1+ii)])
-            for ii in xrange(npeaks)])
+            for ii in range(npeaks)])
 
     def component_integrals(self, xarr, dx=None):
         """
@@ -672,7 +717,7 @@ class SpectralModel(fitter.SimpleFitter):
         fwhm = [self.fwhm_func(
                 *[self.parinfo[str.upper(p+'%i' % n)] for p in self.fwhm_pars]
                 )
-                for n in xrange(self.npeaks)]
+                for n in range(self.npeaks)]
         return fwhm
 
     def analytic_centroids(self, centroidpar=None):
@@ -899,8 +944,8 @@ class SpectralModel(fitter.SimpleFitter):
         d = dict(funcdict)
 
         def modelfunc(xarr, pars=parcopy, **kwargs):
-            for k,v in kwargs.iteritems():
-                if k in pars.keys():
+            for k,v in kwargs.items():
+                if k in list(pars.keys()):
                     pars[k].value = v
 
             return self.n_modelfunc(pars, **self.modelfunc_kwargs)(xarr)

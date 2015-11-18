@@ -2,9 +2,10 @@
 Author: Adam Ginsburg
 Created: 3/17/2011
 """
+from __future__ import print_function
 import numpy as np
 import numpy.ma as ma
-from pyspeckit import spectrum
+from .. import spectrum
 import operator
 from astropy import log
 
@@ -39,7 +40,7 @@ def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
     cube = ma.array(f[0].data.squeeze())  # remove extra dimensions such as polarization
     cube.mask = np.isnan(cube) + np.isinf(cube)
     if hdr.get('NAXIS') > 3 and average_extra is False:
-        print "Extra dimensions in data cube will be ignored (only the first element of that dimension will be kept)."
+        print("Extra dimensions in data cube will be ignored (only the first element of that dimension will be kept).")
     while len(cube.shape) > 3:
         if average_extra:
             cube = cube.mean(axis=0)
@@ -51,7 +52,7 @@ def open_3d_fits(filename,wcstype='',average_extra=False, specaxis=3,
         # Use the CLASS FITS definition (which is non-standard)
         # http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node84.html
         # F(n) = RESTFREQ + CRVALi + ( n - CRPIXi ) * CDELTi
-        print "Loading a CLASS .fits spectrum"
+        print("Loading a CLASS .fits spectrum")
         dv = -1*hdr.get('CDELT3')
         v0 = hdr.get('RESTFREQ') + hdr.get('CRVAL3')
         p3 = hdr.get('CRPIX3')

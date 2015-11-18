@@ -18,7 +18,9 @@ had to OCR and pull out by hand some of the coefficients.
 
 """
 import numpy as np
-import pyspeckit
+from astropy.extern.six import iteritems
+from . import model
+from .. import units
 
 # log(temperature), alphaBalphaB = [[1.0,9.283],
 alphaB=[[1.2,8.823],
@@ -164,7 +166,7 @@ for line in table14dot2['balmer']:
     r_to_hbeta["balmer"+line[0]] = np.array(line[2:])
     wavelength["balmer"+line[0]] = line[1]
 
-for series,values in table14dot2.iteritems():
+for series,values in iteritems(table14dot2):
     if series == 'balmer':
         continue
     for line in values:
@@ -186,7 +188,7 @@ def find_lines(xarr):
     Given a :class:`pyspeckit.units.SpectrosopicAxis` instance, finds all the
     lines that are in bounds.  Returns a list of line names.
     """
-    return [linename for (linename,lam) in wavelength.iteritems() if xarr.as_unit('microns').in_range(lam)]
+    return [linename for (linename,lam) in iteritems(wavelength) if xarr.as_unit('microns').in_range(lam)]
 
 def hydrogen_fitter(sp, temperature=10000, tiedwidth=False):
     """
@@ -261,13 +263,13 @@ def hydrogen_model(xarr, amplitude=1.0, width=0.0, velocity=0.0, a_k=0.0, temper
     xarr = xarr.as_unit('microns')
 
 
-    lw = width / pyspeckit.units.speedoflight_kms * wavelength[reference_line]
+    lw = width / units.speedoflight_kms * wavelength[reference_line]
     center = wavelength[reference_line]
     model += amplitude * np.exp(-(xarr-center)**2 / (2.0*lw)**2)
 
     for line in lines[1:]:
         relamp = (r_to_hbeta[line][tnum]/r_to_hbeta[reference_line][tnum]) 
-        lw = width / pyspeckit.units.speedoflight_kms * wavelength[line]
+        lw = width / units.speedoflight_kms * wavelength[line]
         center = wavelength[line]
     
         model += amplitude * relamp * np.exp(-(xarr-center)**2 / (2.0*lw)**2)
@@ -284,7 +286,7 @@ def add_to_registry(sp):
     Add the Hydrogen model to the Spectrum's fitter registry
     """
     # can't have absorption in recombination case
-    extincted_hydrogen_emission = pyspeckit.models.model.SpectralModel(hydrogen_model, 4, 
+    extincted_hydrogen_emission = model.SpectralModel(hydrogen_model, 4, 
             shortvarnames=('A','\\sigma','\\Delta x','A_K'),
             parnames=['amplitude','width','velocity','extinction'],
             parlimited=[(True,False),(True,False),(False,False), (True,False)], 

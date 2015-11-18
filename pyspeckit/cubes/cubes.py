@@ -5,10 +5,12 @@ cubes.py
 
 From `agpy <http://code.google.com/p/agpy/source/browse/trunk/agpy/cubes.py>`_,
 contains functions to perform various transformations on data cubes and their
-headers.  
+headers.
 
 
 """
+from __future__ import print_function
+from astropy.extern.six.moves import xrange
 from numpy import sqrt,repeat,indices,newaxis,pi,cos,sin,array,mean,nansum
 from math import acos,atan2,tan
 import numpy
@@ -18,12 +20,8 @@ import os
 import astropy.io.fits as fits
 import astropy.wcs as pywcs
 import tempfile
-import posang # agpy code
-import pyspeckit
 from astropy import coordinates
 from astropy import log
-from pyspeckit.specwarnings import warn
-from pyspeckit.parallel_map import parallel_map
 try:
     from AG_fft_tools import smooth
     smoothOK = True
@@ -34,6 +32,10 @@ try:
     scipyOK = True
 except ImportError:
     scipyOK = False
+
+from . import posang # agpy code
+from ..parallel_map import parallel_map
+from ..spectrum import smooth
 
 dtor = pi/180.0
 
@@ -59,7 +61,7 @@ def blfunc_generator(x=None, polyorder=None, splineorder=None,
     def blfunc(args, x=x):
         yfit,yreal = args
         if hasattr(yfit,'mask'):
-            mask = True-yfit.mask
+            mask = ~yfit.mask
         else:
             mask = np.isfinite(yfit)
 
@@ -208,8 +210,8 @@ def speccen_header(header, lon=None, lat=None, proj='TAN', system='celestial',
     newheader['CTYPE{0}'.format(new_spectral_axis)] = 'VRAD'
     if header.get('CUNIT{0}'.format(spectral_axis)):
         newheader['CUNIT{0}'.format(new_spectral_axis)] = header.get('CUNIT{0}'.format(spectral_axis))
-    else: 
-        print "Assuming CUNIT3 is km/s in speccen_header"
+    else:
+        print("Assuming CUNIT3 is km/s in speccen_header")
         newheader['CUNIT{0}'.format(new_spectral_axis)] = 'km/s'
     newheader['CRPIX2'] = 1
     newheader['CRPIX{0}'.format(spectral_axis)] = 1
@@ -247,12 +249,12 @@ def extract_aperture(cube, ap, r_mask=False, wcs=None,
     Extract an aperture from a data cube.  E.g. to acquire a spectrum
     of an outflow that is extended.
 
-    Cube should have shape [z,y,x], e.g. 
+    Cube should have shape [z,y,x], e.g.
     cube = fits.getdata('datacube.fits')
 
     Apertures are specified in PIXEL units with an origin of 0,0 (NOT the 1,1
     fits standard!) unless wcs and coordsys are specified
-    
+
     Parameters
     ----------
     ap : list
@@ -278,9 +280,11 @@ def extract_aperture(cube, ap, r_mask=False, wcs=None,
     """
 
     if wcs is not None and coordsys is not None:
-        if debug: print "Converting aperture ",ap,
+        if debug:
+            print("Converting aperture ",ap,)
         ap = aper_world2pix(ap,wcs,coordsys=coordsys,wunit=wunit)
-        if debug: print " to ",ap
+        if debug:
+            print(" to ",ap)
 
     if len(ap) == 3:
         sh = cube.shape
@@ -379,8 +383,9 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
 
     Returns
     -------
-    A tuple (integrated array, header) if return_hdu is False, or an HDU if it
-    is True
+    subim, hdu : tuple
+        A tuple (integrated array, header) if ``return_hdu`` is ``False``, or an HDU if
+        it is True
     """
 
     if header:
@@ -405,7 +410,7 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
         xhi = int( min([newxcen+newxwid,cube.shape[2]]) )
         yhi = int( min([newycen+newywid,cube.shape[1]]) )
     else:
-        print "Can only use wcs if you pass a header."
+        print("Can only use wcs if you pass a header.")
 
     if zunits is None:
         zunits = units
@@ -416,7 +421,8 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
 
     subim = average(cube[zrange[0]:zrange[1],ylo:yhi,xlo:xhi],axis=0)
     if dvmult and CD3: subim *= CD3
-    elif dvmult: print "Error: could not multiply by dv; CD3=",CD3
+    elif dvmult:
+        print("Error: could not multiply by dv; CD3=",CD3)
 
     if header is None:
         return subim
@@ -435,7 +441,7 @@ def subimage_integ(cube, xcen, xwidth, ycen, ywidth, vrange, header=None,
         # xlo, ylo have been forced to integers already above
         flathead['CRPIX1'] = flathead['CRPIX1'] + xlo
         flathead['CRPIX2'] = flathead['CRPIX2'] + ylo
-        
+
         if return_HDU:
             return fits.PrimaryHDU(data=subim,header=flathead)
         else:
@@ -504,7 +510,7 @@ def subcube(cube, xcen, xwidth, ycen, ywidth, header=None,
             newheader['CRVAL2'] = float(ymid_sky)
         newheader['CRPIX1'] = 1+xwidth
         newheader['CRPIX2'] = 1+ywidth
-        
+
         newHDU =  fits.PrimaryHDU(data=subim,header=newheader)
         if newHDU.header.get('NAXIS1') == 0 or newHDU.header.get('NAXIS2') == 0:
             raise Exception("Cube has been cropped to 0 in one dimension")
@@ -556,7 +562,7 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
         theta = atan2( sin(radif) , ( tan(dec*dtor)*cos(wcs.wcs.crval[1]*dtor)-sin(wcs.wcs.crval[1]*dtor)*cos(radif) ) )
         x = -gamma * sin(theta) / wcs.wcs.cdelt[0] + wcs.wcs.crpix[0]
         y = gamma * cos(theta) / wcs.wcs.cdelt[1] + wcs.wcs.crpix[1]
-    
+
     #print "DEBUG: x,y from math (vectors): ",x,y
     #x,y = wcs.wcs_world2pix(ra,dec,0)  # convert WCS coordinate to pixel coordinate (0 is origin, do not use fits convention)
     #print "DEBUG: x,y from wcs: ",x,y
@@ -576,7 +582,7 @@ def aper_world2pix(ap,wcs,coordsys='galactic',wunit='arcsec'):
             height = ap[3] / conv / abs(wcs.wcs.cdelt[0])
         apold = copy.copy(ap)
         if len(ap) == 5:
-            PA = ap[4] 
+            PA = ap[4]
             ap = [x,y,width,height,PA]
         else:
             ap = [x,y,width,height]
@@ -597,7 +603,7 @@ def getspec(lon,lat,rad,cube,header,r_fits=True,inherit=True,wunit='arcsec'):
     """
     Given a longitude, latitude, aperture radius (arcsec), and a cube file,
     return a .fits file or a spectrum.
-    
+
     Parameters
     ----------
     lon: float
@@ -620,7 +626,7 @@ def getspec(lon,lat,rad,cube,header,r_fits=True,inherit=True,wunit='arcsec'):
             coordsys=coordsys,wunit=wunit)
 
     if nansum(spec) == 0:
-        print "Total of extracted spectrum was zero. lon,lat,rad: ",lon,lat,rad #  Tracing to find your problem."
+        print("Total of extracted spectrum was zero. lon,lat,rad: ",lon,lat,rad)
         #import pdb; pdb.set_trace()
 
     if r_fits:
@@ -641,7 +647,7 @@ def getspec(lon,lat,rad,cube,header,r_fits=True,inherit=True,wunit='arcsec'):
         try:
             newhead['CUNIT1'] = header['CUNIT3']
         except KeyError:
-            print "Header did not contain CUNIT3 keyword.  Defaulting to km/s"
+            print("Header did not contain CUNIT3 keyword.  Defaulting to km/s")
             newhead['CUNIT1'] = "km/s"
         newhead['BUNIT'] = header['BUNIT']
         newhead['APGLON'] = lon
@@ -658,7 +664,7 @@ def getspec_reg(cubefilename,region,**kwargs):
 
     The region must be in the same coordinate system as the cube header
 
-    .. warning:: The second argument of getspec_reg requires a pyregion region list, 
+    .. warning:: The second argument of getspec_reg requires a pyregion region list,
         and therefore this code depends on `pyregion`_.
     """
 
@@ -716,11 +722,11 @@ def spectral_smooth(cube, smooth_factor, downsample=True, parallel=True,
         newshape = cube[::smooth_factor,:,:].shape
     else:
         newshape = cube.shape
-    
+
     # need to make the cube "flat" along dims 1&2 for iteration in the "map"
     flatshape = (cube.shape[0],cube.shape[1]*cube.shape[2])
 
-    Ssmooth = lambda x: pyspeckit.smooth.smooth(x, smooth_factor, downsample=downsample, **kwargs)
+    Ssmooth = lambda x: smooth.smooth(x, smooth_factor, downsample=downsample, **kwargs)
     if parallel:
         newcube = numpy.array(parallel_map(Ssmooth, cube.reshape(flatshape).T, numcores=numcores)).T.reshape(newshape)
     else:
@@ -728,7 +734,7 @@ def spectral_smooth(cube, smooth_factor, downsample=True, parallel=True,
 
     #naive, non-optimal version
     # for (x,y) in zip(xx.flat,yy.flat):
-    #     newcube[:,y,x] = pyspeckit.smooth.smooth(cube[:,y,x], smooth_factor,
+    #     newcube[:,y,x] = smooth.smooth(cube[:,y,x], smooth_factor,
     #             downsample=downsample, **kwargs)
 
     return newcube
@@ -758,7 +764,7 @@ def plane_smooth(cube,cubedim=0,parallel=True,numcores=None,**kwargs):
         smoothcube = array(parallel_map(Psmooth,cubelist,numcores=numcores))
     else:
         smoothcube = array(map(Psmooth,cubelist))
-    
+
     if cubedim != 0:
         smoothcube = smoothcube.swapaxes(0,cubedim)
 
@@ -793,18 +799,18 @@ try:
 
             xcen = (x1+x2)/2.0
             ycen = (y1+y2)/2.0
-            print xcen,ycen,xwidth,ywidth,coord_system
+            print(xcen,ycen,xwidth,ywidth,coord_system)
         else:
             coord_system = in_system
 
-        sc = subcube(cubefile[0].data, xcen, xwidth, ycen, ywidth, 
+        sc = subcube(cubefile[0].data, xcen, xwidth, ycen, ywidth,
                 widthunits='pixels', units="wcs", header=cubefile[0].header,
                 return_HDU=True)
         # note: there should be no security risk here because fits' writeto
         # will not overwrite by default
         tempcube = tempfile.mktemp(suffix='.fits')
         sc.writeto(tempcube)
-        
+
         pa = posang.posang(x1,y1,x2,y2,system=coord_system) - 90
 
         if newheader is None:
@@ -855,7 +861,7 @@ try:
         #print "\n",outname
         #os.system('imhead %s | grep CDELT' % outname)
 
-        
+
         return
 
     def resample_cube(cubefilename, header):

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import atpy
 import urllib,urllib2
 import tempfile
@@ -7,12 +8,12 @@ Module to search Splatalogue.net via splat, modeled loosely on
 ftp://ftp.cv.nrao.edu/NRAO-staff/bkent/slap/idl/
 """
 
-length_dict = {'meters':1.0,'m':1.0,
-        'centimeters':1e-2,'cm':1e-2,
-        'millimeters':1e-3,'mm':1e-3,
-        'nanometers':1e-9,'nm':1e-9,
-        'micrometers':1e-6,'micron':1e-6,'microns':1e-6,'um':1e-6,
-        'kilometers':1e3,'km':1e3,
+length_dict = {'meter':1.0,'m':1.0,
+        'centimeter':1e-2,'cm':1e-2,
+        'millimeter':1e-3,'mm':1e-3,
+        'nanometer':1e-9,'nm':1e-9,
+        'micrometer':1e-6,'micron':1e-6,'microns':1e-6,'um':1e-6,
+        'kilometer':1e3,'km':1e3,
         'angstroms':1e-10,'A':1e-10,
         }
 
@@ -55,8 +56,8 @@ def query_splatalogue(minwav=0.00260,maxwav=0.00261,
     tf = tempfile.NamedTemporaryFile()
     #for line in R:
     #    print >>tf,line.strip()
-    print >>tf,R
-    print tf.name
+    print(R, file=tf)
+    print(tf.name)
     tf.file.flush()
     t = atpy.Table(tf.name,type='vo')
 

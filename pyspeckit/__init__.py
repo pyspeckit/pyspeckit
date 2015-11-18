@@ -7,17 +7,17 @@ from ._astropy_init import *
 __all__ = ['spectrum','cubes','wrappers']
 
 if not _ASTROPY_SETUP_:
-    from version import version as __version__
-    import spectrum
-    import specwarnings
+    from .version import version as __version__
+    from . import spectrum
+    from . import specwarnings
     try:
-        import cubes
+        from . import cubes
     except ImportError:
         specwarnings.warn( "pyspeckit.cubes module not imported - cubes requires pywcs" )
-    import wrappers
-    from wrappers import *
-    from cubes import *
-    from spectrum import *
+    from . import wrappers
+    from .wrappers import *
+    from .cubes import *
+    from .spectrum import *
 
     try:
         from .tests import run_tests

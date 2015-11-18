@@ -1,5 +1,8 @@
+from __future__ import print_function
 import numpy as np
-import itertools, cosmology
+from astropy.extern.six.moves import xrange
+import itertools
+from . import cosmology
 from collections import OrderedDict
 
 """
@@ -224,9 +227,9 @@ class Measurements(object):
         refname = refname[condition]
 
         if len(refpos) == 0:
-            print 'WARNING: No reference lines in this wavelength regime.'
+            print('WARNING: No reference lines in this wavelength regime.')
         elif len(refpos) < self.Nlines:
-            print 'WARNING: More observed lines than reference lines in this band.'
+            print('WARNING: More observed lines than reference lines in this band.')
 
         # Construct all possible (N-element) combos of reference lines
         combos = itertools.combinations(refpos, min(self.Nlines, len(refpos)))
@@ -289,7 +292,7 @@ class Measurements(object):
 
             # If we've know a-priori which lines the unmatched lines are likely to be, use that information
             else:
-                print self.miscline
+                print(self.miscline)
                 for i, miscline in enumerate(self.miscline):
                     for j, x in enumerate(zip(*mpars)[1]):
                         if abs(x - miscline['wavelength']) < self.misctol:
@@ -310,7 +313,7 @@ class Measurements(object):
 
         for line in self.lines.keys():
             if self.debug:
-                print "Computing parameters for line %s" % line
+                print("Computing parameters for line %s" % line)
 
             self.lines[line]['fwhm'] = self.compute_fwhm(self.lines[line]['modelpars'])
             self.lines[line]['flux'] = self.compute_flux(self.lines[line]['modelpars'])
@@ -358,7 +361,9 @@ class Measurements(object):
         """
 
         flux = 0
-        for i in xrange(len(pars) / 3):
+        niter = (len(pars) / 3)
+        assert niter == int(niter)
+        for i in xrange(int(niter)):
             flux += np.sqrt(2. * np.pi) * pars[3 * i] * abs(pars[2 + 3 * i])
 
         return flux * self.fluxnorm
@@ -370,7 +375,8 @@ class Measurements(object):
         """
 
         amp = 0
-        for i in xrange(len(pars) / 3):
+        niter = (len(pars) / 3)
+        for i in xrange(int(niter)):
             amp += pars[3 * i]
         return amp * self.fluxnorm
 
@@ -380,7 +386,8 @@ class Measurements(object):
         """
 
         lum = 0
-        for i in xrange(len(pars) / 3):
+        niter = (len(pars) / 3)
+        for i in xrange(int(niter)):
             lum += self.compute_flux(pars) * 4. * np.pi * self.d**2
         return lum
 
@@ -394,7 +401,8 @@ class Measurements(object):
             return 2. * np.sqrt(2. * np.log(2.)) * abs(pars[2])
         else:
             atol = 1e-4
-            pars2d = np.reshape(pars, (len(pars) / 3, 3))
+            niter = (len(pars) / 3)
+            pars2d = np.reshape(pars, (int(niter), 3))
             start = zip(*pars2d)[1][0]                    # start at central wavelength of first component
 
             # If the centroids are exactly the same for all components, we know the peak, and peak position

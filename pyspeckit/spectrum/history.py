@@ -1,3 +1,4 @@
+from __future__ import print_function
 """
 History logger for the spectroscopic toolkit packge
 
@@ -8,7 +9,7 @@ Author: Adam Ginsburg
 Created: 03/18/2011
 """
 import time
-from pyspeckit.specwarnings import warn
+from ..specwarnings import warn
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -24,5 +25,4 @@ def write_history(header, string):
     try:
         header.add_history(hdrstring)
     except AttributeError:
-        print "WARNING: Error in history writing.  Could not add this string: %s" % hdrstring
-
+        print("WARNING: Error in history writing.  Could not add this string: %s" % hdrstring)

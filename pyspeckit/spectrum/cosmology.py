@@ -13,6 +13,7 @@ Notes:
     -WMAP VII cosmological parameters by default.
 
 """
+from __future__ import print_function
 
 import numpy as np
 

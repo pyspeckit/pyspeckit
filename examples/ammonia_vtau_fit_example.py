@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pyspeckit
 
 # Grab a .fits spectrum with a legitimate header
@@ -67,8 +68,8 @@ sp.specfit(negamp=False, guesses='moments')
 # Save the fit...
 sp.plotter.figure.savefig('nh3_gaussfit.png')
 # and print some information to screen
-print "Guesses: ", sp.specfit.guesses
-print "Best fit: ", sp.specfit.modelpars
+print("Guesses: ", sp.specfit.guesses)
+print("Best fit: ", sp.specfit.modelpars)
 
 # Run the ammonia spec fitter with a reasonable guess
 # Since we only have a single line (1-1), the kinetic temperature is
@@ -85,8 +86,8 @@ sp.specfit(fittype='ammonia_tau',
 sp.specfit.plotresiduals()
 
 sp.plotter.figure.savefig('nh3_ammonia_vtau_fit.png')
-print "Guesses: ", sp.specfit.guesses
-print "Best fit: ", sp.specfit.modelpars
+print("Guesses: ", sp.specfit.guesses)
+print("Best fit: ", sp.specfit.modelpars)
 
 
 # re-plot zoomed in

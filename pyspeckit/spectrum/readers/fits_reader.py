@@ -1,13 +1,15 @@
+from __future__ import print_function
 try:
     import astropy.io.fits as pyfits
 except ImportError:
     import pyfits
-from .. import units
 import numpy.ma as ma
 import numpy as np
+from astropy.extern.six import operator
+
+from .. import units
 from . import make_axis
-import operator
-from pyspeckit.specwarnings import warn
+from ...specwarnings import warn
 
 def open_1d_fits(filename, hdu=0, **kwargs):
     """
@@ -37,7 +39,7 @@ def open_1d_fits(filename, hdu=0, **kwargs):
 
 def open_1d_pyfits(pyfits_hdu, specnum=0, wcstype='', specaxis="1",
         errspecnum=None, autofix=True, scale_keyword=None,
-        scale_action=operator.div, verbose=False, apnum=0, **kwargs):
+        scale_action=operator.truediv, verbose=False, apnum=0, **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
@@ -56,13 +58,18 @@ def open_1d_pyfits(pyfits_hdu, specnum=0, wcstype='', specaxis="1",
                 else: card.verify('silentfix')
             except pyfits.VerifyError:
                 hdr.__delitem__(card.key)
+
     data = pyfits_hdu.data
+
+    with np.errstate(invalid='ignore'):
+        # silently turn signalling nans into quiet nans
+        data[np.isnan(data)] = np.nan
 
     # search for the correct axis (may be 1 or 3, unlikely to be 2 or others)
     # 1 = 1D spectrum
     # 3 = "3D" spectrum with a single x,y point (e.g., JCMT smurf/makecube)
     if hdr.get('NAXIS') > 1:
-        for ii in xrange(1,hdr.get('NAXIS')+1):
+        for ii in range(1,hdr.get('NAXIS')+1):
             ctype = hdr.get('CTYPE%i'%ii)
             if ctype in units.xtype_dict:
                 specaxis="%i" % ii
@@ -103,7 +110,7 @@ will run into errors.""")
             # this is an IRAF .ms.fits file with a 'background' in the 3rd dimension
             spec = ma.array(data[specnum,apnum,:]).squeeze()
         else:
-            for ii in xrange(1,hdr.get('NAXIS')+1):
+            for ii in range(1,hdr.get('NAXIS')+1):
                 # only fail if extra axes have more than one row
                 if hdr.get('NAXIS%i' % ii) > 1 and (ii != int(specaxis)):
                     raise ValueError("Too many axes for open_1d_fits")
@@ -116,7 +123,7 @@ will run into errors.""")
 
     if scale_keyword is not None:
         try:
-            print "Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)
+            print(("Found SCALE keyword %s.  Using %s to scale it" % (scale_keyword,scale_action)))
             scaleval = hdr[scale_keyword]
             spec = scale_action(spec,scaleval)
             errspec = scale_action(errspec,scaleval)
@@ -128,8 +135,9 @@ will run into errors.""")
         # Use the CLASS FITS definition (which is non-standard)
         # http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node84.html
         # F(n) = RESTFREQ + CRVALi + ( n - CRPIXi ) * CDELTi
-        if verbose: print "Loading a CLASS .fits spectrum"
-        dv = -1*hdr.get('CDELT1')
+        if verbose: print("Loading a CLASS .fits spectrum")
+        # there is no reason to assume CDELT is wrong dv = -1*hdr.get('CDELT1')
+        dv = hdr.get('CDELT1')
         if hdr.get('RESTFREQ'):
             v0 = hdr.get('RESTFREQ') + hdr.get('CRVAL1')
         elif hdr.get('RESTF'):
@@ -142,7 +150,7 @@ will run into errors.""")
         v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
         p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
         hdr['CDELT%s' % specaxis] = dv
-        if verbose: print "Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
+        if verbose: print(("Using the FITS CD matrix.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)))
     elif hdr.get(str('CDELT%s%s' % (specaxis,wcstype))):
         if hdr.get(str('PC{0}_{0}'.format(specaxis))):
             dv = hdr['CDELT%s%s' % (specaxis,wcstype)] * hdr.get(str('PC{0}_{0}'.format(specaxis)))
@@ -150,9 +158,9 @@ will run into errors.""")
             dv = hdr['CDELT%s%s' % (specaxis,wcstype)]
         v0 = hdr['CRVAL%s%s' % (specaxis,wcstype)]
         p3 = hdr['CRPIX%s%s' % (specaxis,wcstype)]
-        if verbose: print "Using the FITS CDELT value.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)
+        if verbose: print(("Using the FITS CDELT value.  PIX=%f VAL=%f DELT=%f" % (p3,v0,dv)))
     elif len(data.shape) > 1:
-        if verbose: print "No CDELT or CD in header.  Assuming 2D input with 1st line representing the spectral axis."
+        if verbose: print("No CDELT or CD in header.  Assuming 2D input with 1st line representing the spectral axis.")
         # try assuming first axis is X axis
         if hdr.get('CUNIT%s%s' % (specaxis,wcstype)):
             xarr = data[0,:]
@@ -262,7 +270,9 @@ def make_multispec_axis(hdr, axsplit, WAT1_dict):
         # Data is not dispersion coords
     else: raise ValueError("Unrecognized MULTISPE dispersion in IRAF Echelle specification")
     
-    headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt, 'NAXIS1':naxis, 'NAXIS':1, 'REDSHIFT':z, 'CTYPE1':'wavelength', 'CUNIT1':WAT1_dict['units']}
+    headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt, 'NAXIS1':naxis,
+                 'NAXIS':1, 'REDSHIFT':z, 'CTYPE1':'wavelength',
+                 'CUNIT1':WAT1_dict['units']}
     
     return xax, naxis, headerkws
 
@@ -279,7 +289,7 @@ def read_echelle(pyfits_hdu):
 
     x_axes = []
 
-    for specnum, axstring in specaxdict.iteritems():
+    for specnum, axstring in specaxdict.items():
         axsplit = axstring.replace('"','').split()
         if specnum != int(axsplit[0]):
             raise ValueError("Mismatch in IRAF Echelle specification")
@@ -290,10 +300,14 @@ def read_echelle(pyfits_hdu):
         elif hdr['CTYPE1'] == 'MULTISPE':
             xax,naxis,headerkws = make_multispec_axis(hdr, axsplit, WAT1_dict)
 
-        cards = [pyfits.Card(k,v) for (k,v) in headerkws.iteritems()]
+        cards = [pyfits.Card(k,v) for (k,v) in headerkws.items()]
         header = pyfits.Header(cards)
 
         xarr = make_axis(xax,header)
         x_axes.append(xarr)
+
+    data = pyfits_hdu.data
+    with np.errstate(invalid='ignore'):
+        data[np.isnan(data)] = np.nan
     
-    return pyfits_hdu.data, pyfits_hdu.data*0, units.EchelleAxes(x_axes), hdr
+    return data, np.zeros_like(data), units.EchelleAxes(x_axes), hdr

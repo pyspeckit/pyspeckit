@@ -4,6 +4,7 @@ Cube Fitting
 
 Complicated code for fitting of a whole data cube, pixel-by-pixel
 """
+from __future__ import print_function
 import pyspeckit
 try:
     import astropy.io.fits as pyfits

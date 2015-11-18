@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 
 def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
@@ -80,8 +81,8 @@ def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
     # rev 824 broke this for test_hr2421
     Lstddev = Xax[data<estimator(data)].std()
     Hstddev = Xax[data>estimator(data)].std()
-    #print "Lstddev: %10.3g  Hstddev: %10.3g" % (Lstddev,Hstddev)
-    #print "Lwidth_x: %10.3g  Hwidth_x: %10.3g" % (Lwidth_x,Hwidth_x)
+    #print("Lstddev: %10.3g  Hstddev: %10.3g" % (Lstddev,Hstddev))
+    #print("Lwidth_x: %10.3g  Hwidth_x: %10.3g" % (Lwidth_x,Hwidth_x))
 
     if negamp: # can force the guess to be negative
         xcen,amplitude,width_x = Xax[np.argmin(data)],Lamplitude,Lwidth_x
@@ -94,14 +95,14 @@ def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
         xcen,amplitude,width_x = Xax[np.argmax(data)],Hamplitude,Hwidth_x
 
     if veryverbose:
-        print "Hstddev: %g   Lstddev: %g" % (Hstddev,Lstddev)
-        print ("negamp: %s  amp,width,cen Lower: %g, %g   Upper: %g, %g  Center: %g" %
-               (negamp,Lamplitude,Lwidth_x,Hamplitude,Hwidth_x,xcen))
+        print("Hstddev: %g   Lstddev: %g" % (Hstddev,Lstddev))
+        print(("negamp: %s  amp,width,cen Lower: %g, %g   Upper: %g, %g  Center: %g" %
+               (negamp,Lamplitude,Lwidth_x,Hamplitude,Hwidth_x,xcen)))
     mylist = [amplitude,xcen,width_x]
     if negamp and amplitude > 0 and veryverbose:
-        print "WARNING: likely fit failure.  negamp=True, but amplitude > 0"
+        print("WARNING: likely fit failure.  negamp=True, but amplitude > 0")
     if negamp is False and amplitude < 0 and veryverbose:
-        print "WARNING: likely fit failure.  negamp=False, but amplitude < 0"
+        print("WARNING: likely fit failure.  negamp=False, but amplitude < 0")
     if np.isnan(width_x) or np.isnan(height) or np.isnan(amplitude):
         raise ValueError("something is nan")
     if vheight:

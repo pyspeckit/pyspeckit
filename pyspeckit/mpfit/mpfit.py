@@ -407,10 +407,10 @@ Perform Levenberg-Marquardt least-squares minimization, based on MINPACK-1.
    August, 2002.  Mark Rivers
    Converted from Numeric to numpy (Sergey Koposov, July 2008)
 """
-
+from __future__ import print_function
 import numpy
 import types
-from pyspeckit.spectrum.parinfo import ParinfoList,Parinfo
+from ..spectrum.parinfo import ParinfoList,Parinfo
 from astropy import log
 
 #    Original FORTRAN documentation
@@ -874,11 +874,11 @@ class mpfit:
         if parinfo is not None:
             if type(parinfo) is ParinfoList:
                 pass
-            elif type(parinfo) != types.ListType:
+            elif not isinstance(parinfo, list):
                 self.errmsg = 'ERROR: PARINFO must be a list of dictionaries.'
                 return
             else:
-                if type(parinfo[0]) != types.DictionaryType:
+                if not isinstance(parinfo[0], dict):
                     self.errmsg = 'ERROR: PARINFO must be a list of dictionaries.'
                     return
             if ((xall is not None) and (len(xall) != len(parinfo))):
@@ -1473,7 +1473,7 @@ class mpfit:
 
         # Determine which parameters to print
         nprint = len(x)
-        print "Iter ", ('%6i' % iter),"   CHI-SQUARE = ",('%.10g' % fnorm)," DOF = ", ('%i' % dof)
+        print("Iter ", ('%6i' % iter),"   CHI-SQUARE = ",('%.10g' % fnorm)," DOF = ", ('%i' % dof))
         for i in range(nprint):
             if (parinfo is not None) and ('parname' in parinfo[i]):
                 p = '   ' + parinfo[i]['parname'] + ' = '
@@ -1484,7 +1484,7 @@ class mpfit:
             else:
                 iprint = 1
             if iprint:
-                print p + (pformat % x[i]) + '  '
+                print(p + (pformat % x[i]) + '  ')
         return 0
 
 
@@ -1527,11 +1527,11 @@ class mpfit:
 
         # Convert to numeric arrays if possible
         test = default
-        if type(default) == types.ListType:
+        if isinstance(default, list):
             test=default[0]
-        if isinstance(test, types.IntType):
+        if isinstance(test, int):
             values = numpy.asarray(values, int)
-        elif isinstance(test, types.FloatType):
+        elif isinstance(test, float):
             values = numpy.asarray(values, float)
         return values
 
@@ -2244,7 +2244,7 @@ class mpfit:
     # Procedure to tie one parameter to another.
     def tie(self, p, ptied=None):
         if self.debug:
-            print 'Entering tie...'
+            print('Entering tie...')
         if ptied is None:
             return
         for i in range(len(ptied)):
@@ -2325,14 +2325,14 @@ class mpfit:
     def calc_covar(self, rr, ipvt=None, tol=1.e-14):
 
         if self.debug:
-            print 'Entering calc_covar...'
+            print('Entering calc_covar...')
         if numpy.ndim(rr) != 2:
-            print 'ERROR: r must be a two-dimensional matrix'
+            print('ERROR: r must be a two-dimensional matrix')
             return -1
         s = rr.shape
         n = s[0]
         if s[0] != s[1]:
-            print 'ERROR: r must be a square matrix'
+            print('ERROR: r must be a square matrix')
             return -1
 
         if ipvt is None:

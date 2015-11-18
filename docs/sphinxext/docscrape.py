@@ -8,6 +8,7 @@ import re
 import pydoc
 from StringIO import StringIO
 from warnings import warn
+from astropy.extern.six import iteritems
 
 class Reader(object):
     """A line-based string reader.
@@ -369,7 +370,7 @@ class NumpyDocString(object):
         idx = self['index']
         out = []
         out += ['.. index:: %s' % idx.get('default','')]
-        for section, references in idx.iteritems():
+        for section, references in iteritems(idx):
             if section == 'default':
                 continue
             out += ['   :%s: %s' % (section, ', '.join(references))]

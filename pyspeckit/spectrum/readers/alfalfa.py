@@ -1,6 +1,7 @@
 """
 ALFAFA "source" .sav file
 """
+from __future__ import print_function
 import idlsave
 try:
     import astropy.io.fits as pyfits

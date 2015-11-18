@@ -1,2 +1,2 @@
-import optical
-import radio
+from . import optical
+from . import radio

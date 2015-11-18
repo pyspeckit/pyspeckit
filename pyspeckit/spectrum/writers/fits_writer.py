@@ -1,4 +1,5 @@
 from __future__ import print_function
+from astropy.extern.six import iteritems
 import numpy as np
 from . import Writer
 import pyspeckit
@@ -43,7 +44,7 @@ class write_fits(Writer):
 
         # Generate a WCS header from the X-array
         if self.Spectrum.xarr._make_header(tolerance=tolerance):
-            for k,v in self.Spectrum.xarr.wcshead.iteritems():
+            for k,v in iteritems(self.Spectrum.xarr.wcshead):
                 if v is not None:
                     try:
                         header[k] = v
@@ -59,10 +60,10 @@ class write_fits(Writer):
                 data = np.array( [self.Spectrum.data, self.Spectrum.error] )
             else:
                 data = self.Spectrum.data
-            print("Writing a FITS-standard (linear-x-axis) spectrum to %s" % (fn))
+            print(("Writing a FITS-standard (linear-x-axis) spectrum to %s" % (fn)))
         else:
             # if no header, overwrite header parameters that would be deceptive
-            for k,v in self.Spectrum.xarr.wcshead.iteritems():
+            for k,v in iteritems(self.Spectrum.xarr.wcshead):
                 if v is None:
                     if header.get(k): del header[k]
                 else:
@@ -80,7 +81,7 @@ class write_fits(Writer):
             HDU = pyfits.PrimaryHDU(data=data,
                                     header=pyfits.Header([pyfits.card.Card(k,v)
                                                           for k,v in
-                                                          header.iteritems()]))
+                                                          iteritems(header)]))
         
         HDU.verify('fix')
         HDU.writeto(fn, clobber=clobber, output_verify='fix', **kwargs)

@@ -7,6 +7,9 @@ For a modular ascii table reader, http://cxc.harvard.edu/contrib/asciitable/ is
 probably better.  This single-function code is probably more intuitive to an
 end-user, though.
 """
+from __future__ import print_function
+from astropy.extern.six.moves import xrange
+from astropy.extern.six import iteritems
 import string,re,sys
 import numpy
 try:
@@ -87,7 +90,8 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
     contain data.  If you have scipy and columns of varying length, readcol will
     read in all of the rows with length=mode(row lengths).
     """
-    f=open(filename,'r').readlines()
+    with open(filename,'r') as ff:
+        f = ff.readlines()
     
     null=[f.pop(0) for i in range(skipline)]
 
@@ -116,7 +120,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
     null=[f.pop(0) for i in range(skipafter)]
     
     if fixedformat:
-        myreadff = lambda(x): readff(x,fixedformat)
+        myreadff = lambda x: readff(x,fixedformat)
         splitarr = map(myreadff,f)
         splitarr = filter(commentfilter,splitarr)
     else:
@@ -136,8 +140,8 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
             ncols,nrows = mode(nperline)
             if nrows != len(splitarr):
                 if verbose:
-                    print "Removing %i rows that don't match most common length %i.  \
-                     \n%i rows read into array." % (len(splitarr) - nrows,ncols,nrows)
+                    print("Removing %i rows that don't match most common length %i.  \
+                     \n%i rows read into array." % (len(splitarr) - nrows,ncols,nrows))
                 for i in xrange(len(splitarr)-1,-1,-1):  # need to go backwards
                     if nperline[i] != ncols:
                         splitarr.pop(i)
@@ -146,7 +150,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
         x = numpy.asarray( splitarr , dtype='float')
     except ValueError:
         if verbose: 
-            print "WARNING: reading as string array because %s array failed" % 'float'
+            print("WARNING: reading as string array because %s array failed" % 'float')
         try:
             x = numpy.asarray( splitarr , dtype='S')
         except ValueError:
@@ -165,7 +169,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
 
     if asdict or asStruct:
         mydict = dict(zip(nms,x.T))
-        for k,v in mydict.iteritems():
+        for k,v in iteritems(mydict):
             mydict[k] = get_autotype(v)
         if asdict:
             return mydict
@@ -238,5 +242,5 @@ def make_commentfilter(comment):
             except: return -1
         return commentfilter
     else: # always return false 
-        return lambda(x): -1
+        return lambda x: -1
 

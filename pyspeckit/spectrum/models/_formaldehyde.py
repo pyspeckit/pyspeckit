@@ -6,6 +6,7 @@ import numpy as np
 from pyspeckit.mpfit import mpfit
 from .. import units
 import matplotlib.cbook as mpcb
+from astropy.extern.six.moves import xrange
 
 line_names = ['oneone','twotwo','threethree']
 line_names = ['oneone_f10','oneone_f01','oneone_f22','oneone_f21','oneone_f12','oneone_f11']

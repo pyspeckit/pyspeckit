@@ -6,6 +6,8 @@ GILDAS CLASS file reader
 Read a CLASS file into an :class:`pyspeckit.spectrum.ObsBlock`
 """
 from __future__ import print_function
+from astropy.extern.six.moves import xrange
+from astropy.extern.six import iteritems
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -14,9 +16,9 @@ import numpy
 import numpy as np
 from numpy import pi
 from astropy import log
-from astropy.time import Time
+# from astropy.time import Time
+from astropy import units as u
 import pyspeckit
-import os
 import sys
 import re
 try:
@@ -24,7 +26,6 @@ try:
 except ImportError:
     ProgressBar = lambda x: None
     ProgressBar.update = lambda x: None
-import string
 import struct
 
 import time
@@ -866,6 +867,7 @@ def read_observation(f, obsid, file_description=None, indices=None,
                      my_memmap=None, memmap=True):
     if isinstance(f, str):
         f = open(f,'rb')
+        opened = True
         if memmap:
             my_memmap = numpy.memmap(filename, offset=0, dtype='float32',
                                      mode='r')
@@ -873,6 +875,8 @@ def read_observation(f, obsid, file_description=None, indices=None,
             my_memmap = None
     elif my_memmap is None and memmap:
         raise ValueError("Must pass in a memmap object if passing in a file object.")
+    else:
+        opened = False
 
     if file_description is None:
         file_description = _read_first_record(f)
@@ -888,7 +892,7 @@ def read_observation(f, obsid, file_description=None, indices=None,
     header = obshead
 
     datastart = 0
-    for section_id,section_address in sections.iteritems():
+    for section_id,section_address in iteritems(sections):
         # Section addresses are 1-indexed byte addresses
         # in the current "block"
         sec_position = obs_position + (section_address-1)*4
@@ -904,7 +908,7 @@ def read_observation(f, obsid, file_description=None, indices=None,
     hdr.update({'RAoff':hdr['LAMOF']/pi*180,'DECoff':hdr['BETOF']/pi*180})
     hdr.update({'OBJECT':hdr['SOURC'].strip()})
     hdr.update({'BUNIT':'Tastar'})
-    hdr.update({'EXPOSURE':hdr['TIME']})
+    hdr.update({'EXPOSURE':float(hdr['TIME'])})
     hdr['HDRSTART'] = obs_position
     hdr['DATASTART'] = datastart
     hdr.update(indices[obsid])
@@ -928,6 +932,9 @@ def read_observation(f, obsid, file_description=None, indices=None,
     f.seek(datastart-1)
     spec = _read_spectrum(f, position=datastart-1, nchan=nchan,
                           memmap=memmap, my_memmap=my_memmap)
+
+    if opened:
+        f.close()
 
     return spec, hdr
 
@@ -994,7 +1001,7 @@ class ClassObject(object):
 
     def __repr__(self):
         s = "\n".join(["{k}: {v}".format(k=k,v=v)
-                       for k,v in self.getinfo().iteritems()])
+                       for k,v in iteritems(self.getinfo())])
         return "ClassObject({id}) with {nspec} entries\n".format(id=id(self),
                                                                  nspec=len(self.allind)) + s
 
@@ -1399,10 +1406,10 @@ def make_axis(header,imagfreq=False):
 
     if not imagfreq:
         xarr =  rest_frequency + foff + (numpy.arange(1, nchan+1) - refchan) * fres
-        XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=rest_frequency)
+        XAxis = units.SpectroscopicAxis(xarr,unit='MHz',refX=rest_frequency*u.MHz)
     else:
         xarr = imfreq - (numpy.arange(1, nchan+1) - refchan) * fres
-        XAxis = units.SpectroscopicAxis(xarr,'MHz',frame='rest',refX=imfreq)
+        XAxis = units.SpectroscopicAxis(xarr,unit='MHz',refX=imfreq*u.MHz)
 
     return XAxis
     
@@ -1438,7 +1445,7 @@ def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
         hdr.update(ind)
         # this is slow but necessary...
         H = pyfits.Header()
-        for k,v in hdr.iteritems():
+        for k,v in iteritems(hdr):
             if hasattr(v,"__len__") and not isinstance(v,str):
                 if len(v) > 1:
                     for ii,vv in enumerate(v):

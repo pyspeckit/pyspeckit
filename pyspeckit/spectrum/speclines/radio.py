@@ -1,6 +1,7 @@
 """
 Storage for radio spectral line information.
 """
+from __future__ import print_function
 
 import numpy as np
 import copy
@@ -11,7 +12,7 @@ try:
     import atpy
     atpyOK = True
 except ImportError:
-    import readcol
+    from ..readers import readcol
     atpyOK = False
 
 try:
@@ -130,9 +131,9 @@ class radio_lines(object):
 
         if mask.sum() > 0:
             if mask.sum() > 30 and not force:
-                print "WARNING: show() will plot %i lines!  Use force=True if you want this to happen anyway." % (mask.sum())
+                print("WARNING: show() will plot %i lines!  Use force=True if you want this to happen anyway." % (mask.sum()))
                 return
-            if verbose: print "Labeled %i lines." % mask.sum()
+            if verbose: print("Labeled %i lines." % mask.sum())
             self._lines += [self.Spectrum.plotter.axis.vlines( 
                     self.Spectrum.xarr.x_to_coord(self.table.frequency[mask]-freqoff, 'GHz'),
                     ymin, ymax, color=color, **kwargs)]
@@ -143,7 +144,7 @@ class radio_lines(object):
                     rotation='vertical', color=color)
                 for FREQ,NAME in zip(self.table.frequency[mask]-freqoff,self.table.LatexName[mask])]
         else:
-            if verbose: print "No lines found in range [%g, %g] GHz" % (self.minfreq_GHz, self.maxfreq_GHz)
+            if verbose: print("No lines found in range [%g, %g] GHz" % (self.minfreq_GHz, self.maxfreq_GHz))
 
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
@@ -178,7 +179,7 @@ def get_splat_table(webquery=False, savename=None, **kwargs):
         try:
             splat.rename_column('chemicalname','ChemicalName')
         except:
-            print "Failed to rename chemicalname."
+            print("Failed to rename chemicalname.")
     elif atpyOK:
         splat = atpy.Table(selfpath+"/splatalogue.csv",type='ascii',delimiter=':')
     else:

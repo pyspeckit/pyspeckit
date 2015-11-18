@@ -1,3 +1,5 @@
+from __future__ import print_function
+from astropy.extern.six import iteritems
 import numpy as np
 import warnings
 r2deg = 180/np.pi
@@ -164,7 +166,7 @@ def read_lmv_tofits(fn):
     from astropy.io import fits
     data,header = read_lmv(fn)
 
-    cards = [fits.header.Card(k,v) for k,v in header.iteritems()]
+    cards = [fits.header.Card(k,v) for k,v in iteritems(header)]
     Header = fits.Header(cards)
     hdu = fits.PrimaryHDU(data=data, header=Header)
     return hdu

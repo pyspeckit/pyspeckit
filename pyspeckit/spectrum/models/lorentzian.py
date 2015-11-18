@@ -6,8 +6,9 @@ Lorentzian Fitter
 import numpy
 from numpy.ma import median
 from numpy import pi
-from pyspeckit.mpfit import mpfit
+from ...mpfit import mpfit
 from . import fitter
+from astropy.extern.six.moves import xrange
 
 class LorentzianFitter(fitter.SimpleFitter):
 

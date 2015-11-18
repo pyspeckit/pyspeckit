@@ -3,6 +3,7 @@ Parellel Map snippet by Brian Refsdal
 
 http://www.astropython.org/snippet/2010/3/Parallel-map-using-multiprocessing
 """
+from __future__ import print_function
 import numpy
 import warnings
 from astropy import log
@@ -43,7 +44,7 @@ def worker(f, ii, chunk, out_q, err_q, lock):
   for val in chunk:
     try:
       result = f(val)
-    except Exception, e:
+    except Exception as e:
       err_q.put(e)
       return
 
@@ -75,7 +76,7 @@ def run_tasks(procs, err_q, out_q, num):
     for proc in procs:
       proc.join()
 
-  except Exception, e:
+  except Exception as e:
     # kill all slave processes on ctrl-C
     die(procs)
     raise e
@@ -179,15 +180,15 @@ if __name__ == "__main__":
 
   iterable = [vals]*numtasks
 
-  print ('Running numpy.linalg.eigvals %iX on matrix size [%i,%i]' %
-      (numtasks,size[0],size[1]))
+  print('Running numpy.linalg.eigvals %iX on matrix size [%i,%i]' %
+        (numtasks,size[0],size[1]))
 
   tt = time.time()
   presult = parallel_map(f, iterable)
-  print 'parallel map in %g secs' % (time.time()-tt)
+  print('parallel map in %g secs' % (time.time()-tt))
 
   tt = time.time()
   result = map(f, iterable)
-  print 'serial map in %g secs' % (time.time()-tt)
+  print('serial map in %g secs' % (time.time()-tt))
 
   assert (numpy.asarray(result) == numpy.asarray(presult)).all()

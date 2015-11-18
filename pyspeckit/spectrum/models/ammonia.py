@@ -13,21 +13,22 @@ Module API
 
 """
 import numpy as np
-from pyspeckit.mpfit import mpfit
-from pyspeckit.spectrum.parinfo import ParinfoList,Parinfo
-import fitter
+from ...mpfit import mpfit
+from ...spectrum.parinfo import ParinfoList,Parinfo
+from . import fitter
+from . import model
 import matplotlib.cbook as mpcb
 import copy
-import model
 from astropy import log
 import astropy.units as u
 from astropy import constants
+from astropy.extern.six import iteritems
 from . import mpfit_messages
 import operator
 import string
 
-from ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
-                               voff_lines_dict, tau_wts_dict)
+from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
+                                voff_lines_dict, tau_wts_dict)
 
 def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
@@ -138,7 +139,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     nlevs = 51
     jv=np.arange(nlevs)
     ortho = jv % 3 == 0
-    para = True-ortho
+    para = ~ortho
     Jpara = jv[para]
     Jortho = jv[ortho]
     Brot = 298117.06e6
@@ -220,7 +221,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         tau11_temp = tau_dict['oneone']
         # re-scale all optical depths so that tau is as specified, but the relative taus
         # are sest by the kinetic temperature and partition functions
-        for linename,t in tau_dict.iteritems():
+        for linename,t in iteritems(tau_dict):
             tau_dict[linename] = t * tau/tau11_temp
 
     components =[]
@@ -275,8 +276,8 @@ class ammonia_model(model.SpectralModel):
     def __init__(self,npeaks=1,npars=6,
                  parnames=['tkin','tex','ntot','width','xoff_v','fortho'],
                  **kwargs):
-        self.npeaks = npeaks
-        self.npars = npars
+        npeaks = self.npeaks = int(npeaks)
+        npars = self.npars = int(npars)
         self._default_parnames = parnames
         self.parnames = copy.copy(self._default_parnames)
 
@@ -364,16 +365,16 @@ class ammonia_model(model.SpectralModel):
             else:
                 raise ValueError("Wrong array lengths passed to n_ammonia!")
         else:
-            npars = len(parvals) / self.npeaks
+            npars = int(len(parvals) / self.npeaks)
 
         self._components = []
         def L(x):
             v = np.zeros(len(x))
-            for jj in xrange(self.npeaks):
+            for jj in range(int(self.npeaks)):
                 modelkwargs = kwargs.copy()
-                for ii in xrange(npars):
-                    name = parnames[ii+jj*npars].strip('0123456789').lower()
-                    modelkwargs.update({name:parvals[ii+jj*npars]})
+                for ii in range(int(npars)):
+                    name = parnames[ii+jj*int(npars)].strip('0123456789').lower()
+                    modelkwargs.update({name:parvals[ii+jj*int(npars)]})
                 v += ammonia(x,**modelkwargs)
             return v
         return L
@@ -385,7 +386,7 @@ class ammonia_model(model.SpectralModel):
         """
 
         comps=[]
-        for ii in xrange(self.npeaks):
+        for ii in range(self.npeaks):
             if hyperfine:
                 modelkwargs = dict(zip(self.parnames[ii*self.npars:(ii+1)*self.npars],pars[ii*self.npars:(ii+1)*self.npars]))
                 comps.append( ammonia(xarr,return_components=True,**modelkwargs) )
@@ -522,7 +523,7 @@ class ammonia_model(model.SpectralModel):
                                     **fitfun_kwargs)(xax)
 
         indiv_parinfo = [self.parinfo[jj*self.npars:(jj+1)*self.npars]
-                         for jj in xrange(len(self.parinfo)/self.npars)]
+                         for jj in range(int(len(self.parinfo)/self.npars))]
         modelkwargs = [
                 dict([(p['parname'].strip("0123456789").lower(),p['value']) for p in pi])
                 for pi in indiv_parinfo]
@@ -576,11 +577,11 @@ class ammonia_model(model.SpectralModel):
 
         if not quiet:
             log.info("Creating a 'parinfo' from guesses.")
-        self.npars = len(params) / npeaks
+        self.npars = int(len(params) / npeaks)
 
         if len(params) != npeaks and (len(params) / self.npars) > npeaks:
             npeaks = len(params) / self.npars
-        self.npeaks = npeaks
+        npeaks = self.npeaks = int(npeaks)
 
         if isinstance(params,np.ndarray):
             params=params.tolist()
@@ -602,7 +603,7 @@ class ammonia_model(model.SpectralModel):
         # not, fix them using the defaults
         # (you can put in guesses of length 12 but leave the rest length 6;
         # this code then doubles the length of everything else)
-        for partype,parlist in partype_dict.iteritems():
+        for partype,parlist in iteritems(partype_dict):
             if len(parlist) != self.npars*self.npeaks:
                 # if you leave the defaults, or enter something that can be
                 # multiplied by npars to get to the right number of
@@ -643,11 +644,11 @@ class ammonia_model(model.SpectralModel):
         parinfo = [ {'n':ii, 'value':partype_dict['params'][ii],
                      'limits':[partype_dict['minpars'][ii],partype_dict['maxpars'][ii]],
                      'limited':[partype_dict['limitedmin'][ii],partype_dict['limitedmax'][ii]], 'fixed':partype_dict['fixed'][ii],
-                     'parname':partype_dict['parnames'][ii]+str(ii/self.npars),
+                     'parname':partype_dict['parnames'][ii]+str(int(ii/int(self.npars))),
                      'tied':partype_dict['tied'][ii],
                      'mpmaxstep':max_tem_step*float(partype_dict['parnames'][ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
                      'error': 0}
-            for ii in xrange(len(partype_dict['params'])) ]
+            for ii in range(len(partype_dict['params'])) ]
 
         # hack: remove 'fixed' pars
         #parinfo_with_fixed = parinfo

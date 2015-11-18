@@ -1,3 +1,4 @@
+from __future__ import print_function
 from matplotlib.backend_bases import NavigationToolbar2
 
 class NavigationToolbar3(NavigationToolbar2):

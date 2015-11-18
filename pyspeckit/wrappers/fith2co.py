@@ -5,10 +5,13 @@ H2CO fitter wrapper
 
 Wrapper to fit formaldehyde spectra.
 """
-import pyspeckit
+from __future__ import print_function
+from .. import spectrum
+from ..spectrum import units
 from matplotlib import pyplot
 import copy
 from astropy import units as u
+from astropy.extern.six import iteritems
 
 title_dict = {'oneone':'H$_2$CO 1$_{11}$-1$_{10}$',
               'twotwo':'H$_2$CO 2$_{12}$-2$_{11}$',
@@ -54,7 +57,7 @@ def plot_h2co(spdict, spectra, fignum=1, show_components=False,
                   'twotwo':pyplot.subplot(222),
                   'threethree':pyplot.subplot(223),
                   'fourfour':pyplot.subplot(224)}
-    for linename,sp in spdict.iteritems():
+    for linename,sp in iteritems(spdict):
         sp.plotter.axis=axdict[linename] # permanent
         sp.plotter(axis=axdict[linename],
                    title=title_dict[linename],
@@ -98,7 +101,7 @@ def plot_h2co(spdict, spectra, fignum=1, show_components=False,
         residfignum = fignum
 
     if residaxdict is not None:
-        for linename,sp in spdict.iteritems():
+        for linename,sp in iteritems(spdict):
             sp.specfit.Spectrum.plotter = sp.plotter
             try:
                 yoffset = resid_yoffsets[linename]
@@ -124,10 +127,10 @@ def BigSpectrum_to_H2COdict(sp, vrange=None):
     """
 
     spdict = {}
-    for linename,freq in pyspeckit.spectrum.models.formaldehyde.central_freq_dict.iteritems():
+    for linename,freq in iteritems(spectrum.models.formaldehyde.central_freq_dict):
         if vrange is not None:
-            freq_test_low  = freq - freq * vrange[0]/pyspeckit.units.speedoflight_kms
-            freq_test_high = freq - freq * vrange[1]/pyspeckit.units.speedoflight_kms
+            freq_test_low  = freq - freq * vrange[0]/units.speedoflight_kms
+            freq_test_high = freq - freq * vrange[1]/units.speedoflight_kms
         else:
             freq_test_low = freq_test_high = freq
 

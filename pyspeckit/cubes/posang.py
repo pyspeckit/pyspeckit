@@ -1,4 +1,4 @@
-from pyspeckit.specwarnings import warn
+from ..specwarnings import warn
 try:
     import coords
     coordsOK = True

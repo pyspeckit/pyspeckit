@@ -2,8 +2,9 @@
 This wrapper is intended to replicate the inputs of agpy's showspec.splat_1d code.
 It is uglier than the spectrum class.
 """
+from __future__ import print_function
 
-import pyspeckit
+from ..spectrum.classes import Spectrum
 
 def splat_1d(filename=None,vmin=None,vmax=None,button=None,dobaseline=False,
         exclude=None,smooth=None,order=1,savepre=None,vcrop=True,
@@ -15,7 +16,7 @@ def splat_1d(filename=None,vmin=None,vmax=None,button=None,dobaseline=False,
         fignum=1, axis=None, autorefresh=False, title=None, color=None,
         label=None,clear=False, negamp=None, plotscale=1.0, voff=0.0, **kwargs):
 
-    sp = pyspeckit.Spectrum(filename, specnum=specnum, errspecnum=errspecnum, wcstype=wcstype, **kwargs)
+    sp = Spectrum(filename, specnum=specnum, errspecnum=errspecnum, wcstype=wcstype, **kwargs)
     sp.plotter.xmin = vmin
     sp.plotter.xmax = vmax
     sp.plotter.offset = offset
@@ -27,9 +28,9 @@ def splat_1d(filename=None,vmin=None,vmax=None,button=None,dobaseline=False,
         sp.crop(vmin,vmax)
 
     if button != None:
-        print "button keyword doesn't do anything"
+        print("button keyword doesn't do anything")
     if maskspecnum:
-        print "maskspecnum doesn't do anything [not implemented]"
+        print("maskspecnum doesn't do anything [not implemented]")
 
     if specname:
         sp.plotter.title = specname

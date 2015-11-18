@@ -1,6 +1,7 @@
 """
 Storage for optical spectral line information.
 """
+from __future__ import print_function
 
 import numpy as np
 
@@ -49,8 +50,9 @@ def get_optical_lines():
     xarr = np.sort(xarr)
 
     name = []
-    for i, key in enumerate(lines.keys()): 
-        name.append(lines.keys()[indx[i]])
+    keys = list(lines.keys())
+    for i, key in enumerate(keys): 
+        name.append(keys[indx[i]])
     name = np.array(name)
 
     xunits = []

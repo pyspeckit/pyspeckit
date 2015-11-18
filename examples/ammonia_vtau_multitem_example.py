@@ -59,24 +59,25 @@ spectrum.plotter.axis.plot(spectrum.xarr,
 spectrum.specfit(fittype='nh3_vtau_123', guesses=guesses)
 
 # display the correct and fitted answers
-print "Low column version:"
-print "Real optical depths of component 1: ",[ammonia.ammonia(xarr, tkin=20,
-                                                              ntot=15,
-                                                              fortho=0.5,
-                                                              xoff_v=0.0,
-                                                              width=1.0,
-                                                              return_tau=True)[x]
-                                              for x in ['oneone', 'twotwo',
-                                                        'threethree']]
-print "Real optical depths of component 2: ",[ammonia.ammonia(xarr, tkin=50,
-                                                              ntot=14,
-                                                              fortho=0.5,
-                                                              xoff_v=0.0,
-                                                              width=1.0,
-                                                              return_tau=True)[x]
-                                              for x in ['oneone', 'twotwo',
-                                                        'threethree']]
-print "Fitted parameters: ",spectrum.specfit.parinfo
+print("Low column version:")
+def printthings(ammonia=ammonia.ammonia, xarr=xarr):
+    print("Real optical depths of component 1: ",[ammonia(xarr, tkin=20,
+                                                          ntot=15, fortho=0.5,
+                                                          xoff_v=0.0,
+                                                          width=1.0,
+                                                          return_tau=True)[x]
+                                                  for x in ['oneone', 'twotwo',
+                                                            'threethree']])
+    print("Real optical depths of component 2: ",[ammonia(xarr, tkin=50,
+                                                          ntot=14, fortho=0.5,
+                                                          xoff_v=0.0,
+                                                          width=1.0,
+                                                          return_tau=True)[x]
+                                                  for x in ['oneone', 'twotwo',
+                                                            'threethree']])
+printthings()
+
+print("Fitted parameters: ",spectrum.specfit.parinfo)
 
 # It works, but the covariances between tex and tau are large.
 # So, another example with higher tau (and therefore... less degenerate?)
@@ -91,21 +92,21 @@ spectrum2.specfit.Registry.add_fitter('nh3_vtau_123', fitter, fitter.npars)
 spectrum2.specfit(fittype='nh3_vtau_123', guesses=guesses)
 
 # We can also examine what tau really should have been... kinda.
-print "High column version:"
-print "Real optical depths of component 1: ",[ammonia.ammonia(xarr, tkin=20,
-                                                              ntot=16,
-                                                              fortho=0.5,
-                                                              xoff_v=0.0,
-                                                              width=1.0,
-                                                              return_tau=True)[x]
-                                              for x in ['oneone', 'twotwo',
-                                                        'threethree']]
-print "Real optical depths of component 2: ",[ammonia.ammonia(xarr, tkin=50,
-                                                              ntot=15,
-                                                              fortho=0.5,
-                                                              xoff_v=0.0,
-                                                              width=1.0,
-                                                              return_tau=True)[x]
-                                              for x in ['oneone', 'twotwo',
-                                                        'threethree']]
-print "Fitted parameters: ",spectrum2.specfit.parinfo
+print("High column version:")
+def printthings(ammonia=ammonia.ammonia, xarr=xarr):
+    print("Real optical depths of component 1: ",[ammonia(xarr, tkin=20,
+                                                          ntot=16, fortho=0.5,
+                                                          xoff_v=0.0,
+                                                          width=1.0,
+                                                          return_tau=True)[x]
+                                                  for x in ['oneone', 'twotwo',
+                                                            'threethree']])
+    print("Real optical depths of component 2: ",[ammonia(xarr, tkin=50,
+                                                          ntot=15, fortho=0.5,
+                                                          xoff_v=0.0,
+                                                          width=1.0,
+                                                          return_tau=True)[x]
+                                                  for x in ['oneone', 'twotwo',
+                                                            'threethree']])
+printthings()
+print("Fitted parameters: ",spectrum2.specfit.parinfo)

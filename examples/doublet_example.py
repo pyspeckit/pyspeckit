@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pyspeckit
 
 # Read in J000002.09+155254.1 spectrum, a nice emission-line galaxy
@@ -44,5 +45,5 @@ sp.plotter.savefig('doublet_example_SII.png')
 
 SIIb_obs = sp.specfit.modelpars[-2]
 
-print 'Our guess for the redshift was z = 0.02.'
-print 'The redshift, as derived by the line shift, is z = %g' % ((SIIb_obs / SIIb) - 1)
+print('Our guess for the redshift was z = 0.02.')
+print('The redshift, as derived by the line shift, is z = %g' % ((SIIb_obs / SIIb) - 1))
