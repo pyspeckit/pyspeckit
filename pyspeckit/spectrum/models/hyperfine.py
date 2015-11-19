@@ -350,6 +350,3 @@ class hyperfinemodel(object):
                 return spec
             else:
                 return spec/spec.max() * amp
-
-
-
