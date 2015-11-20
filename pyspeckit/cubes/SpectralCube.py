@@ -1146,6 +1146,7 @@ class Cube(spectrum.Spectrum):
             self.specfit.fitter = sp.specfit.fitter
         except Exception as ex:
             log.error("Fitting the pixel at location {0} failed with error: {1}".format(_temp_fit_loc, ex))
+            log.error("Try setting _temp_fit_loc to a valid pixel")
 
         self.specfit.fittype = sp.specfit.fittype
         self.specfit.parinfo = sp.specfit.parinfo
