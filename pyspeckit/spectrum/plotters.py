@@ -174,6 +174,11 @@ class Plotter(object):
         elif self.axis is None:
             self.axis = self.figure.gca()
 
+        # A check to deal with issue #117: if you close the figure, the axis
+        # still exists, but it cannot be reattached to a figure
+        if not (self.axis.get_figure() is matplotlib.pyplot.figure(self.axis.get_figure().number)):
+            self.axis = self.figure.gca()
+
         if self.axis is not None and self.axis not in self.figure.axes:
             # if you've cleared the axis, but the figure is still open, you
             # need a new axis
