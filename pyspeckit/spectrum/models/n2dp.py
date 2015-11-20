@@ -15,7 +15,7 @@ DOI: 10.1051/0004-6361:200810570
 
 
 """
-import hyperfine
+from . import hyperfine
 import astropy.units as u
 
 # line_names = ['J1-0', 'J2-1', 'J3-2',]
