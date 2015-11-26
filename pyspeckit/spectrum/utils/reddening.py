@@ -45,12 +45,13 @@ def ccm_reddening(wave, ebv=None, a_v=None, r_v=3.1, model='ccm89'):
     The function is works between 910 A and 3.3 microns, although note the
     default ccm89 model is scientifically valid only at >1250 A.
 
-    Model gcc09 uses the updated UV coefficients of Gordon, Cartledge, & Clayton
-    (2009) [2]_, and is valid from 910 A to 3030 A. This function will use CCM89
-    at longer wavelengths if GCC09 is selected, but note that the two do not
-    connect perfectly smoothly. There is a small discontinuity at 3030 A. Note
-    that GCC09 equations 14 and 15 apply to all x>5.9 (the GCC09 paper
-    mistakenly states they do not apply at x>8; K. Gordon, priv. comm.).
+    Model gcc09 uses the updated UV coefficients of Gordon, Cartledge, &
+    Clayton (2009) [2]_, and is valid from 910 A to 3030 A. This function
+    will use CCM89 at longer wavelengths if GCC09 is selected, but note that
+    the two do not connect perfectly smoothly. There is a small
+    discontinuity at 3030 A. Note that GCC09 equations 14 and 15 apply to
+    all x>5.9 (the GCC09 paper mistakenly states they do not apply at x>8;
+    K. Gordon, priv. comm.).
 
     References
     ----------
@@ -61,7 +62,7 @@ def ccm_reddening(wave, ebv=None, a_v=None, r_v=3.1, model='ccm89'):
     """
 
     model = model.lower()
-    if model not in ['ccm89','gcc09']:
+    if model not in ['ccm89', 'gcc09']:
         raise ValueError('model must be ccm89 or gcc09')
     if (a_v is None) and (ebv is None):
         raise ValueError('Must specify either a_v or ebv')
@@ -77,8 +78,8 @@ def ccm_reddening(wave, ebv=None, a_v=None, r_v=3.1, model='ccm89'):
     x = 1e4 / wave.value      # inverse microns
 
     if any(x < 0.3) or any(x > 11):
-        raise ValueError('ccm_dered valid only for wavelengths from 910 A to '+
-            '3.3 microns')
+        raise ValueError('ccm_dered valid only for wavelengths from 910 A to '
+                         '3.3 microns')
     if any(x > 8) and (model == 'ccm89'):
         warnings.warn('CCM89 should not be used below 1250 A.')
 #    if any(x < 3.3) and any(x > 3.3) and (model == 'gcc09'):
@@ -96,11 +97,11 @@ def ccm_reddening(wave, ebv=None, a_v=None, r_v=3.1, model='ccm89'):
     valid = (1.1 <= x) & (x < 3.3)
     y = x[valid] - 1.82
     coef_a = np.array([-0.505, 1.647, -0.827, -1.718, 1.137, 0.701, -0.609,
-        0.104, 1.])
+                       0.104, 1.])
     coef_b = np.array([3.347, -10.805, 5.491, 11.102, -7.985, -3.989, 2.908,
-        1.952, 0.])
-    a[valid] = np.polyval(coef_a,y)
-    b[valid] = np.polyval(coef_b,y)
+                       1.952, 0.])
+    a[valid] = np.polyval(coef_a, y)
+    b[valid] = np.polyval(coef_b, y)
 
     # UV
     valid = (3.3 <= x) & (x < 8)
@@ -120,8 +121,8 @@ def ccm_reddening(wave, ebv=None, a_v=None, r_v=3.1, model='ccm89'):
     y = x[valid] - 8.
     coef_a = np.array([-0.070, 0.137, -0.628, -1.073])
     coef_b = np.array([0.374, -0.420, 4.257, 13.670])
-    a[valid] = np.polyval(coef_a,y)
-    b[valid] = np.polyval(coef_b,y)
+    a[valid] = np.polyval(coef_a, y)
+    b[valid] = np.polyval(coef_b, y)
 
     # Overwrite UV with GCC09 model if applicable. Not an extrapolation.
     if model == 'gcc09':
@@ -169,11 +170,12 @@ def fm_reddening(wave, ebv=None, a_v=None, r_v=3.1, model='f99'):
     Notes
     -----
     Uses Fitzpatrick (1999) [1]_ by default, which relies on the UV
-    parametrization of Fitzpatrick & Massa (1990) [2]_ and spline fitting in the
-    optical and IR. This function is defined from 910 A to 6 microns, but note
-    the claimed validity goes down only to 1150 A. The optical spline points are
-    not taken from F99 Table 4, but rather updated versions from E. Fitzpatrick
-    (this matches the Goddard IDL astrolib routine FM_UNRED).
+    parametrization of Fitzpatrick & Massa (1990) [2]_ and spline fitting in
+    the optical and IR. This function is defined from 910 A to 6 microns,
+    but note the claimed validity goes down only to 1150 A. The optical
+    spline points are not taken from F99 Table 4, but rather updated
+    versions from E. Fitzpatrick (this matches the Goddard IDL astrolib
+    routine FM_UNRED).
 
     The fm07 model uses the Fitzpatrick & Massa (2007) [3]_ parametrization,
     which has a slightly different functional form. That paper claims it
@@ -194,7 +196,7 @@ def fm_reddening(wave, ebv=None, a_v=None, r_v=3.1, model='f99'):
                           "interpolation is not available.")
 
     model = model.lower()
-    if model not in ['f99','fm07']:
+    if model not in ['f99', 'fm07']:
         raise ValueError('model must be f99 or fm07')
     if (a_v is None) and (ebv is None):
         raise ValueError('Must specify either a_v or ebv')
@@ -210,8 +212,8 @@ def fm_reddening(wave, ebv=None, a_v=None, r_v=3.1, model='f99'):
     k = np.zeros(x.size)
 
     if any(x < 0.167) or any(x > 11):
-        raise ValueError('fm_dered valid only for wavelengths from 910 A to '+
-            '6 microns')
+        raise ValueError('fm_dered valid only for wavelengths from 910 A to '
+                         '6 microns')
 
     # UV region
     uvsplit = 10000. / 2700.  # Turn 2700A split into inverse microns.
