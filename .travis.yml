@@ -24,7 +24,7 @@ env:
         # to repeat them for all configurations.
         - NUMPY_VERSION=1.10
         - ASTROPY_VERSION=stable
-        - CONDA_DEPENDENCIES='matplotlib=1.4'
+        - CONDA_DEPENDENCIES='matplotlib=1.4 scipy'
         - PIP_DEPENDENCIES='spectral-cube'
 
     matrix:
