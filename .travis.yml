@@ -22,10 +22,9 @@ env:
         # The following versions are the 'default' for tests, unless
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
-        - MATPLOTLIB_VERSION=1.4
         - NUMPY_VERSION=1.10
         - ASTROPY_VERSION=stable
-        - CONDA_DEPENDENCIES='matplotlib=$MATPLOTLIB_VERSION'
+        - CONDA_DEPENDENCIES='matplotlib=1.4'
         - PIP_DEPENDENCIES='spectral-cube'
 
     matrix:
