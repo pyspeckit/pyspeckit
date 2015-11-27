@@ -465,7 +465,6 @@ class Cube(spectrum.Spectrum):
 
         if hasattr(self,'parcube'):
             sp.specfit.modelpars = self.parcube[:,y,x]
-            sp.specfit.fitter.mpp = sp.specfit.modelpars # also for annotations (differs depending on which function... sigh... need to unify)
             if hasattr(self.specfit,'parinfo') and self.specfit.parinfo is not None:
                 # set the parinfo values correctly for annotations
                 for pi,p,e in zip(sp.specfit.parinfo, sp.specfit.modelpars, self.errcube[:,y,x]):
@@ -476,6 +475,7 @@ class Cube(spectrum.Spectrum):
                         pass
 
             if hasattr(self.specfit,'fitter') and self.specfit.fitter is not None:
+                sp.specfit.fitter.mpp = sp.specfit.modelpars # also for annotations (differs depending on which function... sigh... need to unify)
                 sp.specfit.npeaks = self.specfit.fitter.npeaks
                 sp.specfit.fitter.npeaks = len(sp.specfit.modelpars) / sp.specfit.fitter.npars
                 sp.specfit.fitter.parinfo = sp.specfit.parinfo
@@ -1141,9 +1141,13 @@ class Cube(spectrum.Spectrum):
             whereOK = np.where(OKmask)
             guesses.values = self.parcube[:,whereOK[0][0],whereOK[1][0]]
 
-        sp.specfit(fittype=fittype, guesses=guesses.values)
+        try:
+            sp.specfit(fittype=fittype, guesses=guesses.values)
+            self.specfit.fitter = sp.specfit.fitter
+        except Exception as ex:
+            log.error("Fitting the pixel at location {0} failed with error: {1}.  "
+                      "Try setting _temp_fit_loc to a valid pixel".format(_temp_fit_loc, ex))
 
-        self.specfit.fitter = sp.specfit.fitter
         self.specfit.fittype = sp.specfit.fittype
         self.specfit.parinfo = sp.specfit.parinfo
 

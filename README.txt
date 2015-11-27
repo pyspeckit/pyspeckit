@@ -12,7 +12,7 @@ make user scripting easy).
 Initial implementation focuses on optical and radio applications, e.g.
 gaussian and voigt profile fitting, baseline/continuum fitting, and equivalent
 width measurements.  However, the design is meant to be extensible.  We want
-additional features to be trivial to implement.  
+additional features to be trivial to implement.
 
 In that vein, there is a growing set of spectral models implemented.  The
 model and hyperfinemodel classes makes
@@ -30,18 +30,16 @@ at pyspeckit@gmail.com or post `issues
 
 
 Requirements:
+`astropy <http://www.astropy.org>`_
 `matplotlib <http://matplotlib.sourceforge.net/>`_
 `numpy <http://numpy.scipy.org/>`_
 
-Preferably at least one of:
-`pyfits <http://www.stsci.edu/resources/software_hardware/pyfits/Download>`_
-`atpy <http://atpy.github.com/>`_
-`asciitable <http://cxc.harvard.edu/contrib/asciitable/>`_
-
 Optional:
+`atpy <http://atpy.github.com/>`_
 `scipy <http://www.scipy.org/>`_
-`lmfit-py <https://github.com/newville/lmfit-py>`_
+`lmfit <https://github.com/lmfit/lmfit-py>`_
 `lineid_plot <http://packages.python.org/lineid_plot/>`_
+`spectral-cube <http://spectral-cube.readthedocs.org/>`_
 
 Authors:
 `Adam Ginsburg <adam.g.ginsburg@gmail.com>`_

@@ -119,7 +119,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
     return spdict,spectra
 
 def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
-             show_hyperfine_components=True,
+             show_hyperfine_components=True, annotate=True,
              **plotkwargs):
     """
     Plot the results from a multi-nh3 fit
@@ -171,7 +171,7 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
         if sp.specfit.modelpars is not None:
             sp.specfit.plot_fit(annotate=False, show_components=show_components,
                                 show_hyperfine_components=show_hyperfine_components)
-    if spdict['oneone'].specfit.modelpars is not None:
+    if spdict['oneone'].specfit.modelpars is not None and annotate:
         spdict['oneone'].specfit.annotate(labelspacing=0.05,
                                           prop={'size':'small',
                                                 'stretch':'extra-condensed'},
