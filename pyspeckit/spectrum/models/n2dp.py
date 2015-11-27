@@ -225,13 +225,13 @@ freq_dict.update({
 # for a given line; it gives the relative weights between the J=2-1 and J=3-2
 # lines, for example (the hyperfine weights are treated as normalized within
 # one rotational transition)
-w21 = sum(val for name,val in voff_lines_dict.items() if 'J2-1' in name)
-w32 = sum(val for name,val in voff_lines_dict.items() if 'J3-2' in name)
+w21 = sum(val for name,val in line_strength_dict.items() if 'J2-1' in name)
+w32 = sum(val for name,val in line_strength_dict.items() if 'J3-2' in name)
 relative_strength_total_degeneracy = {
-    name : w21 for name  in voff_lines_dict.keys() if "J2-1" in name
+    name : w21 for name  in line_strength_dict.keys() if "J2-1" in name
     }
 relative_strength_total_degeneracy.update({
-    name : w32 for name  in voff_lines_dict.keys() if "J3-2" in name
+    name : w32 for name  in line_strength_dict.keys() if "J3-2" in name
     })
 
 # Get the list of line names from the previous lists
