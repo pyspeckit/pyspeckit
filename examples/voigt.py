@@ -2,19 +2,25 @@ import pyspeckit
 import numpy as np
 from pyspeckit.spectrum.models import inherited_voigtfitter
 
+# This example uses scipy
+try:
+    import scipy
+except ImportError:
+    exit
+
 # technically, the voigt fitter works as a singlefitter (i.e., you can fit the
-# background level and the peak simultaneously) 
+# background level and the peak simultaneously)
 # in practice, however, you need to fit the background independently except for
 # gaussians.  I don't know why this is.
 
-xarr = pyspeckit.spectrum.units.SpectroscopicAxis(np.linspace(-100,100,500),
+xarr = pyspeckit.spectrum.units.SpectroscopicAxis(np.linspace(-100, 100, 500),
                                                   unit='km/s',
                                                   refX=1e9,
                                                   refX_unit='Hz')
 VF = inherited_voigtfitter.voigt_fitter()
 
 sp1 = pyspeckit.Spectrum(xarr=xarr,
-                         data=(VF.n_modelfunc((1,0,2.5,2.5))(xarr) +
+                         data=(VF.n_modelfunc((1, 0, 2.5, 2.5))(xarr) +
                                np.random.randn(xarr.shape[0])/20.),
                          error=np.ones(xarr.shape[0])/20.)
 sp1.plotter()

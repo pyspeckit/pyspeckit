@@ -13,7 +13,8 @@ try:
 except ImportError:
     scipyOK = False
 
-def voigt(xarr,amp,xcen,sigma,gamma,normalized=False):
+
+def voigt(xarr, amp, xcen, sigma, gamma, normalized=False):
     """
     Normalized Voigt profile
 
@@ -24,7 +25,7 @@ def voigt(xarr,amp,xcen,sigma,gamma,normalized=False):
     If normalized=False, then you can divide the integral of V by
     sigma*sqrt(2*pi) to get the area.
 
-    Original implementation converted from 
+    Original implementation converted from
     http://mail.scipy.org/pipermail/scipy-user/2011-January/028327.html
     (had an incorrect normalization and strange treatment of the input
     parameters)
@@ -52,24 +53,20 @@ def voigt(xarr,amp,xcen,sigma,gamma,normalized=False):
 
     if scipyOK:
         z = ((xarr.value-xcen) + 1j*gamma) / (sigma * np.sqrt(2))
-        V = amp * np.real(scipy.special.wofz(z)) 
+        V = amp * np.real(scipy.special.wofz(z))
         if normalized:
             return V / (sigma*np.sqrt(2*np.pi))
         else:
             return V
-        #tmp = 1.0/scipy.special.wofz(numpy.zeros((len(xarr))) \
-        #      +1j*numpy.sqrt(numpy.log(2.0))*Lfwhm).real
-        #tmp = tmp*amp* \
-        #      scipy.special.wofz(2*numpy.sqrt(numpy.log(2.0))*(xarr-xcen)/Gfwhm+1j* \
-        #      numpy.sqrt(numpy.log(2.0))*Lfwhm).real
-        #return tmp
     else:
-        raise ImportError("Couldn't import scipy, therefore cannot do voigt profile stuff")
+        raise ImportError("Couldn't import scipy, therefore cannot do "
+                          "voigt profile stuff")
+
 
 def voigt_fwhm(sigma, gamma):
     """
     Approximation to the Voigt FWHM from wikipedia
-    
+
     http://en.wikipedia.org/wiki/Voigt_profile
 
     Parameters
@@ -81,6 +78,7 @@ def voigt_fwhm(sigma, gamma):
     """
     return 0.5346 * 2 * gamma + np.sqrt(0.2166*(2*gamma)**2 + sigma**2*8*np.log(2))
 
+
 def voigt_moments(self, *args, **kwargs):
     """
     Get the spectral moments from the moments package.  Use the gaussian width
@@ -89,14 +87,15 @@ def voigt_moments(self, *args, **kwargs):
     m = moments(*args,**kwargs)
     return list(m) + [m[-1]]
 
+
 def voigt_fitter():
     """
     Generator for voigt fitter class
     """
 
     myclass =  model.SpectralModel(voigt, 4,
-            parnames=['amplitude','shift','gwidth','lwidth'], 
-            parlimited=[(False,False),(False,False),(True,False),(True,False)], 
+            parnames=['amplitude','shift','gwidth','lwidth'],
+            parlimited=[(False,False),(False,False),(True,False),(True,False)],
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma_G',r'\sigma_L'),
             centroid_par='shift',
@@ -110,5 +109,5 @@ def voigt_fitter():
     except TypeError: # indicates py3 is being used
         # http://stackoverflow.com/questions/10729909/convert-builtin-function-type-to-method-type-in-python-3?lq=1
         myclass.moments = voigt_moments.__get__(myclass)
-    
+
     return myclass
