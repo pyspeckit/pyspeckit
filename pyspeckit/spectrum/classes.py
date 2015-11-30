@@ -122,6 +122,18 @@ class Spectrum(object):
         >>> sp = pyspeckit.Spectrum('test.fits')
         """
         if filename:
+            if error is not None:
+                raise ValueError("When reading from a file, you cannot specify"
+                                 "the error as an array.  Instead, set it "
+                                 "separately after reading the file, e.g.: \n"
+                                 "sp = Spectrum(filename)\n"
+                                 "sp.error[:] = rms")
+            if xarr is not None:
+                raise ValueError("Cannot specify xarr when reading from a "
+                                 "file.  If the xarr in the file is incorrect,"
+                                 "change it after reading the file in, i.e., "
+                                 "set sp.xarr on another line.")
+
             if filetype is None:
                 suffix = filename.rsplit('.',1)[1]
                 if suffix in readers.suffix_types:
@@ -171,6 +183,9 @@ class Spectrum(object):
                 warn( "WARNING: No header given.  Creating an empty one." )
                 self.header = pyfits.Header()
             self.parse_header(self.header)
+        else:
+            raise ValueError("Must either give a filename or xarr and data "
+                             "keywords to instantiate a pyspeckit.Spectrum")
 
         if hasattr(self.data,'unit'):
             # TODO: use the quantity more appropriately
