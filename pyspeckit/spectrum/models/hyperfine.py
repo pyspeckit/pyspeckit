@@ -6,6 +6,7 @@ Generalized hyperfine component fitter
 """
 import numpy as np
 from astropy import units as u
+from astropy import constants
 import copy
 
 from . import model
@@ -13,6 +14,7 @@ from . import fitter
 
 # should be imported in the future
 ckms = 2.99792458e5
+hoverk = (constants.h.cgs/constants.k_B.cgs).value
 
 class hyperfinemodel(object):
     """
@@ -339,7 +341,11 @@ class hyperfinemodel(object):
             # With "background" function B_nu = CMB, S_nu = absorber, and I_nu = received:
             # I_nu = B_nu * exp(-tau) + (1-exp(-tau)) * S_nu
             # This is a very good approximation for Rohlfs & Wilson eqn 15.29:
-            spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(Tex-Tbackground)
+            #spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*(Tex-Tbackground)
+
+            # this is the exact version of 15.29
+            T0 = hoverk * xarr
+            spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*T0*(1/(np.exp(T0/Tex-1)) - 1/(np.exp(T0/Tbackground)-1))
             
             # This is the equation of radiative transfer using the RJ definitions
             # (eqn 1.37 in Rohlfs)
