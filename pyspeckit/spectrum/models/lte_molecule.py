@@ -63,9 +63,18 @@ if __name__ == "__main__":
     ph2co_321.update(ph2co)
     ph2co_321['dnu'] = (1*u.km/u.s/constants.c * ph2co_321['frequency'])
 
+    ph2co_322 = {
+             'frequency': 218.47563*u.GHz,
+             'energy_upper': kb_cgs*68.0937*u.K,
+    }
+    ph2co_322.update(ph2co)
+    ph2co_322['dnu'] = (1*u.km/u.s/constants.c * ph2co_322['frequency'])
+
     print("tau303 = {0}".format(line_tau(**ph2co_303)))
     print("tau321 = {0}".format(line_tau(**ph2co_321)))
+    print("tau322 = {0}".format(line_tau(**ph2co_322)))
     print("r303/r321 = {0}".format(line_brightness(**ph2co_321)/line_brightness(**ph2co_303)))
+    print("r303/r322 = {0}".format(line_brightness(**ph2co_322)/line_brightness(**ph2co_303)))
 
     # CDMS Q
     import requests
@@ -90,15 +99,23 @@ if __name__ == "__main__":
                                       **ph2co_321).value for tex,pf in
                       zip(tem,Q)])
 
+    del ph2co_322['tex']
+    del ph2co_322['partition_function']
+    T_322 = np.array([line_brightness(tex=tex*u.K, partition_function=pf,
+                                      **ph2co_322).value for tex,pf in
+                      zip(tem,Q)])
+
     import pylab as pl
 
     pl.clf()
     pl.subplot(2,1,1)
-    pl.plot(tem, T_321)
-    pl.plot(tem, T_303)
+    pl.plot(tem, T_321, label='$3_{2,1}-2_{2,0}$')
+    pl.plot(tem, T_322, label='$3_{2,2}-2_{2,1}$')
+    pl.plot(tem, T_303, label='$3_{0,3}-2_{0,2}$')
     pl.xlim(0,200)
     pl.subplot(2,1,2)
-    pl.plot(tem, T_321/T_303)
+    pl.plot(tem, T_321/T_303, label='321/303')
+    pl.plot(tem, T_322/T_303, label='322/303')
     pl.xlim(0,200)
 
     pl.draw(); pl.show()
