@@ -116,8 +116,13 @@ class Interactive(object):
                 else: 
                     print("ERROR: Did not find fitter %s" % fittername)
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
-        elif debug or self._debug:
+        else:
+        #elif debug or self._debug:
             print("Button press not acknowledged",event)
+            if hasattr(event,'button'):
+                print("event.button={0}".format(event.button))
+            if hasattr(event,'key'):
+                print("event.key={0}".format(event.key))
 
 
     def selectregion_interactive(self, event, mark_include=True, debug=False, **kwargs):
