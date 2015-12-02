@@ -116,7 +116,10 @@ class Plotter(object):
         """
         Disconnected the matplotlib key-press callbacks
         """
-        from matplotlib import cbook
+        try:
+            from matplotlib.cbook import BoundMethodProxy
+        except ImportError:
+            from matplotlib.cbook import _BoundMethodProxy as BoundMethodProxy
         if self.figure is not None:
             cbs = self.figure.canvas.callbacks.callbacks
             # this may cause problems since the dict of key press events is a
@@ -126,7 +129,7 @@ class Plotter(object):
                 self._mpl_key_callbacks = {mpl_keypress_handler:
                                            cbs['key_press_event'].pop(mpl_keypress_handler)}
             except KeyError:
-                bmp = cbook.BoundMethodProxy(self.figure.canvas.manager.key_press)
+                bmp = BoundMethodProxy(self.figure.canvas.manager.key_press)
                 self._mpl_key_callbacks = {mpl_keypress_handler:
                                            bmp}
 
