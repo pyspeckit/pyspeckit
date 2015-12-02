@@ -14,6 +14,11 @@ import astropy.units as u
 import copy
 import inspect
 
+try:
+    from matplotlib.cbook import BoundMethodProxy
+except ImportError:
+    from matplotlib.cbook import _BoundMethodProxy as BoundMethodProxy
+
 from . import widgets
 from ..specwarnings import warn
 
@@ -116,10 +121,6 @@ class Plotter(object):
         """
         Disconnected the matplotlib key-press callbacks
         """
-        try:
-            from matplotlib.cbook import BoundMethodProxy
-        except ImportError:
-            from matplotlib.cbook import _BoundMethodProxy as BoundMethodProxy
         if self.figure is not None:
             cbs = self.figure.canvas.callbacks.callbacks
             # this may cause problems since the dict of key press events is a
@@ -137,12 +138,11 @@ class Plotter(object):
         """
         Reconnect the previously disconnected matplotlib keys
         """
-        from matplotlib import cbook
         if self.figure is not None and hasattr(self,'_mpl_key_callbacks'):
             self.figure.canvas.callbacks.callbacks['key_press_event'].update(self._mpl_key_callbacks)
         elif self.figure is not None:
             mpl_keypress_handler = self.figure.canvas.manager.key_press_handler_id
-            bmp = cbook.BoundMethodProxy(self.figure.canvas.manager.key_press)
+            bmp = BoundMethodProxy(self.figure.canvas.manager.key_press)
             self.figure.canvas.callbacks.callbacks['key_press_event'].update({mpl_keypress_handler:
                                                                               bmp})
 
