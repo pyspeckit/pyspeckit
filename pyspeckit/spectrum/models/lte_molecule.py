@@ -8,25 +8,27 @@ eightpicubed = 8 * np.pi**3
 threehc = 3 * constants.h.cgs * constants.c.cgs
 
 
-def line_tau(tex, dnu, total_column, partition_function, degeneracy, frequency,
+def line_tau(tex, total_column, partition_function, degeneracy, frequency,
              dipole_moment, energy_upper):
 
     N_upper = (total_column * degeneracy / partition_function *
                np.exp(-energy_upper / (kb_cgs * tex)))
 
     # equation 29 in Mangum 2015
-    taudnu = (eightpicubed * frequency * dipole_moment**2 / threehc *
-              np.exp(h_cgs*frequency/(kb_cgs*tex)) * N_upper)
+    tauperdnu = (eightpicubed * frequency * dipole_moment**2 / threehc *
+                 (np.exp(h_cgs*frequency/(kb_cgs*tex))-1) * N_upper)
 
-    tau = (taudnu/dnu).decompose()
+    return tauperdnu.decompose()
 
+def Jnu(nu, T):
+    """RJ equivalent temperature (eqn 24)"""
+    return constants.h*nu/constants.k_B / (np.exp(constants.h*nu/(constants.k_B*T))-1)
+
+def line_brightness(tex, dnu, frequency, tbg=2.73*u.K, *args, **kwargs):
+    tau = line_tau(tex=tex, frequency=frequency, *args, **kwargs) / dnu
+    tau = tau.decompose()
     assert tau.unit == u.dimensionless_unscaled
-
-    return tau
-
-def line_brightness(tex, *args, **kwargs):
-    tau = line_tau(tex=tex, *args, **kwargs)
-    return tex * (1 - np.exp(-tau))
+    return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
 
 # url = 'http://cdms.ph1.uni-koeln.de/cdms/tap/'
 # rslt = requests.post(url+"/sync", data={'REQUEST':"doQuery", 'LANG': 'VSS2', 'FORMAT':'XSAMS', 'QUERY':"SELECT SPECIES WHERE MoleculeStoichiometricFormula='CH2O'"})               
