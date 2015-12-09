@@ -1,8 +1,8 @@
 CHANGES
 *******
 
-Version 0.1.18
-~~~~~~~~~~~~~~
+Version 0.1.18 (2015-12-09)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Major change: this is the first version of pyspeckit fully compatible with
 python3.
