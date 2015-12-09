@@ -222,8 +222,8 @@ class hyperfinemodel(object):
                 + Tbackground)
 
     def hyperfine_background(self, xarr, Tbackground=2.73, Tex=5.0, tau=0.1,
-                                xoff_v=0.0, width=1.0, return_tau=False,
-                                **kwargs):
+                             xoff_v=0.0, width=1.0, return_tau=False,
+                             **kwargs):
         """
         Identical to hyperfine, but with Tbackground free.  Assumes already
         background-subtracted
