@@ -15,8 +15,10 @@ It will:
 .. [1] http://projects.scipy.org/scipy/numpy/wiki/CodingStyleGuidelines#docstring-standard
 
 """
+from __future__ import print_function
 
-import os, re, pydoc
+import re
+import pydoc
 from docscrape_sphinx import get_doc_object, SphinxDocString
 import inspect
 
@@ -25,14 +27,14 @@ def mangle_docstrings(app, what, name, obj, options, lines,
     if what == 'module':
         # Strip top title
         title_re = re.compile(r'^\s*[#*=]{4,}\n[a-z0-9 -]+\n[#*=]{4,}\s*',
-                              re.I|re.S)
+                              re.I | re.S)
         lines[:] = title_re.sub('', "\n".join(lines)).split("\n")
     else:
         doc = get_doc_object(obj, what, "\n".join(lines))
         lines[:] = str(doc).split("\n")
 
-    if app.config.numpydoc_edit_link and hasattr(obj, '__name__') and \
-           obj.__name__:
+    if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
+            obj.__name__):
         if hasattr(obj, '__module__'):
             v = dict(full_name="%s.%s" % (obj.__module__, obj.__name__))
         else:
@@ -49,7 +51,7 @@ def mangle_docstrings(app, what, name, obj, options, lines,
             try:
                 references.append(int(l[len('.. ['):l.index(']')]))
             except ValueError:
-                print "WARNING: invalid reference in %s docstring" % name
+                print("WARNING: invalid reference in %s docstring" % name)
 
     # Start renaming from the biggest number, otherwise we may
     # overwrite references.
@@ -72,8 +74,10 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
         'initializes x; see ' in pydoc.getdoc(obj.__init__))):
         return '', ''
 
-    if not (callable(obj) or hasattr(obj, '__argspec_is_invalid_')): return
-    if not hasattr(obj, '__doc__'): return
+    if not (callable(obj) or hasattr(obj, '__argspec_is_invalid_')):
+        return
+    if not hasattr(obj, '__doc__'):
+        return
 
     doc = SphinxDocString(pydoc.getdoc(obj))
     if doc['Signature']:
@@ -105,7 +109,7 @@ def monkeypatch_sphinx_ext_autodoc():
     if sphinx.ext.autodoc.format_signature is our_format_signature:
         return
 
-    print "[numpydoc] Monkeypatching sphinx.ext.autodoc ..."
+    print("[numpydoc] Monkeypatching sphinx.ext.autodoc ...")
     _original_format_signature = sphinx.ext.autodoc.format_signature
     sphinx.ext.autodoc.format_signature = our_format_signature
 
