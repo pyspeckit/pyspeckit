@@ -345,7 +345,7 @@ class hyperfinemodel(object):
 
             # this is the exact version of 15.29
             T0 = hoverk * xarr
-            spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*T0*(1/(np.exp(T0/Tex-1)) - 1/(np.exp(T0/Tbackground)-1))
+            spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*T0*(1/(np.exp(T0/Tex)-1) - 1/(np.exp(T0/Tbackground)-1))
             
             # This is the equation of radiative transfer using the RJ definitions
             # (eqn 1.37 in Rohlfs)
