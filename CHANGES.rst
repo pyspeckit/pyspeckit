@@ -4,6 +4,9 @@ CHANGES
 Version 0.1.19 (unreleased)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Version 0.1.18.1 (2015-12-10)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     * MAJOR bugfix #125: Discovered a major issue introduced in #122 in which a
       typo in the radiative transfer equation results in an incorrect model
 
