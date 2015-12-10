@@ -1,3 +1,4 @@
+from __future__ import print_function
 from .. import astropy_models
 import numpy as np
 try:
@@ -13,8 +14,8 @@ def test_powerlaw(scale=5., alpha=2.):
     plm = powerlaws.PowerLaw1D(1,1,1)
     fitter = fitting.LevMarLSQFitter()
     result = fitter(plm, x, y)
-    print "Result: ",result
-    print "plm.params: ",plm
+    print("Result: ",result)
+    print("plm.params: ",plm)
     return plm
 
 if __name__ == "__main__":

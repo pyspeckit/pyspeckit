@@ -1,8 +1,23 @@
 CHANGES
 *******
 
-Version 0.1.18 (unreleased)
+Version 0.1.19 (unreleased)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    * None yet
+
+Version 0.1.18.1 (2015-12-10)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    * MAJOR bugfix #125: Discovered a major issue introduced in #122 in which a
+      typo in the radiative transfer equation results in an incorrect model
+
+Version 0.1.18 (2015-12-09)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Major change: this is the first version of pyspeckit fully compatible with
+python3.
+
     * Bugfixes: #92, #93 related to fiteach, parameter validation,
       spectroscopic axis array handling, in_range checks, and the ammonia fit
       and plot wrapper.  Also includes an update to the versioning scheme such
@@ -22,6 +37,24 @@ Version 0.1.18 (unreleased)
     * Addition #102: New N2D+ model
     * Bugfix #105: Ammonia thin works (though it is still not recommended)
     * Bugfix #106: Baselines were dependent on the X-axis coordinate unit.
+    * Enhancement #108, 110, 111, 112: Python 3 compatibility
+    * Bugfix #113: Improved plotting & robustness of measure_fwhm, especially
+      when baseline is not subtracted
+    * Bugfix #115: py3ify steppify
+    * Enhancement #117/#119: Better error messages when using
+      ``SpectralCube.load_model`` and more robust figure (re-)opening (if you
+      closed a figure created by spectral cube and then tried to plot again, it
+      would result in a crash.  This behavior was never supported, so it is not
+      a bugfix, but now the behavior should work)
+    * Bugfix #118: Re-fitting within a given window sometimes failed, possibly
+      due to how matplotlib handles event handlers.  Refactoring should make
+      this much more robust.
+    * Enhancement #120: astropy-helpers + travis-ci related infrastructure
+      update
+    * Bugfix #121: Use correct variable name in N2D+ degeneracy
+    * Bugfix #122: Informative errors on file reading & exact RT equation in
+      ``hyperfine`` model
+    * Addition #124: LTE model
 
 Version 0.1.17 (2015-07-14)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

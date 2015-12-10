@@ -222,8 +222,8 @@ class hyperfinemodel(object):
                 + Tbackground)
 
     def hyperfine_background(self, xarr, Tbackground=2.73, Tex=5.0, tau=0.1,
-                                xoff_v=0.0, width=1.0, return_tau=False,
-                                **kwargs):
+                             xoff_v=0.0, width=1.0, return_tau=False,
+                             **kwargs):
         """
         Identical to hyperfine, but with Tbackground free.  Assumes already
         background-subtracted
@@ -345,7 +345,7 @@ class hyperfinemodel(object):
 
             # this is the exact version of 15.29
             T0 = hoverk * xarr
-            spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*T0*(1/(np.exp(T0/Tex-1)) - 1/(np.exp(T0/Tbackground)-1))
+            spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*T0*(1/(np.exp(T0/Tex)-1) - 1/(np.exp(T0/Tbackground)-1))
             
             # This is the equation of radiative transfer using the RJ definitions
             # (eqn 1.37 in Rohlfs)
