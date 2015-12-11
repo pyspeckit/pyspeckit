@@ -479,7 +479,12 @@ class Cube(spectrum.Spectrum):
                 sp.specfit.npeaks = self.specfit.fitter.npeaks
                 sp.specfit.fitter.npeaks = len(sp.specfit.modelpars) / sp.specfit.fitter.npars
                 sp.specfit.fitter.parinfo = sp.specfit.parinfo
-                sp.specfit.model = sp.specfit.fitter.n_modelfunc(sp.specfit.modelpars,**sp.specfit.fitter.modelfunc_kwargs)(sp.xarr)
+                try:
+                    sp.specfit.model = sp.specfit.fitter.n_modelfunc(sp.specfit.modelpars,
+                                                                     **sp.specfit.fitter.modelfunc_kwargs)(sp.xarr)
+                except ValueError:
+                    # possibly invalid model parameters, just skip
+                    sp.specfit.model = np.zeros_like(sp.data)
 
         return sp
 
