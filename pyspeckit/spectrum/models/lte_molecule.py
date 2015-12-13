@@ -9,14 +9,17 @@ threehc = 3 * constants.h.cgs * constants.c.cgs
 
 
 def line_tau(tex, total_column, partition_function, degeneracy, frequency,
-             dipole_moment, energy_upper):
+             energy_upper, einstein_A):
+    # don't use dipole moment, because there are extra hidden dependencies
 
     N_upper = (total_column * degeneracy / partition_function *
                np.exp(-energy_upper / (kb_cgs * tex)))
 
     # equation 29 in Mangum 2015
-    tauperdnu = (eightpicubed * frequency * dipole_moment**2 / threehc *
-                 (np.exp(h_cgs*frequency/(kb_cgs*tex))-1) * N_upper)
+    #tauperdnu = (eightpicubed * frequency * dipole_moment**2 / threehc *
+    #             (np.exp(frequency*h_cgs/(kb_cgs*tex))-1) * N_upper)
+    tauperdnu = ((constants.c**2/(8*np.pi*frequency**2) * einstein_A * N_upper)*
+                 (np.exp(frequency*h_cgs/(kb_cgs*tex))-1))
 
     return tauperdnu.decompose()
 
@@ -28,7 +31,7 @@ def line_brightness(tex, dnu, frequency, tbg=2.73*u.K, *args, **kwargs):
     tau = line_tau(tex=tex, frequency=frequency, *args, **kwargs) / dnu
     tau = tau.decompose()
     assert tau.unit == u.dimensionless_unscaled
-    return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
+    return (Jnu(frequency, tex)-Jnu(frequency, tbg)).decompose() * (1 - np.exp(-tau))
 
 # url = 'http://cdms.ph1.uni-koeln.de/cdms/tap/'
 # rslt = requests.post(url+"/sync", data={'REQUEST':"doQuery", 'LANG': 'VSS2', 'FORMAT':'XSAMS', 'QUERY':"SELECT SPECIES WHERE MoleculeStoichiometricFormula='CH2O'"})               
@@ -48,12 +51,13 @@ if __name__ == "__main__":
              'total_column': 1e12*u.cm**-2,
              'partition_function': 44.6812, # splatalogue's 18.75
              'degeneracy': gI*gJ*gK,
-             'dipole_moment': 2.331e-18*u.esu*u.cm, #2.331*u.debye,
+             #'dipole_moment': 2.331e-18*u.esu*u.cm, #2.331*u.debye,
             }
 
     ph2co_303 = {
              'frequency': 218.22219*u.GHz,
              'energy_upper': kb_cgs*20.95582*u.K,
+             'einstein_A': 10**-3.55007/u.s,
     }
     ph2co_303.update(ph2co)
     ph2co_303['dnu'] = (1*u.km/u.s/constants.c * ph2co_303['frequency'])
@@ -61,6 +65,7 @@ if __name__ == "__main__":
     ph2co_321 = {
              'frequency': 218.76007*u.GHz,
              'energy_upper': kb_cgs*68.11081*u.K,
+             'einstein_A': 10**-3.80235/u.s,
     }
     ph2co_321.update(ph2co)
     ph2co_321['dnu'] = (1*u.km/u.s/constants.c * ph2co_321['frequency'])
@@ -68,6 +73,7 @@ if __name__ == "__main__":
     ph2co_322 = {
              'frequency': 218.47563*u.GHz,
              'energy_upper': kb_cgs*68.0937*u.K,
+             'einstein_A': 10**-3.80373/u.s,
     }
     ph2co_322.update(ph2co)
     ph2co_322['dnu'] = (1*u.km/u.s/constants.c * ph2co_322['frequency'])
