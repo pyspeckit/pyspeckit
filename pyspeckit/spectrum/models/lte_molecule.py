@@ -2,36 +2,68 @@ import numpy as np
 from astropy import units as u
 from astropy import constants
 
-kb_cgs = constants.k_B.cgs
-h_cgs = constants.h.cgs
+kb_cgs = constants.k_B.cgs.value
+h_cgs = constants.h.cgs.value
 eightpicubed = 8 * np.pi**3
 threehc = 3 * constants.h.cgs * constants.c.cgs
+hoverk_cgs = (h_cgs/kb_cgs)
+c_cgs = constants.c.cgs.value
 
 
 def line_tau(tex, total_column, partition_function, degeneracy, frequency,
              energy_upper, einstein_A):
     # don't use dipole moment, because there are extra hidden dependencies
 
+    assert einstein_A.unit.is_equivalent(u.Hz)
+    assert frequency.unit.is_equivalent(u.Hz)
+    assert energy_upper.unit.is_equivalent(u.erg)
+    assert total_column.unit.is_equivalent(u.cm**-2)
+    assert tex.unit.is_equivalent(u.K)
+
+    N_upper = (total_column * degeneracy / partition_function *
+               np.exp(-energy_upper / (constants.k_B * tex)))
+
+    # equation 29 in Mangum 2015
+    #taudnu = (eightpicubed * frequency * dipole_moment**2 / threehc *
+    #             (np.exp(frequency*h_cgs/(kb_cgs*tex))-1) * N_upper)
+    taudnu = ((constants.c**2/(8*np.pi*frequency**2) * einstein_A * N_upper)*
+              (np.exp(frequency*constants.h/(constants.k_B*tex))-1))
+
+    return taudnu.decompose()
+
+def line_tau_cgs(tex, total_column, partition_function, degeneracy, frequency,
+                 energy_upper, einstein_A):
+
     N_upper = (total_column * degeneracy / partition_function *
                np.exp(-energy_upper / (kb_cgs * tex)))
 
     # equation 29 in Mangum 2015
-    #tauperdnu = (eightpicubed * frequency * dipole_moment**2 / threehc *
+    #taudnu = (eightpicubed * frequency * dipole_moment**2 / threehc *
     #             (np.exp(frequency*h_cgs/(kb_cgs*tex))-1) * N_upper)
-    tauperdnu = ((constants.c**2/(8*np.pi*frequency**2) * einstein_A * N_upper)*
-                 (np.exp(frequency*h_cgs/(kb_cgs*tex))-1))
+    taudnu = ((c_cgs**2/(8*np.pi*frequency**2) * einstein_A * N_upper)*
+              (np.exp(frequency*h_cgs/(kb_cgs*tex))-1))
 
-    return tauperdnu.decompose()
+    return taudnu
 
 def Jnu(nu, T):
     """RJ equivalent temperature (eqn 24)"""
     return constants.h*nu/constants.k_B / (np.exp(constants.h*nu/(constants.k_B*T))-1)
+
+def Jnu_cgs(nu, T):
+    """RJ equivalent temperature (eqn 24)
+    (use cgs constants for speed)
+    """
+    return hoverk_cgs*nu / (np.exp(hoverk_cgs*nu/T)-1)
 
 def line_brightness(tex, dnu, frequency, tbg=2.73*u.K, *args, **kwargs):
     tau = line_tau(tex=tex, frequency=frequency, *args, **kwargs) / dnu
     tau = tau.decompose()
     assert tau.unit == u.dimensionless_unscaled
     return (Jnu(frequency, tex)-Jnu(frequency, tbg)).decompose() * (1 - np.exp(-tau))
+
+def line_brightness_cgs(tex, dnu, frequency, tbg=2.73, *args, **kwargs):
+    tau = line_tau(tex=tex, frequency=frequency, *args, **kwargs) / dnu
+    return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
 
 # url = 'http://cdms.ph1.uni-koeln.de/cdms/tap/'
 # rslt = requests.post(url+"/sync", data={'REQUEST':"doQuery", 'LANG': 'VSS2', 'FORMAT':'XSAMS', 'QUERY':"SELECT SPECIES WHERE MoleculeStoichiometricFormula='CH2O'"})               
