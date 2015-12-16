@@ -592,7 +592,7 @@ class Cube(spectrum.Spectrum):
                 verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
                 blank_value=0, integral=True, direct=False, absorption=False,
                 use_nearest_as_guess=False, use_neighbor_as_guess=False,
-                start_from_point=(0,0), multicore=1, position_order = None,
+                start_from_point=(0,0), multicore=1, position_order=None,
                 continuum_map=None, prevalidate_guesses=False, maskmap=None,
                 **fitkwargs):
         """
@@ -691,15 +691,12 @@ class Cube(spectrum.Spectrum):
             OK &= (~bad)
 
 
-        distance = ((xx)**2 + (yy)**2)**0.5
         if start_from_point == 'center':
             start_from_point = (xx.max()/2., yy.max/2.)
         if hasattr(position_order,'shape') and position_order.shape == self.cube.shape[1:]:
             sort_distance = np.argsort(position_order.flat)
         else:
-            d_from_start = np.roll(np.roll(distance,
-                                           start_from_point[0], 0),
-                                   start_from_point[1], 1)
+            d_from_start = ((xx-start_from_point[1])**2 + (yy-start_from_point[0])**2)**0.5
             sort_distance = np.argsort(d_from_start.flat)
 
 
@@ -993,7 +990,7 @@ class Cube(spectrum.Spectrum):
 
         if verbose:
             log.info("Finished final fit %i.  "
-                     "Elapsed time was %0.1f seconds" % (ii+1, time.time()-t0))
+                     "Elapsed time was %0.1f seconds" % (len(valid_pixels), time.time()-t0))
 
 
     def momenteach(self, verbose=True, verbose_level=1, multicore=1, **kwargs):
