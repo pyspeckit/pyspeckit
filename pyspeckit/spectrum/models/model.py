@@ -663,6 +663,10 @@ class SpectralModel(fitter.SimpleFitter):
         IGNORES modelpars;
         just sums self.model
         """
+        if not hasattr(self,'model'):
+            raise ValueError("Must fit (or compute) a model before computing"
+                             " its integral.")
+
         if dx is not None:
             return (self.model*dx).sum()
         else:
@@ -755,6 +759,9 @@ class SpectralModel(fitter.SimpleFitter):
             The X coordinates of the model over which the centroid should be
             computed.  If unspecified, the centroid will be in pixel units
         """
+        if not hasattr(self, 'model'):
+            raise ValueError("Must fit (or compute) a model before measuring "
+                             "its centroid")
         if xarr is None:
             xarr = np.arange(self.model.size)
 
