@@ -824,18 +824,22 @@ class Cube(spectrum.Spectrum):
                 try:
                     sp.specfit(guesses=gg, quiet=verbose_level<=3,
                                verbose=verbose_level>3, **fitkwargs)
+                    self.parcube[:,y,x] = sp.specfit.modelpars
+                    self.errcube[:,y,x] = sp.specfit.modelerrs
+                    success = True
                 except Exception as ex:
                     log.exception("Fit number %i at %i,%i failed on error %s" % (ii,x,y, str(ex)))
                     log.exception("Guesses were: {0}".format(str(gg)))
                     log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
+                    success = False
                     if isinstance(ex,KeyboardInterrupt):
                         raise ex
-                self.parcube[:,y,x] = sp.specfit.modelpars
-                self.errcube[:,y,x] = sp.specfit.modelerrs
-                if integral:
+
+                # keep this out of the 'try' statement
+                if integral and success:
                     self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,
                                                                   return_error=True)
-                self.has_fit[y,x] = True
+                self.has_fit[y,x] = success
             else:
                 self.has_fit[y,x] = False
                 self.parcube[:,y,x] = blank_value
