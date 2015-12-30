@@ -4,7 +4,8 @@ CHANGES
 Version 0.1.19 (unreleased)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    * None yet
+    * Bugfix #128: fiteach would try to measure an integral even if the
+      spectral fit failed
 
 Version 0.1.18.1 (2015-12-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
