@@ -862,7 +862,7 @@ class Cube(spectrum.Spectrum):
                              (ii+1, npix, x, y, snmsg, time.time()-t0, pct))
 
             if sp.specfit.modelerrs is None:
-                log.exception("Fit number %i at %i,%i failed with no specific error.")
+                log.exception("Fit number %i at %i,%i failed with no specific error.") % (ii,x,y)
                 log.exception("Guesses were: {0}".format(str(gg)))
                 log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
                 raise TypeError("The fit never completed; something has gone wrong.")
