@@ -5,6 +5,7 @@ python:
     - 2.7
     - 3.3
     - 3.4
+    - 3.5
 
 # Setting sudo to false opts in to Travis-CI container-based builds.
 sudo: false
@@ -26,7 +27,7 @@ env:
         # The following versions are the 'default' for tests, unless
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
-        - NUMPY_VERSION=1.9
+        - NUMPY_VERSION=1.10
         - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
@@ -55,10 +56,16 @@ matrix:
         # Try Astropy development version
         - python: 2.7
           env: ASTROPY_VERSION=development
-        - python: 3.4
+        - python: 3.5
           env: ASTROPY_VERSION=development
+        - python: 2.7
+          env: ASTROPY_VERSION=lts
+        - python: 3.5
+          env: ASTROPY_VERSION=lts
 
         # Try older numpy versions
+        - python: 2.7
+          env: NUMPY_VERSION=1.9
         - python: 2.7
           env: NUMPY_VERSION=1.8
         - python: 2.7
@@ -92,7 +99,7 @@ install:
     # As described above, using ci-helpers, you should be able to set up an
     # environment with dependencies installed using conda and pip, but in some
     # cases this may not provide enough flexibility in how to install a
-    # specific dependency (and it will not be able to install non-Python 
+    # specific dependency (and it will not be able to install non-Python
     # dependencies). Therefore, you can also include commands below (as
     # well as at the start of the install section or in the before_install
     # section if they are needed before setting up conda) to install any
