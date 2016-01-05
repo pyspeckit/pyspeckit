@@ -1,9 +1,7 @@
 language: python
 
 python:
-    - 2.6
     - 2.7
-    - 3.3
     - 3.4
     - 3.5
 
@@ -62,6 +60,19 @@ matrix:
           env: ASTROPY_VERSION=lts
         - python: 3.5
           env: ASTROPY_VERSION=lts
+
+        # Python 2.6 and 3.3 doesn't have numpy 1.10 in conda, they can be put
+        # back into the main matrix once the numpy build is available in the
+        # astropy-ci-extras channel (or in the one provided in the 
+        # CONDA_CHANNELS environmental variable).
+        - python: 2.6
+          env: SETUP_CMD='egg_info'
+        - python: 2.6
+          env: SETUP_CMD='test' NUMPY_VERSION=1.9
+        - python: 3.3
+          env: SETUP_CMD='egg_info'
+        - python: 3.3
+          env: SETUP_CMD='test' NUMPY_VERSION=1.9
 
         # Try older numpy versions
         - python: 2.7
