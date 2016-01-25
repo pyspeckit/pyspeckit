@@ -504,13 +504,16 @@ class SpectroscopicAxis(u.Quantity):
     def __array_wrap__(self,out_arr,context=None):
         """
         Do this when calling ufuncs
+        (probably overridden by astropy.units.Quantity._wrap_function)
         """
+        log.debug("Inside __array_wrap__")
         ret = np.ndarray.__array_wrap__(self, out_arr, context)
-        try:
-            if len(ret) == 1: # I think this is a bad hack; it used to be unnecessary but a recent update to numpy changed that?
-                ret = float(ret) # FORCE scalar
-        except TypeError: # sometimes ret has no len
-            pass
+
+        # return scalar values for those that should be scalar
+        if hasattr(ret, 'ndim') and ret.ndim == 0:
+            log.debug("ret.ndim == 0")
+            return u.Quantity(ret)
+
         return ret
 
     def _check_consistent_type(self):
@@ -608,7 +611,7 @@ class SpectroscopicAxis(u.Quantity):
             # note that the .value's are outside: if you compare a Quantity, it
             # will return an array of booleans, which always evaluates to True
             # even if that 0-dimensional array (scalar) is False
-            return bool((xval > self.min()).value and (xval < self.max()).value)
+            return bool((xval > self.min()) and (xval < self.max()))
         else:
             warnings.warn("The xvalue being compared in "
                           "SpectroscopicAxis.in_range has no unit.  "
@@ -832,6 +835,56 @@ class SpectroscopicAxis(u.Quantity):
         else:
             return center_frequency, merge_equivalencies(equivalencies,
                                                          u.spectral())
+
+    # OVERRRIDE ASTROPY'S VERSION FOR min, max, etc.
+    def _new_view(self, obj, unit=None):
+        """
+        Create a Quantity view of obj, and set the unit
+
+        By default, return a view of ``obj`` of the same class as ``self``
+        and with the unit passed on, or that of ``self``.  Subclasses can
+        override the type of class used with ``__quantity_subclass__``, and
+        can ensure other properties of ``self`` are copied using
+        `__array_finalize__`.
+
+        Parameters
+        ----------
+        obj : ndarray or scalar
+            The array to create a view of.  If obj is a numpy or python scalar,
+            it will be converted to an array scalar.
+
+        unit : `UnitBase`, or anything convertible to a :class:`~astropy.units.Unit`, or `None`
+            The unit of the resulting object.  It is used to select a
+            subclass, and explicitly assigned to the view if not `None`.
+            If `None` (default), the unit is set by `__array_finalize__`
+            to self._unit.
+
+        Returns
+        -------
+        view : Quantity subclass
+        """
+        # python and numpy scalars cannot be viewed as arrays and thus not as
+        # Quantity either; turn them into zero-dimensional arrays
+        # (These are turned back into scalar in `.value`)
+        if not isinstance(obj, np.ndarray):
+            obj = np.array(obj)
+
+        # 0D should return quantity, not SpectralAxis
+        if obj.ndim == 0:
+            subclass = u.Quantity
+        elif unit is None:
+            subclass = self.__class__
+        else:
+            unit = Unit(unit)
+            subclass, subok = self.__quantity_subclass__(unit)
+            if subok:
+                subclass = self.__class__
+
+        view = obj.view(subclass)
+        view.__array_finalize__(self)
+        if unit is not None:
+            view._unit = unit
+        return view
 
 def merge_equivalencies(old_equivalencies, new_equivalencies):
     """
