@@ -716,6 +716,7 @@ class SpectroscopicAxis(u.Quantity):
 
         if refX is not None:
             center_frequency = u.Quantity(refX, unit=refX_unit)
+            self.refX = center_frequency
         else:
             center_frequency = None
 
