@@ -875,7 +875,7 @@ class SpectroscopicAxis(u.Quantity):
         elif unit is None:
             subclass = self.__class__
         else:
-            unit = Unit(unit)
+            unit = u.Unit(unit)
             subclass, subok = self.__quantity_subclass__(unit)
             if subok:
                 subclass = self.__class__
