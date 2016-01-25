@@ -580,7 +580,7 @@ class Cube(spectrum.Spectrum):
             recompute the model.
         """
         if self._modelcube is None or update:
-            yy,xx = np.indices(self.mapplot.plane.shape)
+            yy,xx = np.indices(self.parcube.shape[1:])
             self._modelcube = np.zeros_like(self.cube)
             for x,y in zip(xx.flat,yy.flat):
                 self._modelcube[:,y,x] = self.specfit.get_full_model(pars=self.parcube[:,y,x])
