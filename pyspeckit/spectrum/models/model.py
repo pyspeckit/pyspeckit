@@ -961,7 +961,10 @@ class SpectralModel(fitter.SimpleFitter):
         funcdet=pymc.Deterministic(name='f',eval=modelfunc,parents=funcdict,doc="The model function")
         d['f'] = funcdet
 
-        datamodel = pymc.distributions.Normal('data',mu=funcdet,tau=1/np.asarray(error)**2,observed=True,value=np.asarray(data))
+        datamodel = pymc.distributions.Normal('data', mu=funcdet,
+                                              tau=1/np.asarray(error)**2,
+                                              observed=True,
+                                              value=np.asarray(data))
         d['data']=datamodel
 
         if return_dict:
