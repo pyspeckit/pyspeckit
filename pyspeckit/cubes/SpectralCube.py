@@ -1353,6 +1353,7 @@ class CubeStack(Cube):
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
         self.plot_special = None
         self.plot_special_kwargs = {}
+        self._modelcube = None
 
         self.mapplot = mapplot.MapPlotter(self)
 
