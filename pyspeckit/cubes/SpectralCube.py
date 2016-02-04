@@ -580,7 +580,7 @@ class Cube(spectrum.Spectrum):
             recompute the model.
         """
         if self._modelcube is None or update:
-            yy,xx = np.indices(self.mapplot.plane.shape)
+            yy,xx = np.indices(self.parcube.shape[1:])
             self._modelcube = np.zeros_like(self.cube)
             for x,y in zip(xx.flat,yy.flat):
                 self._modelcube[:,y,x] = self.specfit.get_full_model(pars=self.parcube[:,y,x])
@@ -862,7 +862,7 @@ class Cube(spectrum.Spectrum):
                              (ii+1, npix, x, y, snmsg, time.time()-t0, pct))
 
             if sp.specfit.modelerrs is None:
-                log.exception("Fit number %i at %i,%i failed with no specific error.")
+                log.exception("Fit number %i at %i,%i failed with no specific error." % (ii,x,y))
                 log.exception("Guesses were: {0}".format(str(gg)))
                 log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
                 raise TypeError("The fit never completed; something has gone wrong.")
@@ -1353,6 +1353,7 @@ class CubeStack(Cube):
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
         self.plot_special = None
         self.plot_special_kwargs = {}
+        self._modelcube = None
 
         self.mapplot = mapplot.MapPlotter(self)
 

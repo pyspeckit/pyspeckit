@@ -923,7 +923,9 @@ class Specfit(interactive.Interactive):
                 or add_baseline is False):
             return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr)
         else:
-            return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
+            return (self.fitter.n_modelfunc(pars,
+                                            **self.fitter.modelfunc_kwargs)(xarr)
+                    + self.Spectrum.baseline.get_model(np.arange(xarr.size)))
 
     def plot_model(self, pars, offset=0.0, annotate=False, clear=False, **kwargs):
         """
