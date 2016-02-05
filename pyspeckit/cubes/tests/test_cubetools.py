@@ -1,6 +1,8 @@
 from .. import cubes
 
+import numpy as np
 from astropy.io import fits
+from astropy import wcs
 
 import os
 
@@ -27,5 +29,15 @@ def test_subimage_integ_header():
                                             vrange=(0,9), zunits='pixels',
                                             units='pixels', header=header)
 
-    assert cutHead['CRPIX1'] == 3.0
-    assert cutHead['CRPIX2'] == -6.0
+    assert cutHead['CRPIX1'] == 7.0
+    assert cutHead['CRPIX2'] == -2.0
+
+    w1 = wcs.WCS(header)
+    w2 = wcs.WCS(cutHead)
+
+    # pixel 2,2 in the original image should be pixel 0,0 in the new one
+    x1,y1,z1 = w1.wcs_pix2world(2,2,0,0)
+    x2,y2 = w2.wcs_pix2world(0,0,0)
+
+    np.testing.assert_almost_equal(x1,x2)
+    np.testing.assert_almost_equal(y1,y2)
