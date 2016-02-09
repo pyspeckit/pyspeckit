@@ -703,8 +703,11 @@ class ammonia_model(model.SpectralModel):
                                          .format(parname, ul, b, a))
 
 class ammonia_model_vtau(ammonia_model):
-    def __init__(self,**kwargs):
-        super(ammonia_model_vtau,self).__init__(parnames=['tkin','tex','tau','width','xoff_v','fortho'])
+    def __init__(self,
+                 parnames=['tkin', 'tex', 'tau', 'width', 'xoff_v', 'fortho'],
+                 **kwargs):
+        super(ammonia_model_vtau, self).__init__(parnames=parnames,
+                                                 **kwargs)
 
     def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
         """
@@ -725,20 +728,44 @@ class ammonia_model_vtau(ammonia_model):
                                            'xoff_v': [False, False],
                                            'fortho': [True, True]},
                           required_limits={'tkin': [0, None],
+                                           'tex': [None,None],
                                            'width': [0, None],
                                            'tau': [0, None],
+                                           'xoff_v': [None,None],
                                            'fortho': [0,1]}):
         super(ammonia_model_vtau, self)._validate_parinfo(must_be_limited=must_be_limited,
                                                           required_limits=required_limits)
 
+    def make_parinfo(self,
+                     params=(20,14,0.5,1.0,0.0,0.5),
+                     fixed=(False,False,False,False,False,False),
+                     limitedmin=(True,True,True,True,False,True),
+                     limitedmax=(False,False,False,False,False,True),
+                     minpars=(TCMB,TCMB,0,0,0,0),
+                     maxpars=(0,0,0,0,0,1),
+                     tied=('',)*6,
+                     **kwargs
+                     ):
+        """
+        parnames=['tkin', 'tex', 'tau', 'width', 'xoff_v', 'fortho']
+        """
+        return super(ammonia_model_vtau, self).make_parinfo(params=params,
+                                                            fixed=fixed,
+                                                            limitedmax=limitedmax,
+                                                            limitedmin=limitedmin,
+                                                            minpars=minpars,
+                                                            maxpars=maxpars,
+                                                            tied=tied,
+                                                            **kwargs)
+
+
 
 class ammonia_model_vtau_thin(ammonia_model_vtau):
-    def __init__(self,**kwargs):
-        super(ammonia_model_vtau_thin, self).__init__(parnames=['tkin', 'tau',
-                                                                'width',
-                                                                'xoff_v',
-                                                                'fortho'],
-                                                      npars=5)
+    def __init__(self,parnames=['tkin', 'tau', 'width', 'xoff_v', 'fortho'],
+                 **kwargs):
+        super(ammonia_model_vtau_thin, self).__init__(parnames=parnames,
+                                                      npars=5,
+                                                      **kwargs)
 
     def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
         """
