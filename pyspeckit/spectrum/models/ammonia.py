@@ -728,7 +728,7 @@ class ammonia_model_vtau(ammonia_model):
                                            'width': [0, None],
                                            'tau': [0, None],
                                            'fortho': [0,1]}):
-        super(ammonia_model_vtau, self)._validate_parinfo(self, must_be_limited=must_be_limited,
+        super(ammonia_model_vtau, self)._validate_parinfo(must_be_limited=must_be_limited,
                                                           required_limits=required_limits)
 
 
