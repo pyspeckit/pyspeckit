@@ -676,7 +676,7 @@ class ammonia_model(model.SpectralModel):
                            'tau': [False, False],
                            'fortho': [True, True]}
         required_limits = {'tkin': [0, None],
-                           'ntot': [0, None],
+                           'ntot': [5, 25],
                            'width': [0, None],
                            'fortho': [0,1]}
         for par in self.parinfo:
