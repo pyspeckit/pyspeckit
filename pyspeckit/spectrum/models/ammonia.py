@@ -30,9 +30,11 @@ import string
 from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
                                 voff_lines_dict, tau_wts_dict)
 
+TCMB = 2.7315 # K
+
 def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
-            background_tb=2.7315,
+            background_tb=TCMB,
             thin=False, verbose=False, return_components=False, debug=False,
             line_names=line_names):
     """
@@ -249,7 +251,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-tauprof))+runspec
         else:
             runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-tauprof))+runspec
-        if runspec.min() < 0 and background_tb == 2.7315:
+        if runspec.min() < 0 and background_tb == TCMB:
             raise ValueError("Model dropped below zero.  That is not possible normally.  Here are the input values: "+
                     ("tex: %f " % tex) +
                     ("tkin: %f " % tkin) +
@@ -301,10 +303,10 @@ class ammonia_model(model.SpectralModel):
         for par in self.default_parinfo:
             if 'tex' in par.parname.lower():
                 par.limited = (True,par.limited[1])
-                par.limits = (max(par.limits[0],2.7315), par.limits[1])
+                par.limits = (max(par.limits[0],TCMB), par.limits[1])
             if 'tkin' in par.parname.lower():
                 par.limited = (True,par.limited[1])
-                par.limits = (max(par.limits[0],2.7315), par.limits[1])
+                par.limits = (max(par.limits[0],TCMB), par.limits[1])
             if 'width' in par.parname.lower():
                 par.limited = (True,par.limited[1])
                 par.limits = (max(par.limits[0],0), par.limits[1])
@@ -568,7 +570,7 @@ class ammonia_model(model.SpectralModel):
                      fixed=(False,False,False,False,False,False),
                      limitedmin=(True,True,True,True,False,True),
                      limitedmax=(False,False,True,False,False,True),
-                     minpars=(2.7315,2.7315,5,0,0,0),
+                     minpars=(TCMB,TCMB,5,0,0,0),
                      maxpars=(0,0,25,0,0,1),
                      tied=('',)*6,
                      max_tem_step=1.,
@@ -625,7 +627,7 @@ class ammonia_model(model.SpectralModel):
                 elif parlist==minpars:
                     # all have minima of zero except kinetic temperature, which can't be below CMB.
                     # Excitation temperature technically can be, but not in this model
-                    partype_dict[partype] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * 2.7315
+                    partype_dict[partype] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * TCMB
                 elif parlist==maxpars: # fractions have upper limits of 1.0
                     partype_dict[partype] = ((np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')).astype('float')
                 elif parlist==parnames: # assumes the right number of parnames (essential)
@@ -740,7 +742,7 @@ class ammonia_model_vtau_thin(ammonia_model):
                      fixed=(False,False,False,False,False),
                      limitedmin=(True,True,True,False,True),
                      limitedmax=(False,False,False,False,True),
-                     minpars=(2.7315,0,0,0,0),
+                     minpars=(TCMB,0,0,0,0),
                      maxpars=(0,0,0,0,1),
                      tied=('',)*5,
                      **kwargs
@@ -770,7 +772,7 @@ class ammonia_model_background(ammonia_model):
         """
 
         # TKIN, TEX, ntot, width, center, ortho fraction
-        return [20,10, 10, 1.0, 0.0, 1.0, 2.7315]
+        return [20,10, 10, 1.0, 0.0, 1.0, TCMB]
 
     def __call__(self,*args,**kwargs):
         #if self.multisingle == 'single':
@@ -780,12 +782,12 @@ class ammonia_model_background(ammonia_model):
         return self.multinh3fit(*args,**kwargs)
 
     def make_parinfo(self, npeaks=1, err=None,
-                    params=(20,20,14,1.0,0.0,0.5,2.7315), parnames=None,
+                    params=(20,20,14,1.0,0.0,0.5,TCMB), parnames=None,
                     fixed=(False,False,False,False,False,False,True),
                     limitedmin=(True,True,True,True,False,True,True),
                     limitedmax=(False,False,False,False,False,True,True),
-                    minpars=(2.73,2.73,0,0,0,0,2.7315), parinfo=None,
-                    maxpars=(0,0,0,0,0,1,2.7315),
+                    minpars=(TCMB,TCMB,0,0,0,0,TCMB), parinfo=None,
+                    maxpars=(0,0,0,0,0,1,TCMB),
                     tied=('',)*7,
                     quiet=True, shh=True,
                      veryverbose=False, **kwargs):
@@ -799,12 +801,12 @@ class ammonia_model_background(ammonia_model):
                                         veryverbose=veryverbose, **kwargs)
 
     def multinh3fit(self, xax, data, npeaks=1, err=None,
-                    params=(20,20,14,1.0,0.0,0.5,2.7315), parnames=None,
+                    params=(20,20,14,1.0,0.0,0.5,TCMB), parnames=None,
                     fixed=(False,False,False,False,False,False,True),
                     limitedmin=(True,True,True,True,False,True,True),
                     limitedmax=(False,False,False,False,False,True,True),
-                    minpars=(2.7315,2.7315,0,0,0,0,2.7315), parinfo=None,
-                    maxpars=(0,0,0,0,0,1,2.73),
+                    minpars=(TCMB,TCMB,0,0,0,0,TCMB), parinfo=None,
+                    maxpars=(0,0,0,0,0,1,TCMB),
                     tied=('',)*7,
                     quiet=True, shh=True,
                     veryverbose=False, **kwargs):
