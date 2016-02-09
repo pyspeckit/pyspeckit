@@ -112,7 +112,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         # allow ntot to be specified as a logarithm.  This is
         # safe because ntot < 1e10 gives a spectrum of all zeros, and the
         # plausible range of columns is not outside the specified range
-        ntot = 10**ntot
+        lin_ntot = 10**ntot
     else:
         raise ValueError("ntot, the logarithmic total column density,"
                          " must be in the range 5 - 25")
@@ -205,7 +205,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             # be the correct one to use.
 
             # Total population of the higher energy inversion transition
-            population_upperstate = ntot * orthoparafrac * partition/(Z.sum())
+            population_upperstate = lin_ntot * orthoparafrac * partition/(Z.sum())
 
             tau_dict[linename] = (population_upperstate /
                                   (1. + np.exp(-h*frq/(kb*tkin) ))*ccms**2 /
@@ -301,10 +301,10 @@ class ammonia_model(model.SpectralModel):
         for par in self.default_parinfo:
             if 'tex' in par.parname.lower():
                 par.limited = (True,par.limited[1])
-                par.limits = (max(par.limits[0],2.73), par.limits[1])
+                par.limits = (max(par.limits[0],2.7315), par.limits[1])
             if 'tkin' in par.parname.lower():
                 par.limited = (True,par.limited[1])
-                par.limits = (max(par.limits[0],2.73), par.limits[1])
+                par.limits = (max(par.limits[0],2.7315), par.limits[1])
             if 'width' in par.parname.lower():
                 par.limited = (True,par.limited[1])
                 par.limits = (max(par.limits[0],0), par.limits[1])
@@ -567,9 +567,9 @@ class ammonia_model(model.SpectralModel):
                      params=(20,20,14,1.0,0.0,0.5), parnames=None,
                      fixed=(False,False,False,False,False,False),
                      limitedmin=(True,True,True,True,False,True),
-                     limitedmax=(False,False,False,False,False,True),
-                     minpars=(2.73,2.73,0,0,0,0),
-                     maxpars=(0,0,0,0,0,1),
+                     limitedmax=(False,False,True,False,False,True),
+                     minpars=(2.7315,2.7315,5,0,0,0),
+                     maxpars=(0,0,25,0,0,1),
                      tied=('',)*6,
                      max_tem_step=1.,
                      **kwargs
@@ -625,7 +625,7 @@ class ammonia_model(model.SpectralModel):
                 elif parlist==minpars:
                     # all have minima of zero except kinetic temperature, which can't be below CMB.
                     # Excitation temperature technically can be, but not in this model
-                    partype_dict[partype] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * 2.73
+                    partype_dict[partype] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * 2.7315
                 elif parlist==maxpars: # fractions have upper limits of 1.0
                     partype_dict[partype] = ((np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')).astype('float')
                 elif parlist==parnames: # assumes the right number of parnames (essential)
@@ -670,7 +670,7 @@ class ammonia_model(model.SpectralModel):
         """
         must_be_limited = {'tkin': [True,False],
                            'tex': [False,False],
-                           'ntot': [True, False],
+                           'ntot': [True, True],
                            'width': [True, False],
                            'xoff_v': [False, False],
                            'tau': [False, False],
@@ -740,7 +740,7 @@ class ammonia_model_vtau_thin(ammonia_model):
                      fixed=(False,False,False,False,False),
                      limitedmin=(True,True,True,False,True),
                      limitedmax=(False,False,False,False,True),
-                     minpars=(2.73,0,0,0,0),
+                     minpars=(2.7315,0,0,0,0),
                      maxpars=(0,0,0,0,1),
                      tied=('',)*5,
                      **kwargs
@@ -770,7 +770,7 @@ class ammonia_model_background(ammonia_model):
         """
 
         # TKIN, TEX, ntot, width, center, ortho fraction
-        return [20,10, 10, 1.0, 0.0, 1.0, 2.73]
+        return [20,10, 10, 1.0, 0.0, 1.0, 2.7315]
 
     def __call__(self,*args,**kwargs):
         #if self.multisingle == 'single':
@@ -780,12 +780,12 @@ class ammonia_model_background(ammonia_model):
         return self.multinh3fit(*args,**kwargs)
 
     def make_parinfo(self, npeaks=1, err=None,
-                    params=(20,20,14,1.0,0.0,0.5,2.73), parnames=None,
+                    params=(20,20,14,1.0,0.0,0.5,2.7315), parnames=None,
                     fixed=(False,False,False,False,False,False,True),
                     limitedmin=(True,True,True,True,False,True,True),
                     limitedmax=(False,False,False,False,False,True,True),
-                    minpars=(2.73,2.73,0,0,0,0,2.73), parinfo=None,
-                    maxpars=(0,0,0,0,0,1,2.73),
+                    minpars=(2.73,2.73,0,0,0,0,2.7315), parinfo=None,
+                    maxpars=(0,0,0,0,0,1,2.7315),
                     tied=('',)*7,
                     quiet=True, shh=True,
                      veryverbose=False, **kwargs):
@@ -799,11 +799,11 @@ class ammonia_model_background(ammonia_model):
                                         veryverbose=veryverbose, **kwargs)
 
     def multinh3fit(self, xax, data, npeaks=1, err=None,
-                    params=(20,20,14,1.0,0.0,0.5,2.73), parnames=None,
+                    params=(20,20,14,1.0,0.0,0.5,2.7315), parnames=None,
                     fixed=(False,False,False,False,False,False,True),
                     limitedmin=(True,True,True,True,False,True,True),
                     limitedmax=(False,False,False,False,False,True,True),
-                    minpars=(2.73,2.73,0,0,0,0,2.73), parinfo=None,
+                    minpars=(2.7315,2.7315,0,0,0,0,2.7315), parinfo=None,
                     maxpars=(0,0,0,0,0,1,2.73),
                     tied=('',)*7,
                     quiet=True, shh=True,
