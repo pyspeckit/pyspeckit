@@ -666,21 +666,21 @@ class ammonia_model(model.SpectralModel):
         #import pdb; pdb.set_trace()
         return parinfo
 
-    def _validate_parinfo(self):
+    def _validate_parinfo(self,
+                          must_be_limited={'tkin': [True,False],
+                                           'tex': [False,False],
+                                           'ntot': [True, True],
+                                           'width': [True, False],
+                                           'xoff_v': [False, False],
+                                           'tau': [False, False],
+                                           'fortho': [True, True]},
+                          required_limits={'tkin': [0, None],
+                                           'ntot': [5, 25],
+                                           'width': [0, None],
+                                           'fortho': [0,1]}):
         """
         Make sure the input parameters are all legitimate
         """
-        must_be_limited = {'tkin': [True,False],
-                           'tex': [False,False],
-                           'ntot': [True, True],
-                           'width': [True, False],
-                           'xoff_v': [False, False],
-                           'tau': [False, False],
-                           'fortho': [True, True]}
-        required_limits = {'tkin': [0, None],
-                           'ntot': [5, 25],
-                           'width': [0, None],
-                           'fortho': [0,1]}
         for par in self.parinfo:
             limited = par.limited
             parname = par.parname.strip(string.digits).lower()
@@ -717,8 +717,22 @@ class ammonia_model_vtau(ammonia_model):
     def __call__(self,*args,**kwargs):
         return self.multinh3fit(*args,**kwargs)
 
+    def _validate_parinfo(self,
+                          must_be_limited={'tkin': [True,False],
+                                           'tex': [False,False],
+                                           'tau': [True, False],
+                                           'width': [True, False],
+                                           'xoff_v': [False, False],
+                                           'fortho': [True, True]},
+                          required_limits={'tkin': [0, None],
+                                           'width': [0, None],
+                                           'tau': [0, None],
+                                           'fortho': [0,1]}):
+        super(ammonia_model_vtau, self)._validate_parinfo(self, must_be_limited=must_be_limited,
+                                                          required_limits=required_limits)
 
-class ammonia_model_vtau_thin(ammonia_model):
+
+class ammonia_model_vtau_thin(ammonia_model_vtau):
     def __init__(self,**kwargs):
         super(ammonia_model_vtau_thin, self).__init__(parnames=['tkin', 'tau',
                                                                 'width',
