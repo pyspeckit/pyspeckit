@@ -108,7 +108,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         if tau is None:
             raise ValueError("When using the 'thin' approximation, tau must "
                              "be used as a parameter.")
-    elif 5 < ntot < 25:
+    elif 5 <= ntot <= 25:
         # allow ntot to be specified as a logarithm.  This is
         # safe because ntot < 1e10 gives a spectrum of all zeros, and the
         # plausible range of columns is not outside the specified range
