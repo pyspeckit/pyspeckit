@@ -26,6 +26,7 @@ for ii in xrange(-15,0):
 
 from . import ammonia_hf
 from .ammonia import ammonia_model,ammonia_model_vtau
+from .ammonia_radex import ammonia_radex_model
 # old way from gaussfitter import gaussian_fitter
 from .inherited_gaussfitter import gaussian_fitter,gaussian_vheight_fitter
 from .inherited_lorentzian import lorentzian_fitter
