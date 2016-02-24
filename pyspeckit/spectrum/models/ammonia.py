@@ -197,7 +197,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
 
 
             # for a complete discussion of these equations, please see
-            # https://gist.github.com/keflavich/3a4aac54e5be334888e4
+            # https://github.com/keflavich/pyspeckit/blob/ammonia_equations/examples/AmmoniaLevelPopulation.ipynb
             # and
             # http://low-sky.github.io/ammoniacolumn/
 
