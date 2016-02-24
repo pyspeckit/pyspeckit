@@ -209,7 +209,8 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             # Total population of the higher energy inversion transition
             population_upperstate = lin_ntot * orthoparafrac * partition/Qtot
 
-            expterm = (np.exp(-h*frq/(kb*tex)) - 1)
+            # the negative here comes from the width term
+            expterm = -(np.exp(-h*frq/(kb*tex)) - 1)
             fracterm = (ccms**2 * aval / (8*np.pi*frq**2))
             widthterm = (ckms/(width*frq*(2*np.pi)**0.5))
 
