@@ -41,14 +41,12 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None, seed=0):
                'CRPIX1': 9, 'CRPIX2': 0, 'CRPIX3': 5,
                'CUNIT1': 'deg', 'CUNIT2': 'deg', 'CUNIT3': 'km s-1',
                'BUNIT' : 'K', 'EQUINOX': 2000.0}
-    for key in keylist:
-        test_hdu.header[key] = keylist[key]
-
     # write out some values used to generate the cube:
-    test_hdu.header['SIGMA'] = abs(sigma1d*cdelt3), 'in units of CUNIT3'
-    test_hdu.header['RMSLVL'] = true_rms
-    test_hdu.header['SEED'] = seed
+    keylist['SIGMA' ] = abs(sigma1d*cdelt3), 'in units of CUNIT3'
+    keylist['RMSLVL'] = true_rms
+    keylist['SEED'  ] = seed
 
+    test_hdu = fits.PrimaryHDU(data=test_cube, header=fits.Header(keylist))
     test_hdu.writeto(outfile, clobber=True, checksum=True)
 
 def download_test_cube(outfile='test.fits'):
