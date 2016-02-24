@@ -47,7 +47,9 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         Array of wavelength/frequency values
     tex: float or None
         Excitation temperature. Assumed LTE if unspecified (``None``), if
-        tex>tkin, or if ``thin`` is specified.
+        tex>tkin, or if ``thin`` is specified.  This is the excitation
+        temperature for *all* of the modeled lines, which means we are
+        explicitly assuming T_ex is the same for all lines.
     ntot: float
         Total log column density of NH3.  Can be specified as a float in the
         range 5-25
