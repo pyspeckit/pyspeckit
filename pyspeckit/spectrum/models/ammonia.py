@@ -179,6 +179,8 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                                        (Crot-Brot)*Jpara**2)/(kb*tkin))
         Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
                                            (Crot-Brot)*Jortho**2)/(kb*tkin))
+        Qpara = Zpara.sum()
+        Qortho = Zortho.sum()
         for linename in line_names:
             if ortho_dict[linename]:
                 orthoparafrac = fortho
@@ -191,29 +193,26 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                 count = para_count # need to treat partition function separately
                 para_count += 1
 
+
+            # for a complete discussion of these equations, please see
+            # https://gist.github.com/keflavich/3a4aac54e5be334888e4
+            # and
+            # http://low-sky.github.io/ammoniacolumn/
+
             # short variable names for readability
             frq = freq_dict[linename]
             partition = Z[count]
             aval = aval_dict[linename]
 
-            # Friesen 2009 eqn A4 points out that the partition function actually says
-            # how many molecules are in the NH3(1-1) state, both upper *and* lower.
-            # population_upperlower = ntot * orthoparafrac * partition/(Z.sum())
-            # population_upperstate = population_upperlower / (1+np.exp(h*frq/(kb*tex)))
-            #
-            # Note Jan 1, 2015: This is accounted for in the eqn below.  The
-            # only difference is that I have used Tkin where Friesen et al 2009
-            # use Tex.  Since Tex describes which states are populated, that may
-            # be the correct one to use.
-
             # Total population of the higher energy inversion transition
             population_upperstate = lin_ntot * orthoparafrac * partition/(Z.sum())
 
-            tau_dict[linename] = (population_upperstate /
-                                  (1. + np.exp(-h*frq/(kb*tkin) ))*ccms**2 /
-                                  (8*np.pi*frq**2) * aval *
-                                  (1-np.exp(-h*frq/(kb*tex))) /
-                                  (width/ckms*frq*np.sqrt(2*np.pi)) )
+            expterm = (np.exp(-h*frq/(kb*tex)) - 1)
+            fracterm = (ccms**2 * aval / (8*np.pi*frq**2))
+            widthterm = (ckms/(width*frq*(2*np.pi)**0.5))
+
+            tau_i = population_upperstate * fracterm * expterm * widthterm
+            tau_dict[linename] = tau_i
 
     # allow tau(11) to be specified instead of ntot
     # in the thin case, this is not needed: ntot plays no role
@@ -242,7 +241,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             tauprof += (tau_dict[linename] * tau_wts[kk] *
                         np.exp(-(xarr.value+nuo-lines[kk])**2 /
                                (2.0*nuwidth[kk]**2)) * fillingfraction)
-            components.append( tauprof )
+            components.append(tauprof)
 
         T0 = (h*xarr.value*1e9/kb) # "temperature" of wavelength
         if tau is not None and thin:
