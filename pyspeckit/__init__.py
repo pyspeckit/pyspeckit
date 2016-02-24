@@ -7,7 +7,6 @@ from ._astropy_init import *
 __all__ = ['spectrum','cubes','wrappers']
 
 if not _ASTROPY_SETUP_:
-    from .version import version as __version__
     from . import spectrum
     from . import specwarnings
     try:
