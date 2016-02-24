@@ -1,10 +1,12 @@
 from .. import cubes, Cube, CubeStack
 
+import numpy as np
 from astropy.io import fits
+from astropy import wcs
 
 import os
 
-def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None):
+def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None, seed=0):
     """
     Generates a simple gaussian cube with noise of
     given shape and writes it as a fits file.
@@ -21,6 +23,7 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None):
     test_cube = gauss1d.array[:,None,None] * gauss2d.array
     test_cube=test_cube/test_cube.max()
     # adding noise:
+    np.random.seed(seed)
     noise_cube = (np.random.random(test_cube.shape)-.5)* \
                         np.median(test_cube.std(axis=0))
     test_cube += noise_cube
@@ -44,6 +47,7 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None):
     # write out some values used to generate the cube:
     test_hdu.header['SIGMA'] = abs(sigma1d*cdelt3), 'in units of CUNIT3'
     test_hdu.header['RMSLVL'] = true_rms
+    test_hdu.header['SEED'] = seed
 
     test_hdu.writeto(outfile, clobber=True, checksum=True)
 
@@ -75,16 +79,25 @@ def test_subimage_integ_header(cubefile='test.fits'):
 
     # saving results from subimage_integ:
     cutData, cutHead = cubes.subimage_integ(cube, xcen, xwidth, ycen, ywidth,
-                                            vrange=(0,header['NAXIS3'-1]), 
+                                            vrange=(0,header['NAXIS3']-1), 
                                             zunits='pixels', units='pixels', 
                                             header=header)
 
     assert cutHead['CRPIX1'] == 7.0
     assert cutHead['CRPIX2'] == -2.0
+    w1 = wcs.WCS(header)
+    w2 = wcs.WCS(cutHead)
+
+    # pixel 2,2 in the original image should be pixel 0,0 in the new one
+    x1,y1,z1 = w1.wcs_pix2world(2,2,0,0)
+    x2,y2 = w2.wcs_pix2world(0,0,0)
+
+    np.testing.assert_almost_equal(x1,x2)
+    np.testing.assert_almost_equal(y1,y2)
 
 def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
     """
-    A draft version for runing a simple test
+    A draft version for running a simple test
     on fiteach(). For now only the line widths
     of gaussian fits are being checked.
 
@@ -177,5 +190,3 @@ def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
         # for verifying that residuals are acceptable
         #assert np.allclose(spc.cube.std(axis=0), spc._modelcube.std(axis=0),
         #        equal_nan=True, atol=spc.header['RMSLVL']*sigma_theshold)
-
-    assert np.allclose(sp_cube._modelcube,sp_stack._modelcube,equal_nan=True)
