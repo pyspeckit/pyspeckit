@@ -185,11 +185,13 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             if ortho_dict[linename]:
                 orthoparafrac = fortho
                 Z = Zortho
+                Qtot = Qortho
                 count = ortho_count
                 ortho_count += 1
             else:
                 orthoparafrac = 1.0-fortho
                 Z = Zpara
+                Qtot = Qpara
                 count = para_count # need to treat partition function separately
                 para_count += 1
 
@@ -205,7 +207,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             aval = aval_dict[linename]
 
             # Total population of the higher energy inversion transition
-            population_upperstate = lin_ntot * orthoparafrac * partition/(Z.sum())
+            population_upperstate = lin_ntot * orthoparafrac * partition/Qtot
 
             expterm = (np.exp(-h*frq/(kb*tex)) - 1)
             fracterm = (ccms**2 * aval / (8*np.pi*frq**2))
