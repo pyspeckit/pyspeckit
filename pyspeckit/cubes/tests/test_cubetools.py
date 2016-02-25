@@ -46,7 +46,14 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None, seed=0):
     keylist['RMSLVL'] = true_rms
     keylist['SEED'  ] = seed
 
-    test_hdu = fits.PrimaryHDU(data=test_cube, header=fits.Header(keylist))
+    try:
+	test_header = fits.Header(keylist)
+	assert test_header[keylist.keys()[0]] == keylist[keylist.keys()[0]]
+    except AssertionError:
+	# seems to fail on some systems
+        for key in keylist:
+	    test_header[key] = keylist[key]
+    test_hdu = fits.PrimaryHDU(data=test_cube, header=test_header)
     test_hdu.writeto(outfile, clobber=True, checksum=True)
 
 def download_test_cube(outfile='test.fits'):
@@ -119,13 +126,13 @@ def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
         ncores = 1
         pass
     spc.fiteach(fittype = 'gaussian',
-	        guesses = guesses,
-	        start_from_pixel = (5,5),
-	    	multicore = ncores,
-                blank_value = np.nan,
-	    	verbose_level = 3,
-                errmap = map_rms,
-                signal_cut = 5)
+		guesses = guesses,
+		start_from_pixel = (5,5),
+		multicore = ncores,
+		blank_value = np.nan,
+		verbose_level = 3,
+		errmap = map_rms,
+		signal_cut = 5)
     if show_plot:
         spc.mapplot()
     if save_pars:
