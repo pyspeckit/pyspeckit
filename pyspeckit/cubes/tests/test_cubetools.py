@@ -151,25 +151,14 @@ def test_fiteach(save_cube=None, save_pars=None, show_plot=False):
     spc = do_fiteach(save_cube, save_pars, show_plot)
 
     # checking the fit
+    map_seed = spc.header['SEED']
     map_sigma_post = spc.parcube[2]
     map_sigma_true = np.zeros_like(map_sigma_post) + spc.header['SIGMA']
     map_in_bounds = np.abs(map_sigma_true-map_sigma_post) < spc.errcube[2]
     err_frac = map_in_bounds[~map_in_bounds].size / float(map_sigma_post.size)
-    # TODO: this is not an ideal aproach - should probably do proper statistics
-    #       on the expected value of median sigma value and check that it lies
-    #       within something like 99.7% of the expected sigma's PDF
-    # make sure the fraction of the fits that don't 
-    # include the true value is within tolerance
-    # TODO: rewrite - the condition is too strict!
-    # if 1-.68 is a peak of the expected value for
-    # the error fraction then this will fail half
-    # of the time. Letting it pass for now.
-    try:
-        assert err_frac < 1-.68, "the fraction of true values outside "+\
-                                 "the confidence intervals is too high "+\
-                                 "({}%)".format(err_frac*100)
-    except AssertionError:
-        pass
+
+    assert map_seed == 0
+    assert err_frac == 0.39
 
 def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
     """
