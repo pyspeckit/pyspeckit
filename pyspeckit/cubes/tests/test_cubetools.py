@@ -71,6 +71,10 @@ def download_test_cube(outfile='test.fits'):
         shutil.move(tmp_path, outfile)
 
 def test_subimage_integ_header(cubefile='test.fits'):
+    """
+    Checks if the coordinates of the spectral
+    cube are drifting away after cropping it.
+    """
     # getting a dummy .fits file
     if not os.path.exists(cubefile):
 	    #download_test_cube(cubefile)
@@ -101,14 +105,7 @@ def test_subimage_integ_header(cubefile='test.fits'):
     np.testing.assert_almost_equal(y1,y2)
 
 def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
-    """
-    A draft version for running a simple test
-    on fiteach(). For now only the line widths
-    of gaussian fits are being checked.
-
-    Generates a fits file and checks that the
-    fitted line width is within expected values.
-    """
+    """Fits a cube with a gaussian for later use"""
     if save_cube is None:
         save_cube = 'test.fits'
     test_sigma = 10 # in pixel values, each pixel is CDELT3 thick
@@ -141,12 +138,10 @@ def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
 
 def test_fiteach(save_cube=None, save_pars=None, show_plot=False):
     """
-    A draft version for runing a simple test
-    on fiteach(). For now only the line widths
-    of gaussian fits are being checked.
-
-    Generates a fits file and checks that the
-    fitted line width is within expected values.
+    A simple test on Cube.fiteach() checking
+    that for a noise with set seed the fraction
+    of line width values within errorbars is
+    remaning constant.
     """
     spc = do_fiteach(save_cube, save_pars, show_plot)
 
@@ -164,7 +159,11 @@ def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
     """
     Tests get_modelcube() method for Cube and CubeStack classes.
     If either cubefile or parfile isn't set, fill generate and
-    fit a sample cube through do_fiteach()
+    fit a sample cube through do_fiteach().
+
+    Computes the residual cube and collapses it into standard
+    deviation of the residual map. Checks that the number of the
+    residual pixels three sigma doesn't change for a fixed noise.
     """
     if cubefile is None or parfile is None:
         cubefile = 'test.fits'
@@ -182,5 +181,5 @@ def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
         resid_cube = spc.cube - spc._modelcube
         # TODO: need to come up with something smarter
         # for verifying that residuals are acceptable
-        #assert np.allclose(spc.cube.std(axis=0), spc._modelcube.std(axis=0),
-        #        equal_nan=True, atol=spc.header['RMSLVL']*sigma_theshold)
+        assert np.allclose(spc.cube.std(axis=0), spc._modelcube.std(axis=0),
+                equal_nan=True, atol=spc.header['RMSLVL']*sigma_theshold)
