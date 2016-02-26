@@ -185,13 +185,13 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         Qortho = Zortho.sum()
         for linename in line_names:
             if ortho_dict[linename]:
-                orthoparafrac = fortho
+                ortho_or_parafrac = fortho
                 Z = Zortho
                 Qtot = Qortho
                 count = ortho_count
                 ortho_count += 1
             else:
-                orthoparafrac = 1.0-fortho
+                ortho_or_parafrac = 1.0-fortho
                 Z = Zpara
                 Qtot = Qpara
                 count = para_count # need to treat partition function separately
@@ -209,7 +209,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             aval = aval_dict[linename]
 
             # Total population of the higher energy inversion transition
-            population_upperstate = lin_ntot * orthoparafrac * partition/Qtot
+            population_upperstate = lin_ntot * ortho_or_parafrac * partition/Qtot
 
             # the negative here comes from the width term
             expterm = -(np.exp(-h*frq/(kb*tex)) - 1)
