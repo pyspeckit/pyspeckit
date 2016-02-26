@@ -171,6 +171,8 @@ def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
         sp_cube = do_fiteach(save_cube=cubefile, save_pars=parfile)
     else:
         sp_cube  = Cube(cubefile)
+    map_seed = sp_cube.header['SEED']
+    map_rms = sp_cube.header['RMSLVL']
     sp_cube.xarr.velocity_convention = 'radio'
     sp_stack = CubeStack([sp_cube])
     sp_stack._modelcube = None
@@ -179,7 +181,7 @@ def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
         spc.load_model_fit(parfile, npars=3)
         spc.get_modelcube()
         resid_cube = spc.cube - spc._modelcube
-        # TODO: need to come up with something smarter
-        # for verifying that residuals are acceptable
-        assert np.allclose(spc.cube.std(axis=0), spc._modelcube.std(axis=0),
-                equal_nan=True, atol=spc.header['RMSLVL']*sigma_theshold)
+	above3sig = (resid_cube.std(axis=0) > map_rms*3).flatten()
+
+	assert map_seed == 0
+	assert above3sig[above3sig].size == 77
