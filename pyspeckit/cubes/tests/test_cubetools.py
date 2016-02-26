@@ -47,12 +47,12 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None, seed=0):
     keylist['SEED'  ] = seed
 
     try:
-	test_header = fits.Header(keylist)
-	assert test_header[keylist.keys()[0]] == keylist[keylist.keys()[0]]
+        test_header = fits.Header(keylist)
+        assert test_header[keylist.keys()[0]] == keylist[keylist.keys()[0]]
     except AssertionError:
-	# seems to fail on some systems
+    # seems to fail on some systems
         for key in keylist:
-	    test_header[key] = keylist[key]
+            test_header[key] = keylist[key]
     test_hdu = fits.PrimaryHDU(data=test_cube, header=test_header)
     test_hdu.writeto(outfile, clobber=True, checksum=True)
 
@@ -77,8 +77,8 @@ def test_subimage_integ_header(cubefile='test.fits'):
     """
     # getting a dummy .fits file
     if not os.path.exists(cubefile):
-	    #download_test_cube(cubefile)
-	    make_test_cube((100,9,9),cubefile)
+        #download_test_cube(cubefile)
+        make_test_cube((100,9,9),cubefile)
 
     cube = fits.getdata(cubefile)
     header = fits.getheader(cubefile)
@@ -110,7 +110,7 @@ def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
         save_cube = 'test.fits'
     test_sigma = 10 # in pixel values, each pixel is CDELT3 thick
     make_test_cube((100,10,10), save_cube, 
-                   sigma=(test_sigma, 5) )
+                      sigma=(test_sigma, 5) )
     # from .. import Cube
     spc = Cube(save_cube)
     guesses = [0.5,0.2,0.8]
@@ -123,13 +123,13 @@ def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
         ncores = 1
         pass
     spc.fiteach(fittype = 'gaussian',
-		guesses = guesses,
-		start_from_pixel = (5,5),
-		multicore = ncores,
-		blank_value = np.nan,
-		verbose_level = 3,
-		errmap = map_rms,
-		signal_cut = 5)
+                guesses = guesses,
+                start_from_pixel = (5,5),
+                multicore = ncores,
+                blank_value = np.nan,
+                verbose_level = 3,
+                errmap = map_rms,
+                signal_cut = 5)
     if show_plot:
         spc.mapplot()
     if save_pars:
@@ -181,7 +181,7 @@ def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
         spc.load_model_fit(parfile, npars=3)
         spc.get_modelcube()
         resid_cube = spc.cube - spc._modelcube
-	above3sig = (resid_cube.std(axis=0) > map_rms*3).flatten()
+    above3sig = (resid_cube.std(axis=0) > map_rms*3).flatten()
 
-	assert map_seed == 0
-	assert above3sig[above3sig].size == 77
+    assert map_seed == 0
+    assert above3sig[above3sig].size == 77
