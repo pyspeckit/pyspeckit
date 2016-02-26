@@ -48,9 +48,9 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None, seed=0):
 
     try:
         test_header = fits.Header(keylist)
-        assert test_header[keylist.keys()[0]] == keylist[keylist.keys()[0]]
+        assert test_header[list(keylist)[0]] == keylist[list(keylist)[0]]
     except AssertionError:
-    # seems to fail on some systems
+        # generates an empty header on some systems (TODO: why?)
         for key in keylist:
             test_header[key] = keylist[key]
     test_hdu = fits.PrimaryHDU(data=test_cube, header=test_header)
