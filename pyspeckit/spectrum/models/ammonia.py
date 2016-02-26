@@ -185,6 +185,9 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         Qortho = Zortho.sum()
         for linename in line_names:
             if ortho_dict[linename]:
+                # define variable "ortho_or_para_frac" that will be the ortho
+                # fraction in the case of an ortho transition or the para
+                # fraction for a para transition
                 ortho_or_parafrac = fortho
                 Z = Zortho
                 Qtot = Qortho
