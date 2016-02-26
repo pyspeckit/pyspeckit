@@ -205,6 +205,9 @@ class Plotter(object):
 
         if clear and self.axis is not None:
             self.axis.clear()
+            # Need to empty the stored model plots
+            if hasattr(self.Spectrum, 'fitter'):
+                self.Spectrum.fitter.clear()
 
         if autorefresh is not None:
             self.autorefresh = autorefresh
