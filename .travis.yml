@@ -25,7 +25,7 @@ env:
         # The following versions are the 'default' for tests, unless
         # overridden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
-        - NUMPY_VERSION=1.10
+        - NUMPY_VERSION=stable
         - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
@@ -63,7 +63,7 @@ matrix:
 
         # Python 2.6 and 3.3 doesn't have numpy 1.10 in conda, they can be put
         # back into the main matrix once the numpy build is available in the
-        # astropy-ci-extras channel (or in the one provided in the 
+        # astropy-ci-extras channel (or in the one provided in the
         # CONDA_CHANNELS environmental variable).
         - python: 2.6
           env: SETUP_CMD='egg_info'
@@ -83,6 +83,10 @@ matrix:
           env: NUMPY_VERSION=1.7
         - python: 2.7
           env: NUMPY_VERSION=1.6
+
+        # Try numpy pre-release
+        - python: 3.5
+          env: NUMPY_VERSION=prerelease
 
 before_install:
 
