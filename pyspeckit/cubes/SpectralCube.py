@@ -1159,42 +1159,42 @@ class Cube(spectrum.Spectrum):
 
     try:
         import cubes
-        def smooth(self,smooth,**kwargs):
+        def smooth(self,factor,**kwargs):
             """
-            Smooth the spectrum by factor `smooth`.
+            Smooth the spectrum by factor `factor`.
 
             Documentation from the :mod:`cubes.spectral_smooth` module:
 
             """
             import cubes
 
-            smooth = round(smooth)
-            self.cube = cubes.spectral_smooth(self.cube,smooth,**kwargs)
-            self.xarr = self.xarr[::smooth]
+            factor = round(factor)
+            self.cube = cubes.spectral_smooth(self.cube,factor,**kwargs)
+            self.xarr = self.xarr[::factor]
             if hasattr(self,'data'):
-                self.data = smooth.smooth(self.data,smooth,**kwargs)
+                self.data = smooth.smooth(self.data,factor,**kwargs)
             if len(self.xarr) != self.cube.shape[0]:
                 raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
             if self.errorcube is not None:
-                self.errorcube = cubes.spectral_smooth(self.errorcube,smooth,**kwargs)
+                self.errorcube = cubes.spectral_smooth(self.errorcube,factor,**kwargs)
 
-            self._smooth_header(smooth)
+            self._smooth_header(factor)
         __doc__ += "cubes.spectral_smooth doc: \n" + cubes.spectral_smooth.__doc__
     except ImportError:
         def smooth(self):
             raise ImportError("Can't import cubes: required for cube spectral smoothing")
 
-    def _smooth_header(self,smooth):
+    def _smooth_header(self,factor):
         """
         Internal - correct the FITS header parameters when smoothing
         """
         if self.header.get('CDELT3') is not None and self.header.get('CRPIX3') is not None:
-            self.header['CDELT3'] = self.header.get('CDELT3') * float(smooth)
-            self.header['CRPIX3'] = self.header.get('CRPIX3') / float(smooth)
+            self.header['CDELT3'] = self.header.get('CDELT3') * float(factor)
+            self.header['CRPIX3'] = self.header.get('CRPIX3') / float(factor)
 
-            history.write_history(self.header,"SMOOTH: Smoothed and downsampled spectrum by factor %i" % (smooth))
-            history.write_history(self.header,"SMOOTH: Changed CRPIX3 from %f to %f" % (self.header.get('CRPIX3')*float(smooth),self.header.get('CRPIX3')))
-            history.write_history(self.header,"SMOOTH: Changed CDELT3 from %f to %f" % (self.header.get('CRPIX3')/float(smooth),self.header.get('CRPIX3')))
+            history.write_history(self.header,"SMOOTH: Smoothed and downsampled spectrum by factor %i" % (factor))
+            history.write_history(self.header,"SMOOTH: Changed CRPIX3 from %f to %f" % (self.header.get('CRPIX3')*float(factor),self.header.get('CRPIX3')))
+            history.write_history(self.header,"SMOOTH: Changed CDELT3 from %f to %f" % (self.header.get('CRPIX3')/float(factor),self.header.get('CRPIX3')))
 
 
     def write_fit(self, fitcubefilename, clobber=False):
