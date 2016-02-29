@@ -46,13 +46,8 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None, seed=0):
     keylist['RMSLVL'] = true_rms
     keylist['SEED'  ] = seed
 
-    try:
-        test_header = fits.Header(keylist)
-        assert test_header[list(keylist)[0]] == keylist[list(keylist)[0]]
-    except AssertionError:
-        # generates an empty header on some systems (TODO: why?)
-        for key in keylist:
-            test_header[key] = keylist[key]
+    test_header = fits.Header()
+    test_header.update(keylist)
     test_hdu = fits.PrimaryHDU(data=test_cube, header=test_header)
     test_hdu.writeto(outfile, clobber=True, checksum=True)
 
