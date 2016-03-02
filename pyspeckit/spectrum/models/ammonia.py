@@ -1,9 +1,9 @@
 """
 ========================================
-Ammonia inversion transition TKIN fitter
+Ammonia inversion transition TROT fitter
 ========================================
 
-Ammonia inversion transition TKIN fitter translated from Erik Rosolowsky's
+Ammonia inversion transition TROT fitter translated from Erik Rosolowsky's
 http://svn.ok.ubc.ca/svn/signals/nh3fit/
 
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
@@ -32,7 +32,7 @@ from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
 
 TCMB = 2.7315 # K
 
-def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
+def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
             background_tb=TCMB,
             thin=False, verbose=False, return_components=False, debug=False,
@@ -47,7 +47,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         Array of wavelength/frequency values
     tex: float or None
         Excitation temperature. Assumed LTE if unspecified (``None``), if
-        tex>tkin, or if ``thin`` is specified.  This is the excitation
+        tex>trot, or if ``thin`` is specified.  This is the excitation
         temperature for *all* of the modeled lines, which means we are
         explicitly assuming T_ex is the same for all lines.
     ntot: float
@@ -71,7 +71,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         synthetic spectrum
     thin: bool
         uses a different parametetrization and requires only the optical depth,
-        width, offset, and tkin to be specified.  In the 'thin' approximation,
+        width, offset, and trot to be specified.  In the 'thin' approximation,
         tex is not used in computation of the partition function - LTE is
         implicitly assumed
     return_components: bool
@@ -99,13 +99,13 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     xarr = xarr.as_unit('GHz')
 
     if tex is not None:
-        # Yes, you certainly can have nonthermal excitation, tex>tkin.
-        #if tex > tkin: # cannot have Tex > Tkin
-        #    tex = tkin
+        # Yes, you certainly can have nonthermal excitation, tex>trot.
+        #if tex > trot: # cannot have Tex > trot
+        #    tex = trot
         if thin: # tex is not used in this case
-            tex = tkin
+            tex = trot
     else:
-        tex = tkin
+        tex = trot
 
     if thin:
         ntot = 15
@@ -164,7 +164,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         these equations, not just the final one)
         """
         dT0 = 41.5                    # Energy diff between (2,2) and (1,1) in K
-        trot = tkin/(1+tkin/dT0*np.log(1+0.6*np.exp(-15.7/tkin)))
+        trot = trot/(1+trot/dT0*np.log(1+0.6*np.exp(-15.7/trot)))
         tau_dict['oneone']     = tau
         tau_dict['twotwo']     = tau*(23.722/23.694)**2*4/3.*5/3.*np.exp(-41.5/trot)
         tau_dict['threethree'] = tau*(23.8701279/23.694)**2*3/2.*14./3.*np.exp(-101.1/trot)
@@ -178,9 +178,9 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         comment each step carefully.
         """
         Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
-                                       (Crot-Brot)*Jpara**2)/(kb*tkin))
+                                       (Crot-Brot)*Jpara**2)/(kb*trot))
         Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
-                                           (Crot-Brot)*Jortho**2)/(kb*tkin))
+                                           (Crot-Brot)*Jortho**2)/(kb*trot))
         Qpara = Zpara.sum()
         Qortho = Zortho.sum()
         for linename in line_names:
@@ -261,7 +261,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         if runspec.min() < 0 and background_tb == TCMB:
             raise ValueError("Model dropped below zero.  That is not possible normally.  Here are the input values: "+
                     ("tex: %f " % tex) +
-                    ("tkin: %f " % tkin) +
+                    ("trot: %f " % trot) +
                     ("ntot: %f " % ntot) +
                     ("width: %f " % width) +
                     ("xoff_v: %f " % xoff_v) +
@@ -269,7 +269,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                     )
 
     if verbose or debug:
-        log.info("tkin: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (tkin,tex,ntot,width,xoff_v,fortho,fillingfraction))
+        log.info("trot: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (trot,tex,ntot,width,xoff_v,fortho,fillingfraction))
 
     if return_components:
         return (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-1*np.array(components)))
@@ -283,7 +283,7 @@ def ammonia(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
 class ammonia_model(model.SpectralModel):
 
     def __init__(self,npeaks=1,npars=6,
-                 parnames=['tkin','tex','ntot','width','xoff_v','fortho'],
+                 parnames=['trot','tex','ntot','width','xoff_v','fortho'],
                  **kwargs):
         npeaks = self.npeaks = int(npeaks)
         npars = self.npars = int(npars)
@@ -311,7 +311,7 @@ class ammonia_model(model.SpectralModel):
             if 'tex' in par.parname.lower():
                 par.limited = (True,par.limited[1])
                 par.limits = (max(par.limits[0],TCMB), par.limits[1])
-            if 'tkin' in par.parname.lower():
+            if 'trot' in par.parname.lower():
                 par.limited = (True,par.limited[1])
                 par.limits = (max(par.limits[0],TCMB), par.limits[1])
             if 'width' in par.parname.lower():
@@ -340,14 +340,14 @@ class ammonia_model(model.SpectralModel):
     def n_ammonia(self, pars=None, parnames=None, **kwargs):
         """
         Returns a function that sums over N ammonia line profiles, where N is the length of
-        tkin,tex,ntot,width,xoff_v,fortho *OR* N = len(pars) / 6
+        trot,tex,ntot,width,xoff_v,fortho *OR* N = len(pars) / 6
 
         The background "height" is assumed to be zero (you must "baseline" your
         spectrum before fitting)
 
         *pars* [ list ]
             a list with len(pars) = (6-nfixed)n, assuming
-            tkin,tex,ntot,width,xoff_v,fortho repeated
+            trot,tex,ntot,width,xoff_v,fortho repeated
 
         *parnames* [ list ]
             len(parnames) must = len(pars).  parnames determine how the ammonia
@@ -426,12 +426,12 @@ class ammonia_model(model.SpectralModel):
 
          These parameters need to have length = 6*npeaks.  If npeaks > 1 and length = 6, they will
          be replicated npeaks times, otherwise they will be reset to defaults:
-           params - Fit parameters: [tkin, tex, ntot (or tau), width, offset, ortho fraction] * npeaks
+           params - Fit parameters: [trot, tex, ntot (or tau), width, offset, ortho fraction] * npeaks
                   If len(params) % 6 == 0, npeaks will be set to len(params) / 6
            fixed - Is parameter fixed?
-           limitedmin/minpars - set lower limits on each parameter (default: width>0, Tex and Tkin > Tcmb)
+           limitedmin/minpars - set lower limits on each parameter (default: width>0, Tex and trot > Tcmb)
            limitedmax/maxpars - set upper limits on each parameter
-           parnames - default parameter names, important for setting kwargs in model ['tkin','tex','ntot','width','xoff_v','fortho']
+           parnames - default parameter names, important for setting kwargs in model ['trot','tex','ntot','width','xoff_v','fortho']
 
            quiet - should MPFIT output each iteration?
            shh - output final parameters?
@@ -545,12 +545,12 @@ class ammonia_model(model.SpectralModel):
         Returns a very simple and likely incorrect guess
         """
 
-        # TKIN, TEX, ntot, width, center, ortho fraction
+        # trot, TEX, ntot, width, center, ortho fraction
         return [20,10, 15, 1.0, 0.0, 1.0]
 
     def annotations(self):
         from decimal import Decimal # for formatting
-        tex_key = {'tkin':'T_K', 'tex':'T_{ex}', 'ntot':'N', 'fortho':'F_o',
+        tex_key = {'trot':'T_K', 'tex':'T_{ex}', 'ntot':'N', 'fortho':'F_o',
                    'width':'\\sigma', 'xoff_v':'v', 'fillingfraction':'FF',
                    'tau':'\\tau_{1-1}'}
         # small hack below: don't quantize if error > value.  We want to see the values.
@@ -634,7 +634,7 @@ class ammonia_model(model.SpectralModel):
                 elif parlist==minpars:
                     # all have minima of zero except kinetic temperature, which can't be below CMB.
                     # Excitation temperature technically can be, but not in this model
-                    partype_dict[partype] = ((np.array(parnames) == 'tkin') + (np.array(parnames) == 'tex')) * TCMB
+                    partype_dict[partype] = ((np.array(parnames) == 'trot') + (np.array(parnames) == 'tex')) * TCMB
                 elif parlist==maxpars: # fractions have upper limits of 1.0
                     partype_dict[partype] = ((np.array(parnames) == 'fortho') + (np.array(parnames) == 'fillingfraction')).astype('float')
                 elif parlist==parnames: # assumes the right number of parnames (essential)
@@ -655,7 +655,7 @@ class ammonia_model(model.SpectralModel):
                      'limited':[partype_dict['limitedmin'][ii],partype_dict['limitedmax'][ii]], 'fixed':partype_dict['fixed'][ii],
                      'parname':partype_dict['parnames'][ii]+str(int(ii/int(self.npars))),
                      'tied':partype_dict['tied'][ii],
-                     'mpmaxstep':max_tem_step*float(partype_dict['parnames'][ii] in ('tex','tkin')), # must force small steps in temperature (True = 1.0)
+                     'mpmaxstep':max_tem_step*float(partype_dict['parnames'][ii] in ('tex','trot')), # must force small steps in temperature (True = 1.0)
                      'error': 0}
             for ii in range(len(partype_dict['params'])) ]
 
@@ -674,14 +674,14 @@ class ammonia_model(model.SpectralModel):
         return parinfo
 
     def _validate_parinfo(self,
-                          must_be_limited={'tkin': [True,False],
+                          must_be_limited={'trot': [True,False],
                                            'tex': [False,False],
                                            'ntot': [True, True],
                                            'width': [True, False],
                                            'xoff_v': [False, False],
                                            'tau': [False, False],
                                            'fortho': [True, True]},
-                          required_limits={'tkin': [0, None],
+                          required_limits={'trot': [0, None],
                                            'ntot': [5, 25],
                                            'width': [0, None],
                                            'fortho': [0,1]}):
@@ -711,7 +711,7 @@ class ammonia_model(model.SpectralModel):
 
 class ammonia_model_vtau(ammonia_model):
     def __init__(self,
-                 parnames=['tkin', 'tex', 'tau', 'width', 'xoff_v', 'fortho'],
+                 parnames=['trot', 'tex', 'tau', 'width', 'xoff_v', 'fortho'],
                  **kwargs):
         super(ammonia_model_vtau, self).__init__(parnames=parnames,
                                                  **kwargs)
@@ -721,20 +721,20 @@ class ammonia_model_vtau(ammonia_model):
         Returns a very simple and likely incorrect guess
         """
 
-        # TKIN, TEX, ntot, width, center, ortho fraction
+        # trot, TEX, ntot, width, center, ortho fraction
         return [20, 10, 10, 1.0, 0.0, 1.0]
 
     def __call__(self,*args,**kwargs):
         return self.multinh3fit(*args,**kwargs)
 
     def _validate_parinfo(self,
-                          must_be_limited={'tkin': [True,False],
+                          must_be_limited={'trot': [True,False],
                                            'tex': [False,False],
                                            'tau': [True, False],
                                            'width': [True, False],
                                            'xoff_v': [False, False],
                                            'fortho': [True, True]},
-                          required_limits={'tkin': [0, None],
+                          required_limits={'trot': [0, None],
                                            'tex': [None,None],
                                            'width': [0, None],
                                            'tau': [0, None],
@@ -754,7 +754,7 @@ class ammonia_model_vtau(ammonia_model):
                      **kwargs
                      ):
         """
-        parnames=['tkin', 'tex', 'tau', 'width', 'xoff_v', 'fortho']
+        parnames=['trot', 'tex', 'tau', 'width', 'xoff_v', 'fortho']
         """
         return super(ammonia_model_vtau, self).make_parinfo(params=params,
                                                             fixed=fixed,
@@ -768,7 +768,7 @@ class ammonia_model_vtau(ammonia_model):
 
 
 class ammonia_model_vtau_thin(ammonia_model_vtau):
-    def __init__(self,parnames=['tkin', 'tau', 'width', 'xoff_v', 'fortho'],
+    def __init__(self,parnames=['trot', 'tau', 'width', 'xoff_v', 'fortho'],
                  **kwargs):
         super(ammonia_model_vtau_thin, self).__init__(parnames=parnames,
                                                       npars=5,
@@ -779,7 +779,7 @@ class ammonia_model_vtau_thin(ammonia_model_vtau):
         Returns a very simple and likely incorrect guess
         """
 
-        # TKIN, tau, width, center, ortho fraction
+        # trot, tau, width, center, ortho fraction
         return [20, 1, 1.0, 0.0, 1.0]
 
     def __call__(self,*args,**kwargs):
@@ -807,7 +807,7 @@ class ammonia_model_vtau_thin(ammonia_model_vtau):
 class ammonia_model_background(ammonia_model):
     def __init__(self,**kwargs):
         super(ammonia_model_background,self).__init__(npars=7,
-                                                      parnames=['tkin', 'tex',
+                                                      parnames=['trot', 'tex',
                                                                 'ntot',
                                                                 'width',
                                                                 'xoff_v',
@@ -819,7 +819,7 @@ class ammonia_model_background(ammonia_model):
         Returns a very simple and likely incorrect guess
         """
 
-        # TKIN, TEX, ntot, width, center, ortho fraction
+        # trot, TEX, ntot, width, center, ortho fraction
         return [20,10, 10, 1.0, 0.0, 1.0, TCMB]
 
     def __call__(self,*args,**kwargs):
@@ -869,7 +869,7 @@ class ammonia_model_background(ammonia_model):
 
     def annotations(self):
         from decimal import Decimal # for formatting
-        tex_key = {'tkin':'T_K', 'tex':'T_{ex}', 'ntot':'N', 'fortho':'F_o',
+        tex_key = {'trot':'T_K', 'tex':'T_{ex}', 'ntot':'N', 'fortho':'F_o',
                    'width':'\\sigma', 'xoff_v':'v', 'fillingfraction':'FF',
                    'tau':'\\tau_{1-1}', 'background_tb':'T_{BG}'}
         # small hack below: don't quantize if error > value.  We want to see the values.
