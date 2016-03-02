@@ -205,6 +205,8 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             # https://github.com/keflavich/pyspeckit/blob/ammonia_equations/examples/AmmoniaLevelPopulation.ipynb
             # and
             # http://low-sky.github.io/ammoniacolumn/
+            # and
+            # https://github.com/pyspeckit/pyspeckit/pull/136
 
             # short variable names for readability
             frq = freq_dict[linename]
@@ -212,14 +214,15 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             aval = aval_dict[linename]
 
             # Total population of the higher energy inversion transition
-            population_upperstate = lin_ntot * ortho_or_parafrac * partition/Qtot
+            population_rotstate = lin_ntot * ortho_or_parafrac * partition/Qtot
 
             # the negative here comes from the width term
-            expterm = -(np.exp(-h*frq/(kb*tex)) - 1)
+            # expterm = -(np.exp(-h*frq/(kb*tex)) - 1)
+            expterm = (1-np.exp(-h*frq/(kb*tex)))/(1+np.exp(-h*frq/(kb*tex)))
             fracterm = (ccms**2 * aval / (8*np.pi*frq**2))
-            widthterm = (ckms/(width*frq*(2*np.pi)**0.5))
+            widthterm = -(ckms/(width*frq*(2*np.pi)**0.5))
 
-            tau_i = population_upperstate * fracterm * expterm * widthterm
+            tau_i = population_rotstate * fracterm * expterm * widthterm
             tau_dict[linename] = tau_i
 
     # allow tau(11) to be specified instead of ntot
