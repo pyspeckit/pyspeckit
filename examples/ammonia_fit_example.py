@@ -74,7 +74,7 @@ print("Guesses: ", sp.specfit.guesses)
 print("Best fit: ", sp.specfit.modelpars)
 
 # Run the ammonia spec fitter with a reasonable guess
-# Parameters are Tkin, Tex, column, width, centroid, ortho fraction
+# Parameters are Trot, Tex, column, width, centroid, ortho fraction
 # Since we only have a single line (1-1), the kinetic temperature is
 # unconstrained: we'll fix it at 7 K.  Similarly, the ortho fraction
 # is fixed to 0.5
