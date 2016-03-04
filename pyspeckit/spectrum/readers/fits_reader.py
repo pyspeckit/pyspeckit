@@ -57,7 +57,7 @@ def open_1d_pyfits(pyfits_hdu, specnum=0, wcstype='', specaxis="1",
                 if verbose: card.verify('fix')
                 else: card.verify('silentfix')
             except pyfits.VerifyError:
-                hdr.__delitem__(card.key)
+                del hdr[card.keyword]
 
     data = pyfits_hdu.data
 

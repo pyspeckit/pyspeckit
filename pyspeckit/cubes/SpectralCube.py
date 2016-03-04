@@ -746,7 +746,10 @@ class Cube(spectrum.Spectrum):
 
             # very annoying - cannot use min/max without checking type
             # maybe can use np.asarray here?
-            if hasattr(sp.data,'mask'):
+            # cannot use sp.data.mask because it can be a scalar boolean,
+            # which does unpredictable things.
+            if hasattr(sp.data, 'mask') and not isinstance(sp.data.mask, (bool,
+                                                                          np.bool_)):
                 sp.data[sp.data.mask] = np.nan
                 sp.error[sp.data.mask] = np.nan
                 sp.data = np.array(sp.data)

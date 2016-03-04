@@ -3,10 +3,10 @@ import matplotlib
 import numpy as np
 import copy
 import re
-import itertools
 from astropy import log
 from astropy import units as u
 from astropy.extern.six.moves import xrange
+from astropy.extern.six import string_types
 
 from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
@@ -591,7 +591,7 @@ class Specfit(interactive.Interactive):
 
         if guesses is None:
             guesses = self.guesses
-        elif guesses in ('moment','moments'):
+        elif isinstance(guesses, string_types) and guesses in ('moment','moments'):
             guesses = self.moments(vheight=False, **kwargs)
 
         if parinfo is not None:

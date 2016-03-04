@@ -59,17 +59,15 @@ class TestFitter(object):
     def test_invalid_guess(self):
         with pytest.raises(ValueError) as ex:
             self.sp.specfit(fittype='gaussian', guesses=(-1, 0, 0.5),
-                       limitedmin=(True,True,True), minpars=(0,0,1e-10))
+                            limitedmin=(True,True,True), minpars=(0,0,1e-10))
         assert str(ex.value) == '-1.0 is less than the lower limit 0'
 
     def test_almost_invalid_guess(self):
         with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('default')
         
             self.sp.specfit(fittype='gaussian', guesses=(0-np.spacing(0), 0, 0.5),
                             limitedmin=(True,True,True), minpars=(0,0,0))
 
-        warnings.simplefilter("always")
-            
         assert "Guesses have been changed from" in str(w[-1].message)
         assert "is less than the lower limit" in str(w[-2].message)
-
