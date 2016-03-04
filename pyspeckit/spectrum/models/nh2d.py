@@ -265,25 +265,24 @@ voff_lines_dict.update({
 # for a given line; it gives the relative weights between the J=2-1 and J=3-2
 # lines, for example (the hyperfine weights are treated as normalized within
 # one rotational transition)
-wo1_1 = sum(val for name,val in voff_lines_dict.items() if 'o-1_01-1_11' in name)
-wp1_1 = sum(val for name,val in voff_lines_dict.items() if 'p-1_01-1_11' in name)
-wo1_0 = sum(val for name,val in voff_lines_dict.items() if 'o-1_01-0_00' in name)
-wp1_0 = sum(val for name,val in voff_lines_dict.items() if 'p-1_01-0_00' in name)
+wo1_1 = sum(val for name,val in line_strength_dict.items() if 'o-1_01-1_11' in name)
+wp1_1 = sum(val for name,val in line_strength_dict.items() if 'p-1_01-1_11' in name)
+wo1_0 = sum(val for name,val in line_strength_dict.items() if 'o-1_01-0_00' in name)
+wp1_0 = sum(val for name,val in line_strength_dict.items() if 'p-1_01-0_00' in name)
 relative_strength_total_degeneracy = {
-    name : wo1_1 for name  in voff_lines_dict.keys() if "o-1_01-1_11" in name
+    name : wo1_1 for name  in line_strength_dict.keys() if "o-1_01-1_11" in name
     }
 relative_strength_total_degeneracy.update({
-    name : wp1_1 for name  in voff_lines_dict.keys() if "p-1_01-1_11" in name
+    name : wp1_1 for name  in line_strength_dict.keys() if "p-1_01-1_11" in name
     })
 relative_strength_total_degeneracy.update({
-    name : wo1_0 for name  in voff_lines_dict.keys() if "o-1_01-0_00" in name
+    name : wo1_0 for name  in line_strength_dict.keys() if "o-1_01-0_00" in name
     })
 relative_strength_total_degeneracy.update({
-    name : wp1_0 for name  in voff_lines_dict.keys() if "p-1_01-0_00" in name
+    name : wp1_0 for name  in line_strength_dict.keys() if "p-1_01-0_00" in name
     })
 # Get the list of line names from the previous lists
 line_names = [name for name in voff_lines_dict.keys()]
-
 
 nh2d_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict,
                                      line_strength_dict,
