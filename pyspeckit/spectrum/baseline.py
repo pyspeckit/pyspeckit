@@ -339,9 +339,9 @@ class Baseline(interactive.Interactive):
 
         return self.button2action(*args, subtract=False, **kwargs)
 
-    def plot_baseline(self, annotate=True, baseline_fit_color=(1,0.65,0,0.75),
-            use_window_limits=None, linewidth=1, alpha=0.75, plotkwargs={},
-            **kwargs):
+    def plot_baseline(self, annotate=True, baseline_fit_color='orange',
+                      use_window_limits=None, linewidth=1, alpha=0.75,
+                      plotkwargs={}, **kwargs):
         """
         Overplot the baseline fit
 

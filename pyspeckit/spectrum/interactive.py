@@ -55,6 +55,22 @@ class Interactive(object):
 
         self._debug = False
 
+    @property
+    def xmin(self):
+        return self._xmin
+
+    @xmin.setter
+    def xmin(self, value):
+        self._xmin = int(value)
+
+    @property
+    def xmax(self):
+        return self._xmax
+
+    @xmax.setter
+    def xmax(self, value):
+        self._xmax = int(value)
+
     def event_manager(self, event, debug=False):
         """
         Decide what to do given input (click, keypress, etc.)
@@ -82,7 +98,7 @@ class Interactive(object):
                 return
 
             if debug or self._debug:
-                log.debug("button: {0} x,y: {1},{2} " 
+                log.debug("button: {0} x,y: {1},{2} "
                           " nclicks 1: {3:f}  2: {4:f}".format
                           (self.nclicks_b1, self.nclicks_b2,
                           button, event.xdata, event.ydata,
