@@ -245,7 +245,7 @@ class Spectrum(object):
 
     @property
     def units(self):
-        log.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
         return self._unit
 
     @unit.setter
@@ -254,7 +254,7 @@ class Spectrum(object):
 
     @units.setter
     def units(self, value):
-        log.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
         self._unit = value
 
     def _register_fitters(self, registry=None):

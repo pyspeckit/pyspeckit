@@ -544,7 +544,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         if mp.status == 0:
             if "parameters are not within PARINFO limits" in mp.errmsg:
-                log.warn( parinfo )
+                log.warning( parinfo )
             raise mpfitException(mp.errmsg)
 
         for i,(p,e) in enumerate(zip(mpp,mpperr)):
@@ -572,7 +572,7 @@ class SpectralModel(fitter.SimpleFitter):
             if debug:
                 raise ValueError("Error: chi^2 is nan")
             else:
-                log.warn("Warning: chi^2 is nan")
+                log.warning("Warning: chi^2 is nan")
         return mpp,self.model,mpperr,chi2
 
     def slope(self, xinp):

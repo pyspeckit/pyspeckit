@@ -48,7 +48,7 @@ vars(subprocess).setdefault('check_call', _check_call_py24)
 def _install(tarball, install_args=()):
     # extracting the tarball
     tmpdir = tempfile.mkdtemp()
-    log.warn('Extracting in %s', tmpdir)
+    log.warning('Extracting in %s', tmpdir)
     old_wd = os.getcwd()
     try:
         os.chdir(tmpdir)
@@ -59,13 +59,13 @@ def _install(tarball, install_args=()):
         # going in the directory
         subdir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
         os.chdir(subdir)
-        log.warn('Now working in %s', subdir)
+        log.warning('Now working in %s', subdir)
 
         # installing
-        log.warn('Installing Setuptools')
+        log.warning('Installing Setuptools')
         if not _python_cmd('setup.py', 'install', *install_args):
-            log.warn('Something went wrong during the installation.')
-            log.warn('See the error message above.')
+            log.warning('Something went wrong during the installation.')
+            log.warning('See the error message above.')
             # exitcode will be 2
             return 2
     finally:
@@ -76,7 +76,7 @@ def _install(tarball, install_args=()):
 def _build_egg(egg, tarball, to_dir):
     # extracting the tarball
     tmpdir = tempfile.mkdtemp()
-    log.warn('Extracting in %s', tmpdir)
+    log.warning('Extracting in %s', tmpdir)
     old_wd = os.getcwd()
     try:
         os.chdir(tmpdir)
@@ -87,17 +87,17 @@ def _build_egg(egg, tarball, to_dir):
         # going in the directory
         subdir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
         os.chdir(subdir)
-        log.warn('Now working in %s', subdir)
+        log.warning('Now working in %s', subdir)
 
         # building an egg
-        log.warn('Building a Setuptools egg in %s', to_dir)
+        log.warning('Building a Setuptools egg in %s', to_dir)
         _python_cmd('setup.py', '-q', 'bdist_egg', '--dist-dir', to_dir)
 
     finally:
         os.chdir(old_wd)
         shutil.rmtree(tmpdir)
     # returning the result
-    log.warn(egg)
+    log.warning(egg)
     if not os.path.exists(egg):
         raise IOError('Could not build the egg.')
 
@@ -285,7 +285,7 @@ def download_setuptools(version=DEFAULT_VERSION, download_base=DEFAULT_URL,
     url = download_base + tgz_name
     saveto = os.path.join(to_dir, tgz_name)
     if not os.path.exists(saveto):  # Avoid repeated downloads
-        log.warn("Downloading %s", url)
+        log.warning("Downloading %s", url)
         downloader = downloader_factory()
         downloader(url, saveto)
     return os.path.realpath(saveto)
@@ -345,7 +345,7 @@ def _build_install_args(options):
     install_args = []
     if options.user_install:
         if sys.version_info < (2, 6):
-            log.warn("--user requires Python 2.6 or later")
+            log.warning("--user requires Python 2.6 or later")
             raise SystemExit(1)
         install_args.append('--user')
     return install_args

@@ -940,7 +940,7 @@ def read_observation(f, obsid, file_description=None, indices=None,
 
 def _read_spectrum(f, position, nchan, my_memmap=None, memmap=True):
     if position != f.tell():
-        log.warn("Reading data from {0}, but the file is wound "
+        log.warning("Reading data from {0}, but the file is wound "
                  "to {1}.".format(position, f.tell()))
     if memmap:
         here = position

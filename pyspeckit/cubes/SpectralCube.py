@@ -668,7 +668,7 @@ class Cube(spectrum.Spectrum):
 
         """
         if 'multifit' in fitkwargs:
-            log.warn("The multifit keyword is no longer required.  All fits "
+            log.warning("The multifit keyword is no longer required.  All fits "
                      "allow for multiple components.", DeprecationWarning)
 
         if not hasattr(self.mapplot,'plane'):
@@ -758,7 +758,7 @@ class Cube(spectrum.Spectrum):
                 sp.error = np.ones(sp.data.shape) * errmap[y,x]
             else:
                 if verbose_level > 1 and ii==0:
-                    log.warn("WARNING: using data std() as error.")
+                    log.warning("WARNING: using data std() as error.")
                 sp.error[:] = sp.data[sp.data==sp.data].std()
             if sp.error is not None and signal_cut > 0:
                 if continuum_map is not None:

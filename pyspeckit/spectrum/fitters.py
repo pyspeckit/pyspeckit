@@ -274,7 +274,7 @@ class Specfit(interactive.Interactive):
 
         if 'multifit' in kwargs:
             kwargs.pop('multifit')
-            log.warn("The multifit keyword is no longer required.  All fits "
+            log.warning("The multifit keyword is no longer required.  All fits "
                      "allow for multiple components.", DeprecationWarning)
 
         self.npeaks = 0
@@ -1874,7 +1874,7 @@ class Specfit(interactive.Interactive):
             line_region[line_region.argmax()-1:line_region.argmax()+1] = True
             reverse_argmax = len(line_region) - line_region.argmax() - 1
             line_region[reverse_argmax-1:reverse_argmax+1] = True
-            log.warn("Fewer than {0} pixels were identified as part of the fit."
+            log.warning("Fewer than {0} pixels were identified as part of the fit."
                      " To enable statistical measurements, the range has been"
                      " expanded by 2 pixels including some regions below the"
                      " threshold.".format(grow_threshold))

@@ -149,7 +149,7 @@ class Baseline(interactive.Interactive):
                 # clashes [unclear; note added 2/12/2014]
                 self.includemask[:] = True
                 if exclude is not None:
-                    log.warn("`reset_selection` was set, so `exclude` is being ignored.")
+                    log.warning("`reset_selection` was set, so `exclude` is being ignored.")
             elif selectregion:
                 # must select region (i.e., exclude edges) AFTER setting 'positive'
                 # include region
@@ -624,7 +624,7 @@ def _spline(data, xarr=None, masktofit=None, order=3, sampling=10,
     if masktofit is None:
         masktofit = np.isfinite(data)
         if not any(masktofit):
-            log.warn("All data was infinite or NaN")
+            log.warning("All data was infinite or NaN")
 
     if xarr is None:
         xarr = np.arange(data.size, dtype=data.dtype)
@@ -632,7 +632,7 @@ def _spline(data, xarr=None, masktofit=None, order=3, sampling=10,
     if downsampler is not None:
         ngood = np.count_nonzero(masktofit)
         if ngood == 0:
-            log.warn("Fitting all data with spline")
+            log.warning("Fitting all data with spline")
             masktofit[:] = True
             ngood = masktofit.size
         endpoint = ngood - (ngood % sampling)
