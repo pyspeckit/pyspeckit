@@ -36,7 +36,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
             background_tb=TCMB,
             thin=False, verbose=False, return_components=False, debug=False,
-            line_names=line_names):
+            line_names=line_names, tkin=None):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
     gaussian parameters
@@ -71,9 +71,13 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         synthetic spectrum
     thin: bool
         uses a different parametetrization and requires only the optical depth,
-        width, offset, and trot to be specified.  In the 'thin' approximation,
+        width, offset, and tkin to be specified.  In the 'thin' approximation,
         tex is not used in computation of the partition function - LTE is
         implicitly assumed
+    tkin : float
+        *only used if ``thin==True``*
+        Used to compute trot assuming a 3-level system consisting of (1,1),
+        (2,1), and (2,2) as in Swift et al, 2005 [2005ApJ...620..823S]
     return_components: bool
         Return a list of arrays, one for each hyperfine component, instead of
         just one array
@@ -106,6 +110,14 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             tex = trot
     else:
         tex = trot
+
+    if thin and tkin is None:
+        raise ValueError("When using the `thin` approximation, you must "
+                         "specify tkin instead of trot")
+    elif not thin and tkin is not None:
+        raise ValueError("When using the standard ammonia model, you must "
+                         "specify trot, not tkin.  If the molecules are in "
+                         "collisional equilibrium with the gas, tkin=trot.")
 
     if thin:
         ntot = 15
@@ -164,18 +176,18 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         these equations, not just the final one)
         """
         dT0 = 41.5                    # Energy diff between (2,2) and (1,1) in K
-        trot = trot/(1+trot/dT0*np.log(1+0.6*np.exp(-15.7/trot)))
+        trot = tkin/(1+tkin/dT0*np.log(1+0.6*np.exp(-15.7/tkin)))
         tau_dict['oneone']     = tau
         tau_dict['twotwo']     = tau*(23.722/23.694)**2*4/3.*5/3.*np.exp(-41.5/trot)
         tau_dict['threethree'] = tau*(23.8701279/23.694)**2*3/2.*14./3.*np.exp(-101.1/trot)
         tau_dict['fourfour']   = tau*(24.1394169/23.694)**2*8/5.*9/3.*np.exp(-177.34/trot)
         line_names = tau_dict.keys()
+        # TODO: Raise a warning if tkin > (some value), probably 50 K, because
+        # the 3-level system approximation used here will break down.
     else:
         """
         Column density is the free parameter.  It is used in conjunction with
         the full partition function to compute the optical depth in each band
-        Given the complexity of these equations, it would be worth my while to
-        comment each step carefully.
         """
         Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
                                        (Crot-Brot)*Jpara**2)/(kb*trot))
