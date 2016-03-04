@@ -506,7 +506,6 @@ class SpectroscopicAxis(u.Quantity):
         Do this when calling ufuncs
         (probably overridden by astropy.units.Quantity._wrap_function)
         """
-        log.debug("Inside __array_wrap__")
         ret = np.ndarray.__array_wrap__(self, out_arr, context)
 
         # return scalar values for those that should be scalar
