@@ -12,7 +12,10 @@ class TestFitter(object):
         dx = 0.1
         x = np.arange(-6,6,dx)
         y = 1-np.exp(-x**2 / 2.)
-        self.sp = Spectrum(xarr=x, data=y)
+        with warnings.catch_warnings():
+            # ignore warning about creating an empty header
+            warnings.simplefilter('ignore')
+            self.sp = Spectrum(xarr=x, data=y)
 
     def test_fitter(self):
         self.sp.specfit(fittype='gaussian', guesses=(-1, 0, 0.5),

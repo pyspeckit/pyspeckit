@@ -1173,7 +1173,7 @@ class mpfit:
                         sum0 = sum(fjac[0:j+1,j]*qtf[0:j+1])/self.fnorm
                         gnorm = numpy.max([gnorm,numpy.abs(sum0/wa2[l])])
             if gnorm == 0.:
-                log.warn("gnorm=0.   wa2={0}".format(wa2))
+                log.warning("gnorm=0.   wa2={0}".format(wa2))
 
             # Test for convergence of the gradient norm
             if gnorm <= gtol:

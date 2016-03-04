@@ -426,7 +426,7 @@ class Specfit(interactive.Interactive):
             eqw = sumofspec / continuum
         if plot and self.Spectrum.plotter.axis:
             if midpt_location == 'plot-center':
-                midpt_pixel = np.round((xmin+xmax)/2.0)
+                midpt_pixel = int(np.round((xmin+xmax)/2.0))
                 midpt       = self.Spectrum.xarr[midpt_pixel].value
             elif midpt_location == 'fitted':
                 try:
@@ -443,7 +443,7 @@ class Specfit(interactive.Interactive):
                 # centered on a fitted line other than the one measured for the
                 # eqw call, if there are more than one fitted lines within the
                 # window.
-                midpt_pixel = (xmin+xmax)/2
+                midpt_pixel = int((xmin+xmax)/2)
                 midval = self.Spectrum.xarr[midpt_pixel].value
                 midpt_index = np.argmin(np.abs(shifts-midval))
                 midpt = shifts[midpt_index]
