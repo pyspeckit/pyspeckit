@@ -6,6 +6,11 @@ Version 0.1.19 (unreleased)
 
     * Bugfix #128: fiteach would try to measure an integral even if the
       spectral fit failed
+    * MAJOR bugfix #136: There was an error in the equation used to create the
+      Ammonia model that would result in fits reporting incorrect values of the
+      column density.  The Ammonia model has been substantially refactored,
+      removing the ``thin`` option in favor of putting the thin approximation
+      into its own function.
 
 Version 0.1.18.1 (2015-12-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

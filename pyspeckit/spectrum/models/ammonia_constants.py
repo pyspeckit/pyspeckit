@@ -1,3 +1,7 @@
+from astropy import constants
+from astropy import units as u
+import numpy as np
+
 num_to_name = {0: 'zero',
                1: 'one',
                2: 'two',
@@ -103,3 +107,26 @@ tau_wts_dict = {
     'sevenseven': [0.00589524944656, 0.00590204051181, 0.371879455317, 0.321515700951, 0.283010263815, 0.00590204051181, 0.00589524944656],
     'eighteight': [0.00459516014524, 0.00459939439378, 0.324116135075, 0.289534720829, 0.367960035019, 0.00459939439378, 0.00459516014524],
 }
+
+#ckms = 2.99792458e5
+ckms = constants.c.to(u.km/u.s).value
+ccms = constants.c.to(u.cm/u.s).value
+#Degeneracies
+# g1 = 1
+# g2 = 1
+#h = 6.6260693e-27
+h = constants.h.cgs.value
+#kb = 1.3806505e-16
+kb = constants.k_B.cgs.value
+# Dipole Moment in cgs (1.476 Debeye)
+#mu0 = 1.476e-18
+
+# Generate Partition Functions
+nlevs = 51
+jv=np.arange(nlevs)
+ortho = jv % 3 == 0
+para = ~ortho
+Jpara = jv[para]
+Jortho = jv[ortho]
+Brot = 298117.06e6
+Crot = 186726.36e6

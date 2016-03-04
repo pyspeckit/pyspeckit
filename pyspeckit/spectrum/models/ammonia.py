@@ -20,8 +20,6 @@ from . import model
 import matplotlib.cbook as mpcb
 import copy
 from astropy import log
-import astropy.units as u
-from astropy import constants
 from astropy.extern.six import iteritems
 from . import mpfit_messages
 import operator
@@ -35,7 +33,7 @@ TCMB = 2.7315 # K
 def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
             background_tb=TCMB,
-            thin=False, verbose=False, return_components=False, debug=False,
+            verbose=False, return_components=False, debug=False,
             line_names=line_names, tkin=None):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
@@ -46,10 +44,10 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     xarr: `pyspeckit.spectrum.units.SpectroscopicAxis`
         Array of wavelength/frequency values
     tex: float or None
-        Excitation temperature. Assumed LTE if unspecified (``None``), if
-        tex>trot, or if ``thin`` is specified.  This is the excitation
-        temperature for *all* of the modeled lines, which means we are
-        explicitly assuming T_ex is the same for all lines.
+        Excitation temperature. Assumed LTE if unspecified (``None``) or if
+        tex>trot.  This is the excitation temperature for *all* of the modeled
+        lines, which means we are explicitly assuming T_ex is the same for all
+        lines.
     ntot: float
         Total log column density of NH3.  Can be specified as a float in the
         range 5-25
@@ -69,15 +67,6 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     return_tau: bool
         Return a dictionary of the optical depths in each line instead of a
         synthetic spectrum
-    thin: bool
-        uses a different parametetrization and requires only the optical depth,
-        width, offset, and tkin to be specified.  In the 'thin' approximation,
-        tex is not used in computation of the partition function - LTE is
-        implicitly assumed
-    tkin : float
-        *only used if ``thin==True``*
-        Used to compute trot assuming a 3-level system consisting of (1,1),
-        (2,1), and (2,2) as in Swift et al, 2005 [2005ApJ...620..823S]
     return_components: bool
         Return a list of arrays, one for each hyperfine component, instead of
         just one array
@@ -102,29 +91,11 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     # Convert X-units to frequency in GHz
     xarr = xarr.as_unit('GHz')
 
-    if tex is not None:
-        # Yes, you certainly can have nonthermal excitation, tex>trot.
-        #if tex > trot: # cannot have Tex > trot
-        #    tex = trot
-        if thin: # tex is not used in this case
-            tex = trot
-    else:
+    if tex is None:
+        log.warn("Assuming tex=trot")
         tex = trot
 
-    if thin and tkin is None:
-        raise ValueError("When using the `thin` approximation, you must "
-                         "specify tkin instead of trot")
-    elif not thin and tkin is not None:
-        raise ValueError("When using the standard ammonia model, you must "
-                         "specify trot, not tkin.  If the molecules are in "
-                         "collisional equilibrium with the gas, tkin=trot.")
-
-    if thin:
-        ntot = 15
-        if tau is None:
-            raise ValueError("When using the 'thin' approximation, tau must "
-                             "be used as a parameter.")
-    elif 5 <= ntot <= 25:
+    if 5 <= ntot <= 25:
         # allow ntot to be specified as a logarithm.  This is
         # safe because ntot < 1e10 gives a spectrum of all zeros, and the
         # plausible range of columns is not outside the specified range
@@ -133,118 +104,153 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         raise ValueError("ntot, the logarithmic total column density,"
                          " must be in the range 5 - 25")
 
-    # fillingfraction is an arbitrary scaling for the data
-    # The model will be (normal model) * fillingfraction
-    if fillingfraction is None:
-        fillingfraction = 1.0
+    from .ammonia_constants import (ckms, ccms, h, kb,
+                                    Jortho, Jpara, Brot, Crot)
 
-    #ckms = 2.99792458e5
-    ckms = constants.c.to(u.km/u.s).value
-    ccms = constants.c.to(u.cm/u.s).value
-    #Degeneracies
-    # g1 = 1
-    # g2 = 1
-    #h = 6.6260693e-27
-    h = constants.h.cgs.value
-    #kb = 1.3806505e-16
-    kb = constants.k_B.cgs.value
-    # Dipole Moment in cgs (1.476 Debeye)
-    #mu0 = 1.476e-18
-
-    # Generate Partition Functions
-    nlevs = 51
-    jv=np.arange(nlevs)
-    ortho = jv % 3 == 0
-    para = ~ortho
-    Jpara = jv[para]
-    Jortho = jv[ortho]
-    Brot = 298117.06e6
-    Crot = 186726.36e6
-
-    runspec = np.zeros(len(xarr))
 
     tau_dict = {}
     para_count = 0
     ortho_count = 1 # ignore 0-0
 
-    if tau is not None and thin:
-        """
-        Use optical depth in the 1-1 line as a free parameter
-        The optical depths of the other lines are then set by the kinetic temperature
-        Tex is still a free parameter in the final spectrum calculation at the bottom
-        (technically, I think this process assumes LTE; Tex should come into play in
-        these equations, not just the final one)
-        """
-        dT0 = 41.5                    # Energy diff between (2,2) and (1,1) in K
-        trot = tkin/(1+tkin/dT0*np.log(1+0.6*np.exp(-15.7/tkin)))
-        tau_dict['oneone']     = tau
-        tau_dict['twotwo']     = tau*(23.722/23.694)**2*4/3.*5/3.*np.exp(-41.5/trot)
-        tau_dict['threethree'] = tau*(23.8701279/23.694)**2*3/2.*14./3.*np.exp(-101.1/trot)
-        tau_dict['fourfour']   = tau*(24.1394169/23.694)**2*8/5.*9/3.*np.exp(-177.34/trot)
-        line_names = tau_dict.keys()
-        # TODO: Raise a warning if tkin > (some value), probably 50 K, because
-        # the 3-level system approximation used here will break down.
-    else:
-        """
-        Column density is the free parameter.  It is used in conjunction with
-        the full partition function to compute the optical depth in each band
-        """
-        Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
-                                       (Crot-Brot)*Jpara**2)/(kb*trot))
-        Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
-                                           (Crot-Brot)*Jortho**2)/(kb*trot))
-        Qpara = Zpara.sum()
-        Qortho = Zortho.sum()
-        for linename in line_names:
-            if ortho_dict[linename]:
-                # define variable "ortho_or_para_frac" that will be the ortho
-                # fraction in the case of an ortho transition or the para
-                # fraction for a para transition
-                ortho_or_parafrac = fortho
-                Z = Zortho
-                Qtot = Qortho
-                count = ortho_count
-                ortho_count += 1
-            else:
-                ortho_or_parafrac = 1.0-fortho
-                Z = Zpara
-                Qtot = Qpara
-                count = para_count # need to treat partition function separately
-                para_count += 1
+    """
+    Column density is the free parameter.  It is used in conjunction with
+    the full partition function to compute the optical depth in each band
+    """
+    Zpara = (2*Jpara+1)*np.exp(-h*(Brot*Jpara*(Jpara+1)+
+                                   (Crot-Brot)*Jpara**2)/(kb*trot))
+    Zortho = 2*(2*Jortho+1)*np.exp(-h*(Brot*Jortho*(Jortho+1)+
+                                       (Crot-Brot)*Jortho**2)/(kb*trot))
+    Qpara = Zpara.sum()
+    Qortho = Zortho.sum()
+    for linename in line_names:
+        if ortho_dict[linename]:
+            # define variable "ortho_or_para_frac" that will be the ortho
+            # fraction in the case of an ortho transition or the para
+            # fraction for a para transition
+            ortho_or_parafrac = fortho
+            Z = Zortho
+            Qtot = Qortho
+            count = ortho_count
+            ortho_count += 1
+        else:
+            ortho_or_parafrac = 1.0-fortho
+            Z = Zpara
+            Qtot = Qpara
+            count = para_count # need to treat partition function separately
+            para_count += 1
 
 
-            # for a complete discussion of these equations, please see
-            # https://github.com/keflavich/pyspeckit/blob/ammonia_equations/examples/AmmoniaLevelPopulation.ipynb
-            # and
-            # http://low-sky.github.io/ammoniacolumn/
-            # and
-            # https://github.com/pyspeckit/pyspeckit/pull/136
+        # for a complete discussion of these equations, please see
+        # https://github.com/keflavich/pyspeckit/blob/ammonia_equations/examples/AmmoniaLevelPopulation.ipynb
+        # and
+        # http://low-sky.github.io/ammoniacolumn/
+        # and
+        # https://github.com/pyspeckit/pyspeckit/pull/136
 
-            # short variable names for readability
-            frq = freq_dict[linename]
-            partition = Z[count]
-            aval = aval_dict[linename]
+        # short variable names for readability
+        frq = freq_dict[linename]
+        partition = Z[count]
+        aval = aval_dict[linename]
 
-            # Total population of the higher energy inversion transition
-            population_rotstate = lin_ntot * ortho_or_parafrac * partition/Qtot
+        # Total population of the higher energy inversion transition
+        population_rotstate = lin_ntot * ortho_or_parafrac * partition/Qtot
 
-            expterm = (1-np.exp(-h*frq/(kb*tex)))/(1+np.exp(-h*frq/(kb*tex)))
-            fracterm = (ccms**2 * aval / (8*np.pi*frq**2))
-            widthterm = (ckms/(width*frq*(2*np.pi)**0.5))
+        expterm = (1-np.exp(-h*frq/(kb*tex)))/(1+np.exp(-h*frq/(kb*tex)))
+        fracterm = (ccms**2 * aval / (8*np.pi*frq**2))
+        widthterm = (ckms/(width*frq*(2*np.pi)**0.5))
 
-            tau_i = population_rotstate * fracterm * expterm * widthterm
-            tau_dict[linename] = tau_i
+        tau_i = population_rotstate * fracterm * expterm * widthterm
+        tau_dict[linename] = tau_i
 
     # allow tau(11) to be specified instead of ntot
     # in the thin case, this is not needed: ntot plays no role
     # this process allows you to specify tau without using the approximate equations specified
     # above.  It should remove ntot from the calculations anyway...
-    if tau is not None and not thin:
+    if tau is not None:
         tau11_temp = tau_dict['oneone']
         # re-scale all optical depths so that tau is as specified, but the relative taus
         # are sest by the kinetic temperature and partition functions
         for linename,t in iteritems(tau_dict):
             tau_dict[linename] = t * tau/tau11_temp
+
+    if return_tau:
+        return tau_dict
+
+
+    model_spectrum = _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v,
+                                       fortho, line_names,
+                                       background_tb=background_tb,
+                                       fillingfraction=fillingfraction,
+                                       return_components=return_components)
+
+    if model_spectrum.min() < 0 and background_tb == TCMB:
+        raise ValueError("Model dropped below zero.  That is not possible "
+                         " normally.  Here are the input values: "+
+                         ("tex: %f " % tex) +
+                         ("trot: %f " % trot) +
+                         ("ntot: %f " % ntot) +
+                         ("width: %f " % width) +
+                         ("xoff_v: %f " % xoff_v) +
+                         ("fortho: %f " % fortho)
+                        )
+
+
+    if verbose or debug:
+        log.info("trot: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  "
+                 "fortho: %g  fillingfraction: %g" % (trot, tex, ntot, width,
+                                                      xoff_v, fortho,
+                                                      fillingfraction))
+
+
+    return model_spectrum
+
+def ammonia_thin(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
+                 fortho=0.0, tau=None, return_tau=False, **kwargs):
+    """
+    Use optical depth in the 1-1 line as a free parameter
+    The optical depths of the other lines are then set by the kinetic
+    temperature
+
+    tkin is used to compute trot assuming a 3-level system consisting of (1,1),
+    (2,1), and (2,2) as in Swift et al, 2005 [2005ApJ...620..823S]
+    """
+
+    tau_dict = {}
+
+    tex = tkin
+
+    dT0 = 41.5                    # Energy diff between (2,2) and (1,1) in K
+    trot = tkin/(1+tkin/dT0*np.log(1+0.6*np.exp(-15.7/tkin)))
+    tau_dict['oneone'] = tau
+    tau_dict['twotwo'] = tau*(23.722/23.694)**2*4/3.*5/3.*np.exp(-41.5/trot)
+    tau_dict['threethree'] = tau*(23.8701279/23.694)**2*3/2.*14./3.*np.exp(-101.1/trot)
+    tau_dict['fourfour'] = tau*(24.1394169/23.694)**2*8/5.*9/3.*np.exp(-177.34/trot)
+    line_names = tau_dict.keys()
+    # TODO: Raise a warning if tkin > (some value), probably 50 K, because
+    # the 3-level system approximation used here will break down.
+
+    if return_tau:
+        return tau_dict
+    else:
+        return _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho,
+                                 line_names, **kwargs)
+
+def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
+                      background_tb=TCMB, fillingfraction=None,
+                      return_components=False):
+    """
+    Helper function: given a dictionary of ammonia optical depths,
+    an excitation tmeperature... etc, produce the spectrum
+    """
+    from .ammonia_constants import (ckms, h, kb)
+
+    # fillingfraction is an arbitrary scaling for the data
+    # The model will be (normal model) * fillingfraction
+    if fillingfraction is None:
+        fillingfraction = 1.0
+
+    # "runspec" means "running spectrum": it is accumulated over a loop
+    runspec = np.zeros(len(xarr))
 
     components =[]
     for linename in line_names:
@@ -265,32 +271,16 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             components.append(tauprof)
 
         T0 = (h*xarr.value*1e9/kb) # "temperature" of wavelength
-        if tau is not None and thin:
-            #runspec = tauprof+runspec
-            # is there ever a case where you want to ignore the optical depth function? I think no
-            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-tauprof))+runspec
-        else:
-            runspec = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-tauprof))+runspec
-        if runspec.min() < 0 and background_tb == TCMB:
-            raise ValueError("Model dropped below zero.  That is not possible normally.  Here are the input values: "+
-                    ("tex: %f " % tex) +
-                    ("trot: %f " % trot) +
-                    ("ntot: %f " % ntot) +
-                    ("width: %f " % width) +
-                    ("xoff_v: %f " % xoff_v) +
-                    ("fortho: %f " % fortho)
-                    )
 
-    if verbose or debug:
-        log.info("trot: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  fortho: %g  fillingfraction: %g" % (trot,tex,ntot,width,xoff_v,fortho,fillingfraction))
+        runspec = ((T0/(np.exp(T0/tex)-1) - T0/(np.exp(T0/background_tb)-1)) *
+                   (1-np.exp(-tauprof)) + runspec)
+
 
     if return_components:
         return (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-1*np.array(components)))
 
-    if return_tau:
-        return tau_dict
-
     return runspec
+
 
 
 class ammonia_model(model.SpectralModel):
@@ -397,24 +387,30 @@ class ammonia_model(model.SpectralModel):
                 for ii in range(int(npars)):
                     name = parnames[ii+jj*int(npars)].strip('0123456789').lower()
                     modelkwargs.update({name:parvals[ii+jj*int(npars)]})
-                v += ammonia(x,**modelkwargs)
+                v += self.modelfunc(x,**modelkwargs)
             return v
         return L
 
     def components(self, xarr, pars, hyperfine=False, **kwargs):
         """
-        Ammonia components don't follow the default, since in Galactic astronomy the hyperfine components should be well-separated.
-        If you want to see the individual components overlaid, you'll need to pass hyperfine to the plot_fit call
+        Ammonia components don't follow the default, since in Galactic
+        astronomy the hyperfine components should be well-separated.
+        If you want to see the individual components overlaid, you'll need to
+        pass hyperfine to the plot_fit call
         """
 
         comps=[]
         for ii in range(self.npeaks):
             if hyperfine:
-                modelkwargs = dict(zip(self.parnames[ii*self.npars:(ii+1)*self.npars],pars[ii*self.npars:(ii+1)*self.npars]))
-                comps.append( ammonia(xarr,return_components=True,**modelkwargs) )
+                modelkwargs = dict(zip(self.parnames[ii*self.npars:(ii+1)*self.npars],
+                                       pars[ii*self.npars:(ii+1)*self.npars]))
+                comps.append(self.modelfunc(xarr, return_components=True,
+                                            **modelkwargs))
             else:
-                modelkwargs = dict(zip(self.parnames[ii*self.npars:(ii+1)*self.npars],pars[ii*self.npars:(ii+1)*self.npars]))
-                comps.append( [ammonia(xarr,return_components=False,**modelkwargs)] )
+                modelkwargs = dict(zip(self.parnames[ii*self.npars:(ii+1)*self.npars],
+                                       pars[ii*self.npars:(ii+1)*self.npars]))
+                comps.append([self.modelfunc(xarr, return_components=False,
+                                             **modelkwargs)])
 
         modelcomponents = np.concatenate(comps)
 
@@ -479,19 +475,21 @@ class ammonia_model(model.SpectralModel):
             raise KeyError("use_lmfit was specified in a location where it "
                            "is unacceptable")
 
-        npars = len(parinfo)/self.npeaks
+        # not used: npars = len(parinfo)/self.npeaks
 
         self._validate_parinfo()
 
         def mpfitfun(x,y,err):
             if err is None:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p,
-                                                                parnames=parinfo.parnames,
-                                                                **fitfun_kwargs)(x))]
+                def f(p,fjac=None):
+                    return [0,(y-self.n_ammonia(pars=p,
+                                                parnames=parinfo.parnames,
+                                                **fitfun_kwargs)(x))]
             else:
-                def f(p,fjac=None): return [0,(y-self.n_ammonia(pars=p,
-                                                                parnames=parinfo.parnames,
-                                                                **fitfun_kwargs)(x))/err]
+                def f(p,fjac=None):
+                    return [0,(y-self.n_ammonia(pars=p,
+                                                parnames=parinfo.parnames,
+                                                **fitfun_kwargs)(x))/err]
             return f
 
         if veryverbose:
@@ -511,8 +509,10 @@ class ammonia_model(model.SpectralModel):
                        quiet=quiet,
                        debug=debug)
             mpp = mp.params
-            if mp.perror is not None: mpperr = mp.perror
-            else: mpperr = mpp*0
+            if mp.perror is not None:
+                mpperr = mp.perror
+            else:
+                mpperr = mpp*0
             chi2 = mp.fnorm
 
         if mp.status == 0:
@@ -546,10 +546,11 @@ class ammonia_model(model.SpectralModel):
 
         indiv_parinfo = [self.parinfo[jj*self.npars:(jj+1)*self.npars]
                          for jj in range(int(len(self.parinfo)/self.npars))]
-        modelkwargs = [
-                dict([(p['parname'].strip("0123456789").lower(),p['value']) for p in pi])
-                for pi in indiv_parinfo]
-        self.tau_list = [ammonia(xax,return_tau=True,**mk) for mk in modelkwargs]
+        modelkwargs = [dict([(p['parname'].strip("0123456789").lower(),
+                              p['value']) for p in pi])
+                       for pi in indiv_parinfo]
+        self.tau_list = [self.modelfunc(xax, return_tau=True,**mk)
+                         for mk in modelkwargs]
 
         return self.mpp,self.model,self.mpperr,chi2
 
@@ -563,9 +564,9 @@ class ammonia_model(model.SpectralModel):
 
     def annotations(self):
         from decimal import Decimal # for formatting
-        tex_key = {'trot':'T_K', 'tex':'T_{ex}', 'ntot':'N', 'fortho':'F_o',
-                   'width':'\\sigma', 'xoff_v':'v', 'fillingfraction':'FF',
-                   'tau':'\\tau_{1-1}'}
+        tex_key = {'trot':'T_R', 'tkin': 'T_K', 'tex':'T_{ex}', 'ntot':'N',
+                   'fortho':'F_o', 'width':'\\sigma', 'xoff_v':'v',
+                   'fillingfraction':'FF', 'tau':'\\tau_{1-1}'}
         # small hack below: don't quantize if error > value.  We want to see the values.
         label_list = []
         for pinfo in self.parinfo:
@@ -613,7 +614,8 @@ class ammonia_model(model.SpectralModel):
         # (it is possible for self.parnames to have npars*npeaks elements where
         # npeaks > 1 coming into this function even though only 6 pars are specified;
         # _default_parnames is the workaround)
-        if parnames is None: parnames = copy.copy(self._default_parnames)
+        if parnames is None:
+            parnames = copy.copy(self._default_parnames)
 
         partype_dict = dict(zip(['params', 'parnames', 'fixed',
                                  'limitedmin', 'limitedmax', 'minpars',
@@ -663,14 +665,15 @@ class ammonia_model(model.SpectralModel):
         # used in components.  Is this just a hack?
         self.parnames = partype_dict['parnames']
 
-        parinfo = [ {'n':ii, 'value':partype_dict['params'][ii],
-                     'limits':[partype_dict['minpars'][ii],partype_dict['maxpars'][ii]],
-                     'limited':[partype_dict['limitedmin'][ii],partype_dict['limitedmax'][ii]], 'fixed':partype_dict['fixed'][ii],
-                     'parname':partype_dict['parnames'][ii]+str(int(ii/int(self.npars))),
-                     'tied':partype_dict['tied'][ii],
-                     'mpmaxstep':max_tem_step*float(partype_dict['parnames'][ii] in ('tex','trot')), # must force small steps in temperature (True = 1.0)
-                     'error': 0}
-            for ii in range(len(partype_dict['params'])) ]
+        parinfo = [{'n':ii, 'value':partype_dict['params'][ii],
+                    'limits':[partype_dict['minpars'][ii],partype_dict['maxpars'][ii]],
+                    'limited':[partype_dict['limitedmin'][ii],partype_dict['limitedmax'][ii]], 'fixed':partype_dict['fixed'][ii],
+                    'parname':partype_dict['parnames'][ii]+str(int(ii/int(self.npars))),
+                    'tied':partype_dict['tied'][ii],
+                    'mpmaxstep':max_tem_step*float(partype_dict['parnames'][ii] in ('tex','trot')), # must force small steps in temperature (True = 1.0)
+                    'error': 0}
+                   for ii in range(len(partype_dict['params']))
+                  ]
 
         # hack: remove 'fixed' pars
         #parinfo_with_fixed = parinfo
@@ -781,11 +784,29 @@ class ammonia_model_vtau(ammonia_model):
 
 
 class ammonia_model_vtau_thin(ammonia_model_vtau):
-    def __init__(self,parnames=['trot', 'tau', 'width', 'xoff_v', 'fortho'],
+    def __init__(self,parnames=['tkin', 'tau', 'width', 'xoff_v', 'fortho'],
                  **kwargs):
         super(ammonia_model_vtau_thin, self).__init__(parnames=parnames,
                                                       npars=5,
                                                       **kwargs)
+        self.modelfunc = ammonia_thin
+
+    def _validate_parinfo(self,
+                          must_be_limited={'tkin': [True,False],
+                                           'tex': [False,False],
+                                           'ntot': [True, True],
+                                           'width': [True, False],
+                                           'xoff_v': [False, False],
+                                           'tau': [False, False],
+                                           'fortho': [True, True]},
+                          required_limits={'tkin': [0, None],
+                                           'ntot': [5, 25],
+                                           'width': [0, None],
+                                           'fortho': [0,1]}):
+        supes = super(ammonia_model_vtau_thin, self)
+        return supes._validate_parinfo(must_be_limited=must_be_limited,
+                                       required_limits=required_limits)
+
 
     def moments(self, Xax, data, negamp=None, veryverbose=False,  **kwargs):
         """
@@ -796,7 +817,7 @@ class ammonia_model_vtau_thin(ammonia_model_vtau):
         return [20, 1, 1.0, 0.0, 1.0]
 
     def __call__(self,*args,**kwargs):
-        return self.multinh3fit(*args, thin=True, **kwargs)
+        return self.multinh3fit(*args, **kwargs)
 
     def make_parinfo(self,
                      params=(20,14,1.0,0.0,0.5),
@@ -898,7 +919,7 @@ class ammonia_model_background(ammonia_model):
                 formatted_value = Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value']))))
                 pm = "$\\pm$"
                 formatted_error = Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error']))
-            label =  "$%s(%i)$=%8s %s %8s" % (parname, parnum, formatted_value, pm, formatted_error)
+            label = "$%s(%i)$=%8s %s %8s" % (parname, parnum, formatted_value, pm, formatted_error)
             label_list.append(label)
         labels = tuple(mpcb.flatten(label_list))
         return labels
