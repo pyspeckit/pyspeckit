@@ -92,7 +92,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     xarr = xarr.as_unit('GHz')
 
     if tex is None:
-        log.warn("Assuming tex=trot")
+        log.warning("Assuming tex=trot")
         tex = trot
 
     if 5 <= ntot <= 25:
@@ -636,7 +636,7 @@ class ammonia_model(model.SpectralModel):
                     partype_dict[partype] *= npeaks
                 elif len(parlist) > self.npars:
                     # DANGER:  THIS SHOULD NOT HAPPEN!
-                    log.warn("WARNING!  Input parameters were longer than allowed for variable {0}".format(parlist))
+                    log.warning("WARNING!  Input parameters were longer than allowed for variable {0}".format(parlist))
                     partype_dict[partype] = partype_dict[partype][:self.npars]
                 elif parlist==params: # this instance shouldn't really be possible
                     partype_dict[partype] = [20,20,1e10,1.0,0.0,0.5] * npeaks

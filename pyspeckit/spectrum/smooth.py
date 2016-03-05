@@ -56,19 +56,19 @@ def smooth(data, smooth, smoothtype='gaussian', downsample=True,
     # deal with NANs or masked values
     if hasattr(data,'mask'):
         if type(data.mask) is np.ndarray:
-            OK = True - data.mask
+            OK = ~data.mask
             if OK.sum() > 0:
                 data = interpolation._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
             else:
                 data = OK
-    if np.any(True - np.isfinite(data)):
+    if np.any(~np.isfinite(data)):
         OK = np.isfinite(data)
         if OK.sum() > 0:
             data = interpolation._interp(np.arange(len(data)),np.arange(len(data))[OK],data[OK])
         else:
             data = OK
 
-    if np.any(True - np.isfinite(data)):
+    if np.any(~np.isfinite(data)):
         raise ValueError("NANs in data array after they have been forcibly removed.")
 
     smdata = np.convolve(data,kernel,convmode)[::downsample_factor]
@@ -80,8 +80,7 @@ def smooth_multispec(data,smoothfactor,**kwargs):
     Smooth multiple spectra as from an ObsBlock (shape should be [speclen, nspec])
     """
 
-    nobs = data.shape[1]
-
-    newdata = np.array( [smooth(D,smoothfactor,**kwargs) for D in data.swapaxes(0,1)]).swapaxes(0,1)
+    newdata = np.array([smooth(D,smoothfactor,**kwargs)
+                        for D in data.swapaxes(0,1)]).swapaxes(0,1)
 
     return newdata

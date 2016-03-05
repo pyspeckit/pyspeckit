@@ -407,8 +407,8 @@ class SpectroscopicAxis(u.Quantity):
         return rep
 
     def __str__(self):
-        selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
-                self.unit,self.umin().value,self.umax().value)
+        selfstr = "SpectroscopicAxis with units %s and range %g:%g." % (
+                self.unit, self.umin().value, self.umax().value)
         if self.refX is not None:
             if not hasattr(self.refX, 'unit'):
                 selfstr += "Reference is %g %s" % (self.refX, self.refX_unit)
@@ -418,22 +418,22 @@ class SpectroscopicAxis(u.Quantity):
 
     @property
     def units(self):
-        log.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
         return self._unit
 
     @units.setter
     def units(self, value):
-        log.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
         self.set_unit(value)
 
     @property
     def refX_units(self):
-        log.warn("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
+        log.warning("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
         return self.refX_unit
 
     @refX_units.setter
     def refX_units(self, value):
-        log.warn("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
+        log.warning("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
         self.refX_unit = value
 
     @property

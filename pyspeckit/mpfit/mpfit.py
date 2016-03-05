@@ -1173,7 +1173,7 @@ class mpfit:
                         sum0 = sum(fjac[0:j+1,j]*qtf[0:j+1])/self.fnorm
                         gnorm = numpy.max([gnorm,numpy.abs(sum0/wa2[l])])
             if gnorm == 0.:
-                log.warn("gnorm=0.   wa2={0}".format(wa2))
+                log.warning("gnorm=0.   wa2={0}".format(wa2))
 
             # Test for convergence of the gradient norm
             if gnorm <= gtol:
@@ -1195,7 +1195,7 @@ class mpfit:
                 # Determine the levenberg-marquardt parameter
                 catch_msg = 'calculating LM parameter (MPFIT_)'
                 [fjac, par, wa1, wa2] = self.lmpar(fjac, ipvt, diag, qtf,
-                                                     delta, wa1, wa2, par=par)
+                                                   delta, wa1, wa2, par=par)
                 # Store the direction p and x+p. Calculate the norm of p
                 wa1 = -wa1
                 if debug:
@@ -1219,15 +1219,14 @@ class mpfit:
                         # Do not allow any steps out of bounds
                         catch_msg = 'checking for a step out of bounds'
                         if nlpeg > 0:
-                            wa1[whlpeg] = numpy.clip( wa1[whlpeg], 0., numpy.max(wa1))
+                            wa1[whlpeg] = numpy.clip(wa1[whlpeg], 0., numpy.max(wa1))
                         if nupeg > 0:
                             wa1[whupeg] = numpy.clip(wa1[whupeg], numpy.min(wa1), 0.)
 
                         dwa1 = numpy.abs(wa1) > machep
                         whl = (numpy.nonzero(((dwa1!=0.) & qllim) & ((free_pars_x + wa1) < llim)))[0]
                         if len(whl) > 0:
-                            t = ((llim[whl] - free_pars_x[whl]) /
-                                  wa1[whl])
+                            t = ((llim[whl] - free_pars_x[whl]) / wa1[whl])
                             alpha = numpy.min([alpha, numpy.min(t)])
                         whu = (numpy.nonzero(((dwa1!=0.) & qulim) & ((free_pars_x + wa1) > ulim)))[0]
                         if len(whu) > 0:

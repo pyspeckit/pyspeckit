@@ -21,7 +21,7 @@ import numpy as np
 import types
 import copy
 import itertools
-import warnings
+from ..specwarnings import warn,PyspeckitWarning
 
 from astropy.io import fits
 from astropy import log
@@ -47,9 +47,9 @@ def not_for_cubes(func):
 
     @wraps(func)
     def wrapper(*args):
-        warnings.warn("This operation ({0}) operates on the spectrum selected "
-                      "from the cube, e.g. with `set_spectrum` or `set_apspec`"
-                      ", it does not operate on the whole cube.")
+        warn("This operation ({0}) operates on the spectrum selected "
+             "from the cube, e.g. with `set_spectrum` or `set_apspec`"
+             ", it does not operate on the whole cube.", PyspeckitWarning)
         return func(*args)
     return wrapper
 
@@ -668,8 +668,8 @@ class Cube(spectrum.Spectrum):
 
         """
         if 'multifit' in fitkwargs:
-            log.warn("The multifit keyword is no longer required.  All fits "
-                     "allow for multiple components.", DeprecationWarning)
+            log.warning("The multifit keyword is no longer required.  All fits "
+                        "allow for multiple components.", DeprecationWarning)
 
         if not hasattr(self.mapplot,'plane'):
             self.mapplot.makeplane()
@@ -747,7 +747,10 @@ class Cube(spectrum.Spectrum):
 
             # very annoying - cannot use min/max without checking type
             # maybe can use np.asarray here?
-            if hasattr(sp.data,'mask'):
+            # cannot use sp.data.mask because it can be a scalar boolean,
+            # which does unpredictable things.
+            if hasattr(sp.data, 'mask') and not isinstance(sp.data.mask, (bool,
+                                                                          np.bool_)):
                 sp.data[sp.data.mask] = np.nan
                 sp.error[sp.data.mask] = np.nan
                 sp.data = np.array(sp.data)
@@ -759,7 +762,7 @@ class Cube(spectrum.Spectrum):
                 sp.error = np.ones(sp.data.shape) * errmap[y,x]
             else:
                 if verbose_level > 1 and ii==0:
-                    log.warn("WARNING: using data std() as error.")
+                    log.warning("WARNING: using data std() as error.", PyspeckitWarning)
                 sp.error[:] = sp.data[sp.data==sp.data].std()
             if sp.error is not None and signal_cut > 0:
                 if continuum_map is not None:

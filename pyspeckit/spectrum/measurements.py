@@ -73,8 +73,8 @@ class Measurements(object):
         self.lines = OrderedDict()
 
         # Read in observed wavelengths
-        tmp1 = np.reshape(self.specfit.modelpars, (len(self.specfit.modelpars) / 3, 3))
-        tmp2 = np.reshape(self.specfit.modelerrs, (len(self.specfit.modelerrs) / 3, 3))
+        tmp1 = np.reshape(self.specfit.modelpars, (int(len(self.specfit.modelpars) / 3), 3))
+        tmp2 = np.reshape(self.specfit.modelerrs, (int(len(self.specfit.modelerrs) / 3), 3))
 
         if ignore is not None:
             tmp1 = np.delete(tmp1, ignore, 0)

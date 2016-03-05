@@ -3,10 +3,10 @@ import matplotlib
 import numpy as np
 import copy
 import re
-import itertools
 from astropy import log
 from astropy import units as u
 from astropy.extern.six.moves import xrange
+from astropy.extern.six import string_types
 
 from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
@@ -274,7 +274,7 @@ class Specfit(interactive.Interactive):
 
         if 'multifit' in kwargs:
             kwargs.pop('multifit')
-            log.warn("The multifit keyword is no longer required.  All fits "
+            log.warning("The multifit keyword is no longer required.  All fits "
                      "allow for multiple components.", DeprecationWarning)
 
         self.npeaks = 0
@@ -426,7 +426,7 @@ class Specfit(interactive.Interactive):
             eqw = sumofspec / continuum
         if plot and self.Spectrum.plotter.axis:
             if midpt_location == 'plot-center':
-                midpt_pixel = np.round((xmin+xmax)/2.0)
+                midpt_pixel = int(np.round((xmin+xmax)/2.0))
                 midpt       = self.Spectrum.xarr[midpt_pixel].value
             elif midpt_location == 'fitted':
                 try:
@@ -443,7 +443,7 @@ class Specfit(interactive.Interactive):
                 # centered on a fitted line other than the one measured for the
                 # eqw call, if there are more than one fitted lines within the
                 # window.
-                midpt_pixel = (xmin+xmax)/2
+                midpt_pixel = int((xmin+xmax)/2)
                 midval = self.Spectrum.xarr[midpt_pixel].value
                 midpt_index = np.argmin(np.abs(shifts-midval))
                 midpt = shifts[midpt_index]
@@ -591,7 +591,7 @@ class Specfit(interactive.Interactive):
 
         if guesses is None:
             guesses = self.guesses
-        elif guesses in ('moment','moments'):
+        elif isinstance(guesses, string_types) and guesses in ('moment','moments'):
             guesses = self.moments(vheight=False, **kwargs)
 
         if parinfo is not None:
@@ -1874,7 +1874,7 @@ class Specfit(interactive.Interactive):
             line_region[line_region.argmax()-1:line_region.argmax()+1] = True
             reverse_argmax = len(line_region) - line_region.argmax() - 1
             line_region[reverse_argmax-1:reverse_argmax+1] = True
-            log.warn("Fewer than {0} pixels were identified as part of the fit."
+            log.warning("Fewer than {0} pixels were identified as part of the fit."
                      " To enable statistical measurements, the range has been"
                      " expanded by 2 pixels including some regions below the"
                      " threshold.".format(grow_threshold))

@@ -5,6 +5,11 @@ Override components of python's builting warnings (as suggested by the manual)
 import warnings
 import sys
 
+class PyspeckitWarning(Warning):
+    """
+    The base warning class from which all pyspeckit warnings should inherit.
+    """
+
 def showwarning(message, category, filename, lineno, file=None, line=None):
     """Hook to write a warning to a file; replace if you like."""
     if file is None:
