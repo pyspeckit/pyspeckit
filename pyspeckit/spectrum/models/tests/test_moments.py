@@ -25,6 +25,6 @@ def test_moments(name):
         params = model_instance.moments(xarr, rawdata)
         print('params:', params)
         assert len(params) == model_instance.npars
-        xarr = SpectroscopicAxis(xarr)
+        xarr = SpectroscopicAxis(xarr, unit='GHz')
         # if moments() returns wrong number of parameters this should fail
         print(model_instance.n_modelfunc(pars=params)(xarr))
