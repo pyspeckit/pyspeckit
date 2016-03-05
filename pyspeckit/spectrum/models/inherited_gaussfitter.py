@@ -45,6 +45,7 @@ def gaussian(x,A,dx,w, return_components=False, normalized=False,
     normalized : bool
         Return a normalized Gaussian?
     """
+    assert w>0,"Width is <= 0"
     x = numpy.array(x) # make sure xarr is no longer a spectroscopic axis
     G = A*numpy.exp(-(x-dx)**2/(2.0*w**2))
     if normalized:
@@ -70,9 +71,9 @@ def gaussian_fitter():
     Generator for Gaussian fitter class
     """
 
-    myclass =  model.SpectralModel(gaussian, 3,
-            parnames=['amplitude','shift','width'], 
-            parlimited=[(False,False),(False,False),(True,False)], 
+    myclass = model.SpectralModel(gaussian, 3,
+            parnames=['amplitude','shift','width'],
+            parlimited=[(False,False),(False,False),(True,False)],
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma'),
             centroid_par='shift',
