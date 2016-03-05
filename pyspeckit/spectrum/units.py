@@ -391,6 +391,7 @@ class SpectroscopicAxis(u.Quantity):
                 "'{cls}' object with a scalar value does not support "
                 "indexing".format(cls=self.__class__.__name__))
 
+        print("In SpectroscopicAxis.__getitem__, the key = {0}".format(key))
         out = super(u.Quantity, self).__getitem__(key)
         if np.isscalar(out):
             return u.Quantity(out, unit=self.unit)
@@ -407,8 +408,8 @@ class SpectroscopicAxis(u.Quantity):
         return rep
 
     def __str__(self):
-        selfstr =  "SpectroscopicAxis with units %s and range %g:%g." % (
-                self.unit,self.umin().value,self.umax().value)
+        selfstr = "SpectroscopicAxis with units %s and range %g:%g." % (
+                self.unit, self.umin().value, self.umax().value)
         if self.refX is not None:
             if not hasattr(self.refX, 'unit'):
                 selfstr += "Reference is %g %s" % (self.refX, self.refX_unit)

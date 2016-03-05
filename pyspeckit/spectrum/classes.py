@@ -601,6 +601,7 @@ class Spectrum(object):
         self.data = sm.smooth(self.data,smooth,downsample=downsample,**kwargs)
 
         if downsample:
+            print("In smooth, the smooth parameter = {0}".format(smooth))
             self.xarr = self.xarr[::smooth]
             if len(self.xarr) != len(self.data):
                 raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
