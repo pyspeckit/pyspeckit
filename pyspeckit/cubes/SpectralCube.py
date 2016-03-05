@@ -699,7 +699,8 @@ class Cube(spectrum.Spectrum):
             d_from_start = ((xx-start_from_point[1])**2 + (yy-start_from_point[0])**2)**0.5
             sort_distance = np.argsort(d_from_start.flat)
 
-
+        if use_neighbor_as_guess:
+            distance = ((xx)**2 + (yy)**2)**0.5
 
         valid_pixels = list(zip(xx.flat[sort_distance][OK.flat[sort_distance]],
                                 yy.flat[sort_distance][OK.flat[sort_distance]]))
@@ -793,9 +794,9 @@ class Cube(spectrum.Spectrum):
             if use_nearest_as_guess and self.has_fit.sum() > 0:
                 if verbose_level > 1 and ii == 0 or verbose_level > 4:
                     log.info("Using nearest fit as guess")
-                d = np.roll(np.roll(distance, x, 0), y, 1)
+                rolled_distance = np.roll(np.roll(distance, x, 0), y, 1)
                 # If there's no fit, set its distance to be unreasonably large
-                nearest_ind = np.argmin(d+1e10*(~self.has_fit))
+                nearest_ind = np.argmin(rolled_distance+1e10*(~self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
                 gg = self.parcube[:,nearest_y,nearest_x]
             elif use_neighbor_as_guess and np.any(local_fits):
