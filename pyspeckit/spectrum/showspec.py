@@ -573,7 +573,7 @@ class Specfit:
         guesses = [height,amplitude,center,width]
         """
         if multifit:
-          log.warn("The multifit keyword has been deprecated", warnings.DeprecationWarning)
+          log.warning("The multifit keyword has been deprecated", warnings.DeprecationWarning)
   
         self.fitcolor = fitcolor
         self.clear()

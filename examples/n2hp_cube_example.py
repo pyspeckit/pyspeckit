@@ -1,6 +1,8 @@
 import pyspeckit
 import os
 import astropy.units as u
+import warnings
+from astropy import wcs
 
 if not os.path.exists('n2hp_cube.fit'):
     import astropy.utils.data as aud
@@ -13,7 +15,9 @@ if not os.path.exists('n2hp_cube.fit'):
         ff.writeto('n2hp_cube.fit')
 
 # Load the spectral cube cropped in the middle for efficiency
-spc = pyspeckit.Cube('n2hp_cube.fit')[:,25:28,12:15]
+with warnings.catch_warnings():
+    warnings.filterwarnings('ignore', category=wcs.FITSFixedWarning)
+    spc = pyspeckit.Cube('n2hp_cube.fit')[:,25:28,12:15]
 # Set the velocity convention: in the future, this may be read directly from
 # the file, but for now it cannot be.
 spc.xarr.refX = 93176265000.0*u.Hz

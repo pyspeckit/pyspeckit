@@ -21,7 +21,7 @@ import numpy as np
 import types
 import copy
 import itertools
-import warnings
+from ..specwarnings import warn,PyspeckitWarning
 
 from astropy.io import fits
 from astropy import log
@@ -47,9 +47,9 @@ def not_for_cubes(func):
 
     @wraps(func)
     def wrapper(*args):
-        warnings.warn("This operation ({0}) operates on the spectrum selected "
-                      "from the cube, e.g. with `set_spectrum` or `set_apspec`"
-                      ", it does not operate on the whole cube.")
+        warn("This operation ({0}) operates on the spectrum selected "
+             "from the cube, e.g. with `set_spectrum` or `set_apspec`"
+             ", it does not operate on the whole cube.", PyspeckitWarning)
         return func(*args)
     return wrapper
 
@@ -668,8 +668,8 @@ class Cube(spectrum.Spectrum):
 
         """
         if 'multifit' in fitkwargs:
-            log.warn("The multifit keyword is no longer required.  All fits "
-                     "allow for multiple components.", DeprecationWarning)
+            log.warning("The multifit keyword is no longer required.  All fits "
+                        "allow for multiple components.", DeprecationWarning)
 
         if not hasattr(self.mapplot,'plane'):
             self.mapplot.makeplane()
@@ -699,7 +699,8 @@ class Cube(spectrum.Spectrum):
             d_from_start = ((xx-start_from_point[1])**2 + (yy-start_from_point[0])**2)**0.5
             sort_distance = np.argsort(d_from_start.flat)
 
-
+        if use_neighbor_as_guess:
+            distance = ((xx)**2 + (yy)**2)**0.5
 
         valid_pixels = list(zip(xx.flat[sort_distance][OK.flat[sort_distance]],
                                 yy.flat[sort_distance][OK.flat[sort_distance]]))
@@ -746,7 +747,10 @@ class Cube(spectrum.Spectrum):
 
             # very annoying - cannot use min/max without checking type
             # maybe can use np.asarray here?
-            if hasattr(sp.data,'mask'):
+            # cannot use sp.data.mask because it can be a scalar boolean,
+            # which does unpredictable things.
+            if hasattr(sp.data, 'mask') and not isinstance(sp.data.mask, (bool,
+                                                                          np.bool_)):
                 sp.data[sp.data.mask] = np.nan
                 sp.error[sp.data.mask] = np.nan
                 sp.data = np.array(sp.data)
@@ -758,7 +762,7 @@ class Cube(spectrum.Spectrum):
                 sp.error = np.ones(sp.data.shape) * errmap[y,x]
             else:
                 if verbose_level > 1 and ii==0:
-                    log.warn("WARNING: using data std() as error.")
+                    log.warning("WARNING: using data std() as error.", PyspeckitWarning)
                 sp.error[:] = sp.data[sp.data==sp.data].std()
             if sp.error is not None and signal_cut > 0:
                 if continuum_map is not None:
@@ -793,9 +797,9 @@ class Cube(spectrum.Spectrum):
             if use_nearest_as_guess and self.has_fit.sum() > 0:
                 if verbose_level > 1 and ii == 0 or verbose_level > 4:
                     log.info("Using nearest fit as guess")
-                d = np.roll(np.roll(distance, x, 0), y, 1)
+                rolled_distance = np.roll(np.roll(distance, x, 0), y, 1)
                 # If there's no fit, set its distance to be unreasonably large
-                nearest_ind = np.argmin(d+1e10*(~self.has_fit))
+                nearest_ind = np.argmin(rolled_distance+1e10*(~self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
                 gg = self.parcube[:,nearest_y,nearest_x]
             elif use_neighbor_as_guess and np.any(local_fits):

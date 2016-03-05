@@ -18,15 +18,11 @@ def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
 
     Parameters
     ----------
-    height:
-        is the background level
-    amplitude:
-        is the maximum (or minimum) of the data after background subtraction
-    x:
-        is the first moment
-    width_x:
-        is the second moment
-    estimator: function
+    Xax : np.ndarray
+        The x-axis for computing the 1st and 2nd moments
+    data : np.ndarray
+        The data from which to compute the various moments
+    estimator : function
         A function to estimate the "height" or "background level" of the data,
         e.g. mean or median.  If masked arrays are being used, use the np.ma
         versions of the numpy functions
@@ -39,10 +35,20 @@ def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
         from the data unless the noise is specified with `noise_estimate`
     noise_estimate: float or None
         Guess for the noise value.  Only matters if `nsigcut` is specified.
+    vheight : bool
+        Include an estimate of the background level?
 
     Returns
     -------
     (height, amplitude, x, width_x)
+    height : float
+        is the background level
+    amplitude : float
+        is the maximum (or minimum) of the data after background subtraction
+    x : float
+        is the first moment
+    width_x : float
+        is the second moment
     """
 
     Xax = np.array(Xax)

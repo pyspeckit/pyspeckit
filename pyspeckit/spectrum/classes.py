@@ -245,7 +245,7 @@ class Spectrum(object):
 
     @property
     def units(self):
-        log.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
         return self._unit
 
     @unit.setter
@@ -254,7 +254,7 @@ class Spectrum(object):
 
     @units.setter
     def units(self, value):
-        log.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
         self._unit = value
 
     def _register_fitters(self, registry=None):
@@ -587,7 +587,7 @@ class Spectrum(object):
 
     def smooth(self,smooth,downsample=True,**kwargs):
         """
-        Smooth the spectrum by factor `smooth`.  
+        Smooth the spectrum by factor `smooth`.
 
 
         Documentation from the :mod:`smooth` module:
@@ -597,7 +597,7 @@ class Spectrum(object):
         downsample: bool
             Downsample the spectrum by the smoothing factor?
         """
-        smooth = round(smooth)
+        smooth = int(round(smooth))
         self.data = sm.smooth(self.data,smooth,downsample=downsample,**kwargs)
 
         if downsample:
