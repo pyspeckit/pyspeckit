@@ -587,7 +587,7 @@ class Spectrum(object):
 
     def smooth(self,smooth,downsample=True,**kwargs):
         """
-        Smooth the spectrum by factor `smooth`.  
+        Smooth the spectrum by factor `smooth`.
 
 
         Documentation from the :mod:`smooth` module:
@@ -597,11 +597,10 @@ class Spectrum(object):
         downsample: bool
             Downsample the spectrum by the smoothing factor?
         """
-        smooth = round(smooth)
+        smooth = int(round(smooth))
         self.data = sm.smooth(self.data,smooth,downsample=downsample,**kwargs)
 
         if downsample:
-            print("In smooth, the smooth parameter = {0}".format(smooth))
             self.xarr = self.xarr[::smooth]
             if len(self.xarr) != len(self.data):
                 raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
