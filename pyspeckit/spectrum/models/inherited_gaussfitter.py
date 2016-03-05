@@ -15,6 +15,7 @@ import numpy as np
 import warnings
 from . import model
 from . import fitter
+from ...specwarnings import PyspeckitWarning
 
 def gaussian(xarr, amplitude, dx, width, return_components=False, normalized=False,
              return_hyperfine_components=False):
@@ -48,7 +49,8 @@ def gaussian(xarr, amplitude, dx, width, return_components=False, normalized=Fal
     if width == 0:
         return np.nan
     elif width < 0:
-        warnings.warn("Negative width in Gaussian: {0}.".format(width))
+        warnings.warn("Negative width in Gaussian: {0}.".format(width),
+                      PyspeckitWarning)
 
     xarr = np.array(xarr) # make sure xarr is no longer a spectroscopic axis
     model = amplitude*np.exp(-(xarr-dx)**2/(2.0*width**2))
