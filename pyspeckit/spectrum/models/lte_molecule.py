@@ -65,6 +65,32 @@ def line_brightness_cgs(tex, dnu, frequency, tbg=2.73, *args, **kwargs):
     tau = line_tau(tex=tex, frequency=frequency, *args, **kwargs) / dnu
     return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
 
+class lte_line_model_generator(object):
+    def __init__(self, molecule_name, **kwargs):
+        pass
+        
+    def line_profile(xarr,):
+        pass
+
+# requires vamdc branch of astroquery
+def get_molecular_parameters(molecule_name, chem_re_flags=0):
+    from astroquery.vamdc import load_species_table
+
+    lut = load_species_table()
+    species_id_dict = lut.find(molecule_name, flags=chem_re_flags)
+    if len(species_id_dict) == 1:
+        species_id = list(species_id_dict.values())[0]
+    else:
+        raise ValueError("Too many species matched: {0}"
+                         .format(species_id_dict))
+     
+    request = r.Request(node=cdms)
+    query_string = "SELECT ALL WHERE VAMDCSpeciesID='%s'" % species_id
+    request.setquery(query_string)
+    result = request.dorequest()
+    Q = m.calculate_partitionfunction(result.data['States'],
+                                      temperature=tex)[species_id]
+
 # url = 'http://cdms.ph1.uni-koeln.de/cdms/tap/'
 # rslt = requests.post(url+"/sync", data={'REQUEST':"doQuery", 'LANG': 'VSS2', 'FORMAT':'XSAMS', 'QUERY':"SELECT SPECIES WHERE MoleculeStoichiometricFormula='CH2O'"})               
 
@@ -79,7 +105,7 @@ if __name__ == "__main__":
 
     # 321 has same parameters for g
 
-    ph2co = {'tex':18.75*u.K, 
+    ph2co = {'tex':18.75*u.K,
              'total_column': 1e12*u.cm**-2,
              'partition_function': 44.6812, # splatalogue's 18.75
              'degeneracy': gI*gJ*gK,
