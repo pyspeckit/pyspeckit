@@ -43,6 +43,13 @@ except ImportError:
     atpyOK = False
 
 try:
+    import specutils
+    specutilsOK = True
+except ImportError:
+    specutilsOK = False
+
+
+try:
     from Spectrum1D import Spectrum1D # inherit from astropy
 except ImportError:
     Spectrum1D = object
@@ -180,7 +187,7 @@ class Spectrum(object):
                 else:
                     self.header = header
             else: # set as blank
-                warn( "WARNING: No header given.  Creating an empty one." )
+                warn("WARNING: No header given.  Creating an empty one.")
                 self.header = pyfits.Header()
             self.parse_header(self.header)
         else:
@@ -218,17 +225,33 @@ class Spectrum(object):
         elif not hasattr(self, '_unit'):
             self._unit = u.dimensionless_unscaled
 
-        if doplot: self.plotter(**plotkwargs)
+        if doplot:
+            self.plotter(**plotkwargs)
 
     @classmethod
     def from_spectrum1d(self, spec1d):
         """
         Tool to load a pyspeckit Spectrum from a specutils object
-
-        (this is intended to be temporary; long-term the pyspeckit Spectrum
-        object will inherit from a specutils Spectrum1D object)
         """
-        raise NotImplementedError
+        self.xarr = units.SpectroscopicAxis(spec1d.dispersion)
+
+        self.data = spec1d.flux
+        self.error = spec1d.uncertainty
+
+        # it is very important that this be done BEFORE the spectofit is set!
+        self._sort()
+        self.plotter = plotters.Plotter(self)
+        self._register_fitters()
+        self.specfit = fitters.Specfit(self,Registry=self.Registry)
+        self.baseline = baseline.Baseline(self)
+        self.speclines = speclines
+
+        # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
+        self.plot_special = None
+        self.plot_special_kwargs = {}
+
+        self._unit = spec1d._unit
+
 
     @classmethod
     def from_hdu(cls, hdu):
