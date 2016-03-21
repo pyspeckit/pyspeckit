@@ -232,6 +232,16 @@ class Spectrum(object):
     def from_spectrum1d(cls, spec1d):
         """
         Tool to load a pyspeckit Spectrum from a specutils object
+
+        Examples
+        --------
+        >>> # grab many spectra from a multiextension FITS file
+        >>> spectra = specutils.io.fits.read_fits_spectrum1d('AAO.fits')
+        >>> sp = pyspeckit.Spectrum.from_spectrum1d(spectra[0])
+
+        >>> # open a single spectrum that could have been opened directly with pyspeckit
+        >>> spectrum = specutils.io.fits.read_fits_spectrum1d('gbt_1d.fits')
+        >>> sp = pyspeckit.Spectrum.from_spectrum1d(spectrum)
         """
         xarr = units.SpectroscopicAxis(spec1d.dispersion)
 
