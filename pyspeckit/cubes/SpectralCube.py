@@ -506,7 +506,6 @@ class Cube(spectrum.Spectrum):
 
         """
 
-        import cubes
         if coordsys is not None:
             wcs = self.mapplot.wcs
         else:
@@ -556,7 +555,6 @@ class Cube(spectrum.Spectrum):
         (defaults to Cube coordinates)
         """
 
-        import cubes
         if coordsys is not None:
             self.data = cubes.extract_aperture(self.cube, aperture,
                                                coordsys=coordsys,
@@ -1161,32 +1159,26 @@ class Cube(spectrum.Spectrum):
         self.specfit.fittype = sp.specfit.fittype
         self.specfit.parinfo = sp.specfit.parinfo
 
-    try:
-        import cubes
-        def smooth(self,factor,**kwargs):
-            """
-            Smooth the spectrum by factor `factor`.
+    def smooth(self,factor,**kwargs):
+        """
+        Smooth the spectrum by factor `factor`.
 
-            Documentation from the :mod:`cubes.spectral_smooth` module:
+        Documentation from the :mod:`cubes.spectral_smooth` module:
 
-            """
-            import cubes
+        """
+        factor = round(factor)
+        self.cube = cubes.spectral_smooth(self.cube,factor,**kwargs)
+        self.xarr = self.xarr[::factor]
+        if hasattr(self,'data'):
+            self.data = smooth.smooth(self.data,factor,**kwargs)
+        if len(self.xarr) != self.cube.shape[0]:
+            raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
+        if self.errorcube is not None:
+            self.errorcube = cubes.spectral_smooth(self.errorcube,factor,**kwargs)
 
-            factor = round(factor)
-            self.cube = cubes.spectral_smooth(self.cube,factor,**kwargs)
-            self.xarr = self.xarr[::factor]
-            if hasattr(self,'data'):
-                self.data = smooth.smooth(self.data,factor,**kwargs)
-            if len(self.xarr) != self.cube.shape[0]:
-                raise ValueError("Convolution resulted in different X and Y array lengths.  Convmode should be 'same'.")
-            if self.errorcube is not None:
-                self.errorcube = cubes.spectral_smooth(self.errorcube,factor,**kwargs)
+        self._smooth_header(factor)
 
-            self._smooth_header(factor)
-        __doc__ += "cubes.spectral_smooth doc: \n" + cubes.spectral_smooth.__doc__
-    except ImportError:
-        def smooth(self):
-            raise ImportError("Can't import cubes: required for cube spectral smoothing")
+    __doc__ += "cubes.spectral_smooth doc: \n" + cubes.spectral_smooth.__doc__
 
     def _smooth_header(self,factor):
         """
