@@ -630,8 +630,8 @@ class BaseSpectrum(object):
             name = " named %s" % self.specname
         else:
             name = ""
-        return (r'<Spectrum object%s over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s at %s>' %
-                (name, self.xarr.min().value, self.xarr.max().value,
+        return (r'<%s object%s over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s at %s>' %
+                (self.__class_name__, name, self.xarr.min().value, self.xarr.max().value,
                  self.xarr.unit, self.data.min(), self.data.max(), self.unit,
                  str(hex(self.__hash__()))))
 
@@ -741,13 +741,16 @@ class BaseSpectrum(object):
             elif hasattr(self,'xarr') and hasattr(other,'xarr'): # purely for readability
 
                 if self._arithmetic_threshold == 'exact':
-                    xarrcheck = all(self.xarr == other.xarr)
+                    xarrcheck = np.all((self.xarr == other.xarr).value)
                 else:
                     if self._arithmetic_threshold_units is None:
                         # not sure this should ever be allowed
-                        xarrcheck = all(np.abs(self.xarr-other.xarr) < self._arithmetic_threshold)
+                        xarrcheck = np.all(np.abs(self.xarr-other.xarr).value < self._arithmetic_threshold)
                     else:
-                        xarrcheck = all(np.abs(self.xarr.as_unit(self._arithmetic_threshold_units)-other.xarr.as_unit(self._arithmetic_threshold_units)) < self._arithmetic_threshold)
+                        xarr_u = self.xarr.as_unit(self._arithmetic_threshold_units)
+                        other_xarr_u = other.xarr.as_unit(self._arithmetic_threshold_units)
+                        xarrcheck = np.all(np.abs(xarr_u - other_xarr_u).value <
+                                           self._arithmetic_threshold)
 
                 if self.shape == other.shape and xarrcheck:
                     newspec = self.copy()
@@ -792,6 +795,8 @@ class BaseSpectrum(object):
     __div__ = _operation_wrapper(np.divide)
 
 class SingleSpectrum(BaseSpectrum):
+    __class_name__ = 'SingleSpectrum'
+
     @classmethod
     def from_spectrum1d(cls, spec1d):
         """
@@ -825,6 +830,8 @@ class SingleSpectrum(BaseSpectrum):
         spec,errspec,XAxis,hdr = readers.open_1d_pyfits(hdu)
         return cls(data=spec, error=errspec, xarr=XAxis, header=hdr)
 
+    __class_name__ = 'BaseSpectrum'
+
 
 class Spectrum(SingleSpectrum):
     """
@@ -833,7 +840,8 @@ class Spectrum(SingleSpectrum):
     formats.
     """
     # just does what BaseSpectrum and SingleSpectrum do
-    pass
+    __class_name__ = 'Spectrum'
+
 
 class Spectra(BaseSpectrum):
     """
@@ -847,6 +855,7 @@ class Spectra(BaseSpectrum):
 
     X array is forcibly sorted in increasing order
     """
+    __class_name__ = 'Spectra'
 
     def __init__(self, speclist, xunit=None, **kwargs):
         """
@@ -1132,4 +1141,3 @@ class XCorrSpectrum(Spectrum):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-

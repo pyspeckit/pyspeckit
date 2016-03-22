@@ -35,3 +35,9 @@ def test_specutils_aao_reader_multiple():
     assert sp.shape[0] == sum([x.flux.shape[0] for x in sp1d]) == 140046
     assert sp.xarr.unit.to_string() == 'Angstrom'
     assert all(sp.error==0)
+
+    # TODO: make this an independent test
+    # this is testing that you can't do arithmetic on axes that are different
+    with pytest.raises(ValueError) as ex:
+        sp[0]-sp[1]
+    assert str(ex.value) == "X-axes do not match."
