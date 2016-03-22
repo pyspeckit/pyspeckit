@@ -4,6 +4,9 @@ CHANGES
 Version 0.1.19 (unreleased)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    * Bugfix #147: Spectrum arithmetic was being allowed between spectrum
+      objects with different X-axes.  This has been disallowed, and a test has
+      been added.
     * Enhancement #147: ``from_spectrum1d`` implemented to instantiate a
       ``pyspeckit.Spectrum`` from a ``specutils.Spectrum1D`` object
     * Bugfix #128: fiteach would try to measure an integral even if the
