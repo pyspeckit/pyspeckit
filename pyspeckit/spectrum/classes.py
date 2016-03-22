@@ -59,40 +59,6 @@ try:
 except ImportError:
     u = None
 
-class SingleSpectrum(object):
-    @classmethod
-    def from_spectrum1d(cls, spec1d):
-        """
-        Tool to load a pyspeckit Spectrum from a specutils object
-
-        Examples
-        --------
-        >>> # grab many spectra from a multiextension FITS file
-        >>> spectra = specutils.io.fits.read_fits_spectrum1d('AAO.fits')
-        >>> sp = pyspeckit.Spectrum.from_spectrum1d(spectra[0])
-
-        >>> # open a single spectrum that could have been opened directly with pyspeckit
-        >>> spectrum = specutils.io.fits.read_fits_spectrum1d('gbt_1d.fits')
-        >>> sp = pyspeckit.Spectrum.from_spectrum1d(spectrum)
-        """
-        xarr = units.SpectroscopicAxis(spec1d.dispersion)
-
-        data = spec1d.flux
-        error = spec1d.uncertainty
-
-        return cls(data=data, error=error, xarr=xarr,
-                   unit=spec1d._unit)
-
-
-    @classmethod
-    def from_hdu(cls, hdu):
-        """
-        Create a pyspeckit Spectrum object from an HDU
-        """
-
-        spec,errspec,XAxis,hdr = readers.open_1d_pyfits(hdu)
-        return cls(data=spec, error=errspec, xarr=XAxis, header=hdr)
-
 class BaseSpectrum(object):
 
     from .interpolation import interpnans
@@ -825,7 +791,42 @@ class BaseSpectrum(object):
     __mul__ = _operation_wrapper(np.multiply)
     __div__ = _operation_wrapper(np.divide)
 
-class Spectrum(BaseSpectrum, SingleSpectrum):
+class SingleSpectrum(BaseSpectrum):
+    @classmethod
+    def from_spectrum1d(cls, spec1d):
+        """
+        Tool to load a pyspeckit Spectrum from a specutils object
+
+        Examples
+        --------
+        >>> # grab many spectra from a multiextension FITS file
+        >>> spectra = specutils.io.fits.read_fits_spectrum1d('AAO.fits')
+        >>> sp = pyspeckit.Spectrum.from_spectrum1d(spectra[0])
+
+        >>> # open a single spectrum that could have been opened directly with pyspeckit
+        >>> spectrum = specutils.io.fits.read_fits_spectrum1d('gbt_1d.fits')
+        >>> sp = pyspeckit.Spectrum.from_spectrum1d(spectrum)
+        """
+        xarr = units.SpectroscopicAxis(spec1d.dispersion)
+
+        data = spec1d.flux
+        error = spec1d.uncertainty
+
+        return cls(data=data, error=error, xarr=xarr,
+                   unit=spec1d._unit)
+
+
+    @classmethod
+    def from_hdu(cls, hdu):
+        """
+        Create a pyspeckit Spectrum object from an HDU
+        """
+
+        spec,errspec,XAxis,hdr = readers.open_1d_pyfits(hdu)
+        return cls(data=spec, error=errspec, xarr=XAxis, header=hdr)
+
+
+class Spectrum(SingleSpectrum):
     """
     The core class for the spectroscopic toolkit.  Contains the data and error
     arrays along with wavelength / frequency / velocity information in various
@@ -847,10 +848,10 @@ class Spectra(BaseSpectrum):
     X array is forcibly sorted in increasing order
     """
 
-    def __init__(self, speclist, xunit='GHz', **kwargs):
+    def __init__(self, speclist, xunit=None, **kwargs):
         """
         """
-        print("Creating spectra")
+        log.info("Creating spectra")
         speclist = list(speclist)
         for ii,spec in enumerate(speclist):
             if type(spec) is str:
@@ -859,7 +860,11 @@ class Spectra(BaseSpectrum):
 
         self.speclist = speclist
 
-        print("Concatenating data")
+        if xunit is None:
+            xunit = speclist[0].xarr.unit
+
+        log.info("Concatenating data")
+
         self.xarr = units.SpectroscopicAxes([sp.xarr.as_unit(xunit) for sp in speclist])
         self.xarr.set_unit(u.Unit(xunit))
         self.xarr.xtype = u.Unit(xunit)
