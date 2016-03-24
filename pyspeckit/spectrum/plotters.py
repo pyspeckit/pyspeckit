@@ -180,8 +180,10 @@ class Plotter(object):
         self._mpl_reconnect()
 
         if axis is not None:
+            #self._mpl_disconnect()
             self.axis = axis
             self.figure = axis.figure
+            #self._mpl_connect()
         elif len(self.figure.axes) > 0 and self.axis is None:
             self.axis = self.figure.axes[0] # default to first axis
         elif self.axis is None:
