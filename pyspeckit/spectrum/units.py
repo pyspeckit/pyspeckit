@@ -567,8 +567,8 @@ class SpectroscopicAxis(u.Quantity):
 
         if unit is not None:
             # could be reversed
-            return np.max([self.coord_to_x(self.max(), units),
-                           self.coord_to_x(self.min(),units)])
+            return np.max([self.coord_to_x(self.max(), unit),
+                           self.coord_to_x(self.min(),unit)])
         else: 
             return self.max()
 
@@ -580,8 +580,8 @@ class SpectroscopicAxis(u.Quantity):
 
         if unit is not None:
             # could be reversed
-            return np.min([self.coord_to_x(self.max(), units),
-                           self.coord_to_x(self.min(),units)])
+            return np.min([self.coord_to_x(self.max(), unit),
+                           self.coord_to_x(self.min(),unit)])
         else: 
             return self.min()
 
