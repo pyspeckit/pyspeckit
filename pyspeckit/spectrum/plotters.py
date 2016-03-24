@@ -173,17 +173,15 @@ class Plotter(object):
             else:
                 self.figure = matplotlib.pyplot.figure()
 
-        if not matplotlib.pyplot.fignum_exists(self.figure.number):
+        if hasattr(self.figure, 'number') and not matplotlib.pyplot.fignum_exists(self.figure.number):
             self.figure = matplotlib.pyplot.figure(self.figure.number)
 
         # always re-connect the interactive keys to avoid frustration...
         self._mpl_reconnect()
 
         if axis is not None:
-            self._mpl_disconnect()
             self.axis = axis
             self.figure = axis.figure
-            self._mpl_connect()
         elif len(self.figure.axes) > 0 and self.axis is None:
             self.axis = self.figure.axes[0] # default to first axis
         elif self.axis is None:
@@ -191,7 +189,8 @@ class Plotter(object):
 
         # A check to deal with issue #117: if you close the figure, the axis
         # still exists, but it cannot be reattached to a figure
-        if not (self.axis.get_figure() is matplotlib.pyplot.figure(self.axis.get_figure().number)):
+        if (hasattr(self.axis.get_figure(), 'number') and
+            not (self.axis.get_figure() is matplotlib.pyplot.figure(self.axis.get_figure().number))):
             self.axis = self.figure.gca()
 
         if self.axis is not None and self.axis not in self.figure.axes:
