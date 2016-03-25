@@ -53,6 +53,11 @@ class Interactive(object):
 
         self.use_window_limits = None
 
+        # initialization: Glue can activate fitters without start_interactive,
+        # so these need to be declared
+        self.click = None
+        self.keyclick = None
+
         self._debug = False
 
     @property
