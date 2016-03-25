@@ -585,21 +585,24 @@ class SpectroscopicAxis(u.Quantity):
         else: 
             return self.min()
 
-    def x_to_pix(self, xval, xval_units=None):
+    def x_to_pix(self, xval, xval_units=None, equivalencies=None):
         """
         Given an X coordinate in SpectroscopicAxis' units, return the corresponding pixel number
         """
         if xval_units in pixel_dict:
             return xval
         else:
-            try:
-                if not xval_units:
-                    xval_units = xval.unit
-            except AttributeError:
-                xval_units = u.dimensionless_unscaled
-            xval = xval * u.Unit(xval_units)            
-            nearest_pix = np.argmin(np.abs(self.value-xval.value))
-            # nearest_pix = np.argmin(np.abs(self.value-xval))
+            if xval_units:
+                xval = xval * u.Unit(xval_units)
+            elif type(xval) is not u.Quantity:
+                xval_units = self.unit
+                xval = xval * u.Unit(xval_units)
+
+            if equivalencies is None:
+                equivalencies = self.equivalencies
+
+            nearest_pix = np.argmin(np.abs(self-xval.to(self.unit, equivalencies)))
+
             return nearest_pix
 
     def in_range(self, xval):
