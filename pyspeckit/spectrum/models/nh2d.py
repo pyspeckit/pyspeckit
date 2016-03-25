@@ -254,10 +254,10 @@ voff_lines_dict.update({
 	name: ((freq_dict[name]*u.Hz).to(u.km/u.s, equivalencies=conv_p1_1).value) for name in freq_dict.keys() if "p-1_01-1_11" in name
     })
 voff_lines_dict.update({
-	name: ((freq_dict[name]*u.Hz).to(u.km/u.s, equivalencies=conv_p1_1).value) for name in freq_dict.keys() if "o-1_01-0_00" in name
+	name: ((freq_dict[name]*u.Hz).to(u.km/u.s, equivalencies=conv_o1_0).value) for name in freq_dict.keys() if "o-1_01-0_00" in name
     })
 voff_lines_dict.update({
-	name: ((freq_dict[name]*u.Hz).to(u.km/u.s, equivalencies=conv_p1_1).value) for name in freq_dict.keys() if "p-1_01-0_00" in name
+	name: ((freq_dict[name]*u.Hz).to(u.km/u.s, equivalencies=conv_p1_0).value) for name in freq_dict.keys() if "p-1_01-0_00" in name
     })
 
 # I don't know yet how to use this parameter... in CLASS it does not exist
