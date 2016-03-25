@@ -107,9 +107,8 @@ class Interactive(object):
             if debug or self._debug:
                 log.debug("button: {0} x,y: {1},{2} "
                           " nclicks 1: {3:f}  2: {4:f}".format
-                          (self.nclicks_b1, self.nclicks_b2,
-                          button, event.xdata, event.ydata,
-                          ))
+                          (button, event.xdata, event.ydata, self.nclicks_b1,
+                           self.nclicks_b2,))
 
             if button in ('p','P','1',1,'i','a'): # p for... parea?  a for area.  i for include
                 # button one is always region selection
