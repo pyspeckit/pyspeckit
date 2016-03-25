@@ -331,10 +331,11 @@ class SpectroscopicAxis(u.Quantity):
             log.debug("Created subarr from a non-ndarray {0}".format(type(xarr)))
         else:
             if not xarr.flags['OWNDATA']:
-                log.warning("The X array does not 'own' its data."
-                            "  It will therefore be copied.")
-                warnings.warn("The X array does not 'own' its data."
-                              "  It will therefore be copied.")
+                # nothing owns its data.  We nearly always have to copy this. =(
+                #log.warning("The X array does not 'own' its data."
+                #            "  It will therefore be copied.")
+                #warnings.warn("The X array does not 'own' its data."
+                #              "  It will therefore be copied.")
                 subarr = xarr.copy()
             else:
                 log.debug("xarr owns its own data.  Continuing as normal.")

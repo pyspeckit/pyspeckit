@@ -57,7 +57,7 @@ class TestUnits(object):
         self.x = units.SpectroscopicAxis(np.arange(5), unit=u.angstrom, velocity_convention='optical', equivalencies=u.doppler_optical(3*u.AA))
         self.length = units.SpectroscopicAxis(np.arange(5), unit=u.nm)
         self.frequency = units.SpectroscopicAxis(np.arange(5), unit=u.GHz)
-        self.speed =  units.SpectroscopicAxis(np.arange(5), unit=u.km/u.s)
+        self.speed = units.SpectroscopicAxis(np.arange(5), unit=u.km/u.s)
 
 
     @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
@@ -145,6 +145,24 @@ class TestUnits(object):
         infinites = np.isinf(xarr.value)
         assert all(np.abs((xarr.value - xvals)/xvals)[~infinites] < threshold)
         assert xarr.unit == unit_from
+
+    def test_x_to_pix(self):
+        # regression test for issue 150
+
+        xarr = pyspeckit.units.SpectroscopicAxis(np.linspace(-50,50)*u.km/u.s)
+        assert xarr.x_to_pix(12*u.km/u.s) == 30
+        assert xarr.x_to_pix(12000*u.m/u.s) == 30
+        assert xarr.x_to_pix(12000,u.m/u.s) == 30
+        assert xarr.x_to_pix(120,u.Mm/u.s) == 49
+
+        with pytest.raises(u.UnitConversionError) as ex:
+            xarr.x_to_pix(120,u.GHz)
+        assert str(ex.value) == "'GHz' (frequency) and 'km / s' (speed) are not convertible"
+
+        xarr = pyspeckit.units.SpectroscopicAxis(np.linspace(-50,50)*u.km/u.s, refX=100*u.GHz,
+                                                 velocity_convention='radio')
+        assert xarr.x_to_pix(100.001,u.GHz) == 23
+
 
 
 if __name__=="__main__":
