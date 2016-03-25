@@ -331,10 +331,11 @@ class SpectroscopicAxis(u.Quantity):
             log.debug("Created subarr from a non-ndarray {0}".format(type(xarr)))
         else:
             if not xarr.flags['OWNDATA']:
-                log.warning("The X array does not 'own' its data."
-                            "  It will therefore be copied.")
-                warnings.warn("The X array does not 'own' its data."
-                              "  It will therefore be copied.")
+                # nothing owns its data.  We nearly always have to copy this. =(
+                #log.warning("The X array does not 'own' its data."
+                #            "  It will therefore be copied.")
+                #warnings.warn("The X array does not 'own' its data."
+                #              "  It will therefore be copied.")
                 subarr = xarr.copy()
             else:
                 log.debug("xarr owns its own data.  Continuing as normal.")
@@ -585,21 +586,21 @@ class SpectroscopicAxis(u.Quantity):
         else: 
             return self.min()
 
-    def x_to_pix(self, xval, xval_units=None):
+    def x_to_pix(self, xval, xval_units=None, equivalencies=None):
         """
         Given an X coordinate in SpectroscopicAxis' units, return the corresponding pixel number
         """
         if xval_units in pixel_dict:
             return xval
         else:
-            try:
-                if not xval_units:
-                    xval_units = xval.unit
-            except AttributeError:
-                xval_units = u.dimensionless_unscaled
-            xval = xval * u.Unit(xval_units)            
-            nearest_pix = np.argmin(np.abs(self.value-xval.value))
-            # nearest_pix = np.argmin(np.abs(self.value-xval))
+            if not hasattr(xval, 'unit'):
+                xval = u.Quantity(xval, xval_units or self.unit)
+
+            if equivalencies is None:
+                equivalencies = self.equivalencies
+
+            nearest_pix = np.argmin(np.abs(self-xval.to(self.unit, equivalencies)))
+
             return nearest_pix
 
     def in_range(self, xval):
