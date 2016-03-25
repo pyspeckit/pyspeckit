@@ -592,11 +592,8 @@ class SpectroscopicAxis(u.Quantity):
         if xval_units in pixel_dict:
             return xval
         else:
-            if xval_units:
-                xval = xval * u.Unit(xval_units)
-            elif type(xval) is not u.Quantity:
-                xval_units = self.unit
-                xval = xval * u.Unit(xval_units)
+            if not hasattr(xval, 'unit'):
+                xval = u.Quantity(xval, xval_units or self.unit)
 
             if equivalencies is None:
                 equivalencies = self.equivalencies
