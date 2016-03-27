@@ -534,7 +534,13 @@ class Plotter(object):
                 #  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
                 self._disconnect_matplotlib_keys()
                 self.Spectrum.specfit(interactive=True)
+
+                if self._active_gui is not None:
+                    self._active_gui.clear_all_connections()
+                    raise ValueError("GUI was active when 'f' key pressed")
+
                 self._active_gui = self.Spectrum.specfit
+
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
                 elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
@@ -546,7 +552,14 @@ class Plotter(object):
                     print("\n\nBaseline initiated from the interactive plotter (with reset)")
                 print("Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'")
                 self._disconnect_matplotlib_keys()
+
+                if self._active_gui is not None:
+                    self._active_gui.clear_all_connections()
+                    raise ValueError("GUI was active when 'b' key pressed")
+
                 self.Spectrum.baseline(interactive=True, reset_selection=(event.key=='B'))
+                self._active_gui = self.Spectrum.baseline
+
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
                 elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
