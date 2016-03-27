@@ -68,6 +68,8 @@ class Plotter(object):
 
         self.automake_fitter_tool = False
 
+        self._active_gui = None
+
     def _get_prop(xy, minmax):
         def getprop(self):
             if self.Spectrum.xarr.unit != self._xunit:
@@ -532,6 +534,7 @@ class Plotter(object):
                 #  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
                 self._disconnect_matplotlib_keys()
                 self.Spectrum.specfit(interactive=True)
+                self._active_gui = self.Spectrum.specfit
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
                 elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():

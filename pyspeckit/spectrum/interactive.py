@@ -305,6 +305,8 @@ class Interactive(object):
         self.nclicks_b1 = 0  # button 1
         self.nclicks_b2 = 0  # button 2
 
+        self.Spectrum.plotter._active_gui = None
+
 
     def start_interactive(self, debug=False, LoudDebug=False,
                           reset_selection=False, print_message=True,
