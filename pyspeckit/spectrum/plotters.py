@@ -532,14 +532,7 @@ class Plotter(object):
                 print("\n\nFitter initiated from the interactive plotter.")
                 # extra optional text:
                 #  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
-                self._disconnect_matplotlib_keys()
-                self.Spectrum.specfit(interactive=True)
-
-                if self._active_gui is not None:
-                    self._active_gui.clear_all_connections()
-                    raise ValueError("GUI was active when 'f' key pressed")
-
-                self._active_gui = self.Spectrum.specfit
+                self.activate_interactive_fitter()
 
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
@@ -551,14 +544,7 @@ class Plotter(object):
                 elif event.key == 'B':
                     print("\n\nBaseline initiated from the interactive plotter (with reset)")
                 print("Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'")
-                self._disconnect_matplotlib_keys()
-
-                if self._active_gui is not None:
-                    self._active_gui.clear_all_connections()
-                    raise ValueError("GUI was active when 'b' key pressed")
-
-                self.Spectrum.baseline(interactive=True, reset_selection=(event.key=='B'))
-                self._active_gui = self.Spectrum.baseline
+                self.activate_interactive_baseline_fitter(reset_selection=(event.key=='B'))
 
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
@@ -733,6 +719,47 @@ class Plotter(object):
         else:
             warn("Cannot add line IDs from measurements unless measurements have been made!")
 
+    def activate_interactive_fitter(self):
+        """
+        Attempt to activate the interactive fitter
+        """
+        if self._active_gui is not None:
+            # This should not be reachable.  Clearing connections is the
+            # "right" behavior if this becomes reachable, but I'd rather raise
+            # an exception because I don't want to get here ever
+            self._active_gui.clear_all_connections()
+            raise ValueError("GUI was active when 'f' key pressed")
+
+        self._activate_interactive(self.Spectrum.specfit, interactive=True)
+
+    def activate_interactive_baseline_fitter(self, **kwargs):
+        """
+        Attempt to activate the interactive baseline fitter
+        """
+        if self._active_gui is not None:
+            # This should not be reachable.  Clearing connections is the
+            # "right" behavior if this becomes reachable, but I'd rather raise
+            # an exception because I don't want to get here ever
+            self._active_gui.clear_all_connections()
+            raise ValueError("GUI was active when 'b' key pressed")
+
+        self._activate_interactive(self.Spectrum.baseline, interactive=True,
+                                   **kwargs)
+
+    def _activate_interactive(self, object_to_activate, **kwargs):
+        self._disconnect_matplotlib_keys()
+
+        self._active_gui = object_to_activate
+
+        # actiavting the gui calls clear_all_connections, which disconnects the
+        # gui
+        try:
+            self._active_gui(**kwargs)
+            self._active_gui = object_to_activate
+            assert self._active_gui is not None
+        except Exception as ex:
+            self._active_gui = None
+            raise ex
 
 def parse_units(labelstring):
     import re

@@ -289,7 +289,8 @@ class Interactive(object):
         cids_to_remove = []
         if not hasattr(self.Spectrum.plotter.figure,'canvas'):
             # just quit out; saves a tab...
-            if debug or self._debug: print("Didn't find a canvas, quitting.")
+            if debug or self._debug:
+                print("Didn't find a canvas, quitting.")
             return
         for eventtype in ('button_press_event','key_press_event'):
             for key,val in iteritems(self.Spectrum.plotter.figure.canvas.callbacks.callbacks[eventtype]):
@@ -328,9 +329,9 @@ class Interactive(object):
         """
         if reset_selection:
             self.includemask[:] = False
-        if print_message: 
+        if print_message:
             print(self.interactive_help_message)
-        if clear_all_connections: 
+        if clear_all_connections:
             self.clear_all_connections()
             self.Spectrum.plotter._disconnect_matplotlib_keys()
         global_kwargs = kwargs
@@ -421,7 +422,7 @@ class Interactive(object):
             * None: No exclusion
         """
         if debug or self._debug:
-            log.info(map(str, ("selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset," xmin: ",xmin, " xmax: ",xmax)))
+            log.info("".join(map(str, ("selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset," xmin: ",xmin, " xmax: ",xmax))))
 
         if xmin is not None and xmax is not None:
             if verbose or debug or self._debug:
