@@ -53,6 +53,11 @@ class Interactive(object):
 
         self.use_window_limits = None
 
+        # initialization: Glue can activate fitters without start_interactive,
+        # so these need to be declared
+        self.click = None
+        self.keyclick = None
+
         self._debug = False
 
     @property
@@ -71,7 +76,7 @@ class Interactive(object):
     def xmax(self, value):
         self._xmax = int(value)
 
-    def event_manager(self, event, debug=False):
+    def event_manager(self, event, force_over_toolbar=False, debug=False):
         """
         Decide what to do given input (click, keypress, etc.)
         """
@@ -88,24 +93,26 @@ class Interactive(object):
         else:
             nwidths = 1
 
-        if toolmode == '' and self.Spectrum.plotter.axis in event.canvas.figure.axes:
+        print("toolmode = {0} force_over_toolbar={1}".format(toolmode, force_over_toolbar))
+        if (toolmode == '' or force_over_toolbar) and self.Spectrum.plotter.axis in event.canvas.figure.axes:
             if hasattr(event,'button'):
                 button = event.button
             elif hasattr(event,'key'):
                 button = event.key
 
+            print("Event: {0}".format(event))
             if event.xdata is None or event.ydata is None:
                 return
 
             if debug or self._debug:
                 log.debug("button: {0} x,y: {1},{2} "
                           " nclicks 1: {3:f}  2: {4:f}".format
-                          (self.nclicks_b1, self.nclicks_b2,
-                          button, event.xdata, event.ydata,
-                          ))
+                          (button, event.xdata, event.ydata, self.nclicks_b1,
+                           self.nclicks_b2,))
 
             if button in ('p','P','1',1,'i','a'): # p for... parea?  a for area.  i for include
                 # button one is always region selection
+                print("Button is {0}".format(button))
                 self.selectregion_interactive(event,debug=debug)
             elif button in ('c','C'):
                 self.clear_highlights()
@@ -134,7 +141,8 @@ class Interactive(object):
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
         else:
         #elif debug or self._debug:
-            print("Button press not acknowledged",event)
+            print("Button press not acknowledged.  event={0}, toolmode={1}".format(event,
+                                                                                   toolmode))
             if hasattr(event,'button'):
                 print("event.button={0}".format(event.button))
             if hasattr(event,'key'):
@@ -281,7 +289,8 @@ class Interactive(object):
         cids_to_remove = []
         if not hasattr(self.Spectrum.plotter.figure,'canvas'):
             # just quit out; saves a tab...
-            if debug or self._debug: print("Didn't find a canvas, quitting.")
+            if debug or self._debug:
+                print("Didn't find a canvas, quitting.")
             return
         for eventtype in ('button_press_event','key_press_event'):
             for key,val in iteritems(self.Spectrum.plotter.figure.canvas.callbacks.callbacks[eventtype]):
@@ -296,6 +305,8 @@ class Interactive(object):
         # Click counters - should always be reset!
         self.nclicks_b1 = 0  # button 1
         self.nclicks_b2 = 0  # button 2
+
+        self.Spectrum.plotter._active_gui = None
 
 
     def start_interactive(self, debug=False, LoudDebug=False,
@@ -318,13 +329,18 @@ class Interactive(object):
         """
         if reset_selection:
             self.includemask[:] = False
-        if print_message: 
+        if print_message:
             print(self.interactive_help_message)
-        if clear_all_connections: 
+        if clear_all_connections:
             self.clear_all_connections()
             self.Spectrum.plotter._disconnect_matplotlib_keys()
-        key_manager = lambda x: self.event_manager(x, debug=debug, **kwargs)
-        click_manager = lambda x: self.event_manager(x, debug=debug, **kwargs)
+        global_kwargs = kwargs
+        def key_manager(x, *args, **kwargs):
+            kwargs.update(global_kwargs)
+            return self.event_manager(x, *args, debug=debug, **kwargs)
+        def click_manager(x, *args, **kwargs):
+            kwargs.update(global_kwargs)
+            return self.event_manager(x, *args, debug=debug, **kwargs)
         key_manager.__name__ = "event_manager"
         click_manager.__name__ = "event_manager"
 
@@ -406,7 +422,7 @@ class Interactive(object):
             * None: No exclusion
         """
         if debug or self._debug:
-            log.info(map(str, ("selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset," xmin: ",xmin, " xmax: ",xmax)))
+            log.info("".join(map(str, ("selectregion kwargs: ",kwargs," use_window_limits: ",use_window_limits," reset: ",reset," xmin: ",xmin, " xmax: ",xmax))))
 
         if xmin is not None and xmax is not None:
             if verbose or debug or self._debug:

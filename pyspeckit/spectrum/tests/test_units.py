@@ -170,4 +170,3 @@ if __name__=="__main__":
     xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=unit_from,refX=5,refX_unit='GHz')
     xarr2=xarr.as_unit('km/s',quiet=False,debug=True)
     xarr3=xarr2.as_unit('GHz',quiet=False,debug=True)
-        
