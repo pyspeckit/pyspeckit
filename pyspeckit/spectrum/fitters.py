@@ -3,6 +3,8 @@ import matplotlib
 import numpy as np
 import copy
 import re
+import warnings
+
 from astropy import log
 from astropy import units as u
 from astropy.extern.six.moves import xrange
@@ -527,12 +529,17 @@ class Specfit(interactive.Interactive):
             assert np.all(self.Spectrum.data.mask == self.spectofit.mask)
         self._valid = True
         if hasattr(self.Spectrum,'baseline'):
-            if (self.Spectrum.baseline.subtracted is False 
-                    and self.Spectrum.baseline.basespec is not None
-                    and len(self.spectofit) == len(self.Spectrum.baseline.basespec)):
+            if ((not self.Spectrum.baseline.subtracted and
+                 self.Spectrum.baseline.basespec is not None and
+                 len(self.spectofit) == len(self.Spectrum.baseline.basespec))):
                 self.spectofit -= self.Spectrum.baseline.basespec
         OKmask = (self.spectofit==self.spectofit)
-        self.spectofit[~OKmask] = 0
+
+        with warnings.catch_warnings():
+            # catch a specific np1.7 futurewarning relating to masks
+            warnings.simplefilter("ignore")
+            self.spectofit[~OKmask] = 0
+
         self.seterrspec()
         self.errspec[~OKmask] = 1e10
         if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
@@ -541,8 +548,8 @@ class Specfit(interactive.Interactive):
     @property
     def mask(self):
         """ Mask: True means "exclude" """
-        if (hasattr(self.spectofit, 'mask') and
-            self.spectofit.shape==self.spectofit.mask.shape):
+        if ((hasattr(self.spectofit, 'mask') and
+             self.spectofit.shape==self.spectofit.mask.shape)):
             mask = self.spectofit.mask
         else:
             mask = np.zeros_like(self.spectofit, dtype='bool')
