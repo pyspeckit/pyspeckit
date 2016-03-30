@@ -87,4 +87,4 @@ script:
    # some extras for future use
    # right now, run_tests is required
    # but py.test works, kinda
-   - py.test -x pyspeckit/spectrum/tests/test_units.py
+   - if [ $SETUP_CMD == 'test' ]; then py.test -x pyspeckit/spectrum/tests/test_units.py; fi
