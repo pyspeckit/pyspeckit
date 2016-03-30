@@ -10,7 +10,7 @@ import os
 
 from ... import Spectrum, Spectra
 
-@pytest.mark.skipif(not SPECUTILS_OK)
+@pytest.mark.skipif("not SPECUTILS_OK")
 def test_specutils_aao_reader_single():
 
     filename = os.path.join(specutils.io.tests.__path__[0],
@@ -23,7 +23,7 @@ def test_specutils_aao_reader_single():
     assert sp.xarr.unit.to_string() == 'Angstrom'
     assert all(sp.error==0)
 
-@pytest.mark.skipif(not SPECUTILS_OK)
+@pytest.mark.skipif("not SPECUTILS_OK")
 def test_specutils_aao_reader_multiple():
 
     filename = os.path.join(specutils.io.tests.__path__[0],

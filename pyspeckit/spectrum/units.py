@@ -726,7 +726,7 @@ class SpectroscopicAxis(u.Quantity):
         if isinstance(self.unit, str):
             self._unit = u.Unit(self.unit)
 
-        return self.to(unit, equivalencies=self.equivalencies)
+        return self.to(unit, equivalencies=self.equivalencies, **kwargs)
 
     def make_dxarr(self, coordinate_location='center'):
         """
