@@ -826,7 +826,7 @@ class SingleSpectrum(BaseSpectrum):
         error = spec1d.uncertainty
 
         return cls(data=data, error=error, xarr=xarr,
-                   unit=spec1d._unit)
+                   unit=spec1d._unit, header=pyfits.Header())
 
 
     @classmethod
