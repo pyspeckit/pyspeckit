@@ -749,7 +749,7 @@ class BaseSpectrum(object):
             elif hasattr(self,'xarr') and hasattr(other,'xarr'): # purely for readability
 
                 if self._arithmetic_threshold == 'exact':
-                    xarrcheck = np.all((self.xarr == other.xarr).value)
+                    xarrcheck = np.all((self.xarr == other.xarr))
                 else:
                     if self._arithmetic_threshold_units is None:
                         # not sure this should ever be allowed
@@ -939,7 +939,7 @@ class Spectra(BaseSpectrum):
 
         if other.xarr.unit != self.xarr.unit:
             # convert all inputs to same unit
-            other.xarr.convert_to_units(self.xarr.unit,**kwargs)
+            other.xarr.convert_to_units(self.xarr.unit)
         self.xarr = units.SpectroscopicAxes([self.xarr,other.xarr])
         self.data = np.concatenate([self.data,other.data])
         self.error = np.concatenate([self.error,other.error])

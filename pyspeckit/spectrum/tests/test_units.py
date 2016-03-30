@@ -1,5 +1,6 @@
 import pyspeckit
-from pyspeckit.spectrum import units
+from .. import units
+from ..units import SpectroscopicAxis
 import numpy as np
 import pytest
 from astropy import units as u
@@ -9,10 +10,10 @@ convention = ['optical','radio','relativistic']
 # these are used to populate a matrix for unit conversion tests
 # being complete is expensive, ~1+ minutes
 unit_type_dict = {
-    #'Hz' :'frequency', 'kHz':'frequency', 'MHz':'frequency', 
+    #'Hz' :'frequency', 'kHz':'frequency', 'MHz':'frequency',
     'GHz':'frequency',
     # not permitted by astropy 'hz' :'frequency', 'khz':'frequency', 'mhz':'frequency', 'ghz':'frequency',
-    #'THz':'frequency', 
+    #'THz':'frequency',
     'meter/second':'velocity',
     #'m/s':'velocity',
     #'kilometer/s':'velocity',
@@ -28,7 +29,7 @@ unit_type_dict = {
     #'m s-1':'velocity',
     'cm s-1':'velocity',
     #'ms-1':'velocity',
-    #'cm/s':'velocity', #'cms':'velocity', 
+    #'cm/s':'velocity', #'cms':'velocity',
     #'meter':'wavelength','m':'wavelength',
     'centimeter':'wavelength',
     #'cm':'wavelength',
@@ -47,9 +48,9 @@ unit_type_dict = {
 }
 
 params = [(a,b,c,d) for a in unit_type_dict if a not in ('unknown',None)
-                  for b in unit_type_dict if b not in ('unknown',None)
-                  for c in convention
-                  for d in ['GHz','cm']]
+          for b in unit_type_dict if b not in ('unknown',None)
+          for c in convention
+          for d in ['GHz','cm']]
 
 class TestUnits(object):
 
@@ -62,8 +63,8 @@ class TestUnits(object):
 
     @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
     def test_convert_to(self, unit_from, unit_to, convention, ref_unit):
-        x.convert_to_unit(unit_to,convention=convention, make_dxarr=False)
-        assert x.unit == u.Unit(unit_to)
+        self.x.convert_to_unit(unit_to,convention=convention, make_dxarr=False)
+        assert self.x.unit == u.Unit(unit_to)
 
     def test_equivalencies_1(self, ):
         assert self.x.equivalencies is not None # == u.doppler_optical(3*u.AA)
@@ -163,6 +164,27 @@ class TestUnits(object):
                                                  velocity_convention='radio')
         assert xarr.x_to_pix(100.001,u.GHz) == 23
 
+    def test_comparison(self):
+        # regression test for issue 153
+
+        xx = np.linspace(-50,50)*u.km/u.s
+
+        # test the quantity-only version first
+        # (so if it crashes here, we know it's not our fault)
+        print()
+        print("Astropy quantity tests\n")
+        mask1 = xx < 0*u.km/u.s
+        print("Resulting type: {0}".format(type(mask1)))
+        assert np.all(mask1[:25])
+        assert np.all(~mask1[25:])
+
+        print()
+        print("Pyspeckit xarr tests\n")
+        xarr = pyspeckit.units.SpectroscopicAxis(xx)
+        mask = xarr < 0*u.km/u.s
+        print("Resulting type: {0}".format(type(mask)))
+        assert np.all(mask[:25])
+        assert np.all(~mask[25:])
 
 
 if __name__=="__main__":
