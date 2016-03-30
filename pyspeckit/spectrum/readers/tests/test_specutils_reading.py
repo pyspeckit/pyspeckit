@@ -36,6 +36,15 @@ def test_specutils_aao_reader_multiple():
     assert sp.xarr.unit.to_string() == 'Angstrom'
     assert all(sp.error==0)
 
+@pytest.mark.skipif("not SPECUTILS_OK")
+def test_specutils_aao_reader_dontallowmismatchdiffs():
+
+    filename = os.path.join(specutils.io.tests.__path__[0],
+                            'files/AAO.fits')
+
+    sp1d = specutils.io.read_fits.read_fits_spectrum1d(filename)
+    sp = Spectra.from_spectrum1d_list(sp1d)
+
     # TODO: make this an independent test
     # this is testing that you can't do arithmetic on axes that are different
     with pytest.raises(ValueError) as ex:

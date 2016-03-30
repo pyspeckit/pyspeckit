@@ -512,7 +512,7 @@ class SpectroscopicAxis(u.Quantity):
         self._equivalencies = getattr(obj, 'equivalencies', [])
         # moved from __init__ - needs to be done whenever viewed
         # (this is slow, though - may be better not to do this)
-        if self.shape: # check to make sure non-scalar
+        if self.shape and self.dtype != np.dtype('bool'): # check to make sure non-scalar
             # can't use make_dxarr here! infinite recursion =(
             self.dxarr = np.diff(np.array(self))
 
@@ -726,7 +726,7 @@ class SpectroscopicAxis(u.Quantity):
         if isinstance(self.unit, str):
             self._unit = u.Unit(self.unit)
 
-        return self.to(unit, equivalencies=self.equivalencies, **kwargs)
+        return self.to(unit, equivalencies=self.equivalencies)
 
     def make_dxarr(self, coordinate_location='center'):
         """
