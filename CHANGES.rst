@@ -4,6 +4,8 @@ CHANGES
 Version 0.1.19 (unreleased)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    * Bugfix #152: SpectroscopicAxis comparisons did not properly yield
+      booleans due to an inheritance error.
     * Bugfix #147: Spectrum arithmetic was being allowed between spectrum
       objects with different X-axes.  This has been disallowed, and a test has
       been added.
