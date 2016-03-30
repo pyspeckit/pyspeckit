@@ -456,9 +456,9 @@ class BaseSpectrum(object):
 
         Parameters
         ----------
-        start : numpy.float or int
+        start : numpy.float or int or astropy quantity
             start of slice
-        stop :  numpy.float or int
+        stop :  numpy.float or int or astropy quantity
             stop of slice
         unit : str
             allowed values are any supported physical unit, 'pixel'
@@ -468,15 +468,23 @@ class BaseSpectrum(object):
             Save the fitted parameters from self.fitter?
         """
 
-        if unit in ('pixel','pixels'):
+        if hasattr(start, 'unit'):
+            start_ind = self.xarr.x_to_pix(start)
+        elif unit in ('pixel','pixels'):
             start_ind = start
-            stop_ind  = stop
         else:
-            x_in_units = self.xarr.as_unit(unit)
-            start_ind = x_in_units.x_to_pix(start)
-            stop_ind  = x_in_units.x_to_pix(stop)
+            start_ind = self.xarr.x_to_pix(start, xval_units=unit)
+
+        if hasattr(stop, 'unit'):
+            stop_ind = self.xarr.x_to_pix(stop)
+        elif unit in ('pixel','pixels'):
+            stop_ind = stop
+        else:
+            stop_ind = self.xarr.x_to_pix(stop, xval_units=unit)
+
         if start_ind > stop_ind:
             start_ind,stop_ind = stop_ind,start_ind
+
         spectrum_slice = slice(start_ind,stop_ind)
 
         log.debug("Slicing from {start} to {stop} with unit {unit} and copy="
@@ -741,7 +749,7 @@ class BaseSpectrum(object):
             elif hasattr(self,'xarr') and hasattr(other,'xarr'): # purely for readability
 
                 if self._arithmetic_threshold == 'exact':
-                    xarrcheck = np.all((self.xarr == other.xarr).value)
+                    xarrcheck = np.all((self.xarr == other.xarr))
                 else:
                     if self._arithmetic_threshold_units is None:
                         # not sure this should ever be allowed
@@ -818,7 +826,7 @@ class SingleSpectrum(BaseSpectrum):
         error = spec1d.uncertainty
 
         return cls(data=data, error=error, xarr=xarr,
-                   unit=spec1d._unit)
+                   unit=spec1d._unit, header=pyfits.Header())
 
 
     @classmethod
@@ -931,7 +939,7 @@ class Spectra(BaseSpectrum):
 
         if other.xarr.unit != self.xarr.unit:
             # convert all inputs to same unit
-            other.xarr.convert_to_units(self.xarr.unit,**kwargs)
+            other.xarr.convert_to_units(self.xarr.unit)
         self.xarr = units.SpectroscopicAxes([self.xarr,other.xarr])
         self.data = np.concatenate([self.data,other.data])
         self.error = np.concatenate([self.error,other.error])

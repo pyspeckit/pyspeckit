@@ -1,18 +1,22 @@
 import pyspeckit
-from pyspeckit.spectrum import units
+from .. import units
+from ..units import SpectroscopicAxis
 import numpy as np
 import pytest
 from astropy import units as u
 
 convention = ['optical','radio','relativistic']
+convention_map = {'optical': u.doppler_optical,
+                  'radio': u.doppler_radio,
+                  'relativistic': u.doppler_relativistic}
 
 # these are used to populate a matrix for unit conversion tests
 # being complete is expensive, ~1+ minutes
 unit_type_dict = {
-    #'Hz' :'frequency', 'kHz':'frequency', 'MHz':'frequency', 
+    #'Hz' :'frequency', 'kHz':'frequency', 'MHz':'frequency',
     'GHz':'frequency',
     # not permitted by astropy 'hz' :'frequency', 'khz':'frequency', 'mhz':'frequency', 'ghz':'frequency',
-    #'THz':'frequency', 
+    #'THz':'frequency',
     'meter/second':'velocity',
     #'m/s':'velocity',
     #'kilometer/s':'velocity',
@@ -28,7 +32,7 @@ unit_type_dict = {
     #'m s-1':'velocity',
     'cm s-1':'velocity',
     #'ms-1':'velocity',
-    #'cm/s':'velocity', #'cms':'velocity', 
+    #'cm/s':'velocity', #'cms':'velocity',
     #'meter':'wavelength','m':'wavelength',
     'centimeter':'wavelength',
     #'cm':'wavelength',
@@ -47,36 +51,59 @@ unit_type_dict = {
 }
 
 params = [(a,b,c,d) for a in unit_type_dict if a not in ('unknown',None)
-                  for b in unit_type_dict if b not in ('unknown',None)
-                  for c in convention
-                  for d in ['GHz','cm']]
+          for b in unit_type_dict if b not in ('unknown',None)
+          for c in convention
+          for d in ['GHz','cm']]
 
 class TestUnits(object):
 
-    def __init__(self):
-        self.x = units.SpectroscopicAxis(np.arange(5), unit=u.angstrom, velocity_convention='optical', equivalencies=u.doppler_optical(3*u.AA))
-        self.length = units.SpectroscopicAxis(np.arange(5), unit=u.nm)
-        self.frequency = units.SpectroscopicAxis(np.arange(5), unit=u.GHz)
-        self.speed = units.SpectroscopicAxis(np.arange(5), unit=u.km/u.s)
-
+    @classmethod
+    def setup_class(cls):
+        cls.x = units.SpectroscopicAxis(np.arange(5), unit=u.angstrom, velocity_convention='optical', equivalencies=u.doppler_optical(3*u.AA))
+        cls.length = units.SpectroscopicAxis(np.arange(5), unit=u.nm)
+        cls.frequency = units.SpectroscopicAxis(np.arange(5), unit=u.GHz)
+        cls.speed = units.SpectroscopicAxis(np.arange(5), unit=u.km/u.s)
+        return cls
 
     @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
     def test_convert_to(self, unit_from, unit_to, convention, ref_unit):
-        x.convert_to_unit(unit_to,convention=convention, make_dxarr=False)
-        assert x.unit == u.Unit(unit_to)
+        try:
+            self.x.convert_to_unit(unit_to,
+                                   velocity_convention=convention,
+                                   make_dxarr=False,
+                                  )
+            assert self.x.unit == u.Unit(unit_to)
+        except TypeError as ex:
+            if str(ex.args[0]) == ('cannot convert value type to array type '
+                                   'without precision loss'):
+                print("{0}->{1} with ref {2} is too imprecise".format(
+                    unit_from, unit_to, ref_unit))
+            else:
+                raise ex
 
     def test_equivalencies_1(self, ):
         assert self.x.equivalencies is not None # == u.doppler_optical(3*u.AA)
 
     @pytest.mark.parametrize(('velocity_convention'), convention)
     def test_equivalencies_2(self, velocity_convention):
-        x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, refX=3*u.AA, velocity_convention=velocity_convention)
-        assert x.equivalencies == u.doppler_optical(3*u.AA)
+        ref = 3*u.AA
+        x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, refX=ref,
+                              velocity_convention=velocity_convention)
+        expected = set(convention_map[velocity_convention](ref) + u.spectral())
+        eq_units = set([item[:2] for item in x.equivalencies])
+        eq_units_expected = set([item[:2] for item in expected])
+        assert eq_units == eq_units_expected
 
     @pytest.mark.parametrize(('velocity_convention'), convention)
     def test_equivalencies_3(self, velocity_convention):
-        x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, refX=3, refX_unit='angstrom', velocity_convention=velocity_convention)
-        assert x.equivalencies == u.get('doppler_{0}'.format(velocity_convention))(3*u.AA)
+        # note that the ref has no unit; the unit is assumed to be the axis units
+        x = SpectroscopicAxis(np.arange(5), unit=u.angstrom, refX=3,
+                              refX_unit='angstrom',
+                              velocity_convention=velocity_convention)
+        expected = set(convention_map[velocity_convention](3*u.AA) + u.spectral())
+        eq_units = set([item[:2] for item in x.equivalencies])
+        eq_units_expected = set([item[:2] for item in expected])
+        assert eq_units == eq_units_expected
 
     def test_initialize_units(self, ):
         xarr = units.SpectroscopicAxis(np.linspace(1,10,10),unit=u.dimensionless_unscaled)
@@ -86,11 +113,11 @@ class TestUnits(object):
 
     @pytest.mark.parametrize(('unit_from','unit_to','convention','ref_unit'),params)
     def test_convert_units(self, unit_from, unit_to, convention, ref_unit):
-        xarr = units.SpectroscopicAxis(np.linspace(1, 10, 3), unit=unit_from,
+        xarr = units.SpectroscopicAxis(np.linspace(4.9, 5.1, 3), unit=unit_from,
                                        refX=5, refX_unit=ref_unit,
                                        velocity_convention=convention,
                                       )
-        xarr.convert_to_unit(unit_to, make_dxarr=False)
+        xarr.convert_to_unit(unit_to, make_dxarr=False,)
         assert xarr.unit == unit_to
 
     def test_convert_units2(self, ):
@@ -140,8 +167,10 @@ class TestUnits(object):
             refX = u.Quantity(5, ref_unit)
         xarr = units.SpectroscopicAxis(np.copy(xvals), unit=unit_from, refX=refX,
                                        velocity_convention=convention)
-        xarr.convert_to_unit(unit_to,convention=convention, make_dxarr=False)
-        xarr.convert_to_unit(unit_from,convention=convention, make_dxarr=False)
+        xarr.convert_to_unit(unit_to, velocity_convention=convention,
+                             make_dxarr=False)
+        xarr.convert_to_unit(unit_from, velocity_convention=convention,
+                             make_dxarr=False)
         infinites = np.isinf(xarr.value)
         assert all(np.abs((xarr.value - xvals)/xvals)[~infinites] < threshold)
         assert xarr.unit == unit_from
@@ -163,6 +192,27 @@ class TestUnits(object):
                                                  velocity_convention='radio')
         assert xarr.x_to_pix(100.001,u.GHz) == 23
 
+    def test_comparison(self):
+        # regression test for issue 153
+
+        xx = np.linspace(-50,50)*u.km/u.s
+
+        # test the quantity-only version first
+        # (so if it crashes here, we know it's not our fault)
+        print()
+        print("Astropy quantity tests\n")
+        mask1 = xx < 0*u.km/u.s
+        print("Resulting type: {0}".format(type(mask1)))
+        assert np.all(mask1[:25])
+        assert np.all(~mask1[25:])
+
+        print()
+        print("Pyspeckit xarr tests\n")
+        xarr = pyspeckit.units.SpectroscopicAxis(xx)
+        mask = xarr < 0*u.km/u.s
+        print("Resulting type: {0}".format(type(mask)))
+        assert np.all(mask[:25])
+        assert np.all(~mask[25:])
 
 
 if __name__=="__main__":
