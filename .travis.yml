@@ -25,7 +25,7 @@ env:
         - NUMPY_VERSION=1.10
         - ASTROPY_VERSION=stable
         - CONDA_DEPENDENCIES='matplotlib=1.4 scipy'
-        - PIP_DEPENDENCIES='spectral-cube lmfit lineid-plot'
+        - PIP_DEPENDENCIES='spectral-cube lmfit lineid-plot specutils'
 
     matrix:
         # Make sure that egg_info works without dependencies
