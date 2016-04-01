@@ -2,19 +2,23 @@
 """
 pyspeckit command line startup script
 """
+from __future__ import print_function
 import sys
 # remove script file's parent directory from path
 # (otherwise, can't import pyspeckit)
-#sys.path.pop(0)
-import pyspeckit
+sys.path.pop(0)
+from pyspeckit.spectrum.classes import Spectrum, Spectra
+from pyspeckit.cubes.SpectralCube import Cube, CubeStack
+from pyspeckit import wrappers as pw
 import optparse
 import os
 import re
 
 if __name__ == "__main__":
 
-    import matplotlib, itertools, pylab
-    import pylab as pl
+    import matplotlib
+    import itertools
+    import pylab
 
     parser=optparse.OptionParser()
     parser.add_option("--verbose","-v",help="Be loud? Default True",default=False,action='store_true')
@@ -35,29 +39,28 @@ if __name__ == "__main__":
     verbose = options.verbose
 
     if verbose:
-        print "Args: ",args
-        print "Options: ",options
+        print("Args: ",args)
+        print("Options: ",options)
 
     if options.debug:
-        print "DEBUG MODE.  Using a different excepthook."
+        print("DEBUG MODE.  Using a different excepthook.")
         def info(type, value, tb):
-           if hasattr(sys, 'ps1') or not sys.stderr.isatty():
-              # we are in interactive mode or we don't have a tty-like
-              # device, so we call the default hook
-              sys.__excepthook__(type, value, tb)
-           else:
-              import traceback, pdb
-              # we are NOT in interactive mode, print the exception...
-              traceback.print_exception(type, value, tb)
-              print
-              # ...then start the debugger in post-mortem mode.
-              pdb.pm()
+            if hasattr(sys, 'ps1') or not sys.stderr.isatty():
+                # we are in interactive mode or we don't have a tty-like
+                # device, so we call the default hook
+                sys.__excepthook__(type, value, tb)
+            else:
+                import traceback, pdb
+                # we are NOT in interactive mode, print the exception...
+                traceback.print_exception(type, value, tb)
+                print()
+                # ...then start the debugger in post-mortem mode.
+                pdb.pm()
         
         sys.excepthook = info
 
     specnum = int(options.specnum)
 
-    import pyspeckit
     if options.wcstype:
         if "," in options.wcstype:
             wcstype = options.wcstype.split(",")
@@ -77,28 +80,28 @@ if __name__ == "__main__":
     
     if len(args) > 1:
         if options.threed:
-            cubelist = [pyspeckit.Cube(fname) for fname in args]
+            cubelist = [Cube(fname) for fname in args]
             splist = cubelist
-            cube = pyspeckit.CubeStack(cubelist)
+            cube = CubeStack(cubelist)
             options.doplot = False
         elif len(wcstype) == len(args):
-            splist = [pyspeckit.Spectrum(a, **kwargs) for a, w in
+            splist = [Spectrum(a, **kwargs) for a, w in
                 zip(args, wcstype)]
-            sp = pyspeckit.Spectra(splist)
+            sp = Spectra(splist)
         else:
-            splist = [pyspeckit.Spectrum(a,**kwargs) for a in args]
-            sp = pyspeckit.Spectra(splist)
+            splist = [Spectrum(a,**kwargs) for a in args]
+            sp = Spectra(splist)
         linestyles = itertools.cycle(["steps-mid","steps-mid--"])
         colors = itertools.cycle(matplotlib.cm.spectral(pylab.linspace(0,1,len(splist))))
     else:
         if len(wcstype)==1:
-            sp = pyspeckit.Spectrum(*args,**kwargs)
+            sp = Spectrum(*args,**kwargs)
         else:
             if options.threed:
-                cube = pyspeckit.Cube(*args)
+                cube = Cube(*args)
                 options.doplot = False
             else:
-                sp = pyspeckit.Spectrum(*args,**kwargs)
+                sp = Spectrum(*args,**kwargs)
     if options.smooth > 0: sp.smooth(float(options.smooth))
     if options.doplot: sp.plotter()
 
@@ -106,7 +109,7 @@ if __name__ == "__main__":
         sp.specfit()
 
     if options.fitnh3:
-        pyspeckit.wrappers.fitnh3.fitnh3(sp)
+        pw.fitnh3.fitnh3(sp)
 
     import IPython
     IPython.embed()
