@@ -6,7 +6,7 @@ from __future__ import print_function
 import sys
 # remove script file's parent directory from path
 # (otherwise, can't import pyspeckit)
-sys.path.pop(0)
+#sys.path.pop(0)
 from pyspeckit.spectrum.classes import Spectrum, Spectra
 from pyspeckit.cubes.SpectralCube import Cube, CubeStack
 from pyspeckit import wrappers as pw
