@@ -93,14 +93,14 @@ class Interactive(object):
         else:
             nwidths = 1
 
-        print("toolmode = {0} force_over_toolbar={1}".format(toolmode, force_over_toolbar))
+        #DEBUG print("toolmode = {0} force_over_toolbar={1}".format(toolmode, force_over_toolbar))
         if (toolmode == '' or force_over_toolbar) and self.Spectrum.plotter.axis in event.canvas.figure.axes:
             if hasattr(event,'button'):
                 button = event.button
             elif hasattr(event,'key'):
                 button = event.key
 
-            print("Event: {0}".format(event))
+            #DEBUG print("Event: {0}".format(event))
             if event.xdata is None or event.ydata is None:
                 return
 
@@ -112,7 +112,7 @@ class Interactive(object):
 
             if button in ('p','P','1',1,'i','a'): # p for... parea?  a for area.  i for include
                 # button one is always region selection
-                print("Button is {0}".format(button))
+                #DEBUG print("Button is {0}".format(button))
                 self.selectregion_interactive(event,debug=debug)
             elif button in ('c','C'):
                 self.clear_highlights()
@@ -139,14 +139,9 @@ class Interactive(object):
                 else: 
                     print("ERROR: Did not find fitter %s" % fittername)
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
-        else:
-        #elif debug or self._debug:
+        elif debug or self._debug:
             print("Button press not acknowledged.  event={0}, toolmode={1}".format(event,
                                                                                    toolmode))
-            if hasattr(event,'button'):
-                print("event.button={0}".format(event.button))
-            if hasattr(event,'key'):
-                print("event.key={0}".format(event.key))
 
 
     def selectregion_interactive(self, event, mark_include=True, debug=False, **kwargs):
@@ -162,7 +157,8 @@ class Interactive(object):
             self.nclicks_b1 = 1
             self._xclick1 = xpix
             self.xclicks.append(xpix)
-            if debug or self._debug: print("Click 1: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax))
+            if debug or self._debug:
+                print("Click 1: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax))
         elif self.nclicks_b1 == 1:
             self._xclick2 = xpix
             self.nclicks_b1 = 0
@@ -189,7 +185,8 @@ class Interactive(object):
                     highlight_line.set_ydata(hly)
                 self.Spectrum.plotter.refresh()
 
-            if debug or self._debug: print("Click 2: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax))
+            if debug or self._debug:
+                print("Click 2: clickx=%i xmin=%i, xmax=%i" % (xpix,self.xmin,self.xmax))
 
         self._update_xminmax()
 
