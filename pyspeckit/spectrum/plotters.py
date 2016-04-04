@@ -404,7 +404,7 @@ class Plotter(object):
 
             if self.ymin and self.ymax:
                 # this is utter nonsense....
-                if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
+                if (np.nanmax(self.Spectrum.data) < self.ymin or np.nanmin(self.Spectrum.data) > self.ymax
                         or reset_ylimits):
                     if not self.silent and not reset_ylimits:
                         warn("Resetting Y-axis min/max because the plot is out of bounds.")
@@ -414,10 +414,7 @@ class Plotter(object):
             if ymin is not None:
                 self.ymin = ymin
             elif self.ymin is None:
-                if hasattr(self.Spectrum.data, 'mask'):
-                    yminval = self.Spectrum.data[xpixmin:xpixmax].min()
-                else:
-                    yminval = np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
+                yminval = np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
                 # Increase the range fractionally.  This means dividing a positive #, multiplying a negative #
                 if yminval < 0:
                     self.ymin = float(yminval)*float(ypeakscale)
@@ -427,10 +424,7 @@ class Plotter(object):
             if ymax is not None:
                 self.ymax = ymax
             elif self.ymax is None:
-                if hasattr(self.Spectrum.data, 'mask'):
-                    ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin)
-                else:
-                    ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin)
+                ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin)
                 if ymaxval > 0:
                     self.ymax = float(ymaxval) * float(ypeakscale) + self.ymin
                 else:
