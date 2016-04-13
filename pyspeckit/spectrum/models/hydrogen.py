@@ -175,12 +175,35 @@ for series,values in iteritems(table14dot2):
 
 
 # not used right now, but it could be so I'm listing it here
-def rrl(n,dn=1,amu=1.007825):   
+def rrl(n,dn=1,amu=1.007825,Z=1):
     """
     compute Radio Recomb Line freqs in GHz
     from Brown, Lockman & Knapp ARAA 1978 16 445
+
+    UPDATED:
+        Gordon & Sorochenko 2009, eqn A6
+
+    Parameters
+    ----------
+    n : int
+        The number of the lower level of the recombination line (H1a is Lyman
+        alpha, for example)
+    dn : int
+        The delta-N of the transition.  alpha=1, beta=2, etc.
+    amu : float
+        The mass of the central atom
+    Z : int
+        The ionization parameter for the atom.  Z=1 is neutral, Z=2 is singly
+        ionized, etc.  For hydrogen, only z=1 makes sense, since ionized
+        hydrogen has no electrons and therefore cannot have recombination
+        lines.
+
+    Returns
+    -------
+    frequency in GHz
     """
     nu = 3.289842e6*(1-5.48593e-4/amu)*(1/float(n)**2 - 1/float(n+dn)**2)
+    nu = 3.28984196e6 * Z**2 * (amu-5.48579911e-4*(Z+1))/(amu-5.48579911e-4*Z) * (1/float(n)**2 - 1/float(n+dn)**2)
     return nu
 
 def find_lines(xarr):
