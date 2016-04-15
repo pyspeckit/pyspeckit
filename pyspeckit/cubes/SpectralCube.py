@@ -1012,6 +1012,9 @@ class Cube(spectrum.Spectrum):
         if not hasattr(self.mapplot,'plane'):
             self.mapplot.makeplane()
 
+        if 'vheight' not in kwargs:
+            kwargs['vheight'] = False
+
         yy,xx = np.indices(self.mapplot.plane.shape)
         if isinstance(self.mapplot.plane, np.ma.core.MaskedArray):
             OK = (~self.mapplot.plane.mask) * self.maskmap
