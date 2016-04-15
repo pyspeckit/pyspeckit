@@ -880,8 +880,9 @@ class Cube(spectrum.Spectrum):
         # try a first fit for exception-catching
         try0 = fit_a_pixel((0,valid_pixels[0][0],valid_pixels[0][1]))
         try:
-            assert len(try0[1]) == len(guesses) == len(self.parcube) == len(self.errcube)
-            assert len(try0[2]) == len(guesses) == len(self.parcube) == len(self.errcube)
+            len_guesses = len(self.momentcube) if usemomentcube else len(guesses)
+            assert len(try0[1]) == len_guesses == len(self.parcube) == len(self.errcube)
+            assert len(try0[2]) == len_guesses == len(self.parcube) == len(self.errcube)
         except TypeError as ex:
             if try0 is None:
                 raise AssertionError("The first fitted pixel did not yield a "
