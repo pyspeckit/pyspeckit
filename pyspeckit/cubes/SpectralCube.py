@@ -713,6 +713,7 @@ class Cube(spectrum.Spectrum):
             log.debug("Number of valid pixels: %i" % len(valid_pixels))
 
         if usemomentcube:
+            if not hasattr(self, 'momentcube'): self.momenteach()
             npars = self.momentcube.shape[0]
         else:
             npars = len(guesses)
