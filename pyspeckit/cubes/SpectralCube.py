@@ -28,7 +28,7 @@ from astropy import log
 from astropy import wcs
 from astropy import units
 from astropy.utils.console import ProgressBar
-from astropy.extern.six import iteritems
+from astropy.extern.six import iteritems, string_types
 from functools import wraps
 
 # import parent package
@@ -587,7 +587,7 @@ class Cube(spectrum.Spectrum):
 
 
     def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
-                verbose_level=1, quiet=True, signal_cut=3, usemomentcube=False,
+                verbose_level=1, quiet=True, signal_cut=3, usemomentcube=None,
                 blank_value=0, integral=True, direct=False, absorption=False,
                 use_nearest_as_guess=False, use_neighbor_as_guess=False,
                 start_from_point=(0,0), multicore=1, position_order=None,
@@ -712,8 +712,11 @@ class Cube(spectrum.Spectrum):
         if verbose_level > 0:
             log.debug("Number of valid pixels: %i" % len(valid_pixels))
 
-        if usemomentcube:
-            if not hasattr(self, 'momentcube'): self.momenteach()
+        guesses_are_moments = (isinstance(guesses, string_types) and
+                                 guesses in ('moment','moments'))
+        if guesses_are_moments or (usemomentcube and len(guesses)):
+            if not hasattr(self, 'momentcube') and guesses_are_moments:
+                self.momenteach()
             npars = self.momentcube.shape[0]
         else:
             npars = len(guesses)
@@ -792,7 +795,6 @@ class Cube(spectrum.Spectrum):
             xpatch, ypatch = get_neighbors(x,y,self.has_fit.shape)
             local_fits = self.has_fit[ypatch+y,xpatch+x]
 
-
             if use_nearest_as_guess and self.has_fit.sum() > 0:
                 if verbose_level > 1 and ii == 0 or verbose_level > 4:
                     log.info("Using nearest fit as guess")
@@ -806,7 +808,12 @@ class Cube(spectrum.Spectrum):
                 # Axis=1 is the axis of all valid neighbors
                 gg = np.mean(self.parcube[:, (ypatch+y)[local_fits],
                                           (xpatch+x)[local_fits]], axis=1)
-            elif usemomentcube:
+            elif guesses_are_moments and usemomentcube is False:
+                raise ValueError("usemomentcube must be set to True")
+            elif guesses_are_moments or (usemomentcube and len(guesses)):
+                if not guesses_are_moments and ii == 0:
+                    log.warn("guesses will be ignored because usemomentcube "
+                             "was set to True.", PyspeckitWarning)
                 if verbose_level > 1 and ii == 0:
                     log.info("Using moment cube")
                 gg = self.momentcube[:,y,x]
@@ -881,7 +888,8 @@ class Cube(spectrum.Spectrum):
         # try a first fit for exception-catching
         try0 = fit_a_pixel((0,valid_pixels[0][0],valid_pixels[0][1]))
         try:
-            len_guesses = len(self.momentcube) if usemomentcube else len(guesses)
+            len_guesses = len(self.momentcube) if (usemomentcube or
+                                guesses_are_moments) else len(guesses)
             assert len(try0[1]) == len_guesses == len(self.parcube) == len(self.errcube)
             assert len(try0[2]) == len_guesses == len(self.parcube) == len(self.errcube)
         except TypeError as ex:
@@ -904,7 +912,7 @@ class Cube(spectrum.Spectrum):
         sp.specfit.Registry = self.Registry # copy over fitter registry
         # this reproduced code is needed because the functional wrapping
         # required for the multicore case prevents gg from being set earlier
-        if usemomentcube:
+        if usemomentcube or guesses_are_moments:
             gg = self.momentcube[:,y,x]
         elif hasattr(guesses,'shape') and guesses.shape[1:] == self.cube.shape[1:]:
             gg = guesses[:,y,x]
