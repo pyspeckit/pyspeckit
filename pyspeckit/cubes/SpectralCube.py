@@ -579,8 +579,12 @@ class Cube(spectrum.Spectrum):
         """
         if self._modelcube is None or update:
             yy,xx = np.indices(self.parcube.shape[1:])
+            isvalid = np.any(self.parcube, axis=0)
             self._modelcube = np.zeros_like(self.cube)
-            for x,y in zip(xx.flat,yy.flat):
+            # progressbar doesn't work with zip; I'm therefore giving up on
+            # "efficiency" in memory by making a list here.
+            for x,y in ProgressBar(list(zip(xx[isvalid],
+                                            yy[isvalid]))):
                 self._modelcube[:,y,x] = self.specfit.get_full_model(pars=self.parcube[:,y,x])
 
         return self._modelcube
@@ -1167,6 +1171,8 @@ class Cube(spectrum.Spectrum):
             self.specfit.fitter = sp.specfit.fitter
         except Exception as ex:
             log.error("Fitting the pixel at location {0} failed with error: {1}.  "
+                      "This is probably harmless, it just means the default pixel "
+                      "has no signal or bad signal.  "
                       "Try setting _temp_fit_loc to a valid pixel".format(_temp_fit_loc, ex))
 
         self.specfit.fittype = sp.specfit.fittype
