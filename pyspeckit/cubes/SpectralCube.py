@@ -1154,6 +1154,13 @@ class Cube(spectrum.Spectrum):
         self.parcube = cube[:npars*npeaks,:,:]
         self.errcube = cube[npars*npeaks:npars*npeaks*2,:,:]
 
+        nanvals = ~np.isfinite(self.parcube)
+        nanvals_flat = np.any(nanvals, axis=0)
+        if np.any(nanvals):
+            log.warn("NaN or infinite values encountered in parameter cube.  ",
+                     PyspeckitWarning)
+            
+
         # make sure params are within limits
         fitter = self.specfit.Registry.multifitters[fittype]
         guesses,throwaway = fitter._make_parinfo(npeaks=npeaks)
@@ -1165,7 +1172,7 @@ class Cube(spectrum.Spectrum):
             sp.specfit(fittype=fittype, guesses=guesses.values)
         except Exception as ex1:
             try:
-                OKmask = np.any(self.parcube, axis=0)
+                OKmask = np.any(self.parcube, axis=0) & ~nanvals_flat
                 whereOK = np.where(OKmask)
                 x,y = whereOK[1][0],whereOK[0][0]
                 sp = self.get_spectrum(x,y)
