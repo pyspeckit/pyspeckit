@@ -579,8 +579,12 @@ class Cube(spectrum.Spectrum):
         """
         if self._modelcube is None or update:
             yy,xx = np.indices(self.parcube.shape[1:])
+            isvalid = np.any(self.parcube, axis=0)
             self._modelcube = np.zeros_like(self.cube)
-            for x,y in zip(xx.flat,yy.flat):
+            # progressbar doesn't work with zip; I'm therefore giving up on
+            # "efficiency" in memory by making a list here.
+            for x,y in ProgressBar(list(zip(xx[isvalid],
+                                            yy[isvalid]))):
                 self._modelcube[:,y,x] = self.specfit.get_full_model(pars=self.parcube[:,y,x])
 
         return self._modelcube
@@ -1141,8 +1145,6 @@ class Cube(spectrum.Spectrum):
 
         # grab a spectrum and fit it however badly you want
         # this is just to __init__ the relevant data structures
-        x,y = _temp_fit_loc
-        sp = self.get_spectrum(x,y)
         if fittype is None:
             if cubefile[0].header.get('FITTYPE'):
                 fittype = cubefile[0].header.get('FITTYPE')
@@ -1152,23 +1154,37 @@ class Cube(spectrum.Spectrum):
         self.parcube = cube[:npars*npeaks,:,:]
         self.errcube = cube[npars*npeaks:npars*npeaks*2,:,:]
 
+        nanvals = ~np.isfinite(self.parcube)
+        nanvals_flat = np.any(nanvals, axis=0)
+        if np.any(nanvals):
+            log.warn("NaN or infinite values encountered in parameter cube.  ",
+                     PyspeckitWarning)
+            
+
         # make sure params are within limits
         fitter = self.specfit.Registry.multifitters[fittype]
         guesses,throwaway = fitter._make_parinfo(npeaks=npeaks)
+
         try:
+            x,y = _temp_fit_loc
+            sp = self.get_spectrum(x,y)
             guesses.values = self.parcube[:,y,x]
-        except ValueError:
-            OKmask = (self.parcube != 0).sum(axis=0) > 0
-            whereOK = np.where(OKmask)
-            guesses.values = self.parcube[:,whereOK[0][0],whereOK[1][0]]
-
-        try:
             sp.specfit(fittype=fittype, guesses=guesses.values)
-            self.specfit.fitter = sp.specfit.fitter
-        except Exception as ex:
-            log.error("Fitting the pixel at location {0} failed with error: {1}.  "
-                      "Try setting _temp_fit_loc to a valid pixel".format(_temp_fit_loc, ex))
+        except Exception as ex1:
+            try:
+                OKmask = np.any(self.parcube, axis=0) & ~nanvals_flat
+                whereOK = np.where(OKmask)
+                x,y = whereOK[1][0],whereOK[0][0]
+                sp = self.get_spectrum(x,y)
+                guesses.values = self.parcube[:,y,x]
+                sp.specfit(fittype=fittype, guesses=guesses.values)
+            except Exception as ex2:
+                log.error("Fitting the pixel at location {0} failed with error: {1}.  "
+                          "Re-trying at location {2} failed with error {3}.  "
+                          "Try setting _temp_fit_loc to a valid pixel".format(_temp_fit_loc, ex1,
+                                                                              (x,y), ex2))
 
+        self.specfit.fitter = sp.specfit.fitter
         self.specfit.fittype = sp.specfit.fittype
         self.specfit.parinfo = sp.specfit.parinfo
 
