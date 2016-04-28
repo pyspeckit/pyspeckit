@@ -1168,13 +1168,13 @@ class Cube(spectrum.Spectrum):
 
         try:
             sp.specfit(fittype=fittype, guesses=guesses.values)
-            self.specfit.fitter = sp.specfit.fitter
         except Exception as ex:
             log.error("Fitting the pixel at location {0} failed with error: {1}.  "
                       "This is probably harmless, it just means the default pixel "
                       "has no signal or bad signal.  "
                       "Try setting _temp_fit_loc to a valid pixel".format(_temp_fit_loc, ex))
 
+        self.specfit.fitter = sp.specfit.fitter
         self.specfit.fittype = sp.specfit.fittype
         self.specfit.parinfo = sp.specfit.parinfo
 
