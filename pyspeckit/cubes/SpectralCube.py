@@ -690,7 +690,7 @@ class Cube(spectrum.Spectrum):
 
 
         if start_from_point == 'center':
-            start_from_point = (xx.max()/2., yy.max/2.)
+            start_from_point = (xx.max()/2., yy.max()/2.)
         if hasattr(position_order,'shape') and position_order.shape == self.cube.shape[1:]:
             sort_distance = np.argsort(position_order.flat)
         else:
