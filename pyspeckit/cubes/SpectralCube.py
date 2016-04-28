@@ -1145,8 +1145,6 @@ class Cube(spectrum.Spectrum):
 
         # grab a spectrum and fit it however badly you want
         # this is just to __init__ the relevant data structures
-        x,y = _temp_fit_loc
-        sp = self.get_spectrum(x,y)
         if fittype is None:
             if cubefile[0].header.get('FITTYPE'):
                 fittype = cubefile[0].header.get('FITTYPE')
@@ -1159,20 +1157,25 @@ class Cube(spectrum.Spectrum):
         # make sure params are within limits
         fitter = self.specfit.Registry.multifitters[fittype]
         guesses,throwaway = fitter._make_parinfo(npeaks=npeaks)
-        try:
-            guesses.values = self.parcube[:,y,x]
-        except ValueError:
-            OKmask = (self.parcube != 0).sum(axis=0) > 0
-            whereOK = np.where(OKmask)
-            guesses.values = self.parcube[:,whereOK[0][0],whereOK[1][0]]
 
         try:
+            x,y = _temp_fit_loc
+            sp = self.get_spectrum(x,y)
+            guesses.values = self.parcube[:,y,x]
             sp.specfit(fittype=fittype, guesses=guesses.values)
-        except Exception as ex:
-            log.error("Fitting the pixel at location {0} failed with error: {1}.  "
-                      "This is probably harmless, it just means the default pixel "
-                      "has no signal or bad signal.  "
-                      "Try setting _temp_fit_loc to a valid pixel".format(_temp_fit_loc, ex))
+        except Exception as ex1:
+            try:
+                OKmask = np.any(self.parcube, axis=0)
+                whereOK = np.where(OKmask)
+                x,y = whereOK[1][0],whereOK[0][0]
+                sp = self.get_spectrum(x,y)
+                guesses.values = self.parcube[:,y,x]
+                sp.specfit(fittype=fittype, guesses=guesses.values)
+            except Exception as ex2:
+                log.error("Fitting the pixel at location {0} failed with error: {1}.  "
+                          "Re-trying at location {2} failed with error {3}.  "
+                          "Try setting _temp_fit_loc to a valid pixel".format(_temp_fit_loc, ex1,
+                                                                              (x,y), ex2))
 
         self.specfit.fitter = sp.specfit.fitter
         self.specfit.fittype = sp.specfit.fittype
