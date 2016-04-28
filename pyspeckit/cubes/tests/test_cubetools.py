@@ -180,3 +180,32 @@ def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
 
     assert map_seed == 0
     assert above3sig[above3sig].size == 77
+
+def test_get_modelcube_badpar(cubefile=None, parfile=None, sigma_threshold=5):
+    """
+    Test loading a model cube that has at least one invalid parameter.
+    Regression test for #163
+
+    This is essentially only testing that get_modelcube works in the presence
+    of invalid fit parameters
+    """
+
+    if cubefile is None or parfile is None:
+        cubefile = 'test.fits'
+        fh = fits.open('test_pars.fits')
+        fh[0].data[1,0,0] *= -1 # set the width to be negative
+        fh.writeto('test_pars_bad.fits', clobber=True)
+        parfile  = 'test_pars_bad.fits'
+        sp_cube = do_fiteach(save_cube=cubefile, save_pars=parfile)
+    else:
+        sp_cube  = Cube(cubefile)
+    map_seed = sp_cube.header['SEED']
+    map_rms = sp_cube.header['RMSLVL']
+    sp_cube.xarr.velocity_convention = 'radio'
+    sp_stack = CubeStack([sp_cube])
+    sp_stack._modelcube = None
+    # assuming one gaussian component
+    for spc in [sp_cube, sp_stack]:
+        spc.load_model_fit(parfile, npars=3, _temp_fit_loc=(0,0))
+        spc.get_modelcube()
+        resid_cube = spc.cube - spc._modelcube
