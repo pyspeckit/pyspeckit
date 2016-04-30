@@ -1,10 +1,9 @@
 language: python
 
 python:
-    - 2.6
     - 2.7
-    - 3.3
     - 3.4
+    - 3.5
 
 # Setting sudo to false opts in to Travis-CI container-based builds.
 sudo: false
@@ -24,9 +23,9 @@ addons:
 env:
     global:
         # The following versions are the 'default' for tests, unless
-        # overidden underneath. They are defined here in order to save having
+        # overridden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
-        - NUMPY_VERSION=1.9
+        - NUMPY_VERSION=stable
         - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
@@ -55,16 +54,39 @@ matrix:
         # Try Astropy development version
         - python: 2.7
           env: ASTROPY_VERSION=development
-        - python: 3.4
+        - python: 3.5
           env: ASTROPY_VERSION=development
+        - python: 2.7
+          env: ASTROPY_VERSION=lts
+        - python: 3.5
+          env: ASTROPY_VERSION=lts
+
+        # Python 2.6 and 3.3 doesn't have numpy 1.10 in conda, they can be put
+        # back into the main matrix once the numpy build is available in the
+        # astropy-ci-extras channel (or in the one provided in the
+        # CONDA_CHANNELS environmental variable).
+        - python: 2.6
+          env: SETUP_CMD='egg_info'
+        - python: 2.6
+          env: SETUP_CMD='test' NUMPY_VERSION=1.9
+        - python: 3.3
+          env: SETUP_CMD='egg_info'
+        - python: 3.3
+          env: SETUP_CMD='test' NUMPY_VERSION=1.9
 
         # Try older numpy versions
+        - python: 2.7
+          env: NUMPY_VERSION=1.9
         - python: 2.7
           env: NUMPY_VERSION=1.8
         - python: 2.7
           env: NUMPY_VERSION=1.7
         - python: 2.7
           env: NUMPY_VERSION=1.6
+
+        # Try numpy pre-release
+        - python: 3.5
+          env: NUMPY_VERSION=prerelease
 
 before_install:
 
@@ -92,7 +114,7 @@ install:
     # As described above, using ci-helpers, you should be able to set up an
     # environment with dependencies installed using conda and pip, but in some
     # cases this may not provide enough flexibility in how to install a
-    # specific dependency (and it will not be able to install non-Python 
+    # specific dependency (and it will not be able to install non-Python
     # dependencies). Therefore, you can also include commands below (as
     # well as at the start of the install section or in the before_install
     # section if they are needed before setting up conda) to install any
