@@ -581,7 +581,7 @@ class Cube(spectrum.Spectrum):
             yy,xx = np.indices(self.parcube.shape[1:])
             nanvals = np.any(~np.isfinite(self.parcube),axis=0)
             isvalid = np.any(self.parcube, axis=0) & ~nanvals
-            self._modelcube = np.zeros_like(self.cube)
+            self._modelcube = np.full_like(self.cube, np.nan)
             # progressbar doesn't work with zip; I'm therefore giving up on
             # "efficiency" in memory by making a list here.
             for x,y in ProgressBar(list(zip(xx[isvalid],
