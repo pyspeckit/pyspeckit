@@ -5,6 +5,16 @@ be removed in affiliated packages.
 The changes below indicate what file the change was made in so that these can
 be copied over manually if desired.
 
+1.1 (unreleased)
+----------------
+
+- Fixed the import of example_mod.py in __init__.py to work properly on
+  Python 3.
+
+- Fixed the version import in conftest.py to work properly if version.py
+  hasn't been generated yet.
+
+
 1.0 (2015-05-31)
 ----------------
 
