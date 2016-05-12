@@ -554,7 +554,7 @@ class BaseSpectrum(object):
         # this should be done by deepcopy, but deepcopy fails with current pyfits
         sp.plotter = self.plotter.copy(parent=sp)
         sp.plotter.Spectrum = sp
-        sp.specfit = self.specfit.copy(parent=sp)
+        sp.specfit = self.specfit.copy(parent=sp, registry=sp.Registry)
         sp.specfit.Spectrum = sp
         sp.specfit.Spectrum.plotter = sp.plotter
         sp.baseline = self.baseline.copy(parent=sp)
@@ -661,7 +661,7 @@ class BaseSpectrum(object):
         newspec.header = copy.copy(self.header)
         newspec.plotter = self.plotter.copy(parent=newspec)
         newspec._register_fitters(registry=self.Registry)
-        newspec.specfit = self.specfit.copy(parent=newspec)
+        newspec.specfit = self.specfit.copy(parent=newspec, registry=newspec.Registry)
         newspec.specfit.Spectrum.plotter = newspec.plotter
         newspec.baseline = self.baseline.copy(parent=newspec)
         newspec.baseline.Spectrum.plotter = newspec.plotter

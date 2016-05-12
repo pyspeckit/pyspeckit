@@ -1598,7 +1598,7 @@ class Specfit(interactive.Interactive):
         # original interactive cmds)
         self.clear_all_connections()
 
-    def copy(self, parent=None):
+    def copy(self, parent=None, registry=None):
         """
         Create a copy of the spectral fit - includes copies of the _full_model,
         the registry, the fitter, parinfo, modelpars, modelerrs, model, npeaks
@@ -1611,7 +1611,15 @@ class Specfit(interactive.Interactive):
             to None to prevent overwriting a previous plot.
         """
 
-        newspecfit = Specfit(parent, Registry=copy.deepcopy(self.Registry))
+        if registry is None:
+            if hasattr(parent, 'Registry'):
+                registry = parent.Registry
+            else:
+                # only make a copy if we're not already given a specific registry
+                # to inherit
+                copy.deepcopy(self.Registry)
+
+        newspecfit = Specfit(parent, Registry=registry)
         newspecfit.parinfo = copy.deepcopy(self.parinfo)
         if newspecfit.parinfo is None:
             newspecfit.modelpars = None
