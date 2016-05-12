@@ -549,7 +549,7 @@ class Cube(spectrum.Spectrum):
                                model_registry=self.Registry,
                               )
 
-        sp.specfit = self.specfit.copy(parent=sp)
+        sp.specfit = self.specfit.copy(parent=sp, registry=sp.Registry)
 
         return sp
 
