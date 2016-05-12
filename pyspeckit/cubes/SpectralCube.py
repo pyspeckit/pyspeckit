@@ -460,7 +460,7 @@ class Cube(spectrum.Spectrum):
                                model_registry=self.Registry,
                               )
 
-        sp.specfit = copy.copy(self.specfit)
+        sp.specfit = self.specfit.copy(parent=sp, registry=sp.Registry)
         # explicitly re-do this (test)
         sp.specfit.includemask = self.specfit.includemask.copy()
         sp.specfit.Spectrum = sp
