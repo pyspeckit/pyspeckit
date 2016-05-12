@@ -65,7 +65,8 @@ class BaseSpectrum(object):
 
     def __init__(self, filename=None, filetype=None, xarr=None, data=None,
                  error=None, header=None, doplot=False, maskdata=True,
-                 unit=None, plotkwargs={}, xarrkwargs={}, **kwargs):
+                 unit=None, plotkwargs={}, xarrkwargs={}, model_registry=None,
+                 **kwargs):
         """
         Create a Spectrum object.
 
@@ -206,8 +207,8 @@ class BaseSpectrum(object):
         # it is very important that this be done BEFORE the spectofit is set!
         self._sort()
         self.plotter = plotters.Plotter(self)
-        self._register_fitters()
-        self.specfit = fitters.Specfit(self,Registry=self.Registry)
+        self._register_fitters(registry=model_registry)
+        self.specfit = fitters.Specfit(self, Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         self.speclines = speclines
 
@@ -508,7 +509,7 @@ class BaseSpectrum(object):
 
         if copy:
             # create new specfit / baseline instances (otherwise they'll be the wrong length)
-            sp._register_fitters()
+            sp._register_fitters(registry=self.Registry)
             sp.baseline = baseline.Baseline(sp)
             sp.specfit = fitters.Specfit(sp,Registry=sp.Registry)
         else:
@@ -551,12 +552,12 @@ class BaseSpectrum(object):
         sp.xarr = sp.xarr.__getitem__(indx)
 
         # this should be done by deepcopy, but deepcopy fails with current pyfits
-        sp.plotter = copy.copy(self.plotter)
+        sp.plotter = self.plotter.copy(parent=sp)
         sp.plotter.Spectrum = sp
-        sp.specfit = copy.copy(self.specfit)
+        sp.specfit = self.specfit.copy(parent=sp, registry=sp.Registry)
         sp.specfit.Spectrum = sp
         sp.specfit.Spectrum.plotter = sp.plotter
-        sp.baseline = copy.copy(self.baseline)
+        sp.baseline = self.baseline.copy(parent=sp)
         sp.baseline.Spectrum = sp
         sp.baseline.Spectrum.plotter = sp.plotter
 
@@ -659,8 +660,8 @@ class BaseSpectrum(object):
 
         newspec.header = copy.copy(self.header)
         newspec.plotter = self.plotter.copy(parent=newspec)
-        newspec._register_fitters()
-        newspec.specfit = self.specfit.copy(parent=newspec)
+        newspec._register_fitters(registry=self.Registry)
+        newspec.specfit = self.specfit.copy(parent=newspec, registry=newspec.Registry)
         newspec.specfit.Spectrum.plotter = newspec.plotter
         newspec.baseline = self.baseline.copy(parent=newspec)
         newspec.baseline.Spectrum.plotter = newspec.plotter
@@ -865,7 +866,7 @@ class Spectra(BaseSpectrum):
     """
     __class_name__ = 'Spectra'
 
-    def __init__(self, speclist, xunit=None, **kwargs):
+    def __init__(self, speclist, xunit=None, model_registry=None, **kwargs):
         """
         """
         log.info("Creating spectra")
@@ -898,7 +899,7 @@ class Spectra(BaseSpectrum):
                     warn("Could not update header KEY=%s to VALUE=%s" % (key,value))
 
         self.plotter = plotters.Plotter(self)
-        self._register_fitters()
+        self._register_fitters(registry=model_registry)
         self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
 
@@ -1019,7 +1020,8 @@ class ObsBlock(Spectra):
     ObsBlocks can be indexed like python lists.
     """
 
-    def __init__(self, speclist, xtype='frequency', xarr=None, force=False, **kwargs):
+    def __init__(self, speclist, xtype='frequency', xarr=None, force=False,
+                 model_registry=None, **kwargs):
 
         if xarr is None:
             self.xarr = speclist[0].xarr
@@ -1050,8 +1052,8 @@ class ObsBlock(Spectra):
         self.error = np.array([sp.error for sp in self.speclist]).swapaxes(0,1).squeeze()
 
         self.plotter = plotters.Plotter(self)
-        self._register_fitters()
-        self.specfit = fitters.Specfit(self,Registry=self.Registry)
+        self._register_fitters(registry=model_registry)
+        self.specfit = fitters.Specfit(self, Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
 
     def average(self, weight=None, inverse_weight=False, error='erravgrtn', debug=False):

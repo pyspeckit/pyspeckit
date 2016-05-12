@@ -456,9 +456,11 @@ class Cube(spectrum.Spectrum):
                                header=header, error=(self.errorcube[:,y,x] if
                                                      self.errorcube is not None
                                                      else None),
-                               unit=self.unit,)
+                               unit=self.unit,
+                               model_registry=self.Registry,
+                              )
 
-        sp.specfit = copy.copy(self.specfit)
+        sp.specfit = self.specfit.copy(parent=sp, registry=sp.Registry)
         # explicitly re-do this (test)
         sp.specfit.includemask = self.specfit.includemask.copy()
         sp.specfit.Spectrum = sp
@@ -543,9 +545,11 @@ class Cube(spectrum.Spectrum):
         sp = spectrum.Spectrum(xarr=self.xarr.copy(),
                                data=data,
                                error=error,
-                               header=header)
+                               header=header,
+                               model_registry=self.Registry,
+                              )
 
-        sp.specfit = self.specfit.copy(parent=sp)
+        sp.specfit = self.specfit.copy(parent=sp, registry=sp.Registry)
 
         return sp
 
