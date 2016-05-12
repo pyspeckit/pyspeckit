@@ -17,6 +17,15 @@ class TestFitter(object):
             warnings.simplefilter('ignore')
             self.sp = Spectrum(xarr=x, data=y)
 
+    def test_copy(self):
+        """
+        Regression test for #166: make sure that a Spectrum's Registry is the
+        same as its fitter's registry
+        """
+        spcopy = self.sp.copy()
+        assert self.sp.Registry is self.sp.specfit.Registry
+        assert spcopy.Registry is spcopy.specfit.Registry
+
     def test_fitter(self):
         self.sp.specfit(fittype='gaussian', guesses=(-1, 0, 0.5),
                         limitedmin=(False,False,True), minpars=(0,0,1e-10))

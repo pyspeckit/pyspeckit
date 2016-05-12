@@ -552,12 +552,12 @@ class BaseSpectrum(object):
         sp.xarr = sp.xarr.__getitem__(indx)
 
         # this should be done by deepcopy, but deepcopy fails with current pyfits
-        sp.plotter = copy.copy(self.plotter)
+        sp.plotter = self.plotter.copy(parent=sp)
         sp.plotter.Spectrum = sp
-        sp.specfit = copy.copy(self.specfit)
+        sp.specfit = self.specfit.copy(parent=sp)
         sp.specfit.Spectrum = sp
         sp.specfit.Spectrum.plotter = sp.plotter
-        sp.baseline = copy.copy(self.baseline)
+        sp.baseline = self.baseline.copy(parent=sp)
         sp.baseline.Spectrum = sp
         sp.baseline.Spectrum.plotter = sp.plotter
 

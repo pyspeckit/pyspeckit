@@ -1591,7 +1591,7 @@ class Specfit(interactive.Interactive):
                 self.multifit(use_window_limits=True)
                 for p in self.button2plot + self.button1plot:
                     p.set_visible(False)
-            else: 
+            else:
                 log.error("Wrong # of parameters")
 
         # disconnect interactive window (and more importantly, reconnect to
@@ -1603,13 +1603,15 @@ class Specfit(interactive.Interactive):
         Create a copy of the spectral fit - includes copies of the _full_model,
         the registry, the fitter, parinfo, modelpars, modelerrs, model, npeaks
 
-        [ parent ] 
+        Parameters
+        ----------
+        parent : `pyspeckit.classes.Spectrum`
             A `~Spectrum` instance that is the parent of the specfit
             instance.  This needs to be specified at some point, but defaults
             to None to prevent overwriting a previous plot.
         """
 
-        newspecfit = Specfit(parent, copy.deepcopy(self.Registry))
+        newspecfit = Specfit(parent, Registry=copy.deepcopy(self.Registry))
         newspecfit.parinfo = copy.deepcopy(self.parinfo)
         if newspecfit.parinfo is None:
             newspecfit.modelpars = None
@@ -1617,11 +1619,11 @@ class Specfit(interactive.Interactive):
         else:
             newspecfit.modelpars = newspecfit.parinfo.values
             newspecfit.modelerrs = newspecfit.parinfo.errors
-        newspecfit.includemask = self.includemask.copy() 
-        newspecfit.model = copy.copy( self.model )
+        newspecfit.includemask = self.includemask.copy()
+        newspecfit.model = copy.copy(self.model)
         newspecfit.npeaks = self.npeaks
         if hasattr(self,'fitter'):
-            newspecfit.fitter = copy.deepcopy( self.fitter )
+            newspecfit.fitter = copy.deepcopy(self.fitter)
             newspecfit.fitter.parinfo = newspecfit.parinfo
         if hasattr(self,'fullmodel'):
             newspecfit._full_model()

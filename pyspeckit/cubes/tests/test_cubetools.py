@@ -1,4 +1,5 @@
 from .. import cubes, Cube, CubeStack
+from ...spectrum.models import n2hp
 
 import numpy as np
 from astropy.io import fits
@@ -209,3 +210,23 @@ def test_get_modelcube_badpar(cubefile=None, parfile=None, sigma_threshold=5):
         spc.load_model_fit(parfile, npars=3, _temp_fit_loc=(0,0))
         spc.get_modelcube()
         resid_cube = spc.cube - spc._modelcube
+
+def test_registry_inheritance(cubefile='test.fits'):
+    """
+    Regression test for #166
+    """
+    # getting a dummy .fits file
+    if not os.path.exists(cubefile):
+        #download_test_cube(cubefile)
+        make_test_cube((100,9,9),cubefile)
+
+    spc = Cube(cubefile)
+
+    spc.xarr.velocity_convention = 'radio'
+    # spc.Registry.add_fitter('n2hp_vtau', n2hp.n2hp_vtau_fitter, 4)
+
+    sp = spc.get_spectrum(3,3)
+    sp.Registry.add_fitter('n2hp_vtau', n2hp.n2hp_vtau_fitter, 4)
+    assert 'n2hp_vtau' in sp.Registry.multifitters
+    assert 'n2hp_vtau' in sp.Registry.npars
+    sp.specfit(fittype='n2hp_vtau', guesses=[1,2,3,4])
