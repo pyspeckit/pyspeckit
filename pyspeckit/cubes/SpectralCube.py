@@ -706,7 +706,7 @@ class Cube(spectrum.Spectrum):
             d_from_start = ((xx-start_from_point[1])**2 + (yy-start_from_point[0])**2)**0.5
             sort_distance = np.argsort(d_from_start.flat)
 
-        if use_neighbor_as_guess:
+        if use_neighbor_as_guess or use_nearest_as_guess:
             distance = ((xx)**2 + (yy)**2)**0.5
 
         valid_pixels = list(zip(xx.flat[sort_distance][OK.flat[sort_distance]],
