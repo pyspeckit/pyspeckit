@@ -500,7 +500,11 @@ class Baseline(interactive.Interactive):
         else:
             # don't overwrite error
             err = err.copy()
-            err._sharedmask = False # to deal with np1.11+ shared mask behavior: should not change anything
+            try:
+                err._sharedmask = False # to deal with np1.11+ shared mask behavior: should not change anything
+            except AttributeError:
+                # apparently numpy won't let you write attributes it doesn't know about...
+                pass
             # assume anything with 0 error is GOOD
             if zeroerr_is_OK:
                 err[err == 0] = 1.
