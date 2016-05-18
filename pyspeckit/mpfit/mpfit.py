@@ -1137,6 +1137,11 @@ class mpfit:
             # Form (q transpose)*fvec and store the first n components in qtf
             catch_msg = 'forming (q transpose)*fvec'
             wa4 = fvec.copy()
+            try:
+                wa4._sharedmask = False # to deal with np1.11+ shared mask behavior: should not change anything
+            except AttributeError:
+                # apparently numpy won't let you write attributes it doesn't know about...
+                pass
             for j in range(n):
                 lj = ipvt[j]
                 temp3 = fjac[j,lj]
