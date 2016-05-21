@@ -19,7 +19,7 @@ def header_to_vlsr(header,**kwargs):
     elif 'DATE-OBS' in header:
         datestr =  header['DATE-OBS']
     else:
-        print "Not sure what date keywords exist..."
+        print("Not sure what date keywords exist...")
     jd = date_to_JD(datestr)
     if 'EQUINOX' in header:
         epoch = header['EQUINOX']
