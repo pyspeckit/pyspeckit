@@ -43,6 +43,10 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     ----------
     xarr: `pyspeckit.spectrum.units.SpectroscopicAxis`
         Array of wavelength/frequency values
+    trot: float
+        The rotational temperature of the lines.  This is the excitation
+        temperature that governs the relative populations of the rotational
+        states.
     tex: float or None
         Excitation temperature. Assumed LTE if unspecified (``None``) or if
         tex>trot.  This is the excitation temperature for *all* of the modeled
@@ -203,6 +207,28 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
 
 
     return model_spectrum
+
+def cold_ammonia(xarr, tkin, **kwargs):
+    """
+    Generate a model Ammonia spectrum based on input temperatures, column, and
+    gaussian parameters
+
+    Parameters
+    ----------
+    xarr: `pyspeckit.spectrum.units.SpectroscopicAxis`
+        Array of wavelength/frequency values
+    tkin: float
+        The kinetic temperature of the lines in K.  Will be converted to
+        rotational temperature following the scheme of Swift et al 2005
+        (http://esoads.eso.org/abs/2005ApJ...620..823S) and further discussed
+        in Equation 7 of Rosolowsky et al 2008
+        (http://adsabs.harvard.edu/abs/2008ApJS..175..509R)
+    """
+
+    dT0 = 41.5 # Energy difference between (2,2) and (1,1) in K
+    trot = tkin/(1+tkin/dT0*np.log(1+0.6*np.exp(-15.7/tkin)))
+
+    return ammonia(xarr, trot=trot, **kwargs)
 
 def ammonia_thin(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                  fortho=0.0, tau=None, return_tau=False, **kwargs):
@@ -566,7 +592,8 @@ class ammonia_model(model.SpectralModel):
         from decimal import Decimal # for formatting
         tex_key = {'trot':'T_R', 'tkin': 'T_K', 'tex':'T_{ex}', 'ntot':'N',
                    'fortho':'F_o', 'width':'\\sigma', 'xoff_v':'v',
-                   'fillingfraction':'FF', 'tau':'\\tau_{1-1}'}
+                   'fillingfraction':'FF', 'tau':'\\tau_{1-1}',
+                   'background_tb':'T_{BG}'}
         # small hack below: don't quantize if error > value.  We want to see the values.
         label_list = []
         for pinfo in self.parinfo:
@@ -577,9 +604,9 @@ class ammonia_model(model.SpectralModel):
                 pm = ""
                 formatted_error=""
             else:
-                formatted_value = "%g" % (Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value'])))))
+                formatted_value = Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value']))))
                 pm = "$\\pm$"
-                formatted_error = "%g" % (Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error'])))
+                formatted_error = Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error']))
             label = "$%s(%i)$=%8s %s %8s" % (parname, parnum, formatted_value, pm, formatted_error)
             label_list.append(label)
         labels = tuple(mpcb.flatten(label_list))
@@ -681,10 +708,10 @@ class ammonia_model(model.SpectralModel):
         #fixed_kwargs = dict((p['parname'].strip("0123456789").lower(),
         #                     p['value'])
         #                    for p in parinfo_with_fixed if p['fixed'])
-        ## don't do this - it breaks the NEXT call because npars != len(parnames) self.parnames = [p['parname'] for p in parinfo]
-        ## this is OK - not a permanent change
+        # don't do this - it breaks the NEXT call because npars != len(parnames) self.parnames = [p['parname'] for p in parinfo]
+        # this is OK - not a permanent change
         #parnames = [p['parname'] for p in parinfo]
-        ## not OK self.npars = len(parinfo)/self.npeaks
+        # not OK self.npars = len(parinfo)/self.npeaks
         parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True)
         #import pdb; pdb.set_trace()
         return parinfo
@@ -719,7 +746,7 @@ class ammonia_model(model.SpectralModel):
                 rlimits = required_limits[parname]
                 for a,b,op,ul in zip(limits, rlimits, (operator.lt,
                                                        operator.gt),
-                                  ('a lower','an upper')):
+                                     ('a lower','an upper')):
                     if b is not None and op(a,b):
                         raise ValueError("Parameter {0} must have {1} limit "
                                          "at least {2} but it is set to {3}."
@@ -756,8 +783,10 @@ class ammonia_model_vtau(ammonia_model):
                                            'tau': [0, None],
                                            'xoff_v': [None,None],
                                            'fortho': [0,1]}):
-        super(ammonia_model_vtau, self)._validate_parinfo(must_be_limited=must_be_limited,
-                                                          required_limits=required_limits)
+        supes = super(ammonia_model_vtau, self)
+        supes._validate_parinfo(must_be_limited=must_be_limited,
+                                required_limits=required_limits)
+        return supes
 
     def make_parinfo(self,
                      params=(20,14,0.5,1.0,0.0,0.5),
@@ -864,14 +893,14 @@ class ammonia_model_background(ammonia_model):
         return self.multinh3fit(*args,**kwargs)
 
     def make_parinfo(self, npeaks=1, err=None,
-                    params=(20,20,14,1.0,0.0,0.5,TCMB), parnames=None,
-                    fixed=(False,False,False,False,False,False,True),
-                    limitedmin=(True,True,True,True,False,True,True),
-                    limitedmax=(False,False,False,False,False,True,True),
-                    minpars=(TCMB,TCMB,0,0,0,0,TCMB), parinfo=None,
-                    maxpars=(0,0,0,0,0,1,TCMB),
-                    tied=('',)*7,
-                    quiet=True, shh=True,
+                     params=(20,20,14,1.0,0.0,0.5,TCMB), parnames=None,
+                     fixed=(False,False,False,False,False,False,True),
+                     limitedmin=(True,True,True,True,False,True,True),
+                     limitedmax=(False,False,False,False,False,True,True),
+                     minpars=(TCMB,TCMB,0,0,0,0,TCMB), parinfo=None,
+                     maxpars=(0,0,0,0,0,1,TCMB),
+                     tied=('',)*7,
+                     quiet=True, shh=True,
                      veryverbose=False, **kwargs):
         return super(ammonia_model_background,
                      self).make_parinfo(npeaks=npeaks, err=err, params=params,
@@ -901,28 +930,30 @@ class ammonia_model_background(ammonia_model):
                                        tied=tied, quiet=quiet, shh=shh,
                                        veryverbose=veryverbose, **kwargs)
 
-    def annotations(self):
-        from decimal import Decimal # for formatting
-        tex_key = {'trot':'T_K', 'tex':'T_{ex}', 'ntot':'N', 'fortho':'F_o',
-                   'width':'\\sigma', 'xoff_v':'v', 'fillingfraction':'FF',
-                   'tau':'\\tau_{1-1}', 'background_tb':'T_{BG}'}
-        # small hack below: don't quantize if error > value.  We want to see the values.
-        label_list = []
-        for pinfo in self.parinfo:
-            parname = tex_key[pinfo['parname'].strip("0123456789").lower()]
-            parnum = int(pinfo['parname'][-1])
-            if pinfo['fixed']:
-                formatted_value = "%s" % pinfo['value']
-                pm = ""
-                formatted_error=""
-            else:
-                formatted_value = Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value']))))
-                pm = "$\\pm$"
-                formatted_error = Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error']))
-            label = "$%s(%i)$=%8s %s %8s" % (parname, parnum, formatted_value, pm, formatted_error)
-            label_list.append(label)
-        labels = tuple(mpcb.flatten(label_list))
-        return labels
+
+class cold_ammonia_model(ammonia_model):
+    def __init__(self,
+                 parnames=['tkin', 'tex', 'tau', 'width', 'xoff_v', 'fortho'],
+                 **kwargs):
+        super(cold_ammonia_model, self).__init__(parnames=parnames, **kwargs)
+        self.modelfunc = cold_ammonia
+
+    def _validate_parinfo(self,
+                          must_be_limited={'tkin': [True,False],
+                                           'tex': [False,False],
+                                           'tau': [True, False],
+                                           'width': [True, False],
+                                           'xoff_v': [False, False],
+                                           'fortho': [True, True]},
+                          required_limits={'tkin': [0, None],
+                                           'tex': [None,None],
+                                           'width': [0, None],
+                                           'tau': [0, None],
+                                           'xoff_v': [None,None],
+                                           'fortho': [0,1]}):
+        supes = super(cold_ammonia_model, self)
+        return supes._validate_parinfo(must_be_limited=must_be_limited,
+                                       required_limits=required_limits)
 
 def _increment_string_number(st, count):
     """
