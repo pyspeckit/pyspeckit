@@ -941,14 +941,14 @@ class cold_ammonia_model(ammonia_model):
     def _validate_parinfo(self,
                           must_be_limited={'tkin': [True,False],
                                            'tex': [False,False],
-                                           'tau': [True, False],
+                                           'ntot': [True, False],
                                            'width': [True, False],
                                            'xoff_v': [False, False],
                                            'fortho': [True, True]},
                           required_limits={'tkin': [0, None],
                                            'tex': [None,None],
                                            'width': [0, None],
-                                           'tau': [0, None],
+                                           'ntot': [0, None],
                                            'xoff_v': [None,None],
                                            'fortho': [0,1]}):
         supes = super(cold_ammonia_model, self)

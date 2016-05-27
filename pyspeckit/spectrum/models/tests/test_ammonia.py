@@ -1,7 +1,8 @@
 import pytest
 import numpy as np
 from astropy import units as u
-from ...classes import Spectrum
+from ...classes import Spectrum, Spectra, units
+from .. import ammonia, ammonia_constants
 
 gg = [5., 2.8, 13.02918494, 0.0855, 14.85, 0.5]
 
@@ -13,7 +14,7 @@ def test_ammonia_parlimits():
                   data=np.random.randn(50))
 
     sp.specfit(fittype='ammonia',
-               guesses=[5., 2.8, 13.02918494, 0.0855, 14.85, 0.5],
+               guesses=gg,
               )
 
 def test_ammonia_parlimits_fails():
@@ -25,8 +26,54 @@ def test_ammonia_parlimits_fails():
     with pytest.raises(ValueError) as ex:
 
         sp.specfit(fittype='ammonia',
-                   guesses=[5., 2.8, 13.02918494, 0.0855, 14.85, 0.5],
+                   guesses=gg,
                    limitedmin=[True, False, False, True, False, True],
                   )
 
     assert 'no such limit is set' in str(ex.value)
+
+def make_synthspec(velo=np.linspace(-25, 25, 251), tkin=25, lte=True,
+                   column=13, width=0.5, vcen=0.0, trot=None, tex=None):
+
+    if lte:
+        trot = tex = tkin
+
+    velo = u.Quantity(velo, u.km/u.s)
+
+    spectra_list = []
+    for line in ('oneone', 'twotwo', 'fourfour'):
+        cfrq = ammonia_constants.freq_dict[line]*u.Hz
+        frq = velo.to(u.GHz, u.doppler_radio(cfrq))
+        xarr = units.SpectroscopicAxis(frq, refX=cfrq)
+        data = ammonia.ammonia(xarr, tex=tex, trot=trot, width=width,
+                               ntot=column, xoff_v=vcen)
+        sp = Spectrum(xarr=xarr, data=data)
+        spectra_list.append(sp)
+
+    return Spectra(spectra_list)
+
+def self_fit_test():
+    spc = make_synthspec()
+    spc.specfit(fittype='ammonia', guesses=[23, 22, 13.1, 1, 0.5, 0])
+
+    np.testing.assert_almost_equal(spc.specfit.parinfo[0].value, 25, 6)
+    np.testing.assert_almost_equal(spc.specfit.parinfo[1].value, 25, 3)
+    np.testing.assert_almost_equal(spc.specfit.parinfo[2].value, 13, 1)
+    np.testing.assert_almost_equal(spc.specfit.parinfo[3].value, 0.5, 7)
+    np.testing.assert_almost_equal(spc.specfit.parinfo[4].value, 0.0, 3)
+
+def cold_ammonia_test():
+
+    # from RADEX:
+    # R = Radex(species='p-nh3', column=1e13, collider_densities={'pH2':1e4}, temperature=25)
+    # R(collider_densities={'ph2': 1e4}, temperature=25, column=1e13)[:12]
+    # trot = trot = (u.Quantity(tbl['upperstateenergy'][8]-tbl['upperstateenergy'][9], u.K) *
+    #    np.log((tbl['upperlevelpop'][9] * R.statistical_weight[8]) /
+    #           (tbl['upperlevelpop'][8] * R.statistical_weight[9]))**-1
+    #    )
+    #    = 28.387641
+    spc = make_synthspec(lte=False, tkin=None, tex=7.0, trot=28.39)
+    spc.specfit.Registry.add_fitter('cold_ammonia',ammonia.cold_ammonia_model(),6)
+    spc.specfit(fittype='cold_ammonia', guesses=[23, 22, 13.1, 1, 0.5, 0])
+
+    return spc
