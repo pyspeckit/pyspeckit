@@ -933,7 +933,7 @@ class ammonia_model_background(ammonia_model):
 
 class cold_ammonia_model(ammonia_model):
     def __init__(self,
-                 parnames=['tkin', 'tex', 'tau', 'width', 'xoff_v', 'fortho'],
+                 parnames=['tkin', 'tex', 'ntot', 'width', 'xoff_v', 'fortho'],
                  **kwargs):
         super(cold_ammonia_model, self).__init__(parnames=parnames, **kwargs)
         self.modelfunc = cold_ammonia

@@ -54,7 +54,8 @@ def make_synthspec(velo=np.linspace(-25, 25, 251), tkin=25, lte=True,
 
 def self_fit_test():
     spc = make_synthspec()
-    spc.specfit(fittype='ammonia', guesses=[23, 22, 13.1, 1, 0.5, 0])
+    spc.specfit(fittype='ammonia', guesses=[23, 22, 13.1, 1, 0.5, 0],
+                fixed=[False,False,False,False,False,True])
 
     np.testing.assert_almost_equal(spc.specfit.parinfo[0].value, 25, 6)
     np.testing.assert_almost_equal(spc.specfit.parinfo[1].value, 25, 3)
@@ -65,15 +66,17 @@ def self_fit_test():
 def cold_ammonia_test():
 
     # from RADEX:
-    # R = Radex(species='p-nh3', column=1e13, collider_densities={'pH2':1e4}, temperature=25)
+    # R = Radex(species='p-nh3', column=1e13, collider_densities={'pH2':1e4}, temperature=20)
     # R(collider_densities={'ph2': 1e4}, temperature=25, column=1e13)[:12]
-    # trot = trot = (u.Quantity(tbl['upperstateenergy'][8]-tbl['upperstateenergy'][9], u.K) *
+    # trot = (u.Quantity(tbl['upperstateenergy'][8]-tbl['upperstateenergy'][9], u.K) *
     #    np.log((tbl['upperlevelpop'][9] * R.statistical_weight[8]) /
     #           (tbl['upperlevelpop'][8] * R.statistical_weight[9]))**-1
     #    )
-    #    = 28.387641
-    spc = make_synthspec(lte=False, tkin=None, tex=7.0, trot=28.39)
+    #    = 22.80
+    spc = make_synthspec(lte=False, tkin=None, tex=6.66, trot=22.80)
     spc.specfit.Registry.add_fitter('cold_ammonia',ammonia.cold_ammonia_model(),6)
-    spc.specfit(fittype='cold_ammonia', guesses=[23, 22, 13.1, 1, 0.5, 0])
+    spc.specfit(fittype='cold_ammonia', guesses=[23, 5, 13.1, 1, 0.5, 0],
+                fixed=[False,False,False,False,False,True]
+               )
 
     return spc
