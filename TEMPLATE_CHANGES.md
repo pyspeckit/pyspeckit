@@ -5,15 +5,62 @@ be removed in affiliated packages.
 The changes below indicate what file the change was made in so that these can
 be copied over manually if desired.
 
-1.1 (unreleased)
+1.1 (2016-06-01)
 ----------------
 
 - Fixed the import of example_mod.py in __init__.py to work properly on
-  Python 3.
+  Python 3. [#167]
 
 - Fixed the version import in conftest.py to work properly if version.py
-  hasn't been generated yet.
+  hasn't been generated yet. [#167]
 
+- Switch to using container-based builds on Travis. [#133]
+
+- Entry points are now defined in the ``setup.cfg`` file. [#130]
+
+- Expanded the default .gitignore file. [#146]
+
+- Switch to using ci-helpers on Travis, and add example AppVeyor config file.
+  [#140]
+
+- Updated astropy-helpers to v1.1.2. [#147]
+
+- Remove ``adjust_compiler`` from ``setup.py`` (this is now dealt with in
+  astropy-helpers). [#154]
+
+- Update ``MANIFEST.in`` to avoid bundling temporary files in astropy-helpers
+  when releasing packages. [#154]
+
+- Updated ``ez_setup.py`` to the latest version. [#135]
+
+- Catch ``KeyError`` when setting up custom test headers in ``conftest.py``.
+  [#143]
+
+- Update ``.travis.yml`` to include testing with the LTS release of Astropy,
+  remove testing against Python 2.6, and update Numpy versions [#148, #168]
+
+- Add an example of how to include data in ``example_subpkg/setup_package.py``.
+  [#158]
+
+- Update ReadTheDocs domains. [#166]
+
+- Updated Sphinx Makefile. [#171]
+
+- Updated AppVeyor config to run on Python 2.7 and 3.5. [#170]
+
+Summary of files that should be updated by affiliated packages:
+
+- ``.gitignore``
+- ``.travis.yml``
+- ``MANIFEST.in``
+- ``ah_bootstrap.py`` and ``astropy-helpers``
+- ``docs/Makefile``
+- ``ez_setup.py``
+- ``packagename/__init__.py``
+- ``packagename/conftest.py``
+- ``setup.cfg`` (if using entry points)
+- ``setup.py``
+- ``appveyor.yml``
 
 1.0 (2015-05-31)
 ----------------
@@ -39,9 +86,9 @@ be copied over manually if desired.
   - Recursively include *.pyx, *.c, and *.pxd files
 
   - Globally exclude *.pyc and *.o files
-  
+
   - Include ``CHANGES.rst``
-  
+
 - Update ``docs/conf.py`` to import Sphinx extensions from
   ``astropy_helpers`` instead of ``astropy``. [#119]
 
