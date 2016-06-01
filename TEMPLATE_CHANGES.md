@@ -48,18 +48,24 @@ be copied over manually if desired.
 
 - Updated AppVeyor config to run on Python 2.7 and 3.5. [#170]
 
-Summary of files that should be updated by affiliated packages:
+In summary, the following files should be updated by affiliated packages:
 
 - ``.gitignore``
-- ``.travis.yml``
 - ``MANIFEST.in``
-- ``ah_bootstrap.py`` and ``astropy-helpers``
 - ``docs/Makefile``
 - ``ez_setup.py``
-- ``packagename/__init__.py``
 - ``packagename/conftest.py``
-- ``setup.cfg`` (if using entry points)
 - ``setup.py``
+- ``setup.cfg`` (if using entry points)
+
+In addition, astropy-helpers should be updated to v1.1.2 and the
+``ah_bootstrap.py`` file should be updated to match the version in
+``astropy-helpers``.
+
+Finally, the following files have been updated, but don't necessarily need to
+be updated since they will likely be heavily customized in affiliated packages:
+
+- ``.travis.yml``
 - ``appveyor.yml``
 
 1.0 (2015-05-31)
