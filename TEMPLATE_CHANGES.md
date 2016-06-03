@@ -5,6 +5,13 @@ be removed in affiliated packages.
 The changes below indicate what file the change was made in so that these can
 be copied over manually if desired.
 
+1.1.1 (2016-06-03)
+------------------
+
+- Fixed the import of configparser on Python 3.5. [#172]
+
+- Updated ``ez_setup.py`` to the latest version. [#174]
+
 1.1 (2016-06-01)
 ----------------
 
