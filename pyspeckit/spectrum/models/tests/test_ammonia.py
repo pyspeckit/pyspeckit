@@ -54,6 +54,25 @@ def make_synthspec(velo=np.linspace(-25, 25, 251), tkin=25, lte=True,
 
     return Spectra(spectra_list)
 
+def make_synthspec_cold(velo=np.linspace(-25, 25, 251), tkin=25,
+                        column=13, width=0.5, vcen=0.0,
+                        lines=('oneone', 'twotwo', 'fourfour'),
+                        ):
+
+    velo = u.Quantity(velo, u.km/u.s)
+
+    spectra_list = []
+    for line in lines:
+        cfrq = ammonia_constants.freq_dict[line]*u.Hz
+        frq = velo.to(u.GHz, u.doppler_radio(cfrq))
+        xarr = units.SpectroscopicAxis(frq, refX=cfrq)
+        data = ammonia.cold_ammonia(xarr, tkin=tkin, width=width, ntot=column,
+                                    xoff_v=vcen)
+        sp = Spectrum(xarr=xarr, data=data)
+        spectra_list.append(sp)
+
+    return Spectra(spectra_list)
+
 def self_fit_test():
     spc = make_synthspec()
     spc.specfit(fittype='ammonia', guesses=[23, 22, 13.1, 1, 0.5, 0],

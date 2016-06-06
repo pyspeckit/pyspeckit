@@ -34,7 +34,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
             background_tb=TCMB,
             verbose=False, return_components=False, debug=False,
-            line_names=line_names, tkin=None):
+            line_names=line_names):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
     gaussian parameters
@@ -234,6 +234,7 @@ def cold_ammonia(xarr, tkin, **kwargs):
 
     dT0 = 41.5 # Energy difference between (2,2) and (1,1) in K
     trot = tkin/(1+tkin/dT0*np.log(1+0.6*np.exp(-15.7/tkin)))
+    log.debug("Cold ammonia turned T_K = {0} into T_rot = {1}".format(tkin,trot)
 
     return ammonia(xarr, trot=trot, **kwargs)
 
