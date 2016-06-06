@@ -98,6 +98,10 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     if tex is None:
         log.warning("Assuming tex=trot")
         tex = trot
+    elif isinstance(tex, dict):
+        for k in tex:
+            assert k in line_names,"{0} not in line list".format(k)
+        line_names = tex.keys()
 
     if 5 <= ntot <= 25:
         # allow ntot to be specified as a logarithm.  This is
@@ -159,7 +163,10 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         # Total population of the higher energy inversion transition
         population_rotstate = lin_ntot * ortho_or_parafrac * partition/Qtot
 
-        expterm = (1-np.exp(-h*frq/(kb*tex)))/(1+np.exp(-h*frq/(kb*tex)))
+        if isinstance(tex, dict):
+            expterm = (1-np.exp(-h*frq/(kb*tex[linename])))/(1+np.exp(-h*frq/(kb*tex[linename])))
+        else:
+            expterm = (1-np.exp(-h*frq/(kb*tex)))/(1+np.exp(-h*frq/(kb*tex)))
         fracterm = (ccms**2 * aval / (8*np.pi*frq**2))
         widthterm = (ckms/(width*frq*(2*np.pi)**0.5))
 
@@ -298,12 +305,23 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
 
         T0 = (h*xarr.value*1e9/kb) # "temperature" of wavelength
 
-        runspec = ((T0/(np.exp(T0/tex)-1) - T0/(np.exp(T0/background_tb)-1)) *
-                   (1-np.exp(-tauprof)) + runspec)
+        if isinstance(tex, dict):
+            runspec = ((T0/(np.exp(T0/tex[linename])-1) -
+                        T0/(np.exp(T0/background_tb)-1)) *
+                       (1-np.exp(-tauprof)) + runspec)
+        else:
+            runspec = ((T0/(np.exp(T0/tex)-1) -
+                        T0/(np.exp(T0/background_tb)-1)) *
+                       (1-np.exp(-tauprof)) + runspec)
 
 
     if return_components:
-        return (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))*(1-np.exp(-1*np.array(components)))
+        if isinstance(tex, 'dict'):
+            term1 = [(T0/(np.exp(T0/tex[linename])-1)-T0/(np.exp(T0/background_tb)-1))
+                     for linename in line_names]
+        else:
+            term1 = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))
+        return term1*(1-np.exp(-1*np.array(components)))
 
     return runspec
 

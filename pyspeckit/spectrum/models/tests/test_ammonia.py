@@ -33,7 +33,9 @@ def test_ammonia_parlimits_fails():
     assert 'no such limit is set' in str(ex.value)
 
 def make_synthspec(velo=np.linspace(-25, 25, 251), tkin=25, lte=True,
-                   column=13, width=0.5, vcen=0.0, trot=None, tex=None):
+                   column=13, width=0.5, vcen=0.0, trot=None, tex=None,
+                   lines=('oneone', 'twotwo', 'fourfour'),
+                   ):
 
     if lte:
         trot = tex = tkin
@@ -41,7 +43,7 @@ def make_synthspec(velo=np.linspace(-25, 25, 251), tkin=25, lte=True,
     velo = u.Quantity(velo, u.km/u.s)
 
     spectra_list = []
-    for line in ('oneone', 'twotwo', 'fourfour'):
+    for line in lines:
         cfrq = ammonia_constants.freq_dict[line]*u.Hz
         frq = velo.to(u.GHz, u.doppler_radio(cfrq))
         xarr = units.SpectroscopicAxis(frq, refX=cfrq)
