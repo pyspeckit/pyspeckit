@@ -227,14 +227,15 @@ def cold_ammonia(xarr, tkin, **kwargs):
     tkin: float
         The kinetic temperature of the lines in K.  Will be converted to
         rotational temperature following the scheme of Swift et al 2005
-        (http://esoads.eso.org/abs/2005ApJ...620..823S) and further discussed
-        in Equation 7 of Rosolowsky et al 2008
+        (http://esoads.eso.org/abs/2005ApJ...620..823S, eqn A6) and further
+        discussed in Equation 7 of Rosolowsky et al 2008
         (http://adsabs.harvard.edu/abs/2008ApJS..175..509R)
     """
 
-    dT0 = 41.5 # Energy difference between (2,2) and (1,1) in K
-    trot = tkin/(1+tkin/dT0*np.log(1+0.6*np.exp(-15.7/tkin)))
-    log.debug("Cold ammonia turned T_K = {0} into T_rot = {1}".format(tkin,trot)
+    dT0 = -41.5 # Energy difference between (2,2) and (1,1) in K
+    # important: dT0 should be negative
+    trot = tkin * (1 + (tkin/dT0)*np.log(1 + 0.6*np.exp(-15.7/tkin)))**-1
+    log.debug("Cold ammonia turned T_K = {0} into T_rot = {1}".format(tkin,trot))
 
     return ammonia(xarr, trot=trot, **kwargs)
 
