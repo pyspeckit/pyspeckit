@@ -232,8 +232,7 @@ def cold_ammonia(xarr, tkin, **kwargs):
         (http://adsabs.harvard.edu/abs/2008ApJS..175..509R)
     """
 
-    dT0 = -41.5 # Energy difference between (2,2) and (1,1) in K
-    # important: dT0 should be negative
+    dT0 = 41.18 # Energy difference between (2,2) and (1,1) in K
     trot = tkin * (1 + (tkin/dT0)*np.log(1 + 0.6*np.exp(-15.7/tkin)))**-1
     log.debug("Cold ammonia turned T_K = {0} into T_rot = {1}".format(tkin,trot))
 

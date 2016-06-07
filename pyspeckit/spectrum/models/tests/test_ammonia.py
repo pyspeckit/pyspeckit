@@ -73,7 +73,10 @@ def make_synthspec_cold(velo=np.linspace(-25, 25, 251), tkin=25,
 
     return Spectra(spectra_list)
 
-def self_fit_test():
+def test_self_fit():
+    """
+    Self-consistency check: make sure inputs are recovered
+    """
     spc = make_synthspec()
     spc.specfit(fittype='ammonia', guesses=[23, 22, 13.1, 1, 0.5, 0],
                 fixed=[False,False,False,False,False,True])
@@ -84,7 +87,7 @@ def self_fit_test():
     np.testing.assert_almost_equal(spc.specfit.parinfo[3].value, 0.5, 7)
     np.testing.assert_almost_equal(spc.specfit.parinfo[4].value, 0.0, 3)
 
-def cold_ammonia_test():
+def test_cold_ammonia():
 
     # from RADEX:
     # R = Radex(species='p-nh3', column=1e13, collider_densities={'pH2':1e4}, temperature=20)
@@ -94,10 +97,16 @@ def cold_ammonia_test():
     #           (tbl['upperlevelpop'][8] * R.statistical_weight[9]))**-1
     #    )
     #    = 22.80
-    spc = make_synthspec(lte=False, tkin=None, tex=6.66, trot=22.80)
+    spc = make_synthspec(lte=False, tkin=None, tex=6.66, trot=17.776914063182385)
     spc.specfit.Registry.add_fitter('cold_ammonia',ammonia.cold_ammonia_model(),6)
     spc.specfit(fittype='cold_ammonia', guesses=[23, 5, 13.1, 1, 0.5, 0],
                 fixed=[False,False,False,False,False,True]
                )
+
+    np.testing.assert_almost_equal(spc.specfit.parinfo['tkin0'].value, 19.8365, 4)
+    np.testing.assert_almost_equal(spc.specfit.parinfo['tex0'].value, 6.66, 3)
+    np.testing.assert_almost_equal(spc.specfit.parinfo['ntot0'].value, 13, 2)
+    np.testing.assert_almost_equal(spc.specfit.parinfo['width0'].value, 0.5, 7)
+    np.testing.assert_almost_equal(spc.specfit.parinfo['xoff_v0'].value, 0.0, 4)
 
     return spc
