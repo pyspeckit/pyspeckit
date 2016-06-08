@@ -15,6 +15,21 @@ num_to_name = {0: 'zero',
 
 line_names = ['oneone','twotwo','threethree','fourfour', "fivefive", "sixsix",
               "sevenseven", "eighteight",]
+
+# indices of the level population array for ortho/para lines
+line_name_indices = {'oneone': 0,
+                     'twotwo': 1,
+                     'fourfour': 2,
+                     'fivefive': 3,
+                     'sevenseven': 4,
+                     'eighteight': 5,
+                     'tenten': 6,
+                     'eleveneleven': 7,
+                     'threethree': 0,
+                     'sixsix': 1,
+                     'ninenine': 2,
+                    }
+
               #'ninenine']
 line_labels = {'oneone': '1-1',
                'twotwo': '2-2',

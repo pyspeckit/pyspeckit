@@ -104,9 +104,13 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     elif isinstance(tex, dict):
         for k in tex:
             assert k in line_names,"{0} not in line list".format(k)
-        # recreate line_names keeping only lines with a specified tex
-        # using this loop instead of tex.keys() preserves the order & data type
-        line_names = [k for k in line_names if k in tex]
+        line_names = tex.keys()
+
+    from .ammonia_constants import line_name_indices, line_names as original_line_names
+
+    # recreate line_names keeping only lines with a specified tex
+    # using this loop instead of tex.keys() preserves the order & data type
+    line_names = [k for k in original_line_names if k in line_names]
 
     if 5 <= ntot <= 25:
         # allow ntot to be specified as a logarithm.  This is
@@ -118,8 +122,6 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                          " must be in the range 5 - 25")
 
     tau_dict = {}
-    para_count = 0
-    ortho_count = 1 # ignore 0-0
 
     """
     Column density is the free parameter.  It is used in conjunction with
@@ -142,15 +144,10 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
             ortho_or_parafrac = fortho
             Z = Zortho
             Qtot = Qortho
-            count = ortho_count
-            ortho_count += 1
         else:
             ortho_or_parafrac = 1.0-fortho
             Z = Zpara
             Qtot = Qpara
-            count = para_count # need to treat partition function separately
-            para_count += 1
-
 
         # for a complete discussion of these equations, please see
         # https://github.com/keflavich/pyspeckit/blob/ammonia_equations/examples/AmmoniaLevelPopulation.ipynb
@@ -161,7 +158,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
 
         # short variable names for readability
         frq = freq_dict[linename]
-        partition = Z[count]
+        partition = Z[line_name_indices[linename]]
         aval = aval_dict[linename]
 
         # Total population of the higher energy inversion transition
@@ -180,9 +177,9 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         tau_dict[linename] = tau_i
 
         log.debug("Line {0}: tau={1}, expterm={2}, pop={3},"
-                  " partition={4}, count={5}"
+                  " partition={4}"
                   .format(linename, tau_i, expterm, population_rotstate,
-                          partition, count))
+                          partition))
 
     # allow tau(11) to be specified instead of ntot
     # in the thin case, this is not needed: ntot plays no role
@@ -297,7 +294,7 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
     # "runspec" means "running spectrum": it is accumulated over a loop
     runspec = np.zeros(len(xarr))
 
-    components =[]
+    components = []
     for linename in line_names:
         voff_lines = np.array(voff_lines_dict[linename])
         tau_wts = np.array(tau_wts_dict[linename])
