@@ -22,6 +22,7 @@ addons:
 
 env:
     global:
+
         # The following versions are the 'default' for tests, unless
         # overridden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
@@ -29,10 +30,16 @@ env:
         - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
+
         # For this package-template, we include examples of Cython modules,
         # so Cython is required for testing. If your package does not include
         # Cython code, you can set CONDA_DEPENDENCIES=''
         - CONDA_DEPENDENCIES='Cython'
+
+        # If there are matplotlib or other GUI tests, uncomment the following
+        # line to use the X virtual framebuffer.
+        # - SETUP_XVFB=True
+
     matrix:
         # Make sure that egg_info works without dependencies
         - SETUP_CMD='egg_info'
@@ -87,13 +94,6 @@ matrix:
         # Try numpy pre-release
         - python: 3.5
           env: NUMPY_VERSION=prerelease
-
-before_install:
-
-    # If there are matplotlib tests, comment these out to
-    # Make sure that interactive matplotlib backends work
-    # - export DISPLAY=:99.0
-    # - sh -e /etc/init.d/xvfb start
 
 install:
 
