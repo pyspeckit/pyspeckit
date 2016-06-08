@@ -93,11 +93,12 @@ def test_cold_ammonia():
     # R = Radex(species='p-nh3', column=1e13, collider_densities={'pH2':1e4}, temperature=20)
     # R(collider_densities={'ph2': 1e4}, temperature=25, column=1e13)[:12]
     # trot = (u.Quantity(tbl['upperstateenergy'][8]-tbl['upperstateenergy'][9], u.K) *
-    #    np.log((tbl['upperlevelpop'][9] * R.statistical_weight[8]) /
-    #           (tbl['upperlevelpop'][8] * R.statistical_weight[9]))**-1
+    #    np.log((tbl['upperlevelpop'][9] * R.upperlevel_statisticalweight[8]) /
+    #           (tbl['upperlevelpop'][8] * R.upperlevel_statisticalweight[9]))**-1
     #    )
     #    = 22.80
-    spc = make_synthspec(lte=False, tkin=None, tex=6.66, trot=17.776914063182385)
+    spc = make_synthspec(lte=False, tkin=None, tex=6.66, trot=17.776914063182385,
+                         lines=['oneone','twotwo'])
     spc.specfit.Registry.add_fitter('cold_ammonia',ammonia.cold_ammonia_model(),6)
     spc.specfit(fittype='cold_ammonia', guesses=[23, 5, 13.1, 1, 0.5, 0],
                 fixed=[False,False,False,False,False,True]
@@ -106,7 +107,46 @@ def test_cold_ammonia():
     np.testing.assert_almost_equal(spc.specfit.parinfo['tkin0'].value, 19.8365, 4)
     np.testing.assert_almost_equal(spc.specfit.parinfo['tex0'].value, 6.66, 3)
     np.testing.assert_almost_equal(spc.specfit.parinfo['ntot0'].value, 13, 2)
-    np.testing.assert_almost_equal(spc.specfit.parinfo['width0'].value, 0.5, 7)
-    np.testing.assert_almost_equal(spc.specfit.parinfo['xoff_v0'].value, 0.0, 4)
+    np.testing.assert_almost_equal(spc.specfit.parinfo['width0'].value, 0.5, 6)
+    np.testing.assert_almost_equal(spc.specfit.parinfo['xoff_v0'].value, 0.0, 3)
 
     return spc
+
+def test_cold_ammonia2():
+
+    tex = {'oneone':6.789360524825584,
+           'twotwo':6.533403488783305,
+          }
+    spc = make_synthspec(lte=False, tkin=None, tex=tex, trot=17.776914063182385,
+                         lines=['oneone','twotwo'])
+    spc.specfit.Registry.add_fitter('cold_ammonia',ammonia.cold_ammonia_model(),6)
+    spc.specfit(fittype='cold_ammonia', guesses=[23, 5, 13.1, 1, 0.5, 0],
+                fixed=[False,False,False,False,False,True]
+               )
+
+    np.testing.assert_almost_equal(spc.specfit.parinfo['tkin0'].value, 19.55, 2)
+    np.testing.assert_almost_equal(spc.specfit.parinfo['tex0'].value, 6.79, 2)
+    np.testing.assert_almost_equal(spc.specfit.parinfo['ntot0'].value, 13, 2)
+    np.testing.assert_almost_equal(spc.specfit.parinfo['width0'].value, 0.5, 4)
+    np.testing.assert_almost_equal(spc.specfit.parinfo['xoff_v0'].value, 0.0, 3)
+
+    return spc
+
+"""
+# debug work to make sure synthspectra look the same
+from pyspeckit.spectrum.models.tests import test_ammonia
+spc1 = test_ammonia.test_cold_ammonia()
+spc2 = test_ammonia.test_cold_ammonia2()
+spc1.plotter()
+spc2.plotter(axis=spc1.plotter.axis, color='b', clear=False)
+
+from pyspeckit.spectrum.models.tests import test_ammonia
+from astropy import log
+log.setLevel('DEBUG')
+spc3 = test_ammonia.make_synthspec(lte=False, tkin=None, trot=17.8, tex=6.66, lines=['oneone','twotwo'])
+spc4 = test_ammonia.make_synthspec(lte=False, tkin=None, trot=17.8, tex={'oneone':6.66, 'twotwo':6.66}, lines=['oneone','twotwo'])
+spc5 = test_ammonia.make_synthspec(lte=False, tkin=None, trot=17.8, tex={'oneone':6.66, 'twotwo':6.66, 'fourfour':6.66}, lines=['oneone','twotwo'])
+spc3.plotter(linewidth=2)
+spc5.plotter(axis=spc3.plotter.axis, color='r', clear=False)
+spc4.plotter(axis=spc3.plotter.axis, color='b', clear=False)
+"""

@@ -92,6 +92,9 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         (if ``return_tau`` is set)
     """
 
+    from .ammonia_constants import (ckms, ccms, h, kb,
+                                    Jortho, Jpara, Brot, Crot)
+
     # Convert X-units to frequency in GHz
     xarr = xarr.as_unit('GHz')
 
@@ -101,7 +104,9 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     elif isinstance(tex, dict):
         for k in tex:
             assert k in line_names,"{0} not in line list".format(k)
-        line_names = tex.keys()
+        # recreate line_names keeping only lines with a specified tex
+        # using this loop instead of tex.keys() preserves the order & data type
+        line_names = [k for k in line_names if k in tex]
 
     if 5 <= ntot <= 25:
         # allow ntot to be specified as a logarithm.  This is
@@ -111,10 +116,6 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     else:
         raise ValueError("ntot, the logarithmic total column density,"
                          " must be in the range 5 - 25")
-
-    from .ammonia_constants import (ckms, ccms, h, kb,
-                                    Jortho, Jpara, Brot, Crot)
-
 
     tau_dict = {}
     para_count = 0
@@ -130,6 +131,9 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                                        (Crot-Brot)*Jortho**2)/(kb*trot))
     Qpara = Zpara.sum()
     Qortho = Zortho.sum()
+
+    log.debug("Partition Function: Q_ortho={0}, Q_para={1}".format(Qortho, Qpara))
+
     for linename in line_names:
         if ortho_dict[linename]:
             # define variable "ortho_or_para_frac" that will be the ortho
@@ -164,14 +168,21 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         population_rotstate = lin_ntot * ortho_or_parafrac * partition/Qtot
 
         if isinstance(tex, dict):
-            expterm = (1-np.exp(-h*frq/(kb*tex[linename])))/(1+np.exp(-h*frq/(kb*tex[linename])))
+            expterm = ((1-np.exp(-h*frq/(kb*tex[linename]))) /
+                       (1+np.exp(-h*frq/(kb*tex[linename]))))
         else:
-            expterm = (1-np.exp(-h*frq/(kb*tex)))/(1+np.exp(-h*frq/(kb*tex)))
+            expterm = ((1-np.exp(-h*frq/(kb*tex))) /
+                       (1+np.exp(-h*frq/(kb*tex))))
         fracterm = (ccms**2 * aval / (8*np.pi*frq**2))
         widthterm = (ckms/(width*frq*(2*np.pi)**0.5))
 
         tau_i = population_rotstate * fracterm * expterm * widthterm
         tau_dict[linename] = tau_i
+
+        log.debug("Line {0}: tau={1}, expterm={2}, pop={3},"
+                  " partition={4}, count={5}"
+                  .format(linename, tau_i, expterm, population_rotstate,
+                          partition, count))
 
     # allow tau(11) to be specified instead of ntot
     # in the thin case, this is not needed: ntot plays no role
@@ -197,17 +208,17 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     if model_spectrum.min() < 0 and background_tb == TCMB:
         raise ValueError("Model dropped below zero.  That is not possible "
                          " normally.  Here are the input values: "+
-                         ("tex: %f " % tex) +
+                         ("tex: {0} ".format(tex)) +
                          ("trot: %f " % trot) +
                          ("ntot: %f " % ntot) +
                          ("width: %f " % width) +
                          ("xoff_v: %f " % xoff_v) +
                          ("fortho: %f " % fortho)
-                        )
+                         )
 
 
     if verbose or debug:
-        log.info("trot: %g  tex: %g  ntot: %g  width: %g  xoff_v: %g  "
+        log.info("trot: %g  tex: %s  ntot: %g  width: %g  xoff_v: %g  "
                  "fortho: %g  fillingfraction: %g" % (trot, tex, ntot, width,
                                                       xoff_v, fortho,
                                                       fillingfraction))
@@ -317,14 +328,14 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
 
 
     if return_components:
-        if isinstance(tex, 'dict'):
+        if isinstance(tex, dict):
             term1 = [(T0/(np.exp(T0/tex[linename])-1)-T0/(np.exp(T0/background_tb)-1))
                      for linename in line_names]
         else:
             term1 = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))
         return term1*(1-np.exp(-1*np.array(components)))
-
-    return runspec
+    else:
+        return runspec
 
 
 
