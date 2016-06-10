@@ -777,7 +777,7 @@ class Cube(spectrum.Spectrum):
                 if verbose_level > 1 and ii==0:
                     log.warning("WARNING: using data std() as error.", PyspeckitWarning)
                 sp.error[:] = sp.data[sp.data==sp.data].std()
-            if sp.error is not None and signal_cut > 0:
+            if sp.error is not None and signal_cut > 0 and not all(sp.error == 0):
                 if continuum_map is not None:
                     snr = (sp.data-continuum_map[y,x]) / sp.error
                 else:

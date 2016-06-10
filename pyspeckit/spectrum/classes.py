@@ -175,7 +175,7 @@ class BaseSpectrum(object):
             if error is not None:
                 self.error = error
             else:
-                self.error = None
+                self.error = np.zeros_like(data)
             if hasattr(header,'get'):
                 if not isinstance(header, pyfits.Header):
                     cards = [pyfits.Card(k, header[k]) for k in header]
