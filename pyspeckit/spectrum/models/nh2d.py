@@ -12,7 +12,7 @@ Ronak Y. Shah and Alwyn Wootten ApJ 554, 933-947 (2001)
 http://adsabs.harvard.edu/abs/2001ApJ...554..933S
 
 """
-import hyperfine
+from . import hyperfine
 import astropy.units as u
 
 freq_dict_cen ={
