@@ -6,7 +6,7 @@ PySpecKit Spectroscopic Toolkit
    :target: https://gitter.im/pyspeckit/pyspeckit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
  * Documentation: `<http://pyspeckit.readthedocs.org/en/latest/>`_
- * Homepage: `<pyspeckit.bitbucket.org>`_
+ * Homepage: `<http://pyspeckit.bitbucket.org>`_
  * Source pages: `<https://github.com/pyspeckit/pyspeckit>`_ and `<https://bitbucket.org/pyspeckit/pyspeckit>`_
 
 This is a code framework designed to allow for analysis of spectroscopic data
