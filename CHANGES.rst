@@ -1,9 +1,21 @@
 CHANGES
 *******
 
-Version 0.1.19 (unreleased)
+Version 0.1.19 (2016-06-12)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    * Enhancement #170: Added a ``cold_ammonia`` model, which uses a specific
+      set of approximations to fit the rotational temperature and retrieve the
+      kinetic temperature
+    * Bugfix #166: Spectrum objects should, and now do, inherit the registry
+      from their parents.  This is critical for fitting non-default models to
+      cubes
+    * Bugfix #163: Allow parameter cubes that have NaNs to be loaded
+    * Enhancement #161: Cleaned up moment-specified guesses for cubes
+    * Enhancement #160: Added multiply ionized RRLs to the RRL models
+    * Enhancement #156: NaN pixels are treated as though they were masked out
+      (previously, numpy masked arrays had to be used for this functionality)
+    * Bugfix #154: pyspeckit script upgraded to py3 compatible
     * Bugfix #152: SpectroscopicAxis comparisons did not properly yield
       booleans due to an inheritance error.
     * Bugfix #147: Spectrum arithmetic was being allowed between spectrum
