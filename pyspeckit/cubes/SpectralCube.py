@@ -17,6 +17,8 @@ The 'grunt work' is performed by the :py:mod:`cubes` module
 from __future__ import print_function
 
 import time
+import sys
+import traceback
 import numpy as np
 import types
 import copy
@@ -847,7 +849,12 @@ class Cube(spectrum.Spectrum):
                     self.errcube[:,y,x] = sp.specfit.modelerrs
                     success = True
                 except Exception as ex:
+                    exc_traceback = sys.exc_info()[2]
                     log.exception("Fit number %i at %i,%i failed on error %s" % (ii,x,y, str(ex)))
+                    log.exception("Failure was in file {0} at line {1}".format(
+                        exc_traceback.tb_frame.f_code.co_filename,
+                        exc_traceback.tb_lineno,))
+                    traceback.print_tb(exc_traceback)
                     log.exception("Guesses were: {0}".format(str(gg)))
                     log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
                     success = False
