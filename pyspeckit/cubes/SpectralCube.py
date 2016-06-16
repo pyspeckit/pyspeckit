@@ -1313,7 +1313,7 @@ class CubeStack(Cube):
         self.xarr = SpectroscopicAxes([sp.xarr for sp in cubelist])
         self.cube = np.ma.concatenate([icube.cube for icube in cubelist])
 
-        if any([icube.errorcube is not None for icube in cubelist]):
+        if np.any([icube.errorcube is not None for icube in cubelist]):
             if all([icube.errorcube is not None for icube in cubelist]):
                 self.errorcube = np.ma.concatenate([icube.errorcube for icube in cubelist])
             else:

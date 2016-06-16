@@ -1804,6 +1804,8 @@ class Specfit(interactive.Interactive):
         >>> p0 = emcee_ensemble.p0 * (np.random.randn(*emcee_ensemble.p0.shape) / 10. + 1.0)
         >>> pos,logprob,state = emcee_ensemble.run_mcmc(p0,100)
         """
+        import emcee
+
         if hasattr(self.fitter,'get_emcee_ensemblesampler'):
             nwalkers = (self.fitter.npars * self.fitter.npeaks + self.fitter.vheight) * 2
             emc = self.fitter.get_emcee_ensemblesampler(self.Spectrum.xarr,
