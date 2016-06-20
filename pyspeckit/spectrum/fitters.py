@@ -625,9 +625,11 @@ class Specfit(interactive.Interactive):
         
         scalefactor = 1.0
         if renormalize in ('auto',True):
-            datarange = self.spectofit[self.xmin:self.xmax].max() - self.spectofit[self.xmin:self.xmax].min()
+            datarange = np.nanmax(self.spectofit[self.xmin:self.xmax]) - np.nanmin(self.spectofit[self.xmin:self.xmax])
             if abs(datarange) < 1e-9:
                 scalefactor = np.median(np.abs(self.spectofit))
+                if not np.isfinite(scalefactor):
+                    raise ValueError("non-finite scalefactor = {0} encountered.".format(scalefactor))
                 log.info("Renormalizing data by factor %e to improve fitting procedure"
                          % scalefactor)
                 self.spectofit /= scalefactor
