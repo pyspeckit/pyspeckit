@@ -488,6 +488,9 @@ class Interactive(object):
                     x1 = self.Spectrum.xarr.x_to_pix(x1)
                     # WCS units should be end-inclusive
                     x2 = self.Spectrum.xarr.x_to_pix(x2)+1
+                log.debug("Exclusion pixels: {0} to {1}".format(x1,x2))
+                if x1 > x2:
+                    x1,x2 = x2,x1
                 self.includemask[x1:x2] = False
         elif exclude is not None:
             log.error("An 'exclude' keyword was specified with an odd number "
