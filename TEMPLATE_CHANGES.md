@@ -5,6 +5,85 @@ be removed in affiliated packages.
 The changes below indicate what file the change was made in so that these can
 be copied over manually if desired.
 
+1.1.2 (2016-07-02)
+------------------
+
+- Updated .travis.yml to show usage of SETUP_XVFB ci-helpers option. [#177]
+
+- Updated astropy-helpers to v1.2. [#180]
+
+- Fixed import of ``configparser`` in ``docs/conf.py``. [#180]
+
+1.1.1 (2016-06-03)
+------------------
+
+- Fixed the import of configparser on Python 3.5. [#172]
+
+- Updated ``ez_setup.py`` to the latest version. [#174]
+
+1.1 (2016-06-01)
+----------------
+
+- Fixed the import of example_mod.py in __init__.py to work properly on
+  Python 3. [#167]
+
+- Fixed the version import in conftest.py to work properly if version.py
+  hasn't been generated yet. [#167]
+
+- Switch to using container-based builds on Travis. [#133]
+
+- Entry points are now defined in the ``setup.cfg`` file. [#130]
+
+- Expanded the default .gitignore file. [#146]
+
+- Switch to using ci-helpers on Travis, and add example AppVeyor config file.
+  [#140]
+
+- Updated astropy-helpers to v1.1.2. [#147]
+
+- Remove ``adjust_compiler`` from ``setup.py`` (this is now dealt with in
+  astropy-helpers). [#154]
+
+- Update ``MANIFEST.in`` to avoid bundling temporary files in astropy-helpers
+  when releasing packages. [#154]
+
+- Updated ``ez_setup.py`` to the latest version. [#135]
+
+- Catch ``KeyError`` when setting up custom test headers in ``conftest.py``.
+  [#143]
+
+- Update ``.travis.yml`` to include testing with the LTS release of Astropy,
+  remove testing against Python 2.6, and update Numpy versions [#148, #168]
+
+- Add an example of how to include data in ``example_subpkg/setup_package.py``.
+  [#158]
+
+- Update ReadTheDocs domains. [#166]
+
+- Updated Sphinx Makefile. [#171]
+
+- Updated AppVeyor config to run on Python 2.7 and 3.5. [#170]
+
+In summary, the following files should be updated by affiliated packages:
+
+- ``.gitignore``
+- ``MANIFEST.in``
+- ``docs/Makefile``
+- ``ez_setup.py``
+- ``packagename/conftest.py``
+- ``setup.py``
+- ``setup.cfg`` (if using entry points)
+
+In addition, astropy-helpers should be updated to v1.1.2 and the
+``ah_bootstrap.py`` file should be updated to match the version in
+``astropy-helpers``.
+
+Finally, the following files have been updated, but don't necessarily need to
+be updated since they will likely be heavily customized in affiliated packages:
+
+- ``.travis.yml``
+- ``appveyor.yml``
+
 1.0 (2015-05-31)
 ----------------
 
@@ -29,9 +108,9 @@ be copied over manually if desired.
   - Recursively include *.pyx, *.c, and *.pxd files
 
   - Globally exclude *.pyc and *.o files
-  
+
   - Include ``CHANGES.rst``
-  
+
 - Update ``docs/conf.py`` to import Sphinx extensions from
   ``astropy_helpers`` instead of ``astropy``. [#119]
 
