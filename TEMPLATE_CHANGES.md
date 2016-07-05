@@ -5,6 +5,10 @@ be removed in affiliated packages.
 The changes below indicate what file the change was made in so that these can
 be copied over manually if desired.
 
+1.1.3 (unreleased)
+------------------
+- Updated the setup.cfg to include the version number. [#129]
+
 1.1.2 (2016-07-02)
 ------------------
 
