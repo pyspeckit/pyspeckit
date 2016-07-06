@@ -5,6 +5,11 @@ be removed in affiliated packages.
 The changes below indicate what file the change was made in so that these can
 be copied over manually if desired.
 
+1.1.3 (unreleased)
+------------------
+
+- Removed Python 2.6 tests from travis.yml file as astropy 1.2 no longer supports Python 2.6 [#183]
+
 1.1.2 (2016-07-02)
 ------------------
 
