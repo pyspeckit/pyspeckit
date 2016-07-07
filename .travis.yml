@@ -28,6 +28,7 @@ env:
         # to repeat them for all configurations.
         - NUMPY_VERSION=stable
         - ASTROPY_VERSION=stable
+        - MAIN_CMD='python setup.py'
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
 
@@ -47,6 +48,10 @@ env:
         - SETUP_CMD='test'
 
 matrix:
+
+    # Don't wait for allowed failures
+    fast_finish: true
+
     include:
 
         # Do a coverage test in Python 2.
@@ -92,6 +97,16 @@ matrix:
         - python: 3.5
           env: NUMPY_VERSION=prerelease
 
+        # Do a PEP8 test with pycodestyle
+        - os: linux
+          env: MAIN_CMD='pycodestyle packagename --count' SETUP_CMD=''
+
+    allow_failures:
+        # Do a PEP8 test with pycodestyle
+        # (allow to fail unless your code completely compliant)
+        - os: linux
+          env: MAIN_CMD='pycodestyle packagename --count' SETUP_CMD=''
+
 install:
 
     # We now use the ci-helpers package to set up our testing environment.
@@ -118,7 +133,7 @@ install:
     # other dependencies.
 
 script:
-   - python setup.py $SETUP_CMD
+   - $MAIN_CMD $SETUP_CMD
 
 after_success:
     # If coveralls.io is set up for this package, uncomment the line
