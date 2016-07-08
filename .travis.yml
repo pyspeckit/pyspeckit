@@ -98,13 +98,13 @@ matrix:
           env: NUMPY_VERSION=prerelease
 
         # Do a PEP8 test with pycodestyle
-        - os: linux
+        - python: 3.5
           env: MAIN_CMD='pycodestyle packagename --count' SETUP_CMD=''
 
     allow_failures:
         # Do a PEP8 test with pycodestyle
         # (allow to fail unless your code completely compliant)
-        - os: linux
+        - python: 3.5
           env: MAIN_CMD='pycodestyle packagename --count' SETUP_CMD=''
 
 install:
