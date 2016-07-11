@@ -218,20 +218,20 @@ class TestUnits(object):
         # regression for issue 175
 
         xx = np.linspace(-50,50)*u.km/u.s
-        dx = np.mean(np.diff(xx)).value
+        dx = np.mean(np.diff(xx))
         xarr = pyspeckit.units.SpectroscopicAxis(xx, refX=5*u.GHz)
 
-        assert xarr.cdelt() == dx
+        np.testing.assert_almost_equal(xarr.cdelt().value, dx.value)
         assert len(xarr.dxarr) == len(xarr)
 
         xarr = pyspeckit.units.SpectroscopicAxis(xx, refX=5*u.GHz)
 
         # check both orders: dxarr is a property, so this could be different
         assert len(xarr.dxarr) == len(xarr)
-        assert xarr.cdelt() == dx
+        np.testing.assert_almost_equal(xarr.cdelt().value, dx.value)
 
         xarr2 = xarr[10:-10]
-        assert xarr2.cdelt() == dx
+        np.testing.assert_almost_equal(xarr2.cdelt().value, dx.value)
         assert len(xarr2) == len(xarr2.dxarr)
 
 
