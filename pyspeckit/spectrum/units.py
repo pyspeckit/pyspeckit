@@ -739,7 +739,9 @@ class SpectroscopicAxis(u.Quantity):
 
     def make_dxarr(self, coordinate_location='center'):
         """
-        Create a "delta-x" array corresponding to the X array.
+        Create a "delta-x" array corresponding to the X array.  It will have
+        the same length as the input array, which is achieved by concatenating
+        an extra pixel somewhere.
 
         Parameter
         ----------
@@ -759,6 +761,7 @@ class SpectroscopicAxis(u.Quantity):
             self._dxarr = np.concatenate([dxarr[:1],dxarr])
         else:
             raise ValueError("Invalid coordinate location.")
+        self._dxarr._unit = self.unit
 
     def cdelt(self, tolerance=1e-8, approx=False):
         """

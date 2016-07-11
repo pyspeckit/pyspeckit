@@ -214,6 +214,28 @@ class TestUnits(object):
         assert np.all(mask[:25])
         assert np.all(~mask[25:])
 
+    def test_cdelt(self):
+        # regression for issue 175
+
+        xx = np.linspace(-50,50)*u.km/u.s
+        dx = np.mean(np.diff(xx)).value
+        xarr = pyspeckit.units.SpectroscopicAxis(xx, refX=5*u.GHz)
+
+        assert xarr.cdelt() == dx
+        assert len(xarr.dxarr) == len(xarr)
+
+        xarr = pyspeckit.units.SpectroscopicAxis(xx, refX=5*u.GHz)
+
+        # check both orders: dxarr is a property, so this could be different
+        assert len(xarr.dxarr) == len(xarr)
+        assert xarr.cdelt() == dx
+
+        xarr2 = xarr[10:-10]
+        assert xarr2.cdelt() == dx
+        assert len(xarr2) == len(xarr2.dxarr)
+
+
+
 
 if __name__=="__main__":
     unit_from='GHz'
