@@ -269,7 +269,7 @@ class BaseSpectrum(object):
             self.data = self.data[argsort]
             self.error = self.error[argsort]
             self.xarr = self.xarr[argsort]
-            self.xarr.dxarr = np.diff(self.xarr.value)
+            self.xarr.make_dxarr()
 
     def write(self,filename,type=None,**kwargs):
         """

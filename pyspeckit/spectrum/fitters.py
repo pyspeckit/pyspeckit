@@ -378,7 +378,7 @@ class Specfit(interactive.Interactive):
         else:
             xmax = self.Spectrum.xarr.x_to_pix(xmax, xval_units=xunits)
 
-        dx = np.abs(self.Spectrum.xarr[xmin:xmax].cdelt(approx=True))
+        dx = np.abs(self.Spectrum.xarr[xmin:xmax].cdelt(approx=True).value)
 
         log.debug("xmin={0} xmax={1} dx={2} continuum={3}"
                   .format(xmin, xmax, dx, continuum))
@@ -393,10 +393,11 @@ class Specfit(interactive.Interactive):
                     continuum = self.Spectrum.baseline.basespec[center_pix]
                 elif continuum_as_baseline:
                     integrals[-1] += -(self.Spectrum.baseline.basespec[xmin:xmax] - continuum).sum() * dx
-                eqw.append( -integ / continuum)
+                eqw.append(-integ / continuum)
             if plot:
                 plot = False
-                if mycfg.WARN: warn( "Cannot plot multiple Equivalent Widths" )
+                if mycfg.WARN:
+                    warn("Cannot plot multiple Equivalent Widths")
         elif fitted:
             model = self.get_model(self.Spectrum.xarr[xmin:xmax],
                                    add_baseline=False)
@@ -467,7 +468,7 @@ class Specfit(interactive.Interactive):
             if annotate:
                 self.Spectrum.plotter.axis.legend(
                         [(matplotlib.collections.CircleCollection([0],facecolors=[plotcolor],edgecolors=[plotcolor]))],
-                        [('EQW: %0.3g' % eqw)], 
+                        [('EQW: %0.3g' % eqw)],
                         markerscale=0.01, borderpad=0.1, handlelength=0.1,
                         handletextpad=0.1, loc=loc)
             if self.Spectrum.plotter.autorefresh:
@@ -625,9 +626,11 @@ class Specfit(interactive.Interactive):
         
         scalefactor = 1.0
         if renormalize in ('auto',True):
-            datarange = self.spectofit[self.xmin:self.xmax].max() - self.spectofit[self.xmin:self.xmax].min()
+            datarange = np.nanmax(self.spectofit[self.xmin:self.xmax]) - np.nanmin(self.spectofit[self.xmin:self.xmax])
             if abs(datarange) < 1e-9:
-                scalefactor = np.median(np.abs(self.spectofit))
+                scalefactor = np.nanmedian(np.abs(self.spectofit))
+                if not np.isfinite(scalefactor):
+                    raise ValueError("non-finite scalefactor = {0} encountered.".format(scalefactor))
                 log.info("Renormalizing data by factor %e to improve fitting procedure"
                          % scalefactor)
                 self.spectofit /= scalefactor
@@ -1406,14 +1409,14 @@ class Specfit(interactive.Interactive):
                     for x in integration_limits]
 
         if xmax - xmin > 1: # can only get cdelt if there's more than 1 pixel
-            dx = self.Spectrum.xarr[xmin:xmax].cdelt()
+            dx = self.Spectrum.xarr[xmin:xmax].cdelt().value
         else:
             dx = None
         if dx is None:
             #dx = np.abs(np.concatenate([np.diff(self.Spectrum.xarr),[0]]))
             #warn("Irregular X-axis.  The last pixel is ignored.")
             self.Spectrum.xarr.make_dxarr()
-            dx = self.Spectrum.xarr.dxarr
+            dx = self.Spectrum.xarr.dxarr.value
         else:
             # shouldn't shape be a 'property'?
             dx = np.repeat(np.abs(dx), self.Spectrum.shape)
@@ -1804,6 +1807,8 @@ class Specfit(interactive.Interactive):
         >>> p0 = emcee_ensemble.p0 * (np.random.randn(*emcee_ensemble.p0.shape) / 10. + 1.0)
         >>> pos,logprob,state = emcee_ensemble.run_mcmc(p0,100)
         """
+        import emcee
+
         if hasattr(self.fitter,'get_emcee_ensemblesampler'):
             nwalkers = (self.fitter.npars * self.fitter.npeaks + self.fitter.vheight) * 2
             emc = self.fitter.get_emcee_ensemblesampler(self.Spectrum.xarr,
@@ -1904,9 +1909,9 @@ class Specfit(interactive.Interactive):
         cd = xarr.dxarr.min()
         
         if interpolate_factor > 1:
-            newxarr = units.SpectroscopicAxis(np.arange(xarr.min().value-cd,
-                                                        xarr.max().value+cd,
-                                                        cd /
+            newxarr = units.SpectroscopicAxis(np.arange(xarr.min().value-cd.value,
+                                                        xarr.max().value+cd.value,
+                                                        cd.value /
                                                         float(interpolate_factor)
                                                        ),
                                               unit=xarr.unit,

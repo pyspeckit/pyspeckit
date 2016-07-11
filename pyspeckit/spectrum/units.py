@@ -510,11 +510,12 @@ class SpectroscopicAxis(u.Quantity):
         self.center_frequency = getattr(obj, 'center_frequency', None)
         self.center_frequency_unit = getattr(obj, 'center_frequency_unit', None)
         self._equivalencies = getattr(obj, 'equivalencies', [])
+        # instead of making dxarr on init, make it on first use (see property dxarr)
         # moved from __init__ - needs to be done whenever viewed
         # (this is slow, though - may be better not to do this)
-        if self.shape and self.dtype != np.dtype('bool'): # check to make sure non-scalar
-            # can't use make_dxarr here! infinite recursion =(
-            self.dxarr = np.diff(np.array(self))
+        #if self.shape and self.dtype != np.dtype('bool'): # check to make sure non-scalar
+        #    # can't use make_dxarr here! infinite recursion =(
+        #    self.dxarr = np.diff(np.array(self))
 
     def __array_wrap__(self,out_arr,context=None):
         """
@@ -665,9 +666,9 @@ class SpectroscopicAxis(u.Quantity):
         self.flags.writeable=False
         if make_dxarr:
             self.make_dxarr()
-        elif hasattr(self, 'dxarr'):
+        elif hasattr(self, '_dxarr'):
             # remove the old, wrong one
-            del self.dxarr
+            del self._dxarr
 
 
     def as_unit(self, unit, equivalencies=[], velocity_convention=None, refX=None,
@@ -728,9 +729,19 @@ class SpectroscopicAxis(u.Quantity):
 
         return self.to(unit, equivalencies=self.equivalencies)
 
+    @property
+    def dxarr(self):
+        if hasattr(self, '_dxarr'):
+            return self._dxarr
+        else:
+            self.make_dxarr()
+            return self._dxarr
+
     def make_dxarr(self, coordinate_location='center'):
         """
-        Create a "delta-x" array corresponding to the X array.
+        Create a "delta-x" array corresponding to the X array.  It will have
+        the same length as the input array, which is achieved by concatenating
+        an extra pixel somewhere.
 
         Parameter
         ----------
@@ -743,13 +754,14 @@ class SpectroscopicAxis(u.Quantity):
         """
         dxarr = np.diff(self)
         if self.size <= 2:
-            self.dxarr = np.ones(self.size)*dxarr
+            self._dxarr = np.ones(self.size)*dxarr
         elif coordinate_location in ['left','center']:
-            self.dxarr = np.concatenate([dxarr,dxarr[-1:]])
+            self._dxarr = np.concatenate([dxarr,dxarr[-1:]])
         elif coordinate_location in ['right']:
-            self.dxarr = np.concatenate([dxarr[:1],dxarr])
+            self._dxarr = np.concatenate([dxarr[:1],dxarr])
         else:
             raise ValueError("Invalid coordinate location.")
+        self._dxarr._unit = self.unit
 
     def cdelt(self, tolerance=1e-8, approx=False):
         """
@@ -763,12 +775,15 @@ class SpectroscopicAxis(u.Quantity):
         approx : bool
             Return the mean DX even if it is inaccurate
         """
-        if not hasattr(self,'dxarr'): # if cropping happens...
+        if not hasattr(self,'_dxarr'): # if cropping happens...
             self.make_dxarr()
         if len(self) <= 1:
             raise ValueError("Cannot have cdelt of length-%i array" % len(self))
         if approx or abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
             return self.dxarr.mean().flat[0]
+        else:
+            raise ValueError("Spectral axis is not linear to within {0}.  "
+                             "cdelt is not well-defined.".format(tolerance))
 
     def _make_header(self, tolerance=1e-8):
         """
@@ -884,6 +899,10 @@ class SpectroscopicAxis(u.Quantity):
         if unit is not None:
             view._unit = unit
 
+        # any slice needs to regenerate its dxarr
+        if hasattr(view, '_dxarr'):
+            del view._dxarr
+
         #DEBUG print("unit is {1}, self.unit is {2}, class is {0}, viewtype={3}".format(subclass, unit, self.unit, type(view)))
         return view
 
@@ -898,7 +917,8 @@ def merge_equivalencies(old_equivalencies, new_equivalencies):
 
     for equivalency in total_equivalencies:
         equivalency_id = equivalency[0].to_string()+equivalency[1].to_string()
-        if equivalency_id in seen: continue
+        if equivalency_id in seen:
+            continue
         seen[equivalency_id] = 1
         result.append(equivalency)
     return result
