@@ -2001,7 +2001,7 @@ class Specfit(interactive.Interactive):
                         any_out_of_range.append("gt:close")
                 else:
                     raise ValueError("{0} is greater than the upper limit {1}"
-                                     .format(param.value, param.limits[0]))
+                                     .format(param.value, param.limits[1]))
             elif mode == 'check':
                 any_out_of_range.append(False)
 
