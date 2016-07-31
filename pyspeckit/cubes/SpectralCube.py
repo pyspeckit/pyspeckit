@@ -677,8 +677,8 @@ class Cube(spectrum.Spectrum):
 
         """
         if 'multifit' in fitkwargs:
-            log.warning("The multifit keyword is no longer required.  All fits "
-                        "allow for multiple components.", DeprecationWarning)
+            warn("The multifit keyword is no longer required.  All fits "
+                 "allow for multiple components.", DeprecationWarning)
 
         if not hasattr(self.mapplot,'plane'):
             self.mapplot.makeplane()
@@ -776,10 +776,10 @@ class Cube(spectrum.Spectrum):
             else:
                 if ii==0:
                     # issue the warning only once (ii==0), but always issue
-                    log.warning("WARNING: using data std() as error.  "
-                                "If signal_cut is set, this can result in "
-                                "some pixels not being fit.",
-                                PyspeckitWarning)
+                    warn("Using data std() as error.  "
+                         "If signal_cut is set, this can result in "
+                         "some pixels not being fit.",
+                         PyspeckitWarning)
                 sp.error[:] = sp.data[sp.data==sp.data].std()
             if sp.error is None:
                 raise TypeError("The Spectrum's error is unset.  This should "
