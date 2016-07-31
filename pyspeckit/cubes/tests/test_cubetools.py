@@ -1,11 +1,12 @@
-from .. import cubes, Cube, CubeStack
-from ...spectrum.models import n2hp
-
+import os
+import warnings
 import numpy as np
 from astropy.io import fits
 from astropy import wcs
 
-import os
+from .. import cubes, Cube, CubeStack
+from ...spectrum.models import n2hp
+
 
 def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None, seed=0):
     """
@@ -239,6 +240,11 @@ def test_noerror_cube(cubefile='test.fits'):
         make_test_cube((100,9,9),cubefile)
 
     spc = Cube(cubefile)
-    spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8])
+    with warnings.catch_warnings(record=True) as w:
+        spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8])
+    assert "If signal_cut is set" in str(w[-1].message)
 
+    assert not np.all(spc.has_fit)
+
+    spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8], signal_cut=0)
     assert np.all(spc.has_fit)
