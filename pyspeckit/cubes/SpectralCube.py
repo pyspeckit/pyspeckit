@@ -774,8 +774,12 @@ class Cube(spectrum.Spectrum):
             elif errmap is not None:
                 sp.error = np.ones(sp.data.shape) * errmap[y,x]
             else:
-                if verbose_level > 1 and ii==0:
-                    log.warning("WARNING: using data std() as error.", PyspeckitWarning)
+                if ii==0:
+                    # issue the warning only once (ii==0), but always issue
+                    log.warning("WARNING: using data std() as error.  "
+                                "If signal_cut is set, this can result in "
+                                "some pixels not being fit.",
+                                PyspeckitWarning)
                 sp.error[:] = sp.data[sp.data==sp.data].std()
             if sp.error is not None and signal_cut > 0 and not all(sp.error == 0):
                 if continuum_map is not None:
