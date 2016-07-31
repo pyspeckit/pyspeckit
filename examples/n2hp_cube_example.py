@@ -43,7 +43,7 @@ if os.path.exists('n2hp_fitted_parameters.fits'):
 else:
     # Run the fitter
     # Estimated time to completion ~ 2 minutes
-    spc.fiteach(fittype='n2hp_vtau', multifit=True,
+    spc.fiteach(fittype='n2hp_vtau',
                 guesses=[5,0.5,3,1], # Tex=5K, tau=0.5, v_center=12, width=1 km/s
                 signal_cut=3, # minimize the # of pixels fit for the example
                 start_from_point=(2,2), # start at a pixel with signal

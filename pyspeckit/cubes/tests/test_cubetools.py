@@ -20,26 +20,27 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None, seed=0):
         sigma1d, sigma2d = sigma
 
     gauss1d = Gaussian1DKernel(stddev=sigma1d, x_size=shape[0])
-    gauss2d = Gaussian2DKernel(stddev=sigma2d, x_size=shape[1], 
-                                               y_size=shape[2])
+    gauss2d = Gaussian2DKernel(stddev=sigma2d,
+                               x_size=shape[1],
+                               y_size=shape[2])
     test_cube = gauss1d.array[:,None,None] * gauss2d.array
     test_cube=test_cube/test_cube.max()
     # adding noise:
     np.random.seed(seed)
-    noise_cube = (np.random.random(test_cube.shape)-.5)* \
-                        np.median(test_cube.std(axis=0))
+    noise_cube = ((np.random.random(test_cube.shape)-.5) *
+                  np.median(test_cube.std(axis=0)))
     test_cube += noise_cube
     true_rms = noise_cube.std()
-    
+
     # making a simple header for the test cube:
     test_hdu = fits.PrimaryHDU(test_cube)
-    # the strange cdelt values are a workaround 
+    # the strange cdelt values are a workaround
     # for what seems to be a bug in wcslib:
     # https://github.com/astropy/astropy/issues/4555
     cdelt1, cdelt2, cdelt3 = -(4e-3+1e-8), 4e-3+1e-8, -0.1
     keylist = {'CTYPE1': 'RA---GLS', 'CTYPE2': 'DEC--GLS', 'CTYPE3': 'VRAD',
                'CDELT1': cdelt1, 'CDELT2': cdelt2, 'CDELT3': cdelt3,
-               'CRVAL1': 0, 'CRVAL2': 0, 'CRVAL3': 5, 
+               'CRVAL1': 0, 'CRVAL2': 0, 'CRVAL3': 5,
                'CRPIX1': 9, 'CRPIX2': 0, 'CRPIX3': 5,
                'CUNIT1': 'deg', 'CUNIT2': 'deg', 'CUNIT3': 'km s-1',
                'BUNIT' : 'K', 'EQUINOX': 2000.0}
@@ -85,8 +86,8 @@ def test_subimage_integ_header(cubefile='test.fits'):
 
     # saving results from subimage_integ:
     cutData, cutHead = cubes.subimage_integ(cube, xcen, xwidth, ycen, ywidth,
-                                            vrange=(0,header['NAXIS3']-1), 
-                                            zunits='pixels', units='pixels', 
+                                            vrange=(0,header['NAXIS3']-1),
+                                            zunits='pixels', units='pixels',
                                             header=header)
 
     assert cutHead['CRPIX1'] == 7.0
@@ -106,7 +107,7 @@ def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
     if save_cube is None:
         save_cube = 'test.fits'
     test_sigma = 10 # in pixel values, each pixel is CDELT3 thick
-    make_test_cube((100,10,10), save_cube, 
+    make_test_cube((100,10,10), save_cube,
                       sigma=(test_sigma, 5) )
     # from .. import Cube
     spc = Cube(save_cube)
@@ -241,10 +242,14 @@ def test_noerror_cube(cubefile='test.fits'):
 
     spc = Cube(cubefile)
     with warnings.catch_warnings(record=True) as w:
-        spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8])
+        warnings.simplefilter('default')
+        spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8],
+                    start_from_point=(4,4),
+                   )
     assert "If signal_cut is set" in str(w[-1].message)
-
     assert not np.all(spc.has_fit)
 
-    spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8], signal_cut=0)
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter('default')
+        spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8], signal_cut=0)
     assert np.all(spc.has_fit)
