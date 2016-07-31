@@ -230,3 +230,15 @@ def test_registry_inheritance(cubefile='test.fits'):
     assert 'n2hp_vtau' in sp.Registry.multifitters
     assert 'n2hp_vtau' in sp.Registry.npars
     sp.specfit(fittype='n2hp_vtau', guesses=[1,2,3,4])
+
+def test_noerror_cube(cubefile='test.fits'):
+    """
+    Regression test for #159
+    """
+    if not os.path.exists(cubefile):
+        make_test_cube((100,9,9),cubefile)
+
+    spc = Cube(cubefile)
+    spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8])
+
+    assert np.all(spc.has_fit)
