@@ -243,7 +243,9 @@ def test_noerror_cube(cubefile='test.fits'):
     spc = Cube(cubefile)
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('default')
-        spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8])
+        spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8],
+                    start_from_point=(4,4),
+                   )
     assert "If signal_cut is set" in str(w[-1].message)
 
     assert not np.all(spc.has_fit)
