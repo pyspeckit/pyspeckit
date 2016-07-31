@@ -599,11 +599,11 @@ class Cube(spectrum.Spectrum):
 
     def fiteach(self, errspec=None, errmap=None, guesses=(), verbose=True,
                 verbose_level=1, quiet=True, signal_cut=3, usemomentcube=None,
-                blank_value=0, integral=True, direct=False, absorption=False,
-                use_nearest_as_guess=False, use_neighbor_as_guess=False,
-                start_from_point=(0,0), multicore=1, position_order=None,
-                continuum_map=None, prevalidate_guesses=False, maskmap=None,
-                **fitkwargs):
+                blank_value=0, integral=False, direct_integral=False,
+                absorption=False, use_nearest_as_guess=False,
+                use_neighbor_as_guess=False, start_from_point=(0,0),
+                multicore=1, position_order=None, continuum_map=None,
+                prevalidate_guesses=False, maskmap=None, **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
 
@@ -674,7 +674,10 @@ class Cube(spectrum.Spectrum):
         integral : bool
             If set, the integral of each spectral fit will be computed and
             stored in the attribute ``.integralmap``
-
+        direct_integral : bool
+            Return the integral of the *spectrum* (as opposed to the fitted
+            model) over a range defined by the `integration_limits` if specified or
+            `threshold` otherwise 
         """
         if 'multifit' in fitkwargs:
             log.warning("The multifit keyword is no longer required.  All fits "
@@ -867,7 +870,7 @@ class Cube(spectrum.Spectrum):
 
                 # keep this out of the 'try' statement
                 if integral and success:
-                    self.integralmap[:,y,x] = sp.specfit.integral(direct=direct,
+                    self.integralmap[:,y,x] = sp.specfit.integral(direct=direct_integral,
                                                                   return_error=True)
                 self.has_fit[y,x] = success
             else:
