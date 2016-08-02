@@ -648,9 +648,11 @@ class Specfit(interactive.Interactive):
                     if par.scaleable:
                         guesses[jj] /= scalefactor
 
-        xtofit = self.Spectrum.xarr[self.xmin:self.xmax][~self.mask_sliced]
-        spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced]
-        err = self.errspec[self.xmin:self.xmax][~self.mask_sliced]
+        # all fit data must be float64, otherwise the optimizers may take steps
+        # less than the precision of the data and get stuck
+        xtofit = self.Spectrum.xarr[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
+        spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
+        err = self.errspec[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
 
         if parinfo is not None:
             self._validate_parinfo(parinfo, mode='fix')
@@ -697,7 +699,8 @@ class Specfit(interactive.Interactive):
         for par in self.parinfo:
             if par.scaleable:
                 par.value = par.value * scalefactor
-                par.error = par.error * scalefactor
+                if par.error is not None:
+                    par.error = par.error * scalefactor
 
         self.modelpars = self.parinfo.values
         self.modelerrs = self.parinfo.errors

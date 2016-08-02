@@ -40,6 +40,12 @@ def line_tau_cgs(tex, total_column, partition_function, degeneracy, frequency,
     # equation 29 in Mangum 2015
     #taudnu = (eightpicubed * frequency * dipole_moment**2 / threehc *
     #             (np.exp(frequency*h_cgs/(kb_cgs*tex))-1) * N_upper)
+
+    # substitute eqn 11:
+    # Aij = 64 pi^4 nu^3 / (3 h c^3) |mu ul|^2
+    # becomes
+    # dipole_moment^2 = 3 h c^3 Aij / ( 64 pi^4 nu^3 )
+
     taudnu = ((c_cgs**2/(8*np.pi*frequency**2) * einstein_A * N_upper)*
               (np.exp(frequency*h_cgs/(kb_cgs*tex))-1))
 
