@@ -313,10 +313,10 @@ class Specfit(interactive.Interactive):
             else:
                 raise ValueError("Guess and parinfo were somehow invalid.")
         else:
-            print("Can't fit with given fittype {0}:"
-                  " it is not Registered as a fitter.".format(self.fittype))
-            return
-        if save: self.savefit()
+            raise ValueError("Can't fit with given fittype {0}:"
+                             " it is not Registered as a fitter.".format(self.fittype))
+        if save:
+            self.savefit()
 
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
             components=False, annotate=False, alpha=0.5, loc='lower left',
@@ -1448,15 +1448,16 @@ class Specfit(interactive.Interactive):
             
             # the model considered here must NOT include the baseline!
             # if it does, you'll get the integral of the continuum
-            fullmodel = self.get_full_model(add_baseline=False)
+            #fullmodel = self.get_full_model(add_baseline=False)
 
             if self.Spectrum.xarr.cdelt() is not None:
                 dx = np.median(dx)
                 integ = self.fitter.integral(self.modelpars, dx=dx, **kwargs)
                 if return_error:
-                    if mycfg.WARN: print("WARNING: The computation of the error "
-                                         "on the integral is not obviously "
-                                         "correct or robust... it's just a guess.")
+                    if mycfg.WARN:
+                        warn("WARNING: The computation of the error "
+                             "on the integral is not obviously "
+                             "correct or robust... it's just a guess.")
                     OK = self.model_mask(threshold=threshold, add_baseline=False)
                     error = np.sqrt((self.errspec[OK]**2).sum()) * dx
                     #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
