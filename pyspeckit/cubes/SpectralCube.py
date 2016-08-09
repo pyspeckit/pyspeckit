@@ -251,6 +251,7 @@ class Cube(spectrum.Spectrum):
         if deep:
             newcube.xarr = copy.copy(self.xarr)
             newcube.data = copy.copy(self.data)
+            newcube.cube = copy.copy(self.cube)
             if self.error is not None:
                 newcube.error = copy.copy(self.error)
 
