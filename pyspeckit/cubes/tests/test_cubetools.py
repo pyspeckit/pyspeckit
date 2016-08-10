@@ -262,9 +262,12 @@ def test_slice_header(cubefile='test.fits'):
         make_test_cube((100,9,9),cubefile)
 
     spc = Cube(cubefile)
-    spc_cut = spc.slice(-1, 1, 'km/s')
 
-    assert spc_cut.header['NAXIS3'] == spc_cut.xarr.size
-    assert (spc_cut.xarr.x_to_pix(spc_cut.header['CRVAL3'],
-                                  spc_cut.header['CUNIT3']) + 1
-            == spc_cut.header['CRPIX3'])
+    spc_cut = spc.slice(-1, 1, 'km/s')
+    naxis3 = spc_cut.header['NAXIS3']
+    crval3 = spc_cut.header['CRVAL3']
+    crpix3 = spc_cut.header['CRPIX3']
+    cunit3 = spc_cut.header['CUNIT3']
+
+    assert naxis3 == spc_cut.xarr.size
+    assert spc_cut.xarr.x_to_pix(crval3, cunit3) + 1 == crpix3
