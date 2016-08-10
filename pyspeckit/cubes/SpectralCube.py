@@ -254,7 +254,8 @@ class Cube(spectrum.Spectrum):
         if deep:
             for attr in deep_attr_lst:
                 setattr(newcube, attr, copy.copy(getattr(self, attr)))
-            newcube.wcs = self.wcs.deepcopy()
+            if hasattr(self, 'wcs'):
+                newcube.wcs = self.wcs.deepcopy()
             newcube.header = self.header.copy()
 
         newcube.plotter = self.plotter.copy(parent=newcube)
