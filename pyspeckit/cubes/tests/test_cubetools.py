@@ -263,7 +263,7 @@ def test_slice_header(cubefile='test.fits'):
 
     spc = Cube(cubefile)
 
-    spc_cut = spc.slice(-1, 1, 'km/s')
+    spc_cut = spc.slice(-1, 1, 'km/s', update_header = True)
     naxis3 = spc_cut.header['NAXIS3']
     crval3 = spc_cut.header['CRVAL3']
     crpix3 = spc_cut.header['CRPIX3']

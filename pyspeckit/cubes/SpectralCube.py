@@ -289,7 +289,7 @@ class Cube(spectrum.Spectrum):
         self.header.update(newhead)
 
     def slice(self, start=None, stop=None, unit='pixel', preserve_fits=False,
-              copy=True):
+              copy=True, update_header=False):
         """
         Slice a cube along the spectral axis
         (equivalent to "spectral_slab" from the spectral_cube package)
@@ -302,6 +302,8 @@ class Cube(spectrum.Spectrum):
             stop of slice
         unit : str
             allowed values are any supported physical unit, 'pixel'
+        update_header : bool
+            modifies the header of the spectral cube according to the slice
         """
 
         x_in_units = self.xarr.as_unit(unit)
@@ -334,7 +336,8 @@ class Cube(spectrum.Spectrum):
             newcube.baseline.order = self.baseline.order
 
         # modify the header in the new cube
-        newcube._update_header_from_xarr()
+        if update_header:
+            newcube._update_header_from_xarr()
 
         # TODO: update the wcs as well
 
