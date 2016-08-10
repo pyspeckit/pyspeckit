@@ -264,5 +264,7 @@ def test_slice_header(cubefile='test.fits'):
     spc = Cube(cubefile)
     spc_cut = spc.slice(-1, 1, 'km/s')
 
-    # TODO: this lets *bad* headers through, make another check
     assert spc_cut.header['NAXIS3'] == spc_cut.xarr.size
+    assert (spc_cut.xarr.x_to_pix(spc_cut.header['CRVAL3'],
+                                  spc_cut.header['CUNIT3']) + 1
+            == spc_cut.header['CRPIX3'])
