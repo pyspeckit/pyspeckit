@@ -243,19 +243,20 @@ class Cube(spectrum.Spectrum):
 
     def copy(self,deep=True):
         """
-        Create a copy of the spectrum with its own plotter, fitter, etc.
+        Create a copy of the spectral cube with its own plotter, fitter, etc.
         Useful for, e.g., comparing smoothed to unsmoothed data
         """
-
         newcube = copy.copy(self)
-        if deep:
-            newcube.xarr = copy.copy(self.xarr)
-            newcube.data = copy.copy(self.data)
-            newcube.cube = copy.copy(self.cube)
-            if self.error is not None:
-                newcube.error = copy.copy(self.error)
-
         newcube.header = copy.copy(self.header)
+
+        deep_attr_lst = ['xarr', 'data', 'cube', 'maskmap',
+                         'error', 'errorcube']
+        if deep:
+            for attr in deep_attr_lst:
+                setattr(newcube, attr, copy.copy(getattr(self, attr)))
+            newcube.wcs = self.wcs.deepcopy()
+            newcube.header = self.header.copy()
+
         newcube.plotter = self.plotter.copy(parent=newcube)
         newcube._register_fitters()
         newcube.specfit = self.specfit.copy(parent=newcube)
