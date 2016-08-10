@@ -295,3 +295,17 @@ def test_stuck_cubestack(timeout = 5):
         p.terminate
 
     assert not frozen
+
+def test_copy_id(cubefile='test.fits'):
+    """
+    Regression test for #182
+    """
+    # getting a dummy .fits file
+    if not os.path.exists(cubefile):
+        #download_test_cube(cubefile)
+        make_test_cube((100,9,9),cubefile)
+
+    spc1 = Cube(cubefile)
+    spc2 = spc1.copy()
+
+    assert id(spc1.cube) != id(spc2.cube)
