@@ -639,7 +639,10 @@ class Plotter(object):
             assert velocity_offset.unit.is_equivalent(u.km/u.s)
 
         doppler = getattr(u, 'doppler_{0}'.format(velocity_convention))
-        equivalency = doppler(self.Spectrum.xarr.refX)
+        if self.Spectrum.xarr.refX is not None:
+            equivalency = doppler(self.Spectrum.xarr.refX)
+        else:
+            equivalency = doppler(self.Spectrum.xarr.as_unit(u.GHz)[0])
 
         xvals = []
         for xv in line_xvals:
