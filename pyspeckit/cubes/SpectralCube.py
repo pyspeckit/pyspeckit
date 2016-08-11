@@ -274,6 +274,7 @@ class Cube(spectrum.Spectrum):
         self.xarr._make_header()
         sp_naxis = self._spectral_axis_number
 
+        # change keywords in xarr._make_header from, e.g., CRPIX1 to CRPIX3
         newhead = {(key.replace('1', str(sp_naxis))
                     if key.endswith('1') else key): val
                    for key, val in self.xarr.wcshead.iteritems()}

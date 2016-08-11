@@ -256,7 +256,7 @@ def test_noerror_cube(cubefile='test.fits'):
 
 def test_slice_header(cubefile='test.fits'):
     """
-    Regression test for [make a PR!]
+    Regression test for 184
     """
     if not os.path.exists(cubefile):
         make_test_cube((100,9,9),cubefile)
