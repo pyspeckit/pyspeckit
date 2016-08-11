@@ -339,8 +339,12 @@ class Cube(spectrum.Spectrum):
         # modify the header in the new cube
         if update_header:
             newcube._update_header_from_xarr()
-
-        # TODO: update the wcs as well
+            # create a new wcs instance from the updated header
+            newcube.wcs = wcs.WCS(newcube.header)
+            newcube.wcs.wcs.fix()
+            newcube._spectral_axis_number = newcube.wcs.wcs.spec + 1
+            newcube._first_cel_axis_num = np.where(newcube.wcs.wcs.axis_types
+                                                   // 1000 == 2)[0][0] + 1
 
         return newcube
 
