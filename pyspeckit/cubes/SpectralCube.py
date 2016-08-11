@@ -267,8 +267,30 @@ class Cube(spectrum.Spectrum):
 
         return newcube
 
+    def _update_header_from_xarr(self):
+        """Uses SpectroscopiAxis' _make_header method to update Cube header"""
+        self.header['NAXIS3'] = self.xarr.size
+
+        self.xarr._make_header()
+        sp_naxis = self._spectral_axis_number
+
+        # change keywords in xarr._make_header from, e.g., CRPIX1 to CRPIX3
+        newhead = {(key.replace('1', str(sp_naxis))
+                    if key.endswith('1') else key): val
+                   for key, val in iteritems(self.xarr.wcshead)}
+
+        for key, val in iteritems(newhead):
+            if isinstance(val, units.Quantity):
+                newhead[key] = val.value
+            elif (isinstance(val, units.CompositeUnit)
+                  or isinstance(val, units.Unit)):
+                newhead[key] = val.to_string()
+            log.debug("Updating header: {}: {}".format(key, val))
+
+        self.header.update(newhead)
+
     def slice(self, start=None, stop=None, unit='pixel', preserve_fits=False,
-              copy=True):
+              copy=True, update_header=False):
         """
         Slice a cube along the spectral axis
         (equivalent to "spectral_slab" from the spectral_cube package)
@@ -281,6 +303,8 @@ class Cube(spectrum.Spectrum):
             stop of slice
         unit : str
             allowed values are any supported physical unit, 'pixel'
+        update_header : bool
+            modifies the header of the spectral cube according to the slice
         """
 
         x_in_units = self.xarr.as_unit(unit)
@@ -311,6 +335,16 @@ class Cube(spectrum.Spectrum):
             newcube.specfit.parinfo = self.specfit.parinfo
             newcube.baseline.baselinepars = self.baseline.baselinepars
             newcube.baseline.order = self.baseline.order
+
+        # modify the header in the new cube
+        if update_header:
+            newcube._update_header_from_xarr()
+            # create a new wcs instance from the updated header
+            newcube.wcs = wcs.WCS(newcube.header)
+            newcube.wcs.wcs.fix()
+            newcube._spectral_axis_number = newcube.wcs.wcs.spec + 1
+            newcube._first_cel_axis_num = np.where(newcube.wcs.wcs.axis_types
+                                                   // 1000 == 2)[0][0] + 1
 
         return newcube
 

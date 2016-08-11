@@ -253,3 +253,21 @@ def test_noerror_cube(cubefile='test.fits'):
         warnings.simplefilter('default')
         spc.fiteach(fittype='gaussian', guesses=[0.7,0.5,0.8], signal_cut=0)
     assert np.all(spc.has_fit)
+
+def test_slice_header(cubefile='test.fits'):
+    """
+    Regression test for 184
+    """
+    if not os.path.exists(cubefile):
+        make_test_cube((100,9,9),cubefile)
+
+    spc = Cube(cubefile)
+
+    spc_cut = spc.slice(-1, 1, 'km/s', update_header = True)
+    naxis3 = spc_cut.header['NAXIS3']
+    crval3 = spc_cut.header['CRVAL3']
+    crpix3 = spc_cut.header['CRPIX3']
+    cunit3 = spc_cut.header['CUNIT3']
+
+    assert naxis3 == spc_cut.xarr.size
+    assert spc_cut.xarr.x_to_pix(crval3, cunit3) + 1 == crpix3
