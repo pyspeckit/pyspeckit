@@ -607,15 +607,16 @@ class SpectroscopicAxis(u.Quantity):
         Given an X coordinate in SpectroscopicAxis' units, return whether the pixel is in range
         """
         if hasattr(xval, 'unit'):
-            # note that the .value's are outside: if you compare a Quantity, it
-            # will return an array of booleans, which always evaluates to True
-            # even if that 0-dimensional array (scalar) is False
-            return bool((xval > self.min()) and (xval < self.max()))
+            return bool((xval > self.as_unit(xval.unit).min()) and
+                        (xval < self.as_unit(xval.unit).max()))
         else:
             warnings.warn("The xvalue being compared in "
                           "SpectroscopicAxis.in_range has no unit.  "
                           "Assuming the unit is the same as the current "
                           "axis unit.")
+            # note that the .value's are outside: if you compare a Quantity, it
+            # will return an array of booleans, which always evaluates to True
+            # even if that 0-dimensional array (scalar) is False
             return bool((xval > self.min().value) and (xval < self.max().value))
 
     def x_to_coord(self, xval, xunit, verbose=False):

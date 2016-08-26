@@ -631,6 +631,9 @@ class Specfit(interactive.Interactive):
                 scalefactor = np.nanmedian(np.abs(self.spectofit))
                 if not np.isfinite(scalefactor):
                     raise ValueError("non-finite scalefactor = {0} encountered.".format(scalefactor))
+                elif scalefactor == 0:
+                    raise ValueError("scalefactor = {0} encountered, which will result "
+                                     "in divide-by-zero errors".format(scalefactor))
                 log.info("Renormalizing data by factor %e to improve fitting procedure"
                          % scalefactor)
                 self.spectofit /= scalefactor
