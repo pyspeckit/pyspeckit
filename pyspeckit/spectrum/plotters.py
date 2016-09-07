@@ -13,6 +13,7 @@ import numpy as np
 import astropy.units as u
 import copy
 import inspect
+from astropy import log
 
 try:
     from matplotlib.cbook import BoundMethodProxy
@@ -70,10 +71,12 @@ class Plotter(object):
 
         self._active_gui = None
 
+    @property
+    def _xunit(self):
+        return self.spectrum.xarr.unit
+
     def _get_prop(xy, minmax):
         def getprop(self):
-            if self.Spectrum.xarr.unit != self._xunit:
-                self._xunit = self.Spectrum.xarr.unit
             if xy == 'x':
                 if minmax == 'min':
                     if self._xlim[0] and self._xunit:
@@ -462,19 +465,23 @@ class Plotter(object):
             self.axis.set_title(self.title)
 
         if xlabel is not None:
+            log.debug("setting xlabel={0}".format(xlabel))
             self.xlabel = xlabel
         elif self._xunit:
-            # WAS: self.xlabel = self.Spectrum.xarr.xtype.title()
             try:
                 self.xlabel = xlabel_table[self._xunit.physical_type.lower()]
             except KeyError:
                 self.xlabel = self._xunit.physical_type.title()
             # WAS: self.xlabel += " ("+u.Unit(self._xunit).to_string()+")"
             self.xlabel += " ({0})".format(self._xunit.to_string())
+            log.debug("xunit is {1}. set xlabel={0}".format(self.xlabel,
+                                                            self._xunit))
 
             if verbose_label:
                 self.xlabel = "%s %s" % (self.Spectrum.xarr.velocity_convention.title(),
                                          self.xlabel)
+        else:
+            log.warn("Plotter: xlabel was not set")
 
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
