@@ -43,17 +43,16 @@ class Plotter(object):
     """
 
 
-    def __init__(self, Spectrum, autorefresh=True, title="",
-                 xlabel="", silent=True, plotscale=1.0, **kwargs):
+    def __init__(self, Spectrum, autorefresh=True, title="", xlabel=None,
+                 silent=True, plotscale=1.0, **kwargs):
         self.figure = None
         self.axis = None
         self.Spectrum = Spectrum
-        self._xunit = Spectrum.xarr.unit
         # plot parameters
         self.offset = 0.0 # vertical offset
         self.autorefresh = autorefresh
         self.xlabel = xlabel
-        self.title  = title
+        self.title = title
         self.errorplot = None
         self.plotkwargs = kwargs
         self._xlim = [None,None]
@@ -73,7 +72,7 @@ class Plotter(object):
 
     @property
     def _xunit(self):
-        return self.spectrum.xarr.unit
+        return self.Spectrum.xarr.unit
 
     def _get_prop(xy, minmax):
         def getprop(self):
