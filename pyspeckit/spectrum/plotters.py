@@ -645,7 +645,8 @@ class Plotter(object):
             equivalency = doppler(self.Spectrum.xarr.as_unit(u.GHz)[0])
 
         xvals = []
-        for xv in line_xvals:
+        linenames_toplot = []
+        for xv,ln in zip(line_xvals, line_names):
             if hasattr(xv, 'unit'):
                 pass
             else:
@@ -657,7 +658,9 @@ class Plotter(object):
                 xv = xv + velocity_offset
             xv = xv.to(self.Spectrum.xarr.unit, equivalencies=equivalency)
 
-            xvals.append(xv.value)
+            if self.Spectrum.xarr.in_range(xv):
+                xvals.append(xv.value)
+                linenames_toplot.append(ln)
 
         if auto_yloc:
             yr = self.axis.get_ylim()
@@ -667,7 +670,7 @@ class Plotter(object):
         lineid_plot.plot_line_ids(self.Spectrum.xarr,
                                   self.Spectrum.data,
                                   xvals,
-                                  line_names,
+                                  linenames_toplot,
                                   ax=self.axis,
                                   **kwargs)
 
