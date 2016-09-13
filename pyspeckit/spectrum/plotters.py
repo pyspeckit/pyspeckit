@@ -13,6 +13,7 @@ import numpy as np
 import astropy.units as u
 import copy
 import inspect
+from astropy import log
 
 try:
     from matplotlib.cbook import BoundMethodProxy
@@ -661,6 +662,10 @@ class Plotter(object):
             if self.Spectrum.xarr.in_range(xv):
                 xvals.append(xv.value)
                 linenames_toplot.append(ln)
+
+        if len(xvals) != len(line_xvals):
+            log.warn("Skipped {0} out-of-bounds lines when plotting line IDs."
+                     .format(len(line_xvals)-len(xvals)))
 
         if auto_yloc:
             yr = self.axis.get_ylim()
