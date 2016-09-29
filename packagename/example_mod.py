@@ -16,7 +16,7 @@ def primes(imax):
         The list of prime numbers.
     """
 
-    p = range(10000)
+    p = list(range(10000))
     result = []
     k = 0
     n = 2
