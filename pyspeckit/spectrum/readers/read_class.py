@@ -43,7 +43,7 @@ def print_timing(func):
         t1 = time.time()
         res = func(*arg,**kwargs)
         t2 = time.time()
-        log.info('%s took %0.5g s' % (func.func_name, (t2-t1)))
+        log.info('%s took %0.5g s' % (func.__name__, (t2-t1)))
         return res
     wrapper.__doc__ = func.__doc__
     return wrapper
@@ -397,7 +397,7 @@ def _find_index(entry_number, file_description, return_position=False):
     #! Find ken (relative entry number in the extension, starts from 1)
     #ken = entry_num - file%desc%lexn(kex-1)
 
-    kb = ((ken-1)*file_description['lind'])/file_description['reclen']
+    kb = ((ken-1)*file_description['lind'])//file_description['reclen']
     #kb = ((ken-1)*file%desc%lind)/file%desc%reclen  ! In the extension, the
     #    ! relative record position (as an offset, starts from 0) where the
     #    ! Entry Index starts. NB: there can be a non-integer number of Entry
@@ -416,7 +416,7 @@ def _find_index(entry_number, file_description, return_position=False):
         return (kbl*file_description['reclen']+k)*4
     else:
         return kbl,k
-    
+
 
 def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
                 entry_number=None, file_description=None):
@@ -550,7 +550,7 @@ def _read_header(f, type=0, position=None):
 
 def _read_first_record(f):
     f.seek(0)
-    filetype = f.read(4)
+    filetype = f.read(4).decode('utf-8')
     if fileversion_dict[filetype] == 'v1':
         return _read_first_record_v1(f)
     else:
@@ -780,7 +780,7 @@ def _read_obshead_v1(f, position=None, verbose=False):
     """
     if position is not None:
         f.seek(position)
-    IDcode = f.read(4)
+    IDcode = f.read(4).decode('utf-8')
     if IDcode.strip() != '2':
         raise IndexError("Observation Header reading failure at {0}.  "
                          "Record does not appear to be an observation header.".
