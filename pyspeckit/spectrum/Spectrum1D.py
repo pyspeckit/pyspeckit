@@ -287,7 +287,7 @@ class Spectrum1DCollection(object):
         elif is_instance(new_dispersion, np.array):
             self.dispersion = new_dispersion
         else:
-            raise ValueError, "The dispersion specified could is not a known type. Should be a list, a numpy array, or a Spectrum1D object."
+            raise ValueError("The dispersion specified could is not a known type. Should be a list, a numpy array, or a Spectrum1D object.")
         # Add other types that unambiguously define a dispersion array.
 
 
