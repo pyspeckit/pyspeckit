@@ -38,7 +38,7 @@ there is no meaning to a negative width, since the width enters into the
 equation for a gaussian as :math:`\sigma^2`.
 
 Note that the need to limit parameters is the main reason for the existence of `lmfit-py <https://github.com/newville/lmfit-py>`_
-and `mpfit <http://astrolibpy.googlecode.com/git-history/4993aa4e7c1001efe7c00048ec2b9d5ccac83ff7/mpfit/mpfit.py>`_. 
+and `mpfit <https://github.com/segasai/astrolibpy/blob/4993aa4e7c1001efe7c00048ec2b9d5ccac83ff7/mpfit/mpfit.py>`_. 
 
 Tying Parameters
 ----------------

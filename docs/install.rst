@@ -16,7 +16,7 @@ PySpecKit requires at least the basic scientific packages:
 
 * `numpy <http://numpy.scipy.org/>`_
 * `matplotlib <http://matplotlib.sourceforge.net>`_
-* `mpfit is included <http://code.google.com/p/astrolibpy/source/browse/trunk/mpfit>`_
+* `mpfit is included <https://github.com/segasai/astrolibpy/tree/master/mpfit>`_
 * `scipy <http://www.scipy.org/>`_ is optional. It is  only required for RADEX
   grid interpolation and certain types of optimization
 * python2.7 or `ordereddict <http://pypi.python.org/pypi/ordereddict>`_ for model parameter storage
