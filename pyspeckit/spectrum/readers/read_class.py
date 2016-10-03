@@ -43,7 +43,7 @@ def print_timing(func):
         t1 = time.time()
         res = func(*arg,**kwargs)
         t2 = time.time()
-        log.info('%s took %0.5g s' % (func.func_name, (t2-t1)))
+        log.info('%s took %0.5g s' % (func.__name__, (t2-t1)))
         return res
     wrapper.__doc__ = func.__doc__
     return wrapper
@@ -129,7 +129,7 @@ keys_lengths = {
 
         'COMMENT': [ # -1
                     ('LTEXT',1,'int32'), # integer(kind=4) :: ltext   ! Length of comment
-                    ('CTEXT',1024/4,'|S1024'), # character ctext*1024       ! Comment string
+                    ('CTEXT',1024//4,'|S1024'), # character ctext*1024       ! Comment string
                    ],
         
         'GENERAL': [ # -2
@@ -387,7 +387,7 @@ def _read_indices(f, file_description):
 
 def _find_index(entry_number, file_description, return_position=False):
     if file_description['gex'] == 10:
-        kex=(entry_number-1)/file_description['lex1'] + 1
+        kex=(entry_number-1)//file_description['lex1'] + 1
     else:
         # exponential growth:
         #kex = gi8_dicho(file_description['nex'], file_description['lexn'], entry_number) - 1
@@ -397,7 +397,7 @@ def _find_index(entry_number, file_description, return_position=False):
     #! Find ken (relative entry number in the extension, starts from 1)
     #ken = entry_num - file%desc%lexn(kex-1)
 
-    kb = ((ken-1)*file_description['lind'])/file_description['reclen']
+    kb = ((ken-1)*file_description['lind'])//file_description['reclen']
     #kb = ((ken-1)*file%desc%lind)/file%desc%reclen  ! In the extension, the
     #    ! relative record position (as an offset, starts from 0) where the
     #    ! Entry Index starts. NB: there can be a non-integer number of Entry
@@ -416,7 +416,7 @@ def _find_index(entry_number, file_description, return_position=False):
         return (kbl*file_description['reclen']+k)*4
     else:
         return kbl,k
-    
+
 
 def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
                 entry_number=None, file_description=None):
@@ -550,7 +550,7 @@ def _read_header(f, type=0, position=None):
 
 def _read_first_record(f):
     f.seek(0)
-    filetype = f.read(4)
+    filetype = f.read(4).decode('utf-8')
     if fileversion_dict[filetype] == 'v1':
         return _read_first_record_v1(f)
     else:
@@ -675,7 +675,7 @@ def _read_first_record_v2(f):
             #file%desc%lexn(iex) = file%desc%lexn(iex-1) + nent
     file_description['nentries'] = np.sum(file_description['lexn'])
     record_length_words = file_description['reclen']
-    aex = numpy.fromfile(f, count=(record_length_words-15)/2, dtype='int64')
+    aex = numpy.fromfile(f, count=(record_length_words-15)//2, dtype='int64')
     file_description['aex'] = aex[aex!=0]
     assert len(file_description['aex']) == file_description['nex']
     file_description['version'] = 2
@@ -780,7 +780,7 @@ def _read_obshead_v1(f, position=None, verbose=False):
     """
     if position is not None:
         f.seek(position)
-    IDcode = f.read(4)
+    IDcode = f.read(4).decode('utf-8')
     if IDcode.strip() != '2':
         raise IndexError("Observation Header reading failure at {0}.  "
                          "Record does not appear to be an observation header.".
@@ -946,7 +946,7 @@ def _read_spectrum(f, position, nchan, my_memmap=None, memmap=True):
         here = position
         #spectrum = numpy.memmap(filename, offset=here, dtype='float32',
         #                        mode='r', shape=(nchan,))
-        spectrum = my_memmap[here/4:here/4+nchan]
+        spectrum = my_memmap[here//4:here//4+nchan]
         f.seek(here+nchan*4)
     else:
         f.seek(position)
