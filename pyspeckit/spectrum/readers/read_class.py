@@ -129,7 +129,7 @@ keys_lengths = {
 
         'COMMENT': [ # -1
                     ('LTEXT',1,'int32'), # integer(kind=4) :: ltext   ! Length of comment
-                    ('CTEXT',1024/4,'|S1024'), # character ctext*1024       ! Comment string
+                    ('CTEXT',1024//4,'|S1024'), # character ctext*1024       ! Comment string
                    ],
         
         'GENERAL': [ # -2
@@ -387,7 +387,7 @@ def _read_indices(f, file_description):
 
 def _find_index(entry_number, file_description, return_position=False):
     if file_description['gex'] == 10:
-        kex=(entry_number-1)/file_description['lex1'] + 1
+        kex=(entry_number-1)//file_description['lex1'] + 1
     else:
         # exponential growth:
         #kex = gi8_dicho(file_description['nex'], file_description['lexn'], entry_number) - 1
@@ -675,7 +675,7 @@ def _read_first_record_v2(f):
             #file%desc%lexn(iex) = file%desc%lexn(iex-1) + nent
     file_description['nentries'] = np.sum(file_description['lexn'])
     record_length_words = file_description['reclen']
-    aex = numpy.fromfile(f, count=(record_length_words-15)/2, dtype='int64')
+    aex = numpy.fromfile(f, count=(record_length_words-15)//2, dtype='int64')
     file_description['aex'] = aex[aex!=0]
     assert len(file_description['aex']) == file_description['nex']
     file_description['version'] = 2
@@ -946,7 +946,7 @@ def _read_spectrum(f, position, nchan, my_memmap=None, memmap=True):
         here = position
         #spectrum = numpy.memmap(filename, offset=here, dtype='float32',
         #                        mode='r', shape=(nchan,))
-        spectrum = my_memmap[here/4:here/4+nchan]
+        spectrum = my_memmap[here//4:here//4+nchan]
         f.seek(here+nchan*4)
     else:
         f.seek(position)
