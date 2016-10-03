@@ -6,6 +6,7 @@ Goal: Use decorators to log each command in full
 Author: Adam Ginsburg
 Created: 03/17/2011
 """
+from __future__ import print_function
 import os
 import time
 
@@ -28,7 +29,7 @@ class Logger(object):
             os.rename(filename,newfilename)
 
         self.outfile = open(filename,'w')
-        print >>self.outfile,"Began logging at %s" % (time.strftime("%M/%d/%Y %H:%M:%S",time.localtime()))
+        print("Began logging at %s" % (time.strftime("%M/%d/%Y %H:%M:%S",time.localtime())), file=self.outfile)
 
     def __call__(self, function):
         """
@@ -36,9 +37,9 @@ class Logger(object):
         def wrapper(*args, **kwargs):
             modname = function.__module__
             fname = function.__name__
-            print >>self.outfile,"%s.%s" % (modname,fname) +\
+            print("%s.%s" % (modname,fname) +\
                     "("+"".join([a.__name__ for a in args]) + \
-                    "".join(["%s=%s" % (k,v) for (k,v) in kwargs])+ ")"
+                    "".join(["%s=%s" % (k,v) for (k,v) in kwargs])+ ")", file=self.outfile)
             return function
         return wrapper
 

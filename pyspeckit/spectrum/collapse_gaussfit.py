@@ -1,10 +1,11 @@
+from __future__ import print_function
 try:
     import scipy
     from scipy import optimize,sqrt
     from scipy.optimize import leastsq
     #from scipy.stats.stats import nanmedian,nanmean,_nanmedian
 except ImportError:
-    print "Scipy cold not be loaded.  Collapse_gaussfit may fail"
+    print("Scipy cold not be loaded.  Collapse_gaussfit may fail")
 import numpy
 from numpy import vectorize,zeros,exp,median,where,asarray,array,nonzero,ma,arange,square
 from astropy.extern.six.moves import xrange
@@ -132,12 +133,12 @@ def adaptive_collapse_gaussfit(cube,axis=2,nsig=3,nrsig=4,prefix='interesting',
     offset_arr2 = zeros(cube.shape[1:])  # define gaussian param arrays 
     ncarr = (cube.max(axis=0) > mean_std*nsig)        # cutoff: don't fit no-signal spectra
     starttime = time.time()              # timing for output
-    print cube.shape
-    print "Fitting a total of %i spectra with peak signal above %f" % (ncarr.sum(),mean_std*nsig)
+    print(cube.shape)
+    print("Fitting a total of %i spectra with peak signal above %f" % (ncarr.sum(),mean_std*nsig))
     for i in xrange(cube.shape[1]):      # Loop over all elements for 
         t0 = time.time()
         nspec = (cube[:,i,:].max(axis=0) > mean_std*nsig).sum()
-        print "Working on row %d with %d spectra to fit" % (i,nspec) ,
+        print("Working on row %d with %d spectra to fit" % (i,nspec), end=' ')
         for j in xrange(cube.shape[2]):
             if cube[:,i,j].max() > mean_std*nsig:
 #            if cube[:,i,j].max() > MAD(cube[:,i,j]):            
@@ -157,9 +158,9 @@ def adaptive_collapse_gaussfit(cube,axis=2,nsig=3,nrsig=4,prefix='interesting',
                 offset_arr1[i,j] = numpy.nan
         dt = time.time()-t0
         if nspec > 0:
-            print "in %f seconds (average: %f)" % (dt,dt/float(nspec))
+            print("in %f seconds (average: %f)" % (dt,dt/float(nspec)))
         else: 
-            print 
+            print() 
     chi2_arr = resid_arr**2
     resids = ma.masked_where(numpy.isnan(chi2_arr),chi2_arr) # hide bad values
 #    residcut = (resids.mean() + (resids.std() * nrsig) )  # Old versino - used standard deviation and mean
@@ -168,7 +169,7 @@ def adaptive_collapse_gaussfit(cube,axis=2,nsig=3,nrsig=4,prefix='interesting',
 #    to_refit[numpy.isnan(to_refit)] = 0
     inds = array(nonzero(to_refit)).transpose()
     dgc,tgc = 0,0
-    print "Refitting a total of %i spectra with peak residual above %f" % (to_refit.sum(),residcut)
+    print("Refitting a total of %i spectra with peak residual above %f" % (to_refit.sum(),residcut))
     f=open("%s_triples.txt" % prefix,'w')
 #    vconv = lambda x: (x-p3+1)*dv+v0    # convert to velocity frame
     vind = vconv(arange(cube[:,0,0].shape[0]))
@@ -188,9 +189,9 @@ def adaptive_collapse_gaussfit(cube,axis=2,nsig=3,nrsig=4,prefix='interesting',
             offset_arr2[i,j] = doublepars[1]
             ncarr[i,j] += 1
         if new_chi2 > residcut: # Even if double was better, see if a triple might be better yet [but don't store it in the params arrays!]
-            print >>f,"Triple-gaussian fitting at %i,%i (%i'th double, %i'th triple)" % (i,j,dgc,tgc)
+            print("Triple-gaussian fitting at %i,%i (%i'th double, %i'th triple)" % (i,j,dgc,tgc), file=f)
             if tgc % 100 == 0:
-                print "Triple-gaussian fitting at %i,%i (%i'th double, %i'th triple)" % (i,j,dgc,tgc)
+                print("Triple-gaussian fitting at %i,%i (%i'th double, %i'th triple)" % (i,j,dgc,tgc))
             tgc += 1
             tpguess = [doublepars[0],doublepars[1],(doublepars[0]+doublepars[1])/2.,doublepars[2],doublepars[3],doublepars[2]*5.,doublepars[4],doublepars[5],doublepars[4]/5.]
             triplepars = return_triple_param(cube[:,i,j],params=tpguess)
@@ -212,11 +213,11 @@ def adaptive_collapse_gaussfit(cube,axis=2,nsig=3,nrsig=4,prefix='interesting',
                 savefig("%s_%s.%s.png" % (prefix,i,j))
                 clf()
             ncarr[i,j] += 1
-            print >>f,triplepars
+            print(triplepars, file=f)
         dgc += 1
 
     f.close()
-    print "Total time %f seconds for %i double and %i triple gaussians" % (time.time()-starttime,dgc,tgc)
+    print("Total time %f seconds for %i double and %i triple gaussians" % (time.time()-starttime,dgc,tgc))
 
     return width_arr1,width_arr2,chi2_arr,offset_arr1,offset_arr2,amp_arr1,amp_arr2,ncarr
 
@@ -230,12 +231,12 @@ def collapse_gaussfit(cube,axis=2):
     chi2_arr = zeros(cube.shape[1:])
     offset_arr = zeros(cube.shape[1:])
     starttime = time.time()
-    print cube.shape
-    print "Fitting a total of %i spectra with peak signal above %f" % ((cube.max(axis=0) > mean_std).sum(),mean_std)
+    print(cube.shape)
+    print("Fitting a total of %i spectra with peak signal above %f" % ((cube.max(axis=0) > mean_std).sum(),mean_std))
     for i in xrange(cube.shape[1]):
         t0 = time.time()
         nspec = (cube[:,i,:].max(axis=0) > mean_std).sum()
-        print "Working on row %d with %d spectra to fit" % (i,nspec) ,
+        print("Working on row %d with %d spectra to fit" % (i,nspec), end=' ')
         for j in xrange(cube.shape[2]):
             if cube[:,i,j].max() > mean_std:
                 pars = return_param(cube[:,i,j])
@@ -250,8 +251,8 @@ def collapse_gaussfit(cube,axis=2):
                 amp_arr[i,j] = numpy.nan
         dt = time.time()-t0
         if nspec > 0:
-            print "in %f seconds (average: %f)" % (dt,dt/float(nspec))
-    print "Total time %f seconds" % (time.time()-starttime)
+            print("in %f seconds (average: %f)" % (dt,dt/float(nspec)))
+    print("Total time %f seconds" % (time.time()-starttime))
 
     return width_arr,offset_arr,amp_arr,chi2_arr
 
@@ -269,12 +270,12 @@ def collapse_double_gaussfit(cube,axis=2):
     offset_arr1 = zeros(cube.shape[1:])
     offset_arr2 = zeros(cube.shape[1:])
     starttime = time.time()
-    print cube.shape
-    print "Fitting a total of %i spectra with peak signal above %f" % ((cube.max(axis=0) > mean_std).sum(),mean_std)
+    print(cube.shape)
+    print("Fitting a total of %i spectra with peak signal above %f" % ((cube.max(axis=0) > mean_std).sum(),mean_std))
     for i in xrange(cube.shape[1]):
         t0 = time.time()
         nspec = (cube[:,i,:].max(axis=0) > mean_std).sum()
-        print "Working on row %d with %d spectra to fit" % (i,nspec) ,
+        print("Working on row %d with %d spectra to fit" % (i,nspec), end=' ')
         for j in xrange(cube.shape[2]):
             if cube[:,i,j].max() > mean_std:
                 pars = return_double_param(cube[:,i,j])
@@ -293,8 +294,8 @@ def collapse_double_gaussfit(cube,axis=2):
                 offset_arr2[i,j] = numpy.nan
         dt = time.time()-t0
         if nspec > 0:
-            print "in %f seconds (average: %f)" % (dt,dt/float(nspec))
-    print "Total time %f seconds" % (time.time()-starttime)
+            print("in %f seconds (average: %f)" % (dt,dt/float(nspec)))
+    print("Total time %f seconds" % (time.time()-starttime))
 
     return width_arr1,width_arr2,chi2_arr,offset_arr1,offset_arr2,amp_arr1,amp_arr2
 

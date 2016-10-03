@@ -20,6 +20,7 @@ TO DO:
 
 
 
+from __future__ import print_function
 import math
 
 import pylab
@@ -135,17 +136,17 @@ class SpecPlotter:
         tb = get_current_fig_manager().toolbar
         #if ((self.axis is None) or (self.axis==event.inaxes)) and tb.mode=='':
         if event.button==1 and tb.mode=='':
-            print "OverPlotting spectrum from point %i,%i" % (clickX,clickY)
+            print("OverPlotting spectrum from point %i,%i" % (clickX,clickY))
             self.plotspec(clickY,clickX,button=event.button,cube=True)
         elif event.button==2:
-            print "Plotting spectrum from point %i,%i" % (clickX,clickY)
+            print("Plotting spectrum from point %i,%i" % (clickX,clickY))
             self.plotspec(clickY,clickX,button=event.button,cube=True,clear=True)
         elif event.button==3:
-            print "Disconnecting GAIA-like tool"
+            print("Disconnecting GAIA-like tool")
             self.gaiafig.canvas.mpl_disconnect(self.clickid)
         else:
-            print "Call failed for some reason: "
-            print "event: ",event
+            print("Call failed for some reason: ")
+            print("event: ",event)
   
     def plotspec(self, i=0, j=0, cube=False, title=None,
             button=1, clear=False,color=None, continuum=None,
@@ -266,7 +267,7 @@ class SpecPlotter:
         self.clearlines() 
 
         if ctype != 'freq':
-            print "Sorry, non-frequency units not implemented yet."
+            print("Sorry, non-frequency units not implemented yet.")
             return
 
         speedoflight=2.99792458e5
@@ -581,7 +582,7 @@ class Specfit:
         self.ngauss = 0
         self.fitkwargs = kwargs
         if interactive:
-            print "Left-click twice to select a fitting range, then middle-click twice to select a peak and width"
+            print("Left-click twice to select a fitting range, then middle-click twice to select a peak and width")
             self.nclicks_b1 = 0
             self.nclicks_b2 = 0
             self.guesses = []
@@ -589,7 +590,7 @@ class Specfit:
             self.autoannotate = annotate
         else:
             if guesses is None:
-                print "You must input guesses when using multifit.  Also, baseline first!"
+                print("You must input guesses when using multifit.  Also, baseline first!")
             else:
                 self.guesses = guesses
                 self.multifit()
@@ -755,7 +756,7 @@ class Specfit:
                     self.ngauss = 1
                     self.auto = True
             else:
-                print "Fitting region is too small (channels %i:%i).  Try again." % (self.gx1,self.gx2)
+                print("Fitting region is too small (channels %i:%i).  Try again." % (self.gx1,self.gx2))
 
     def guesspeakwidth(self,event):
         if self.nclicks_b2 % 2 == 0:
@@ -775,7 +776,7 @@ class Specfit:
             if self.auto:
                 self.auto = False
             if self.nclicks_b2 / 2 > self.ngauss:
-                print "There have been %i middle-clicks but there are only %i gaussians" % (self.nclicks_b2,self.ngauss)
+                print("There have been %i middle-clicks but there are only %i gaussians" % (self.nclicks_b2,self.ngauss))
                 self.ngauss += 1
 
     def clear(self,legend=True):
@@ -792,13 +793,13 @@ class Specfit:
         elif event.button == 3:
             disconnect(self.click)
             if self.ngauss > 0:
-                print len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.gx1,self.gx2
+                print(len(self.guesses)/3," Guesses: ",self.guesses," X channel range: ",self.gx1,self.gx2)
                 if len(self.guesses) % 3 == 0:
                     self.multifit()
                     for p in self.guessplot + self.fitregion:
                         p.set_visible(False)
                 else: 
-                    print "error, wrong # of pars"
+                    print("error, wrong # of pars")
         if self.specplotter.autorefresh: self.specplotter.refresh()
 
     def clearlegend(self):
@@ -941,7 +942,7 @@ def baseline(spectrum,xarr=None,xmin='default',xmax='default',order=1,quiet=True
         err[mask] = 1e10
         spectrum[mask] = 0
     if (spectrum!=spectrum).sum() > 0:
-        print "There is an error in baseline: some values are NaN"
+        print("There is an error in baseline: some values are NaN")
         import pdb; pdb.set_trace()
 
     mp = mpfit(mpfitfun(spectrum[xmin:xmax],err[xmin:xmax]),xall=pguess,quiet=quiet)
@@ -971,7 +972,7 @@ def open_3d(filename):
     else:
         xunits = hdr.get('CUNIT3')
         if xunits in ("hz","Hz"):
-            print "Converting from Hz to GHz"
+            print("Converting from Hz to GHz")
             xunits = "GHz"
             conversion_factor = 1.0e9
         else:
@@ -1020,7 +1021,7 @@ def open_1d(filename,specnum=0,wcstype='',errspecnum=None,maskspecnum=None):
     else:
         xunits = hdr.get('CUNIT1'+wcstype)
         if xunits in ("hz","Hz"):
-            print "Converting from Hz to GHz"
+            print("Converting from Hz to GHz")
             xunits = "GHz"
             conversion_factor = 1.0e9
         else:

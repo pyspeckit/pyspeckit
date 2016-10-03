@@ -30,7 +30,7 @@ def header_to_vlsr(header,**kwargs):
 
     lst = sexagesimal_to_decimal(header['LST'])
 
-    print ra,dec,latitude,lst,jd,epoch
+    print(ra,dec,latitude,lst,jd,epoch)
     return topo_to_lsr(ra,dec,latitude,lst,jd,epoch)
 
 def date_to_JD(datestr, **kwargs):
@@ -143,9 +143,9 @@ def helio_to_lsr(ra, dec):
     return pyslalib.slalib.sla_rvlsrk(ra/180.*np.pi, dec/180.*np.pi)
 
 def topo_to_lsr(ra, dec, latitude, lst, jd, epoch, height=None):
-    print "helio->lsr: ",helio_to_lsr(ra,dec)
-    print "geo->helio: ",geo_to_helio(ra,dec,jd,epoch)
-    print "topo->geo: ",topo_to_geo(ra,dec,latitude,lst,height=height)
+    print("helio->lsr: ",helio_to_lsr(ra,dec))
+    print("geo->helio: ",geo_to_helio(ra,dec,jd,epoch))
+    print("topo->geo: ",topo_to_geo(ra,dec,latitude,lst,height=height))
     return helio_to_lsr(ra,dec) + geo_to_helio(ra,dec,jd,epoch) + topo_to_geo(ra,dec,latitude,lst,height=height)
 
 def frame_grid(ra=0.0,dec=0.0,latitude=0.0,jd=51544,lst=0,vtopo=0.0,epoch=2000,):

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 from astropy import units as u
 from astropy import constants
@@ -142,11 +143,11 @@ if __name__ == "__main__":
     ph2co_322.update(ph2co)
     ph2co_322['dnu'] = (1*u.km/u.s/constants.c * ph2co_322['frequency'])
 
-    print("tau303 = {0}".format(line_tau(**ph2co_303)))
-    print("tau321 = {0}".format(line_tau(**ph2co_321)))
-    print("tau322 = {0}".format(line_tau(**ph2co_322)))
-    print("r303/r321 = {0}".format(line_brightness(**ph2co_321)/line_brightness(**ph2co_303)))
-    print("r303/r322 = {0}".format(line_brightness(**ph2co_322)/line_brightness(**ph2co_303)))
+    print(("tau303 = {0}".format(line_tau(**ph2co_303))))
+    print(("tau321 = {0}".format(line_tau(**ph2co_321))))
+    print(("tau322 = {0}".format(line_tau(**ph2co_322))))
+    print(("r303/r321 = {0}".format(line_brightness(**ph2co_321)/line_brightness(**ph2co_303))))
+    print(("r303/r322 = {0}".format(line_brightness(**ph2co_322)/line_brightness(**ph2co_303))))
 
     # CDMS Q
     import requests

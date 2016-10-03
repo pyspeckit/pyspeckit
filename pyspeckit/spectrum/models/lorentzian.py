@@ -3,6 +3,7 @@
 Lorentzian Fitter
 =================
 """
+from __future__ import print_function
 import numpy
 from numpy.ma import median
 from numpy import pi
@@ -59,4 +60,4 @@ class LorentzianFitter(fitter.SimpleFitter):
         """
         not implemented
         """
-        print "Not implemented"
+        print("Not implemented")
