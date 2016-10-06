@@ -10,9 +10,9 @@ the pymc interface, it is possible to define priors that strictly limit the
 parameter space.  So far that is not possible with emcee.
 
 The examples below use a custom plotting package from `agpy
-<http://code.google.com/p/agpy/>`_.  It is a relatively simple but convenient
+<https://github.com/keflavich/agpy/>`_.  It is a relatively simple but convenient
 wrapper around numpy's histogram2d.  `pymc_plotting
-<http://code.google.com/p/agpy/source/browse/trunk/agpy/pymc_plotting.py>`_
+<https://github.com/keflavich/agpy/blob/master/agpy/pymc_plotting.py>`_
 takes care of indexing, percentile determination, and coloring.
 
 The example below shows the results of a gaussian fit to noisy data (S/N ~ 6).
