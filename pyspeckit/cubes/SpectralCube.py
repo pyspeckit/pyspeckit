@@ -1385,9 +1385,11 @@ class CubeStack(Cube):
         self.data = self.cube[:,y0,x0]
         self.error = self.errorcube[:,y0,x0] if self.errorcube is not None else None
 
-        self.header = cubelist[0].header
+        self.header = cubelist[0].header.copy()
         for cube in cubelist:
             for key,value in cube.header.items():
+                if key in ['HISTORY', 'COMMENT']:
+                    continue
                 self.header[key] = value
 
         if self.header:
