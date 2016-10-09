@@ -286,7 +286,7 @@ def is_ascii(s):
     Returns
     -------
     is_ascii : bool
-        Returns True if all characters in the string are Unicode. False
+        Returns True if all characters in the string are ascii. False
         otherwise.
     """
     return len(s) == len(s.encode('utf-8'))
