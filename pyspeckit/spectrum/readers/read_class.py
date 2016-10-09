@@ -1318,7 +1318,7 @@ class ClassObject(object):
 
 @print_timing
 def read_class(filename, downsample_factor=None, sourcename=None,
-               telescope=None, posang=None, verbose=False,
+               telescope=None, line=None, posang=None, verbose=False,
                flag_array=None):
     """
     Read a binary class file.
@@ -1336,6 +1336,8 @@ def read_class(filename, downsample_factor=None, sourcename=None,
         Source names to match to the data (uses regex)
     telescope: str or list of str
         'XTEL' or 'TELE' parameters: the telescope & instrument
+    line: str or list of str
+        The line name
     posang: tuple of 2 floats
         The first float is the minimum value for the position angle. The second
         float is the maximum value for the position angle.
@@ -1351,6 +1353,8 @@ def read_class(filename, downsample_factor=None, sourcename=None,
         sourcename = [sourcename]
     if not isinstance(telescope, (list,tuple)):
         telescope = [telescope]
+    if not isinstance(line, (list,tuple)):
+        line = [line]
 
     spectra,headers = [],[]
     if verbose:
@@ -1358,8 +1362,10 @@ def read_class(filename, downsample_factor=None, sourcename=None,
     selection = [ii
                  for source in sourcename
                  for tel in telescope
+                 for li in line
                  for ii in classobj.select_spectra(sourcere=source,
                                                    telescope=tel,
+                                                   line=li,
                                                    posang=posang)]
 
     sphdr = classobj.read_observations(selection)
