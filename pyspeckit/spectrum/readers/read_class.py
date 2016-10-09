@@ -1329,6 +1329,11 @@ def read_class(filename, downsample_factor=None, sourcename=None,
         Source names to match to the data (uses regex)
     telescope: str or list of str
         'XTEL' or 'TELE' parameters: the telescope & instrument
+    posang: tuple of 2 floats
+        The first float is the minimum value for the position angle. The second
+        float is the maximum value for the position angle.
+    verbose: bool
+        Log messages with severity INFO
     flag_array: np.ndarray
         An array with the same shape as the data used to flag out
         (remove) data when downsampling.  True = flag out
