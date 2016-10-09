@@ -229,7 +229,7 @@ keys_lengths = {
 
 def _read_bytes(f, n):
     '''Read the next `n` bytes (from idlsave)'''
-    return f.read(n)
+    return f.read(n).decode('utf-8')
 
 """
 Warning: UNCLEAR what endianness should be!
@@ -276,13 +276,20 @@ def _read_int(f):
     return struct.unpack('i',f.read(4))
 
 def is_ascii(s):
-    try:
-        s.decode('ascii')
-        return True
-    except UnicodeDecodeError:
-        return False
-    except UnicodeEncodeError:
-        return False
+    """Check if there are non-ascii characters in Unicode string
+
+    Parameters
+    ----------
+    s : str
+        The string to be checked
+
+    Returns
+    -------
+    is_ascii : bool
+        Returns True if all characters in the string are Unicode. False
+        otherwise.
+    """
+    return len(s) == len(s.encode('utf-8'))
 
 def is_all_null(s):
     return all(x=='\x00' for x in s)
