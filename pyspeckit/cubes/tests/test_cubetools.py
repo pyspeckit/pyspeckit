@@ -295,3 +295,26 @@ def test_stuck_cubestack(timeout = 5):
         p.terminate
 
     assert not frozen
+
+def test_copy_ids(cubefile='test.fits'):
+    """
+    Regression test for #182
+    """
+    # getting a dummy .fits file
+    if not os.path.exists(cubefile):
+        #download_test_cube(cubefile)
+        make_test_cube((100,9,9),cubefile)
+
+    spc1 = Cube(cubefile)
+    spc2 = spc1.copy()
+    deep_attr_lst = ['xarr', 'data', 'cube', 'maskmap',
+                     'error', 'errorcube']
+    for attr in deep_attr_lst:
+        attr1, attr2 = getattr(spc1, attr), getattr(spc2, attr)
+        # None always points to the same id
+        if attr1 is not None:
+            assert id(attr1) != id(attr2)
+
+    naxis_old = spc1.header['NAXIS1']
+    spc2.header['NAXIS1'] += 1
+    assert spc1.header['NAXIS1'] == naxis_old
