@@ -229,7 +229,7 @@ keys_lengths = {
 
 def _read_bytes(f, n):
     '''Read the next `n` bytes (from idlsave)'''
-    return f.read(n)
+    return f.read(n).decode('utf-8')
 
 """
 Warning: UNCLEAR what endianness should be!
@@ -276,13 +276,20 @@ def _read_int(f):
     return struct.unpack('i',f.read(4))
 
 def is_ascii(s):
-    try:
-        s.decode('ascii')
-        return True
-    except UnicodeDecodeError:
-        return False
-    except UnicodeEncodeError:
-        return False
+    """Check if there are non-ascii characters in Unicode string
+
+    Parameters
+    ----------
+    s : str
+        The string to be checked
+
+    Returns
+    -------
+    is_ascii : bool
+        Returns True if all characters in the string are ascii. False
+        otherwise.
+    """
+    return len(s) == len(s.encode('utf-8'))
 
 def is_all_null(s):
     return all(x=='\x00' for x in s)
@@ -1311,7 +1318,7 @@ class ClassObject(object):
 
 @print_timing
 def read_class(filename, downsample_factor=None, sourcename=None,
-               telescope=None, posang=None, verbose=False,
+               telescope=None, line=None, posang=None, verbose=False,
                flag_array=None):
     """
     Read a binary class file.
@@ -1329,6 +1336,13 @@ def read_class(filename, downsample_factor=None, sourcename=None,
         Source names to match to the data (uses regex)
     telescope: str or list of str
         'XTEL' or 'TELE' parameters: the telescope & instrument
+    line: str or list of str
+        The line name
+    posang: tuple of 2 floats
+        The first float is the minimum value for the position angle. The second
+        float is the maximum value for the position angle.
+    verbose: bool
+        Log messages with severity INFO
     flag_array: np.ndarray
         An array with the same shape as the data used to flag out
         (remove) data when downsampling.  True = flag out
@@ -1339,6 +1353,8 @@ def read_class(filename, downsample_factor=None, sourcename=None,
         sourcename = [sourcename]
     if not isinstance(telescope, (list,tuple)):
         telescope = [telescope]
+    if not isinstance(line, (list,tuple)):
+        line = [line]
 
     spectra,headers = [],[]
     if verbose:
@@ -1346,8 +1362,10 @@ def read_class(filename, downsample_factor=None, sourcename=None,
     selection = [ii
                  for source in sourcename
                  for tel in telescope
+                 for li in line
                  for ii in classobj.select_spectra(sourcere=source,
                                                    telescope=tel,
+                                                   line=li,
                                                    posang=posang)]
 
     sphdr = classobj.read_observations(selection)
