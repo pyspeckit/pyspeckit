@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 from astropy.io import fits
 from astropy import wcs
+import multiprocessing
 
 from .. import cubes, Cube, CubeStack
 from ...spectrum.models import n2hp
@@ -271,3 +272,26 @@ def test_slice_header(cubefile='test.fits'):
 
     assert naxis3 == spc_cut.xarr.size
     assert spc_cut.xarr.x_to_pix(crval3, cunit3) + 1 == crpix3
+
+def test_stuck_cubestack(timeout = 5):
+    make_test_cube(outfile = 'cube1.fits')
+    make_test_cube(outfile = 'cube2.fits')
+    spc1 = Cube('cube1.fits')
+    spc2 = Cube('cube2.fits')
+    spc1.header['HISTORY'] = "history and comment keywords"
+    spc2.header['COMMENT'] = "should not cause any trouble"
+    spc1.xarr.velocity_convention = 'radio'
+    spc2.xarr.velocity_convention = 'radio'
+
+    def timecap():
+        CubeStack([spc1, spc2])
+
+    p = multiprocessing.Process(target = timecap)
+    p.start()
+    p.join(timeout = timeout)
+
+    frozen = p.is_alive()
+    if frozen:
+        p.terminate
+
+    assert not frozen
