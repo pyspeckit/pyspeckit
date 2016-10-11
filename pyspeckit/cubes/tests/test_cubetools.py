@@ -9,45 +9,64 @@ from .. import cubes, Cube, CubeStack
 from ...spectrum.models import n2hp
 
 
-def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None, seed=0):
+def make_test_cube(shape=(30,9,9), outfile='test.fits', snr=30,
+                   sigma=None, seed=0):
     """
-    Generates a simple gaussian cube with noise of
-    given shape and writes it as a fits file.
+    Generates a simple gaussian cube with noise of given shape and writes
+    it out as a FITS file.
+
+    Parameters
+    ----------
+    shape : a tuple of three ints, optional
+        Sets the size of the resulting spectral cube.
+    snr : float, optional
+        The signal to noise ratio of brightest channel in the central pixel
+    outfile : string or file object, optional
+        Output file.
+    sigma : a tuple of two floats, optional
+        Standard deviations of the Gaussian kernels used to generate the
+        signal component. The two components of the tuple govern the spectral
+        and spatial kernel sizes, respectively.
+    seed : int or array_like, optional
+        Passed to np.random.seed to set the random generator.
     """
     from astropy.convolution import Gaussian1DKernel, Gaussian2DKernel
     if sigma is None:
-        sigma1d, sigma2d = shape[0]/10., np.mean(shape[1:])/5.
+        sigma1d, sigma2d = shape[0] / 10., np.mean(shape[1:]) / 5.
     else:
         sigma1d, sigma2d = sigma
 
-    gauss1d = Gaussian1DKernel(stddev=sigma1d, x_size=shape[0])
-    gauss2d = Gaussian2DKernel(stddev=sigma2d,
-                               x_size=shape[1],
-                               y_size=shape[2])
-    test_cube = gauss1d.array[:,None,None] * gauss2d.array
-    test_cube=test_cube/test_cube.max()
-    # adding noise:
+    # generate a 3d ellipsoid with a maximum of one
+    gauss1d = Gaussian1DKernel(stddev = sigma1d, x_size = shape[0])
+    gauss2d = Gaussian2DKernel(stddev = sigma2d,
+                               x_size = shape[1],
+                               y_size = shape[2])
+    signal_cube = gauss1d.array[:, None, None] * gauss2d.array
+    signal_cube = signal_cube / signal_cube.max()
+
+    # adding Gaussian noise
     np.random.seed(seed)
-    noise_cube = ((np.random.random(test_cube.shape)-.5) *
-                  np.median(test_cube.std(axis=0)))
-    test_cube += noise_cube
-    true_rms = noise_cube.std()
+    noise_std = signal_cube.max() / snr
+    noise_cube = np.random.normal(loc = 0, scale = noise_std,
+                                  size = signal_cube.shape)
+    test_cube = signal_cube + noise_cube
 
     # making a simple header for the test cube:
     test_hdu = fits.PrimaryHDU(test_cube)
     # the strange cdelt values are a workaround
     # for what seems to be a bug in wcslib:
     # https://github.com/astropy/astropy/issues/4555
-    cdelt1, cdelt2, cdelt3 = -(4e-3+1e-8), 4e-3+1e-8, -0.1
+    cdelt1, cdelt2, cdelt3 = -(4e-3 + 1e-8), 4e-3 + 1e-8, -0.1
     keylist = {'CTYPE1': 'RA---GLS', 'CTYPE2': 'DEC--GLS', 'CTYPE3': 'VRAD',
                'CDELT1': cdelt1, 'CDELT2': cdelt2, 'CDELT3': cdelt3,
                'CRVAL1': 0, 'CRVAL2': 0, 'CRVAL3': 5,
                'CRPIX1': 9, 'CRPIX2': 0, 'CRPIX3': 5,
                'CUNIT1': 'deg', 'CUNIT2': 'deg', 'CUNIT3': 'km s-1',
+               'BMAJ': cdelt2 * 3, 'BMIN': cdelt2 * 3, 'BPA': 0.0,
                'BUNIT' : 'K', 'EQUINOX': 2000.0}
     # write out some values used to generate the cube:
     keylist['SIGMA' ] = abs(sigma1d*cdelt3), 'in units of CUNIT3'
-    keylist['RMSLVL'] = true_rms
+    keylist['RMSLVL'] = noise_std
     keylist['SEED'  ] = seed
 
     test_header = fits.Header()
