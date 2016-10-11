@@ -50,7 +50,6 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', snr=30,
     noise_cube = np.random.normal(loc = 0, scale = noise_std,
                                   size = signal_cube.shape)
     test_cube = signal_cube + noise_cube
-
     # making a simple header for the test cube:
     test_hdu = fits.PrimaryHDU(test_cube)
     # the strange cdelt values are a workaround
@@ -63,7 +62,7 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', snr=30,
                'CRPIX1': 9, 'CRPIX2': 0, 'CRPIX3': 5,
                'CUNIT1': 'deg', 'CUNIT2': 'deg', 'CUNIT3': 'km s-1',
                'BMAJ': cdelt2 * 3, 'BMIN': cdelt2 * 3, 'BPA': 0.0,
-               'BUNIT' : 'K', 'EQUINOX': 2000.0}
+               'BUNIT' : 'K', 'EQUINOX': 2000.0, 'RESTFREQ': 300e9}
     # write out some values used to generate the cube:
     keylist['SIGMA' ] = abs(sigma1d*cdelt3), 'in units of CUNIT3'
     keylist['RMSLVL'] = noise_std
