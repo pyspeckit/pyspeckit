@@ -1,6 +1,7 @@
 import os
 import warnings
 import numpy as np
+from astropy.convolution import Gaussian1DKernel, Gaussian2DKernel
 from astropy.io import fits
 from astropy import wcs
 import multiprocessing
@@ -30,7 +31,6 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', snr=30,
     seed : int or array_like, optional
         Passed to np.random.seed to set the random generator.
     """
-    from astropy.convolution import Gaussian1DKernel, Gaussian2DKernel
     if sigma is None:
         sigma1d, sigma2d = shape[0] / 10., np.mean(shape[1:]) / 5.
     else:
@@ -128,21 +128,13 @@ def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
     test_sigma = 10 # in pixel values, each pixel is CDELT3 thick
     make_test_cube((100,10,10), save_cube,
                       sigma=(test_sigma, 5) )
-    # from .. import Cube
     spc = Cube(save_cube)
     guesses = [0.5,0.2,0.8]
     map_rms = np.zeros_like(spc.cube[0])+spc.header['RMSLVL']
-    map_snr = spc.cube.std(axis=0)/map_rms
-    try:
-        import multiprocessing
-        ncores = multiprocessing.cpu_count()
-    except ImportError:
-        ncores = 1
-        pass
     spc.fiteach(fittype = 'gaussian',
                 guesses = guesses,
                 start_from_pixel = (5,5),
-                multicore = ncores,
+                multicore = multiprocessing.cpu_count(),
                 blank_value = np.nan,
                 verbose_level = 3,
                 errmap = map_rms,
@@ -278,7 +270,7 @@ def test_noerror_cube(cubefile='test.fits'):
 
 def test_slice_header(cubefile='test.fits'):
     """
-    Regression test for 184
+    Regression test for #184
     """
     if not os.path.exists(cubefile):
         make_test_cube((100,9,9),cubefile)
@@ -295,6 +287,9 @@ def test_slice_header(cubefile='test.fits'):
     assert spc_cut.xarr.x_to_pix(crval3, cunit3) + 1 == crpix3
 
 def test_stuck_cubestack(timeout = 5):
+    """
+    Regression test for #194
+    """
     make_test_cube(outfile = 'cube1.fits')
     make_test_cube(outfile = 'cube2.fits')
     spc1 = Cube('cube1.fits')
@@ -321,10 +316,8 @@ def test_copy_ids(cubefile='test.fits'):
     """
     Regression test for #182
     """
-    # getting a dummy .fits file
     if not os.path.exists(cubefile):
-        #download_test_cube(cubefile)
-        make_test_cube((100,9,9),cubefile)
+        make_test_cube((100,9,9), cubefile)
 
     spc1 = Cube(cubefile)
     spc2 = spc1.copy()
