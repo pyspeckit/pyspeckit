@@ -172,7 +172,7 @@ def test_fiteach(save_cube=None, save_pars=None, show_plot=False):
     assert map_seed == 0
     assert err_frac == 0.39
 
-def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
+def test_get_modelcube(cubefile=None, parfile=None):
     """
     Tests get_modelcube() method for Cube and CubeStack classes.
     If either cubefile or parfile isn't set, fill generate and
@@ -188,20 +188,23 @@ def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
         sp_cube = do_fiteach(save_cube=cubefile, save_pars=parfile)
     else:
         sp_cube  = Cube(cubefile)
-    map_seed = sp_cube.header['SEED']
+
     map_rms = sp_cube.header['RMSLVL']
+    map_seed = sp_cube.header['SEED']
+    assert map_seed == 0
+
     sp_cube.xarr.velocity_convention = 'radio'
     sp_stack = CubeStack([sp_cube])
     sp_stack._modelcube = None
     # assuming one gaussian component
     for spc in [sp_cube, sp_stack]:
         spc.load_model_fit(parfile, npars=3)
+        # calling CubeStack converted xarr units to GHz
+        spc.xarr.convert_to_unit('km/s')
         spc.get_modelcube()
         resid_cube = spc.cube - spc._modelcube
-    above3sig = (resid_cube.std(axis=0) > map_rms*3).flatten()
-
-    assert map_seed == 0
-    assert above3sig[above3sig].size == 77
+        above1sig = (resid_cube.std(axis=0) > map_rms).flatten()
+        assert above1sig[above1sig].size == 31
 
 def test_get_modelcube_badpar(cubefile=None, parfile=None, sigma_threshold=5):
     """
