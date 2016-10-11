@@ -170,7 +170,7 @@ def test_fiteach(save_cube=None, save_pars=None, show_plot=False):
     err_frac = map_in_bounds[~map_in_bounds].size / float(map_sigma_post.size)
 
     assert map_seed == 0
-    assert err_frac == 0.39
+    assert err_frac == 0.34
 
 def test_get_modelcube(cubefile=None, parfile=None):
     """
