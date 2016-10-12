@@ -1,6 +1,7 @@
 import os
 import warnings
 import numpy as np
+from astropy.convolution import Gaussian1DKernel, Gaussian2DKernel
 from astropy.io import fits
 from astropy import wcs
 import multiprocessing
@@ -9,45 +10,62 @@ from .. import cubes, Cube, CubeStack
 from ...spectrum.models import n2hp
 
 
-def make_test_cube(shape=(30,9,9), outfile='test.fits', sigma=None, seed=0):
+def make_test_cube(shape=(30,9,9), outfile='test.fits', snr=30,
+                   sigma=None, seed=0):
     """
-    Generates a simple gaussian cube with noise of
-    given shape and writes it as a fits file.
+    Generates a simple gaussian cube with noise of given shape and writes
+    it out as a FITS file.
+
+    Parameters
+    ----------
+    shape : a tuple of three ints, optional
+        Sets the size of the resulting spectral cube.
+    snr : float, optional
+        The signal to noise ratio of brightest channel in the central pixel
+    outfile : string or file object, optional
+        Output file.
+    sigma : a tuple of two floats, optional
+        Standard deviations of the Gaussian kernels used to generate the
+        signal component. The two components of the tuple govern the spectral
+        and spatial kernel sizes, respectively.
+    seed : int or array_like, optional
+        Passed to np.random.seed to set the random generator.
     """
-    from astropy.convolution import Gaussian1DKernel, Gaussian2DKernel
     if sigma is None:
-        sigma1d, sigma2d = shape[0]/10., np.mean(shape[1:])/5.
+        sigma1d, sigma2d = shape[0] / 10., np.mean(shape[1:]) / 5.
     else:
         sigma1d, sigma2d = sigma
 
-    gauss1d = Gaussian1DKernel(stddev=sigma1d, x_size=shape[0])
-    gauss2d = Gaussian2DKernel(stddev=sigma2d,
-                               x_size=shape[1],
-                               y_size=shape[2])
-    test_cube = gauss1d.array[:,None,None] * gauss2d.array
-    test_cube=test_cube/test_cube.max()
-    # adding noise:
-    np.random.seed(seed)
-    noise_cube = ((np.random.random(test_cube.shape)-.5) *
-                  np.median(test_cube.std(axis=0)))
-    test_cube += noise_cube
-    true_rms = noise_cube.std()
+    # generate a 3d ellipsoid with a maximum of one
+    gauss1d = Gaussian1DKernel(stddev = sigma1d, x_size = shape[0])
+    gauss2d = Gaussian2DKernel(stddev = sigma2d,
+                               x_size = shape[1],
+                               y_size = shape[2])
+    signal_cube = gauss1d.array[:, None, None] * gauss2d.array
+    signal_cube = signal_cube / signal_cube.max()
 
+    # adding Gaussian noise
+    np.random.seed(seed)
+    noise_std = signal_cube.max() / snr
+    noise_cube = np.random.normal(loc = 0, scale = noise_std,
+                                  size = signal_cube.shape)
+    test_cube = signal_cube + noise_cube
     # making a simple header for the test cube:
     test_hdu = fits.PrimaryHDU(test_cube)
     # the strange cdelt values are a workaround
     # for what seems to be a bug in wcslib:
     # https://github.com/astropy/astropy/issues/4555
-    cdelt1, cdelt2, cdelt3 = -(4e-3+1e-8), 4e-3+1e-8, -0.1
+    cdelt1, cdelt2, cdelt3 = -(4e-3 + 1e-8), 4e-3 + 1e-8, -0.1
     keylist = {'CTYPE1': 'RA---GLS', 'CTYPE2': 'DEC--GLS', 'CTYPE3': 'VRAD',
                'CDELT1': cdelt1, 'CDELT2': cdelt2, 'CDELT3': cdelt3,
                'CRVAL1': 0, 'CRVAL2': 0, 'CRVAL3': 5,
                'CRPIX1': 9, 'CRPIX2': 0, 'CRPIX3': 5,
                'CUNIT1': 'deg', 'CUNIT2': 'deg', 'CUNIT3': 'km s-1',
-               'BUNIT' : 'K', 'EQUINOX': 2000.0}
+               'BMAJ': cdelt2 * 3, 'BMIN': cdelt2 * 3, 'BPA': 0.0,
+               'BUNIT' : 'K', 'EQUINOX': 2000.0, 'RESTFREQ': 300e9}
     # write out some values used to generate the cube:
     keylist['SIGMA' ] = abs(sigma1d*cdelt3), 'in units of CUNIT3'
-    keylist['RMSLVL'] = true_rms
+    keylist['RMSLVL'] = noise_std
     keylist['SEED'  ] = seed
 
     test_header = fits.Header()
@@ -110,21 +128,13 @@ def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
     test_sigma = 10 # in pixel values, each pixel is CDELT3 thick
     make_test_cube((100,10,10), save_cube,
                       sigma=(test_sigma, 5) )
-    # from .. import Cube
     spc = Cube(save_cube)
     guesses = [0.5,0.2,0.8]
     map_rms = np.zeros_like(spc.cube[0])+spc.header['RMSLVL']
-    map_snr = spc.cube.std(axis=0)/map_rms
-    try:
-        import multiprocessing
-        ncores = multiprocessing.cpu_count()
-    except ImportError:
-        ncores = 1
-        pass
     spc.fiteach(fittype = 'gaussian',
                 guesses = guesses,
                 start_from_pixel = (5,5),
-                multicore = ncores,
+                multicore = multiprocessing.cpu_count(),
                 blank_value = np.nan,
                 verbose_level = 3,
                 errmap = map_rms,
@@ -152,9 +162,9 @@ def test_fiteach(save_cube=None, save_pars=None, show_plot=False):
     err_frac = map_in_bounds[~map_in_bounds].size / float(map_sigma_post.size)
 
     assert map_seed == 0
-    assert err_frac == 0.39
+    assert err_frac == 0.34
 
-def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
+def test_get_modelcube(cubefile=None, parfile=None):
     """
     Tests get_modelcube() method for Cube and CubeStack classes.
     If either cubefile or parfile isn't set, fill generate and
@@ -170,20 +180,23 @@ def test_get_modelcube(cubefile=None, parfile=None, sigma_threshold=5):
         sp_cube = do_fiteach(save_cube=cubefile, save_pars=parfile)
     else:
         sp_cube  = Cube(cubefile)
-    map_seed = sp_cube.header['SEED']
+
     map_rms = sp_cube.header['RMSLVL']
+    map_seed = sp_cube.header['SEED']
+    assert map_seed == 0
+
     sp_cube.xarr.velocity_convention = 'radio'
     sp_stack = CubeStack([sp_cube])
     sp_stack._modelcube = None
     # assuming one gaussian component
     for spc in [sp_cube, sp_stack]:
         spc.load_model_fit(parfile, npars=3)
+        # calling CubeStack converted xarr units to GHz
+        spc.xarr.convert_to_unit('km/s')
         spc.get_modelcube()
         resid_cube = spc.cube - spc._modelcube
-    above3sig = (resid_cube.std(axis=0) > map_rms*3).flatten()
-
-    assert map_seed == 0
-    assert above3sig[above3sig].size == 77
+        above1sig = (resid_cube.std(axis=0) > map_rms).flatten()
+        assert above1sig[above1sig].size == 31
 
 def test_get_modelcube_badpar(cubefile=None, parfile=None, sigma_threshold=5):
     """
@@ -257,7 +270,7 @@ def test_noerror_cube(cubefile='test.fits'):
 
 def test_slice_header(cubefile='test.fits'):
     """
-    Regression test for 184
+    Regression test for #184
     """
     if not os.path.exists(cubefile):
         make_test_cube((100,9,9),cubefile)
@@ -274,6 +287,9 @@ def test_slice_header(cubefile='test.fits'):
     assert spc_cut.xarr.x_to_pix(crval3, cunit3) + 1 == crpix3
 
 def test_stuck_cubestack(timeout = 5):
+    """
+    Regression test for #194
+    """
     make_test_cube(outfile = 'cube1.fits')
     make_test_cube(outfile = 'cube2.fits')
     spc1 = Cube('cube1.fits')
@@ -300,10 +316,8 @@ def test_copy_ids(cubefile='test.fits'):
     """
     Regression test for #182
     """
-    # getting a dummy .fits file
     if not os.path.exists(cubefile):
-        #download_test_cube(cubefile)
-        make_test_cube((100,9,9),cubefile)
+        make_test_cube((100,9,9), cubefile)
 
     spc1 = Cube(cubefile)
     spc2 = spc1.copy()
