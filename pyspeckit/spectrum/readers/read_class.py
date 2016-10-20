@@ -51,15 +51,21 @@ def print_timing(func):
 
 
 """ Specification: http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html """
-filetype_dict = {'1A  ':'Multiple_IEEE','1   ':'Multiple_Vax','1B  ':'Multiple_EEEI',
-                 '2A  ':'v2','2   ':'v2','2B  ':'v2',
-                 '9A  ':'Single_IEEE','9   ':'Single_Vax','9B  ':'Single_EEEI'}
+filetype_dict = {b'1A  ':'Multiple_IEEE',
+                 b'1   ':'Multiple_Vax',
+                 b'1B  ':'Multiple_EEEI',
+                 b'2A  ':'v2',
+                 b'2   ':'v2',
+                 b'2B  ':'v2',
+                 b'9A  ':'Single_IEEE',
+                 b'9   ':'Single_Vax',
+                 b'9B  ':'Single_EEEI'}
 
-fileversion_dict = {'1A  ':'v1',
-                    '2A  ':'v2'}
+fileversion_dict = {b'1A  ':'v1',
+                    b'2A  ':'v2'}
 
-record_lengths = {'1A': 512,
-                  '2A': 1024*4}
+record_lengths = {b'1A': 512,
+                  b'2A': 1024*4}
 
 header_id_numbers = {0: 'USER CODE',
                      -1: 'COMMENT',

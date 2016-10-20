@@ -12,10 +12,9 @@ c_cgs = constants.c.cgs.value
 
 
 def line_tau(tex, total_column, partition_function, degeneracy, frequency,
-             energy_upper, einstein_A):
+             energy_upper, einstein_A=None):
     # don't use dipole moment, because there are extra hidden dependencies
 
-    assert einstein_A.unit.is_equivalent(u.Hz)
     assert frequency.unit.is_equivalent(u.Hz)
     assert energy_upper.unit.is_equivalent(u.erg)
     assert total_column.unit.is_equivalent(u.cm**-2)
@@ -27,10 +26,35 @@ def line_tau(tex, total_column, partition_function, degeneracy, frequency,
     # equation 29 in Mangum 2015
     #taudnu = (eightpicubed * frequency * dipole_moment**2 / threehc *
     #             (np.exp(frequency*h_cgs/(kb_cgs*tex))-1) * N_upper)
+    assert einstein_A.unit.is_equivalent(u.Hz)
     taudnu = ((constants.c**2/(8*np.pi*frequency**2) * einstein_A * N_upper)*
               (np.exp(frequency*constants.h/(constants.k_B*tex))-1))
 
     return taudnu.decompose()
+
+def line_tau_nonquantum(tex, total_column, partition_function, degeneracy,
+                        frequency, energy_upper, SijMu2=None, molwt=None):
+
+    assert frequency.unit.is_equivalent(u.Hz)
+    assert energy_upper.unit.is_equivalent(u.erg)
+    assert total_column.unit.is_equivalent(u.cm**-2)
+    assert tex.unit.is_equivalent(u.K)
+
+    energy_lower = energy_upper - frequency*constants.h
+    #N_lower = (total_column * degeneracy / partition_function *
+    #           np.exp(-energy_lower / (constants.k_B * tex)))
+
+    # http://www.cv.nrao.edu/php/splat/OSU_Splat.html
+    assert SijMu2.unit.is_equivalent(u.debye**2)
+    amu = u.Da
+    assert molwt.unit.is_equivalent(amu)
+    C1 = 54.5953 * u.nm**2 * u.K**0.5 / amu**0.5 / u.debye**2
+    C2 = 4.799237e-5 * u.K / u.MHz
+    C3 = (1.43877506 * u.K / ((1*u.cm).to(u.Hz, u.spectral()) * constants.h)).to(u.K/u.erg)
+    #C3 = (constants.h / constants.k_B).to(u.K/u.erg)
+    tau = total_column/partition_function * C1 * (molwt/tex)**0.5 * (1-np.exp(-C2*frequency/tex)) * SijMu2 * np.exp(-C3*energy_lower/tex)
+
+    return tau.decompose()
 
 def line_tau_cgs(tex, total_column, partition_function, degeneracy, frequency,
                  energy_upper, einstein_A):
