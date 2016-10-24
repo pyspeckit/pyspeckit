@@ -72,7 +72,9 @@ for key in list(filetype_dict.keys()):
     filetype_dict[ensure_bytes(key)] = filetype_dict[key]
 
 fileversion_dict = {'1A  ':'v1',
-                    '2A  ':'v2'}
+                    '2A  ':'v2',
+                    '9A  ':'v1', # untested
+                   }
 for key in list(fileversion_dict.keys()):
     fileversion_dict[ensure_bytes(key)] = fileversion_dict[key]
 
@@ -736,9 +738,9 @@ def gi8_dicho(ninp,lexn,xval,ceil=True):
     ival = isup
     return ival
 
-def _read_obshead(f, file_description, position=None):
+def _read_obshead(f, file_description, position=None, verbose=False):
     if file_description['version'] == 1:
-        return _read_obshead_v1(f, position=position)
+        return _read_obshead_v1(f, position=position, verbose=verbose)
     if file_description['version'] == 2:
         return _read_obshead_v2(f, position=position)
     else:
@@ -808,7 +810,7 @@ def _read_obshead_v1(f, position=None, verbose=False):
     if position is not None:
         f.seek(position)
     IDcode = f.read(4)
-    if IDcode.strip() != '2':
+    if IDcode.strip() != b'2':
         raise IndexError("Observation Header reading failure at {0}.  "
                          "Record does not appear to be an observation header.".
                          format(f.tell() - 4))
@@ -892,7 +894,7 @@ def test_downsample1d():
                   np.array([0.5,  2.5,  4.0,  6.5,  8.5]))
 
 def read_observation(f, obsid, file_description=None, indices=None,
-                     my_memmap=None, memmap=True):
+                     my_memmap=None, memmap=True, verbose=False):
     if isinstance(f, str):
         f = open(f,'rb')
         opened = True
@@ -915,8 +917,10 @@ def read_observation(f, obsid, file_description=None, indices=None,
     index = indices[obsid]
 
     obs_position = (index['BLOC']-1)*file_description['reclen']*4 + (index['WORD']-1)*4
+    log.debug("Reading observation at position {0}".format(obs_position))
     obsnum,obshead,sections = _read_obshead(f, file_description,
-                                            position=obs_position)
+                                            position=obs_position,
+                                            verbose=verbose)
     header = obshead
 
     datastart = 0
