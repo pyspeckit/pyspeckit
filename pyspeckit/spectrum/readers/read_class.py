@@ -8,6 +8,7 @@ Read a CLASS file into an :class:`pyspeckit.spectrum.ObsBlock`
 from __future__ import print_function
 from astropy.extern.six.moves import xrange
 from astropy.extern.six import iteritems
+from astropy.extern import six
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -48,15 +49,34 @@ def print_timing(func):
     wrapper.__doc__ = func.__doc__
     return wrapper
 
-
+def ensure_bytes(string):
+    """
+    Ensure a given string is in byte form
+    """
+    if six.PY3:
+        return bytes(string, 'utf-8')
+    else:
+        return str(string)
 
 """ Specification: http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node58.html """
-filetype_dict = {'1A  ':'Multiple_IEEE','1   ':'Multiple_Vax','1B  ':'Multiple_EEEI',
-                 '2A  ':'v2','2   ':'v2','2B  ':'v2',
-                 '9A  ':'Single_IEEE','9   ':'Single_Vax','9B  ':'Single_EEEI'}
+filetype_dict = {'1A  ':'Multiple_IEEE',
+                 '1   ':'Multiple_Vax',
+                 '1B  ':'Multiple_EEEI',
+                 '2A  ':'v2',
+                 '2   ':'v2',
+                 '2B  ':'v2',
+                 '9A  ':'Single_IEEE',
+                 '9   ':'Single_Vax',
+                 '9B  ':'Single_EEEI'}
+for key in list(filetype_dict.keys()):
+    filetype_dict[ensure_bytes(key)] = filetype_dict[key]
 
 fileversion_dict = {'1A  ':'v1',
-                    '2A  ':'v2'}
+                    '2A  ':'v2',
+                    '9A  ':'v1', # untested
+                   }
+for key in list(fileversion_dict.keys()):
+    fileversion_dict[ensure_bytes(key)] = fileversion_dict[key]
 
 record_lengths = {'1A': 512,
                   '2A': 1024*4}
@@ -115,31 +135,31 @@ GENERAL
 
 keys_lengths = {
         'unknown': [
-     ( 'NUM'     ,1,'int32'), # Observation number
-     ( 'VER'     ,1,'int32'), # Version number
-     ( 'TELES'   ,3,'|S12') , # Telescope name
-     ( 'DOBS'    ,1,'int32'), # Date of observation
-     ( 'DRED'    ,1,'int32'), # Date of reduction
-     ( 'TYPEC'   ,1,'int32'), # Type of coordinates
-     ( 'KIND'    ,1,'int32'), # Type of data
-     ( 'QUAL'    ,1,'int32'), # Quality of data
-     ( 'SCAN'    ,1,'int32'), # Scan number
-     ( 'SUBSCAN' ,1,'int32'), # Subscan number
+     ('NUM'     ,1,'int32'), # Observation number
+     ('VER'     ,1,'int32'), # Version number
+     ('TELES'   ,3,'|S12') , # Telescope name
+     ('DOBS'    ,1,'int32'), # Date of observation
+     ('DRED'    ,1,'int32'), # Date of reduction
+     ('TYPEC'   ,1,'int32'), # Type of coordinates
+     ('KIND'    ,1,'int32'), # Type of data
+     ('QUAL'    ,1,'int32'), # Quality of data
+     ('SCAN'    ,1,'int32'), # Scan number
+     ('SUBSCAN' ,1,'int32'), # Subscan number
      ],
 
-        'COMMENT': [ # -1
+       'COMMENT': [ # -1
                     ('LTEXT',1,'int32'), # integer(kind=4) :: ltext   ! Length of comment
                     ('CTEXT',1024//4,'|S1024'), # character ctext*1024       ! Comment string
                    ],
-        
-        'GENERAL': [ # -2
-     ( 'UT'      ,2,'float64'), #  rad UT of observation
-     ( 'ST'      ,2,'float64'), #  rad LST of observation
-     ( 'AZ'      ,1,'float32'), #  rad Azimuth
-     ( 'EL'      ,1,'float32'), #  rad Elevation
-     ( 'TAU'     ,1,'float32'), # neper Opacity
-     ( 'TSYS'    ,1,'float32'), #    K System temperature
-     ( 'TIME'    ,1,'float32'), #    s Integration time
+
+       'GENERAL': [ # -2
+     ('UT'      ,2,'float64'), #  rad UT of observation
+     ('ST'      ,2,'float64'), #  rad LST of observation
+     ('AZ'      ,1,'float32'), #  rad Azimuth
+     ('EL'      ,1,'float32'), #  rad Elevation
+     ('TAU'     ,1,'float32'), # neper Opacity
+     ('TSYS'    ,1,'float32'), #    K System temperature
+     ('TIME'    ,1,'float32'), #    s Integration time
                     # XUNIT should not be there?
      #( 'XUNIT'   ,1,'int32'),   # code X unit (if xcoord_sec is present)
      ] ,
@@ -209,27 +229,27 @@ keys_lengths = {
     ],
 
     'DRIFT':[ # 16?
-        ('FREQ',1,'float64') ,  #! [ MHz] Rest frequency                   real(kind=8)    :: 
-        ('WIDTH',1,'float32'),  #! [ MHz] Bandwidth                        real(kind=4)    :: 
-        ('NPOIN',1,'int32')  ,  #! [    ] Number of data points              integer(kind=4) :: 
-        ('RPOIN',1,'float32'),  #! [    ] Reference point                  real(kind=4)    :: 
-        ('TREF',1,'float32') ,  #! [   ?] Time at reference                real(kind=4)    :: 
-        ('AREF',1,'float32') ,  #! [ rad] Angular offset at ref.           real(kind=4)    :: 
-        ('APOS',1,'float32') ,  #! [ rad] Position angle of drift          real(kind=4)    :: 
-        ('TRES',1,'float32') ,  #! [   ?] Time resolution                  real(kind=4)    :: 
-        ('ARES',1,'float32') ,  #! [ rad] Angular resolution               real(kind=4)    :: 
-        ('BAD',1,'float32')  ,  #! [    ] Blanking value                   real(kind=4)    :: 
-        ('CTYPE',1,'int32')  ,  #! [code] Type of offsets                    integer(kind=4) :: 
-        ('CIMAG',1,'float64'),  #! [ MHz] Image frequency                  real(kind=8)    :: 
-        ('COLLA',1,'float32'),  #! [   ?] Collimation error Az             real(kind=4)    :: 
-        ('COLLE',1,'float32'),  #! [   ?] Collimation error El             real(kind=4)    :: 
+        ('FREQ',1,'float64') ,  #! [ MHz] Rest frequency                   real(kind=8)    ::
+        ('WIDTH',1,'float32'),  #! [ MHz] Bandwidth                        real(kind=4)    ::
+        ('NPOIN',1,'int32')  ,  #! [    ] Number of data points              integer(kind=4) ::
+        ('RPOIN',1,'float32'),  #! [    ] Reference point                  real(kind=4)    ::
+        ('TREF',1,'float32') ,  #! [   ?] Time at reference                real(kind=4)    ::
+        ('AREF',1,'float32') ,  #! [ rad] Angular offset at ref.           real(kind=4)    ::
+        ('APOS',1,'float32') ,  #! [ rad] Position angle of drift          real(kind=4)    ::
+        ('TRES',1,'float32') ,  #! [   ?] Time resolution                  real(kind=4)    ::
+        ('ARES',1,'float32') ,  #! [ rad] Angular resolution               real(kind=4)    ::
+        ('BAD',1,'float32')  ,  #! [    ] Blanking value                   real(kind=4)    ::
+        ('CTYPE',1,'int32')  ,  #! [code] Type of offsets                    integer(kind=4) ::
+        ('CIMAG',1,'float64'),  #! [ MHz] Image frequency                  real(kind=8)    ::
+        ('COLLA',1,'float32'),  #! [   ?] Collimation error Az             real(kind=4)    ::
+        ('COLLE',1,'float32'),  #! [   ?] Collimation error El             real(kind=4)    ::
     ],
-     
+
      }
 
 def _read_bytes(f, n):
     '''Read the next `n` bytes (from idlsave)'''
-    return f.read(n).decode('utf-8')
+    return f.read(n)
 
 """
 Warning: UNCLEAR what endianness should be!
@@ -289,10 +309,10 @@ def is_ascii(s):
         Returns True if all characters in the string are ascii. False
         otherwise.
     """
-    return len(s) == len(s.encode('utf-8'))
+    return len(s) == len(s.decode('ascii').encode('utf-8'))
 
 def is_all_null(s):
-    return all(x=='\x00' for x in s)
+    return all(x=='\x00' for x in s) or all(x==b'\x00' for x in s)
 
 
 """
@@ -319,7 +339,7 @@ from clic_file.f90: v1, v2
     integer(kind=4)  :: bpc        ! 26   : baseline bandpass cal status        integer(kind=4)  :: bpc        ! 29   : baseline bandpass cal status
     integer(kind=4)  :: ic         ! 27   : instrumental cal status             integer(kind=4)  :: ic         ! 30   : instrumental cal status
     integer(kind=4)  :: recei      ! 28   : receiver number                     integer(kind=4)  :: recei      ! 31   : receiver number
-    real(kind=4)     :: ut         ! 29   : UT                  [s]             real(kind=4)     :: ut         ! 32   : UT                  [s] 
+    real(kind=4)     :: ut         ! 29   : UT                  [s]             real(kind=4)     :: ut         ! 32   : UT                  [s]
     integer(kind=4)  :: pad2(3)    ! 30-32: padding to 32 4-bytes word
 
 equivalently
@@ -388,7 +408,7 @@ def _read_indices(f, file_description):
     #else:
     #    raise ValueError("Invalid file version {0}".format(file_description['version']))
 
-                
+
     return all_indices
 
 
@@ -439,20 +459,20 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
     if filetype in ('1A  ','v1', 1):
         log.debug('Index filetype 1A')
         index = {
-                    "XBLOC":_read_int32(f),
-                    "XNUM":_read_int32(f),
-                    "XVER":_read_int32(f),
-                    "XSOURC":_read_word(f,12),
-                    "XLINE":_read_word(f,12),
-                    "XTEL":_read_word(f,12),
-                    "XDOBS":_read_int32(f),
-                    "XDRED":_read_int32(f),
-                    "XOFF1":_read_float32(f),# 	 first offset (real, radians) 
-                    "XOFF2":_read_float32(f),# 	 second offset (real, radians) 
-                    "XTYPE":_read_int32(f),# 	 coordinate system ('EQ'', 'GA', 'HO') 
-                    "XKIND":_read_int32(f),# 	 Kind of observation (0: spectral, 1: continuum, ) 
-                    "XQUAL":_read_int32(f),# 	 Quality (0-9)  
-                    "XSCAN":_read_int32(f),# 	 Scan number 
+                   "XBLOC":_read_int32(f),
+                   "XNUM":_read_int32(f),
+                   "XVER":_read_int32(f),
+                   "XSOURC":_read_word(f,12),
+                   "XLINE":_read_word(f,12),
+                   "XTEL":_read_word(f,12),
+                   "XDOBS":_read_int32(f),
+                   "XDRED":_read_int32(f),
+                   "XOFF1":_read_float32(f),# 	 first offset (real, radians)
+                   "XOFF2":_read_float32(f),# 	 second offset (real, radians)
+                   "XTYPE":_read_int32(f),# 	 coordinate system ('EQ'', 'GA', 'HO')
+                   "XKIND":_read_int32(f),# 	 Kind of observation (0: spectral, 1: continuum, )
+                   "XQUAL":_read_int32(f),# 	 Quality (0-9)
+                   "XSCAN":_read_int32(f),# 	 Scan number
                 }
         index['BLOC'] = index['XBLOC'] # v2 compatibility
         index['WORD'] = 1 # v2 compatibility
@@ -557,11 +577,13 @@ def _read_header(f, type=0, position=None):
 
 def _read_first_record(f):
     f.seek(0)
-    filetype = f.read(4).decode('utf-8')
+    filetype = f.read(4)
     if fileversion_dict[filetype] == 'v1':
         return _read_first_record_v1(f)
-    else:
+    elif fileversion_dict[filetype] == 'v2':
         return _read_first_record_v2(f)
+    else:
+        raise ValueError("Unrecognized filetype {0}".format(filetype))
 
 def _read_first_record_v1(f, record_length_words=128):
     r"""
@@ -716,9 +738,9 @@ def gi8_dicho(ninp,lexn,xval,ceil=True):
     ival = isup
     return ival
 
-def _read_obshead(f, file_description, position=None):
+def _read_obshead(f, file_description, position=None, verbose=False):
     if file_description['version'] == 1:
-        return _read_obshead_v1(f, position=position)
+        return _read_obshead_v1(f, position=position, verbose=verbose)
     if file_description['version'] == 2:
         return _read_obshead_v2(f, position=position)
     else:
@@ -759,7 +781,7 @@ def _read_obshead_v2(f, position=None):
                          "Record does not appear to be an observation header.".
                          format(position))
     f.seek(position)
-    
+
     entrydescv2_nw1=11
     entrydescv2_nw2=5
     obshead = {
@@ -787,8 +809,8 @@ def _read_obshead_v1(f, position=None, verbose=False):
     """
     if position is not None:
         f.seek(position)
-    IDcode = f.read(4).decode('utf-8')
-    if IDcode.strip() != '2':
+    IDcode = f.read(4)
+    if IDcode.strip() != b'2':
         raise IndexError("Observation Header reading failure at {0}.  "
                          "Record does not appear to be an observation header.".
                          format(f.tell() - 4))
@@ -797,16 +819,17 @@ def _read_obshead_v1(f, position=None, verbose=False):
     if verbose:
         print("nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum",nblocks,nbyteob,data_address,data_length,nheaders,obindex,nsec,obsnum)
         print("DATA_LENGTH: ",data_length)
-    
+
     seccodes = numpy.fromfile(f,count=nsec,dtype='int32')
     # Documentation says addresses then length: It is apparently wrong
     seclen = numpy.fromfile(f,count=nsec,dtype='int32')
     secaddr = numpy.fromfile(f,count=nsec,dtype='int32')
-    if verbose: print("Section codes, addresses, lengths: ",seccodes,secaddr,seclen)
+    if verbose:
+        print("Section codes, addresses, lengths: ",seccodes,secaddr,seclen)
 
     hdr = {'NBLOCKS':nblocks, 'NBYTEOB':nbyteob, 'DATAADDR':data_address,
-            'DATALEN':data_length, 'NHEADERS':nheaders, 'OBINDEX':obindex,
-            'NSEC':nsec, 'OBSNUM':obsnum}
+           'DATALEN':data_length, 'NHEADERS':nheaders, 'OBINDEX':obindex,
+           'NSEC':nsec, 'OBSNUM':obsnum}
 
     #return obsnum,seccodes
     return obsnum,hdr,dict(zip(seccodes,secaddr))
@@ -815,16 +838,16 @@ def _read_obshead_v1(f, position=None, verbose=False):
 # def _read_preheader(f):
 #     """
 #     Not entirely clear what this is, but it is stuff that precedes the actual data
-# 
+#
 #     Looks something like this:
 #     array([          1,          -2,          -3,          -4,         -14,
 #                  9,          17,          18,          25,          55,
 #                 64,          81,          99, -1179344801,   979657591,
-# 
+#
 #     -2, -3, -4, -14 indicate the 4 header types
 #     9,17,18,25 *MAY* indicate the number of bytes in each
-#     
-# 
+#
+#
 #     HOW is it indicated how many entries there are?
 #     """
 #     # 13 comes from counting 1, -2,....99 above
@@ -868,15 +891,15 @@ def test_downsample1d():
     weight = np.ones(10)
     weight[5]=0
     assert np.all(downsample_1d(data, 2, weight=weight, estimator=np.mean) ==
-                  np.array([ 0.5,  2.5,  4. ,  6.5,  8.5]))
+                  np.array([0.5,  2.5,  4.0,  6.5,  8.5]))
 
 def read_observation(f, obsid, file_description=None, indices=None,
-                     my_memmap=None, memmap=True):
+                     my_memmap=None, memmap=True, verbose=False):
     if isinstance(f, str):
         f = open(f,'rb')
         opened = True
         if memmap:
-            my_memmap = numpy.memmap(filename, offset=0, dtype='float32',
+            my_memmap = numpy.memmap(f, offset=0, dtype='float32',
                                      mode='r')
         else:
             my_memmap = None
@@ -894,8 +917,10 @@ def read_observation(f, obsid, file_description=None, indices=None,
     index = indices[obsid]
 
     obs_position = (index['BLOC']-1)*file_description['reclen']*4 + (index['WORD']-1)*4
+    log.debug("Reading observation at position {0}".format(obs_position))
     obsnum,obshead,sections = _read_obshead(f, file_description,
-                                            position=obs_position)
+                                            position=obs_position,
+                                            verbose=verbose)
     header = obshead
 
     datastart = 0
@@ -1210,7 +1235,7 @@ class ClassObject(object):
 
     @property
     def headers(self):
-        return [self._spectra[ii][1] 
+        return [self._spectra[ii][1]
                 if ii in self._spectra else x
                 for ii,x in enumerate(self.allind)]
 
@@ -1253,24 +1278,24 @@ class ClassObject(object):
         if frequency is not None:
             self._load_all_spectra()
 
-        sel = [(re.search(re.escape(line), h['LINE'], re.IGNORECASE)
+        sel = [(re.search(re.escape(ensure_bytes(line)), h['LINE'], re.IGNORECASE)
                 if line is not None else True) and
-               (re.search(linere, h['LINE'], linereflags)
+               (re.search(ensure_bytes(linere), h['LINE'], linereflags)
                 if linere is not None else True) and
                (h['SCAN'] == scan if scan is not None else True) and
                ((h['OFF1'] == offset or
                  h['OFF2'] == offset) if offset is not None else True) and
-               (re.search(re.escape(source), h['CSOUR'], re.IGNORECASE)
+               (re.search(re.escape(ensure_bytes(source)), h['CSOUR'], re.IGNORECASE)
                 if source is not None else True) and
-               (re.search(sourcere, h['CSOUR'], sourcereflags)
+               (re.search(ensure_bytes(sourcere), h['CSOUR'], sourcereflags)
                 if sourcere is not None else True) and
                (h['OFF1']>range[0] and h['OFF1'] < range[1] and
                 h['OFF2']>range[2] and h['OFF2'] < range[3]
                 if range is not None and len(range)==4 else True) and
                (h['QUAL'] == quality if quality is not None else True) and
-               (re.search(re.escape(telescope), h['CTELE'], re.IGNORECASE)
+               (re.search(re.escape(ensure_bytes(telescope)), h['CTELE'], re.IGNORECASE)
                 if telescope is not None else True) and
-               (re.search(telescopere, h['CTELE'], telescopereflags)
+               (re.search(ensure_bytes(telescopere), h['CTELE'], telescopereflags)
                 if telescopere is not None else True) and
                (h['SUBSCAN']==subscan if subscan is not None else True) and
                (h['NUM'] >= number[0] and h['NUM'] < number[1]
@@ -1331,7 +1356,7 @@ def read_class(filename, downsample_factor=None, sourcename=None,
     filename: str
     downsample_factor: None or int
         Factor by which to downsample data by averaging.  Useful for
-        overresolved data. 
+        overresolved data.
     sourcename: str or list of str
         Source names to match to the data (uses regex)
     telescope: str or list of str
@@ -1430,7 +1455,7 @@ def make_axis(header,imagfreq=False):
         XAxis = units.SpectroscopicAxis(xarr,unit='MHz',refX=imfreq*u.MHz)
 
     return XAxis
-    
+
 @print_timing
 def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
                        imagfreq=False, DEBUG=False,  **kwargs):
@@ -1581,11 +1606,11 @@ def class_to_spectra(filename, datatuple=None, **kwargs):
 
 def tests():
     """
-    Tests are specific to the machine on which this code was developed. 
+    Tests are specific to the machine on which this code was developed.
     """
-    fn1 = '/Users/adam/work/bolocam/hht/class_003.smt' 
-    #fn1 = '/Users/adam/work/bolocam/hht/class_001.smt' 
-    #fn1 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-20824-073.cls' 
+    fn1 = '/Users/adam/work/bolocam/hht/class_003.smt'
+    #fn1 = '/Users/adam/work/bolocam/hht/class_001.smt'
+    #fn1 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-20824-073.cls'
     #fn2 = '/Users/adam/work/bolocam/hht/test_SMT-F1M-VU-79472+203.cls'
     #F1 = read_class(fn1)#,DEBUG=True)
     #F2 = read_class(fn2)
