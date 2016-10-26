@@ -551,6 +551,7 @@ def _read_index(f, filetype='v1', DEBUG=False, clic=False, position=None,
         raise NotImplementedError("Filetype {0} not implemented.".format(filetype))
 
     # from kernel/lib/gsys/date.f90: gag_julda
+    index['MJD'] = index['DOBS'] + 60549
     class_dobs = index['DOBS']
     index['DOBS'] = ((class_dobs + 365*2025)/365.2425 + 1)
     # SLOW
@@ -944,6 +945,8 @@ def read_observation(f, obsid, file_description=None, indices=None,
     hdr['HDRSTART'] = obs_position
     hdr['DATASTART'] = datastart
     hdr.update(indices[obsid])
+    # Define MJD as mid-exposure time in MJD
+    hdr.update({'OBSDATE': hdr['MJD'] + hdr['UT']/2./pi})
 
     # Apparently the data are still valid in this case?
     #if hdr['XNUM'] != obsid+1:
