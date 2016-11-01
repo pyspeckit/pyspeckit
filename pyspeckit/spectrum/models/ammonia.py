@@ -309,7 +309,7 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
         for kk,nuo in enumerate(nuoff):
             tauprof += (tau_dict[linename] * tau_wts[kk] *
                         np.exp(-(xarr.value+nuo-lines[kk])**2 /
-                               (2.0*nuwidth[kk]**2)) * fillingfraction)
+                               (2.0*nuwidth[kk]**2)))
             components.append(tauprof)
 
         T0 = (h*xarr.value*1e9/kb) # "temperature" of wavelength
@@ -317,11 +317,11 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
         if isinstance(tex, dict):
             runspec = ((T0/(np.exp(T0/tex[linename])-1) -
                         T0/(np.exp(T0/background_tb)-1)) *
-                       (1-np.exp(-tauprof)) + runspec)
+                       (1-np.exp(-tauprof)) * fillingfraction + runspec)
         else:
             runspec = ((T0/(np.exp(T0/tex)-1) -
                         T0/(np.exp(T0/background_tb)-1)) *
-                       (1-np.exp(-tauprof)) + runspec)
+                       (1-np.exp(-tauprof)) * fillingfraction + runspec)
 
 
     if return_components:
