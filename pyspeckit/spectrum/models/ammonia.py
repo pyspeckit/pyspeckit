@@ -317,7 +317,7 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
         if isinstance(tex, dict):
             runspec = ((T0/(np.exp(T0/tex[linename])-1) -
                         T0/(np.exp(T0/background_tb)-1)) *
-                       (1-np.exp(-tauprof)) + runspec)
+                       (1-np.exp(-tauprof)) * fillingfraction + runspec)
         else:
             runspec = ((T0/(np.exp(T0/tex)-1) -
                         T0/(np.exp(T0/background_tb)-1)) *
