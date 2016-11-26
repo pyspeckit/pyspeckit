@@ -12,6 +12,9 @@ be copied over manually if desired.
 
 - Removed Python 2.6 tests from travis.yml file as astropy 1.2 no longer supports Python 2.6 [#183]
 
+- Updated ``setup.cfg`` and ``setup.py`` so that the install requirements
+  are defined in ``setup.cfg``. [#208]
+
 1.1.2 (2016-07-02)
 ------------------
 
