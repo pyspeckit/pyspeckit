@@ -52,6 +52,20 @@ Authors:
 `Jordan Mirocha <mirochaj@gmail.com>`_
 (or both of us at pyspeckit@gmail.com)
 
+Contributors: (see https://github.com/pyspeckit/pyspeckit/graphs/contributors)
+
+ * Erik Rosolowsky (Ammonia models, RADEX-based models)
+ * Vlas Sokolov (cube fitting, ammonia and N2H+ modeling)
+ * Miguel de Val-Borro (CLASS file reading, python3 compatibility, bugfixes)
+ * Brigitta Sipocz (internals & logistics)
+ * Jaime Pineda (N2D+, N2H+ models, bugfixes)
+ * Allison Youngblood (H2 model fit)
+ * Taylor Hogge (Ammonia models)
+ * Dinos Kousidis (ESO summer student - Astropy integration)
+ * Mike Lum (EQW fitter)
+ * Matt Craig, Erik Tollerud, Thomas Robitaille (minor - Astropy integration)
+
+
 The PySpecKit logo uses the Voyager 1 image of Earth known as the "Pale Blue Dot"
 [ `original source <http://visibleearth.nasa.gov/view_rec.php?id=601>`_ |  `reprocessed image <http://instructors.dwrl.utexas.edu/mcginnis/sites/instructors.cwrl.utexas.edu.mcginnis/files/pale_blue_dot2.jpg>`_ ]
 
