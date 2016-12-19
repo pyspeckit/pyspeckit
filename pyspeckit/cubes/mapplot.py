@@ -129,7 +129,9 @@ class MapPlotter(object):
         .. todo:
             Allow mapplot in subfigure
         """
-        if self.figure is None:
+        if (self.figure is None):
+            self.figure = matplotlib.pyplot.figure()
+        elif (not matplotlib.pyplot.fignum_exists(self.figure.number)):
             self.figure = matplotlib.pyplot.figure()
         else:
             self._disconnect()
