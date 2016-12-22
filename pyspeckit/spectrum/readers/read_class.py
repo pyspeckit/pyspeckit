@@ -1421,7 +1421,7 @@ def read_class(filename, downsample_factor=None, sourcename=None,
 def downsample_header(hdr, downsample_factor):
     for k in ('NCHAN','NPOIN','DATALEN'):
         if k in hdr:
-            hdr[k] = hdr[k] / downsample_factor
+            hdr[k] = int((hdr[k] / downsample_factor))
     # maybe wrong? h['RCHAN'] = (h['RCHAN']-1) / downsample_factor + 1
     scalefactor = 1./downsample_factor
     hdr['RCHAN'] = (hdr['RCHAN']-1)*scalefactor + 0.5 + scalefactor/2.
