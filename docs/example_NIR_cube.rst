@@ -113,8 +113,5 @@ Fitting H2 1-0 S(1) line in NIR data cube
   # Write pyspeckit parcube and errcube to file
   pyspeckit_fits_filename = input_filename.replace("cube.fits",
                                                    "pyspeckitfits_h2_1-0S1.fits")
-  if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
-       cube_h2.write_fit(pyspeckit_fits_filename,overwrite=True)
-  else:
-       cube_h2.write_fit(pyspeckit_fits_filename,clobber=True)
+  cube_h2.write_fit(pyspeckit_fits_filename,overwrite=True)
 

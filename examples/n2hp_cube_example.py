@@ -60,10 +60,7 @@ else:
 # in current and pending publications
 
 # Save the fitted parameters to a FITS file, and overwrite one if one exists
-if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
-    spc.write_fit('n2hp_fitted_parameters.fits', overwrite=True)
-else:
-    spc.write_fit('n2hp_fitted_parameters.fits', clobber=True)
+spc.write_fit('n2hp_fitted_parameters.fits', overwrite=True)
 
 # Show an integrated image
 spc.mapplot()
