@@ -146,10 +146,7 @@ def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
     if show_plot:
         spc.mapplot()
     if save_pars:
-        if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
-            spc.write_fit(save_pars, overwrite=True)
-        else:
-            spc.write_fit(save_pars, clobber=True)
+        spc.write_fit(save_pars, overwrite=True)
     return spc
 
 def test_fiteach(save_cube=None, save_pars=None, show_plot=False):
