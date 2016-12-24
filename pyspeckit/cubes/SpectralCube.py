@@ -25,6 +25,7 @@ import copy
 import itertools
 from ..specwarnings import warn,PyspeckitWarning
 
+import astropy
 from astropy.io import fits
 from astropy import log
 from astropy import wcs
@@ -1332,7 +1333,10 @@ class Cube(spectrum.Spectrum):
             log.exception("Make sure you run the cube fitter first.")
             return
 
-        fitcubefile.writeto(fitcubefilename, overwrite=overwrite)
+        if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+            fitcubefile.writeto(fitcubefilename, overwrite=overwrite)
+        else:
+            fitcubefile.writeto(fitcubefilename, clobber=overwrite)
 
     def write_cube(self):
         raise NotImplementedError

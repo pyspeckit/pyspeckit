@@ -1,5 +1,6 @@
 from __future__ import print_function
 from astropy.extern.six import iteritems
+import astropy
 import numpy as np
 from . import Writer
 import pyspeckit
@@ -84,4 +85,7 @@ class write_fits(Writer):
                                                           iteritems(header)]))
         
         HDU.verify('fix')
-        HDU.writeto(fn, overwrite=overwrite, output_verify='fix', **kwargs)
+        if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+            HDU.writeto(fn, overwrite=overwrite, output_verify='fix', **kwargs)
+        else:
+            HDU.writeto(fn, clobber=overwrite, output_verify='fix', **kwargs)

@@ -68,7 +68,10 @@ using both `spectral_cube <spectral-cube.rtfd.org>`_ and pyspeckit
                           line in slabs], axis=0)
    hdr = fits.getheader('moments/moment1_125_{0}_kms.fits'.format(line))
    outfilename = 'moments/moment1_125_mean_kms.fits'
-   fits.PrimaryHDU(data=mean_moment, header=hdr).writeto(outfilename, overwrite=True)
+   if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+       fits.PrimaryHDU(data=mean_moment, header=hdr).writeto(outfilename, overwrite=True)
+   else:
+       fits.PrimaryHDU(data=mean_moment, header=hdr).writeto(outfilename, clobber=True)
 
    # Create a cube of many different lines all in velocity
    # This will allow us to measure a velocity more accurate than is possible
