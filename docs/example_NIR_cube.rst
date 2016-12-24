@@ -3,6 +3,7 @@ Fitting H2 1-0 S(1) line in NIR data cube
 
 .. code-block:: python
 
+  import astropy
   import pyspeckit
   import pylab as pl
   import numpy as np
@@ -104,10 +105,13 @@ Fitting H2 1-0 S(1) line in NIR data cube
   # Write the image to file
   h2filename = input_filename.replace("cube.fits","h2_1-0S1.fits")
   h2fits = pyfits.PrimaryHDU(data=h2_image,header=cube_h2.header)
-  h2fits.writeto(h2filename,clobber=True)
+  if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+       h2fits.writeto(h2filename,overwrite=True)
+  else:
+       h2fits.writeto(h2filename,clobber=True)
        
   # Write pyspeckit parcube and errcube to file
   pyspeckit_fits_filename = input_filename.replace("cube.fits",
                                                    "pyspeckitfits_h2_1-0S1.fits")
-  cube_h2.write_fit(pyspeckit_fits_filename,clobber=True)
+  cube_h2.write_fit(pyspeckit_fits_filename,overwrite=True)
 

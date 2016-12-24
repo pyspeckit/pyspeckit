@@ -1,3 +1,4 @@
+import astropy
 import pyspeckit
 import os
 import astropy.units as u
@@ -59,7 +60,7 @@ else:
 # in current and pending publications
 
 # Save the fitted parameters to a FITS file, and overwrite one if one exists
-spc.write_fit('n2hp_fitted_parameters.fits', clobber=True)
+spc.write_fit('n2hp_fitted_parameters.fits', overwrite=True)
 
 # Show an integrated image
 spc.mapplot()
@@ -81,6 +82,6 @@ spc.mapplot.plane = spc.parcube[2,:,:]
 spc.mapplot(estimator=None)
 
 # running in script mode, the figures won't show by default on some systems
-import pylab as pl
+# import pylab as pl
 # pl.draw()
 # pl.show()

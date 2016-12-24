@@ -1,4 +1,5 @@
 from __future__ import print_function
+import astropy
 try:
     import scipy
     from scipy import optimize,sqrt
@@ -322,12 +323,18 @@ def wrap_collapse_gauss(filename,outprefix,redo='no'):
     db = doubleB
     gcd = double_gaussian(db[3],db[4],db[0],db[1],db[5],db[6])(indices(cube.shape)[0])
     fitsfile[0].data = gcd
-    fitsfile.writeto('%s_doublegausscube.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_doublegausscube.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_doublegausscube.fits' % outprefix,clobber=True)
 
     gcd[numpy.isnan(gcd)] = 0
     doubleResids = cube-gcd
     fitsfile[0].data = doubleResids
-    fitsfile.writeto('%s_doublegaussresids.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_doublegaussresids.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_doublegaussresids.fits' % outprefix,clobber=True)
 
 
     #doubleB[4] = (doubleB[4]-v0) / dv + p3-1
@@ -335,7 +342,10 @@ def wrap_collapse_gauss(filename,outprefix,redo='no'):
     doubleB[4] = (doubleB[4]-p3+1) * dv + v0
     doubleB[3] = (doubleB[3]-p3+1) * dv + v0
     fitsfile[0].data = asarray(doubleB)
-    fitsfile.writeto('%s_doublegausspars.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_doublegausspars.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_doublegausspars.fits' % outprefix,clobber=True)
 
     if redo=='no':
         singleB = asarray(collapse_gaussfit(cube,axis=0))
@@ -345,14 +355,23 @@ def wrap_collapse_gauss(filename,outprefix,redo='no'):
     gc = gaussian(singleB[1],singleB[0],singleB[2])(indices(cube.shape)[0])
     singleB[1] = (singleB[1]-p3+1) * dv + v0
     fitsfile[0].data = gc
-    fitsfile.writeto('%s_singlegausscube.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_singlegausscube.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_singlegausscube.fits' % outprefix,clobber=True)
 
     gc[numpy.isnan(gc)]=0
     singleResids = cube-gc
     fitsfile[0].data = singleResids
-    fitsfile.writeto('%s_singlegaussresids.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_singlegaussresids.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_singlegaussresids.fits' % outprefix,clobber=True)
     fitsfile[0].data = asarray(singleB)
-    fitsfile.writeto('%s_singlegausspars.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_singlegausspars.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_singlegausspars.fits' % outprefix,clobber=True)
 
     fitsfile[0].header.__delitem__('CD3_3')
     fitsfile[0].header.__delitem__('CRVAL3')
@@ -363,12 +382,18 @@ def wrap_collapse_gauss(filename,outprefix,redo='no'):
     doubleResids[numpy.isnan(doubleResids)] = 0
     totalDResids = doubleResids.sum(axis=0)
     fitsfile[0].data = totalDResids
-    fitsfile.writeto('%s_doublegauss_totalresids.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_doublegauss_totalresids.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_doublegauss_totalresids.fits' % outprefix,clobber=True)
 
     singleResids[numpy.isnan(singleResids)] = 0
     totalSResids = singleResids.sum(axis=0)
     fitsfile[0].data = totalSResids
-    fitsfile.writeto('%s_singlegauss_totalresids.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_singlegauss_totalresids.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_singlegauss_totalresids.fits' % outprefix,clobber=True)
 
     return singleB,doubleB
 
@@ -401,12 +426,18 @@ def wrap_collapse_adaptive(filename,outprefix,redo='no',nsig=5,nrsig=2,doplot=Tr
     db = adaptB
     gcd = double_gaussian(db[3],db[4],db[0],db[1],db[5],db[6])(indices(cube.shape)[0])
     fitsfile[0].data = gcd
-    fitsfile.writeto('%s_adaptgausscube.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_adaptgausscube.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_adaptgausscube.fits' % outprefix,clobber=True)
 
     gcd[numpy.isnan(gcd)] = 0
     adaptResids = cube-gcd
     fitsfile[0].data = adaptResids
-    fitsfile.writeto('%s_adaptgaussresids.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_adaptgaussresids.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_adaptgaussresids.fits' % outprefix,clobber=True)
 
 
     #adaptB[4] = (adaptB[4]-v0) / dv + p3-1
@@ -414,7 +445,10 @@ def wrap_collapse_adaptive(filename,outprefix,redo='no',nsig=5,nrsig=2,doplot=Tr
     adaptB[4] = (adaptB[4]-p3+1) * dv + v0
     adaptB[3] = (adaptB[3]-p3+1) * dv + v0
     fitsfile[0].data = asarray(adaptB)
-    fitsfile.writeto('%s_adaptgausspars.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_adaptgausspars.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_adaptgausspars.fits' % outprefix,clobber=True)
 
     fitsfile[0].header.__delitem__('CD3_3')
     fitsfile[0].header.__delitem__('CRVAL3')
@@ -425,7 +459,9 @@ def wrap_collapse_adaptive(filename,outprefix,redo='no',nsig=5,nrsig=2,doplot=Tr
     adaptResids[numpy.isnan(adaptResids)] = 0
     totalDResids = adaptResids.sum(axis=0)
     fitsfile[0].data = totalDResids
-    fitsfile.writeto('%s_adaptgauss_totalresids.fits' % outprefix,clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        fitsfile.writeto('%s_adaptgauss_totalresids.fits' % outprefix,overwrite=True)
+    else:
+        fitsfile.writeto('%s_adaptgauss_totalresids.fits' % outprefix,clobber=True)
 
     return adaptB
-
