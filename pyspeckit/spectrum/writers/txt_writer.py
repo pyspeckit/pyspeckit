@@ -11,13 +11,13 @@ class write_txt(object):
     def __init__(self, Spectrum):
         self.Spectrum = Spectrum
 
-    def write_data(self, clobber = True):
+    def write_data(self, overwrite = True):
         """
         Write all fit information to an ASCII file.
         """
         
         fn = "{0}_fit.dat".format(self.Spectrum.fileprefix)
-        if not clobber:
+        if not overwrite:
             i = 1
             while os.path.exists(fn):
                 fn = "{0}_fit({1}).dat".format(self.Spectrum.fileprefix, i)

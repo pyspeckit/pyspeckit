@@ -14,7 +14,7 @@ except ImportError:
     fitscheck = False
 
 class write_fits(Writer):
-    def write_data(self, filename=None, newsuffix='out', clobber=True,
+    def write_data(self, filename=None, newsuffix='out', overwrite=True,
                    tolerance=1e-8, write_error=True, **kwargs):
         """
         Write spectrum to fits file.
@@ -84,4 +84,4 @@ class write_fits(Writer):
                                                           iteritems(header)]))
         
         HDU.verify('fix')
-        HDU.writeto(fn, clobber=clobber, output_verify='fix', **kwargs)
+        HDU.writeto(fn, overwrite=overwrite, output_verify='fix', **kwargs)

@@ -87,7 +87,7 @@ else:
     cube11.momenteach()
     momentcube = cube11.momentcube
     momentcubefile = pyfits.PrimaryHDU(data=momentcube, header=cube11.header)
-    momentcubefile.writeto('hot_momentcube.fits',clobber=True)
+    momentcubefile.writeto('hot_momentcube.fits',overwrite=True)
 
 # Create a "guess cube".  Because we're fitting physical parameters in this
 # case, we want to make the initial guesses somewhat reasonable
@@ -106,7 +106,7 @@ else:
     guesses[5,:,:] = 0.5                   # F(ortho) - ortho NH3 fraction (fixed)
 
     guesscube = pyfits.PrimaryHDU(data=guesses, header=cube11.header)
-    guesscube.writeto(guessfn, clobber=True)
+    guesscube.writeto(guessfn, overwrite=True)
 
 # This bit doesn't need to be in an if statment
 if fitcube:

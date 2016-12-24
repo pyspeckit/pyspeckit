@@ -5,7 +5,7 @@ from . import Writer
 class write_hdf5(Writer):
 
     def write_data(self, filename=None, newsuffix='out', extras=None,
-                   clobber=True):
+                   overwrite=True):
         """
         Write information to hdf5 file.
 
@@ -25,7 +25,7 @@ class write_hdf5(Writer):
         else:
             fn = filename
 
-        if clobber:
+        if overwrite:
             f = h5py.File(fn, 'w')
         else:
             i = 1

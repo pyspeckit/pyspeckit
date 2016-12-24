@@ -71,7 +71,7 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', snr=30,
     test_header = fits.Header()
     test_header.update(keylist)
     test_hdu = fits.PrimaryHDU(data=test_cube, header=test_header)
-    test_hdu.writeto(outfile, clobber=True, checksum=True)
+    test_hdu.writeto(outfile, overwrite=True, checksum=True)
 
 def download_test_cube(outfile='test.fits'):
     """
@@ -142,7 +142,7 @@ def do_fiteach(save_cube=None, save_pars=None, show_plot=False):
     if show_plot:
         spc.mapplot()
     if save_pars:
-        spc.write_fit(save_pars, clobber=True)
+        spc.write_fit(save_pars, overwrite=True)
     return spc
 
 def test_fiteach(save_cube=None, save_pars=None, show_plot=False):
@@ -211,7 +211,7 @@ def test_get_modelcube_badpar(cubefile=None, parfile=None, sigma_threshold=5):
         cubefile = 'test.fits'
         fh = fits.open('test_pars.fits')
         fh[0].data[1,0,0] *= -1 # set the width to be negative
-        fh.writeto('test_pars_bad.fits', clobber=True)
+        fh.writeto('test_pars_bad.fits', overwrite=True)
         parfile  = 'test_pars_bad.fits'
         sp_cube = do_fiteach(save_cube=cubefile, save_pars=parfile)
     else:

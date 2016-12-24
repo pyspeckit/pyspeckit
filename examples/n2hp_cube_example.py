@@ -59,7 +59,7 @@ else:
 # in current and pending publications
 
 # Save the fitted parameters to a FITS file, and overwrite one if one exists
-spc.write_fit('n2hp_fitted_parameters.fits', clobber=True)
+spc.write_fit('n2hp_fitted_parameters.fits', overwrite=True)
 
 # Show an integrated image
 spc.mapplot()

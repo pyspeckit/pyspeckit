@@ -779,7 +779,7 @@ try:
 
     def rotcrop_cube(x1, y1, x2, y2, cubename, outname, xwidth=25, ywidth=25,
                      in_system='galactic',  out_system='equatorial',
-                     clobber=True, newheader=None, xcen=None, ycen=None):
+                     overwrite=True, newheader=None, xcen=None, ycen=None):
         """
         Crop a data cube and then rotate it with montage
 
@@ -838,7 +838,7 @@ try:
                     newheader2[key] = newheader.get(key)
             if newheader.get('CD3_3') and newheader2.get('CDELT3') is None:
                 newheader2['CDELT3'] = newheader.get('CD3_3')
-            newheader2.toTxtFile(tempheader,clobber=True)
+            newheader2.toTxtFile(tempheader,overwrite=True)
             #if newheader2.get('CDELT3') is None:
             #    raise Exception("No CD3_3 or CDELT3 in header.")
         else:
@@ -846,10 +846,10 @@ try:
                 newheader2 = fits.Header()
                 newheader2.fromTxtFile(newheader)
             tempheader = tempfile.mktemp(suffix='.hdr')
-            newheader2.toTxtFile(tempheader,clobber=True)
+            newheader2.toTxtFile(tempheader,overwrite=True)
 
 
-        montage.wrappers.reproject_cube(tempcube,outname,header=tempheader,clobber=clobber)
+        montage.wrappers.reproject_cube(tempcube,outname,header=tempheader,overwrite=overwrite)
         #print "\n",outname
         #os.system('imhead %s | grep CDELT' % outname)
 
@@ -859,7 +859,7 @@ try:
         #if tempcube.header.get('CDELT3') is None:
         #    raise Exception("No CD3_3 or CDELT3 in header.")
         #print tempcube.header.get('CDELT3')
-        tempcube.writeto(outname,clobber=True)
+        tempcube.writeto(outname,overwrite=True)
         #print tempcube.get('CDELT3')
         #print "\n",outname
         #os.system('imhead %s | grep CDELT' % outname)

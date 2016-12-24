@@ -1281,7 +1281,7 @@ class Cube(spectrum.Spectrum):
             history.write_history(self.header,"SMOOTH: Changed CDELT3 from %f to %f" % (self.header.get('CRPIX3')/float(factor),self.header.get('CRPIX3')))
 
 
-    def write_fit(self, fitcubefilename, clobber=False):
+    def write_fit(self, fitcubefilename, overwrite=False):
         """
         Write out a fit cube containing the ``.parcube`` and ``.errcube`` using
         the information in the fit's parinfo to set the header keywords.  The
@@ -1300,7 +1300,7 @@ class Cube(spectrum.Spectrum):
         ----------
         fitcubefilename: string
             Filename to write to
-        clobber: bool
+        overwrite: bool
             Overwrite file if it exists?
         """
 
@@ -1332,7 +1332,7 @@ class Cube(spectrum.Spectrum):
             log.exception("Make sure you run the cube fitter first.")
             return
 
-        fitcubefile.writeto(fitcubefilename, clobber=clobber)
+        fitcubefile.writeto(fitcubefilename, overwrite=overwrite)
 
     def write_cube(self):
         raise NotImplementedError

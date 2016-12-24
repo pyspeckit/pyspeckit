@@ -57,5 +57,5 @@ f[0].header.update('CTYPE3','FITPAR')
 f[0].header.update('CRVAL3',0)
 f[0].header.update('CRPIX3',1)
 # save your work
-f.writeto('region5.hcn.nosmooth.fit.fits', clobber=True)
+f.writeto('region5.hcn.nosmooth.fit.fits', overwrite=True)
 

@@ -15,7 +15,7 @@ import os
 
 def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
         vheight=False, verbose=False, signal_cut=3, verbose_level=2,
-        clobber=True, **kwargs):
+        overwrite=True, **kwargs):
     """
     Light-weight wrapper for cube fitting
 
@@ -53,7 +53,7 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
     signal_cut: [ float ] 
         Signal-to-Noise ratio minimum.  Spectra with a peak below this S/N ratio
         will not be fit and will be left blank in the output fit parameter cube
-    clobber: [ bool ] 
+    overwrite: [ bool ] 
         Overwrite parameter .fits cube if it exists?
 
     `kwargs` are passed to :class:`pyspeckit.Spectrum.specfit`
@@ -96,7 +96,7 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
     f[0].header['CRVAL3'] = 0
     f[0].header['CRPIX3'] = 1
     # save your work
-    f.writeto(outfilename, clobber=clobber)
+    f.writeto(outfilename, overwrite=overwrite)
 
     return sp
 
