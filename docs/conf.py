@@ -92,10 +92,7 @@ print "rootpath: ",rootpath
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.pngmath',
-              'sphinx.ext.mathjax', 'sphinx.ext.intersphinx',
-              'sphinx.ext.todo', 'numpydoc', 'flickr', 'edit_on_github',
-              'edit_on_bitbucket']
+extensions += ['flickr', 'edit_on_github', 'edit_on_bitbucket']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -147,7 +144,7 @@ class Mock(object):
 
 MOCK_MODULES = {'matplotlib', 'matplotlib.pyplot', 'matplotlib.figure',
                 'matplotlib.widgets', 'matplotlib.cbook', 'pyfits', 'scipy',
-                'astropy', 
+                'astropy',
                 'numpy', 'scipy', 'pyfits', 'astropy', 'pytest', 'astropy.wcs',
                 'astropy.io', 'astropy.io.fits', 'astropy.nddata',
                 'scipy.interpolate', 'scipy.ndimage', 'pywcs', 'matplotlib',
