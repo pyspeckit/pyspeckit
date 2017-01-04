@@ -37,10 +37,23 @@ AUTHOR_EMAIL = metadata.get('author_email', '')
 LICENSE = metadata.get('license', 'unknown')
 URL = metadata.get('url', 'http://astropy.org')
 
-# Get the long description from the package's docstring
-__import__(PACKAGENAME)
-package = sys.modules[PACKAGENAME]
-LONG_DESCRIPTION = package.__doc__
+# order of priority for long_description:
+#   (1) set in setup.cfg,
+#   (2) load README.rst,
+#   (3) package docstring
+_cfg_long_description = metadata.get('long_description', '')
+if _cfg_long_description:
+    LONG_DESCRIPTION = _cfg_long_description
+
+elif os.path.exists('README.rst'):
+    with open('README.rst') as f:
+        LONG_DESCRIPTION = f.read()
+
+else:
+    # Get the long description from the package's docstring
+    __import__(PACKAGENAME)
+    package = sys.modules[PACKAGENAME]
+    LONG_DESCRIPTION = package.__doc__
 
 # Store the package name in a built-in variable so it's easy
 # to get from other parts of the setup infrastructure
