@@ -39,12 +39,17 @@ URL = metadata.get('url', 'http://astropy.org')
 
 # order of priority for long_description:
 #   (1) set in setup.cfg,
-#   (2) load README.rst,
-#   (3) package docstring
+#   (2) load LONG_DESCRIPTION.rst,
+#   (3) load README.rst,
+#   (4) package docstring
 readme_glob = 'README*'
 _cfg_long_description = metadata.get('long_description', '')
 if _cfg_long_description:
     LONG_DESCRIPTION = _cfg_long_description
+
+elif os.path.exists('LONG_DESCRIPTION.rst'):
+    with open('LONG_DESCRIPTION.rst') as f:
+        LONG_DESCRIPTION = f.read()
 
 elif len(glob.glob(readme_glob)) > 0:
     with open(glob.glob(readme_glob)[0]) as f:
