@@ -8,7 +8,7 @@ import sys
 import ah_bootstrap
 from setuptools import setup
 
-#A dirty hack to get around some early import/configurations ambiguities
+# A dirty hack to get around some early import/configurations ambiguities
 if sys.version_info[0] >= 3:
     import builtins
 else:
