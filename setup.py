@@ -41,12 +41,13 @@ URL = metadata.get('url', 'http://astropy.org')
 #   (1) set in setup.cfg,
 #   (2) load README.rst,
 #   (3) package docstring
+readme_glob = 'README*'
 _cfg_long_description = metadata.get('long_description', '')
 if _cfg_long_description:
     LONG_DESCRIPTION = _cfg_long_description
 
-elif os.path.exists('README.rst'):
-    with open('README.rst') as f:
+elif len(glob.glob(readme_glob)) > 0:
+    with open(glob.glob(readme_glob)[0]) as f:
         LONG_DESCRIPTION = f.read()
 
 else:
@@ -77,9 +78,9 @@ cmdclassd = register_commands(PACKAGENAME, VERSION, RELEASE)
 generate_version_py(PACKAGENAME, VERSION, RELEASE,
                     get_debug_option(PACKAGENAME))
 
-# Treat everything in scripts except README.rst as a script to be installed
+# Treat everything in scripts except README* as a script to be installed
 scripts = [fname for fname in glob.glob(os.path.join('scripts', '*'))
-           if os.path.basename(fname) != 'README.rst']
+           if not os.path.basename(fname).startswith('README')]
 
 
 # Get configuration information from all of the various subpackages.
