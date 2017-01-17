@@ -113,14 +113,14 @@ class Interactive(object):
             if button in ('p','P','1',1,'i','a'): # p for... parea?  a for area.  i for include
                 # button one is always region selection
                 #DEBUG print("Button is {0}".format(button))
-                self.selectregion_interactive(event,debug=debug)
+                self._selectregion_interactive(event,debug=debug)
             elif button in ('c','C'):
                 self.clear_highlights()
                 self.clear_all_connections()
                 self.Spectrum.plotter()
             elif button in ('e','x','E','X'): # e for exclude, x for x-clude
                 # exclude/delete/remove
-                self.selectregion_interactive(event, mark_include=False, debug=debug)
+                self._selectregion_interactive(event, mark_include=False, debug=debug)
             elif button in ('m','M','2',2): # m for mark
                 if debug or self._debug: log.debug("Button 2 action")
                 self.button2action(event,debug=debug,nwidths=nwidths)
@@ -144,7 +144,7 @@ class Interactive(object):
                                                                                    toolmode))
 
 
-    def selectregion_interactive(self, event, mark_include=True, debug=False, **kwargs):
+    def _selectregion_interactive(self, event, mark_include=True, debug=False, **kwargs):
         """
         select regions for baseline fitting
         """
@@ -482,7 +482,9 @@ class Interactive(object):
 
         # Exclude keyword-specified excludes.  Assumes exclusion in current X array units
         log.debug("Exclude: {0}".format(exclude))
-        if exclude is not None and len(exclude) % 2 == 0:
+        if exclude == 'interactive':
+            self.start_interactive()
+        elif exclude is not None and len(exclude) % 2 == 0:
             for x1,x2 in zip(exclude[::2],exclude[1::2]):
                 if xtype.lower() in ('wcs',) or xtype in units.xtype_dict:
                     x1 = self.Spectrum.xarr.x_to_pix(x1)
