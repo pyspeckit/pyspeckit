@@ -67,12 +67,12 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
 
 Additionally, here are some real-world examples.  They are not guaranteed to
 work, but they show the use of pyspeckit in pipelines and paper-producing
-code.::
+code.
 
-    * `Fit each spectrum in a VLA NH3 6-6 cube (Goddi, Ginsburg, Zhang 2016) <https://github.com/keflavich/w51_vla_nh3_goddi/blob/master/code/fit_66_cube.py>`__
-    * `Fit each spectrum in an Arecibo H2CO 1-1 cube (Ginsburg et al, 2015) <https://github.com/keflavich/w51_singledish_h2co_maps/blob/master/analysis_scripts/pyspeckit_cube_fit_justlineprops.py>`__
-    * `Crop an ALMA CH3CN cube, then fit each spectrum <https://github.com/keflavich/SgrB2_ALMA_3mm_Mosaic/blob/9c3d4b79aa4ea01e848bd5c29c1949e9ba3b42e7/analysis/ch3cn_fiteach.py>`__
-    * `Fit each spectrum in an APEX H2CO 3-2 cube with 1 and 2 components (Ginsburg et al, 2016) <https://github.com/keflavich/APEX_CMZ_H2CO/blob/e298704dc395c3829a4b22118521d56912dd7c19/analysis/fit_the_brick.py#L31>`__
-    * `Compute moments, then fit each spectrum in a MUSE cube (McCleod et al, 2015) <https://github.com/keflavich/OrionNotebooks/blob/f890e10eaae479a95c766877d752bc38aca096f5/muse/vmap_085.py>`__
-    * `Fit H2 and BrG in a TripleSpec NIR cube (Youngblood et al, 2016) <https://github.com/allisony/TspecCubes/blob/1d02dbb8b274b0cc7fac0fcd378e2f2712434ff5/fit_cube.py>`__
-    * `Fit NH3 1-1 and 2-2 spectra for the GBT Ammonia Survey (Pineda, Friesen et al) <https://github.com/GBTAmmoniaSurvey/GAS/blob/9769e2e845915a2bb1801b66405a0f8eb787f5bc/GAS/PropertyMaps.py>`__
+- `Fit each spectrum in a VLA NH3 6-6 cube (Goddi, Ginsburg, Zhang 2016) <https://github.com/keflavich/w51_vla_nh3_goddi/blob/master/code/fit_66_cube.py>`__
+- `Fit each spectrum in an Arecibo H2CO 1-1 cube (Ginsburg et al, 2015) <https://github.com/keflavich/w51_singledish_h2co_maps/blob/master/analysis_scripts/pyspeckit_cube_fit_justlineprops.py>`__
+- `Crop an ALMA CH3CN cube, then fit each spectrum <https://github.com/keflavich/SgrB2_ALMA_3mm_Mosaic/blob/9c3d4b79aa4ea01e848bd5c29c1949e9ba3b42e7/analysis/ch3cn_fiteach.py>`__
+- `Fit each spectrum in an APEX H2CO 3-2 cube with 1 and 2 components (Ginsburg et al, 2016) <https://github.com/keflavich/APEX_CMZ_H2CO/blob/e298704dc395c3829a4b22118521d56912dd7c19/analysis/fit_the_brick.py#L31>`__
+- `Compute moments, then fit each spectrum in a MUSE cube (McCleod et al, 2015) <https://github.com/keflavich/OrionNotebooks/blob/f890e10eaae479a95c766877d752bc38aca096f5/muse/vmap_085.py>`__
+- `Fit H2 and BrG in a TripleSpec NIR cube (Youngblood et al, 2016) <https://github.com/allisony/TspecCubes/blob/1d02dbb8b274b0cc7fac0fcd378e2f2712434ff5/fit_cube.py>`__
+- `Fit NH3 1-1 and 2-2 spectra for the GBT Ammonia Survey (Pineda, Friesen et al) <https://github.com/GBTAmmoniaSurvey/GAS/blob/9769e2e845915a2bb1801b66405a0f8eb787f5bc/GAS/PropertyMaps.py>`__
