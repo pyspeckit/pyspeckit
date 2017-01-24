@@ -195,6 +195,12 @@ class BaseSpectrum(object):
             self.unit = str(self.data.unit)
             self.data = self.data.value
 
+        if hasattr(self.error, 'unit'):
+            # errors have to have the same units as data, but then should be
+            # converted to arrays.  Long term, we'd like to have everything
+            # be treated internally as a Quantity, but... not yet.
+            self.error = self.error.to(self.unit).value
+
         if maskdata:
             if hasattr(self.data,'mask'):
                 self.data.mask += np.isnan(self.data) + np.isinf(self.data)
@@ -241,6 +247,14 @@ class BaseSpectrum(object):
     def units(self, value):
         log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
         self._unit = value
+
+    @property
+    def data_quantity(self):
+        return u.Quantity(self.data, unit=self.unit)
+
+    @property
+    def error_quantity(self):
+        return u.Quantity(self.error, unit=self.unit)
 
     def _register_fitters(self, registry=None):
         """
