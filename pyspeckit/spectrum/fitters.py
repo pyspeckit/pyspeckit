@@ -321,7 +321,7 @@ class Specfit(interactive.Interactive):
                 self.guesses = list(guesses) # always copy the input variable
                 self.multifit(show_components=show_components, verbose=verbose,
                               debug=debug, use_lmfit=use_lmfit,
-                              guesses=guesses, annotate=annotate, **kwargs)
+                              guesses=list(guesses), annotate=annotate, **kwargs)
             else:
                 raise ValueError("Guess and parinfo were somehow invalid.")
         else:
@@ -617,9 +617,11 @@ class Specfit(interactive.Interactive):
                 del self.fitkwargs[kw]
 
         if guesses is None:
-            guesses = self.guesses
-        elif isinstance(guesses, string_types) and guesses in ('moment','moments'):
+            guesses = list(self.guesses)
+        elif isinstance(guesses, string_types) and guesses in ('moment', 'moments'):
             guesses = self.moments(vheight=False, **kwargs)
+        else:
+            guesses = list(guesses) # needs to be mutable, but needs to be a copy!!
 
         if parinfo is not None:
             if guesses is not None:
@@ -1633,9 +1635,9 @@ class Specfit(interactive.Interactive):
         """
         if fittype is None:
             fittype = self.fittype
-        return self.Registry.multifitters[fittype].moments(
-                self.Spectrum.xarr[self.xmin:self.xmax],
-                self.spectofit[self.xmin:self.xmax],  **kwargs)
+        return list(self.Registry.multifitters[fittype].moments(
+            self.Spectrum.xarr[self.xmin:self.xmax],
+            self.spectofit[self.xmin:self.xmax],  **kwargs))
 
     def button3action(self, event, debug=False, nwidths=1):
         """
