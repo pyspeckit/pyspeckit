@@ -740,6 +740,7 @@ class Cube(spectrum.Spectrum):
             bad = np.isnan(guesses).sum(axis=0).astype('bool')
             OK &= (~bad)
 
+        log.info("Fitting up to {0} spectra".format(OK.sum()))
 
         if start_from_point == 'center':
             start_from_point = (xx.max()/2., yy.max()/2.)

@@ -265,22 +265,34 @@ class Specfit(interactive.Interactive):
             line
         
         """
-        if clear: self.clear()
+        if clear:
+            self.clear()
         if reset_selection:
             self.selectregion(verbose=verbose, debug=debug,
                               fit_plotted_area=fit_plotted_area,
                               exclude=exclude,
                               use_window_limits=use_window_limits, **kwargs)
         for arg in ['xmin','xmax','xtype','reset']:
-            if arg in kwargs: kwargs.pop(arg)
+            if arg in kwargs:
+                kwargs.pop(arg)
 
         if 'multifit' in kwargs:
             kwargs.pop('multifit')
             log.warning("The multifit keyword is no longer required.  All fits "
-                     "allow for multiple components.", DeprecationWarning)
+                        "allow for multiple components.", DeprecationWarning)
+
+        if 'guess' in kwargs:
+            if guesses is None:
+                guesses = kwargs.pop('guess')
+                log.warning("The keyword 'guess' is nonstandard; please use 'guesses'")
+            else:
+                raise ValueError("Received keywords 'guess' and 'guesses'.  "
+                                 "Please only use 'guesses'")
 
         self.npeaks = 0
         self.fitkwargs = kwargs
+        log.debug("Additional keyword arguments passed to fitter are: {0}"
+                  .format(kwargs))
         if interactive:
             if self.Spectrum.plotter.axis is None:
                 raise Exception("Interactive fitting requires a plotter.")
