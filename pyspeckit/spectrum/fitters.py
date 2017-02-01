@@ -318,7 +318,7 @@ class Specfit(interactive.Interactive):
                               annotate=annotate, parinfo=parinfo,
                               guesses=guesses, **kwargs)
             elif guesses is not None:
-                self.guesses = guesses
+                self.guesses = list(guesses) # always copy the input variable
                 self.multifit(show_components=show_components, verbose=verbose,
                               debug=debug, use_lmfit=use_lmfit,
                               guesses=guesses, annotate=annotate, **kwargs)
@@ -615,6 +615,9 @@ class Specfit(interactive.Interactive):
             guesses = self.moments(vheight=False, **kwargs)
 
         if parinfo is not None:
+            if guesses is not None:
+                raise ValueError("Both guesses and parinfo were specified, "
+                                 "but only one of these is allowed.")
             guesses = parinfo.values
 
         if len(guesses) < self.Registry.npars[self.fittype]:
@@ -635,6 +638,15 @@ class Specfit(interactive.Interactive):
         self.fitkwargs.update(kwargs)
         if 'renormalize' in self.fitkwargs:
             del self.fitkwargs['renormalize']
+
+        # if parinfo was specified, we use it and ignore guesses otherwise, we
+        # make a parinfo so we can test 'scaleable' below
+        if parinfo is not None:
+            pinf_for_scaling = parinfo
+        else:
+            pinf_for_scaling, _ = self.fitter._make_parinfo(parvalues=guesses,
+                                                            npeaks=self.npeaks,
+                                                            **self.fitkwargs)
         
         scalefactor = 1.0
         if renormalize in ('auto',True):
@@ -649,19 +661,25 @@ class Specfit(interactive.Interactive):
                 log.info("Renormalizing data by factor %e to improve fitting procedure"
                          % scalefactor)
                 self.spectofit /= scalefactor
-                self.errspec   /= scalefactor
+                self.errspec /= scalefactor
 
                 # this error should be unreachable, but is included as a sanity check
-                if self.fitter.npeaks * self.fitter.npars != len(self.fitter.parinfo):
-                    raise ValueError("Length of parinfo doesn't agree with npeaks * npars = %i" %
-                            (self.fitter.npeaks * self.fitter.npars))
+                if self.fitter.npeaks * self.fitter.npars != len(pinf_for_scaling):
+                    raise ValueError("Length of parinfo doesn't agree with "
+                                     " npeaks * npars = {0}"
+                                     .format(self.fitter.npeaks *
+                                             self.fitter.npars))
+                if len(guesses) != len(pinf_for_scaling):
+                    raise ValueError("Length of parinfo doens't match length of guesses")
 
                 # zip guesses with parinfo: truncates parinfo if len(parinfo) > len(guesses)
                 # actually not sure how/when/if this should happen; this might be a bad hack
                 # revisit with tests!!
-                for jj,(guess,par) in enumerate(zip(guesses,self.fitter.parinfo)):
+                for jj,(guess,par) in enumerate(zip(guesses,pinf_for_scaling)):
                     if par.scaleable:
                         guesses[jj] /= scalefactor
+
+                log.debug("Rescaled guesses to {0}".format(guesses))
 
         # all fit data must be float64, otherwise the optimizers may take steps
         # less than the precision of the data and get stuck
@@ -695,7 +713,7 @@ class Specfit(interactive.Interactive):
                  "parameter limits.  DEBUG INFO: {0}".format(any_out_of_range))
 
         self.spectofit *= scalefactor
-        self.errspec   *= scalefactor
+        self.errspec *= scalefactor
 
         if hasattr(self.fitter.mp,'status'):
             self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
@@ -731,7 +749,8 @@ class Specfit(interactive.Interactive):
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
         if 'tied' in self.fitkwargs:
             for ii, element in enumerate(self.fitkwargs['tied']):
-                if not element.strip(): continue
+                if not element.strip():
+                    continue
                 
                 if '[' in element and ']' in element:
                     i1 = element.index('[') + 1
