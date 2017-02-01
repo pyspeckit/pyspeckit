@@ -27,7 +27,7 @@ class TestFitter(object):
         with warnings.catch_warnings():
             # ignore warning about creating an empty header
             warnings.simplefilter('ignore')
-            self.sp_multi = Spectrum(xarr=x, data=y_multi_tiny)
+            self.sp_multi_tiny = Spectrum(xarr=x, data=y_multi_tiny)
 
 
     def test_init(self):
