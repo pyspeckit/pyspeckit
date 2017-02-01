@@ -318,10 +318,12 @@ class Specfit(interactive.Interactive):
                               annotate=annotate, parinfo=parinfo,
                               guesses=None, **kwargs)
             elif guesses is not None:
-                self.guesses = list(guesses) # always copy the input variable
+                if isinstance(guesses, tuple):
+                    guesses = list(guesses)
+                self.guesses = guesses
                 self.multifit(show_components=show_components, verbose=verbose,
                               debug=debug, use_lmfit=use_lmfit,
-                              guesses=list(guesses), annotate=annotate, **kwargs)
+                              guesses=guesses, annotate=annotate, **kwargs)
             else:
                 raise ValueError("Guess and parinfo were somehow invalid.")
         else:
