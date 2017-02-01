@@ -219,6 +219,7 @@ def test_get_modelcube_badpar(cubefile=None, parfile=None, sigma_threshold=5):
             fh.writeto('test_pars_bad.fits', overwrite=True)
         else:
             fh.writeto('test_pars_bad.fits', clobber=True)
+        fh.close()
         parfile  = 'test_pars_bad.fits'
         sp_cube = do_fiteach(save_cube=cubefile, save_pars=parfile)
     else:

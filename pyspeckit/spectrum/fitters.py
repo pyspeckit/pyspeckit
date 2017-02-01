@@ -316,7 +316,7 @@ class Specfit(interactive.Interactive):
                 self.multifit(show_components=show_components, verbose=verbose,
                               debug=debug, use_lmfit=use_lmfit,
                               annotate=annotate, parinfo=parinfo,
-                              guesses=guesses, **kwargs)
+                              guesses=None, **kwargs)
             elif guesses is not None:
                 self.guesses = list(guesses) # always copy the input variable
                 self.multifit(show_components=show_components, verbose=verbose,
@@ -616,18 +616,20 @@ class Specfit(interactive.Interactive):
             if kw in self.fitkwargs:
                 del self.fitkwargs[kw]
 
+        if guesses is not None and parinfo is not None:
+            raise ValueError("Both guesses and parinfo were specified, "
+                             "but only one of these is allowed.")
+
         if guesses is None:
-            guesses = list(self.guesses)
+            if parinfo is not None:
+                guesses = list(parinfo.values)
+            else:
+                guesses = list(self.guesses)
         elif isinstance(guesses, string_types) and guesses in ('moment', 'moments'):
             guesses = self.moments(vheight=False, **kwargs)
         else:
             guesses = list(guesses) # needs to be mutable, but needs to be a copy!!
 
-        if parinfo is not None:
-            if guesses is not None:
-                raise ValueError("Both guesses and parinfo were specified, "
-                                 "but only one of these is allowed.")
-            guesses = parinfo.values
 
         if len(guesses) < self.Registry.npars[self.fittype]:
             raise ValueError("Too few parameters input.  Need at least %i for %s models" % (self.Registry.npars[self.fittype],self.fittype))
@@ -687,6 +689,10 @@ class Specfit(interactive.Interactive):
                 for jj,(guess,par) in enumerate(zip(guesses,pinf_for_scaling)):
                     if par.scaleable:
                         guesses[jj] /= scalefactor
+                        # if parinfo was passed in, this will change it
+                        # if it was not, it will change only the placeholder
+                        # (becuase we are passing by reference above)
+                        par.value /= scalefactor
 
                 log.debug("Rescaled guesses to {0}".format(guesses))
 
@@ -745,9 +751,9 @@ class Specfit(interactive.Interactive):
         # rescale any scaleable parameters
         for par in self.parinfo:
             if par.scaleable:
-                par.value = par.value * scalefactor
+                par.value *= scalefactor
                 if par.error is not None:
-                    par.error = par.error * scalefactor
+                    par.error *= scalefactor
 
         self.modelpars = self.parinfo.values
         self.modelerrs = self.parinfo.errors
