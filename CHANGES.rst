@@ -4,7 +4,7 @@ CHANGES
 Version 0.1.20 (unreleased)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- - none yet
+    * Minor #210: add cold_ammonia to the registry
 
 Version 0.1.19 (2016-06-12)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
