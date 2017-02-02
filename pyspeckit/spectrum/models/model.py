@@ -344,6 +344,12 @@ class SpectralModel(fitter.SimpleFitter):
         else:
             parvals = list(pars)
 
+        if np.any(np.isnan(parvals)):
+            raise ValueError("A parameter is NaN.  Unless you gave a NaN "
+                             "value directly, this is a bug and should be "
+                             "reported.  If you specified a NaN parameter, "
+                             "don't do that.")
+
         log.debug("pars to n_modelfunc: {0}, parvals:{1}".format(pars, parvals))
         def L(x):
             v = np.zeros(len(x))
