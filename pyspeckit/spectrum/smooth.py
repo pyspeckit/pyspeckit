@@ -28,10 +28,10 @@ def smooth(data, smooth, smoothtype='gaussian', downsample=True,
         'data' (assuming data is larger than the kernel)
     """
     
-    roundsmooth = round(smooth) # can only downsample by integers
+    roundsmooth = int(round(smooth)) # can only downsample by integers
 
     if downsample_factor is None and downsample:
-        downsample_factor = int(roundsmooth)
+        downsample_factor = roundsmooth
     elif downsample_factor is None:
         downsample_factor = 1
 
