@@ -407,7 +407,7 @@ class Plotter(object):
                                   ypeakscale=ypeakscale, **kwargs)
                 return
 
-            if self.ymin and self.ymax:
+            if self.ymin is not None and self.ymax is not None:
                 # this is utter nonsense....
                 if (np.nanmax(self.Spectrum.data) < self.ymin or np.nanmin(self.Spectrum.data) > self.ymax
                         or reset_ylimits):

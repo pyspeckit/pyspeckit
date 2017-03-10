@@ -252,6 +252,17 @@ class BaseSpectrum(object):
     def data_quantity(self):
         return u.Quantity(self.data, unit=self.unit)
 
+    @data_quantity.setter
+    def data_quantity(self, value):
+        if not hasattr(value, 'unit'):
+            raise ValueError("To set the data to a Quantity value, it must "
+                             "have a unit.")
+        if hasattr(self.data, 'mask') and not hasattr(value, 'mask'):
+            raise ValueError("The original data had a mask.  You must use "
+                             "a masked array to set the data value.")
+        self.data = value.value
+        self.unit = value.unit
+
     @property
     def error_quantity(self):
         return u.Quantity(self.error, unit=self.unit)
@@ -326,7 +337,8 @@ class BaseSpectrum(object):
         else:
             warn("Warning: Invalid xtype in text header - this may mean no "
                  "text header was available.  X-axis units will be pixels "
-                 "unless you set them manually (e.g., sp.xarr.unit='angstroms')")
+                 "unless you set them manually "
+                 "(e.g., sp.xarr=SpectroscopicAxis(sp.xarr.value, unit='angstroms')")
             self.xarr.xtype = 'pixels'
             self.xarr.set_unit(u.pixel)
             #raise ValueError("Invalid xtype in text header")
@@ -954,7 +966,7 @@ class Spectra(BaseSpectrum):
 
         if other.xarr.unit != self.xarr.unit:
             # convert all inputs to same unit
-            other.xarr.convert_to_units(self.xarr.unit)
+            other.xarr.convert_to_unit(self.xarr.unit)
         self.xarr = units.SpectroscopicAxes([self.xarr,other.xarr])
         self.data = np.concatenate([self.data,other.data])
         self.error = np.concatenate([self.error,other.error])

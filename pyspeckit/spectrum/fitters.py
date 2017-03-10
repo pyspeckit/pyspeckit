@@ -1262,6 +1262,7 @@ class Specfit(interactive.Interactive):
 
     def annotate(self,loc='upper right',labelspacing=0.25, markerscale=0.01,
                  borderpad=0.1, handlelength=0.1, handletextpad=0.1,
+                 fontsize=10,
                  frameon=False, chi2=None, optimal_chi2_kwargs={}, **kwargs):
         """
         Add a legend to the plot showing the fitted parameters
@@ -1317,7 +1318,7 @@ class Specfit(interactive.Interactive):
                 self._annotation_labels, loc=loc, markerscale=markerscale,
                 borderpad=borderpad, handlelength=handlelength,
                 handletextpad=handletextpad, labelspacing=labelspacing,
-                frameon=frameon, **kwargs)
+                frameon=frameon, fontsize=fontsize, **kwargs)
             self.Spectrum.plotter.axis.add_artist(self.fitleg)
             self.fitleg.draggable(True)
             if self.Spectrum.plotter.autorefresh:
