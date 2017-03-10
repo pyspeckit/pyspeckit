@@ -13,9 +13,28 @@ http://adsabs.harvard.edu/abs/2005ApJ...620..800D
 import numpy as np
 from . import model
 
-def hill5_model( xarr, tau, v_lsr,  v_infall,  sigma,  tpeak, TBG=2.73):
+def hill5_model(xarr, tau, v_lsr,  v_infall,  sigma,  tpeak, TBG=2.73):
     """
-    The rest of this needs to be translated from C
+    The hill5 from de Vries and Myers 2005.  This model implicitly has zero
+    optical depth in the envelope, no envelope velocity, and has a fixed
+    background radiation temperature (see Table 2 in the paper).
+
+    Parameters
+    ----------
+    xarr : np.ndarray
+        array of x values
+    tau : float
+        tau_c, the core-center optical depth
+    v_lsr : float
+        The centroid velocity in km/s
+    v_infall : float
+        The infall velocity
+    sigma : float
+        The line width
+    tpeak : float
+        The peak brightness temperature
+    TBG : float
+        The background temperature
     """
   
     vf = v_lsr+v_infall
@@ -25,8 +44,8 @@ def hill5_model( xarr, tau, v_lsr,  v_infall,  sigma,  tpeak, TBG=2.73):
     tauf = tau*np.exp(-((velocity_array-vf)/sigma)**2 / 2.0 )
     taur = tau*np.exp(-((velocity_array-vr)/sigma)**2 / 2.0 )
 
-    subf = ( (1-np.exp(-tauf))/tauf * (tauf>1e-4) + (tauf < 1e-4) )
-    subr = ( (1-np.exp(-taur))/taur * (taur>1e-4) + (taur < 1e-4) )
+    subf = ((1-np.exp(-tauf))/tauf * (tauf>1e-4) + (tauf < 1e-4))
+    subr = ((1-np.exp(-taur))/taur * (taur>1e-4) + (taur < 1e-4))
     subf[subf != subf] = 1.0
     subr[subr != subr] = 1.0
   

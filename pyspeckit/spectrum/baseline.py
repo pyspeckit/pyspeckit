@@ -427,7 +427,7 @@ class Baseline(interactive.Interactive):
         else:
             print("Baseline wasn't subtracted; not unsubtracting.")
 
-    def annotate(self,loc='upper left'):
+    def annotate(self, loc='upper left', fontsize=10):
         if self.powerlaw:
             bltext = "bl: $y=%6.3g\\times(x)^{-%6.3g}$" % (self.baselinepars[0],self.baselinepars[1])
         elif self.spline:
@@ -438,13 +438,17 @@ class Baseline(interactive.Interactive):
         #self.blleg = text(xloc,yloc     ,bltext,transform = self.Spectrum.plotter.axis.transAxes)
         self.clearlegend()
         pl = matplotlib.collections.CircleCollection([0],edgecolors=['k'])
-        self.blleg = self.Spectrum.plotter.axis.legend(
-                (pl,),
-                (bltext,),loc=loc,markerscale=0.001,
-                borderpad=0.1, handlelength=0.1, handletextpad=0.1, frameon = False
-                )
+        self.blleg = self.Spectrum.plotter.axis.legend((pl,), (bltext,),
+                                                       loc=loc,
+                                                       markerscale=0.001,
+                                                       borderpad=0.1,
+                                                       handlelength=0.1,
+                                                       handletextpad=0.1,
+                                                       frameon=False,
+                                                       fontsize=fontsize)
         self.Spectrum.plotter.axis.add_artist(self.blleg)
-        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
+        if self.Spectrum.plotter.autorefresh:
+            self.Spectrum.plotter.refresh()
 
     def clearlegend(self):
         if self.blleg is not None:
