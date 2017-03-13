@@ -12,6 +12,8 @@ Module API
 ^^^^^^^^^^
 
 """
+from __future__ import division
+
 import numpy as np
 from ...mpfit import mpfit
 from ...spectrum.parinfo import ParinfoList,Parinfo
@@ -425,7 +427,7 @@ class ammonia_model(model.SpectralModel):
             # (n_modelfuncs = n_ammonia can be called directly)
             # n_modelfuncs doesn't care how many peaks there are
             if len(pars) % len(parnames) == 0:
-                parnames = [p for ii in range(len(pars)/len(parnames)) for p in parnames]
+                parnames = [p for ii in range(len(pars)//len(parnames)) for p in parnames]
                 npars = len(parvals) / self.npeaks
             else:
                 raise ValueError("Wrong array lengths passed to n_ammonia!")
