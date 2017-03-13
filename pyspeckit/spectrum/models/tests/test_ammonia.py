@@ -132,6 +132,29 @@ def test_cold_ammonia2():
 
     return spc
 
+def test_ammonia_x2():
+    kwargs = dict(lte=False, tkin=None, lines=('oneone', 'twotwo'))
+    redhot = dict(trot=25, tex=10, column=13, width=1, vcen=1)
+    bluecold = dict(trot=12, tex=7, column=13, width=.2, vcen=-1)
+    redhot.update(kwargs)
+    bluecold.update(kwargs)
+    sp_redhot = make_synthspec(**redhot)
+    sp_bluecold = make_synthspec(**bluecold)
+
+    sp = sp_redhot.copy()
+    sp.Registry.add_fitter('ammonia', ammonia.ammonia_model(), 6)
+    sp.specfit.fitter = sp.specfit.Registry.multifitters['ammonia']
+    sp.specfit.fitter.npeaks = 2
+    sp.data = sp_redhot.data + sp_bluecold.data
+    assert np.allclose(sp.data.max(), 0.301252, rtol=1e-5)
+
+    unpack_pars = lambda d: [d[key] for key in ['trot', 'tex',
+                             'column', 'width', 'vcen']]+[0]
+
+    model = sp.specfit.get_full_model(pars=unpack_pars(redhot)
+                                      +unpack_pars(bluecold))
+    assert np.allclose(sp.data, model, rtol=1e-5)
+
 """
 # debug work to make sure synthspectra look the same
 from pyspeckit.spectrum.models.tests import test_ammonia
