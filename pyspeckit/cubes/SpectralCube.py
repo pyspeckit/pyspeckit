@@ -608,7 +608,7 @@ class Cube(spectrum.Spectrum):
             self.data = cubes.extract_aperture(self.cube, aperture,
                                                coordsys=None, method=method)
 
-    def get_modelcube(self, update=False):
+    def get_modelcube(self, update=False, multicore=1):
         """
         Return or generate a "model cube", which will have the same shape as
         the ``.cube`` but will have spectra generated from the fitted model.
@@ -620,17 +620,34 @@ class Cube(spectrum.Spectrum):
         update : bool
             If the cube has already been computed, set this to ``True`` to
             recompute the model.
+        multicore: int
+            if >1, try to use multiprocessing via parallel_map to run on multiple cores
         """
         if self._modelcube is None or update:
             yy,xx = np.indices(self.parcube.shape[1:])
             nanvals = np.any(~np.isfinite(self.parcube),axis=0)
             isvalid = np.any(self.parcube, axis=0) & ~nanvals
+            valid_pixels = zip(xx[isvalid], yy[isvalid])
             self._modelcube = np.full_like(self.cube, np.nan)
-            # progressbar doesn't work with zip; I'm therefore giving up on
-            # "efficiency" in memory by making a list here.
-            for x,y in ProgressBar(list(zip(xx[isvalid],
-                                            yy[isvalid]))):
-                self._modelcube[:,int(y),int(x)] = self.specfit.get_full_model(pars=self.parcube[:,int(y),int(x)])
+
+            def model_a_pixel(xy):
+                x,y = int(xy[0]), int(xy[1])
+                self._modelcube[:,y,x] = self.specfit.get_full_model(pars=self.parcube[:,y,x])
+                return ((x,y), self._modelcube[:,y,x])
+
+            if multicore > 1:
+                sequence = [(x,y) for x,y in valid_pixels]
+                result = parallel_map(model_a_pixel, sequence, numcores=multicore)
+                merged_result = [core_result for core_result in result
+                                 if core_result is not None]
+                for mr in merged_result:
+                    ((x,y), model) = mr
+                    self._modelcube[:,y,x] = model
+            else:
+                # progressbar doesn't work with zip; I'm therefore giving up on
+                # "efficiency" in memory by making a list here.
+                for xy in ProgressBar(list(valid_pixels)):
+                    model_a_pixel(xy)
 
         return self._modelcube
 

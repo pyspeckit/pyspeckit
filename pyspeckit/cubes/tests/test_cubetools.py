@@ -168,7 +168,7 @@ def test_fiteach(save_cube=None, save_pars=None, show_plot=False):
     assert map_seed == 0
     assert err_frac == 0.34
 
-def test_get_modelcube(cubefile=None, parfile=None):
+def test_get_modelcube(cubefile=None, parfile=None, multicore=1):
     """
     Tests get_modelcube() method for Cube and CubeStack classes.
     If either cubefile or parfile isn't set, fill generate and
@@ -197,12 +197,13 @@ def test_get_modelcube(cubefile=None, parfile=None):
         spc.load_model_fit(parfile, npars=3)
         # calling CubeStack converted xarr units to GHz
         spc.xarr.convert_to_unit('km/s')
-        spc.get_modelcube()
+        spc.get_modelcube(multicore=multicore)
         resid_cube = spc.cube - spc._modelcube
         above1sig = (resid_cube.std(axis=0) > map_rms).flatten()
         assert above1sig[above1sig].size == 31
 
-def test_get_modelcube_badpar(cubefile=None, parfile=None, sigma_threshold=5):
+def test_get_modelcube_badpar(cubefile=None, parfile=None, sigma_threshold=5,
+                              multicore=1):
     """
     Test loading a model cube that has at least one invalid parameter.
     Regression test for #163
@@ -232,7 +233,7 @@ def test_get_modelcube_badpar(cubefile=None, parfile=None, sigma_threshold=5):
     # assuming one gaussian component
     for spc in [sp_cube, sp_stack]:
         spc.load_model_fit(parfile, npars=3, _temp_fit_loc=(0,0))
-        spc.get_modelcube()
+        spc.get_modelcube(multicore=multicore)
         resid_cube = spc.cube - spc._modelcube
 
 def test_registry_inheritance(cubefile='test.fits'):
