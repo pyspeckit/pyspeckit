@@ -1118,20 +1118,19 @@ class Cube(spectrum.Spectrum):
         if multicore > 1:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             result = parallel_map(moment_a_pixel, sequence, numcores=multicore)
-            merged_result = [core_result
+            merged_result = [core_result.tolist()
                              for core_result in result
                              if core_result is not None]
-            for mr in merged_result:
-                for TEMP in mr:
-                    ((x,y), moments) = TEMP
-                    self.momentcube[:,int(y),int(x)] = moments
+            for TEMP in merged_result:
+                ((x,y), moments) = TEMP
+                self.momentcube[:,int(y),int(x)] = moments
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 moment_a_pixel((ii,x,y))
 
         if verbose:
             log.info("Finished final moment %i.  "
-                     "Elapsed time was %0.1f seconds" % (ii+1, time.time()-t0))
+                     "Elapsed time was %0.1f seconds" % (OK.sum(), time.time()-t0))
 
     def show_moment(self, momentnumber, **kwargs):
         """

@@ -16,3 +16,14 @@ def test_get_spectrum(cubefile='smalltest.fits'):
     sp = pcube.get_spectrum(1,1)
 
     assert len(sp) == 10
+
+def test_momenteach(cubefile='momenttestcube.fits'):
+    if not os.path.exists(cubefile):
+        make_test_cube(outfile=cubefile)
+    spc = Cube(cubefile)
+    spc.momenteach(multicore=2)
+    parallel = spc.momentcube.copy()
+    spc.momenteach(multicore=1)
+    serial = spc.momentcube.copy()
+
+    assert all(serial == parallel)
