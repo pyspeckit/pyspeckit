@@ -98,7 +98,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                                     Jortho, Jpara, Brot, Crot)
 
     # Convert X-units to frequency in GHz
-    if xarr.unit.name != 'GHz':
+    if xarr.unit.to_string() != 'GHz':
         xarr = xarr.as_unit('GHz')
 
     if tex is None:
