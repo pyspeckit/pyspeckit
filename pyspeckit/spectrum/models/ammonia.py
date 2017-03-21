@@ -527,6 +527,8 @@ class ammonia_model(model.SpectralModel):
                                           'fixed', 'limitedmin', 'limitedmax',
                                           'minpars', 'maxpars', 'tied',
                                           'max_tem_step'))
+        fitfun_kwargs.update(self.modelfunc_kwargs)
+
         if 'use_lmfit' in fitfun_kwargs:
             raise KeyError("use_lmfit was specified in a location where it "
                            "is unacceptable")
