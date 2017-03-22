@@ -456,9 +456,9 @@ class SpectralModel(fitter.SimpleFitter):
         #modelpars = [p.value for p in parinfo.values()]
         #modelerrs = [p.stderr for p in parinfo.values() if p.stderr is not None else 0]
 
-        self.LMParams = LMParams
-        self.parinfo._from_Parameters(LMParams)
-        log.debug("LMParams: {0}".format(LMParams))
+        self.LMParams = minimizer.params
+        self.parinfo._from_Parameters(self.LMParams)
+        log.debug("LMParams: {0}".format(self.LMParams))
         log.debug("parinfo: {0}".format(parinfo))
 
         self.mp = minimizer
