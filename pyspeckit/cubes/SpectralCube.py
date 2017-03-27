@@ -704,6 +704,10 @@ class Cube(spectrum.Spectrum):
         blank_value: float
             Value to replace non-fitted locations with.  A good alternative is
             numpy.nan
+        errmap: ndarray[naxis=2] or ndarray[naxis=3]
+            A map of errors used for the individual pixels of the spectral
+            cube. 2D errmap results in an equal weighting of each given
+            spectrum, while a 3D array sets individual weights of each channel
         verbose: bool
         verbose_level: int
             Controls how much is output.
@@ -831,7 +835,10 @@ class Cube(spectrum.Spectrum):
             if errspec is not None:
                 sp.error = errspec
             elif errmap is not None:
-                sp.error = np.ones(sp.data.shape) * errmap[int(y),int(x)]
+                if errmap.shape == self.cube.shape[1:]:
+                    sp.error = np.ones(sp.data.shape) * errmap[int(y),int(x)]
+                elif errmap.shape == self.cube.shape:
+                    sp.error = errmap[:, int(y), int(x)]
             else:
                 if ii==0:
                     # issue the warning only once (ii==0), but always issue
