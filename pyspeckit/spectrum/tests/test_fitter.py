@@ -42,9 +42,10 @@ class TestFitter(object):
         assert self.sp.Registry is self.sp.specfit.Registry
         assert spcopy.Registry is spcopy.specfit.Registry
 
-    def test_fitter(self):
+    def test_fitter(self, use_lmfit=False):
         self.sp.specfit(fittype='gaussian', guesses=(-1, 0, 0.5),
-                        limitedmin=(False,False,True), minpars=(0,0,1e-10))
+                        limitedmin=(False,False,True), minpars=(0,0,1e-10),
+                        use_lmfit=use_lmfit)
         assert self.sp.specfit.parinfo.limited == [(False,False),(False,False),(True,False)]
         assert self.sp.specfit.parinfo.limits == [(0,0),(0,0),(1e-10,0)]
         np.testing.assert_almost_equal(self.sp.specfit.parinfo[0].value, -1)
@@ -53,13 +54,19 @@ class TestFitter(object):
 
         # Do it again to make sure there are no behavioral changes the second time around
         self.sp.specfit(fittype='gaussian', guesses=(-1, 0, 0.5),
-                        limitedmin=(False,False,True), minpars=(0,0,1e-10))
+                        limitedmin=(False,False,True), minpars=(0,0,1e-10),
+                        use_lmfit=use_lmfit)
         assert self.sp.specfit.parinfo.limited == [(False,False),(False,False),(True,False)]
         assert self.sp.specfit.parinfo.limits == [(0,0),(0,0),(1e-10,0)]
         np.testing.assert_almost_equal(self.sp.specfit.parinfo[0].value, -1)
         np.testing.assert_almost_equal(self.sp.specfit.parinfo[1].value,  0)
         np.testing.assert_almost_equal(self.sp.specfit.parinfo[2].value,  1)
 
+    def test_lmfitter(self):
+        """
+        Regression test for #223: make sure lmfitter returns proper pars
+        """
+        self.test_fitter(use_lmfit=True)
 
     def test_set_pars(self):
         self.sp.specfit(fittype='gaussian', guesses=(-1, 0, 0.5),
@@ -103,7 +110,7 @@ class TestFitter(object):
     def test_almost_invalid_guess(self):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('default')
-        
+
             self.sp.specfit(fittype='gaussian', guesses=(0-np.spacing(0), 0, 0.5),
                             limitedmin=(True,True,True), minpars=(0,0,0))
 
