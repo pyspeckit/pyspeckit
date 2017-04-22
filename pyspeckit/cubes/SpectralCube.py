@@ -157,7 +157,7 @@ class Cube(spectrum.Spectrum):
             self.header = header
             self.error = None
             if self.cube is not None:
-                self.data = self.cube[:,y0,x0]
+                self.data = self.cube[:,int(y0),int(x0)]
 
         if not hasattr(self, '_unit'):
             self.unit = units.dimensionless_unscaled
@@ -642,6 +642,8 @@ class Cube(spectrum.Spectrum):
                                  if core_result is not None]
                 for mr in merged_result:
                     ((x,y), model) = mr
+                    x = int(x)
+                    y = int(y)
                     self._modelcube[:,y,x] = model
             else:
                 # progressbar doesn't work with zip; I'm therefore giving up on
@@ -1406,8 +1408,8 @@ class CubeStack(Cube):
                 # techically that's alright
                 pass
         self._sort()
-        self.data = self.cube[:,y0,x0]
-        self.error = self.errorcube[:,y0,x0] if self.errorcube is not None else None
+        self.data = self.cube[:,int(y0),int(x0)]
+        self.error = self.errorcube[:,int(y0),int(x0)] if self.errorcube is not None else None
 
         self.header = cubelist[0].header.copy()
         for cube in cubelist:
