@@ -704,6 +704,10 @@ class Cube(spectrum.Spectrum):
         blank_value: float
             Value to replace non-fitted locations with.  A good alternative is
             numpy.nan
+        errmap: ndarray[naxis=2] or ndarray[naxis=3]
+            A map of errors used for the individual pixels of the spectral
+            cube. 2D errmap results in an equal weighting of each given
+            spectrum, while a 3D array sets individual weights of each channel
         verbose: bool
         verbose_level: int
             Controls how much is output.
@@ -795,6 +799,9 @@ class Cube(spectrum.Spectrum):
 
         self.parcube = np.zeros((npars,)+self.mapplot.plane.shape)
         self.errcube = np.zeros((npars,)+self.mapplot.plane.shape)
+        # testing...
+        self.guesscube = np.zeros((npars,)+self.mapplot.plane.shape)
+
         if integral:
             self.integralmap = np.zeros((2,)+self.mapplot.plane.shape)
 
@@ -831,7 +838,10 @@ class Cube(spectrum.Spectrum):
             if errspec is not None:
                 sp.error = errspec
             elif errmap is not None:
-                sp.error = np.ones(sp.data.shape) * errmap[int(y),int(x)]
+                if errmap.shape == self.cube.shape[1:]:
+                    sp.error = np.ones(sp.data.shape) * errmap[int(y),int(x)]
+                elif errmap.shape == self.cube.shape:
+                    sp.error = errmap[:, int(y), int(x)]
             else:
                 if ii==0:
                     # issue the warning only once (ii==0), but always issue
@@ -939,6 +949,7 @@ class Cube(spectrum.Spectrum):
                 if integral:
                     self.integralmap[:,int(y),int(x)] = blank_value
 
+            self.guesscube[:, int(y), int(x)] = gg
 
             if blank_value != 0:
                 self.parcube[self.parcube == 0] = blank_value
@@ -961,9 +972,9 @@ class Cube(spectrum.Spectrum):
 
             if integral:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs,
-                        self.integralmap[:,int(y),int(x)])
+                        self.integralmap[:,int(y),int(x)], gg)
             else:
-                return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs)
+                return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs, gg)
         #### BEGIN TEST BLOCK ####
         # This test block is to make sure you don't run a 30 hour fitting
         # session that's just going to crash at the end.
@@ -1033,9 +1044,9 @@ class Cube(spectrum.Spectrum):
             # force it to maintain a sensible shape.
             try:
                 if integral:
-                    ((x,y), m1, m2, intgl) = merged_result[0]
+                    ((x,y), m1, m2, intgl, gg) = merged_result[0]
                 else:
-                    ((x,y), m1, m2) = merged_result[0]
+                    ((x,y), m1, m2, gg) = merged_result[0]
             except ValueError:
                 if verbose > 1:
                     log.exception("ERROR: merged_result[0] is {0} which has the"
@@ -1050,9 +1061,9 @@ class Cube(spectrum.Spectrum):
                     continue
                 try:
                     if integral:
-                        ((x,y), modelpars, modelerrs, intgl) = TEMP
+                        ((x,y), modelpars, modelerrs, intgl, gg) = TEMP
                     else:
-                        ((x,y), modelpars, modelerrs) = TEMP
+                        ((x,y), modelpars, modelerrs, gg) = TEMP
                 except TypeError:
                     # implies that TEMP does not have the shape ((a,b),c,d)
                     # as above, shouldn't be possible, but it happens...
@@ -1073,6 +1084,7 @@ class Cube(spectrum.Spectrum):
                     self.has_fit[int(y),int(x)] = max(modelpars) > 0
                 if integral:
                     self.integralmap[:,int(y),int(x)] = intgl
+                self.guesscube[:,int(y),int(x)] = gg
         else:
             for ii,(x,y) in enumerate(valid_pixels):
                 fit_a_pixel((ii,x,y))
@@ -1236,7 +1248,7 @@ class Cube(spectrum.Spectrum):
         if np.any(nanvals):
             log.warn("NaN or infinite values encountered in parameter cube.  ",
                      PyspeckitWarning)
-            
+
 
         # make sure params are within limits
         fitter = self.specfit.Registry.multifitters[fittype]
