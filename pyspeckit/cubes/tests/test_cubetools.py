@@ -8,8 +8,8 @@ import astropy
 import multiprocessing
 
 from .. import cubes, Cube, CubeStack
-from ...spectrum.models import n2hp
-
+from ...spectrum.models import n2hp, ammonia_constants
+from ...spectrum.models.ammonia import cold_ammonia_model
 
 def make_test_cube(shape=(30,9,9), outfile='test.fits', snr=30,
                    sigma=None, seed=0):
@@ -341,3 +341,71 @@ def test_copy_ids(cubefile='test.fits'):
     naxis_old = spc1.header['NAXIS1']
     spc2.header['NAXIS1'] += 1
     assert spc1.header['NAXIS1'] == naxis_old
+
+def make_nh3_cube(shape, pars, errs11, errs22, seed=42):
+    """
+    Tinkers with two test gaussian cubes, overwriting their spectra with NH3
+    (1,1) and (2,2) lines.
+    """
+    xsize = shape[0]
+    np.random.seed(seed)
+    make_test_cube(shape=shape, outfile='foo11.fits')
+    make_test_cube(shape=shape, outfile='foo22.fits')
+    spc11 = Cube('foo11.fits')
+    spc22 = Cube('foo22.fits')
+    spc11.xarr.velocity_convention = 'radio'
+    spc22.xarr.velocity_convention = 'radio'
+    spc11.xarr.refX = ammonia_constants.freq_dict['oneone']
+    spc22.xarr.refX = ammonia_constants.freq_dict['twotwo']
+
+    spc = CubeStack([spc11, spc22])
+    spc.specfit.Registry.add_fitter('cold_ammonia', npars=6,
+                                    function=cold_ammonia_model(
+                                        line_names=['oneone', 'twotwo']))
+    spc.specfit.fitter = spc.specfit.Registry.multifitters['cold_ammonia']
+
+    for y, x in np.ndindex(spc.cube.shape[1:]):
+        spc.cube[:, y, x] = spc.specfit.get_full_model(pars=pars)
+        spc.cube[:xsize, y, x] += np.random.normal(scale=errs11, size=xsize)
+        spc.cube[xsize:, y, x] += np.random.normal(scale=errs22, size=xsize)
+
+    return spc
+
+def test_nonuniform_chan_weights(shape=(1000, 1, 2), err11=0.01, err22=0.25,
+                                 pars=[15, 15, 14, 0.2, -45, 0.5],
+                                 guesses=[12, 12, 14, 0.1, -45, 0.5]):
+    """ Regression test for #224 """
+    # Line setup - a high S/R (1,1) NH3 line fit together with a noisy (2,2) line.
+    spc = make_nh3_cube(shape, pars, err11, err22)
+    errorcube = np.zeros_like(spc.cube)
+    xsize = shape[0]
+    errorcube[:xsize] = err11
+    errorcube[xsize:] = err22
+
+    # case #1:
+    # the errors are calculated on both lines separately, and (1,1)
+    # and (2,2) channels are being weighed equally with their respective errors
+    spc.fiteach(fittype='cold_ammonia', errmap=errorcube, guesses=guesses,
+                fixed=[False] * 5 + [True])
+
+    pinfo = spc.get_spectrum(0, 0).specfit.parinfo
+    err_Tkin = pinfo.errors[0]
+    err_sigma = pinfo.errors[3]
+
+    # NOTE: if the (1,1) and (2,2) channels are being weighed equally, the
+    # uncertainties would be err_Tkin ~ 0.8924 and err_sigma ~ 0.12545
+    assert np.allclose(err_sigma, 9.696e-4, 1e-4)
+    assert np.allclose(err_Tkin, 1.5147, 1e-4)
+
+    # case #2, expecting the same outcome as case 1:
+    # it's also OK to let errmap=None if the Cube.errorcube has been predefined
+    spc.errorcube = errorcube
+    spc.fiteach(fittype='cold_ammonia', errmap=None, guesses=guesses,
+                fixed=[False] * 5 + [True])
+
+    pinfo = spc.get_spectrum(0, 0).specfit.parinfo
+    err_Tkin = pinfo.errors[0]
+    err_sigma = pinfo.errors[3]
+
+    assert np.allclose(err_sigma, 9.696e-4, 1e-4)
+    assert np.allclose(err_Tkin, 1.5147, 1e-4)
