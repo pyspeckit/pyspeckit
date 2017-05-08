@@ -839,6 +839,8 @@ class Cube(spectrum.Spectrum):
                     sp.error = np.ones(sp.data.shape) * errmap[int(y),int(x)]
                 elif errmap.shape == self.cube.shape:
                     sp.error = errmap[:, int(y), int(x)]
+            elif self.errorcube is not None:
+                sp.error = self.errorcube[:, int(y), int(x)]
             else:
                 if ii==0:
                     # issue the warning only once (ii==0), but always issue
