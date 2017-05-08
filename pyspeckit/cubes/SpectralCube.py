@@ -835,6 +835,10 @@ class Cube(spectrum.Spectrum):
             if errspec is not None:
                 sp.error = errspec
             elif errmap is not None:
+                if self.errorcube is not None:
+                    raise ValueError("Either the 'errmap' argument or"
+                                     " self.errorcube attribute should be"
+                                     " specified, but not both.")
                 if errmap.shape == self.cube.shape[1:]:
                     sp.error = np.ones(sp.data.shape) * errmap[int(y),int(x)]
                 elif errmap.shape == self.cube.shape:
