@@ -1,3 +1,4 @@
+import astropy
 import pyspeckit
 import os
 import astropy.units as u
@@ -10,8 +11,9 @@ if not os.path.exists('n2hp_cube.fit'):
     f = aud.download_file('ftp://cdsarc.u-strasbg.fr/pub/cats/J/A%2BA/472/519/fits/opha_n2h.fit')
     with fits.open(f) as ff:
         ff[0].header['CUNIT3'] = 'm/s'
-        for kw in ['CTYPE4','CRVAL4','CDELT4','CRPIX4']:
-            del ff[0].header[kw]
+        for kw in ['CTYPE4','CRVAL4','CDELT4','CRPIX4','CROTA4']:
+            if kw in ff[0].header:
+                del ff[0].header[kw]
         ff.writeto('n2hp_cube.fit')
 
 # Load the spectral cube cropped in the middle for efficiency
@@ -42,7 +44,7 @@ if os.path.exists('n2hp_fitted_parameters.fits'):
 else:
     # Run the fitter
     # Estimated time to completion ~ 2 minutes
-    spc.fiteach(fittype='n2hp_vtau', multifit=True,
+    spc.fiteach(fittype='n2hp_vtau',
                 guesses=[5,0.5,3,1], # Tex=5K, tau=0.5, v_center=12, width=1 km/s
                 signal_cut=3, # minimize the # of pixels fit for the example
                 start_from_point=(2,2), # start at a pixel with signal
@@ -58,7 +60,7 @@ else:
 # in current and pending publications
 
 # Save the fitted parameters to a FITS file, and overwrite one if one exists
-spc.write_fit('n2hp_fitted_parameters.fits', clobber=True)
+spc.write_fit('n2hp_fitted_parameters.fits', overwrite=True)
 
 # Show an integrated image
 spc.mapplot()
@@ -80,6 +82,6 @@ spc.mapplot.plane = spc.parcube[2,:,:]
 spc.mapplot(estimator=None)
 
 # running in script mode, the figures won't show by default on some systems
-import pylab as pl
+# import pylab as pl
 # pl.draw()
 # pl.show()

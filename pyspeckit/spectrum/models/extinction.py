@@ -5,7 +5,7 @@ Returns multiplicative factors...
 """
 from pyspeckit.spectrum import units
 
-def extinction_function(wavelength, tau0=0, alpha=0, lambda0=2.5, lambda_units='microns'):
+def extinction_function(wavelength, tau0=0, alpha=0, lambda0=2.5, lambda_units='micron'):
     """
     Returns a model with modelfunc replaced...
     """

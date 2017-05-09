@@ -9,6 +9,7 @@ Created 3/17/08
 Original version available at http://code.google.com/p/agpy/source/browse/trunk/agpy/gaussfitter.py
 (the version below uses a Class instead of independent functions)
 """
+from __future__ import print_function
 import numpy
 from numpy.ma import median
 from numpy import pi
@@ -144,7 +145,7 @@ class gaussian_fitter(model.SpectralModel):
             if len(parlist) != 3*self.npeaks:
                 # if you leave the defaults, or enter something that can be multiplied by 3 to get to the
                 # right number of formaldehydeians, it will just replicate
-                if veryverbose: print "Correcting length of parameter %s" % parlistname
+                if veryverbose: print("Correcting length of parameter %s" % parlistname)
                 if len(parlist) == 3: 
                     parlist *= self.npeaks 
                 elif parlistname=="params":
@@ -187,11 +188,11 @@ class gaussian_fitter(model.SpectralModel):
                 for ii in xrange(len(params)) ]
 
         if veryverbose:
-            print "GUESSES: "
-            print "\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo])
+            print("GUESSES: ")
+            print("\n".join(["%s: %s" % (p['parname'],p['value']) for p in parinfo]))
 
         if debug: 
-            for p in parinfo: print p
+            for p in parinfo: print(p)
             
         mp = mpfit(mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,**kwargs)
         mpp = mp.params
@@ -203,14 +204,14 @@ class gaussian_fitter(model.SpectralModel):
             raise Exception(mp.errmsg)
 
         if not shh:
-            print "Fit status: ",mp.status
-            print "Fit error message: ",mp.errmsg
-            print "Fit message: ",mpfit_messages[mp.status]
-            print "Final fit values: "
+            print("Fit status: ",mp.status)
+            print("Fit error message: ",mp.errmsg)
+            print("Fit message: ",mpfit_messages[mp.status])
+            print("Final fit values: ")
             for i,p in enumerate(mpp):
                 parinfo[i]['value'] = p
-                print parinfo[i]['parname'],p," +/- ",mpperr[i]
-            print "Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp)
+                print(parinfo[i]['parname'],p," +/- ",mpperr[i])
+            print("Chi2: ",mp.fnorm," Reduced Chi2: ",mp.fnorm/len(data)," DOF:",len(data)-len(mpp))
 
         self.mp = mp
         self.mpp = mpp

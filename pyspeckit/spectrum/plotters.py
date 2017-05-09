@@ -13,6 +13,7 @@ import numpy as np
 import astropy.units as u
 import copy
 import inspect
+from astropy import log
 
 try:
     from matplotlib.cbook import BoundMethodProxy
@@ -42,17 +43,16 @@ class Plotter(object):
     """
 
 
-    def __init__(self, Spectrum, autorefresh=True, title="",
-                 xlabel="", silent=True, plotscale=1.0, **kwargs):
+    def __init__(self, Spectrum, autorefresh=True, title="", xlabel=None,
+                 silent=True, plotscale=1.0, **kwargs):
         self.figure = None
         self.axis = None
         self.Spectrum = Spectrum
-        self._xunit = Spectrum.xarr.unit
         # plot parameters
         self.offset = 0.0 # vertical offset
         self.autorefresh = autorefresh
         self.xlabel = xlabel
-        self.title  = title
+        self.title = title
         self.errorplot = None
         self.plotkwargs = kwargs
         self._xlim = [None,None]
@@ -68,10 +68,14 @@ class Plotter(object):
 
         self.automake_fitter_tool = False
 
+        self._active_gui = None
+
+    @property
+    def _xunit(self):
+        return self.Spectrum.xarr.unit
+
     def _get_prop(xy, minmax):
         def getprop(self):
-            if self.Spectrum.xarr.unit != self._xunit:
-                self._xunit = self.Spectrum.xarr.unit
             if xy == 'x':
                 if minmax == 'min':
                     if self._xlim[0] and self._xunit:
@@ -173,17 +177,17 @@ class Plotter(object):
             else:
                 self.figure = matplotlib.pyplot.figure()
 
-        if not matplotlib.pyplot.fignum_exists(self.figure.number):
+        if hasattr(self.figure, 'number') and not matplotlib.pyplot.fignum_exists(self.figure.number):
             self.figure = matplotlib.pyplot.figure(self.figure.number)
 
         # always re-connect the interactive keys to avoid frustration...
         self._mpl_reconnect()
 
         if axis is not None:
-            self._mpl_disconnect()
+            #self._mpl_disconnect()
             self.axis = axis
             self.figure = axis.figure
-            self._mpl_connect()
+            #self._mpl_connect()
         elif len(self.figure.axes) > 0 and self.axis is None:
             self.axis = self.figure.axes[0] # default to first axis
         elif self.axis is None:
@@ -191,7 +195,8 @@ class Plotter(object):
 
         # A check to deal with issue #117: if you close the figure, the axis
         # still exists, but it cannot be reattached to a figure
-        if not (self.axis.get_figure() is matplotlib.pyplot.figure(self.axis.get_figure().number)):
+        if (hasattr(self.axis.get_figure(), 'number') and
+            not (self.axis.get_figure() is matplotlib.pyplot.figure(self.axis.get_figure().number))):
             self.axis = self.figure.gca()
 
         if self.axis is not None and self.axis not in self.figure.axes:
@@ -202,6 +207,9 @@ class Plotter(object):
 
         if clear and self.axis is not None:
             self.axis.clear()
+            # Need to empty the stored model plots
+            if hasattr(self.Spectrum, 'fitter'):
+                self.Spectrum.fitter.clear()
 
         if autorefresh is not None:
             self.autorefresh = autorefresh
@@ -399,9 +407,9 @@ class Plotter(object):
                                   ypeakscale=ypeakscale, **kwargs)
                 return
 
-            if self.ymin and self.ymax:
+            if self.ymin is not None and self.ymax is not None:
                 # this is utter nonsense....
-                if (self.Spectrum.data.max() < self.ymin or self.Spectrum.data.min() > self.ymax
+                if (np.nanmax(self.Spectrum.data) < self.ymin or np.nanmin(self.Spectrum.data) > self.ymax
                         or reset_ylimits):
                     if not self.silent and not reset_ylimits:
                         warn("Resetting Y-axis min/max because the plot is out of bounds.")
@@ -411,10 +419,7 @@ class Plotter(object):
             if ymin is not None:
                 self.ymin = ymin
             elif self.ymin is None:
-                if hasattr(self.Spectrum.data, 'mask'):
-                    yminval = self.Spectrum.data[xpixmin:xpixmax].min()
-                else:
-                    yminval = np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
+                yminval = np.nanmin(self.Spectrum.data[xpixmin:xpixmax])
                 # Increase the range fractionally.  This means dividing a positive #, multiplying a negative #
                 if yminval < 0:
                     self.ymin = float(yminval)*float(ypeakscale)
@@ -424,10 +429,7 @@ class Plotter(object):
             if ymax is not None:
                 self.ymax = ymax
             elif self.ymax is None:
-                if hasattr(self.Spectrum.data, 'mask'):
-                    ymaxval = ((self.Spectrum.data[xpixmin:xpixmax]).max()-self.ymin)
-                else:
-                    ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin)
+                ymaxval = (np.nanmax(self.Spectrum.data[xpixmin:xpixmax])-self.ymin)
                 if ymaxval > 0:
                     self.ymax = float(ymaxval) * float(ypeakscale) + self.ymin
                 else:
@@ -462,19 +464,23 @@ class Plotter(object):
             self.axis.set_title(self.title)
 
         if xlabel is not None:
+            log.debug("setting xlabel={0}".format(xlabel))
             self.xlabel = xlabel
         elif self._xunit:
-            # WAS: self.xlabel = self.Spectrum.xarr.xtype.title()
             try:
                 self.xlabel = xlabel_table[self._xunit.physical_type.lower()]
             except KeyError:
                 self.xlabel = self._xunit.physical_type.title()
             # WAS: self.xlabel += " ("+u.Unit(self._xunit).to_string()+")"
             self.xlabel += " ({0})".format(self._xunit.to_string())
+            log.debug("xunit is {1}. set xlabel={0}".format(self.xlabel,
+                                                            self._xunit))
 
             if verbose_label:
                 self.xlabel = "%s %s" % (self.Spectrum.xarr.velocity_convention.title(),
                                          self.xlabel)
+        else:
+            log.warn("Plotter: xlabel was not set")
 
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
@@ -529,8 +535,8 @@ class Plotter(object):
                 print("\n\nFitter initiated from the interactive plotter.")
                 # extra optional text:
                 #  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
-                self._disconnect_matplotlib_keys()
-                self.Spectrum.specfit(interactive=True)
+                self.activate_interactive_fitter()
+
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
                 elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
@@ -541,8 +547,8 @@ class Plotter(object):
                 elif event.key == 'B':
                     print("\n\nBaseline initiated from the interactive plotter (with reset)")
                 print("Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'")
-                self._disconnect_matplotlib_keys()
-                self.Spectrum.baseline(interactive=True, reset_selection=(event.key=='B'))
+                self.activate_interactive_baseline_fitter(reset_selection=(event.key=='B'))
+
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
                 elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
@@ -639,10 +645,14 @@ class Plotter(object):
             assert velocity_offset.unit.is_equivalent(u.km/u.s)
 
         doppler = getattr(u, 'doppler_{0}'.format(velocity_convention))
-        equivalency = doppler(self.Spectrum.xarr.refX)
+        if self.Spectrum.xarr.refX is not None:
+            equivalency = doppler(self.Spectrum.xarr.refX)
+        else:
+            equivalency = doppler(self.Spectrum.xarr.as_unit(u.GHz)[0])
 
         xvals = []
-        for xv in line_xvals:
+        linenames_toplot = []
+        for xv,ln in zip(line_xvals, line_names):
             if hasattr(xv, 'unit'):
                 pass
             else:
@@ -654,7 +664,13 @@ class Plotter(object):
                 xv = xv + velocity_offset
             xv = xv.to(self.Spectrum.xarr.unit, equivalencies=equivalency)
 
-            xvals.append(xv.value)
+            if self.Spectrum.xarr.in_range(xv):
+                xvals.append(xv.value)
+                linenames_toplot.append(ln)
+
+        if len(xvals) != len(line_xvals):
+            log.warn("Skipped {0} out-of-bounds lines when plotting line IDs."
+                     .format(len(line_xvals)-len(xvals)))
 
         if auto_yloc:
             yr = self.axis.get_ylim()
@@ -664,7 +680,7 @@ class Plotter(object):
         lineid_plot.plot_line_ids(self.Spectrum.xarr,
                                   self.Spectrum.data,
                                   xvals,
-                                  line_names,
+                                  linenames_toplot,
                                   ax=self.axis,
                                   **kwargs)
 
@@ -716,6 +732,47 @@ class Plotter(object):
         else:
             warn("Cannot add line IDs from measurements unless measurements have been made!")
 
+    def activate_interactive_fitter(self):
+        """
+        Attempt to activate the interactive fitter
+        """
+        if self._active_gui is not None:
+            # This should not be reachable.  Clearing connections is the
+            # "right" behavior if this becomes reachable, but I'd rather raise
+            # an exception because I don't want to get here ever
+            self._active_gui.clear_all_connections()
+            raise ValueError("GUI was active when 'f' key pressed")
+
+        self._activate_interactive(self.Spectrum.specfit, interactive=True)
+
+    def activate_interactive_baseline_fitter(self, **kwargs):
+        """
+        Attempt to activate the interactive baseline fitter
+        """
+        if self._active_gui is not None:
+            # This should not be reachable.  Clearing connections is the
+            # "right" behavior if this becomes reachable, but I'd rather raise
+            # an exception because I don't want to get here ever
+            self._active_gui.clear_all_connections()
+            raise ValueError("GUI was active when 'b' key pressed")
+
+        self._activate_interactive(self.Spectrum.baseline, interactive=True,
+                                   **kwargs)
+
+    def _activate_interactive(self, object_to_activate, **kwargs):
+        self._disconnect_matplotlib_keys()
+
+        self._active_gui = object_to_activate
+
+        # actiavting the gui calls clear_all_connections, which disconnects the
+        # gui
+        try:
+            self._active_gui(**kwargs)
+            self._active_gui = object_to_activate
+            assert self._active_gui is not None
+        except Exception as ex:
+            self._active_gui = None
+            raise ex
 
 def parse_units(labelstring):
     import re

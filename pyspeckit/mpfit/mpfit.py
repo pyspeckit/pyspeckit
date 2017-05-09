@@ -1137,6 +1137,12 @@ class mpfit:
             # Form (q transpose)*fvec and store the first n components in qtf
             catch_msg = 'forming (q transpose)*fvec'
             wa4 = fvec.copy()
+            log.log(5, 'Before optimizing wa4, value is ={0}'.format(wa4))
+            try:
+                wa4._sharedmask = False # to deal with np1.11+ shared mask behavior: should not change anything
+            except AttributeError:
+                # apparently numpy won't let you write attributes it doesn't know about...
+                pass
             for j in range(n):
                 lj = ipvt[j]
                 temp3 = fjac[j,lj]
@@ -1147,6 +1153,7 @@ class mpfit:
                     wa4[j:] = wj - fj * sum(fj*wj) / temp3
                 fjac[j,lj] = wa1[j]
                 qtf[j] = wa4[j]
+            log.log(5, 'After optimizing wa4, qtf={0}'.format(qtf))
             # From this point on, only the square matrix, consisting of the
             # triangle of R, is needed.
             fjac = fjac[0:n, 0:n]
@@ -1198,10 +1205,9 @@ class mpfit:
                                                    delta, wa1, wa2, par=par)
                 # Store the direction p and x+p. Calculate the norm of p
                 wa1 = -wa1
-                if debug:
-                    print("before parameter setting; wa1={0}".format(wa1))
-                    print("before parameter setting; wa2={0}".format(wa2))
-                    print("before parameter setting; params={0}".format(self.params))
+                log.log(5, "before parameter setting; wa1={0}".format(wa1))
+                log.log(5, "before parameter setting; wa2={0}".format(wa2))
+                log.log(5, "before parameter setting; params={0}".format(self.params))
 
                 if (qanylim == 0) and (qminmax == 0):
                     # No parameter limits, so just move to new position WA2
@@ -1956,7 +1962,7 @@ class mpfit:
     #
 
     def qrsolv(self, r, ipvt, diag, qtb, sdiag):
-        log.log(5, 'Entering qrsolv...')
+        log.log(5, 'Entering qrsolv... r={0} ipvt={1} diag={2} qtb={3}'.format(r, ipvt, diag, qtb))
         sz = r.shape
         # not used m = sz[0]
         n = sz[1]
@@ -2127,7 +2133,7 @@ class mpfit:
 
     def lmpar(self, r, ipvt, diag, qtb, delta, x, sdiag, par=None):
 
-        log.log(5, 'Entering lmpar...')
+        log.log(5, 'Entering lmpar... delta={0} x={1} sdiag={2} qtb={3}'.format(delta, x, sdiag, qtb))
         dwarf = self.machar.minnum
         machep = self.machar.machep
         sz = r.shape

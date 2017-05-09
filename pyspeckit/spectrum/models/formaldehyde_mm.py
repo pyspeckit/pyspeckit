@@ -169,7 +169,8 @@ def formaldehyde_mm_radex(xarr,
     spec = np.sum([
         (formaldehyde_mm_vtau(xarr, Tex=float(tex[ii]), tau=float(tau[ii]),
             xoff_v=xoff_v, width=width, **kwargs)
-        * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
+        * (xarr.as_unit('GHz').value>minfreq[ii]) * 
+         (xarr.as_unit('GHz').value<maxfreq[ii])) for ii in xrange(len(tex))],
                 axis=0)
   
     return spec

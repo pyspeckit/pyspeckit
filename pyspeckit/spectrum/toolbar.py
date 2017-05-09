@@ -4,7 +4,7 @@ from matplotlib.backend_bases import NavigationToolbar2
 class NavigationToolbar3(NavigationToolbar2):
 
     def press_pan(self, event):
-        print "pan pressed"
+        print("pan pressed")
         super(NavigationToolbar3,self).press_pan(self,event)
 
 class MyNavToolbar(NavigationToolbar2):

@@ -99,7 +99,7 @@ class SmartCaseNoSpaceDict(dict):
             return dict.pop(self, key.lower().replace(" ",""),def_val)
         else:
             return cased
-    
+
 
 length_dict = {'meter':1.0,'m':1.0,
                'centimeter':1e-2,'cm':1e-2,
@@ -290,7 +290,7 @@ class SpectroscopicAxis(u.Quantity):
         """
         Make a new spectroscopic axis instance
         Default units Hz
-        
+
         Parameter
         ----------
         xarr : np.ndarray
@@ -331,15 +331,16 @@ class SpectroscopicAxis(u.Quantity):
             log.debug("Created subarr from a non-ndarray {0}".format(type(xarr)))
         else:
             if not xarr.flags['OWNDATA']:
-                log.warning("The X array does not 'own' its data."
-                            "  It will therefore be copied.")
-                warnings.warn("The X array does not 'own' its data."
-                              "  It will therefore be copied.")
+                # nothing owns its data.  We nearly always have to copy this. =(
+                #log.warning("The X array does not 'own' its data."
+                #            "  It will therefore be copied.")
+                #warnings.warn("The X array does not 'own' its data."
+                #              "  It will therefore be copied.")
                 subarr = xarr.copy()
             else:
                 log.debug("xarr owns its own data.  Continuing as normal.")
                 subarr = xarr
-        
+
         subarr = subarr.view(self)
 
         # Only need to set xarr's unit if it's not a quantity
@@ -399,16 +400,30 @@ class SpectroscopicAxis(u.Quantity):
 
     def __repr__(self):
         if self.shape is ():
-            rep = ("SpectroscopicAxis([%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self.value, self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
+            rep = ("SpectroscopicAxis([%r], unit=%r, refX=%r,"
+                   " refX_unit=%r, frame=%r, redshift=%r, xtype=%r,"
+                   " velocity convention=%r)" % (self.value, self.unit,
+                                                 self.refX, self.refX_unit,
+                                                 self.frame, self.redshift,
+                                                 self.xtype,
+                                                 self.velocity_convention))
         else:
-            rep = ("SpectroscopicAxis([%r,...,%r], unit=%r, refX=%r, refX_unit=%r, frame=%r, redshift=%r, xtype=%r, velocity convention=%r)" %
-                (self[0].value, self[-1].value, self.unit, self.refX, self.refX_unit, self.frame, self.redshift, self.xtype, self.velocity_convention))
+            rep = ("SpectroscopicAxis([%r,...,%r], unit=%r,"
+                   " refX=%r, refX_unit=%r, frame=%r, redshift=%r,"
+                   " xtype=%r, velocity convention=%r)" % (self[0].value,
+                                                           self[-1].value,
+                                                           self.unit,
+                                                           self.refX,
+                                                           self.refX_unit,
+                                                           self.frame,
+                                                           self.redshift,
+                                                           self.xtype,
+                                                           self.velocity_convention))
         return rep
 
     def __str__(self):
-        selfstr = "SpectroscopicAxis with units %s and range %g:%g." % (
-                self.unit, self.umin().value, self.umax().value)
+        selfstr = ("SpectroscopicAxis with units %s and range %g:%g." % (
+            self.unit, self.umin().value, self.umax().value))
         if self.refX is not None:
             if not hasattr(self.refX, 'unit'):
                 selfstr += "Reference is %g %s" % (self.refX, self.refX_unit)
@@ -473,7 +488,7 @@ class SpectroscopicAxis(u.Quantity):
                                                    center_frequency=self.refX,
                                                    equivalencies=u.spectral())
             self.center_frequency, self._equivalencies = temp1,temp2
-    
+
     def __getattr__(self, name):
         # can't use getattr because it triggers infinite recursion
         object.__getattribute__(self, name)
@@ -495,18 +510,21 @@ class SpectroscopicAxis(u.Quantity):
         self.center_frequency = getattr(obj, 'center_frequency', None)
         self.center_frequency_unit = getattr(obj, 'center_frequency_unit', None)
         self._equivalencies = getattr(obj, 'equivalencies', [])
+        # instead of making dxarr on init, make it on first use (see property dxarr)
         # moved from __init__ - needs to be done whenever viewed
         # (this is slow, though - may be better not to do this)
-        if self.shape: # check to make sure non-scalar
-            # can't use make_dxarr here! infinite recursion =(
-            self.dxarr = np.diff(np.array(self))
+        #if self.shape and self.dtype != np.dtype('bool'): # check to make sure non-scalar
+        #    # can't use make_dxarr here! infinite recursion =(
+        #    self.dxarr = np.diff(np.array(self))
 
     def __array_wrap__(self,out_arr,context=None):
         """
         Do this when calling ufuncs
         (probably overridden by astropy.units.Quantity._wrap_function)
         """
-        ret = np.ndarray.__array_wrap__(self, out_arr, context)
+        # DEBUG print("ARRAY WRAP: pyspeckit.  context={0}".format(context))
+        ret = super(SpectroscopicAxis, self).__array_wrap__(out_arr, context=context)
+        #ret = np.ndarray.__array_wrap__(self, out_arr, context)
 
         # return scalar values for those that should be scalar
         if hasattr(ret, 'ndim') and ret.ndim == 0:
@@ -514,25 +532,6 @@ class SpectroscopicAxis(u.Quantity):
             return u.Quantity(ret)
 
         return ret
-
-    def _check_consistent_type(self):
-        """
-        Make sure self.xtype is unit_type_dict[unit]
-        if this is NOT true, can cause significant errors
-        """
-        if self.xtype is None:
-            OK = False
-        else:
-            OK = self.xtype.lower() == self.unit
-
-        if not OK:
-            raise InconsistentTypeError("Unit: %s Type[unit]: %s in %r" % (self.unit,unit_type_dict[self.unit],self))
-
-    def _fix_type(self):
-        try:
-            self._check_consistent_type()
-        except InconsistentTypeError:
-            self.xtype = unit_type_dict[self.unit]
 
     @classmethod
     def validate_unit(self, unit, bad_unit_response='raise'):
@@ -552,8 +551,9 @@ class SpectroscopicAxis(u.Quantity):
             elif bad_unit_response == "raise":
                 raise ValueError('Unit %s not recognized.' % unit)
             else:
-                raise ValueError('Unit %s not recognized. Invalid bad_unit_response, valid options: [%s/%s]' 
-                                % (unit, "raise", "pixel"))
+                raise ValueError('Unit %s not recognized. Invalid '
+                                 'bad_unit_response, valid options: [%s/%s]' %
+                                 (unit, "raise", "pixel"))
         return unit
 
     def set_unit(self, unit, bad_unit_response='raise'):
@@ -567,9 +567,9 @@ class SpectroscopicAxis(u.Quantity):
 
         if unit is not None:
             # could be reversed
-            return np.max([self.coord_to_x(self.max(), units),
-                           self.coord_to_x(self.min(),units)])
-        else: 
+            return np.max([self.coord_to_x(self.max(), unit),
+                           self.coord_to_x(self.min(),unit)])
+        else:
             return self.max()
 
     def umin(self, unit=None):
@@ -580,26 +580,26 @@ class SpectroscopicAxis(u.Quantity):
 
         if unit is not None:
             # could be reversed
-            return np.min([self.coord_to_x(self.max(), units),
-                           self.coord_to_x(self.min(),units)])
-        else: 
+            return np.min([self.coord_to_x(self.max(), unit),
+                           self.coord_to_x(self.min(),unit)])
+        else:
             return self.min()
 
-    def x_to_pix(self, xval, xval_units=None):
+    def x_to_pix(self, xval, xval_units=None, equivalencies=None):
         """
         Given an X coordinate in SpectroscopicAxis' units, return the corresponding pixel number
         """
         if xval_units in pixel_dict:
             return xval
         else:
-            try:
-                if not xval_units:
-                    xval_units = xval.unit
-            except AttributeError:
-                xval_units = u.dimensionless_unscaled
-            xval = xval * u.Unit(xval_units)            
-            nearest_pix = np.argmin(np.abs(self.value-xval.value))
-            # nearest_pix = np.argmin(np.abs(self.value-xval))
+            if not hasattr(xval, 'unit'):
+                xval = u.Quantity(xval, xval_units or self.unit)
+
+            if equivalencies is None:
+                equivalencies = self.equivalencies
+
+            nearest_pix = np.argmin(np.abs(self-xval.to(self.unit, equivalencies)))
+
             return nearest_pix
 
     def in_range(self, xval):
@@ -607,15 +607,16 @@ class SpectroscopicAxis(u.Quantity):
         Given an X coordinate in SpectroscopicAxis' units, return whether the pixel is in range
         """
         if hasattr(xval, 'unit'):
-            # note that the .value's are outside: if you compare a Quantity, it
-            # will return an array of booleans, which always evaluates to True
-            # even if that 0-dimensional array (scalar) is False
-            return bool((xval > self.min()) and (xval < self.max()))
+            return bool((xval > self.as_unit(xval.unit).min()) and
+                        (xval < self.as_unit(xval.unit).max()))
         else:
             warnings.warn("The xvalue being compared in "
                           "SpectroscopicAxis.in_range has no unit.  "
                           "Assuming the unit is the same as the current "
                           "axis unit.")
+            # note that the .value's are outside: if you compare a Quantity, it
+            # will return an array of booleans, which always evaluates to True
+            # even if that 0-dimensional array (scalar) is False
             return bool((xval > self.min().value) and (xval < self.max().value))
 
     def x_to_coord(self, xval, xunit, verbose=False):
@@ -637,7 +638,7 @@ class SpectroscopicAxis(u.Quantity):
         value converted to xunit
         e.g.:
         xarr.units = 'km/s'
-        xarr.refX = 5.0 
+        xarr.refX = 5.0
         xarr.refX_unit = GHz
         xarr.coord_to_x(6000,'GHz') == 5.1 # GHz
         """
@@ -666,9 +667,9 @@ class SpectroscopicAxis(u.Quantity):
         self.flags.writeable=False
         if make_dxarr:
             self.make_dxarr()
-        elif hasattr(self, 'dxarr'):
+        elif hasattr(self, '_dxarr'):
             # remove the old, wrong one
-            del self.dxarr
+            del self._dxarr
 
 
     def as_unit(self, unit, equivalencies=[], velocity_convention=None, refX=None,
@@ -676,7 +677,7 @@ class SpectroscopicAxis(u.Quantity):
                 **kwargs):
         """
         Convert the spectrum to the specified units.  This is a wrapper function
-        to convert between frequency/velocity/wavelength and simply change the 
+        to convert between frequency/velocity/wavelength and simply change the
         units of the X axis.  Frame conversion is... not necessarily implemented.
 
         Parameter
@@ -720,18 +721,28 @@ class SpectroscopicAxis(u.Quantity):
             center_frequency = None
 
         self.center_frequency, self._equivalencies = \
-            self.find_equivalencies(velocity_convention, 
+            self.find_equivalencies(velocity_convention,
                                     center_frequency,
                                     equivalencies)
-        
+
         if isinstance(self.unit, str):
             self._unit = u.Unit(self.unit)
 
         return self.to(unit, equivalencies=self.equivalencies)
 
+    @property
+    def dxarr(self):
+        if hasattr(self, '_dxarr'):
+            return self._dxarr
+        else:
+            self.make_dxarr()
+            return self._dxarr
+
     def make_dxarr(self, coordinate_location='center'):
         """
-        Create a "delta-x" array corresponding to the X array.
+        Create a "delta-x" array corresponding to the X array.  It will have
+        the same length as the input array, which is achieved by concatenating
+        an extra pixel somewhere.
 
         Parameter
         ----------
@@ -744,13 +755,14 @@ class SpectroscopicAxis(u.Quantity):
         """
         dxarr = np.diff(self)
         if self.size <= 2:
-            self.dxarr = np.ones(self.size)*dxarr
+            self._dxarr = np.ones(self.size)*dxarr
         elif coordinate_location in ['left','center']:
-            self.dxarr = np.concatenate([dxarr,dxarr[-1:]])
+            self._dxarr = np.concatenate([dxarr,dxarr[-1:]])
         elif coordinate_location in ['right']:
-            self.dxarr = np.concatenate([dxarr[:1],dxarr])
+            self._dxarr = np.concatenate([dxarr[:1],dxarr])
         else:
             raise ValueError("Invalid coordinate location.")
+        self._dxarr._unit = self.unit
 
     def cdelt(self, tolerance=1e-8, approx=False):
         """
@@ -764,12 +776,15 @@ class SpectroscopicAxis(u.Quantity):
         approx : bool
             Return the mean DX even if it is inaccurate
         """
-        if not hasattr(self,'dxarr'): # if cropping happens...
+        if not hasattr(self,'_dxarr'): # if cropping happens...
             self.make_dxarr()
         if len(self) <= 1:
             raise ValueError("Cannot have cdelt of length-%i array" % len(self))
         if approx or abs(self.dxarr.max()-self.dxarr.min())/abs(self.dxarr.min()) < tolerance:
             return self.dxarr.mean().flat[0]
+        else:
+            raise ValueError("Spectral axis is not linear to within {0}.  "
+                             "cdelt is not well-defined.".format(tolerance))
 
     def _make_header(self, tolerance=1e-8):
         """
@@ -884,6 +899,12 @@ class SpectroscopicAxis(u.Quantity):
         view.__array_finalize__(self)
         if unit is not None:
             view._unit = unit
+
+        # any slice needs to regenerate its dxarr
+        if hasattr(view, '_dxarr'):
+            del view._dxarr
+
+        #DEBUG print("unit is {1}, self.unit is {2}, class is {0}, viewtype={3}".format(subclass, unit, self.unit, type(view)))
         return view
 
 def merge_equivalencies(old_equivalencies, new_equivalencies):
@@ -897,7 +918,8 @@ def merge_equivalencies(old_equivalencies, new_equivalencies):
 
     for equivalency in total_equivalencies:
         equivalency_id = equivalency[0].to_string()+equivalency[1].to_string()
-        if equivalency_id in seen: continue
+        if equivalency_id in seen:
+            continue
         seen[equivalency_id] = 1
         result.append(equivalency)
     return result
@@ -977,7 +999,7 @@ class EchelleAxes(SpectroscopicAxis):
         velocity_convention = axislist[0].velocity_convention
         for ax in axislist:
             if ax.xtype != xtype:
-                try: 
+                try:
                     ax.change_xtype(xtype)
                 except:
                     ValueError("Axis had wrong xtype and could not be converted.")
@@ -1029,7 +1051,7 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
         * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
         * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )^-1
         * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
-        * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c) 
+        * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c)
 
     """
     if input_units in frequency_dict:
@@ -1058,7 +1080,7 @@ def frequency_to_velocity(frequencies, input_units, center_frequency=None,
     """
     Conventions defined here:
     http://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
-     
+
      * Radio 	V = c (f0 - f)/f0 	f(V) = f0 ( 1 - V/c )
      * Optical 	V = c (f0 - f)/f 	f(V) = f0 ( 1 + V/c )-1
      * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1

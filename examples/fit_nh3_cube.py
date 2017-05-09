@@ -17,6 +17,7 @@ ammonia, can take a long time.  Test this on a small cube first!
     the initial guess)
 """
 import pyspeckit
+import astropy
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -87,6 +88,9 @@ else:
     cube11.momenteach()
     momentcube = cube11.momentcube
     momentcubefile = pyfits.PrimaryHDU(data=momentcube, header=cube11.header)
+if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+    momentcubefile.writeto('hot_momentcube.fits',overwrite=True)
+else:
     momentcubefile.writeto('hot_momentcube.fits',clobber=True)
 
 # Create a "guess cube".  Because we're fitting physical parameters in this
@@ -106,7 +110,10 @@ else:
     guesses[5,:,:] = 0.5                   # F(ortho) - ortho NH3 fraction (fixed)
 
     guesscube = pyfits.PrimaryHDU(data=guesses, header=cube11.header)
-    guesscube.writeto(guessfn, clobber=True)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        guesscube.writeto(guessfn, overwrite=True)
+    else:
+        guesscube.writeto(guessfn, clobber=True)
 
 # This bit doesn't need to be in an if statment
 if fitcube:

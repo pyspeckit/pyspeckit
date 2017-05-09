@@ -175,12 +175,35 @@ for series,values in iteritems(table14dot2):
 
 
 # not used right now, but it could be so I'm listing it here
-def rrl(n,dn=1,amu=1.007825):   
+def rrl(n,dn=1,amu=1.007825,Z=1):
     """
     compute Radio Recomb Line freqs in GHz
     from Brown, Lockman & Knapp ARAA 1978 16 445
+
+    UPDATED:
+        Gordon & Sorochenko 2009, eqn A6
+
+    Parameters
+    ----------
+    n : int
+        The number of the lower level of the recombination line (H1a is Lyman
+        alpha, for example)
+    dn : int
+        The delta-N of the transition.  alpha=1, beta=2, etc.
+    amu : float
+        The mass of the central atom
+    Z : int
+        The ionization parameter for the atom.  Z=1 is neutral, Z=2 is singly
+        ionized, etc.  For hydrogen, only z=1 makes sense, since ionized
+        hydrogen has no electrons and therefore cannot have recombination
+        lines.
+
+    Returns
+    -------
+    frequency in GHz
     """
     nu = 3.289842e6*(1-5.48593e-4/amu)*(1/float(n)**2 - 1/float(n+dn)**2)
+    nu = 3.28984196e6 * Z**2 * (amu-5.48579911e-4*(Z+1))/(amu-5.48579911e-4*Z) * (1/float(n)**2 - 1/float(n+dn)**2)
     return nu
 
 def find_lines(xarr):
@@ -188,7 +211,7 @@ def find_lines(xarr):
     Given a :class:`pyspeckit.units.SpectrosopicAxis` instance, finds all the
     lines that are in bounds.  Returns a list of line names.
     """
-    return [linename for (linename,lam) in iteritems(wavelength) if xarr.as_unit('microns').in_range(lam)]
+    return [linename for (linename,lam) in iteritems(wavelength) if xarr.as_unit('micron').in_range(lam)]
 
 def hydrogen_fitter(sp, temperature=10000, tiedwidth=False):
     """
@@ -218,8 +241,8 @@ def hydrogen_fitter(sp, temperature=10000, tiedwidth=False):
 
     dx = np.median(sp.xarr.dxarr)
 
-    subguesses = [[ sp.data[sp.xarr.as_unit('microns').x_to_pix(wavelength[line])],
-        sp.xarr.x_to_coord(wavelength[line],'microns'),
+    subguesses = [[ sp.data[sp.xarr.as_unit('micron').x_to_pix(wavelength[line])],
+        sp.xarr.x_to_coord(wavelength[line],'micron'),
         dx*2.0 ] for line in lines]
     guesses = [g for sublist in subguesses for g in sublist]
 
@@ -260,7 +283,7 @@ def hydrogen_model(xarr, amplitude=1.0, width=0.0, velocity=0.0, a_k=0.0, temper
     reference_line = lines[0]
 
     model = np.array(xarr * 0)
-    xarr = xarr.as_unit('microns')
+    xarr = xarr.as_unit('micron')
 
 
     lw = width / units.speedoflight_kms * wavelength[reference_line]
@@ -291,7 +314,7 @@ def add_to_registry(sp):
             parnames=['amplitude','width','velocity','extinction'],
             parlimited=[(True,False),(True,False),(False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
-            fitunits='microns')
+            fitunits='micron')
 
     sp.Registry.add_fitter('hydrogen', extincted_hydrogen_emission,
             extincted_hydrogen_emission.npars)

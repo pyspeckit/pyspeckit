@@ -31,6 +31,15 @@ the semi-private method ::
     sp._register_fitters(registry=MyRegistry)
 
 
+Examples
+--------
+
+If you want to register a new variable-optical-depth deuterated ammonia model,
+you could do the following:
+
+    sp.specfit.register_fitter(name='nh2d', function=nh2d.nh2d_vtau_fitter, npars=4)
+    
+
 API
 ~~~
 

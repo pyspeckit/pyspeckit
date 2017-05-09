@@ -1,3 +1,4 @@
+import astropy
 import pyspeckit
 try:
     from astropy.io import fits as pyfits
@@ -57,5 +58,7 @@ f[0].header.update('CTYPE3','FITPAR')
 f[0].header.update('CRVAL3',0)
 f[0].header.update('CRPIX3',1)
 # save your work
-f.writeto('region5.hcn.nosmooth.fit.fits', clobber=True)
-
+if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+    f.writeto('region5.hcn.nosmooth.fit.fits', overwrite=True)
+else:
+    f.writeto('region5.hcn.nosmooth.fit.fits', clobber=True)

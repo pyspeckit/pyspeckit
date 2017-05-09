@@ -56,11 +56,12 @@ class SpectralModel(fitter.SimpleFitter):
         parvalues : list (optional)
             the initial guesses for the input parameters (defaults to ZEROS)
         parlimits :  list (optional)
-            the upper/lower limits for each variable     (defaults to ZEROS)
+            the upper/lower limits for each variable (defaults to ZEROS)
         parfixed  : list (optional)
-            Can declare any variables to be fixed        (defaults to ZEROS)
+            Can declare any variables to be fixed (defaults to ZEROS)
         parerror  : list (optional)
-            technically an output parameter... hmm       (defaults to ZEROS)
+            technically an output parameter.  Specifying it here will have no
+            effect. (defaults to ZEROS)
         partied   : list (optional)
             not the past tense of party.  Can declare, via text, that
             some parameters are tied to each other.  Defaults to zeros like the
@@ -68,7 +69,7 @@ class SpectralModel(fitter.SimpleFitter):
         fitunits : str (optional)
             convert X-axis to these units before passing to model
         parsteps : list (optional)
-            minimum step size for each paremeter          (defaults to ZEROS)
+            minimum step size for each paremeter (defaults to ZEROS)
         npeaks   : list (optional)
             default number of peaks to assume when fitting (can be overridden)
         shortvarnames : list (optional)
@@ -229,14 +230,17 @@ class SpectralModel(fitter.SimpleFitter):
                              'error': 0, 'tied':""}]
         elif vheight and len(self.parinfo) == self.default_npars and len(parvalues) == self.default_npars:
             # if you're one par short, guess zero
-            self.parinfo = [ {'n':0, 'value': 0, 'limits':(0,0),
-                'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
-                'error': 0, 'tied':"" } ]
+            self.parinfo = [{
+                'n':0, 'value': 0, 'limits':(0,0), 'limited': (False,False),
+                'fixed':False, 'parname':'HEIGHT', 'error': 0, 'tied':""
+            }]
         elif vheight and len(self.parinfo) == self.default_npars+1 and len(parvalues) == self.default_npars+1:
             # the right numbers are passed *AND* there is already a height param
-            self.parinfo = [ {'n':0, 'value':parvalues.pop(0), 'limits':(0,0),
-                'limited': (False,False), 'fixed':False, 'parname':'HEIGHT',
-                'error': 0, 'tied':"" } ]
+            self.parinfo = [{
+                'n':0, 'value':parvalues.pop(0), 'limits':(0,0),
+                'limited': (False,False), 'fixed': False, 'parname':'HEIGHT',
+                'error': 0, 'tied':""
+            }]
             #heightparnum = (i for i,s in self.parinfo if 'HEIGHT' in s['parname'])
             #for hpn in heightparnum:
             #    self.parinfo[hpn]['value'] = parvalues[0]
@@ -269,15 +273,15 @@ class SpectralModel(fitter.SimpleFitter):
         # generate the parinfo dict
         # note that 'tied' must be a blank string (i.e. ""), not False, if it is not set
         # parlimited, parfixed, and parlimits are all two-element items (tuples or lists)
-        self.parinfo += [ {'n':ii+self.npars*jj+vheight,
-            'value':float(temp_pardict['parvalues'][ii+self.npars*jj]),
-            'step':temp_pardict['parsteps'][ii+self.npars*jj],
-            'limits':temp_pardict['parlimits'][ii+self.npars*jj],
-            'limited':temp_pardict['parlimited'][ii+self.npars*jj],
-            'fixed':temp_pardict['parfixed'][ii+self.npars*jj],
-            'parname':temp_pardict['parnames'][ii].upper()+"%0i" % int(jj),
-            'error':float(temp_pardict['parerror'][ii+self.npars*jj]),
-            'tied':temp_pardict['partied'][ii+self.npars*jj] if temp_pardict['partied'][ii+self.npars*jj] else ""} 
+        self.parinfo += [{'n':ii+self.npars*jj+vheight,
+                          'value':float(temp_pardict['parvalues'][ii+self.npars*jj]),
+                          'step':temp_pardict['parsteps'][ii+self.npars*jj],
+                          'limits':temp_pardict['parlimits'][ii+self.npars*jj],
+                          'limited':temp_pardict['parlimited'][ii+self.npars*jj],
+                          'fixed':temp_pardict['parfixed'][ii+self.npars*jj],
+                          'parname':temp_pardict['parnames'][ii].upper()+"%0i" % int(jj),
+                          'error':float(temp_pardict['parerror'][ii+self.npars*jj]),
+                          'tied':temp_pardict['partied'][ii+self.npars*jj] if temp_pardict['partied'][ii+self.npars*jj] else ""}
             for jj in range(self.npeaks)
             for ii in range(self.npars) ] # order matters!
 
@@ -339,6 +343,12 @@ class SpectralModel(fitter.SimpleFitter):
             parvals = [p.value for p in parvals]
         else:
             parvals = list(pars)
+
+        if np.any(np.isnan(parvals)):
+            raise ValueError("A parameter is NaN.  Unless you gave a NaN "
+                             "value directly, this is a bug and should be "
+                             "reported.  If you specified a NaN parameter, "
+                             "don't do that.")
 
         log.debug("pars to n_modelfunc: {0}, parvals:{1}".format(pars, parvals))
         def L(x):
@@ -446,9 +456,9 @@ class SpectralModel(fitter.SimpleFitter):
         #modelpars = [p.value for p in parinfo.values()]
         #modelerrs = [p.stderr for p in parinfo.values() if p.stderr is not None else 0]
 
-        self.LMParams = LMParams
-        self.parinfo._from_Parameters(LMParams)
-        log.debug("LMParams: {0}".format(LMParams))
+        self.LMParams = minimizer.params
+        self.parinfo._from_Parameters(self.LMParams)
+        log.debug("LMParams: {0}".format(self.LMParams))
         log.debug("parinfo: {0}".format(parinfo))
 
         self.mp = minimizer

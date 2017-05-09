@@ -1,6 +1,6 @@
 PySpecKit Spectroscopic Toolkit
 -------------------------------
-`<pyspeckit.bitbucket.org>`_
+`<http://pyspeckit.bitbucket.org>`_
 and `<https://github.com/pyspeckit/pyspeckit>`_
 
 This is a code framework designed to allow for analysis of spectroscopic data

@@ -43,6 +43,13 @@ except ImportError:
     atpyOK = False
 
 try:
+    import specutils
+    specutilsOK = True
+except ImportError:
+    specutilsOK = False
+
+
+try:
     from Spectrum1D import Spectrum1D # inherit from astropy
 except ImportError:
     Spectrum1D = object
@@ -52,18 +59,14 @@ try:
 except ImportError:
     u = None
 
-class Spectrum(object):
-    """
-    The core class for the spectroscopic toolkit.  Contains the data and error
-    arrays along with wavelength / frequency / velocity information in various
-    formats.
-    """
+class BaseSpectrum(object):
 
     from .interpolation import interpnans
 
     def __init__(self, filename=None, filetype=None, xarr=None, data=None,
                  error=None, header=None, doplot=False, maskdata=True,
-                 unit=None, plotkwargs={}, xarrkwargs={}, **kwargs):
+                 unit=None, plotkwargs={}, xarrkwargs={}, model_registry=None,
+                 **kwargs):
         """
         Create a Spectrum object.
 
@@ -86,7 +89,7 @@ class Spectrum(object):
             functionality.
         data : `np.ndarray`
             The data array (must have same length as xarr)
-        error : `np.ndarray` 
+        error : `np.ndarray`
             The error array (must have same length as the data and xarr arrays)
         header : `pyfits.Header` or dict
             The header from which to read unit information.  Needs to be a
@@ -108,7 +111,7 @@ class Spectrum(object):
         --------
 
         >>> sp = pyspeckit.Spectrum(data=np.random.randn(100),
-                    xarr=np.linspace(-50, 50, 100), error=np.ones(100)*0.1, 
+                    xarr=np.linspace(-50, 50, 100), error=np.ones(100)*0.1,
                     xarrkwargs={'unit':'km/s', 'refX':4.829, 'refX_unit':'GHz',
                         'xtype':'VLSR-RAD'}, header={})
 
@@ -116,8 +119,8 @@ class Spectrum(object):
                     units='km/s', refX=6562.83, refX_unit='angstroms')
         >>> data = np.random.randn(100)*5 + np.random.rand(100)*100
         >>> err = np.sqrt(data/5.)*5. # Poisson noise
-        >>> sp = pyspeckit.Spectrum(data=data, error=err, xarr=xarr, header={}) 
-        
+        >>> sp = pyspeckit.Spectrum(data=data, error=err, xarr=xarr, header={})
+
         >>> # if you already have a simple fits file
         >>> sp = pyspeckit.Spectrum('test.fits')
         """
@@ -149,7 +152,7 @@ class Spectrum(object):
                     raise TypeError("Filetype %s not recognized" % filetype)
 
             self.data,self.error,self.xarr,self.header = reader(filename,**kwargs)
-            
+
             # these should probably be replaced with registerable function s...
             if filetype in ('fits','tspec','pyfits','sdss'):
                 self.parse_header(self.header)
@@ -172,7 +175,7 @@ class Spectrum(object):
             if error is not None:
                 self.error = error
             else:
-                self.error = data * 0
+                self.error = np.zeros_like(data)
             if hasattr(header,'get'):
                 if not isinstance(header, pyfits.Header):
                     cards = [pyfits.Card(k, header[k]) for k in header]
@@ -180,7 +183,7 @@ class Spectrum(object):
                 else:
                     self.header = header
             else: # set as blank
-                warn( "WARNING: No header given.  Creating an empty one." )
+                warn("WARNING: No header given.  Creating an empty one.")
                 self.header = pyfits.Header()
             self.parse_header(self.header)
         else:
@@ -191,6 +194,12 @@ class Spectrum(object):
             # TODO: use the quantity more appropriately
             self.unit = str(self.data.unit)
             self.data = self.data.value
+
+        if hasattr(self.error, 'unit'):
+            # errors have to have the same units as data, but then should be
+            # converted to arrays.  Long term, we'd like to have everything
+            # be treated internally as a Quantity, but... not yet.
+            self.error = self.error.to(self.unit).value
 
         if maskdata:
             if hasattr(self.data,'mask'):
@@ -204,8 +213,8 @@ class Spectrum(object):
         # it is very important that this be done BEFORE the spectofit is set!
         self._sort()
         self.plotter = plotters.Plotter(self)
-        self._register_fitters()
-        self.specfit = fitters.Specfit(self,Registry=self.Registry)
+        self._register_fitters(registry=model_registry)
+        self.specfit = fitters.Specfit(self, Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
         self.speclines = speclines
 
@@ -218,26 +227,8 @@ class Spectrum(object):
         elif not hasattr(self, '_unit'):
             self._unit = u.dimensionless_unscaled
 
-        if doplot: self.plotter(**plotkwargs)
-
-    @classmethod
-    def from_spectrum1d(self, spec1d):
-        """
-        Tool to load a pyspeckit Spectrum from a specutils object
-
-        (this is intended to be temporary; long-term the pyspeckit Spectrum
-        object will inherit from a specutils Spectrum1D object)
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def from_hdu(cls, hdu):
-        """
-        Create a pyspeckit Spectrum object from an HDU
-        """
-
-        spec,errspec,XAxis,hdr = readers.open_1d_pyfits(hdu)
-        return cls(data=spec, error=errspec, xarr=XAxis, header=hdr)
+        if doplot:
+            self.plotter(**plotkwargs)
 
     @property
     def unit(self):
@@ -257,6 +248,25 @@ class Spectrum(object):
         log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
         self._unit = value
 
+    @property
+    def data_quantity(self):
+        return u.Quantity(self.data, unit=self.unit)
+
+    @data_quantity.setter
+    def data_quantity(self, value):
+        if not hasattr(value, 'unit'):
+            raise ValueError("To set the data to a Quantity value, it must "
+                             "have a unit.")
+        if hasattr(self.data, 'mask') and not hasattr(value, 'mask'):
+            raise ValueError("The original data had a mask.  You must use "
+                             "a masked array to set the data value.")
+        self.data = value.value
+        self.unit = value.unit
+
+    @property
+    def error_quantity(self):
+        return u.Quantity(self.error, unit=self.unit)
+
     def _register_fitters(self, registry=None):
         """
         Register fitters independently for each spectrum instance
@@ -272,19 +282,20 @@ class Spectrum(object):
 
         for modelname, model in iteritems(registry.multifitters):
             self.Registry.add_fitter(modelname, model,
-                    registry.npars[modelname], key=registry.associated_keys.get(modelname))
+                                     registry.npars[modelname],
+                                     key=registry.associated_keys.get(modelname))
 
     def _sort(self):
         """
-        Make sure X axis is monotonic.  
+        Make sure X axis is monotonic.
         """
         if self.xarr.dxarr.min() < 0:
             argsort = np.argsort(self.xarr)
             self.data = self.data[argsort]
             self.error = self.error[argsort]
             self.xarr = self.xarr[argsort]
-            self.xarr.dxarr = np.diff(self.xarr.value)
-        
+            self.xarr.make_dxarr()
+
     def write(self,filename,type=None,**kwargs):
         """
         Write the spectrum to a file.  The available file types are listed
@@ -324,7 +335,10 @@ class Spectrum(object):
             unit = Table.columns[xtype].unit
             self.xarr.set_unit(unit)
         else:
-            warn( "Warning: Invalid xtype in text header - this may mean no text header was available.  X-axis units will be pixels unless you set them manually (e.g., sp.xarr.unit='angstroms')")
+            warn("Warning: Invalid xtype in text header - this may mean no "
+                 "text header was available.  X-axis units will be pixels "
+                 "unless you set them manually "
+                 "(e.g., sp.xarr=SpectroscopicAxis(sp.xarr.value, unit='angstroms')")
             self.xarr.xtype = 'pixels'
             self.xarr.set_unit(u.pixel)
             #raise ValueError("Invalid xtype in text header")
@@ -342,7 +356,7 @@ class Spectrum(object):
         self.header['CTYPE1'] = self.xarr.xtype
         self.header['BUNIT'] = self.unit
         self.header['BTYPE'] = self.ytype
-        
+
     def parse_hdf5_header(self, hdr):
         """
         HDF5 reader will create a hdr dictionary from HDF5 dataset attributes
@@ -350,8 +364,8 @@ class Spectrum(object):
         instance.
 
         .. todo:: Move this to the hdf5 reader?
-        """    
-        
+        """
+
         self.xarr.xtype = hdr['xtype']
         self.xarr.xunit = hdr['xunit']
         self.ytype = hdr['ytype']
@@ -378,7 +392,7 @@ class Spectrum(object):
         elif not hasattr(self, 'unit') or (hasattr(self,'unit') and self.unit
                                            is None):
             self.unit = 'undefined'
-            
+
         if hdr.get('BTYPE'):
             self.ytype = hdr.get('BTYPE').strip()
         else:
@@ -392,16 +406,19 @@ class Spectrum(object):
             self.specname = hdr.get('OBJNAME')
         else:
             self.specname = ''
-            
+
     def measure(self, z=None, d=None, fluxnorm=None, miscline=None,
-            misctol=10.0, ignore=None, derive=True, **kwargs):
+                misctol=10.0, ignore=None, derive=True, **kwargs):
         """
         Initialize the measurements class - only do this after you have run a
         fitter otherwise pyspeckit will be angry!
         """
         self.measurements=measurements.Measurements(self, z=z, d=d,
-                fluxnorm=fluxnorm, miscline=miscline, misctol=misctol,
-                ignore=ignore, derive=derive, **kwargs)
+                                                    fluxnorm=fluxnorm,
+                                                    miscline=miscline,
+                                                    misctol=misctol,
+                                                    ignore=ignore,
+                                                    derive=derive, **kwargs)
 
     def crop(self, x1, x2, unit=None, **kwargs):
         """
@@ -463,12 +480,12 @@ class Spectrum(object):
 
         .. WARNING:: this is the same as cropping right now, but it returns a
             copy instead of cropping inplace
-        
+
         Parameters
         ----------
-        start : numpy.float or int
+        start : numpy.float or int or astropy quantity
             start of slice
-        stop :  numpy.float or int
+        stop :  numpy.float or int or astropy quantity
             stop of slice
         unit : str
             allowed values are any supported physical unit, 'pixel'
@@ -477,16 +494,24 @@ class Spectrum(object):
         preserve_fits : bool
             Save the fitted parameters from self.fitter?
         """
-        
-        if unit in ('pixel','pixels'):
+
+        if hasattr(start, 'unit'):
+            start_ind = self.xarr.x_to_pix(start)
+        elif unit in ('pixel','pixels'):
             start_ind = start
-            stop_ind  = stop
         else:
-            x_in_units = self.xarr.as_unit(unit)
-            start_ind = x_in_units.x_to_pix(start)
-            stop_ind  = x_in_units.x_to_pix(stop)
+            start_ind = self.xarr.x_to_pix(start, xval_units=unit)
+
+        if hasattr(stop, 'unit'):
+            stop_ind = self.xarr.x_to_pix(stop)
+        elif unit in ('pixel','pixels'):
+            stop_ind = stop
+        else:
+            stop_ind = self.xarr.x_to_pix(stop, xval_units=unit)
+
         if start_ind > stop_ind:
             start_ind,stop_ind = stop_ind,start_ind
+
         spectrum_slice = slice(start_ind,stop_ind)
 
         log.debug("Slicing from {start} to {stop} with unit {unit} and copy="
@@ -510,7 +535,7 @@ class Spectrum(object):
 
         if copy:
             # create new specfit / baseline instances (otherwise they'll be the wrong length)
-            sp._register_fitters()
+            sp._register_fitters(registry=self.Registry)
             sp.baseline = baseline.Baseline(sp)
             sp.specfit = fitters.Specfit(sp,Registry=sp.Registry)
         else:
@@ -539,7 +564,7 @@ class Spectrum(object):
     @flux.setter
     def flux(self,value):
         self.data = value
-    
+
     def __getitem__(self, indx):
         """
         Slice the data using pixel units (not quite the same as self.slice
@@ -553,15 +578,15 @@ class Spectrum(object):
         sp.xarr = sp.xarr.__getitem__(indx)
 
         # this should be done by deepcopy, but deepcopy fails with current pyfits
-        sp.plotter = copy.copy(self.plotter)
+        sp.plotter = self.plotter.copy(parent=sp)
         sp.plotter.Spectrum = sp
-        sp.specfit = copy.copy(self.specfit)
+        sp.specfit = self.specfit.copy(parent=sp, registry=sp.Registry)
         sp.specfit.Spectrum = sp
         sp.specfit.Spectrum.plotter = sp.plotter
-        sp.baseline = copy.copy(self.baseline)
+        sp.baseline = self.baseline.copy(parent=sp)
         sp.baseline.Spectrum = sp
         sp.baseline.Spectrum.plotter = sp.plotter
-        
+
         return sp
 
     def downsample(self, dsfactor):
@@ -608,7 +633,7 @@ class Spectrum(object):
                 self.error = sm.smooth(self.error,smooth,**kwargs)
             self.baseline.downsample(smooth)
             self.specfit.downsample(smooth)
-    
+
             self._smooth_header(smooth)
     smooth.__doc__ += "sm.smooth doc: \n" + sm.smooth.__doc__
 
@@ -640,11 +665,11 @@ class Spectrum(object):
             name = " named %s" % self.specname
         else:
             name = ""
-        return r'<Spectrum object%s over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s at %s>' % \
-                (name, self.xarr.min().value, self.xarr.max().value, self.xarr.unit,
-                        self.data.min(), self.data.max(), self.unit,
-                        str(hex(self.__hash__())))
-    
+        return (r'<%s object%s over spectral range %6.5g : %6.5g %s and flux range = [%2.1f, %2.1f] %s at %s>' %
+                (self.__class_name__, name, self.xarr.min().value, self.xarr.max().value,
+                 self.xarr.unit, self.data.min(), self.data.max(), self.unit,
+                 str(hex(self.__hash__()))))
+
 
     def copy(self,deep=True):
         """
@@ -661,8 +686,8 @@ class Spectrum(object):
 
         newspec.header = copy.copy(self.header)
         newspec.plotter = self.plotter.copy(parent=newspec)
-        newspec._register_fitters()
-        newspec.specfit = self.specfit.copy(parent=newspec)
+        newspec._register_fitters(registry=self.Registry)
+        newspec.specfit = self.specfit.copy(parent=newspec, registry=newspec.Registry)
         newspec.specfit.Spectrum.plotter = newspec.plotter
         newspec.baseline = self.baseline.copy(parent=newspec)
         newspec.baseline.Spectrum.plotter = newspec.plotter
@@ -684,8 +709,10 @@ class Spectrum(object):
         if len(statrange) == 2:
             pix1 = self.xarr.x_to_pix(statrange[0])
             pix2 = self.xarr.x_to_pix(statrange[1])
-            if pix1 > pix2: pix1,pix2 = pix2,pix1
-            elif pix1 == pix2: raise ValueError("Invalid statistics range - includes 0 pixels")
+            if pix1 > pix2:
+                pix1,pix2 = pix2,pix1
+            elif pix1 == pix2:
+                raise ValueError("Invalid statistics range - includes 0 pixels")
             data = self.data[pix1:pix2]
         elif interactive:
             raise NotImplementedError('Not implemented yet.  Probably need to move the stats command into a different module first')
@@ -715,7 +742,7 @@ class Spectrum(object):
         # self.radio = speclines.radio.radio_lines(self)
         # or optical:
         # self.optical = speclines.optical.optical_lines(self)
-        if not linetype in self.__dict__: # don't replace it if it already exists
+        if linetype not in self.__dict__: # don't replace it if it already exists
             self.__dict__[linetype] = speclines.__dict__[linetype].__dict__[linetype+"_lines"](self,**kwargs)
 
     def moments(self, unit='km/s', **kwargs):
@@ -740,22 +767,25 @@ class Spectrum(object):
         after checking for shape matching
         """
 
-        def ofunc(self, other): 
+        def ofunc(self, other):
             if np.isscalar(other):
                 newspec = self.copy()
-                newspec.data = operation(newspec.data, other) 
+                newspec.data = operation(newspec.data, other)
                 return newspec
 
             elif hasattr(self,'xarr') and hasattr(other,'xarr'): # purely for readability
 
                 if self._arithmetic_threshold == 'exact':
-                    xarrcheck = all(self.xarr == other.xarr)
+                    xarrcheck = np.all((self.xarr == other.xarr))
                 else:
                     if self._arithmetic_threshold_units is None:
                         # not sure this should ever be allowed
-                        xarrcheck = all(np.abs(self.xarr-other.xarr) < self._arithmetic_threshold)
+                        xarrcheck = np.all(np.abs(self.xarr-other.xarr).value < self._arithmetic_threshold)
                     else:
-                        xarrcheck = all(np.abs(self.xarr.as_unit(self._arithmetic_threshold_units)-other.xarr.as_unit(self._arithmetic_threshold_units)) < self._arithmetic_threshold)
+                        xarr_u = self.xarr.as_unit(self._arithmetic_threshold_units)
+                        other_xarr_u = other.xarr.as_unit(self._arithmetic_threshold_units)
+                        xarrcheck = np.all(np.abs(xarr_u - other_xarr_u).value <
+                                           self._arithmetic_threshold)
 
                 if self.shape == other.shape and xarrcheck:
                     newspec = self.copy()
@@ -799,8 +829,56 @@ class Spectrum(object):
     __mul__ = _operation_wrapper(np.multiply)
     __div__ = _operation_wrapper(np.divide)
 
+class SingleSpectrum(BaseSpectrum):
+    __class_name__ = 'SingleSpectrum'
 
-class Spectra(Spectrum):
+    @classmethod
+    def from_spectrum1d(cls, spec1d):
+        """
+        Tool to load a pyspeckit Spectrum from a specutils object
+
+        Examples
+        --------
+        >>> # grab many spectra from a multiextension FITS file
+        >>> spectra = specutils.io.fits.read_fits_spectrum1d('AAO.fits')
+        >>> sp = pyspeckit.Spectrum.from_spectrum1d(spectra[0])
+
+        >>> # open a single spectrum that could have been opened directly with pyspeckit
+        >>> spectrum = specutils.io.fits.read_fits_spectrum1d('gbt_1d.fits')
+        >>> sp = pyspeckit.Spectrum.from_spectrum1d(spectrum)
+        """
+        xarr = units.SpectroscopicAxis(spec1d.dispersion)
+
+        data = spec1d.flux
+        error = spec1d.uncertainty
+
+        return cls(data=data, error=error, xarr=xarr,
+                   unit=spec1d._unit, header=pyfits.Header())
+
+
+    @classmethod
+    def from_hdu(cls, hdu):
+        """
+        Create a pyspeckit Spectrum object from an HDU
+        """
+
+        spec,errspec,XAxis,hdr = readers.open_1d_pyfits(hdu)
+        return cls(data=spec, error=errspec, xarr=XAxis, header=hdr)
+
+    __class_name__ = 'BaseSpectrum'
+
+
+class Spectrum(SingleSpectrum):
+    """
+    The core class for the spectroscopic toolkit.  Contains the data and error
+    arrays along with wavelength / frequency / velocity information in various
+    formats.
+    """
+    # just does what BaseSpectrum and SingleSpectrum do
+    __class_name__ = 'Spectrum'
+
+
+class Spectra(BaseSpectrum):
     """
     A list of individual Spectrum objects.  Intended to be used for
     concatenating different wavelength observations of the SAME OBJECT.  Can be
@@ -808,15 +886,16 @@ class Spectra(Spectrum):
     fitting multiple lines on non-continguous axes simultaneously.  Be wary of
     plotting these though...
 
-    Can be indexed like python lists.  
+    Can be indexed like python lists.
 
     X array is forcibly sorted in increasing order
     """
+    __class_name__ = 'Spectra'
 
-    def __init__(self, speclist, xunit='GHz', **kwargs):
+    def __init__(self, speclist, xunit=None, model_registry=None, **kwargs):
         """
         """
-        print("Creating spectra")
+        log.info("Creating spectra")
         speclist = list(speclist)
         for ii,spec in enumerate(speclist):
             if type(spec) is str:
@@ -825,7 +904,11 @@ class Spectra(Spectrum):
 
         self.speclist = speclist
 
-        print("Concatenating data")
+        if xunit is None:
+            xunit = speclist[0].xarr.unit
+
+        log.info("Concatenating data")
+
         self.xarr = units.SpectroscopicAxes([sp.xarr.as_unit(xunit) for sp in speclist])
         self.xarr.set_unit(u.Unit(xunit))
         self.xarr.xtype = u.Unit(xunit)
@@ -842,10 +925,10 @@ class Spectra(Spectrum):
                     warn("Could not update header KEY=%s to VALUE=%s" % (key,value))
 
         self.plotter = plotters.Plotter(self)
-        self._register_fitters()
+        self._register_fitters(registry=model_registry)
         self.specfit = fitters.Specfit(self,Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
-        
+
         self.unit = speclist[0].unit
         for spec in speclist:
             if spec.unit != self.unit:
@@ -854,6 +937,20 @@ class Spectra(Spectrum):
         # Special.  This needs to be modified to be more flexible; for now I need it to work for nh3
         self.plot_special = None
         self.plot_special_kwargs = {}
+
+    @classmethod
+    def from_spectrum1d_list(cls, lst):
+        """
+        Tool to load a collection of pyspeckit Spectra from a specutils list of
+        Spectrum1D objects
+
+        Examples
+        --------
+        >>> # grab many spectra from a multiextension FITS file
+        >>> spectra = specutils.io.fits.read_fits_spectrum1d('AAO.fits')
+        >>> sp = pyspeckit.Spectrum.from_spectrum1d_list(spectra)
+        """
+        return cls([Spectrum.from_spectrum1d(spec) for spec in lst])
 
     def __add__(self,other):
         """
@@ -869,10 +966,10 @@ class Spectra(Spectrum):
 
         if other.xarr.unit != self.xarr.unit:
             # convert all inputs to same unit
-            spec.xarr.convert_to_units(self.xarr.unit,**kwargs)
-        self.xarr = units.SpectroscopicAxes([self.xarr,spec.xarr])
-        self.data = np.concatenate([self.data,spec.data])
-        self.error = np.concatenate([self.error,spec.error])
+            other.xarr.convert_to_unit(self.xarr.unit)
+        self.xarr = units.SpectroscopicAxes([self.xarr,other.xarr])
+        self.data = np.concatenate([self.data,other.data])
+        self.error = np.concatenate([self.error,other.error])
         self._sort()
 
     def __getitem__(self,index):
@@ -881,7 +978,7 @@ class Spectra(Spectrum):
         """
         return self.speclist[index]
 
-    def __len__(self): 
+    def __len__(self):
         """
         len(spectra) != len(spectrum) !
         """
@@ -934,7 +1031,7 @@ class Spectra(Spectrum):
                                              self.xarr,self.specfit.fullmodel)
 
             sp.plotter(**plotkwargs)
-            
+
             if plot_fit and self.specfit.model is not None:
                 sp.specfit.plot_fit(**plotfitkwargs)
 
@@ -946,10 +1043,11 @@ class ObsBlock(Spectra):
     Consists of multiple spectra with a shared X-axis.  Intended to hold groups
     of observations of the same object in the same setup for later averaging.
 
-    ObsBlocks can be indexed like python lists.  
+    ObsBlocks can be indexed like python lists.
     """
 
-    def __init__(self, speclist, xtype='frequency', xarr=None, force=False, **kwargs):
+    def __init__(self, speclist, xtype='frequency', xarr=None, force=False,
+                 model_registry=None, **kwargs):
 
         if xarr is None:
             self.xarr = speclist[0].xarr
@@ -966,7 +1064,7 @@ class ObsBlock(Spectra):
             if not np.array_equal(spec.xarr, self.xarr):
                 if not force:
                     raise ValueError("Mismatch between X axes in ObsBlock")
-            if spec.unit != self.unit: 
+            if spec.unit != self.unit:
                 raise ValueError("Mismatched units")
 
         if force:
@@ -980,18 +1078,18 @@ class ObsBlock(Spectra):
         self.error = np.array([sp.error for sp in self.speclist]).swapaxes(0,1).squeeze()
 
         self.plotter = plotters.Plotter(self)
-        self._register_fitters()
-        self.specfit = fitters.Specfit(self,Registry=self.Registry)
+        self._register_fitters(registry=model_registry)
+        self.specfit = fitters.Specfit(self, Registry=self.Registry)
         self.baseline = baseline.Baseline(self)
-        
+
     def average(self, weight=None, inverse_weight=False, error='erravgrtn', debug=False):
         """
         Average all scans in an ObsBlock.  Returns a single Spectrum object
-        
+
         Parameters
         ----------
         weight : string
-            a header keyword to weight by.   If not specified, the spectra will be 
+            a header keyword to weight by.   If not specified, the spectra will be
             averaged without weighting
         inverse_weight : bool
             Is the header keyword an inverse-weight (e.g., a variance?)
@@ -1017,11 +1115,14 @@ class ObsBlock(Spectra):
         data_nonan = np.nan_to_num(self.data)
         weighted_data = (data_nonan * wtarr)
         weighted_data_axsum = weighted_data.sum(axis=1)
-        weight_axsum = wtarr.sum(axis=1) 
-        avgdata =  weighted_data_axsum / weight_axsum 
+        weight_axsum = wtarr.sum(axis=1)
+        avgdata = weighted_data_axsum / weight_axsum
         if error is 'scanrms':
             # axis swapping is for projection... avgdata = 0'th axis
-            errspec = np.sqrt( (((data_nonan.swapaxes(0,1)-avgdata) * wtarr.swapaxes(0,1))**2 / wtarr.swapaxes(0,1)**2).swapaxes(0,1).sum(axis=1) )
+            errspec = np.sqrt((((data_nonan.swapaxes(0,1)-avgdata) *
+                                wtarr.swapaxes(0,1))**2 /
+                               wtarr.swapaxes(0,1)**2).swapaxes(0,1).sum(axis=1)
+                             )
         elif error is 'erravg':
             errspec = self.error.mean(axis=1)
         elif error is 'erravgrtn':
@@ -1032,7 +1133,7 @@ class ObsBlock(Spectra):
 
         if debug:
             # this statement, and much of the text above, is to test an absolutely insane error:
-            # wtarr.sum(axis=1) randomly - say, one out of every 10-100 occurrences - fills with 
+            # wtarr.sum(axis=1) randomly - say, one out of every 10-100 occurrences - fills with
             # nonsense values (1e-20, 1e-55, whatever).  There is no pattern to this; it occurs in
             # while loops, but ONLY IN THIS FUNCTION.  This is unreproduceable anywhere else.
             print("selfdata    min: %10g max: %10g" % (self.data.min(), self.data.max()))
@@ -1045,7 +1146,8 @@ class ObsBlock(Spectra):
 
         return spec
 
-    def __len__(self): return len(self.speclist)
+    def __len__(self):
+        return len(self.speclist)
 
     def __getitem__(self,index):
         """
@@ -1065,7 +1167,7 @@ class ObsBlock(Spectra):
         self.error = sm.smooth_multispec(self.error,smooth,**kwargs)
         self.baseline.downsample(smooth)
         self.specfit.downsample(smooth)
-    
+
         self._smooth_header(smooth)
 
 class XCorrSpectrum(Spectrum):
@@ -1075,4 +1177,3 @@ class XCorrSpectrum(Spectrum):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
