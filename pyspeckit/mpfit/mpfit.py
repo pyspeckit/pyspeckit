@@ -1149,8 +1149,10 @@ class mpfit:
                 if temp3 != 0:
                     fj = fjac[j:,lj]
                     wj = wa4[j:]
+                    # vsokolov 21 Mar 2017: switched to numpy's sum(),
+                    #                       as both are numpy arrays.
                     # *** optimization wa4(j:*)
-                    wa4[j:] = wj - fj * sum(fj*wj) / temp3
+                    wa4[j:] = wj - fj * numpy.sum(fj*wj) / temp3
                 fjac[j,lj] = wa1[j]
                 qtf[j] = wa4[j]
             log.log(5, 'After optimizing wa4, qtf={0}'.format(qtf))
@@ -1871,7 +1873,9 @@ class mpfit:
                     # *** Note optimization a(j:*,lk)
                     # (corrected 20 Jul 2000)
                     if a[j,lj] != 0:
-                        a[j:,lk] = ajk - ajj * sum(ajk*ajj)/a[j,lj]
+                        # vsokolov 21 Mar 2017: switched to numpy's sum(),
+                        #                       as both are numpy arrays.
+                        a[j:,lk] = ajk - ajj * numpy.sum(ajk*ajj)/a[j,lj]
                         if (pivot != 0) and (rdiag[k] != 0):
                             temp = a[j,lk]/rdiag[k]
                             rdiag[k] = rdiag[k] * numpy.sqrt(numpy.max([(1.-temp**2), 0.]))

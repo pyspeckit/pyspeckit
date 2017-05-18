@@ -98,7 +98,8 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                                     Jortho, Jpara, Brot, Crot)
 
     # Convert X-units to frequency in GHz
-    xarr = xarr.as_unit('GHz')
+    if xarr.unit.to_string() != 'GHz':
+        xarr = xarr.as_unit('GHz')
 
     if tex is None:
         log.warning("Assuming tex=trot")
@@ -526,6 +527,8 @@ class ammonia_model(model.SpectralModel):
                                           'fixed', 'limitedmin', 'limitedmax',
                                           'minpars', 'maxpars', 'tied',
                                           'max_tem_step'))
+        fitfun_kwargs.update(self.modelfunc_kwargs)
+
         if 'use_lmfit' in fitfun_kwargs:
             raise KeyError("use_lmfit was specified in a location where it "
                            "is unacceptable")
