@@ -37,6 +37,7 @@ except ImportError:
 
 from . import posang # agpy code
 from ..parallel_map import parallel_map
+from ..spectrum import smooth as sm
 
 dtor = pi/180.0
 
@@ -729,7 +730,7 @@ def spectral_smooth(cube, smooth_factor, downsample=True, parallel=True,
     # need to make the cube "flat" along dims 1&2 for iteration in the "map"
     flatshape = (cube.shape[0],cube.shape[1]*cube.shape[2])
 
-    Ssmooth = lambda x: smooth.smooth(x, smooth_factor, downsample=downsample, **kwargs)
+    Ssmooth = lambda x: sm.smooth(x, smooth_factor, downsample=downsample, **kwargs)
     if parallel:
         newcube = numpy.array(parallel_map(Ssmooth, cube.reshape(flatshape).T, numcores=numcores)).T.reshape(newshape)
     else:
@@ -737,7 +738,7 @@ def spectral_smooth(cube, smooth_factor, downsample=True, parallel=True,
 
     #naive, non-optimal version
     # for (x,y) in zip(xx.flat,yy.flat):
-    #     newcube[:,y,x] = smooth.smooth(cube[:,y,x], smooth_factor,
+    #     newcube[:,y,x] = sm.smooth(cube[:,y,x], smooth_factor,
     #             downsample=downsample, **kwargs)
 
     return newcube
