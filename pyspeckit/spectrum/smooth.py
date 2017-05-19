@@ -8,7 +8,7 @@ def smoothed(spectrum, **kwargs):
     return sp
 
 def smooth(data, smooth, smoothtype='gaussian', downsample=True,
-           downsample_factor=None, convmode='same'):
+           downsample_factor=None, convmode='same', **kwargs):
     """
     Smooth and downsample the data array.  NaN data points will be replaced
     with interpolated values
@@ -47,9 +47,9 @@ def smooth(data, smooth, smoothtype='gaussian', downsample=True,
         if len(kernel) > len(data):
             lengthdiff = len(kernel)-len(data)
             if lengthdiff % 2 == 0: # make kernel same size as data
-                kernel = kernel[lengthdiff/2:-lengthdiff/2]
+                kernel = kernel[lengthdiff//2:-lengthdiff//2]
             else: # make kernel 1 pixel smaller than data but still symmetric
-                kernel = kernel[lengthdiff/2+1:-lengthdiff/2-1]
+                kernel = kernel[lengthdiff//2+1:-lengthdiff//2-1]
     elif smoothtype == 'boxcar':
         kernel = np.ones(roundsmooth)/float(roundsmooth)
 

@@ -730,11 +730,15 @@ def spectral_smooth(cube, smooth_factor, downsample=True, parallel=True,
     # need to make the cube "flat" along dims 1&2 for iteration in the "map"
     flatshape = (cube.shape[0],cube.shape[1]*cube.shape[2])
 
-    Ssmooth = lambda x: sm.smooth(x, smooth_factor, downsample=downsample, **kwargs)
+    Ssmooth = lambda x: sm.smooth(x, smooth_factor,
+                                  downsample=downsample, **kwargs)
     if parallel:
-        newcube = numpy.array(parallel_map(Ssmooth, cube.reshape(flatshape).T, numcores=numcores)).T.reshape(newshape)
+        res = parallel_map(Ssmooth, cube.reshape(flatshape).T,
+                           numcores=numcores)
     else:
-        newcube = numpy.array(map(Ssmooth, cube.reshape(flatshape).T)).T.reshape(newshape)
+        res = list(map(Ssmooth, cube.reshape(flatshape).T))
+
+    newcube = np.array(res).T.reshape(newshape)
 
     #naive, non-optimal version
     # for (x,y) in zip(xx.flat,yy.flat):
