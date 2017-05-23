@@ -1,12 +1,42 @@
 PySpecKit Projects
 ==================
 
-A few projects appropriate for a Google Summer of Code, `ESA Summer of Code in
-Space <http://sophia.estec.esa.int/socis2013/>`_, or similar are outlined
+A few projects appropriate for a Google Summer of Code or similar are outlined
 below.
+
+
+Refactor and Expand the pyspeckit modeling tools
+------------------------------------------------
+Since the development of pyspeckit, there has been substantial progress on a
+more general class of `modeling tools from astropy
+<http://docs.astropy.org/en/latest/modeling/index.html>`_.
+Pyspeckit already has a wide variety of data fitting and modeling tools that
+can readily be modified to use the astropy modeling formalism.
+
+Details of this project need to be worked out, but will include:
+
+ * refactoring pyspeckit.models to use astropy.models
+ * building a graphical interface to astropy.models
+
+Refactor and Expand the Unit Test suite
+---------------------------------------
+
+Pyspeckit is a complicated code suite, which has led to many bugs, particularly
+in the UI.  An improved unit test suite would help prevent or remove these
+bugs.  Such a project would start by breaking down the existing tests, which
+are really end-to-end tests, into their component units.
+
+The refactor would be to use astropy's wrappers around pytest to make the
+testing smoother and easier to extend.  The current model has tests
+in a different repository because the data got too big, but we can and
+should have the *data* in a different repository, but the tests all in
+one place.
+
 
 Incorporate astropy.units into pyspeckit.units
 ----------------------------------------------
+*This project was done by an ESO-hosted summer student, Dinos Kousidis.*
+
 This project is at the core of both `pyspeckit` and `specutils
 <https://github.com/astropy/specutils>`_.
 
@@ -27,24 +57,3 @@ equivalency.
 The end goal will be to have a `Spectrum` object that will live in `specutils`_
 and be inherited by `pyspeckit`, which will provide the interface to modeling
 and graphical tools.
-
-Refactor and Expand the pyspeckit modeling tools
-------------------------------------------------
-Since the development of pyspeckit, there has been substantial progress on a
-more general class of `modeling tools from astropy
-<http://docs.astropy.org/en/latest/modeling/index.html>`_.
-Pyspeckit already has a wide variety of data fitting and modeling tools that
-can readily be modified to use the astropy modeling formalism.
-
-Details of this project need to be worked out, but will include:
-
- * refactoring pyspeckit.models to use astropy.models
- * building a graphical interface to astropy.models
-
-Expand the Unit Test suite
---------------------------
-
-Pyspeckit is a complicated code suite, which has led to many bugs, particularly
-in the UI.  An improved unit test suite would help prevent or remove these
-bugs.  Such a project would start by breaking down the existing tests, which
-are really end-to-end tests, into their component units.
