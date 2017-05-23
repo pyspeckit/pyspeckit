@@ -1247,8 +1247,8 @@ class Cube(spectrum.Spectrum):
         nanvals = ~np.isfinite(self.parcube)
         nanvals_flat = np.any(nanvals, axis=0)
         if np.any(nanvals):
-            log.warn("NaN or infinite values encountered in parameter cube.  ",
-                     PyspeckitWarning)
+            warn("NaN or infinite values encountered in parameter cube.",
+                 PyspeckitWarning)
             
 
         # make sure params are within limits
