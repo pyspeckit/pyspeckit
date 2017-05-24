@@ -412,6 +412,9 @@ class ammonia_model(model.SpectralModel):
             len(parnames) must = len(pars).  parnames determine how the ammonia
             function parses the arguments
         """
+        npeaks = self.npeaks
+        npars = len(self.default_parinfo)
+
         if hasattr(pars,'values'):
             # important to treat as Dictionary, since lmfit params & parinfo both have .items
             parnames,parvals = zip(*pars.items())
@@ -429,16 +432,15 @@ class ammonia_model(model.SpectralModel):
             # n_modelfuncs doesn't care how many peaks there are
             if len(pars) % len(parnames) == 0:
                 parnames = [p for ii in range(len(pars)//len(parnames)) for p in parnames]
-                npars = len(parvals) / self.npeaks
+                npeaks = int(len(parvals) / npars)
+                log.debug("Setting npeaks={0} npars={1}".format(npeaks, npars))
             else:
                 raise ValueError("Wrong array lengths passed to n_ammonia!")
-        else:
-            npars = int(len(parvals) / self.npeaks)
 
         self._components = []
         def L(x):
             v = np.zeros(len(x))
-            for jj in range(int(self.npeaks)):
+            for jj in range(int(npeaks)):
                 modelkwargs = kwargs.copy()
                 for ii in range(int(npars)):
                     name = parnames[ii+jj*int(npars)].strip('0123456789').lower()
