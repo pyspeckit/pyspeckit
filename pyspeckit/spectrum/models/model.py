@@ -133,6 +133,16 @@ class SpectralModel(fitter.SimpleFitter):
             return self.lmfitter(*args,**kwargs)
         return self.fitter(*args,**kwargs)
 
+    @property
+    def npeaks(self):
+        return int(self._npeaks)
+
+    @npeaks.setter
+    def npeaks(self, value):
+        if int(value) != value:
+            raise ValueError("npeaks must be an integer")
+        self._npeaks = int(value)
+
     def make_parinfo(self, **kwargs):
         return self._make_parinfo(**kwargs)[0]
         
