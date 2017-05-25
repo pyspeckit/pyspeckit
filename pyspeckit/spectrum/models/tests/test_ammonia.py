@@ -155,6 +155,33 @@ def test_ammonia_x2():
                                       +unpack_pars(bluecold))
     assert np.allclose(sp.data, model, rtol=1e-5)
 
+def test_regression_179():
+    # making a dummy spectrum
+    xarr = units.SpectroscopicAxis(range(20), 'km/s')
+    xarr.velocity_convention='radio'
+    xarr.refX = ammonia_constants.freq_dict['oneone']*u.Hz
+
+    # one zero-amplitude component and one with Tmb>0
+    blank = [10., 2.7315, 14., 0.2, 0.0, 0.5]
+    nonzero = [10., 5, 14., 0.2, 10.0, 0.5]
+
+    c_nh3 = ammonia.cold_ammonia_model()
+
+    # so far so good, the modeled amplitudes are okay
+    assert c_nh3.n_modelfunc(blank)(xarr).max() == 0
+    assert c_nh3.n_modelfunc(nonzero)(xarr).max() > 0
+
+    # but I was expecting the two below to be the same
+    assert c_nh3.n_modelfunc(blank+nonzero)(xarr).max() > 0
+    assert c_nh3.n_modelfunc(nonzero+blank)(xarr).max() > 0
+
+    sp = Spectrum(data=np.zeros_like(xarr.value), xarr=xarr)
+    sp.Registry.add_fitter('cold_ammonia', ammonia.cold_ammonia_model(),6)
+    sp.specfit.fitter = sp.specfit.Registry.multifitters['cold_ammonia']
+    sp.specfit.fittype = 'cold_ammonia'
+    assert sp.specfit.get_full_model(pars=nonzero+blank).max() > 0
+
+
 """
 # debug work to make sure synthspectra look the same
 from pyspeckit.spectrum.models.tests import test_ammonia
