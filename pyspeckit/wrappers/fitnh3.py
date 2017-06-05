@@ -18,7 +18,7 @@ Example use:
     sp33.xarr.refX = pyspeckit.spectrum.models.ammonia.freq_dict['threethree']
     input_dict={'oneone':sp11,'twotwo':sp22,'threethree':sp33}
     spf = pyspeckit.wrappers.fitnh3.fitnh3tkin(input_dict)
-     
+
 
 """
 from __future__ import print_function
@@ -45,18 +45,21 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
                guessline='twotwo', tex=15,tkin=20,column=15.0,fortho=0.66,
                tau=None, thin=False, quiet=False, doplot=True, fignum=1,
                guessfignum=2, smooth=False, scale_keyword=None, rebase=False,
-               npeaks=1, guesses=None, **kwargs): 
+               npeaks=1, guesses=None, **kwargs):
     """
     Given a dictionary of filenames and lines, fit them together
     e.g. {'oneone':'G000.000+00.000_nh3_11.fits'}
     """
-    spdict = dict([ (linename,Spectrum(value, scale_keyword=scale_keyword))
+    spdict = dict([(linename, Spectrum(value, scale_keyword=scale_keyword))
                    if type(value) is str else (linename,value)
-                   for linename, value in iteritems(input_dict) ])
+                   for linename, value in iteritems(input_dict)
+                  ])
     splist = spdict.values()
 
-    for sp in splist: # required for plotting, cropping
-        sp.xarr.convert_to_unit('km/s')
+    for transition,sp in spdict.items(): # required for plotting, cropping
+        sp.xarr.convert_to_unit('km/s', velocity_convention='radio',
+                                refX=pyspeckit.spectrum.models.ammonia.freq_dict[transition]*u.Hz,
+                                quiet=True)
 
     if crop and len(crop) == 2:
         for sp in splist:
@@ -80,12 +83,12 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
     errguess = spdict[guessline].specfit.residuals.std()
 
     if rebase:
-        # redo baseline subtraction excluding the centroid +/- about 20 km/s 
+        # redo baseline subtraction excluding the centroid +/- about 20 km/s
         vlow = spdict[guessline].specfit.modelpars[1]-(19.8+spdict[guessline].specfit.modelpars[2]*2.35)
         vhigh = spdict[guessline].specfit.modelpars[1]+(19.8+spdict[guessline].specfit.modelpars[2]*2.35)
         for sp in splist:
             sp.baseline(exclude=[vlow,vhigh], **baselinekwargs)
-    
+
     for sp in splist:
         sp.error[:] = errguess
 
@@ -118,8 +121,8 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
 
     return spdict,spectra
 
-def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
-             show_hyperfine_components=True, annotate=True,
+def plot_nh3(spdict, spectra, fignum=1, show_components=False,
+             residfignum=None, show_hyperfine_components=True, annotate=True,
              **plotkwargs):
     """
     Plot the results from a multi-nh3 fit
@@ -134,8 +137,10 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
     pyplot.clf()
     splist = spdict.values()
 
-    for sp in splist:
-        sp.xarr.convert_to_unit('km/s',quiet=True)
+    for transition,sp in spdict.items():
+        sp.xarr.convert_to_unit('km/s', velocity_convention='radio',
+                                refX=pyspeckit.spectrum.models.ammonia.freq_dict[transition]*u.Hz,
+                                quiet=True)
         sp.specfit.fitter = copy.copy(spectra.specfit.fitter)
         sp.specfit.modelpars = spectra.specfit.modelpars
         sp.specfit.parinfo = spectra.specfit.parinfo
@@ -145,15 +150,17 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
             sp.specfit.model = sp.specfit.fitter.n_ammonia(pars=spectra.specfit.modelpars, parnames=spectra.specfit.fitter.parnames)(sp.xarr)
 
     if len(splist) == 2:
-        axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212) }
+        axdict = {'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212)}
     elif len(splist) == 3:
-        axdict = { 'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223),
+        axdict = {'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223),
                   'threethree':pyplot.subplot(224),
-                  'fourfour':pyplot.subplot(224) }
+                  'fourfour':pyplot.subplot(224)
+                 }
     elif len(splist) == 4:
-        axdict = { 'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222),
+        axdict = {'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222),
                   'threethree':pyplot.subplot(223),
-                  'fourfour':pyplot.subplot(224) }
+                  'fourfour':pyplot.subplot(224)
+                 }
     else:
         raise NotImplementedError("Plots with {0} subplots are not yet "
                                   "implemented.  Pull requests are "
@@ -202,10 +209,10 @@ def plot_nh3(spdict,spectra,fignum=1, show_components=False, residfignum=None,
 
 
 def fitnh3(spectrum, vrange=[-100,100], vrangeunit='km/s', quiet=False, Tex=20,
-           Tkin=15, column=1e15, fortho=1.0, tau=None): 
+           Tkin=15, column=1e15, fortho=1.0, tau=None, spec_convert_kwargs={}):
 
     if vrange:
-        spectrum.xarr.convert_to_unit(vrangeunit)
+        spectrum.xarr.convert_to_unit(vrangeunit, **spec_convert_kwargs)
         spectrum.crop(*vrange, unit=vrangeunit)
 
     spectrum.specfit(fittype='gaussian', negamp=False, guesses='moments')
@@ -244,9 +251,12 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
             assert np.all(np.array(spdict[linename].xarr == sp.xarr,
                           dtype='bool'))
             spdict[linename].xarr.refX = freq
-            spdict[linename].xarr.convert_to_unit('km/s')
-            assert np.all(np.array(spdict[linename].xarr.as_unit('GHz') ==
-                                   sp.xarr, dtype='bool'))
+            spdict[linename].xarr.convert_to_unit('km/s',
+                                                  velocity_convention='radio',
+                                                  refX=pyspeckit.spectrum.models.ammonia.freq_dict[linename]*u.Hz,
+                                                  quiet=True)
+            np.testing.assert_array_almost_equal(spdict[linename].xarr.as_unit('GHz').value,
+                                                 sp.xarr.value)
             log.debug("Line {0}={2}: {1}".format(linename, spdict[linename],
                                                  freq))
             if vrange is not None:
@@ -263,7 +273,7 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
 
     log.debug(str(spdict))
     return spdict
-                    
+
 def plotter_override(sp, vrange=None, **kwargs):
     """
     Do plot_nh3 with syntax similar to plotter()

@@ -98,7 +98,8 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                                     Jortho, Jpara, Brot, Crot)
 
     # Convert X-units to frequency in GHz
-    xarr = xarr.as_unit('GHz')
+    if xarr.unit.to_string() != 'GHz':
+        xarr = xarr.as_unit('GHz')
 
     if tex is None:
         log.warning("Assuming tex=trot")
@@ -411,6 +412,9 @@ class ammonia_model(model.SpectralModel):
             len(parnames) must = len(pars).  parnames determine how the ammonia
             function parses the arguments
         """
+        npeaks = self.npeaks
+        npars = len(self.default_parinfo)
+
         if hasattr(pars,'values'):
             # important to treat as Dictionary, since lmfit params & parinfo both have .items
             parnames,parvals = zip(*pars.items())
@@ -428,16 +432,15 @@ class ammonia_model(model.SpectralModel):
             # n_modelfuncs doesn't care how many peaks there are
             if len(pars) % len(parnames) == 0:
                 parnames = [p for ii in range(len(pars)//len(parnames)) for p in parnames]
-                npars = len(parvals) / self.npeaks
+                npeaks = int(len(parvals) / npars)
+                log.debug("Setting npeaks={0} npars={1}".format(npeaks, npars))
             else:
                 raise ValueError("Wrong array lengths passed to n_ammonia!")
-        else:
-            npars = int(len(parvals) / self.npeaks)
 
         self._components = []
         def L(x):
             v = np.zeros(len(x))
-            for jj in range(int(self.npeaks)):
+            for jj in range(int(npeaks)):
                 modelkwargs = kwargs.copy()
                 for ii in range(int(npars)):
                     name = parnames[ii+jj*int(npars)].strip('0123456789').lower()
@@ -526,6 +529,8 @@ class ammonia_model(model.SpectralModel):
                                           'fixed', 'limitedmin', 'limitedmax',
                                           'minpars', 'maxpars', 'tied',
                                           'max_tem_step'))
+        fitfun_kwargs.update(self.modelfunc_kwargs)
+
         if 'use_lmfit' in fitfun_kwargs:
             raise KeyError("use_lmfit was specified in a location where it "
                            "is unacceptable")
