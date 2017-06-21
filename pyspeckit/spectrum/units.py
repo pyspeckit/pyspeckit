@@ -432,26 +432,6 @@ class SpectroscopicAxis(u.Quantity):
         return selfstr
 
     @property
-    def units(self):
-        log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
-        return self._unit
-
-    @units.setter
-    def units(self, value):
-        log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
-        self.set_unit(value)
-
-    @property
-    def refX_units(self):
-        log.warning("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
-        return self.refX_unit
-
-    @refX_units.setter
-    def refX_units(self, value):
-        log.warning("'refX_units' is deprecated; please use 'refX_unit'", DeprecationWarning)
-        self.refX_unit = value
-
-    @property
     def refX_unit(self):
         if hasattr(self.refX, 'unit'):
             return self.refX.unit
