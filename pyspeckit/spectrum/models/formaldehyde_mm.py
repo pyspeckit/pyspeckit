@@ -60,6 +60,121 @@ formaldehyde_mm_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
 formaldehyde_mm_vtau_fitter = formaldehyde_mm_vtau.fitter
 formaldehyde_mm_vtau_vheight_fitter = formaldehyde_mm_vtau.vheight_fitter
 
+def formaldehyde_mm_despotic_functions(gridtable):
+    
+    DensArr = np.sort(np.unique(gridtable['nH2']))
+    ColArr = np.sort(np.unique(gridtable['Column']))
+    TempArr = np.sort(np.unique(gridtable['Temperature']))
+    DvArr = np.sort(np.unique(gridtable['sigmaNT']))
+    GridData_Tex_303_202 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan
+    GridData_Tex_322_221 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan
+    GridData_Tex_321_220 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan    
+    GridData_tau_303_202 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan
+    GridData_tau_322_221 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan
+    GridData_tau_321_220 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan    
+
+    i, j, k, l= np.meshgrid(np.arange(DensArr.size),
+                          np.arange(ColArr.size),
+                          np.arange(TempArr.size),
+                          np.arange(DvArr.size))
+
+    for ii, jj, kk, ll in zip(i.flatten(), j.flatten(), k.flatten(), l.flatten()):
+        idx = np.where((gridtable['Temperature'] == TempArr[kk]) *
+                       (gridtable['Column'] == ColArr[jj]) *
+                       (gridtable['nH2'] == DensArr[ii]) *
+                       (gridtable['sigmaNT'] == DvArr[ll]))
+        GridData_Tex_303_202[ii, jj, kk, ll] = gridtable[idx]['Tex_303_202']
+        GridData_Tex_322_221[ii, jj, kk, ll] = gridtable[idx]['Tex_322_221']
+        GridData_Tex_321_220[ii, jj, kk, ll] = gridtable[idx]['Tex_321_220']
+        GridData_tau_303_202[ii, jj, kk, ll] = gridtable[idx]['tau_303_202']
+        GridData_tau_322_221[ii, jj, kk, ll] = gridtable[idx]['tau_322_221']
+        GridData_tau_321_220[ii, jj, kk, ll] = gridtable[idx]['tau_321_220']
+
+
+    def h2co_303_202(logdensity=4, logcolumn=13, temperature=25, sigmav=2.0):
+        iidx = np.interp(logdensity, np.log10(DensArr), np.arange(len(DensArr)))
+        jidx = np.interp(logcolumn, np.log10(ColArr), np.arange(len(ColArr)))
+        kidx = np.interp(temperature, TempArr, np.arange(len(TempArr)))
+        lidx = np.interp(sigmav, DvArr, np.arange(len(DvArr)))
+        xvec = np.array([iidx, jidx, kidx, lidx])
+        xvec.shape += (1,)
+        Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_303_202,
+                                                          xvec)
+        tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_303_202,
+                                                          xvec)
+        return (Tex, tau)
+
+    def h2co_322_221(logdensity=4, logcolumn=13, temperature=25, sigmav=2.0):
+        iidx = np.interp(logdensity, np.log10(DensArr), np.arange(len(DensArr)))
+        jidx = np.interp(logcolumn, np.log10(ColArr), np.arange(len(ColArr)))
+        kidx = np.interp(temperature, TempArr, np.arange(len(TempArr)))
+        lidx = np.interp(sigmav, DvArr, np.arange(len(DvArr)))
+        xvec = np.array([iidx, jidx, kidx, lidx])
+        xvec.shape += (1,)
+        Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_322_221, xvec)
+        tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_322_221, xvec)
+        return (Tex, tau)
+
+    def h2co_321_220(logdensity=4, logcolumn=13, temperature=25, sigmav=2.0):
+        iidx = np.interp(logdensity, np.log10(DensArr), np.arange(len(DensArr)))
+        jidx = np.interp(logcolumn, np.log10(ColArr), np.arange(len(ColArr)))
+        kidx = np.interp(temperature, TempArr, np.arange(len(TempArr)))
+        lidx = np.interp(sigmav, DvArr, np.arange(len(DvArr)))
+        xvec = np.array([iidx, jidx, kidx, lidx])
+        xvec.shape += (1,)
+        Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_321_220, xvec)
+        tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_321_220, xvec)
+        return (Tex, tau)
+    return (h2co_303_202, h2co_322_221, h2co_321_220)
+
+def formaldehyde_mm_despotic(xarr, 
+                             temperature=25,
+                             column=13,
+                             density=4,
+                             xoff_v=0.0,
+                             width=1.0, 
+                             grid_vwidth=1.0,
+                             h2co_303_202=None,
+                             h2co_322_221=None,
+                             h2co_321_220=None,
+                             debug=False,
+                             verbose=False,
+                             **kwargs):
+
+    Tex303_202, tau303_202 = h2co_303_202(logdensity=density,
+                                          logcolumn=column,
+                                          temperature=temperature,
+                                          sigmav=width)
+    
+    Tex322_221, tau322_221 = h2co_322_221(logdensity=density,
+                                          logcolumn=column,
+                                          temperature=temperature,
+                                          sigmav=width)
+
+    Tex321_220, tau321_220 = h2co_321_220(logdensity=density,
+                                          logcolumn=column,
+                                          temperature=temperature,
+                                          sigmav=width)
+
+    tex = [Tex303_202, Tex322_221, Tex321_220]
+    tau = [tau303_202, tau322_221, tau321_220]
+    minfreq = [218.15, 218.40, 218.7]
+    maxfreq = [218.25, 218.55, 218.8]
+    spec = np.sum([
+        (formaldehyde_mm_vtau(xarr, Tex=float(tex[ii]), tau=float(tau[ii]),
+                              xoff_v=xoff_v, width=width, **kwargs)
+         * (xarr.as_unit('GHz').value>minfreq[ii]) * 
+         (xarr.as_unit('GHz').value<maxfreq[ii])) for ii in xrange(len(tex))],
+                  axis=0)
+    return spec
+
+    
 def formaldehyde_mm_radex(xarr, 
         temperature=25,
         column=13,
