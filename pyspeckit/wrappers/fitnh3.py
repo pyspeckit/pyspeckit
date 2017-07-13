@@ -36,7 +36,7 @@ from astropy import log
 from astropy import units as u
 
 pyspeckit.spectrum.fitters.default_Registry.add_fitter('ammonia_tau_thin',
-                                                       pyspeckit.spectrum.models.ammonia_model_vtau_thin(),
+                                                       pyspeckit.spectrum.models.ammonia.ammonia_model_vtau_thin(),
                                                        5)
 
 title_dict = {'oneone':'NH$_3(1,1)$', 'twotwo':'NH$_3(2,2)$',
