@@ -79,23 +79,17 @@ def formaldehyde_mm_despotic_functions(gridtable):
     GridData_tau_321_220 = np.zeros((len(DensArr), len(ColArr),
                                      len(TempArr), len(DvArr))) + np.nan    
 
-    i, j, k, l= np.meshgrid(np.arange(DensArr.size),
-                          np.arange(ColArr.size),
-                          np.arange(TempArr.size),
-                          np.arange(DvArr.size))
+    ii = np.interp(gridtable['nH2'], DensArr, np.arange(len(DensArr))).astype(np.int)
+    jj = np.interp(gridtable['Column'], ColArr, np.arange(len(ColArr))).astype(np.int)
+    kk = np.interp(gridtable['Temperature'], TempArr, np.arange(len(TempArr))).astype(np.int)
+    ll = np.interp(gridtable['sigmaNT'], DvArr, np.arange(len(DvArr))).astype(np.int)
 
-    for ii, jj, kk, ll in zip(i.flatten(), j.flatten(), k.flatten(), l.flatten()):
-        idx = np.where((gridtable['Temperature'] == TempArr[kk]) *
-                       (gridtable['Column'] == ColArr[jj]) *
-                       (gridtable['nH2'] == DensArr[ii]) *
-                       (gridtable['sigmaNT'] == DvArr[ll]))
-        GridData_Tex_303_202[ii, jj, kk, ll] = gridtable[idx]['Tex_303_202']
-        GridData_Tex_322_221[ii, jj, kk, ll] = gridtable[idx]['Tex_322_221']
-        GridData_Tex_321_220[ii, jj, kk, ll] = gridtable[idx]['Tex_321_220']
-        GridData_tau_303_202[ii, jj, kk, ll] = gridtable[idx]['tau_303_202']
-        GridData_tau_322_221[ii, jj, kk, ll] = gridtable[idx]['tau_322_221']
-        GridData_tau_321_220[ii, jj, kk, ll] = gridtable[idx]['tau_321_220']
-
+    GridData_Tex_303_202[ii, jj, kk, ll] = gridtable['Tex_303_202']
+    GridData_Tex_322_221[ii, jj, kk, ll] = gridtable['Tex_322_221']
+    GridData_Tex_321_220[ii, jj, kk, ll] = gridtable['Tex_321_220']
+    GridData_tau_303_202[ii, jj, kk, ll] = gridtable['tau_303_202']
+    GridData_tau_322_221[ii, jj, kk, ll] = gridtable['tau_322_221']
+    GridData_tau_321_220[ii, jj, kk, ll] = gridtable['tau_321_220']
 
     def h2co_303_202(logdensity=4, logcolumn=13, temperature=25, sigmav=2.0):
         iidx = np.interp(logdensity, np.log10(DensArr), np.arange(len(DensArr)))
