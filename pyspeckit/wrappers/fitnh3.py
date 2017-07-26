@@ -35,6 +35,10 @@ import random
 from astropy import log
 from astropy import units as u
 
+pyspeckit.spectrum.fitters.default_Registry.add_fitter('ammonia_tau_thin',
+                                                       pyspeckit.spectrum.models.ammonia.ammonia_model_vtau_thin(),
+                                                       5)
+
 title_dict = {'oneone':'NH$_3(1,1)$', 'twotwo':'NH$_3(2,2)$',
               'threethree':'NH$_3(3,3)$', 'fourfour':'NH$_3(4,4)$',
               'fivefive':'NH$_3(5,5)$', 'sixsix':'NH$_3(6,6)$',
@@ -105,16 +109,19 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
                        (tkin+random.random()*i, tex, tau+random.random()*i,
                         widthguess+random.random()*i, vguess+random.random()*i,
                         fortho)]
-        spectra.specfit(fittype='ammonia_tau',quiet=quiet,multifit=None,guesses=guesses,
-                        thin=thin, **kwargs)
+        fittype = 'ammonia_tau_thin' if thin else 'ammonia_tau'
+        spectra.specfit(fittype=fittype,quiet=quiet,multifit=None,guesses=guesses,
+                        **kwargs)
     else:
         if guesses is None:
             guesses = [a for i in xrange(npeaks) for a in
                        (tkin+random.random()*i, tex, column+random.random()*i,
                         widthguess+random.random()*i, vguess+random.random()*i,
                         fortho)]
+        if thin:
+            raise ValueError("'thin' keyword not supported for the generic ammonia model")
         spectra.specfit(fittype='ammonia',quiet=quiet,multifit=None,guesses=guesses,
-                        thin=thin, **kwargs)
+                        **kwargs)
 
     if doplot:
         plot_nh3(spdict,spectra,fignum=fignum)
