@@ -24,6 +24,7 @@ except ImportError:
 
 try:
     from despotic import cloud
+    Democracy=False
 except ImportError:
     Democracy=True  # Because it's not despotic :D
 
