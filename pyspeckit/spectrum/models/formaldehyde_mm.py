@@ -111,8 +111,8 @@ def build_despotic_grids(gridfile='ph2co_grid_despotic.fits', ph2coAbund=1e-8,
     """
 
     if Democracy:
-        warnings.warn("No despotic install found.  Cannot build grids")
-        return
+        raise Exception("No despotic install found.  Cannot build grids")
+
     
     core = cloud(fileName="protostellarCore.desp", verbose=True)
 
