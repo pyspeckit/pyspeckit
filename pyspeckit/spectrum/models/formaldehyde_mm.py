@@ -22,6 +22,15 @@ try:
 except ImportError:
     scipyOK=False
 
+try:
+    from despotic import cloud
+except ImportError:
+    Democracy=True  # Because it's not despotic :D
+
+from astropy.utils.console import ProgressBar
+from astropy.table import Table
+import warnings
+
 line_names = ['threeohthree','threetwotwo','threetwoone']
 
 # http://adsabs.harvard.edu/abs/1971ApJ...169..429T has the most accurate freqs
@@ -60,8 +69,124 @@ formaldehyde_mm_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
 formaldehyde_mm_vtau_fitter = formaldehyde_mm_vtau.fitter
 formaldehyde_mm_vtau_vheight_fitter = formaldehyde_mm_vtau.vheight_fitter
 
-def formaldehyde_mm_despotic_functions(gridtable):
+def build_despotic_grids(gridfile='ph2co_grid_despotic.fits', ph2coAbund=1e-8,
+                         nDens=21, logDensLower=2.0, logDensUpper=6.0,
+                         nCol=21, logColLower=11.0, logColUpper=15.0,
+                         nTemp=51, Tlower=10.0, Tupper=300.0,
+                         nDv=5, DvLower=1.0, DvUpper=5.0):
+    """
+    Generates grids of p-H2CO line intensities using Despotic.  Outputs a astropy Table.
     
+    Parameters
+    ----------
+    gridfile : string
+        Name of grid file to output.
+    ph2coAbund : float
+        Fractional abundance of p-H2CO
+    nDens : int
+        Number of grid points in the volume density
+    logDensLower : float
+        log of volume density at lower bound of grid (log(n/cm**-3))
+    logDensUpper : float
+        log of volume density at upper bound of grid (log(n/cm**-3))
+    nCol : int
+        Number of grid points in the column density
+    logColLower : float
+        log of column density of p-H2CO at lower bound of grid (log(N/cm**-2))
+    logColUpper : float
+        log of column density of p-H2CO at upper bound of grid (log(N/cm**-2))
+    nTemp : int
+        Number of grid points in the temperature grid
+    Tower : float
+        temperature at lower bound of grid (K)
+    Tupper : float
+        temperature at upper bound of grid (K)
+    nDv : int
+        Number of grid points in the line width
+    DvLower : float
+        line width (non-thermal) at lower bound of grid (km/s)
+    DvUpper : float
+        line width (non-thermal) at upper bound of grid (km/s)
+
+    """
+
+    if Democracy:
+        warnings.warn("No despotic install found.  Cannot build grids")
+        return
+    
+    core = cloud(fileName="protostellarCore.desp", verbose=True)
+
+    nlower = logDensLower
+    nupper = logDensUpper
+
+    Nlower = logColLower
+    Nupper = logColUpper
+
+    Temps = np.linspace(Tlower, Tupper, nTemp)
+    Cols = 1e1**np.linspace(Nlower, Nupper, nCol)
+    Densities = 1e1**(np.linspace(nlower, nupper, nDens))
+    LineWidth = np.linspace(DvLower, DvUpper, nDv)
+
+    outtable = Table(names = ['Tex_303_202', 'Tex_322_221', 'Tex_321_220',
+                              'tau_303_202', 'tau_322_221', 'tau_321_220',
+                              'Temperature', 'Column', 'nH2', 'sigmaNT'])
+
+    TempArr, ColArr, DensArr, DvArr = np.meshgrid(Temps,
+                                                  Cols,
+                                                  Densities,
+                                                  LineWidth)
+
+    for T, N, n, dv in ProgressBar(zip(TempArr.flatten(),
+                                   ColArr.flatten(),
+                                   DensArr.flatten(),
+                                   DvArr.flatten())):
+        core.colDen = N/ph2coAbund
+        core.Tg = T
+        core.Td = T
+        core.nH = n
+        core.sigmaNT = dv
+        lines = core.lineLum('p-h2co')
+        outtable.add_row()
+        outtable[-1]['Tex_303_202'] = lines[2]['Tex']
+        outtable[-1]['tau_303_202'] = lines[2]['tau']
+        outtable[-1]['Tex_322_221'] = lines[9]['Tex']
+        outtable[-1]['tau_322_221'] = lines[9]['tau']
+        outtable[-1]['Tex_321_220'] = lines[12]['Tex']
+        outtable[-1]['tau_321_220'] = lines[12]['tau']
+        outtable[-1]['Temperature'] = T
+        outtable[-1]['Column'] = N
+        outtable[-1]['nH2'] = n
+        outtable[-1]['sigmaNT'] = dv
+
+    outtable.write(gridfile, format='fits',overwrite=True)
+
+
+
+def formaldehyde_mm_despotic_functions(gridtable):
+    """
+    This builds interpolation functions for use in fitting.
+
+    Parameters
+    ----------
+    gridtable : str
+       Name of grid in astropy table
+
+    Returns
+    -------
+    h2co_303_202, h2co_322_221, h2co_321_220 : function
+       Functions that return the excitation temperature and optical depth given input density,
+       temperature, column density and line width.
+
+    """
+    if gridtable is None:
+        warnings.warn("No gridfile found.  Building grids using despotic")
+        try:
+            build_despotic_grids('ph2co_grid_despotic.fits')
+            gridtable = Table.read('ph2co_grid_despotic.fits')
+        except:  # TODO -- make this more specific
+            warnings.warn("Failed to build functions because no grids available")
+            return
+
     DensArr = np.sort(np.unique(gridtable['nH2']))
     ColArr = np.sort(np.unique(gridtable['Column']))
     TempArr = np.sort(np.unique(gridtable['Temperature']))
@@ -140,7 +265,12 @@ def formaldehyde_mm_despotic(xarr,
                              debug=False,
                              verbose=False,
                              **kwargs):
-
+    """
+    Fitter to p-H2CO using despotic grids.  Requires building grids and passing in 
+    functions for interpolating the h2co transition optical depth and 
+    excitation temperatures. 
+    """
+    
     Tex303_202, tau303_202 = h2co_303_202(logdensity=density,
                                           logcolumn=column,
                                           temperature=temperature,
