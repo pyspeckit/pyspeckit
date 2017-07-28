@@ -542,7 +542,7 @@ class SpectroscopicAxis(u.Quantity):
                 unit = u.dimensionless_unscaled
             elif unit == 'unknown':
                 unit = u.dimensionless_unscaled
-            elif unit == 'angstroms':
+            elif unit in ('angstroms','Angstroms'):
                 unit = 'angstrom'
             unit = u.Unit(unit)
         except ValueError:
