@@ -28,6 +28,17 @@ try:
 except ImportError:
     scipyOK=False
 
+try:
+    from despotic import cloud
+    Democracy=False
+except ImportError:
+    Democracy=True  # Because it's not despotic :D
+
+from astropy.utils.console import ProgressBar
+from astropy.table import Table
+import warnings
+
+    
 line_names = ['oneone','twotwo','threethree']
 line_names = ['oneone_f10', 'oneone_f01', 'oneone_f22', 'oneone_f21',
               'oneone_f12', 'oneone_f11', 'twotwo_f11', 'twotwo_f12',
@@ -52,7 +63,7 @@ line_strength_dict={
         'twotwo_f12':  5.,
         'twotwo_f21':  5.,
         'twotwo_f32': 5.19,
-        'twotwo_f33': 41.48,
+        'twotwo_f33': 41.49,
         'twotwo_f22': 23.15,
         'twotwo_f23': 5.19,
         'threethree_f22':1,
@@ -78,23 +89,30 @@ relative_strength_total_degeneracy={
         'threethree_f33':3.0,
         }
 hf_freq_dict={
-        'oneone_f10':4.82965996e9 - 18.53e3,
-        'oneone_f01':4.82965996e9 - 1.34e3,
-        'oneone_f22':4.82965996e9 - 0.35e3,
-        'oneone_f21':4.82965996e9 + 4.05e3,
-        'oneone_f12':4.82965996e9 + 6.48e3,
-        'oneone_f11':4.82965996e9 + 11.08e3,
-        'twotwo_f11':14.48847881e9 - 19.97e3,
-        'twotwo_f12':14.48847881e9 -  7.03e3,
-        'twotwo_f21':14.48847881e9 -  2.20e3,
-        'twotwo_f32':14.48847881e9 +  0.12e3,
-        'twotwo_f33':14.48847881e9 +  0.89e3,
-        'twotwo_f22':14.48847881e9 + 10.74e3,
-        'twotwo_f23':14.48847881e9 + 11.51e3,
-        'threethree_f22':28.97478e9,
-        'threethree_f44':28.97480e9,
-        'threethree_f33':28.97481e9,
-        }
+    'oneone_f10':4.82965996e9 - 18.53e3,
+    'oneone_f01':4.82965996e9 - 1.34e3,
+    'oneone_f22':4.82965996e9 - 0.35e3,
+    'oneone_f21':4.82965996e9 + 4.05e3,
+    'oneone_f12':4.82965996e9 + 6.48e3,
+    'oneone_f11':4.82965996e9 + 11.08e3,
+    # 'twotwo_f11':14.48847881e9 - 19.97e3,
+    # 'twotwo_f12':14.48847881e9 -  7.03e3,
+    # 'twotwo_f21':14.48847881e9 -  2.20e3,
+    # 'twotwo_f32':14.48847881e9 +  0.12e3,
+    # 'twotwo_f33':14.48847881e9 +  0.89e3,
+    # 'twotwo_f22':14.48847881e9 + 10.74e3,
+    # 'twotwo_f23':14.48847881e9 + 11.51e3,
+    'twotwo_f11':14.48847881e9 - 20.73e3,
+    'twotwo_f12':14.48847881e9 -  8.5e3,
+    'twotwo_f21':14.48847881e9 -  0.71e3,
+    'twotwo_f32':14.48847881e9 +  0.71e3,
+    'twotwo_f33':14.48847881e9 +  1.42e3,
+    'twotwo_f22':14.48847881e9 + 9.76e3,
+    'twotwo_f23':14.48847881e9 + 10.12e3,
+    'threethree_f22':28.97478e9,
+    'threethree_f44':28.97480e9,
+    'threethree_f33':28.97481e9,
+}
 freq_dict = copy.copy(hf_freq_dict)
 freq_dict.update(central_freq_dict)
 aval_dict = {
@@ -159,6 +177,335 @@ formaldehyde_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
 formaldehyde_vtau_fitter = formaldehyde_vtau.fitter
 formaldehyde_vtau_vheight_fitter = formaldehyde_vtau.vheight_fitter
 formaldehyde_vtau_tbg_fitter = formaldehyde_vtau.background_fitter
+
+
+def build_despotic_grids(gridfile='oh2co_grid_despotic.fits', oh2coAbund=1e-8,
+                         nDens=21, logDensLower=2.0, logDensUpper=6.0,
+                         nCol=21, logColLower=11.0, logColUpper=15.0,
+                         nTemp=51, Tlower=10.0, Tupper=300.0,
+                         nDv=5, DvLower=1.0, DvUpper=5.0):
+    """
+    Generates grids of o-H2CO line intensities using Despotic.  Outputs a astropy Table.
+    
+    Parameters
+    ----------
+    gridfile : string
+        Name of grid file to output.
+    ph2coAbund : float
+        Fractional abundance of o-H2CO
+    nDens : int
+        Number of grid points in the volume density
+    logDensLower : float
+        log of volume density at lower bound of grid (log(n/cm**-3))
+    logDensUpper : float
+        log of volume density at upper bound of grid (log(n/cm**-3))
+    nCol : int
+        Number of grid points in the column density
+    logColLower : float
+        log of column density of p-H2CO at lower bound of grid (log(N/cm**-2))
+    logColUpper : float
+        log of column density of p-H2CO at upper bound of grid (log(N/cm**-2))
+    nTemp : int
+        Number of grid points in the temperature grid
+    Tower : float
+        temperature at lower bound of grid (K)
+    Tupper : float
+        temperature at upper bound of grid (K)
+    nDv : int
+        Number of grid points in the line width
+    DvLower : float
+        line width (non-thermal) at lower bound of grid (km/s)
+    DvUpper : float
+        line width (non-thermal) at upper bound of grid (km/s)
+
+    """
+
+    if Democracy:
+        raise Exception("No despotic install found.  Cannot build grids")
+
+    
+    core = cloud(fileName="protostellarCore.desp", verbose=True)
+
+    nlower = logDensLower
+    nupper = logDensUpper
+
+    Nlower = logColLower
+    Nupper = logColUpper
+
+    Temps = np.linspace(Tlower, Tupper, nTemp)
+    Cols = 1e1**np.linspace(Nlower, Nupper, nCol)
+    Densities = 1e1**(np.linspace(nlower, nupper, nDens))
+    LineWidth = np.linspace(DvLower, DvUpper, nDv)
+
+    outtable = Table(names = ['Tex_110_111', 'Tex_211_212', 'Tex_312_313',
+                              'tau_110_111', 'tau_211_212', 'tau_312_313',
+                              'Temperature', 'Column', 'nH2', 'sigmaNT'])
+
+    TempArr, ColArr, DensArr, DvArr = np.meshgrid(Temps,
+                                                  Cols,
+                                                  Densities,
+                                                  LineWidth)
+
+    for T, N, n, dv in ProgressBar(zip(TempArr.flatten(),
+                                   ColArr.flatten(),
+                                   DensArr.flatten(),
+                                   DvArr.flatten())):
+        core.colDen = N/oh2coAbund
+        core.Tg = T
+        core.Td = T
+        core.nH = n
+        core.sigmaNT = dv
+        lines = core.lineLum('o-h2co')
+        outtable.add_row()
+        outtable[-1]['Tex_110_111'] = lines[0]['Tex']
+        outtable[-1]['tau_110_111'] = lines[0]['tau']
+        outtable[-1]['Tex_211_212'] = lines[2]['Tex']
+        outtable[-1]['tau_211_212'] = lines[2]['tau']
+        outtable[-1]['Tex_312_313'] = lines[5]['Tex']
+        outtable[-1]['tau_312_313'] = lines[5]['tau']
+        outtable[-1]['Temperature'] = T
+        outtable[-1]['Column'] = N
+        outtable[-1]['nH2'] = n
+        outtable[-1]['sigmaNT'] = dv
+
+    outtable.write(gridfile, format='fits', overwrite=True)
+
+    
+def formaldehyde_despotic_functions(gridtable):
+    """
+    This builds interpolation functions for use in fitting.
+
+    Parameters
+    ----------
+    gridtable : str
+       Name of grid in astropy table
+
+    Returns
+    -------
+    h2co_110_111, h2co_211_212, h2co_312_313 : function
+       Functions that return the excitation temperature and optical depth given input density,
+       temperature, column density and line width.
+
+    """
+    if gridtable is None:
+        warnings.warn("No gridfile found.  Building grids using despotic")
+        try:
+            build_despotic_grids('ph2co_grid_despotic.fits')
+            gridtable = Table.read('ph2co_grid_despotic.fits')
+        except:  # TODO -- make this more specific
+            warnings.warn("Failed to build functions because no grids available")
+            return
+
+    DensArr = np.sort(np.unique(gridtable['nH2']))
+    ColArr = np.sort(np.unique(gridtable['Column']))
+    TempArr = np.sort(np.unique(gridtable['Temperature']))
+    DvArr = np.sort(np.unique(gridtable['sigmaNT']))
+    GridData_Tex_110_111 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan
+    GridData_Tex_211_212 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan
+    GridData_Tex_312_313 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan    
+    GridData_tau_110_111 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan
+    GridData_tau_211_212 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan
+    GridData_tau_312_313 = np.zeros((len(DensArr), len(ColArr),
+                                     len(TempArr), len(DvArr))) + np.nan    
+
+    ii = np.interp(gridtable['nH2'], DensArr, np.arange(len(DensArr))).astype(np.int)
+    jj = np.interp(gridtable['Column'], ColArr, np.arange(len(ColArr))).astype(np.int)
+    kk = np.interp(gridtable['Temperature'], TempArr, np.arange(len(TempArr))).astype(np.int)
+    ll = np.interp(gridtable['sigmaNT'], DvArr, np.arange(len(DvArr))).astype(np.int)
+
+    GridData_Tex_110_111[ii, jj, kk, ll] = gridtable['Tex_110_111']
+    GridData_Tex_211_212[ii, jj, kk, ll] = gridtable['Tex_211_212']
+    GridData_Tex_312_313[ii, jj, kk, ll] = gridtable['Tex_312_313']
+    GridData_tau_110_111[ii, jj, kk, ll] = gridtable['tau_110_111']
+    GridData_tau_211_212[ii, jj, kk, ll] = gridtable['tau_211_212']
+    GridData_tau_312_313[ii, jj, kk, ll] = gridtable['tau_312_313']
+
+    def h2co_110_111(logdensity=4, logcolumn=13, temperature=25, sigmav=2.0):
+        iidx = np.interp(logdensity, np.log10(DensArr), np.arange(len(DensArr)))
+        jidx = np.interp(logcolumn, np.log10(ColArr), np.arange(len(ColArr)))
+        kidx = np.interp(temperature, TempArr, np.arange(len(TempArr)))
+        lidx = np.interp(sigmav, DvArr, np.arange(len(DvArr)))
+        xvec = np.array([iidx, jidx, kidx, lidx])
+        xvec.shape += (1,)
+        Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_110_111,
+                                                          xvec)
+        tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_110_111,
+                                                          xvec)
+        return (Tex, tau)
+
+    def h2co_211_212(logdensity=4, logcolumn=13, temperature=25, sigmav=2.0):
+        iidx = np.interp(logdensity, np.log10(DensArr), np.arange(len(DensArr)))
+        jidx = np.interp(logcolumn, np.log10(ColArr), np.arange(len(ColArr)))
+        kidx = np.interp(temperature, TempArr, np.arange(len(TempArr)))
+        lidx = np.interp(sigmav, DvArr, np.arange(len(DvArr)))
+        xvec = np.array([iidx, jidx, kidx, lidx])
+        xvec.shape += (1,)
+        Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_211_212, xvec)
+        tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_211_212, xvec)
+        return (Tex, tau)
+
+    def h2co_312_313(logdensity=4, logcolumn=13, temperature=25, sigmav=2.0):
+        iidx = np.interp(logdensity, np.log10(DensArr), np.arange(len(DensArr)))
+        jidx = np.interp(logcolumn, np.log10(ColArr), np.arange(len(ColArr)))
+        kidx = np.interp(temperature, TempArr, np.arange(len(TempArr)))
+        lidx = np.interp(sigmav, DvArr, np.arange(len(DvArr)))
+        xvec = np.array([iidx, jidx, kidx, lidx])
+        xvec.shape += (1,)
+        Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_312_313, xvec)
+        tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_312_313, xvec)
+        return (Tex, tau)
+    return (h2co_110_111, h2co_211_212, h2co_312_313)
+
+def formaldehyde_despotic(xarr, 
+                          temperature=25,
+                          column=13,
+                          density=4,
+                          xoff_v=0.0,
+                          width=1.0, 
+                          grid_vwidth=1.0,
+                          h2co_110_111=None,
+                          h2co_211_212=None,
+                          h2co_312_313=None,
+                          debug=False,
+                          verbose=False,
+                          **kwargs):
+    """
+    Fitter to o-H2CO using despotic grids.  Requires building grids and passing in 
+    functions for interpolating the h2co transition optical depth and 
+    excitation temperatures. 
+    """
+    # The grids are built with a specified NON-THERMAL limit
+    width_NT = np.sqrt(width**2 - 1.38e-26 * temperature / (30 * 1.66e-24))
+
+    if np.isnan(width_NT):
+        width_NT=0.00
+        
+    Tex110_111, tau110_111 = h2co_110_111(logdensity=density,
+                                          logcolumn=column,
+                                          temperature=temperature,
+                                          sigmav=width_NT)
+    
+    Tex211_212, tau211_212 = h2co_211_212(logdensity=density,
+                                          logcolumn=column,
+                                          temperature=temperature,
+                                          sigmav=width_NT)
+
+    Tex312_313, tau312_313 = h2co_312_313(logdensity=density,
+                                          logcolumn=column,
+                                          temperature=temperature,
+                                          sigmav=width_NT)
+
+    tex = [Tex110_111, Tex211_212, Tex312_313]
+    tau = [tau110_111, tau211_212, tau312_313]
+    minfreq = [3.0, 13.00, 26.00]
+    maxfreq = [6.0, 16.00, 30.00]
+    spec = np.sum([(formaldehyde_vtau(xarr,Tex=float(tex[ii]),
+                                      tau=float(tau[ii]),
+                                      xoff_v=xoff_v,
+                                      width=width, **kwargs)
+                    * (xarr.as_unit('GHz').value > minfreq[ii]) *
+                    (xarr.as_unit('GHz').value < maxfreq[ii]))
+                   for ii in xrange(len(tex))], 
+                  axis=0)
+    return spec
+
+def formaldehyde_despotic_twocomp(xarr, 
+                                  temperature=25,
+                                  column=13,
+                                  density=4,
+                                  xoff_v=0.0,
+                                  width=1.0, 
+                                  temperature2=25,
+                                  column2=13,
+                                  density2=4,
+                                  xoff_v2=0.0,
+                                  width2=1.0, 
+                                  grid_vwidth=1.0,
+                                  h2co_110_111=None,
+                                  h2co_211_212=None,
+                                  h2co_312_313=None,
+                                  debug=False,
+                                  verbose=False,
+                                  **kwargs):
+    """
+    Fitter to o-H2CO using despotic grids.  Requires building grids and passing in 
+    functions for interpolating the h2co transition optical depth and 
+    excitation temperatures. 
+    """
+    # The grids are built with a specified NON-THERMAL limit
+    width_NT = np.sqrt(width**2 - 1.38e-26 * temperature / (30 * 1.66e-24))
+    width_NT2 = np.sqrt(width2**2 - 1.38e-26 * temperature2 / (30 * 1.66e-24))
+
+    if np.isnan(width_NT):
+        width_NT=0.0
+    if np.isnan(width_NT2):
+        width_NT2=0.0
+        
+    Tex110_111, tau110_111 = h2co_110_111(logdensity=density,
+                                          logcolumn=column,
+                                          temperature=temperature,
+                                          sigmav=width_NT)
+    
+    Tex211_212, tau211_212 = h2co_211_212(logdensity=density,
+                                          logcolumn=column,
+                                          temperature=temperature,
+                                          sigmav=width_NT)
+
+    Tex312_313, tau312_313 = h2co_312_313(logdensity=density,
+                                          logcolumn=column,
+                                          temperature=temperature,
+                                          sigmav=width_NT)
+
+    tex = [Tex110_111, Tex211_212, Tex312_313]
+    tau = [tau110_111, tau211_212, tau312_313]
+    minfreq = [3.0, 13.00, 26.00]
+    maxfreq = [6.0, 16.00, 30.00]
+    spec = np.sum([(formaldehyde_vtau(xarr,Tex=float(tex[ii]),
+                                      tau=float(tau[ii]),
+                                      xoff_v=xoff_v,
+                                      width=width, **kwargs)
+                    * (xarr.as_unit('GHz').value > minfreq[ii]) *
+                    (xarr.as_unit('GHz').value < maxfreq[ii]))
+                   for ii in xrange(len(tex))], 
+                  axis=0)
+
+    Tex110_111, tau110_111 = h2co_110_111(logdensity=density2,
+                                          logcolumn=column2,
+                                          temperature=temperature2,
+                                          sigmav=width_NT2)
+    
+    Tex211_212, tau211_212 = h2co_211_212(logdensity=density2,
+                                          logcolumn=column2,
+                                          temperature=temperature2,
+                                          sigmav=width_NT2)
+
+    Tex312_313, tau312_313 = h2co_312_313(logdensity=density2,
+                                          logcolumn=column2,
+                                          temperature=temperature2,
+                                          sigmav=width_NT2)
+
+    tex = [Tex110_111, Tex211_212, Tex312_313]
+    tau = [tau110_111, tau211_212, tau312_313]
+    spec2 = np.sum([(formaldehyde_vtau(xarr,Tex=float(tex[ii]),
+                                       tau=float(tau[ii]),
+                                       xoff_v=xoff_v2,
+                                       width=width2, **kwargs)
+                     * (xarr.as_unit('GHz').value > minfreq[ii]) *
+                     (xarr.as_unit('GHz').value < maxfreq[ii]))
+                    for ii in xrange(len(tex))], 
+                   axis=0)
+
+    
+    specsum = spec+spec2
+    print (temperature, temperature2, column, column2, density, density2, xoff_v2, xoff_v, width_NT, width_NT2)
+    return specsum
+
+
 
 def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
                        grid_vwidth=1.0, grid_vwidth_scale=False, texgrid=None,
