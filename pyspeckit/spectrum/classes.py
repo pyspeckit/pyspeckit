@@ -42,11 +42,12 @@ try:
 except ImportError:
     atpyOK = False
 
-try:
-    import specutils
-    specutilsOK = True
-except ImportError:
-    specutilsOK = False
+# specutils -> legacy specutils
+# try:
+#     import specutils
+#     specutilsOK = True
+# except ImportError:
+#     specutilsOK = False
 
 
 try:
