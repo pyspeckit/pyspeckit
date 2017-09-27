@@ -907,6 +907,16 @@ class Spectra(BaseSpectrum):
         if xunit is None:
             xunit = speclist[0].xarr.unit
 
+        if xunit.is_equivalent(u.km/u.s):
+            refX = speclist[0].xarr.refX
+            if refX is None:
+                warn("Combining spectra with velocity coordinates, "
+                     "but refX is None")
+            for spec in speclist[1:]:
+                if spec.xarr.refX != refX:
+                    raise ValueError("When combining spectra in velocity coordinates, "
+                                     "they must have the same reference frequency.")
+
         log.info("Concatenating data")
 
         self.xarr = units.SpectroscopicAxes([sp.xarr.as_unit(xunit) for sp in speclist])

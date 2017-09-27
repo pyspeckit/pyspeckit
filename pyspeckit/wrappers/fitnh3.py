@@ -16,7 +16,7 @@ Example use:
     sp11.xarr.refX = pyspeckit.spectrum.models.ammonia.freq_dict['oneone']
     sp22.xarr.refX = pyspeckit.spectrum.models.ammonia.freq_dict['twotwo']
     sp33.xarr.refX = pyspeckit.spectrum.models.ammonia.freq_dict['threethree']
-    input_dict={'oneone':sp11,'twotwo':sp22,'threethree':sp33}
+    input_dict={'oneone':sp11, 'twotwo':sp22, 'threethree':sp33}
     spf = pyspeckit.wrappers.fitnh3.fitnh3tkin(input_dict)
 
 
@@ -39,14 +39,14 @@ pyspeckit.spectrum.fitters.default_Registry.add_fitter('ammonia_tau_thin',
                                                        pyspeckit.spectrum.models.ammonia.ammonia_model_vtau_thin(),
                                                        5)
 
-title_dict = {'oneone':'NH$_3(1,1)$', 'twotwo':'NH$_3(2,2)$',
-              'threethree':'NH$_3(3,3)$', 'fourfour':'NH$_3(4,4)$',
-              'fivefive':'NH$_3(5,5)$', 'sixsix':'NH$_3(6,6)$',
-              'sevenseven':'NH$_3(7,7)$', 'eighteight':'NH$_3(8,8)$',
+title_dict = {'oneone':'NH$_3(1, 1)$', 'twotwo':'NH$_3(2, 2)$',
+              'threethree':'NH$_3(3, 3)$', 'fourfour':'NH$_3(4, 4)$',
+              'fivefive':'NH$_3(5, 5)$', 'sixsix':'NH$_3(6, 6)$',
+              'sevenseven':'NH$_3(7, 7)$', 'eighteight':'NH$_3(8, 8)$',
              }
 
 def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
-               guessline='twotwo', tex=15,tkin=20,column=15.0,fortho=0.66,
+               guessline='twotwo', tex=15, tkin=20, column=15.0, fortho=0.66,
                tau=None, thin=False, quiet=False, doplot=True, fignum=1,
                guessfignum=2, smooth=False, scale_keyword=None, rebase=False,
                npeaks=1, guesses=None, **kwargs):
@@ -55,12 +55,12 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
     e.g. {'oneone':'G000.000+00.000_nh3_11.fits'}
     """
     spdict = dict([(linename, Spectrum(value, scale_keyword=scale_keyword))
-                   if type(value) is str else (linename,value)
+                   if type(value) is str else (linename, value)
                    for linename, value in iteritems(input_dict)
                   ])
     splist = spdict.values()
 
-    for transition,sp in spdict.items(): # required for plotting, cropping
+    for transition, sp in spdict.items(): # required for plotting, cropping
         sp.xarr.convert_to_unit('km/s', velocity_convention='radio',
                                 refX=pyspeckit.spectrum.models.ammonia.freq_dict[transition]*u.Hz,
                                 quiet=True)
@@ -79,11 +79,11 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
 
     spdict[guessline].specfit(fittype='gaussian', negamp=False, vheight=False,
                               guesses='moments')
-    ampguess,vguess,widthguess = spdict[guessline].specfit.modelpars
+    ampguess, vguess, widthguess = spdict[guessline].specfit.modelpars
     if widthguess < 0:
         raise ValueError("Width guess was < 0.  This is impossible.")
-    print("RMS guess (errspec): ",spdict[guessline].specfit.errspec.mean())
-    print("RMS guess (residuals): ",spdict[guessline].specfit.residuals.std())
+    print("RMS guess (errspec): ", spdict[guessline].specfit.errspec.mean())
+    print("RMS guess (residuals): ", spdict[guessline].specfit.residuals.std())
     errguess = spdict[guessline].specfit.residuals.std()
 
     if rebase:
@@ -91,10 +91,11 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
         vlow = spdict[guessline].specfit.modelpars[1]-(19.8+spdict[guessline].specfit.modelpars[2]*2.35)
         vhigh = spdict[guessline].specfit.modelpars[1]+(19.8+spdict[guessline].specfit.modelpars[2]*2.35)
         for sp in splist:
-            sp.baseline(exclude=[vlow,vhigh], **baselinekwargs)
+            sp.baseline(exclude=[vlow, vhigh], **baselinekwargs)
 
     for sp in splist:
         sp.error[:] = errguess
+        sp.xarr.convert_to_unit(u.GHz)
 
     if doplot:
         spdict[guessline].plotter(figure=guessfignum)
@@ -110,7 +111,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
                         widthguess+random.random()*i, vguess+random.random()*i,
                         fortho)]
         fittype = 'ammonia_tau_thin' if thin else 'ammonia_tau'
-        spectra.specfit(fittype=fittype,quiet=quiet,multifit=None,guesses=guesses,
+        spectra.specfit(fittype=fittype, quiet=quiet, multifit=None, guesses=guesses,
                         **kwargs)
     else:
         if guesses is None:
@@ -120,13 +121,13 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
                         fortho)]
         if thin:
             raise ValueError("'thin' keyword not supported for the generic ammonia model")
-        spectra.specfit(fittype='ammonia',quiet=quiet,multifit=None,guesses=guesses,
+        spectra.specfit(fittype='ammonia', quiet=quiet, multifit=None, guesses=guesses,
                         **kwargs)
 
     if doplot:
-        plot_nh3(spdict,spectra,fignum=fignum)
+        plot_nh3(spdict, spectra, fignum=fignum)
 
-    return spdict,spectra
+    return spdict, spectra
 
 def plot_nh3(spdict, spectra, fignum=1, show_components=False,
              residfignum=None, show_hyperfine_components=True, annotate=True,
@@ -144,7 +145,7 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
     pyplot.clf()
     splist = spdict.values()
 
-    for transition,sp in spdict.items():
+    for transition, sp in spdict.items():
         sp.xarr.convert_to_unit('km/s', velocity_convention='radio',
                                 refX=pyspeckit.spectrum.models.ammonia.freq_dict[transition]*u.Hz,
                                 quiet=True)
@@ -173,13 +174,13 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
                                   "implemented.  Pull requests are "
                                   "welcome!".format(len(splist)))
 
-    for linename,sp in iteritems(spdict):
+    for linename, sp in iteritems(spdict):
         if linename not in axdict:
             raise NotImplementedError("Plot windows for {0} cannot "
                                       "be automatically arranged (yet)."
                                       .format(linename))
         sp.plotter.axis=axdict[linename] # permanent
-        sp.plotter(axis=axdict[linename],title=title_dict[linename], **plotkwargs)
+        sp.plotter(axis=axdict[linename], title=title_dict[linename], **plotkwargs)
         sp.specfit.Spectrum.plotter = sp.plotter
         sp.specfit.selectregion(reset=True)
         if sp.specfit.modelpars is not None:
@@ -210,12 +211,12 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
                       'threethree':pyplot.subplot(223),
                       'fourfour':pyplot.subplot(224)
                      }
-        for linename,sp in iteritems(spdict):
+        for linename, sp in iteritems(spdict):
             sp.specfit.plotresiduals(axis=axdict[linename])
 
 
 
-def fitnh3(spectrum, vrange=[-100,100], vrangeunit='km/s', quiet=False, Tex=20,
+def fitnh3(spectrum, vrange=[-100, 100], vrangeunit='km/s', quiet=False, Tex=20,
            Tkin=15, column=1e15, fortho=1.0, tau=None, spec_convert_kwargs={}):
 
     if vrange:
@@ -223,12 +224,12 @@ def fitnh3(spectrum, vrange=[-100,100], vrangeunit='km/s', quiet=False, Tex=20,
         spectrum.crop(*vrange, unit=vrangeunit)
 
     spectrum.specfit(fittype='gaussian', negamp=False, guesses='moments')
-    ampguess,vguess,widthguess = spectrum.specfit.modelpars
+    ampguess, vguess, widthguess = spectrum.specfit.modelpars
 
     if tau is None:
-        spectrum.specfit(fittype='ammonia',quiet=quiet,multifit=None,guesses=[Tex,Tkin,column,widthguess,vguess,fortho])
+        spectrum.specfit(fittype='ammonia', quiet=quiet, multifit=None, guesses=[Tex, Tkin, column, widthguess, vguess, fortho])
     else:
-        spectrum.specfit(fittype='ammonia_tau',quiet=quiet,multifit=None,guesses=[Tex,Tkin,tau,widthguess,vguess,fortho])
+        spectrum.specfit(fittype='ammonia_tau', quiet=quiet, multifit=None, guesses=[Tex, Tkin, tau, widthguess, vguess, fortho])
 
     return spectrum
 
@@ -241,7 +242,7 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
     sp.xarr.convert_to_unit('GHz')
 
     spdict = {}
-    for linename,freq in iteritems(spectrum.models.ammonia.freq_dict):
+    for linename, freq in iteritems(spectrum.models.ammonia.freq_dict):
         if not hasattr(freq, 'unit'):
             freq = freq*u.Hz
         if vrange is not None:
@@ -250,7 +251,7 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
         else:
             freq_test_low = freq_test_high = freq
 
-        log.debug("freq test low,high: {0}, {1}".format(freq_test_low, freq_test_high))
+        log.debug("freq test low, high: {0}, {1}".format(freq_test_low, freq_test_high))
         if (sp.xarr.as_unit('Hz').in_range(freq_test_low) or
                 sp.xarr.as_unit('Hz').in_range(freq_test_high)):
             spdict[linename] = sp.copy(deep=True)
@@ -291,7 +292,7 @@ def plotter_override(sp, vrange=None, **kwargs):
 
     if len(spdict) > 4:
         raise ValueError("Too many lines ({0}) found.".format(len(spdict)))
-    if len(spdict) not in (2,3,4):
+    if len(spdict) not in (2, 3, 4):
         raise ValueError("Not enough lines; don't need to use the NH3 plot wrapper")
 
     plot_nh3(spdict, sp, **kwargs)
