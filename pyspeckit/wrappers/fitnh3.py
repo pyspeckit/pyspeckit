@@ -22,6 +22,7 @@ Example use:
 
 """
 from __future__ import print_function
+import warnings
 from astropy.extern.six.moves import xrange
 from astropy.extern.six import iteritems
 import pyspeckit
@@ -46,14 +47,40 @@ title_dict = {'oneone':'NH$_3(1, 1)$', 'twotwo':'NH$_3(2, 2)$',
              }
 
 def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
-               guessline='twotwo', tex=15, tkin=20, column=15.0, fortho=0.66,
-               tau=None, thin=False, quiet=False, doplot=True, fignum=1,
-               guessfignum=2, smooth=False, scale_keyword=None, rebase=False,
-               npeaks=1, guesses=None, **kwargs):
+               cropunit=None, guessline='twotwo', tex=15, trot=20, column=15.0,
+               fortho=0.66, tau=None, thin=False, quiet=False, doplot=True,
+               fignum=1, guessfignum=2, smooth=False, scale_keyword=None,
+               rebase=False, tkin=None, npeaks=1, guesses=None, **kwargs):
     """
     Given a dictionary of filenames and lines, fit them together
     e.g. {'oneone':'G000.000+00.000_nh3_11.fits'}
+
+    Parameters
+    ----------
+    input_dict : dict
+        A dictionary in which the keys are the ammonia line names (e.g.,
+        'oneone', 'twotwo', etc) and the values are either Spectrum objects
+        or filenames of spectra
+    dobaseline : bool
+        Fit and subtract a baseline prior to fitting the model?
+        Keyword arguments to `pyspeckit.spectrum.Spectrum.baseline` are
+        specified in ``baselinekwargs``.
+    baselinekwargs : dict
+        The keyword arguments for the baseline
+    crop : bool or tuple
+        A range of values to crop the spectrum to.  The units are specified by
+        ``cropunit``; the default ``None`` will use pixels.  If False, no
+        cropping will be performed.
+    cropunit : None or astropy unit
+        The unit for the crop parameter
     """
+    if tkin is not None:
+        if trot == 20 or trot is None:
+            trot = tkin
+        else:
+            raise ValueError("Please specify trot, not tkin")
+        warnings.warn("Keyword 'tkin' is deprecated; use trot instead", DeprecationWarning)
+
     spdict = dict([(linename, Spectrum(value, scale_keyword=scale_keyword))
                    if type(value) is str else (linename, value)
                    for linename, value in iteritems(input_dict)
@@ -67,7 +94,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
 
     if crop and len(crop) == 2:
         for sp in splist:
-            sp.crop(*crop)
+            sp.crop(*crop, unit=cropunit)
 
     if dobaseline:
         for sp in splist:
@@ -107,21 +134,21 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
     if tau is not None:
         if guesses is None:
             guesses = [a for i in xrange(npeaks) for a in
-                       (tkin+random.random()*i, tex, tau+random.random()*i,
+                       (trot+random.random()*i, tex, tau+random.random()*i,
                         widthguess+random.random()*i, vguess+random.random()*i,
                         fortho)]
         fittype = 'ammonia_tau_thin' if thin else 'ammonia_tau'
-        spectra.specfit(fittype=fittype, quiet=quiet, multifit=None, guesses=guesses,
+        spectra.specfit(fittype=fittype, quiet=quiet, guesses=guesses,
                         **kwargs)
     else:
         if guesses is None:
             guesses = [a for i in xrange(npeaks) for a in
-                       (tkin+random.random()*i, tex, column+random.random()*i,
+                       (trot+random.random()*i, tex, column+random.random()*i,
                         widthguess+random.random()*i, vguess+random.random()*i,
                         fortho)]
         if thin:
             raise ValueError("'thin' keyword not supported for the generic ammonia model")
-        spectra.specfit(fittype='ammonia', quiet=quiet, multifit=None, guesses=guesses,
+        spectra.specfit(fittype='ammonia', quiet=quiet, guesses=guesses,
                         **kwargs)
 
     if doplot:
@@ -217,7 +244,14 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
 
 
 def fitnh3(spectrum, vrange=[-100, 100], vrangeunit='km/s', quiet=False, Tex=20,
-           Tkin=15, column=1e15, fortho=1.0, tau=None, spec_convert_kwargs={}):
+           trot=15, column=1e15, fortho=1.0, tau=None, Tkin=None, spec_convert_kwargs={}):
+
+    if Tkin is not None:
+        if trot == 20 or trot is None:
+            trot = Tkin
+        else:
+            raise ValueError("Please specify trot, not Tkin")
+        warnings.warn("Keyword 'Tkin' is deprecated; use trot instead", DeprecationWarning)
 
     if vrange:
         spectrum.xarr.convert_to_unit(vrangeunit, **spec_convert_kwargs)
@@ -227,9 +261,12 @@ def fitnh3(spectrum, vrange=[-100, 100], vrangeunit='km/s', quiet=False, Tex=20,
     ampguess, vguess, widthguess = spectrum.specfit.modelpars
 
     if tau is None:
-        spectrum.specfit(fittype='ammonia', quiet=quiet, multifit=None, guesses=[Tex, Tkin, column, widthguess, vguess, fortho])
+        spectrum.specfit(fittype='ammonia', quiet=quiet,
+                         guesses=[Tex, trot, column, widthguess, vguess,
+                                  fortho])
     else:
-        spectrum.specfit(fittype='ammonia_tau', quiet=quiet, multifit=None, guesses=[Tex, Tkin, tau, widthguess, vguess, fortho])
+        spectrum.specfit(fittype='ammonia_tau', quiet=quiet,
+                         guesses=[Tex, trot, tau, widthguess, vguess, fortho])
 
     return spectrum
 
