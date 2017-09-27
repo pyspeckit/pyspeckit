@@ -905,6 +905,8 @@ class Spectra(BaseSpectrum):
 
         self.speclist = speclist
 
+        xunit = u.Unit(xunit)
+
         if xunit is None:
             xunit = speclist[0].xarr.unit
 
