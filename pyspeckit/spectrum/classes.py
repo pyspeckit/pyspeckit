@@ -905,12 +905,12 @@ class Spectra(BaseSpectrum):
 
         self.speclist = speclist
 
-        xunit = u.Unit(xunit)
-
         if xunit is None:
             xunit = speclist[0].xarr.unit
+        else:
+            xunit = u.Unit(xunit)
 
-        if xunit.is_equivalent(u.km/u.s):
+        if xunit is not None and xunit.is_equivalent(u.km/u.s):
             refX = speclist[0].xarr.refX
             if refX is None:
                 warn("Combining spectra with velocity coordinates, "
