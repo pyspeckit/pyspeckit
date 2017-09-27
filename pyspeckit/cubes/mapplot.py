@@ -153,7 +153,10 @@ class MapPlotter(object):
             self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=self.header)
             self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure,convention=convention)
             self.FITSFigure.show_colorscale(vmin=vmin, vmax=vmax, cmap=cmap, **plotkwargs)
-            self.axis = self.FITSFigure._ax1
+            if hasattr(self.FITSFigure, '_ax1'):
+                self.axis = self.FITSFigure._ax1
+            else:
+                self.axis = self.FITSFigure.ax
             if colorbar:
                 try:
                     self.FITSFigure.add_colorbar()
