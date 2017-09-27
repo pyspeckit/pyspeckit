@@ -16,6 +16,7 @@ python:
     - 2.7
     - 3.4
     - 3.5
+    - 3.6
 
 env:
     global:
@@ -41,10 +42,10 @@ matrix:
         - python: 2.7
           env: SETUP_CMD='build_sphinx' # don't crash for warnings
 
-        # Try Astropy development version
-        - python: 2.7
-          env: ASTROPY_VERSION=development SETUP_CMD='test'
+        # Try Astropy development version (which is no longer compatible with py2.7)
         - python: 3.5
+          env: ASTROPY_VERSION=development SETUP_CMD='test'
+        - python: 3.6
           env: ASTROPY_VERSION=development SETUP_CMD='test'
 
         # Try with optional dependencies disabled
