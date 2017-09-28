@@ -58,9 +58,6 @@ matrix:
           env: SETUP_CMD='test'
                CONDA_DEPENDENCIES='matplotlib=1.5'
                PIP_DEPENDENCIES=''
-        # Try older numpy versions
-        - python: 2.7
-          env: NUMPY_VERSION=1.9 SETUP_CMD='test'
 
     allow_failures:
     #  Optional dependencies disabled
