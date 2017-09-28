@@ -29,6 +29,7 @@ import pyspeckit
 from .. import spectrum
 from ..spectrum.classes import Spectrum, Spectra
 from ..spectrum import units
+from ..spectrum.models import ammonia_constants
 import numpy as np
 from matplotlib import pyplot
 import copy
@@ -223,21 +224,27 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
         pyplot.figure(residfignum)
         pyplot.clf()
         if len(splist) == 2:
-            axdict = {'oneone':pyplot.subplot(211),
-                      'twotwo':pyplot.subplot(212)
-                     }
+            ii = 1
+            for linename in ammonia_constants.line_names:
+                if linename in spdict:
+                    axdict[linename] = pyplot.subplot(2,1,ii)
+                    ii+=1
         elif len(splist) == 3:
-            axdict = {'oneone':pyplot.subplot(211),
-                      'twotwo':pyplot.subplot(223),
-                      'threethree':pyplot.subplot(224),
-                      'fourfour':pyplot.subplot(224)
-                     }
+            ii = 1
+            for linename in ammonia_constants.line_names:
+                if linename in spdict:
+                    if ii == 1:
+                        axdict[linename] = pyplot.subplot(2,1,ii)
+                        ii+=2
+                    else:
+                        axdict[linename] = pyplot.subplot(2,2,ii)
+                        ii+=1
         elif len(splist) == 4:
-            axdict = {'oneone':pyplot.subplot(221),
-                      'twotwo':pyplot.subplot(222),
-                      'threethree':pyplot.subplot(223),
-                      'fourfour':pyplot.subplot(224)
-                     }
+            ii = 1
+            for linename in ammonia_constants.line_names:
+                if linename in spdict:
+                    axdict[linename] = pyplot.subplot(2,2,ii)
+                    ii+=1
         for linename, sp in iteritems(spdict):
             sp.specfit.plotresiduals(axis=axdict[linename])
 
