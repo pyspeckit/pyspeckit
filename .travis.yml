@@ -25,7 +25,7 @@ env:
         # to repeat them for all configurations.
         - NUMPY_VERSION=1.13
         - ASTROPY_VERSION=stable
-        - CONDA_DEPENDENCIES='matplotlib=1.4 scipy'
+        - CONDA_DEPENDENCIES='matplotlib=1.5 scipy'
         - PIP_DEPENDENCIES='spectral-cube lmfit lineid-plot specutils'
 
     matrix:
@@ -39,7 +39,7 @@ matrix:
 
         # Check for sphinx doc build warnings - we do this first because it
         # may run for a long time
-        - python: 3.5
+        - python: 3.6
           env: SETUP_CMD='build_sphinx' # don't crash for warnings
 
         # Try Astropy development version (which is no longer compatible with py2.7)
