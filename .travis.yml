@@ -23,7 +23,7 @@ env:
         # The following versions are the 'default' for tests, unless
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
-        - NUMPY_VERSION=1.12
+        - NUMPY_VERSION=1.13
         - ASTROPY_VERSION=stable
         - CONDA_DEPENDENCIES='matplotlib=1.4 scipy'
         - PIP_DEPENDENCIES='spectral-cube lmfit lineid-plot specutils'
