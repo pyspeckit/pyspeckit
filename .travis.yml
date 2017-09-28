@@ -23,7 +23,7 @@ env:
         # The following versions are the 'default' for tests, unless
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
-        - NUMPY_VERSION=1.13
+        - NUMPY_VERSION=1.11 # numpy > 1.11 is not compatible with mpl 1
         - ASTROPY_VERSION=stable
         - CONDA_DEPENDENCIES='matplotlib=1.5 scipy'
         - PIP_DEPENDENCIES='spectral-cube lmfit lineid-plot specutils'
@@ -51,11 +51,11 @@ matrix:
         # Try with optional dependencies disabled
         - python: 2.7
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.4'
+               CONDA_DEPENDENCIES='matplotlib=1.5'
                PIP_DEPENDENCIES=''
         - python: 3.5
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.4'
+               CONDA_DEPENDENCIES='matplotlib=1.5'
                PIP_DEPENDENCIES=''
         # Try older numpy versions
         - python: 2.7
@@ -65,11 +65,11 @@ matrix:
     #  Optional dependencies disabled
         - python: 2.7
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.4'
+               CONDA_DEPENDENCIES='matplotlib=1.5'
                PIP_DEPENDENCIES=''
         - python: 3.5
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.4'
+               CONDA_DEPENDENCIES='matplotlib=1.5'
                PIP_DEPENDENCIES=''
 
 install:
