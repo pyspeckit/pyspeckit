@@ -42,11 +42,12 @@ try:
 except ImportError:
     atpyOK = False
 
-try:
-    import specutils
-    specutilsOK = True
-except ImportError:
-    specutilsOK = False
+# specutils -> legacy specutils
+# try:
+#     import specutils
+#     specutilsOK = True
+# except ImportError:
+#     specutilsOK = False
 
 
 try:
@@ -906,6 +907,18 @@ class Spectra(BaseSpectrum):
 
         if xunit is None:
             xunit = speclist[0].xarr.unit
+        else:
+            xunit = u.Unit(xunit)
+
+        if xunit is not None and xunit.is_equivalent(u.km/u.s):
+            refX = speclist[0].xarr.refX
+            if refX is None:
+                warn("Combining spectra with velocity coordinates, "
+                     "but refX is None")
+            for spec in speclist[1:]:
+                if spec.xarr.refX != refX:
+                    raise ValueError("When combining spectra in velocity coordinates, "
+                                     "they must have the same reference frequency.")
 
         log.info("Concatenating data")
 

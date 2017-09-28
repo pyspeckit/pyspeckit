@@ -696,6 +696,7 @@ class Specfit(interactive.Interactive):
                         # if it was not, it will change only the placeholder
                         # (becuase we are passing by reference above)
                         par.value /= scalefactor
+                        par.limits = [lim / scalefactor for lim in par.limits]
 
                 log.debug("Rescaled guesses to {0}".format(guesses))
 
@@ -757,6 +758,8 @@ class Specfit(interactive.Interactive):
                 par.value *= scalefactor
                 if par.error is not None:
                     par.error *= scalefactor
+                if par.limits is not None:
+                    par.limits = [lim*scalefactor for lim in par.limits]
 
         self.modelpars = self.parinfo.values
         self.modelerrs = self.parinfo.errors

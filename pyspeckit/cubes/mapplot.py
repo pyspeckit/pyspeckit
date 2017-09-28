@@ -70,7 +70,7 @@ class MapPlotter(object):
 
         self.overplot_colorcycle = itertools.cycle(['b', 'g', 'r', 'c', 'm', 'y'])
         self.overplot_linestyle = '-'
- 
+
         self.Cube = Cube
         if self.Cube is not None:
             self.header = cubes.flatten_header(self.Cube.header, delete=True)
@@ -91,8 +91,8 @@ class MapPlotter(object):
         The map to be plotted is selected using `makeplane`.
         The `estimator` keyword argument is passed to that function.
 
-        The plotted map, once shown, is interactive.  You can click on it with any 
-        of the three mouse buttons. 
+        The plotted map, once shown, is interactive.  You can click on it with any
+        of the three mouse buttons.
 
         Button 1 or keyboard '1':
             Plot the selected pixel's spectrum in another window.  Mark the
@@ -153,7 +153,10 @@ class MapPlotter(object):
             self.fitsfile = pyfits.PrimaryHDU(data=self.plane,header=self.header)
             self.FITSFigure = aplpy.FITSFigure(self.fitsfile,figure=self.figure,convention=convention)
             self.FITSFigure.show_colorscale(vmin=vmin, vmax=vmax, cmap=cmap, **plotkwargs)
-            self.axis = self.FITSFigure._ax1
+            if hasattr(self.FITSFigure, '_ax1'):
+                self.axis = self.FITSFigure._ax1
+            else:
+                self.axis = self.FITSFigure.ax
             if colorbar:
                 try:
                     self.FITSFigure.add_colorbar()
@@ -167,12 +170,12 @@ class MapPlotter(object):
                 if self.colorbar.ax in self.axis.figure.axes:
                     self.axis.figure.delaxes(self.colorbar.ax)
             self.axis.imshow(self.plane, vmin=vmin, vmax=vmax, cmap=cmap, **plotkwargs)
-            if colorbar: 
+            if colorbar:
                 try:
                     self.colorbar = matplotlib.pyplot.colorbar(self.axis.images[0])
                 except Exception as ex:
                     print("ERROR: Could not create colorbar!  Error was %s" % str(ex))
-            self._origin = 0 # normal convention 
+            self._origin = 0 # normal convention
 
         self.canvas = self.axis.figure.canvas
 
@@ -230,7 +233,7 @@ class MapPlotter(object):
         elif type(estimator) is int:
             if hasattr(self.Cube,'parcube'):
                 self.plane = self.Cube.parcube[estimator,:,:]
-        
+
         if self.plane is None:
             raise ValueError("Invalid estimator %s" % (str(estimator)))
 
@@ -253,7 +256,7 @@ class MapPlotter(object):
         if event.inaxes:
             clickX = np.round(event.xdata) - self._origin
             clickY = np.round(event.ydata) - self._origin
-        
+
             # grab toolbar info so that we don't do anything if a tool is selected
             tb = self.canvas.toolbar
             if tb.mode != '':
@@ -277,7 +280,7 @@ class MapPlotter(object):
                     event.button = int(event.key)
                     event.key = None
                     self.plot_spectrum(event)
-            elif (hasattr(event,'button') and event.button in (1,2) 
+            elif (hasattr(event,'button') and event.button in (1,2)
                     and not (self._clickX == clickX and self._clickY == clickY)):
                 if event.button == 1:
                     self._remove_circle()
@@ -396,7 +399,7 @@ class MapPlotter(object):
         """
         Create a copy of the map plotter with blank (uninitialized) axis & figure
 
-        [ parent ] 
+        [ parent ]
             A spectroscopic axis instance that is the parent of the specfit
             instance.  This needs to be specified at some point, but defaults
             to None to prevent overwriting a previous plot.

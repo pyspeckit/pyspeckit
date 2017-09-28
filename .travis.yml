@@ -16,15 +16,17 @@ python:
     - 2.7
     - 3.4
     - 3.5
+    - 3.6
 
 env:
     global:
         # The following versions are the 'default' for tests, unless
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
-        - NUMPY_VERSION=1.10
+        - NUMPY_VERSION=1.11 # numpy > 1.11 is not compatible with mpl 1
         - ASTROPY_VERSION=stable
-        - CONDA_DEPENDENCIES='matplotlib=1.4 scipy'
+        - CONDA_DEPENDENCIES='matplotlib=1.5 scipy'
+        - SPHINX_VERSION=1.5.6 # spectral-cube 0.4.0 won't install with newer versions
         - PIP_DEPENDENCIES='spectral-cube lmfit lineid-plot specutils'
 
     matrix:
@@ -38,37 +40,34 @@ matrix:
 
         # Check for sphinx doc build warnings - we do this first because it
         # may run for a long time
-        - python: 2.7
+        - python: 3.6
           env: SETUP_CMD='build_sphinx' # don't crash for warnings
 
-        # Try Astropy development version
-        - python: 2.7
-          env: ASTROPY_VERSION=development SETUP_CMD='test'
+        # Try Astropy development version (which is no longer compatible with py2.7)
         - python: 3.5
+          env: ASTROPY_VERSION=development SETUP_CMD='test'
+        - python: 3.6
           env: ASTROPY_VERSION=development SETUP_CMD='test'
 
         # Try with optional dependencies disabled
         - python: 2.7
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.4'
+               CONDA_DEPENDENCIES='matplotlib=1.5'
                PIP_DEPENDENCIES=''
         - python: 3.5
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.4'
+               CONDA_DEPENDENCIES='matplotlib=1.5'
                PIP_DEPENDENCIES=''
-        # Try older numpy versions
-        - python: 2.7
-          env: NUMPY_VERSION=1.9 SETUP_CMD='test'
 
     allow_failures:
     #  Optional dependencies disabled
         - python: 2.7
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.4'
+               CONDA_DEPENDENCIES='matplotlib=1.5'
                PIP_DEPENDENCIES=''
         - python: 3.5
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.4'
+               CONDA_DEPENDENCIES='matplotlib=1.5'
                PIP_DEPENDENCIES=''
 
 install:
