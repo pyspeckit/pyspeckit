@@ -214,6 +214,7 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
 
 
 def make_axdict(splist, spdict):
+    axdict = {}
     if len(splist) == 2:
         ii = 1
         for linename in ammonia_constants.line_names:
