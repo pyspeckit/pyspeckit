@@ -185,22 +185,7 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
         if spectra.specfit.modelpars is not None:
             sp.specfit.model = sp.specfit.fitter.n_ammonia(pars=spectra.specfit.modelpars, parnames=spectra.specfit.fitter.parnames)(sp.xarr)
 
-    if len(splist) == 2:
-        axdict = {'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(212)}
-    elif len(splist) == 3:
-        axdict = {'oneone':pyplot.subplot(211), 'twotwo':pyplot.subplot(223),
-                  'threethree':pyplot.subplot(224),
-                  'fourfour':pyplot.subplot(224)
-                 }
-    elif len(splist) == 4:
-        axdict = {'oneone':pyplot.subplot(221), 'twotwo':pyplot.subplot(222),
-                  'threethree':pyplot.subplot(223),
-                  'fourfour':pyplot.subplot(224)
-                 }
-    else:
-        raise NotImplementedError("Plots with {0} subplots are not yet "
-                                  "implemented.  Pull requests are "
-                                  "welcome!".format(len(splist)))
+    axdict = make_axdict(splist, spdict)
 
     for linename, sp in iteritems(spdict):
         if linename not in axdict:
@@ -223,31 +208,40 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
     if residfignum is not None:
         pyplot.figure(residfignum)
         pyplot.clf()
-        if len(splist) == 2:
-            ii = 1
-            for linename in ammonia_constants.line_names:
-                if linename in spdict:
-                    axdict[linename] = pyplot.subplot(2,1,ii)
-                    ii+=1
-        elif len(splist) == 3:
-            ii = 1
-            for linename in ammonia_constants.line_names:
-                if linename in spdict:
-                    if ii == 1:
-                        axdict[linename] = pyplot.subplot(2,1,ii)
-                        ii+=2
-                    else:
-                        axdict[linename] = pyplot.subplot(2,2,ii)
-                        ii+=1
-        elif len(splist) == 4:
-            ii = 1
-            for linename in ammonia_constants.line_names:
-                if linename in spdict:
-                    axdict[linename] = pyplot.subplot(2,2,ii)
-                    ii+=1
+        axdict = make_axdict(splist, spdict)
         for linename, sp in iteritems(spdict):
             sp.specfit.plotresiduals(axis=axdict[linename])
 
+
+def make_axdict(splist, spdict):
+    if len(splist) == 2:
+        ii = 1
+        for linename in ammonia_constants.line_names:
+            if linename in spdict:
+                axdict[linename] = pyplot.subplot(2,1,ii)
+                ii+=1
+    elif len(splist) == 3:
+        ii = 1
+        for linename in ammonia_constants.line_names:
+            if linename in spdict:
+                if ii == 1:
+                    axdict[linename] = pyplot.subplot(2,1,ii)
+                    ii+=2
+                else:
+                    axdict[linename] = pyplot.subplot(2,2,ii)
+                    ii+=1
+    elif len(splist) == 4:
+        ii = 1
+        for linename in ammonia_constants.line_names:
+            if linename in spdict:
+                axdict[linename] = pyplot.subplot(2,2,ii)
+                ii+=1
+    else:
+        raise NotImplementedError("Plots with {0} subplots are not yet "
+                                  "implemented.  Pull requests are "
+                                  "welcome!".format(len(splist)))
+
+    return axdict
 
 
 def fitnh3(spectrum, vrange=[-100, 100], vrangeunit='km/s', quiet=False, Tex=20,
