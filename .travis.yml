@@ -26,6 +26,7 @@ env:
         - NUMPY_VERSION=1.11 # numpy > 1.11 is not compatible with mpl 1
         - ASTROPY_VERSION=stable
         - CONDA_DEPENDENCIES='matplotlib=1.5 scipy'
+        - SPHINX_VERSION=1.5.6 # spectral-cube 0.4.0 won't install with newer versions
         - PIP_DEPENDENCIES='spectral-cube lmfit lineid-plot specutils'
 
     matrix:
