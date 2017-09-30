@@ -1,4 +1,4 @@
-name: package-template
+name: packagename
 
 channels:
     - astropy

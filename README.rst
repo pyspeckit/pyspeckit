@@ -25,3 +25,8 @@ Status reports for developers
 .. image:: https://travis-ci.org/astropy/package-template.svg
     :target: https://travis-ci.org/astropy/package-template
     :alt: Travis Status
+
+License
+-------
+
+This project is Copyright (c) Astropy Developers and licensed under the terms of the BSD 3-Clause license. See the licenses folder for more information.

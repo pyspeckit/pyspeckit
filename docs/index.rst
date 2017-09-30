@@ -1,8 +1,8 @@
 Documentation
 =============
 
-This is an affiliated package for the AstroPy package. The documentation for
-this package is here:
+This is the documentation for packagename.
+
 
 .. toctree::
   :maxdepth: 2

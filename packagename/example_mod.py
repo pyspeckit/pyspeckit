@@ -41,9 +41,11 @@ def primes(imax):
 
 def do_primes(n, usecython=False):
     if usecython:
+        
         from .example_c import primes as cprimes
         print('Using cython-based primes')
         return cprimes(n)
+        
     else:
         print('Using pure python primes')
         return primes(n)

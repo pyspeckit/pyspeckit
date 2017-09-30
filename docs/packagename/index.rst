@@ -1,8 +1,8 @@
-****************
-Template package
-****************
+*************************
+packagename Documentation
+*************************
 
-This is the documentation for the affiliated package.
+This is the documentation for packagename.
 
 Reference/API
 =============
