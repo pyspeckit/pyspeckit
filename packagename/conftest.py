@@ -32,7 +32,7 @@ from astropy.tests.pytest_plugins import *
 ## running the tests.
 # import os
 #
-## This is to figure out the affiliated package version, rather than
+## This is to figure out the package version, rather than
 ## using Astropy's
 # try:
 #     from .version import version
