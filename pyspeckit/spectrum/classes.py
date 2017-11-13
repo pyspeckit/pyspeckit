@@ -800,12 +800,16 @@ class BaseSpectrum(object):
                 # allow array subtraction
                 if self.shape != other.shape:
                     raise ValueError("Shape mismatch in data")
-                elif hasattr(self,'xarr'):
+                elif hasattr(self, 'xarr'):
                     newspec = self.copy()
                     newspec.data = operation(newspec.data, other)
-                elif hasattr(other,'xarr'): # is this even possible?
+                elif hasattr(other, 'xarr'): # is this even possible?
                     newspec = other.copy()
                     newspec.data = operation(self, other.data)
+                else:
+                    raise ValueError("Data shapes match but somehow neither side is a Spectrum")
+            else:
+                raise ValueError("Data types are incompatible")
 
         return ofunc
 
