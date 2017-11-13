@@ -768,13 +768,18 @@ class BaseSpectrum(object):
         after checking for shape matching
         """
 
+        log.debug("Operation Wrapper being called for operation {0}".format(operation))
+
         def ofunc(self, other):
+            log.debug("ofunc on operation {2} being called with {0} and {1}".format(self, other, operation))
             if np.isscalar(other):
+                log.debug("'other' is scalar")
                 newspec = self.copy()
                 newspec.data = operation(newspec.data, other)
                 return newspec
 
             elif hasattr(self,'xarr') and hasattr(other,'xarr'): # purely for readability
+                log.debug("both sides of operation have xarr")
 
                 if self._arithmetic_threshold == 'exact':
                     xarrcheck = np.all((self.xarr == other.xarr))
@@ -796,16 +801,21 @@ class BaseSpectrum(object):
                     raise ValueError("Shape mismatch in data")
                 elif not xarrcheck:
                     raise ValueError("X-axes do not match.")
+                else:
+                    raise Exception("Unexpected Error")
             elif hasattr(self,'shape') and hasattr(other,'shape'):
+                log.debug("both sides of operation have shape: {0}, {1}".format(self.shape, other.shape))
                 # allow array subtraction
                 if self.shape != other.shape:
                     raise ValueError("Shape mismatch in data")
                 elif hasattr(self, 'xarr'):
                     newspec = self.copy()
                     newspec.data = operation(newspec.data, other)
+                    return newspec
                 elif hasattr(other, 'xarr'): # is this even possible?
                     newspec = other.copy()
                     newspec.data = operation(self, other.data)
+                    return newspec
                 else:
                     raise ValueError("Data shapes match but somehow neither side is a Spectrum")
             else:
