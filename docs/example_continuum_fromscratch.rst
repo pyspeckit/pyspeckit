@@ -60,7 +60,7 @@ accessible via the `pyspeckit.Spectrum.baseline` tools because they use
    center_guess = (data*xaxis).sum()/data.sum()
    width_guess = (data.sum() / amplitude_guess / (2*np.pi))**0.5
    guesses = [amplitude_guess, center_guess, width_guess]
-   sp.specfit(fittype='gaussian', guesses=guesses)
+   sp_contsub.specfit(fittype='gaussian', guesses=guesses)
 
-   sp.plotter(errstyle='fill')
-   sp.specfit.plot_fit()
+   sp_contsub.plotter(errstyle='fill')
+   sp_contsub.specfit.plot_fit()
