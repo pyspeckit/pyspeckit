@@ -90,6 +90,6 @@ def nh3_vtau_multimodel_generator(linenames):
                                               ('T_{{ex}}({0})'.format(line_labels[ln]),
                                                '\\tau({0})'.format(line_labels[ln]))
                                              ],
-            fitunits='Hz')
+            fitunit='Hz')
 
     return mod

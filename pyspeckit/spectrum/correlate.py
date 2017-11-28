@@ -9,15 +9,15 @@ from . import units as units_module
 from . import classes
 from . import headers
 
-def correlate(spectrum1, spectrum2, range=None, units=None, errorweight=False):
+def correlate(spectrum1, spectrum2, range=None, unit=None, errorweight=False):
     """
     Cross-correlate spectrum1 with spectrum2
 
     """
 
     if range is not None:
-        spectrum1 = spectrum1.slice(*range, units=units)
-        spectrum2 = spectrum2.slice(*range, units=units)
+        spectrum1 = spectrum1.slice(*range, unit=unit)
+        spectrum2 = spectrum2.slice(*range, unit=unit)
 
     if not (spectrum1.xarr.shape == spectrum2.xarr.shape) or not all(spectrum1.xarr == spectrum2.xarr):
         spectrum2 = interpolation.interp(spectrum2, spectrum1)
