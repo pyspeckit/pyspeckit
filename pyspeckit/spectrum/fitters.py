@@ -511,7 +511,6 @@ class Specfit(interactive.Interactive):
         input spectrum or determine the error using the RMS of the residuals,
         depending on whether the residuals exist.
         """
-        log.debug("Error spectrum is being set")
         if (self.Spectrum.error is not None) and not usestd:
             if (self.Spectrum.error == 0).all():
                 if self.residuals is not None and useresiduals:
@@ -534,7 +533,6 @@ class Specfit(interactive.Interactive):
             self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
         else:
             self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
-        log.debug("Mean of error spectrum is {0}".format(self.errspec.mean()))
 
     def setfitspec(self):
         """
