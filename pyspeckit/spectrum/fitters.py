@@ -511,6 +511,7 @@ class Specfit(interactive.Interactive):
         input spectrum or determine the error using the RMS of the residuals,
         depending on whether the residuals exist.
         """
+        log.debug("Error spectrum is being set")
         if (self.Spectrum.error is not None) and not usestd:
             if (self.Spectrum.error == 0).all():
                 if self.residuals is not None and useresiduals:
@@ -533,6 +534,7 @@ class Specfit(interactive.Interactive):
             self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
         else:
             self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
+        log.debug("Mean of error spectrum is {0}".format(self.errspec.mean()))
 
     def setfitspec(self):
         """
@@ -560,7 +562,7 @@ class Specfit(interactive.Interactive):
                  self.Spectrum.baseline.basespec is not None and
                  len(self.spectofit) == len(self.Spectrum.baseline.basespec))):
                 self.spectofit -= self.Spectrum.baseline.basespec
-        OKmask = (self.spectofit==self.spectofit)
+        OKmask = np.isfinite(self.spectofit)
 
         with warnings.catch_warnings():
             # catch a specific np1.7 futurewarning relating to masks
@@ -568,8 +570,14 @@ class Specfit(interactive.Interactive):
             self.spectofit[~OKmask] = 0
 
         self.seterrspec()
+
+        # the "OK" mask is just checking that the values are finite
         self.errspec[~OKmask] = 1e10
-        if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
+
+        # if an includemask is set *and* there are some included values, "mask out" the rest
+        # otherwise, if *all* data are excluded, we should assume that means the includemask
+        # simply hasn't been initialized
+        if self.includemask is not None and (self.includemask.shape == self.errspec.shape) and any(self.includemask):
             self.errspec[~self.includemask] = 1e10*self.errspec.max()
 
     @property
@@ -937,7 +945,7 @@ class Specfit(interactive.Interactive):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight+np.sum(self.parinfo.fixed)
+        self.dof = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight+np.sum(self.parinfo.fixed)
         self.vheight=vheight
         if vheight:
             self.Spectrum.baseline.order = 0
@@ -1666,6 +1674,11 @@ class Specfit(interactive.Interactive):
         Perform the fit (or die trying)
         Hide the guesses
         """
+        if self.nclicks_b1 == 0:
+            # there has been no selection
+            # therefore, we assume *everything* is selected
+            self.includemask[:] = True
+
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.click)
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.keyclick)
         npars = 2+nwidths
