@@ -38,8 +38,11 @@ def make_test_cube(shape=(30,9,9), outfile='test.fits', snr=30,
         sigma1d, sigma2d = sigma
 
     # generate a 3d ellipsoid with a maximum of one
-    gauss1d = Gaussian1DKernel(stddev = sigma1d, x_size = shape[0])
-    gauss2d = Gaussian2DKernel(stddev = sigma2d,
+    gauss1d = Gaussian1DKernel(x_stddev = sigma1d,
+                               y_stddev = sigma1d,
+                               x_size = shape[0],)
+    gauss2d = Gaussian2DKernel(x_stddev = sigma2d,
+                               y_stddev = sigma2d,
                                x_size = shape[1],
                                y_size = shape[2])
     signal_cube = gauss1d.array[:, None, None] * gauss2d.array
