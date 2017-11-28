@@ -364,10 +364,10 @@ class SpectroscopicAxis(u.Quantity):
         subarr.velocity_convention = velocity_convention
 
         if not center_frequency:
-            if refX:
+            if refX is not None:
                 center_frequency = refX
         if not center_frequency_unit:
-            if refX_unit:
+            if refX_unit is not None:
                 center_frequency_unit = refX_unit
             else:
                 center_frequency_unit = unit
