@@ -586,7 +586,10 @@ class Specfit(interactive.Interactive):
     @property
     def dof(self):
         """ degrees of freedom in fit """
-        return (self.includemask.sum() - self.mask.sum() - self.npeaks *
+        if not hasattr(self, 'npix_fitted'):
+            raise AttributeError('No fit has been run, so npix_fitted is not '
+                                 'defined and dof cannot be computed.')
+        return (self.npix_fitted - self.npeaks *
                 self.Registry.npars[self.fittype] + np.sum(self.parinfo.fixed) +
                 np.sum([x != '' for x in self.parinfo.tied]))
 
@@ -807,6 +810,12 @@ class Specfit(interactive.Interactive):
         self._full_model()
 
         self.history_fitpars()
+
+        # calculate the number of pixels included in the fit.  This should
+        # *only* be done when fitting, not when selecting data.
+        # (see self.dof)
+        self.npix_fitted = self.includemask.sum() - self.mask.sum()
+
 
     def refit(self, use_lmfit=False):
         """ Redo a fit using the current parinfo as input """
