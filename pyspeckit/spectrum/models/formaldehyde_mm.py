@@ -450,14 +450,14 @@ formaldehyde_mm_fitter = formaldehyde_mm_model(formaldehyde_mm, 3,
         parlimited=[(False,False),(False,False), (True,False)], 
         parlimits=[(0,0), (0,0), (0,0)],
         shortvarnames=("A","v","\\sigma"), # specify the parameter names (TeX is OK)
-        fitunits='Hz' )
+        fitunit='Hz' )
 
 formaldehyde_mm_vheight_fitter = formaldehyde_mm_model(fitter.vheightmodel(formaldehyde_mm), 4,
         parnames=['height','amp','center','width'], 
         parlimited=[(False,False),(False,False),(False,False), (True,False)], 
         parlimits=[(0,0), (0,0), (0,0), (0,0)],
         shortvarnames=("H","A","v","\\sigma"), # specify the parameter names (TeX is OK)
-        fitunits='Hz' )
+        fitunit='Hz' )
 
 
 try:

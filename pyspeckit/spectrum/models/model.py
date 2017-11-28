@@ -32,7 +32,7 @@ class SpectralModel(fitter.SimpleFitter):
 
     def __init__(self, modelfunc, npars, 
                  shortvarnames=("A","\\Delta x","\\sigma"),
-                 fitunits=None,
+                 fitunit=None,
                  centroid_par=None,
                  fwhm_func=None,
                  fwhm_pars=None,
@@ -66,7 +66,7 @@ class SpectralModel(fitter.SimpleFitter):
             not the past tense of party.  Can declare, via text, that
             some parameters are tied to each other.  Defaults to zeros like the
             others, but it's not clear if that's a sensible default
-        fitunits : str (optional)
+        fitunit : str (optional)
             convert X-axis to these units before passing to model
         parsteps : list (optional)
             minimum step size for each paremeter (defaults to ZEROS)
@@ -88,7 +88,7 @@ class SpectralModel(fitter.SimpleFitter):
             self.__doc__ += modelfunc.__doc__
         self.npars = npars
         self.default_npars = npars
-        self.fitunits = fitunits
+        self.fitunit = fitunit
         
         # this needs to be set once only
         self.shortvarnames = shortvarnames
@@ -148,7 +148,7 @@ class SpectralModel(fitter.SimpleFitter):
         
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
                       parlimits=None, parlimited=None, parfixed=None,
-                      parerror=None, partied=None, fitunits=None,
+                      parerror=None, partied=None, fitunit=None,
                       parsteps=None, npeaks=1, parinfo=None, names=None,
                       values=None, limits=None, limited=None, fixed=None,
                       error=None, tied=None, steps=None, negamp=None,
@@ -429,13 +429,13 @@ class SpectralModel(fitter.SimpleFitter):
             raise ImportError( "Could not import lmfit, try using mpfit instead." )
 
         self.xax = xax # the 'stored' xax is just a link to the original
-        if hasattr(xax,'convert_to_unit') and self.fitunits is not None:
+        if hasattr(xax,'convert_to_unit') and self.fitunit is not None:
             # some models will depend on the input units.  For these, pass in an X-axis in those units
             # (gaussian, voigt, lorentz profiles should not depend on units.  Ammonia, formaldehyde,
             # H-alpha, etc. should)
             xax = copy.copy(xax)
-            xax.convert_to_unit(self.fitunits, quiet=quiet)
-        elif self.fitunits is not None:
+            xax.convert_to_unit(self.fitunit, quiet=quiet)
+        elif self.fitunit is not None:
             raise TypeError("X axis does not have a convert method")
 
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
@@ -528,14 +528,14 @@ class SpectralModel(fitter.SimpleFitter):
             #throwaway, kwargs = self._make_parinfo(debug=debug, **kwargs)
 
         self.xax = xax # the 'stored' xax is just a link to the original
-        if hasattr(xax,'as_unit') and self.fitunits is not None:
+        if hasattr(xax,'as_unit') and self.fitunit is not None:
             # some models will depend on the input units.  For these, pass in an X-axis in those units
             # (gaussian, voigt, lorentz profiles should not depend on units.  Ammonia, formaldehyde,
             # H-alpha, etc. should)
             xax = copy.copy(xax)
-            # xax.convert_to_unit(self.fitunits, quiet=quiet)
-            xax = xax.as_unit(self.fitunits, quiet=quiet, **kwargs)
-        elif self.fitunits is not None:
+            # xax.convert_to_unit(self.fitunit, quiet=quiet)
+            xax = xax.as_unit(self.fitunit, quiet=quiet, **kwargs)
+        elif self.fitunit is not None:
             raise TypeError("X axis does not have a convert method")
 
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):

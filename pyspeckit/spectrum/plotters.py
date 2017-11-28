@@ -78,14 +78,14 @@ class Plotter(object):
         def getprop(self):
             if xy == 'x':
                 if minmax == 'min':
-                    if self._xlim[0] and self._xunit:
+                    if self._xlim[0] is not None and self._xunit:
                         try:
                             self._xlim[0]._unit = self._xunit
                         except AttributeError:
                             self._xlim[0] = u.Quantity(self._xlim[0], self._xunit)
                     return self._xlim[0]
                 elif minmax == 'max':
-                    if self._xlim[1] and self._xunit:
+                    if self._xlim[1] is not None and self._xunit:
                         try:
                             self._xlim[1]._unit = self._xunit
                         except AttributeError:

@@ -1,5 +1,5 @@
 Models
-==================
+======
 See :doc:`parameters` for information on how to restrict/modify model parameters.
 
 .. module:: pyspeckit.spectrum.models
@@ -28,6 +28,15 @@ Here are some examples of how to make your own fitters::
             shortvarnames=('A',r'\Delta x',r'\sigma'))
 
 Then you can `register <registration.html>`_ these fitters.
+
+Fitting
+=======
+
+Once you have a model defined, you can fit it using the
+`pyspeckit.Spectrum.specfit` module.  Documents on fitting have not been
+prepared yet, but you can learn most of the tricks by looking at the various
+fitting examples and the :doc:`parameters` documentation.
+
 
 .. TODO::
     Implement the gaussian-hermite profile described here:
