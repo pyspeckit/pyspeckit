@@ -255,7 +255,7 @@ class Interactive(object):
             widthguess = (abs(event.xdata-self.guesses[-1-nwidths]) /
                           numpy.sqrt(2*numpy.log(2)))
             if numpy.isnan(widthguess) or widthguess <= 0:
-                newwidthguess = numpy.abs(self.Spectrum.xarr.diff()).min()
+                newwidthguess = numpy.abs(self.Spectrum.xarr.diff()).min().value
                 if newwidthguess <= 0:
                     raise ValueError("A width guess could not be determined.")
                 log.exception("Error: width guess was {0}.  It is being forced to {1}."
