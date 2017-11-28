@@ -843,7 +843,7 @@ class SpectroscopicAxis(u.Quantity):
             (from_unit, to_unit, forward, backward)
             forward and backward are functions that convert values between those units
         """
-        if velocity_convention and center_frequency:
+        if velocity_convention is not None and center_frequency is not None:
             new_equivalencies = velocity_conventions[velocity_convention](center_frequency)
             return center_frequency, merge_equivalencies(new_equivalencies,
                                                          equivalencies)
