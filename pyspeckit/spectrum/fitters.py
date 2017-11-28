@@ -584,6 +584,14 @@ class Specfit(interactive.Interactive):
         return mask
 
     @property
+    def dof(self):
+        """ degrees of freedom in fit """
+        return (self.includemask.sum() - self.mask.sum() - self.npeaks *
+                self.Registry.npars[self.fittype] + np.sum(self.parinfo.fixed) +
+                np.sum([x != '' for x in self.parinfo.tied]))
+
+
+    @property
     def mask_sliced(self):
         """ Sliced (subset) Mask: True means "exclude" """
         return self.mask[self.xmin:self.xmax]
@@ -751,10 +759,6 @@ class Specfit(interactive.Interactive):
         self.chi2 = chi2
         self.model = model * scalefactor
         self.parinfo = self.fitter.parinfo
-
-        self.dof = (self.includemask.sum() - self.mask.sum() - self.npeaks *
-                    self.Registry.npars[self.fittype] +
-                    np.sum(self.parinfo.fixed))
 
         # rescale any scaleable parameters
         for par in self.parinfo:
@@ -1822,10 +1826,7 @@ class Specfit(interactive.Interactive):
 
         if reduced:
             # vheight included here or not?  assuming it should be...
-            dof = (modelmask.sum() -
-                   self.fitter.npars - self.vheight +
-                   np.sum(self.parinfo.fixed))
-            return chi2/dof
+            return chi2/self.dof
         else:
             return chi2
 
