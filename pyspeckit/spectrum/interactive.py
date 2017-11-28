@@ -246,7 +246,8 @@ class Interactive(object):
             self.guesses += [peakguess,event.xdata] + [1]*nwidths
             self.npeaks += 1
             self.nclicks_b2 += 1
-            if debug or self._debug: print("Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata))
+            if debug or self._debug:
+                print("Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata))
             self.button2plot += [self.Spectrum.plotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
             #self.Spectrum.plotter.refresh() #plot(**self.Spectrum.plotter.plotkwargs)
         elif self.nclicks_b2 % modnum >= 1:
@@ -275,7 +276,8 @@ class Interactive(object):
             self.nclicks_b2 += 1
         else:
             raise ValueError("Bug in guesspeakwidth: somehow, the number of clicks doesn't make sense.")
-        if debug or self._debug: print("Guesses: ",self.guesses)
+        if debug or self._debug:
+            print("Guesses: ",self.guesses)
 
     def firstclick_guess(self):
         """
