@@ -246,18 +246,29 @@ class Interactive(object):
             self.guesses += [peakguess,event.xdata] + [1]*nwidths
             self.npeaks += 1
             self.nclicks_b2 += 1
-            if debug or self._debug: print("Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata))
+            if debug or self._debug:
+                print("Peak %i click %i at x,y %g,%g" % (self.npeaks,self.nclicks_b2,event.xdata,event.ydata))
             self.button2plot += [self.Spectrum.plotter.axis.scatter(event.xdata,event.ydata,marker='x',c='r')]
             #self.Spectrum.plotter.refresh() #plot(**self.Spectrum.plotter.plotkwargs)
         elif self.nclicks_b2 % modnum >= 1:
             # odd clicks are widths
             whichwidth = self.nclicks_b2 % modnum
-            self.guesses[-whichwidth] = (abs(event.xdata-self.guesses[-1-nwidths]) /
-                    numpy.sqrt(2*numpy.log(2)))
-            if debug or self._debug: print("Width %i whichwidth %i click %i at x,y %g,%g width: %g" % (self.npeaks,whichwidth,self.nclicks_b2,event.xdata,event.ydata,self.guesses[-whichwidth]))
+            widthguess = (abs(event.xdata-self.guesses[-1-nwidths]) /
+                          numpy.sqrt(2*numpy.log(2)))
+            if numpy.isnan(widthguess) or widthguess <= 0:
+                newwidthguess = numpy.abs(self.Spectrum.xarr.diff()).min().value
+                if newwidthguess <= 0:
+                    raise ValueError("A width guess could not be determined.")
+                log.exception("Error: width guess was {0}.  It is being forced to {1}."
+                              .format(widthguess, newwidthguess))
+                widthguess = newwidthguess
+            self.guesses[-whichwidth] = widthguess
+            if debug or self._debug:
+                print("Width %i whichwidth %i click %i at x,y %g,%g width: %g" % (self.npeaks,whichwidth,self.nclicks_b2,event.xdata,event.ydata,self.guesses[-whichwidth]))
             self.button2plot += self.Spectrum.plotter.axis.plot([event.xdata,
-                2*self.guesses[-1-nwidths]-event.xdata],[event.ydata]*2,
-                color='r')
+                                                                 2*self.guesses[-1-nwidths]-event.xdata],
+                                                                [event.ydata]*2,
+                                                                color='r')
             #self.Spectrum.plotter.refresh() #plot(**self.Spectrum.plotter.plotkwargs)
             if self.nclicks_b2 / (1+nwidths) > self.npeaks:
                 print("There have been %i middle-clicks but there are only %i features" % (self.nclicks_b2,self.npeaks))
@@ -265,7 +276,8 @@ class Interactive(object):
             self.nclicks_b2 += 1
         else:
             raise ValueError("Bug in guesspeakwidth: somehow, the number of clicks doesn't make sense.")
-        if debug or self._debug: print("Guesses: ",self.guesses)
+        if debug or self._debug:
+            print("Guesses: ",self.guesses)
 
     def firstclick_guess(self):
         """

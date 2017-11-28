@@ -501,14 +501,14 @@ class BaseSpectrum(object):
         elif unit in ('pixel','pixels'):
             start_ind = start
         else:
-            start_ind = self.xarr.x_to_pix(start, xval_units=unit)
+            start_ind = self.xarr.x_to_pix(start, xval_unit=unit)
 
         if hasattr(stop, 'unit'):
             stop_ind = self.xarr.x_to_pix(stop)
         elif unit in ('pixel','pixels'):
             stop_ind = stop
         else:
-            stop_ind = self.xarr.x_to_pix(stop, xval_units=unit)
+            stop_ind = self.xarr.x_to_pix(stop, xval_unit=unit)
 
         if start_ind > stop_ind:
             start_ind,stop_ind = stop_ind,start_ind

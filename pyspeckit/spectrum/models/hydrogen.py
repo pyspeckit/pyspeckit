@@ -314,7 +314,7 @@ def add_to_registry(sp):
             parnames=['amplitude','width','velocity','extinction'],
             parlimited=[(True,False),(True,False),(False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
-            fitunits='micron')
+            fitunit='micron')
 
     sp.Registry.add_fitter('hydrogen', extincted_hydrogen_emission,
             extincted_hydrogen_emission.npars)
