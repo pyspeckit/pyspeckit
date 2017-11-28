@@ -391,7 +391,7 @@ class ammonia_model(model.SpectralModel):
         self.modelfunc_kwargs = kwargs
         # lower case? self.modelfunc_kwargs.update({'parnames':self.parinfo.parnames})
         self.use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else False
-        self.fitunits = 'GHz'
+        self.fitunit = 'GHz'
 
     def __call__(self,*args,**kwargs):
         return self.multinh3fit(*args,**kwargs)

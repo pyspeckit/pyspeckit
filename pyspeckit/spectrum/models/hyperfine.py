@@ -56,7 +56,7 @@ class hyperfinemodel(object):
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
             # specify the parameter names (LaTeX is OK)
             shortvarnames=("T_{ex}","\\tau","v","\\sigma"),
-            fitunits='Hz' )
+            fitunit='Hz' )
 
         self.nlines = len(line_names)
 
@@ -67,7 +67,7 @@ class hyperfinemodel(object):
             parlimits=[(0,0), (0,0), (0,0)]+[(0,0),]*self.nlines,
             shortvarnames=("T_{ex}","v","\\sigma") +
                            tuple(("\\tau(\\mathrm{%s})" % k for k in self.line_names)),
-            fitunits='Hz')
+            fitunit='Hz')
 
         self.varyhf_amp_fitter = model.SpectralModel(self.hyperfine_varyhf_amp, 2+self.nlines,
             parnames=['center','width']+['amp%s' % k for k in self.line_names],
@@ -75,7 +75,7 @@ class hyperfinemodel(object):
             parlimits=[(0,0), (0,0)]+[(0,0),]*self.nlines,
             shortvarnames=("v","\\sigma") +
                            tuple(("amp(\\mathrm{%s})" % k for k in self.line_names)),
-            fitunits='Hz')
+            fitunit='Hz')
 
         self.varyhf_amp_width_fitter = model.SpectralModel(self.hyperfine_varyhf_amp_width,1+self.nlines*2,
             parnames=['center']+['amp%s' % k for k in self.line_names]+['width%s' % k for k in self.line_names], 
@@ -85,49 +85,49 @@ class hyperfinemodel(object):
                            tuple(("amp(\\mathrm{%s})" % k for k in self.line_names)) + 
                            tuple(("\\sigma(\\mathrm{%s})" % k for k in self.line_names))), 
             # specify the parameter names (TeX is OK)
-            fitunits='Hz' )
+            fitunit='Hz' )
 
         self.vheight_fitter = model.SpectralModel(fitter.vheightmodel(self),5,
             parnames=['height','Tex','tau','center','width'],
             parlimited=[(False,False), (False,False), (True,False), (False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
             shortvarnames=("H","T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz' )
+            fitunit='Hz' )
 
         self.background_fitter = model.SpectralModel(self.hyperfine_addbackground,5,
             parnames=['Tbackground','Tex','tau','center','width'],
             parlimited=[(True,False), (False,False), (False,False), (True,False), (False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
             shortvarnames=('T_{BG}',"T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz')
+            fitunit='Hz')
 
         self.background_contsub_fitter = model.SpectralModel(self.hyperfine_background,5,
             parnames=['Tbackground','Tex','tau','center','width'],
             parlimited=[(True,False), (False,False), (False,False), (True,False), (False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
             shortvarnames=('T_{BG}',"T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz')
+            fitunit='Hz')
 
         self.ampfitter = model.SpectralModel(self.hyperfine_amp,3,
             parnames=['amp','center','width'], 
             parlimited=[(False,False), (False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=("amp","v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz' )
+            fitunit='Hz' )
 
         self.taufitter = model.SpectralModel(self.hyperfine_tau,3,
             parnames=['tau','center','width'], 
             parlimited=[(True,False), (False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=(r'\tau',"v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz')
+            fitunit='Hz')
 
         self.totaltaufitter = model.SpectralModel(self.hyperfine_tau_total,3,
             parnames=['tau','center','width'], 
             parlimited=[(True,False), (False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=(r'\tau',"v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz')
+            fitunit='Hz')
 
     def __copy__(self):
         # http://stackoverflow.com/questions/1500718/what-is-the-right-way-to-override-the-copy-deepcopy-operations-on-an-object-in-p

@@ -21,12 +21,12 @@ hdr    = pyfits.getheader(path_to_data+'/1-1_2-2_T=5to55_lvg_troscompt_100square
 # # all of the parameters after the first are passed to the model function
 formaldehyde_radex_fitter = models.model.SpectralModel(
         models.formaldehyde.formaldehyde_radex_orthopara_temp, 6,
-        parnames=['density','column','orthopara','temperature','center','width'], 
+        parnames=['density','column','orthopara','temperature','center','width'],
         parvalues=[4,12,1.0,15.0,0,1],
-        parlimited=[(True,True), (True,True), (True,True), (True,True), (False,False), (True,False)], 
+        parlimited=[(True,True), (True,True), (True,True), (True,True), (False,False), (True,False)],
         parlimits=[(1,8), (11,16), (-3,np.log10(3.0)), (5,55), (0,0), (0,0)],
         parsteps=[0.01,0.01,0,0,0,0],
-        fitunits='Hz',
+        fitunit='Hz',
         texgrid=((4,5,texgrid1),(14,15,texgrid2)),
         taugrid=((4,5,taugrid1),(14,15,taugrid2)),
         hdr=hdr,

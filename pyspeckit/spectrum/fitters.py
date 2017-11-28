@@ -335,8 +335,8 @@ class Specfit(interactive.Interactive):
 
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
             components=False, annotate=False, alpha=0.5, loc='lower left',
-            xmin=None, xmax=None, xunits='pixel', continuum_as_baseline=False,
-            midpt_location='plot-center'):
+            xmin=None, xmax=None, xunits=None, continuum_as_baseline=False,
+            xunit='pixel', midpt_location='plot-center'):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
@@ -365,7 +365,7 @@ class Specfit(interactive.Interactive):
         xmin : float
         xmax : float
             The range over which to compute the EQW
-        xunits : str
+        xunit : str
             The units of xmin/xmax
         midpt_location : 'fitted', 'plot-center'
             If 'plot' is set, this determines where the EQW will be drawn.  It
@@ -383,15 +383,19 @@ class Specfit(interactive.Interactive):
             elif np.median(self.Spectrum.baseline.basespec) < 0:
                 if mycfg.WARN: warn( "WARNING: Baseline / continuum is negative: equivalent width is poorly defined." )
 
+        if xunits is not None and xunit=='pixel':
+            # todo: deprecation warning
+            xunit = xunits
+
         # determine range to use
         if xmin is None:
             xmin = self.xmin #self.Spectrum.xarr.x_to_pix(self.xmin)
         else:
-            xmin = self.Spectrum.xarr.x_to_pix(xmin, xval_units=xunits)
+            xmin = self.Spectrum.xarr.x_to_pix(xmin, xval_units=xunit)
         if xmax is None:
             xmax = self.xmax #self.Spectrum.xarr.x_to_pix(self.xmax)
         else:
-            xmax = self.Spectrum.xarr.x_to_pix(xmax, xval_units=xunits)
+            xmax = self.Spectrum.xarr.x_to_pix(xmax, xval_units=xunit)
 
         dx = np.abs(self.Spectrum.xarr[xmin:xmax].cdelt(approx=True).value)
 
@@ -1589,7 +1593,7 @@ class Specfit(interactive.Interactive):
         return OK
 
     def get_model_xlimits(self, threshold='auto', peak_fraction=0.01,
-                          add_baseline=False, units='pixels'):
+                          add_baseline=False, unit='pixels', units=None):
         """
         Return the x positions of the first and last points at which the model
         is above some threshold
@@ -1616,7 +1620,11 @@ class Specfit(interactive.Interactive):
         xpixmin = OK.argmax()
         xpixmax = len(OK) - OK[::-1].argmax() - 1
 
-        if units == 'pixels':
+        if units is not None and unit =='pixels':
+            # todo: deprecate
+            unit = units
+
+        if unit == 'pixels':
             return [xpixmin,xpixmax]
         else:
             return self.Spectrum.xarr[[xpixmin,xpixmax]].as_unit(units)
