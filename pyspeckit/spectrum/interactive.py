@@ -255,9 +255,12 @@ class Interactive(object):
             widthguess = (abs(event.xdata-self.guesses[-1-nwidths]) /
                           numpy.sqrt(2*numpy.log(2)))
             if numpy.isnan(widthguess) or widthguess <= 0:
-                log.exception("Error: width guess was {0}.  It is being forced to 0."
-                              .format(widthguess))
-                widthguess = 0
+                newwidthguess = numpy.abs(self.Spectrum.xarr.diff()).min()
+                if newwidthguess <= 0:
+                    raise ValueError("A width guess could not be determined.")
+                log.exception("Error: width guess was {0}.  It is being forced to {1}."
+                              .format(widthguess, newwidthguess))
+                widthguess = newwidthguess
             self.guesses[-whichwidth] = widthguess
             if debug or self._debug:
                 print("Width %i whichwidth %i click %i at x,y %g,%g width: %g" % (self.npeaks,whichwidth,self.nclicks_b2,event.xdata,event.ydata,self.guesses[-whichwidth]))
