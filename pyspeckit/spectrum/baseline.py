@@ -170,6 +170,7 @@ class Baseline(interactive.Interactive):
                                      exclusionlevel*np.abs(full_model).max())
                 #import pdb; pdb.set_trace()
 
+            log.debug("kwargs to button2 action = {0}".format(kwargs))
             self.button2action(fit_original=fit_original,
                                baseline_fit_color=baseline_fit_color,
                                debug=debug,
@@ -198,6 +199,8 @@ class Baseline(interactive.Interactive):
         """
         Run the fit and set `self.basespec`
         """
+        log.debug("In baseline.fit, xarr_fit_unit={0}"
+                  .format(xarr_fit_unit))
 
         self.powerlaw = powerlaw or self.powerlaw
         self.spline = spline
@@ -221,7 +224,7 @@ class Baseline(interactive.Interactive):
                                  err=self.Spectrum.error, order=self.order,
                                  masktoexclude=~self.includemask,
                                  powerlaw=self.powerlaw,
-                                 xarr_fitunits=xarr_fit_unit,
+                                 xarr_fit_unit=xarr_fit_unit,
                                  **kwargs)
             self.basespec, self.baselinepars = (a,b)
 
@@ -236,6 +239,7 @@ class Baseline(interactive.Interactive):
         """
         Do the baseline fitting and save and plot the results.
 
+        Note that powerlaw fitting will only consider positive data.
         """
         if debug:
             print("Button 2/3 Baseline.  Subtract={0}".format(subtract))
@@ -254,7 +258,7 @@ class Baseline(interactive.Interactive):
         self._xfit_units = self.Spectrum.xarr.unit
 
         log.debug("Fitting baseline: powerlaw={0} "
-                  "spline={1}".format(self.powerlaw, spline))
+                  "spline={1}".format(powerlaw, spline))
         self.fit(powerlaw=powerlaw, includemask=self.includemask,
                  order=self.order, spline=spline,
                  spline_sampling=spline_sampling,
@@ -429,12 +433,14 @@ class Baseline(interactive.Interactive):
 
     def annotate(self, loc='upper left', fontsize=10):
         if self.powerlaw:
-            bltext = "bl: $y=%6.3g\\times(x)^{-%6.3g}$" % (self.baselinepars[0],self.baselinepars[1])
+            bltext = "bl: $y=%6.3g\\times(x)^{-%6.3g}$" % (self.baselinepars[0],
+                                                           self.baselinepars[1])
         elif self.spline:
             bltext = "bl: spline"
         else:
             bltext = "bl: $y=$"+"".join(["$%+6.3gx^{%i}$" % (f,self.order-i)
-                for i,f in enumerate(self.baselinepars)])
+                                         for i,f in
+                                         enumerate(self.baselinepars)])
         #self.blleg = text(xloc,yloc     ,bltext,transform = self.Spectrum.plotter.axis.transAxes)
         self.clearlegend()
         pl = matplotlib.collections.CircleCollection([0],edgecolors=['k'])
@@ -465,7 +471,7 @@ class Baseline(interactive.Interactive):
     def _baseline(self, spectrum, xarr=None, err=None,
                   order=1, quiet=True, masktoexclude=None, powerlaw=False,
                   xarr_fit_unit='pixels', LoudDebug=False, renormalize='auto',
-                  zeroerr_is_OK=True, spline=False, **kwargs):
+                  pguess=None, zeroerr_is_OK=True, spline=False, **kwargs):
         """
         Fit a baseline/continuum to a spectrum
 
@@ -491,10 +497,11 @@ class Baseline(interactive.Interactive):
         if xarr is None or xarr_fit_unit == 'pixels':
             xarrconv = np.arange(spectrum.size)
         elif xarr_fit_unit not in (None, 'native'):
-            xarrconv = xarr.as_unit(xarr_fit_unit)
+            xarrconv = xarr.as_unit(xarr_fit_unit).value
         else:
             xarrconv = xarr
         log.debug("xarrconv = {0}".format(xarrconv))
+        log.debug("xarr_fit_unit = {0}".format(xarr_fit_unit))
 
 
         # A good alternate implementation of masking is to only pass mpfit the data
@@ -532,23 +539,30 @@ class Baseline(interactive.Interactive):
         if powerlaw:
             # for powerlaw fitting, only consider positive data
             OK *= spectrum > 0
-            pguess = [np.median(spectrum[OK]),2.0]
+            if pguess is None:
+                pguess = [np.median(spectrum[OK]) * np.median(xarrconv[OK]), 1.0]
             if LoudDebug:
                 print("_baseline powerlaw Guesses: ",pguess)
+                
+            parinfo = [{}, {'limited':(True, False), 'limits':(0,0)}]
 
-            def mpfitfun(data,err):
+            def mpfitfun(data, err):
                 #def f(p,fjac=None): return [0,np.ravel(((p[0] * (xarrconv[OK]-p[2])**(-p[1]))-data)/err)]
                 # Logarithmic fitting:
                 def f(p,fjac=None):
                     #return [0,
                     #        np.ravel( (np.log10(data) - np.log10(p[0]) + p[1]*np.log10(xarrconv[OK]/p[2])) / (err/data) )
                     #        ]
-                    return [0, np.ravel( (data - self.get_model(xarr=xarrconv[OK],baselinepars=p)) / (err/data) )]
+                    return [0, np.ravel(
+                        (data - self.get_model(xarr=xarrconv[OK],baselinepars=p)) /
+                        (err/data))]
                 return f
         else:
             pguess = [0]*(order+1)
             if LoudDebug:
                 print("_baseline Guesses: ",pguess)
+
+            parinfo = None
 
             def mpfitfun(data,err):
                 def f(p,fjac=None):
@@ -573,6 +587,7 @@ class Baseline(interactive.Interactive):
                              "https://github.com/pyspeckit/pyspeckit/issues")
 
         mp = mpfit.mpfit(mpfitfun(spectrum[OK], err[OK]), xall=pguess,
+                         parinfo=parinfo,
                          quiet=quiet)
         if np.isnan(mp.fnorm):
             raise ValueError("chi^2 is NAN in baseline fitting")
