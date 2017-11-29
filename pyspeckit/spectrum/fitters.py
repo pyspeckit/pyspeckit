@@ -589,9 +589,11 @@ class Specfit(interactive.Interactive):
         if not hasattr(self, 'npix_fitted'):
             raise AttributeError('No fit has been run, so npix_fitted is not '
                                  'defined and dof cannot be computed.')
-        return (self.npix_fitted - self.npeaks *
+        return (self.npix_fitted - self.vheight - self.npeaks *
                 self.Registry.npars[self.fittype] + np.sum(self.parinfo.fixed) +
                 np.sum([x != '' for x in self.parinfo.tied]))
+
+        #self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight+np.sum(self.parinfo.fixed)
 
 
     @property
@@ -809,12 +811,12 @@ class Specfit(interactive.Interactive):
         # make sure the full model is populated
         self._full_model()
 
-        self.history_fitpars()
-
         # calculate the number of pixels included in the fit.  This should
         # *only* be done when fitting, not when selecting data.
         # (see self.dof)
         self.npix_fitted = self.includemask.sum() - self.mask.sum()
+
+        self.history_fitpars()
 
 
     def refit(self, use_lmfit=False):
@@ -918,9 +920,10 @@ class Specfit(interactive.Interactive):
                 log.info("Renormalizing data by factor %e to improve fitting procedure"
                          % scalefactor)
                 self.spectofit /= scalefactor
-                self.errspec   /= scalefactor
+                self.errspec /= scalefactor
                 self.guesses[0] /= scalefactor
-                if vheight: self.guesses[1] /= scalefactor
+                if vheight:
+                    self.guesses[1] /= scalefactor
 
         log.debug("Guesses before fit: {0}".format(self.guesses))
 
@@ -929,19 +932,15 @@ class Specfit(interactive.Interactive):
             del self.fitkwargs['debug']
 
         mpp,model,mpperr,chi2 = self.fitter(
-                self.Spectrum.xarr[self.xmin:self.xmax],
-                self.spectofit[self.xmin:self.xmax],
-                err=self.errspec[self.xmin:self.xmax],
-                vheight=vheight,
-                params=self.guesses,
-                parinfo=parinfo,
-                debug=debug,
-                use_lmfit=use_lmfit,
-                **self.fitkwargs)
+            self.Spectrum.xarr[self.xmin:self.xmax],
+            self.spectofit[self.xmin:self.xmax],
+            err=self.errspec[self.xmin:self.xmax], vheight=vheight,
+            params=self.guesses, parinfo=parinfo, debug=debug,
+            use_lmfit=use_lmfit, **self.fitkwargs)
         log.debug("1. Guesses, fits after: {0}, {1}".format(self.guesses, mpp))
 
         self.spectofit *= scalefactor
-        self.errspec   *= scalefactor
+        self.errspec *= scalefactor
 
         if hasattr(self.fitter.mp,'status'):
             self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
@@ -950,7 +949,6 @@ class Specfit(interactive.Interactive):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight+np.sum(self.parinfo.fixed)
         self.vheight=vheight
         if vheight:
             self.Spectrum.baseline.order = 0
@@ -961,7 +959,8 @@ class Specfit(interactive.Interactive):
             # Need to figure out *WHY* anything would want an extra parameter
             if len(mpp) == self.fitter.npars+1:
                 mpp = mpp[1:]
-        else: self.model = model*scalefactor
+        else:
+            self.model = model*scalefactor
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model*scalefactor
         self.modelpars = mpp
         self.modelerrs = mpperr
@@ -982,6 +981,8 @@ class Specfit(interactive.Interactive):
 
         # make sure the full model is populated
         self._full_model(debug=debug)
+
+        self.npix_fitted = self.includemask.sum() - self.mask.sum()
 
         log.debug("2. Guesses, fits after vheight removal: {0},{1}"
                   .format(self.guesses, mpp))
