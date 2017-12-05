@@ -817,6 +817,8 @@ class Cube(spectrum.Spectrum):
 
         self._counter = 0
 
+        self._tracebacks = {}
+
         t0 = time.time()
 
         def fit_a_pixel(iixy):
@@ -931,6 +933,7 @@ class Cube(spectrum.Spectrum):
                     success = True
                 except Exception as ex:
                     exc_traceback = sys.exc_info()[2]
+                    self.tracebacks[(ii,x,y)] = exc_traceback
                     log.exception("Fit number %i at %i,%i failed on error %s" % (ii,x,y, str(ex)))
                     log.exception("Failure was in file {0} at line {1}".format(
                         exc_traceback.tb_frame.f_code.co_filename,

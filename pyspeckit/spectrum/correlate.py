@@ -35,23 +35,29 @@ def correlate(spectrum1, spectrum2, range=None, unit=None, errorweight=False):
     #
     # this might be more correct: http://arxiv.org/pdf/1006.4069v1.pdf eqn 4
     # but it doesn't quite fit my naive expectations so:
-    error = (np.correlate( (spectrum1.error)**2 , np.ones(xcorr.shape), mode='same') +
-             np.correlate( (spectrum2.error)**2 , np.ones(xcorr.shape), mode='same'))**0.5
+    error = (np.correlate((spectrum1.error)**2, np.ones(xcorr.shape), mode='same') +
+             np.correlate((spectrum2.error)**2, np.ones(xcorr.shape), mode='same'))**0.5
 
     xarr = spectrum1.xarr
     x_range = xarr.max()-xarr.min()
     xmin = -x_range/2.
-    xmax = x_range/2.
+    xmax =  x_range/2.
     offset_values = np.linspace(xmin, xmax, len(xarr))
 
     offset_xarr = units_module.SpectroscopicAxis(offset_values, unit=xarr.unit)
 
     header = headers.intersection(spectrum1.header, spectrum2.header)
-    header.update('CRPIX1',1)
+    header['CRPIX1'] = 1
     try:
-        header.update('CRVAL1',xmin)
+        header['CRVAL1'] = xmin
     except ValueError:
-        header.update('CRVAL1',xmin.tolist())
-    header.update('CDELT1',offset_xarr.cdelt())
+        try:
+            header['CRVAL1'] = xmin.tolist()
+        except NotImplementedError:
+            header['CRVAL1'] = xmin.value
+    try:
+        header['CDELT1'] = offset_xarr.cdelt()
+    except ValueError:
+        header['CDELT1'] = offset_xarr.cdelt().value
 
     return classes.XCorrSpectrum(xarr=offset_xarr, data=xcorr, header=header, error=error)
