@@ -618,10 +618,6 @@ class BaseSpectrum(object):
 
         Documentation from the :mod:`smooth` module:
 
-        Parameters
-        ----------
-        downsample: bool
-            Downsample the spectrum by the smoothing factor?
         """
         smooth = int(round(smooth))
         self.data = sm.smooth(self.data,smooth,downsample=downsample,**kwargs)
