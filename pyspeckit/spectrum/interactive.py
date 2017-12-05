@@ -122,10 +122,12 @@ class Interactive(object):
                 # exclude/delete/remove
                 self._selectregion_interactive(event, mark_include=False, debug=debug)
             elif button in ('m','M','2',2): # m for mark
-                if debug or self._debug: log.debug("Button 2 action")
+                if debug or self._debug:
+                    log.debug("Button 2 action")
                 self.button2action(event,debug=debug,nwidths=nwidths)
             elif button in ('d','D','3',3): # d for done
-                if debug or self._debug: log.debug("Button 3 action")
+                if debug or self._debug:
+                    log.debug("Button 3 action")
                 self.button3action(event,debug=debug,nwidths=nwidths)
             elif button in ('?'):
                 # print statement: we really want this to go to the terminal
@@ -191,7 +193,8 @@ class Interactive(object):
         self._update_xminmax()
 
     def highlight_fitregion(self,  drawstyle='steps-mid', color=(0,0.8,0,0.5),
-            linewidth=2, alpha=0.5, clear_highlights=True, **kwargs):
+                            linewidth=2, alpha=0.5, clear_highlights=True,
+                            **kwargs):
         """
         Re-highlight the fitted region
 

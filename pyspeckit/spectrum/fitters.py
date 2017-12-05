@@ -560,7 +560,7 @@ class Specfit(interactive.Interactive):
                  self.Spectrum.baseline.basespec is not None and
                  len(self.spectofit) == len(self.Spectrum.baseline.basespec))):
                 self.spectofit -= self.Spectrum.baseline.basespec
-        OKmask = (self.spectofit==self.spectofit)
+        OKmask = np.isfinite(self.spectofit)
 
         with warnings.catch_warnings():
             # catch a specific np1.7 futurewarning relating to masks
@@ -568,8 +568,14 @@ class Specfit(interactive.Interactive):
             self.spectofit[~OKmask] = 0
 
         self.seterrspec()
+
+        # the "OK" mask is just checking that the values are finite
         self.errspec[~OKmask] = 1e10
-        if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
+
+        # if an includemask is set *and* there are some included values, "mask out" the rest
+        # otherwise, if *all* data are excluded, we should assume that means the includemask
+        # simply hasn't been initialized
+        if self.includemask is not None and (self.includemask.shape == self.errspec.shape) and any(self.includemask):
             self.errspec[~self.includemask] = 1e10*self.errspec.max()
 
     @property
@@ -1680,6 +1686,11 @@ class Specfit(interactive.Interactive):
         Perform the fit (or die trying)
         Hide the guesses
         """
+        if self.nclicks_b1 == 0:
+            # there has been no selection
+            # therefore, we assume *everything* is selected
+            self.includemask[:] = True
+
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.click)
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.keyclick)
         npars = 2+nwidths
