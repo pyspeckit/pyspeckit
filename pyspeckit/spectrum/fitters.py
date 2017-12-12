@@ -1181,7 +1181,7 @@ class Specfit(interactive.Interactive):
         if pars is None:
             pars = self.modelpars
 
-        self.modelcomponents = self.fitter.components(xarr, pars, **component_kwargs)
+        self.modelcomponents = self.fitter.components(xarr=xarr, pars=pars, **component_kwargs)
 
         yoffset = plot_offset + component_yoffset
         if add_baseline:

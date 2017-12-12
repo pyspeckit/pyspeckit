@@ -107,3 +107,5 @@ sp.specfit(fittype='ammonia',
            quiet=False)
 sp.specfit.plotresiduals()
 sp.plotter.figure.savefig('nh3_ammonia_multifit_zoom.png')
+
+sp.specfit.plot_fit(show_hyperfine_components=True)
