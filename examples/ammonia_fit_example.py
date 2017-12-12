@@ -109,3 +109,9 @@ sp.specfit.plotresiduals()
 sp.plotter.figure.savefig('nh3_ammonia_multifit_zoom.png')
 
 sp.specfit.plot_fit(show_hyperfine_components=True)
+assert len(sp.specfit._plotted_components) == 202
+x1,y1 = (sp.specfit._plotted_components)[0].get_data()
+x2,y2 = (sp.specfit._plotted_components)[0].get_data()
+# make sure they are not all identical (regression test for when the cumulative
+# spectrum was being added N times)
+assert not np.all(y1==y2)
