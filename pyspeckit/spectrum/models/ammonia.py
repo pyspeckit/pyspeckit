@@ -297,7 +297,9 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
     # "runspec" means "running spectrum": it is accumulated over a loop
     runspec = np.zeros(len(xarr))
 
-    components = []
+    if return_components:
+        components = []
+
     for linename in line_names:
         voff_lines = np.array(voff_lines_dict[linename])
         tau_wts = np.array(tau_wts_dict[linename])
@@ -310,10 +312,12 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
         # tau array
         tauprof = np.zeros(len(xarr))
         for kk,nuo in enumerate(nuoff):
-            tauprof += (tau_dict[linename] * tau_wts[kk] *
+            tauprof_ = (tau_dict[linename] * tau_wts[kk] *
                         np.exp(-(xarr.value+nuo-lines[kk])**2 /
                                (2.0*nuwidth[kk]**2)))
-            components.append(tauprof)
+            if return_components:
+                components.append(tauprof_)
+            tauprof += tauprof_
 
         T0 = (h*xarr.value*1e9/kb) # "temperature" of wavelength
 
@@ -449,7 +453,8 @@ class ammonia_model(model.SpectralModel):
             return v
         return L
 
-    def components(self, xarr, pars, hyperfine=False, **kwargs):
+    def components(self, xarr, pars, hyperfine=False,
+                   return_hyperfine_components=False, **kwargs):
         """
         Ammonia components don't follow the default, since in Galactic
         astronomy the hyperfine components should be well-separated.
@@ -459,7 +464,7 @@ class ammonia_model(model.SpectralModel):
 
         comps=[]
         for ii in range(self.npeaks):
-            if hyperfine:
+            if hyperfine or return_hyperfine_components:
                 modelkwargs = dict(zip(self.parnames[ii*self.npars:(ii+1)*self.npars],
                                        pars[ii*self.npars:(ii+1)*self.npars]))
                 comps.append(self.modelfunc(xarr, return_components=True,
