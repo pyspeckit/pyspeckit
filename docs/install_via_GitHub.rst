@@ -1,6 +1,28 @@
 Install pyspeckit via GitHub
 ============================
 
+Quick
+-----
+
+You can pip install the development version of pyspeckit::
+
+    pip install https://github.com/pyspeckit/pyspeckit/archive/master.zip
+
+
+Installing a branch
+-------------------
+
+If there's a bugfix branch, e.g., from a pull request, you can install it in a similar way.  Just replace the branch name::
+
+    pip install https://github.com/pyspeckit/pyspeckit/archive/{branchname}.zip
+
+
+
+More detailed
+-------------
+
+If you want to help develop pyspeckit, follow these instructions:
+
 Logged into your github account, go to https://github.com/pyspeckit/pyspeckit
 and click “Fork” in upper right.
 
