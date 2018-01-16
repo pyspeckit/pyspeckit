@@ -1,34 +1,62 @@
 Install pyspeckit via GitHub
 ============================
 
+Quick
+-----
+
+You can pip install the development version of pyspeckit::
+
+    pip install https://github.com/pyspeckit/pyspeckit/archive/master.zip
+
+
+Installing a branch
+-------------------
+
+If there's a bugfix branch, e.g., from a pull request, you can install it in a similar way.  Just replace the branch name::
+
+    pip install https://github.com/pyspeckit/pyspeckit/archive/{branchname}.zip
+    
+Or, if the contribution is from a different user::
+    
+    pip install https://github.com/{username}/pyspeckit/archive/{branchname}.zip
+
+Where in both cases you need to replace ``{{branchname}}`` and ``{username}``.
+
+
+
+More detailed
+-------------
+
+If you want to help develop pyspeckit, follow these instructions:
+
 Logged into your github account, go to https://github.com/pyspeckit/pyspeckit
 and click “Fork” in upper right.
 
 Copy the URL of your pyspeckit fork https://github.com/*yourusername*/pyspeckit
 
-On the command line type
+On the command line type::
 
-  ``git clone https://github.com/yourusername/pyspeckit``
+  git clone https://github.com/yourusername/pyspeckit
 
-(it will put it in a directory called pyspeckit in your working directory)
+(it will put it in a directory called pyspeckit in your working directory)::
 
-  ``cd pyspeckit``
+  cd pyspeckit
 
-  ``git remote add upstream https://github.com/pyspeckit/pyspeckit``
+  git remote add upstream https://github.com/pyspeckit/pyspeckit
 
-To get the most up to date version, type
+To get the most up to date version, type::
 
-  ``git pull upstream master``
+  git pull upstream master
 
-Update your personal "fork" to match ``upstream/master``
+Update your personal "fork" to match ``upstream/master``::
 
-  ``git push origin master``
+  git push origin master
 
 and enter your username and password if it asks.
 
-Still in the ``pyspeckit/`` directory, type
+Still in the ``pyspeckit/`` directory, type::
 
-  ``python setup.py develop``
+  python setup.py develop
 
 You're good to go!
 
