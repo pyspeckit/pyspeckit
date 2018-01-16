@@ -9,10 +9,7 @@ from __future__ import print_function
 from astropy.extern.six.moves import xrange
 from astropy.extern.six import iteritems
 from astropy.extern import six
-try:
-    import astropy.io.fits as pyfits
-except ImportError:
-    import pyfits
+import astropy.io.fits as pyfits
 import numpy
 import numpy as np
 from numpy import pi
@@ -90,8 +87,13 @@ header_id_numbers = {0: 'USER CODE',
                      -6: 'HISTORY',
                      -7: 'UNKNOWN-APEX',
                     # -8: 'SWITCH',
+                     -9: 'GAUSSFIT', # "private"; see class-interfaces-private.f90
                      -10: 'DRIFT',
+                     -11: 'BEAMSWITCH', # "private"; see class-interfaces-private.f90
+                     -12: 'SHELLFIT', # "private"; see class-interfaces-private.f90
+                     -13: 'NH3FIT', # "private"; see class-interfaces-private.f90
                      -14: 'CALIBRATION',
+                     -18: 'ABSFIT', # "private"; see class-interfaces-private.f90
                     }
 
 header_id_lengths = {-2: 9, # may really be 10?
@@ -778,14 +780,14 @@ def _read_obshead_v2(f, position=None):
     else:
         position = f.tell()
     IDcode = f.read(4)
-    if IDcode.strip() != '2':
+    if IDcode.strip() != b'2':
         raise IndexError("Observation Header reading failure at {0}.  "
                          "Record does not appear to be an observation header.".
                          format(position))
     f.seek(position)
 
-    entrydescv2_nw1=11
-    entrydescv2_nw2=5
+    entrydescv2_nw1 = 11
+    entrydescv2_nw2 = 5
     obshead = {
         'CODE': f.read(4),
         'VERSION': _read_int32(f),
@@ -1313,7 +1315,10 @@ class ClassObject(object):
                 h['COMPPOSA']%180 < posang[1]
                 if posang is not None and len(posang)==2
                 else True) and
-               (h['XVER'] > 0 if not include_old_versions else True)
+               # 1A uses XVER, 2A uses VER.  If neither are present, it's
+               # probably not a valid spectrum?
+               (h.get('XVER', h.get('VER', -999)) > 0
+                if not include_old_versions else True)
                for h in self.headers
               ]
 
@@ -1498,7 +1503,7 @@ def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
         Create a SpectroscopicAxis with the image frequency.
     """
     if datatuple is None:
-        spectra,header,indexes = read_class(filename,DEBUG=DEBUG, **kwargs)
+        spectra,header,indexes = read_class(filename, **kwargs)
     else:
         spectra,header,indexes = datatuple
 
@@ -1511,13 +1516,28 @@ def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
         H = pyfits.Header()
         for k,v in iteritems(hdr):
             if hasattr(v,"__len__") and not isinstance(v,str):
+                # make an array of header entries, but this
+                # supports only up to 10 of them...
                 if len(v) > 1:
-                    for ii,vv in enumerate(v):
-                        H.update(k[:7]+str(ii),vv)
+                    if len(v) < 10:
+                        for ii,vv in enumerate(v):
+                            newkey = k[:7]+str(ii)
+                            H[newkey] = vv
+                    elif len(v) < 100:
+                        for ii,vv in enumerate(v):
+                            newkey = k[:6]+str(ii)
+                            H[newkey] = vv
+                    else:
+                        raise ValueError("Too many entries for {0}".format(k))
                 else:
-                    H.update(k,v[0])
-            elif pyfits.Card._comment_FSC_RE.match(str(v)) is not None:
-                H.update(k,v)
+                    H[k] = v[0]
+            #elif not any(x in str(v).lower() for x in ('comment', 'end', 'history')):
+            #    # do not try to add comments...
+            #    This commented out block used to attempt to reject comments
+            #    using a private regex in the old pyfits which no longer exists.
+            #    I don't know if it was necessary.
+            else:
+                H[k] = v
         scannum = hdr['SCAN']
         if 'XTEL' in hdr and hdr['XTEL'].strip() not in telescope:
             continue
@@ -1525,8 +1545,8 @@ def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
             continue
         if (source is not None) and (hdr['SOURC'].strip() not in source):
             continue
-        hdr.update({'RESTFREQ':hdr.get('RESTF')})
-        H.update('RESTFREQ',hdr.get('RESTF'))
+        hdr['RESTFREQ'] = hdr.get('RESTF')
+        H['RESTFREQ'] = hdr.get('RESTF')
 
         #print "Did not skip %s,%s.  Scannum, last: %i,%i" % (hdr['XTEL'],hdr['LINE'],scannum,lastscannum)
 
