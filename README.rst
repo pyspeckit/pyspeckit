@@ -12,7 +12,7 @@ infrastructure developed for the ``astropy`` core and affiliated packages.
 
 For more information, see:
 
-* `Detailed instructions for using this template <http://docs.astropy.org/en/latest/development/affiliated-packages.html>`_
+* `Detailed instructions for using this template <http://docs.astropy.org/en/latest/development/astropy-package-template.html>`_
 * `The Affiliated Packages section of the Astropy web site <http://affiliated.astropy.org>`_
 * `This template's Github code repository <https://github.com/astropy/package-template>`_
 
