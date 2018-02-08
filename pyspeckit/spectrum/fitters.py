@@ -1695,6 +1695,7 @@ class Specfit(interactive.Interactive):
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.keyclick)
         npars = 2+nwidths
         if self.npeaks > 0:
+            self.guesses = self.fitter.parse_3par_guesses(self.guesses)
             log.info("{0} Guesses : {1}  X channel range: {2}-{3}"
                      .format(len(self.guesses)/npars, self.guesses, self.xmin,
                              self.xmax))
