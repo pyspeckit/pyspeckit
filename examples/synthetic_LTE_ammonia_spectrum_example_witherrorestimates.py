@@ -35,7 +35,7 @@ data = noise+synth_data
 # this will give a "blank header" warning, which is fine
 sp = pyspeckit.Spectrum(data=data, error=error, xarr=xaxis,
                         xarrkwargs={'unit':'km/s'},
-                        unit=u.erg/u.s/u.cm**2/u.AA)
+                        unit=u.K)
 
 sp.plotter(figure=pl.figure(1), errstyle='fill')
 
