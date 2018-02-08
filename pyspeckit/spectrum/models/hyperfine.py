@@ -356,3 +356,25 @@ class hyperfinemodel(object):
                 return spec
             else:
                 return spec/spec.max() * amp
+
+    def parse_3par_guesses(self, guesses):
+        """
+        Try to convert a set of interactive guesses (peak, center, width) into
+        guesses appropriate to the model.
+
+        For hyperfine models, we just add in an extra parameter tau=1 and
+        assume peak=tex
+        """
+        if len(guesses) % 3 != 0:
+            raise ValueError("Guesses passed to parse_3par_guesses must have "
+                             "length % 3 == 0")
+        npeaks = len(guesses) / 3
+
+        new_guesses = [y for y in [guesses[ii-(int(ii/4))] if ii % 4==0
+                                   else 1 if ii % 4 == 1
+                                   else guesses[ii-(int(ii/4)+1)]
+                                   for ii in range(int(npeaks*4))]]
+
+        # for this default model, we just return the guesses - other models
+        # will override this.
+        return new_guesses

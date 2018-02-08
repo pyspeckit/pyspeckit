@@ -997,6 +997,19 @@ class SpectralModel(fitter.SimpleFitter):
             mc.use_step_method(pymc.AdaptiveMetropolis,[d[p] for p in self.parinfo.names])
 
         return mc
+
+    def parse_3par_guesses(self, guesses):
+        """
+        Try to convert a set of interactive guesses (peak, center, width) into
+        guesses appropriate to the model.
+        """
+        if len(guesses) % 3 != 0:
+            raise ValueError("Guesses passed to parse_3par_guesses must have "
+                             "length % 3 == 0")
+
+        # for this default model, we just return the guesses - other models
+        # will override this.
+        return guesses
     
 class AstropyModel(SpectralModel):
 
