@@ -375,6 +375,4 @@ class hyperfinemodel(object):
                                    else guesses[ii-(int(ii/4)+1)]
                                    for ii in range(int(npeaks*4))]]
 
-        # for this default model, we just return the guesses - other models
-        # will override this.
         return new_guesses

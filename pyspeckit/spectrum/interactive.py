@@ -88,11 +88,6 @@ class Interactive(object):
             toolmode = ''
         self.event_history.append(event)
 
-        if hasattr(self,'fitter') and self.fitter.npars > 3:
-            nwidths = self.fitter.npars-2
-        else:
-            nwidths = 1
-
         #DEBUG print("toolmode = {0} force_over_toolbar={1}".format(toolmode, force_over_toolbar))
         if (toolmode == '' or force_over_toolbar) and self.Spectrum.plotter.axis in event.canvas.figure.axes:
             if hasattr(event,'button'):
@@ -124,11 +119,11 @@ class Interactive(object):
             elif button in ('m','M','2',2): # m for mark
                 if debug or self._debug:
                     log.debug("Button 2 action")
-                self.button2action(event,debug=debug,nwidths=nwidths)
+                self.button2action(event,debug=debug)
             elif button in ('d','D','3',3): # d for done
                 if debug or self._debug:
                     log.debug("Button 3 action")
-                self.button3action(event,debug=debug,nwidths=nwidths)
+                self.button3action(event,debug=debug)
             elif button in ('?'):
                 # print statement: we really want this to go to the terminal
                 print(self.interactive_help_message)

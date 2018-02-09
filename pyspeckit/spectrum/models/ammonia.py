@@ -816,6 +816,42 @@ class ammonia_model(model.SpectralModel):
                                          "at least {2} but it is set to {3}."
                                          .format(parname, ul, b, a))
 
+
+    def parse_3par_guesses(self, guesses):
+        """
+        Try to convert a set of interactive guesses (peak, center, width) into
+        guesses appropriate to the model.
+
+        For NH3 models, we add in several extra parameters:
+            tex = peak
+            trot = tex * 2
+            fortho = 0.5
+            ntot = 15
+
+        ntot is set to a constant ~10^15 because this results in optical depths
+        near 1, so it forces the emission to be approximately significant.
+        trot > tex so that we're in a physical regime to begin with.
+        """
+        gauss_npars = 3
+        if len(guesses) % gauss_npars != 0:
+            raise ValueError("Guesses passed to parse_3par_guesses must have "
+                             "length % 3 == 0")
+        npeaks = len(guesses) / gauss_npars
+        npars = 6
+
+        new_guesses = [-1, -1, 15, -1, -1, 0.5] * npeaks
+
+        for ii in range(npeaks):
+            peak = guesses[ii * gauss_npars + 0]
+            center = guesses[ii * gauss_npars + 1]
+            width = guesses[ii * gauss_npars + 2]
+            new_guesses[ii*npars + 0] = peak * 2
+            new_guesses[ii*npars + 1] = peak
+            new_guesses[ii*npars + 3] = width
+            new_guesses[ii*npars + 4] = center
+
+        return new_guesses
+
 class ammonia_model_vtau(ammonia_model):
     def __init__(self,
                  parnames=['trot', 'tex', 'tau', 'width', 'xoff_v', 'fortho'],
