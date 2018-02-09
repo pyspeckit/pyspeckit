@@ -39,17 +39,26 @@ sp = pyspeckit.Spectrum(data=data,
                         xarr=xaxis,
                         error=np.ones_like(synth_data)*stddev)
 # fit it
-sp.specfit(fittype='ammonia', guesses=[35,10,15,5,5,0],
-           fixed=[False,False,False,False,False,True])
+# Setting limits is important for running the MCMC chains below (they set the
+# priors)
+sp.specfit(fittype='ammonia',
+           # trot, tex, ntot, width, center, fortho
+           guesses=[35,10,15,5,5,0],
+           fixed=[False,False,False,False,False,True],
+           minpars=[3,3,10,0,-10,0],
+           maxpars=[80,80,20,10,10,1],
+           limitedmin=[True]*6,
+           limitedmax=[True]*6,
+          )
 # then get the pymc values
-MCwithpriors = sp.specfit.get_pymc(use_fitted_values=True)
-MCwithpriors.sample(10100,burn=100,tune_interval=250)
+MCuniformpriors = sp.specfit.get_pymc()
+MCuniformpriors.sample(10100,burn=100,tune_interval=250)
 
 # MC vs least squares:
 print(sp.specfit.parinfo)
 
-print(MCwithpriors.stats()['tex0'],
-      MCwithpriors.stats()['ntot0'])
+print(MCuniformpriors.stats()['tex0'],
+      MCuniformpriors.stats()['ntot0'])
 
 
 
@@ -57,7 +66,7 @@ print(MCwithpriors.stats()['tex0'],
 from mpl_plot_templates import pymc_plotting
 import pylab
 pylab.figure(1).clf()
-pymc_plotting.hist2d(MCwithpriors, 'tex0', 'ntot0',
+pymc_plotting.hist2d(MCuniformpriors, 'tex0', 'ntot0',
                      bins=[25,25])
 pylab.plot([tex['oneone']],[ntot],'k+',markersize=25)
 pylab.axis([6,10.5,14.6,14.9])
