@@ -48,7 +48,8 @@ MCwithpriors.sample(10100,burn=100,tune_interval=250)
 # MC vs least squares:
 print(sp.specfit.parinfo)
 
-print(MCwithpriors.stats()['tex0'],MCwithpriors.stats()['ntot0'])
+print(MCwithpriors.stats()['tex0'],
+      MCwithpriors.stats()['ntot0'])
 
 
 
