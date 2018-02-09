@@ -350,6 +350,25 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
 
 
 class ammonia_model(model.SpectralModel):
+    """
+    The basic Ammonia (NH3) model with 6 free parameters:
+        Trot, Tex, ntot, width, xoff_v, and fortho
+
+    Trot is the rotational temperature.  It governs the relative populations of
+    the rotational states, i.e., the relative strength of different transitions
+
+    Tex is the excitation temperature.  It is assumed constant across all
+    states, which is not always a good assumption - a radiative transfer and
+    excitation model is required to constrain this, though.
+
+    ntot is the total column density of p-NH3 integrated over all states.
+
+    width is the linewidth
+
+    xoff_v is the velocity offset / line of sight velocity
+
+    fortho is the ortho fraction  (northo / (northo+npara))
+    """
 
     def __init__(self,npeaks=1,npars=6,
                  parnames=['trot','tex','ntot','width','xoff_v','fortho'],
