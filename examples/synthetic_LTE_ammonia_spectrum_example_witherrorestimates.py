@@ -49,7 +49,7 @@ sp.specfit(fittype='ammonia',
 # do it again to set the errors neatly
 sp.specfit(fittype='ammonia',
            #guesses=[20, 15, 15.5, 3, 2, 1],
-           guesses=[30, 25, 15.5, 3, 2, 0],
+           guesses=sp.specfit.parinfo.values,
            fixed=[False,False,False,False,False,True])
 
 
@@ -237,7 +237,8 @@ for ii,par in enumerate(sp.specfit.parinfo):
                            nsteps)
 
     if par.parname == 'delta0':
-        start, step, end = 0, 5/nsteps, 5
+        maxdelta = 10
+        start, step, end = 0, maxdelta/nsteps, maxdelta
         par_vals = np.linspace(start, end, nsteps)
 
     par_likes = np.array([chi2(sp, replace(sp.specfit.parinfo.values, ii, val))
@@ -299,9 +300,9 @@ for ii,(par1,par2) in enumerate(itertools.combinations(itemgetter(0,2,3,4,6)(sp.
     step2 = (end2 - start2) / nsteps
 
     if par1.parname == 'delta0':
-        start1, step1, end1 = 0, 5/nsteps, 5
+        start1, step1, end1 = 0, maxdelta/nsteps, maxdelta
     if par2.parname == 'delta0':
-        start2, step2, end2 = 0, 5/nsteps, 5
+        start2, step2, end2 = 0, maxdelta/nsteps, maxdelta
 
     assert end1 > start1
     assert end2 > start2

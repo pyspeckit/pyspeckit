@@ -62,3 +62,6 @@ You can also check out the `source code <https://github.com/pyspeckit/pyspeckit>
 .. note ::
    pyspeckit is hosted on both bitbucket and github.  Both versions are kept up
    to date, so it should not matter which one you choose to install.
+
+.. toctree::
+   install_via_GitHub
