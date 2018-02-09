@@ -998,10 +998,12 @@ class ammonia_model_restricted_tex(ammonia_model):
         super(ammonia_model_restricted_tex, self).__init__(npars=7,
                                                            parnames=parnames,
                                                            **kwargs)
-        def ammonia_dtex(*args, delta=None, **kwargs):
+        def ammonia_dtex(*args, **kwargs):
             """
             Strip out the 'delta' keyword
             """
+            # for py2 compatibility, must strip out manually
+            delta = kwargs.pop('delta') if 'delta' in kwargs else None
             np.testing.assert_allclose(kwargs['trot'] - kwargs['tex'],
                                        delta)
             return ammonia(*args, **kwargs)
