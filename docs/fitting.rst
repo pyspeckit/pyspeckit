@@ -6,3 +6,7 @@ Model Fitting
     :members:
     :inherited-members:
     :undoc-members:
+
+
+.. toctree::
+   fit_custom_model

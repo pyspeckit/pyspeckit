@@ -50,6 +50,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    Optical MUSE Spectral Cube <example_MUSE>
    Template Fitting <example_template>
    Monte Carlo <example_pymc>
+   Monte Carlo for NH3 <example_pymc_ammonia>
 
 .. toctree::
    :maxdepth: 3

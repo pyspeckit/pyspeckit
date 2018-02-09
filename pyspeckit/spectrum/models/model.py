@@ -892,7 +892,7 @@ class SpectralModel(fitter.SimpleFitter):
         return sampler
 
     def get_pymc(self, xarr, data, error, use_fitted_values=False, inf=np.inf,
-            use_adaptive=False, return_dict=False, **kwargs):
+                 use_adaptive=False, return_dict=False, **kwargs):
         """
         Create a pymc MCMC sampler.  Defaults to 'uninformative' priors
 
@@ -903,6 +903,8 @@ class SpectralModel(fitter.SimpleFitter):
         use_fitted_values : bool
             Each parameter with a measured error will have a prior defined by
             the Normal distribution with sigma = par.error and mean = par.value
+        use_adaptive : bool
+            Use the Adaptive Metropolis-Hastings sampler?
 
         Examples
         --------
@@ -943,7 +945,7 @@ class SpectralModel(fitter.SimpleFitter):
         parcopy = copy.deepcopy(self.parinfo)
         for par in parcopy:
             lolim = par.limits[0] if par.limited[0] else -inf
-            uplim = par.limits[1] if par.limited[1] else  inf
+            uplim = par.limits[1] if par.limited[1] else inf
             if par.fixed:
                 funcdict[par.parname] = pymc.distributions.Uniform(par.parname, par.value, par.value, value=par.value)
             elif use_fitted_values:
@@ -963,7 +965,7 @@ class SpectralModel(fitter.SimpleFitter):
                         funcdict[par.parname] = pymc.distributions.Uninformative(par.parname, value=par.value)
             elif any(par.limited):
                 lolim = par.limits[0] if par.limited[0] else -1e10
-                uplim = par.limits[1] if par.limited[1] else  1e10
+                uplim = par.limits[1] if par.limited[1] else 1e10
                 funcdict[par.parname] = pymc.distributions.Uniform(par.parname, lower=lolim, upper=uplim, value=par.value)
             else:
                 funcdict[par.parname] = pymc.distributions.Uninformative(par.parname, value=par.value)
