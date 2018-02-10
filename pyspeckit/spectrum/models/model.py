@@ -1,6 +1,6 @@
 """
 =============================
-Generic SpectralModel wrapper 
+Generic SpectralModel wrapper
 =============================
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 """
@@ -18,7 +18,11 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 except ImportError:
-    warn( "OrderedDict is required for modeling.  If you have python <2.7, install the ordereddict module." ) 
+    warn("OrderedDict is required for modeling.  "
+         "If you have python <2.7, install the ordereddict module.")
+
+# define the allowed guess types and the order in which they are received
+valid_guess_types = ('amplitude', 'center', 'width')
 
 class SpectralModel(fitter.SimpleFitter):
     """
@@ -30,14 +34,16 @@ class SpectralModel(fitter.SimpleFitter):
     of the hyperfine codes (hcn, n2hp) for examples.
     """
 
-    def __init__(self, modelfunc, npars, 
+    def __init__(self, modelfunc, npars,
                  shortvarnames=("A","\\Delta x","\\sigma"),
                  fitunit=None,
                  centroid_par=None,
                  fwhm_func=None,
                  fwhm_pars=None,
                  integral_func=None,
-                 use_lmfit=False, **kwargs):
+                 use_lmfit=False,
+                 guess_types=('amplitude', 'center', 'width'),
+                 **kwargs):
         """
         Spectral Model Initialization
 
@@ -74,6 +80,13 @@ class SpectralModel(fitter.SimpleFitter):
             default number of peaks to assume when fitting (can be overridden)
         shortvarnames : list (optional)
             TeX names of the variables to use when annotating
+        amplitude_types : tuple
+            A tuple listing the types of the different parameters when guessing.
+            The valid values are 'amplitude', 'width', and 'center'.  These are
+            handled by parse_3par_guesses, which translate these into input
+            guess lists for the fitter.  For a "standard" 3-parameter Gaussian
+            fitter, nothing changes, but for other models that have more than
+            3 parameters, some translation is needed.
 
         Returns
         -------
@@ -89,10 +102,10 @@ class SpectralModel(fitter.SimpleFitter):
         self.npars = npars
         self.default_npars = npars
         self.fitunit = fitunit
-        
+
         # this needs to be set once only
         self.shortvarnames = shortvarnames
-        
+
         self.default_parinfo = None
         self.default_parinfo, kwargs = self._make_parinfo(**kwargs)
         self.parinfo = copy.copy(self.default_parinfo)
@@ -106,10 +119,16 @@ class SpectralModel(fitter.SimpleFitter):
 
         # FWHM function and parameters
         self.fwhm_func = fwhm_func
-        self.fwhm_pars = fwhm_pars 
+        self.fwhm_pars = fwhm_pars
 
         # analytic integral function
         self.integral_func = integral_func
+
+        for gt in guess_types:
+            if not isinstance(gt, float) and gt not in valid_guess_types:
+                raise ValueError("Guess type must be one of {0} or a float"
+                                 .format(valid_guess_types))
+        self.guess_types = guess_types
 
     def __copy__(self):
         # http://stackoverflow.com/questions/1500718/what-is-the-right-way-to-override-the-copy-deepcopy-operations-on-an-object-in-p
@@ -127,7 +146,7 @@ class SpectralModel(fitter.SimpleFitter):
         return result
 
     def __call__(self, *args, **kwargs):
-        
+
         use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
         if use_lmfit:
             return self.lmfitter(*args,**kwargs)
@@ -145,7 +164,7 @@ class SpectralModel(fitter.SimpleFitter):
 
     def make_parinfo(self, **kwargs):
         return self._make_parinfo(**kwargs)[0]
-        
+
     def _make_parinfo(self, params=None, parnames=None, parvalues=None,
                       parlimits=None, parlimited=None, parfixed=None,
                       parerror=None, partied=None, fitunit=None,
@@ -392,7 +411,7 @@ class SpectralModel(fitter.SimpleFitter):
         """
         Wrapper function to compute the fit residuals in an lmfit-friendly format
         """
-        def f(p): 
+        def f(p):
             #pars = [par.value for par in p.values()]
             kwargs = {}
             kwargs.update(self.modelfunc_kwargs)
@@ -410,7 +429,7 @@ class SpectralModel(fitter.SimpleFitter):
 
         Parameters
         ----------
-        xax : SpectroscopicAxis 
+        xax : SpectroscopicAxis
             The X-axis of the spectrum
         data : ndarray
             The data to fit
@@ -487,7 +506,7 @@ class SpectralModel(fitter.SimpleFitter):
                 chi2 = ((data-self.model)**2).sum()
         if np.isnan(chi2):
             warn( "Warning: chi^2 is nan" )
-    
+
         if hasattr(self.mp,'ier') and self.mp.ier not in [1,2,3,4]:
             log.warning("Fitter failed: %s, %s" % (self.mp.message, self.mp.lmdif_message))
 
@@ -497,12 +516,12 @@ class SpectralModel(fitter.SimpleFitter):
                debug=False, parinfo=None, **kwargs):
         """
         Run the fitter using mpfit.
-        
+
         kwargs will be passed to _make_parinfo and mpfit.
 
         Parameters
         ----------
-        xax : SpectroscopicAxis 
+        xax : SpectroscopicAxis
             The X-axis of the spectrum
         data : ndarray
             The data to fit
@@ -641,7 +660,7 @@ class SpectralModel(fitter.SimpleFitter):
                       parerrs[ii+jj*self.npars+self.vheight],
                       svn[ii+jj*self.npars],
                       self.parinfo.fixed[ii+jj*self.npars+self.vheight],
-                      jj) 
+                      jj)
                       for jj in range(self.npeaks) for ii in range(self.npars)]
 
         label_list = []
@@ -653,7 +672,7 @@ class SpectralModel(fitter.SimpleFitter):
             else:
                 label = ("$%s(%i)$=%8s $\\pm$ %8s" % (varname,varnumber,
                     Decimal("%g" % value).quantize( Decimal("%0.2g" % (min(np.abs([value,error])))) ),
-                    Decimal("%g" % error).quantize(Decimal("%0.2g" % (error))),)) 
+                    Decimal("%g" % error).quantize(Decimal("%0.2g" % (error))),))
             label_list.append(label)
 
         labels = tuple(mpcb.flatten(label_list))
@@ -762,8 +781,8 @@ class SpectralModel(fitter.SimpleFitter):
         if centroidpar is None:
             centroidpar = self.centroid_par
 
-        centr = [par.value 
-                for par in self.parinfo 
+        centr = [par.value
+                for par in self.parinfo
                 if str.upper(centroidpar) in par.parname]
 
         return centr
@@ -807,7 +826,7 @@ class SpectralModel(fitter.SimpleFitter):
         difference = np.abs(data-model)
 
         # prob = 1/(2*np.pi)**0.5/error * exp(-difference**2/(2.*error**2))
-        
+
         #logprob = np.log(1./(2.*np.pi)**0.5/error) * (-difference**2/(2.*error**2))
         logprob = (-difference**2/(2.*error**2))
 
@@ -922,7 +941,7 @@ class SpectralModel(fitter.SimpleFitter):
         >>> # How do you define a likelihood distribution with a lower limit?!
         >>> MCwithpriors.sample(1000)
         >>> MCwithpriors.stats()['AMPLITUDE0']
-        
+
         """
         old_errsettings = np.geterr()
         try:
@@ -991,13 +1010,36 @@ class SpectralModel(fitter.SimpleFitter):
 
         if return_dict:
             return d
-        
+
         mc = pymc.MCMC(d)
         if use_adaptive:
             mc.use_step_method(pymc.AdaptiveMetropolis,[d[p] for p in self.parinfo.names])
 
         return mc
-    
+
+    def parse_3par_guesses(self, guesses):
+        """
+        Try to convert a set of interactive guesses (peak, center, width) into
+        guesses appropriate to the model.
+        """
+        if len(guesses) % 3 != 0:
+            raise ValueError("Guesses passed to parse_3par_guesses must have "
+                             "length % 3 == 0")
+
+        npeaks_guessed = len(guesses) // 3
+
+        guess_dict = {(valid_guess_types[ii % 3], ii // 3): gval
+                      for ii, gval in enumerate(guesses)}
+
+        new_guesses = [guess_dict[(gtype, ii)]
+                       if isinstance(gtype, str)
+                       else gtype
+                       for ii in range(npeaks_guessed)
+                       for gtype in self.guess_types
+                      ]
+
+        return new_guesses
+
 class AstropyModel(SpectralModel):
 
     def __init__(self, model, shortvarnames=None, **kwargs):
@@ -1011,19 +1053,18 @@ class AstropyModel(SpectralModel):
             shortvarnames = model.param_names
 
         super(AstropyModel,self).__init__(model, len(model.parameters),
-            shortvarnames=shortvarnames,
-            model=model,
-            **kwargs)
+                                          shortvarnames=shortvarnames,
+                                          model=model, **kwargs)
 
         self.mp = None
         self.vheight = False
         self.npeaks = 1
-        
+
 
     def _make_parinfo(self, model=None):
 
         self.parinfo = ParinfoList([
-            Parinfo(parname=name,value=value) 
+            Parinfo(parname=name,value=value)
             for name,value in zip(model.param_names,model.parameters)])
 
         return self.parinfo, {}
@@ -1056,7 +1097,7 @@ class AstropyModel(SpectralModel):
             self.modelfunc.parameters = params
 
         self.astropy_fitter = models.fitting.NonLinearLSQFitter(self.modelfunc)
-        
+
         if err is None:
             self.astropy_fitter(xax, data, **kwargs)
         else:

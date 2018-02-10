@@ -1693,17 +1693,25 @@ class Specfit(interactive.Interactive):
 
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.click)
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.keyclick)
-        npars = 2+nwidths
         if self.npeaks > 0:
-            log.info("{0} Guesses : {1}  X channel range: {2}-{3}"
-                     .format(len(self.guesses)/npars, self.guesses, self.xmin,
-                             self.xmax))
-            if len(self.guesses) % npars == 0:
-                self.multifit(use_window_limits=True)
-                for p in self.button2plot + self.button1plot:
-                    p.set_visible(False)
+
+            if hasattr(self, 'fitter'):
+                self.guesses = self.fitter.parse_3par_guesses(self.guesses)
             else:
-                log.error("Wrong # of parameters")
+                # default fitter is a Gaussian, which has 3 parameters
+                if len(self.guesses) % 3 != 0:
+                    log.error("Default fitter is Gaussian, and there were "
+                              "{0} guess parameters, which is not a "
+                              "multiple of 3.".format(len(self.guesses)))
+
+            log.info("{0} Guesses : {1}  X channel range: {2}-{3}"
+                     .format(len(self.guesses), self.guesses, self.xmin,
+                             self.xmax))
+
+            self.multifit(use_window_limits=True)
+
+            for p in self.button2plot + self.button1plot:
+                p.set_visible(False)
 
         # disconnect interactive window (and more importantly, reconnect to
         # original interactive cmds)
