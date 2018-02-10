@@ -836,7 +836,7 @@ class ammonia_model(model.SpectralModel):
         if len(guesses) % gauss_npars != 0:
             raise ValueError("Guesses passed to parse_3par_guesses must have "
                              "length % 3 == 0")
-        npeaks = len(guesses) / gauss_npars
+        npeaks = len(guesses) // gauss_npars
         npars = 6
 
         new_guesses = [-1, -1, 15, -1, -1, 0.5] * npeaks

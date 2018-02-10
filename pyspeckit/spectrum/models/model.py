@@ -125,8 +125,8 @@ class SpectralModel(fitter.SimpleFitter):
         self.integral_func = integral_func
 
         for gt in guess_types:
-            if gt not in valid_guess_types:
-                raise ValueError("Guess type must be one of {0}"
+            if not isinstance(gt, float) and gt not in valid_guess_types:
+                raise ValueError("Guess type must be one of {0} or a float"
                                  .format(valid_guess_types))
         self.guess_types = guess_types
 
@@ -1032,6 +1032,8 @@ class SpectralModel(fitter.SimpleFitter):
                       for ii, gval in enumerate(guesses)}
 
         new_guesses = [guess_dict[(gtype, ii)]
+                       if isinstance(gtype, str)
+                       else gtype
                        for ii in range(npeaks_guessed)
                        for gtype in self.guess_types
                       ]

@@ -200,3 +200,19 @@ spc3.plotter(linewidth=2)
 spc5.plotter(axis=spc3.plotter.axis, color='r', clear=False)
 spc4.plotter(axis=spc3.plotter.axis, color='b', clear=False)
 """
+
+def test_ammonia_guessing():
+
+    mod = ammonia.ammonia_model()
+
+    rslt = mod.parse_3par_guesses(['amp', 'cen', 'wid'])
+
+    assert rslt == ['ampamp', 'amp', 15, 'wid', 'cen', 0.5]
+
+    rslt = mod.parse_3par_guesses(['amp1', 'cen1', 'wid1',
+                                   'amp2', 'cen2', 'wid2',
+                                  ])
+
+    assert rslt == ['amp1amp1', 'amp1', 15, 'wid1', 'cen1', 0.5,
+                    'amp2amp2', 'amp2', 15, 'wid2', 'cen2', 0.5,
+                   ]

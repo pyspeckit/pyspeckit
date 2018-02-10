@@ -20,3 +20,17 @@ def test_hill5():
     np.testing.assert_almost_equal(sp.specfit.parinfo[2].value, 2.0)
     np.testing.assert_almost_equal(sp.specfit.parinfo[3].value, 1.0)
     np.testing.assert_almost_equal(sp.specfit.parinfo[4].value, 1.0)
+
+def test_hill5_guessing():
+
+    rslt = hill5infall.parse_3par_guesses(['amp', 'cen', 'wid'])
+
+    assert rslt == [1.0, 'cen', 1.0, 'wid', 'amp']
+
+    rslt = hill5infall.parse_3par_guesses(['amp1', 'cen1', 'wid1',
+                                           'amp2', 'cen2', 'wid2',
+                                          ])
+
+    assert rslt == [1.0, 'cen1', 1.0, 'wid1', 'amp1',
+                    1.0, 'cen2', 1.0, 'wid2', 'amp2',
+                   ]
