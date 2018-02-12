@@ -180,6 +180,7 @@ class Specfit(interactive.Interactive):
 
     @cfgdec
     def __call__(self, interactive=False, usemoments=True,
+                 fittype=None,
                  clear_all_connections=True, debug=False, guesses='moments',
                  parinfo=None, save=True, annotate=None, show_components=None,
                  use_lmfit=False, verbose=True, clear=True,
@@ -277,6 +278,10 @@ class Specfit(interactive.Interactive):
             if arg in kwargs:
                 kwargs.pop(arg)
 
+        if fittype is not None:
+            self.fittype = fittype
+            self.fitter = self.Registry.multifitters[self.fittype]
+
         if 'multifit' in kwargs:
             kwargs.pop('multifit')
             log.warning("The multifit keyword is no longer required.  All fits "
@@ -324,6 +329,7 @@ class Specfit(interactive.Interactive):
                 self.guesses = guesses
                 self.multifit(show_components=show_components, verbose=verbose,
                               debug=debug, use_lmfit=use_lmfit,
+                              fittype=fittype,
                               guesses=guesses, annotate=annotate, **kwargs)
             else:
                 raise ValueError("Guess and parinfo were somehow invalid.")

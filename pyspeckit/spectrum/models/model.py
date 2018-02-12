@@ -13,6 +13,9 @@ import matplotlib.cbook as mpcb
 from . import fitter
 from . import mpfit_messages
 from pyspeckit.specwarnings import warn
+import itertools
+import operator
+from astropy.extern import six
 try:
     from collections import OrderedDict
 except ImportError:
@@ -125,7 +128,7 @@ class SpectralModel(fitter.SimpleFitter):
         self.integral_func = integral_func
 
         for gt in guess_types:
-            if not isinstance(gt, float) and gt not in valid_guess_types:
+            if not isinstance(gt, float) and not any(g in gt for g in valid_guess_types):
                 raise ValueError("Guess type must be one of {0} or a float"
                                  .format(valid_guess_types))
         self.guess_types = guess_types
@@ -1028,6 +1031,12 @@ class SpectralModel(fitter.SimpleFitter):
 
         npeaks_guessed = len(guesses) // 3
 
+
+        gtypes = [parse_offset_guess(gtype, gval)[0]
+                  for gtype, gval in zip(itertools.cycle(self.guess_types),
+                                         [0]*len(self.guess_types))]
+
+
         guess_dict = {(valid_guess_types[ii % 3], ii // 3): gval
                       for ii, gval in enumerate(guesses)}
 
@@ -1035,8 +1044,14 @@ class SpectralModel(fitter.SimpleFitter):
                        if isinstance(gtype, str)
                        else gtype
                        for ii in range(npeaks_guessed)
-                       for gtype in self.guess_types
+                       for gtype in gtypes
                       ]
+
+        new_guesses = [parse_offset_guess(gtype, gval)[1]
+                       for gtype, gval in zip(itertools.cycle(self.guess_types),
+                                              new_guesses)]
+
+        assert len(new_guesses) % len(self.guess_types) == 0
 
         return new_guesses
 
@@ -1130,3 +1145,30 @@ class AstropyModel(SpectralModel):
         except AttributeError:
             self.modelfunc.parameters = pars
         return self.modelfunc
+
+def parse_offset_guess(gname, gval):
+    """
+    Utility function for handling guesses.  Allows guess types to be specified
+    as 'amplitude*2' or 'width+3'.
+    """
+    operators = '+-*/'
+    if not isinstance(gname, six.string_types):
+        return gname, gval
+    ops = [x for x in operators if x in gname]
+    if len(ops)>1:
+        raise ValueError("Invalid offset guess")
+    elif len(ops) == 0:
+        return gname,gval
+    else:
+        opmap = {"+": operator.add,
+                 "-": operator.sub,
+                 "*": operator.mul,
+                 "/": operator.truediv,
+                }
+        op = ops[0]
+        pars = gname.split(op)
+        gname = [p for p in gname.split(op) if p in valid_guess_types][0]
+        pars = [gval if p in valid_guess_types else float(p)
+                for p in pars]
+        gval = opmap[op](*pars)
+        return gname, gval
