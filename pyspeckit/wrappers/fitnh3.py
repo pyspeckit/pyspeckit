@@ -31,7 +31,6 @@ from ..spectrum.classes import Spectrum, Spectra
 from ..spectrum import units
 from ..spectrum.models import ammonia_constants
 import numpy as np
-from matplotlib import pyplot
 import copy
 import random
 from astropy import log
@@ -172,6 +171,7 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
         'twotwo': spectrum,
         etc.
     """
+    from matplotlib import pyplot
     spectra.plotter.figure = pyplot.figure(fignum)
     spectra.plotter.axis = spectra.plotter.figure.gca()
     pyplot.clf()
@@ -218,6 +218,7 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
 
 
 def make_axdict(splist, spdict):
+    from matplotlib import pyplot
     axdict = {}
     if len(splist) == 2:
         ii = 1

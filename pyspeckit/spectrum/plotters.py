@@ -7,7 +7,6 @@ Plotter
 """
 from __future__ import print_function
 import matplotlib
-import matplotlib.pyplot
 import matplotlib.figure
 import numpy as np
 import astropy.units as u
@@ -45,6 +44,10 @@ class Plotter(object):
 
     def __init__(self, Spectrum, autorefresh=True, title="", xlabel=None,
                  silent=True, plotscale=1.0, **kwargs):
+
+        import matplotlib.pyplot
+        self._pyplot = matplotlib.pyplot
+
         self.figure = None
         self.axis = None
         self.Spectrum = Spectrum
@@ -168,17 +171,17 @@ class Plotter(object):
             self.figure = figure
             self.axis = self.figure.gca()
         elif type(figure) is int:
-            self.figure = matplotlib.pyplot.figure(figure)
+            self.figure = self._pyplot.figure(figure)
             self.axis = self.figure.gca()
         elif self.figure is None:
             if isinstance(axis,matplotlib.axes.Axes):
                 self.axis = axis
                 self.figure = axis.figure
             else:
-                self.figure = matplotlib.pyplot.figure()
+                self.figure = self._pyplot.figure()
 
-        if hasattr(self.figure, 'number') and not matplotlib.pyplot.fignum_exists(self.figure.number):
-            self.figure = matplotlib.pyplot.figure(self.figure.number)
+        if hasattr(self.figure, 'number') and not self._pyplot.fignum_exists(self.figure.number):
+            self.figure = self._pyplot.figure(self.figure.number)
 
         # always re-connect the interactive keys to avoid frustration...
         self._mpl_reconnect()
@@ -196,7 +199,7 @@ class Plotter(object):
         # A check to deal with issue #117: if you close the figure, the axis
         # still exists, but it cannot be reattached to a figure
         if (hasattr(self.axis.get_figure(), 'number') and
-            not (self.axis.get_figure() is matplotlib.pyplot.figure(self.axis.get_figure().number))):
+            not (self.axis.get_figure() is self._pyplot.figure(self.axis.get_figure().number))):
             self.axis = self.figure.gca()
 
         if self.axis is not None and self.axis not in self.figure.axes:
@@ -235,8 +238,8 @@ class Plotter(object):
         self._mpl_disconnect()
         self._mpl_connect()
         # disable fullscreen & grid
-        matplotlib.pyplot.rcParams['keymap.fullscreen'] = 'ctrl+f'
-        matplotlib.pyplot.rcParams['keymap.grid'] = 'ctrl+g'
+        self._pyplot.rcParams['keymap.fullscreen'] = 'ctrl+f'
+        self._pyplot.rcParams['keymap.grid'] = 'ctrl+g'
 
     def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid',
              linewidth=0.5, errstyle=None, erralpha=0.2, errcolor=None,
@@ -539,7 +542,7 @@ class Plotter(object):
 
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
-                elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
+                elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in self._pyplot.get_fignums():
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
             elif event.key is not None and event.key.lower() == 'b':
                 if event.key == 'b':
@@ -551,7 +554,7 @@ class Plotter(object):
 
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
-                elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in matplotlib.pyplot.get_fignums():
+                elif hasattr(self,'FitterTool') and self.FitterTool.toolfig.number not in self._pyplot.get_fignums():
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
             elif event.key == 'r':
                 # print("\n\nReconnected matplotlib shortcut keys.")

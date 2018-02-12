@@ -1,7 +1,6 @@
 from __future__ import print_function
 from astropy.extern.six.moves import xrange
 from matplotlib.widgets import Widget,Button,Slider
-from matplotlib import pyplot
 import matplotlib
 import warnings
 
@@ -97,6 +96,8 @@ class FitterSliders(Widget):
         self.targetfig = targetfig
         self.specfit = specfit
         self.parlimitdict = parlimitdict
+
+        from matplotlib import pyplot
 
         if toolfig is None:
             tbar = matplotlib.rcParams['toolbar'] # turn off the navigation toolbar for the toolfig
@@ -279,6 +280,8 @@ class FitterTools(Widget):
         self.specfit = specfit
         self.baseline = specfit.Spectrum.baseline
         self.plotter = specfit.Spectrum.plotter
+
+        from matplotlib import pyplot
 
         if toolfig is None:
             tbar = matplotlib.rcParams['toolbar'] # turn off the navigation toolbar for the toolfig
