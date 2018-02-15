@@ -133,7 +133,7 @@ class Interactive(object):
                     self.fitter = self.Registry.multifitters[fittername]
                     self.fittype = fittername
                     print("Selected multi-fitter %s" % fittername)
-                else: 
+                else:
                     print("ERROR: Did not find fitter %s" % fittername)
             if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
         elif debug or self._debug:
@@ -161,7 +161,7 @@ class Interactive(object):
             self.nclicks_b1 = 0
             self.xclicks.append(xpix)
             # force click1 to be left (swap)
-            if self._xclick1 > self._xclick2:  
+            if self._xclick1 > self._xclick2:
                 self._xclick1,self._xclick2 = self._xclick2,self._xclick1
 
             # ensure that the fit/plot range is at least as large as the click range
@@ -206,7 +206,7 @@ class Interactive(object):
                 self.Spectrum.xarr,
                 # +bad adds nans to points that are not to be included
                 self.Spectrum.data+self.Spectrum.plotter.offset+bad,
-                drawstyle=drawstyle, color=color, 
+                drawstyle=drawstyle, color=color,
                 linewidth=linewidth,
                 alpha=alpha,
                 **kwargs)
@@ -416,7 +416,7 @@ class Interactive(object):
             Note that this is not necessarily the same as the window plot limits!
 
         *use_window_limits* : [ bool ]
-            Use the plot limits *as displayed*.  Defaults to self.use_window_limits 
+            Use the plot limits *as displayed*.  Defaults to self.use_window_limits
             (:attr:`pyspeckit.spectrum.interactive.use_window_limits`).
             Overwrites xmin,xmax set by plotter
 
@@ -479,14 +479,14 @@ class Interactive(object):
             if verbose:
                 log.info("Left region selection unchanged."
                          "  xminpix, xmaxpix: %i,%i" % (self.xmin,self.xmax))
-        
+
         if self.xmin == self.xmax:
             # Reset if there is no fitting region
             self.xmin = 0
             # End-inclusive
             self.xmax = self.Spectrum.data.shape[0]
             log.debug("Reset to full range because the endpoints were equal")
-        elif self.xmin>self.xmax: 
+        elif self.xmin>self.xmax:
             # Swap endpoints if the axis has a negative delta-X
             self.xmin,self.xmax = self.xmax,self.xmin
             log.debug("Swapped endpoints because the left end was greater than the right")
