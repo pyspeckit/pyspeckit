@@ -51,7 +51,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
                fortho=0.66, tau=None, thin=False, quiet=False, doplot=True,
                fignum=1, guessfignum=2, smooth=False, scale_keyword=None,
                rebase=False, tkin=None, npeaks=1, guesses=None,
-               guess_error=True, **kwargs):
+               guess_error=True, plotter_wrapper_kwargs={}, **kwargs):
     """
     Given a dictionary of filenames and lines, fit them together
     e.g. {'oneone':'G000.000+00.000_nh3_11.fits'}
@@ -76,6 +76,8 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
         The unit for the crop parameter
     guess_error : bool
         Use the guess line to estimate the error in all spectra?
+    plotter_wrapper_kwargs : dict
+        Keyword arguments to pass to the plotter
     """
     if tkin is not None:
         if trot == 20 or trot is None:
@@ -156,7 +158,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
                         **kwargs)
 
     if doplot:
-        plot_nh3(spdict, spectra, fignum=fignum)
+        plot_nh3(spdict, spectra, fignum=fignum, **plotter_wrapper_kwargs)
 
     return spdict, spectra
 
