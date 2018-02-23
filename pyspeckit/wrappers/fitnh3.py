@@ -162,6 +162,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
 
 def plot_nh3(spdict, spectra, fignum=1, show_components=False,
              residfignum=None, show_hyperfine_components=True, annotate=True,
+             axdict=None, figure=None,
              **plotkwargs):
     """
     Plot the results from a multi-nh3 fit
@@ -172,9 +173,10 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
         etc.
     """
     from matplotlib import pyplot
-    spectra.plotter.figure = pyplot.figure(fignum)
-    spectra.plotter.axis = spectra.plotter.figure.gca()
-    pyplot.clf()
+    if figure is None:
+        spectra.plotter.figure = pyplot.figure(fignum)
+        spectra.plotter.axis = spectra.plotter.figure.gca()
+       
     splist = spdict.values()
 
     for transition, sp in spdict.items():
@@ -189,7 +191,8 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
         if spectra.specfit.modelpars is not None:
             sp.specfit.model = sp.specfit.fitter.n_ammonia(pars=spectra.specfit.modelpars, parnames=spectra.specfit.fitter.parnames)(sp.xarr)
 
-    axdict = make_axdict(splist, spdict)
+    if axdict is None:
+        axdict = make_axdict(splist, spdict)
 
     for linename, sp in iteritems(spdict):
         if linename not in axdict:
