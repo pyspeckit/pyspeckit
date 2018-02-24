@@ -986,7 +986,10 @@ class Cube(spectrum.Spectrum):
         # This test block is to make sure you don't run a 30 hour fitting
         # session that's just going to crash at the end.
         # try a first fit for exception-catching
-        try0 = fit_a_pixel((0,valid_pixels[0][0],valid_pixels[0][1]))
+        if len(start_from_point) == 2:
+            try0 = fit_a_pixel((0,start_from_point[0], start_from_point[1]))
+        else:
+            try0 = fit_a_pixel((0,valid_pixels[0][0],valid_pixels[0][1]))
         try:
             len_guesses = len(self.momentcube) if (usemomentcube or
                                 guesses_are_moments) else len(guesses)
