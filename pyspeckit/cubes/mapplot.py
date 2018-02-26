@@ -275,7 +275,7 @@ class MapPlotter(object):
                 elif event.key == 'o':
                     clickX,clickY = round(clickX),round(clickY)
                     print("OverPlotting spectrum from point %i,%i" % (clickX-1,clickY-1))
-                    color=self.overplot_colorcycle.next()
+                    color = next(self.overplot_colorcycle)
                     self._add_click_mark(clickX,clickY,clear=False, color=color)
                     self.Cube.plot_spectrum(clickX-1,clickY-1,clear=False, color=color, linestyle=self.overplot_linestyle)
                 elif event.key in ('1','2'):
@@ -290,7 +290,7 @@ class MapPlotter(object):
                     color = 'k'
                     linestyle = 'steps-mid'
                 else:
-                    color = self.overplot_colorcycle.next()
+                    color = next(self.overplot_colorcycle)
                     linestyle = self.overplot_linestyle
                     clear=False
                 rad = ( (self._clickX-clickX)**2 + (self._clickY-clickY)**2 )**0.5
@@ -308,7 +308,7 @@ class MapPlotter(object):
                 elif event.button==2:
                     clickX,clickY = round(clickX),round(clickY)
                     print("OverPlotting spectrum from point %i,%i" % (clickX-1,clickY-1))
-                    color=self.overplot_colorcycle.next()
+                    color = next(self.overplot_colorcycle)
                     self._add_click_mark(clickX,clickY,clear=False, color=color)
                     self.Cube.plot_spectrum(clickX-1,clickY-1,clear=False, color=color, linestyle=self.overplot_linestyle)
                 elif event.button==3:
