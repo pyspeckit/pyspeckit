@@ -105,7 +105,9 @@ class lte_line_model_generator(object):
         pass
 
 # requires vamdc branch of astroquery
-def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
+def get_molecular_parameters(molecule_name,
+                             molecule_name_vamdc=None,
+                             tex=50, fmin=1*u.GHz, fmax=1*u.THz,
                              chem_re_flags=0, **kwargs):
     """
     Get the molecular parameters for a molecule from the CDMS database using
@@ -114,7 +116,10 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     Parameters
     ----------
     molecule_name : string
-        The string name of the molecule
+        The string name of the molecule (normal name, like CH3OH or CH3CH2OH)
+    molecule_name_vamdc : string or None
+        If specified, gives this name to vamdc instead of the normal name.
+        Needed for some molecules, like CH3CH2OH -> C2H5OH.
     tex : float
         Optional excitation temperature (basically checks if the partition
         function calculator works)
@@ -127,12 +132,21 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     from vamdclib import specmodel
 
     lut = load_species_table.species_lookuptable()
-    species_id_dict = lut.find(molecule_name, flags=chem_re_flags)
+    species_id_dict = lut.find(molecule_name_vamdc or molecule_name,
+                               flags=chem_re_flags)
     if len(species_id_dict) == 1:
         species_id = list(species_id_dict.values())[0]
+    elif len(species_id_dict) == 0:
+        raise ValueError("No matches for {0}".format(molecule_name))
     else:
         raise ValueError("Too many species matched: {0}"
                          .format(species_id_dict))
+
+    # do this here, before trying to compute the partition function, because
+    # this query could fail
+    slaim = Splatalogue.query_lines(fmin, fmax, chemical_name=molecule_name,
+                                    line_lists=['SLAIM'],
+                                    show_upper_degeneracy=True, **kwargs)
      
     nl = nodes.Nodelist()
     nl.findnode('cdms')
@@ -150,9 +164,6 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
                                                        temperature=tem).values())[0]
         return Q
 
-    slaim = Splatalogue.query_lines(fmin, fmax, chemical_name=molecule_name,
-                                    line_lists=['SLAIM'],
-                                    show_upper_degeneracy=True, **kwargs)
 
     freqs = np.array(slaim['Freq-GHz'])*u.GHz
     aij = slaim['Log<sub>10</sub> (A<sub>ij</sub>)']
