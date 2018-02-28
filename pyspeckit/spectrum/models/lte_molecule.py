@@ -196,18 +196,24 @@ def generate_model(xarr, vcen, width, tex, column,
     # assume equal-width channels
     #kwargs = dict(rest=ref_freq)
     #equiv = u.doppler_radio(**kwargs)
-    channelwidth = np.abs(xarr[1].to(u.Hz, ) - xarr[0].to(u.Hz, )).value
+
+    # channelwidth array, with last element approximated
+    channelwidth = np.empty_like(xarr.value)
+    channelwidth[:-1] = np.abs(np.diff(xarr.to(u.Hz))).value
+    channelwidth[-1] = channelwidth[-2]
+
     #velo = xarr.to(u.km/u.s, equiv).value
     freq = xarr.to(u.Hz).value # same unit as nu below
     model = np.zeros_like(xarr).value
+
+    # splatalogue can report bad frequencies as zero
+    OK = freqs.value != 0
 
     freqs_ = freqs.to(u.Hz).value
 
     Q = partfunc(tex)
 
-    for A, g, nu, eu in zip(aij, deg, freqs_, EU):
-        if nu == 0:
-            continue
+    for A, g, nu, eu in zip(aij[OK], deg[OK], freqs_[OK], EU[OK]):
         tau_per_dnu = line_tau_cgs(tex,
                                    column,
                                    Q,
