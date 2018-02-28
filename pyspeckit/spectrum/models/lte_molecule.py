@@ -206,6 +206,8 @@ def generate_model(xarr, vcen, width, tex, column,
     Q = partfunc(tex)
 
     for A, g, nu, eu in zip(aij, deg, freqs_, EU):
+        if nu == 0:
+            continue
         tau_per_dnu = line_tau_cgs(tex,
                                    column,
                                    Q,
