@@ -2,6 +2,7 @@ from __future__ import print_function
 import numpy as np
 from astropy import units as u
 from astropy import constants
+from .model import SpectralModel
 
 kb_cgs = constants.k_B.cgs.value
 h_cgs = constants.h.cgs.value
@@ -104,10 +105,28 @@ class lte_line_model_generator(object):
         pass
 
 # requires vamdc branch of astroquery
-def get_molecular_parameters(molecule_name, chem_re_flags=0):
-    from astroquery.vamdc import load_species_table
+def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
+                             chem_re_flags=0, **kwargs):
+    """
+    Get the molecular parameters for a molecule from the CDMS database using
+    vamdclib
 
-    lut = load_species_table()
+    Parameters
+    ----------
+    molecule_name : string
+        The string name of the molecule
+    tex : float
+        Optional excitation temperature (basically checks if the partition
+        function calculator works)
+    """
+    from astroquery.vamdc import load_species_table
+    from astroquery.splatalogue import Splatalogue
+
+    from vamdclib import nodes
+    from vamdclib import request
+    from vamdclib import specmodel
+
+    lut = load_species_table.species_lookuptable()
     species_id_dict = lut.find(molecule_name, flags=chem_re_flags)
     if len(species_id_dict) == 1:
         species_id = list(species_id_dict.values())[0]
@@ -115,12 +134,110 @@ def get_molecular_parameters(molecule_name, chem_re_flags=0):
         raise ValueError("Too many species matched: {0}"
                          .format(species_id_dict))
      
-    request = r.Request(node=cdms)
+    nl = nodes.Nodelist()
+    nl.findnode('cdms')
+    cdms = nl.findnode('cdms')
+
+    request = request.Request(node=cdms)
     query_string = "SELECT ALL WHERE VAMDCSpeciesID='%s'" % species_id
     request.setquery(query_string)
     result = request.dorequest()
-    Q = m.calculate_partitionfunction(result.data['States'],
-                                      temperature=tex)[species_id]
+    Q = list(specmodel.calculate_partitionfunction(result.data['States'],
+                                                   temperature=tex).values())[0]
+    
+    def partfunc(tem):
+        Q = list(specmodel.calculate_partitionfunction(result.data['States'],
+                                                       temperature=tem).values())[0]
+        return Q
+
+    slaim = Splatalogue.query_lines(fmin, fmax, chemical_name=molecule_name,
+                                    line_lists=['SLAIM'],
+                                    show_upper_degeneracy=True, **kwargs)
+
+    freqs = np.array(slaim['Freq-GHz'])*u.GHz
+    aij = slaim['Log<sub>10</sub> (A<sub>ij</sub>)']
+    deg = slaim['Upper State Degeneracy']
+    EU = (np.array(slaim['E_U (K)'])*u.K*constants.k_B).to(u.erg).value
+
+    return freqs, aij, deg, EU, partfunc
+
+def generate_model(xarr, vcen, width, tex, column,
+                   freqs, aij, deg, EU, partfunc,
+                   background=None, tbg=2.73,
+                  ):
+    
+    if hasattr(tex,'unit'):
+        tex = tex.value
+    if hasattr(tbg,'unit'):
+        tbg = tbg.value
+    if hasattr(column, 'unit'):
+        column = column.value
+    if column < 25:
+        column = 10**column
+    if hasattr(vcen, 'unit'):
+        vcen = vcen.value
+    if hasattr(width, 'unit'):
+        width = width.value
+
+    ckms = constants.c.to(u.km/u.s).value
+
+    # assume equal-width channels
+    #kwargs = dict(rest=ref_freq)
+    #equiv = u.doppler_radio(**kwargs)
+    channelwidth = np.abs(xarr[1].to(u.Hz, ) - xarr[0].to(u.Hz, )).value
+    #velo = xarr.to(u.km/u.s, equiv).value
+    freq = xarr.to(u.Hz).value # same unit as nu below
+    model = np.zeros_like(xarr).value
+
+    freqs_ = freqs.to(u.Hz).value
+
+    Q = partfunc(tex)
+
+    for A, g, nu, eu in zip(aij, deg, freqs_, EU):
+        tau_per_dnu = line_tau_cgs(tex,
+                                   column,
+                                   Q,
+                                   g,
+                                   nu,
+                                   eu,
+                                   10**A)
+        width_dnu = width / ckms * nu
+        s = np.exp(-(freq-(1-vcen/ckms)*nu)**2/(2*width_dnu**2))*tau_per_dnu/channelwidth
+        jnu = (Jnu_cgs(nu, tex)-Jnu_cgs(nu, tbg))
+
+        model = model + jnu*(1-np.exp(-s))
+
+    if background is not None:
+        return background-model
+    return model
+
+"""
+Example case to produce a model:
+
+freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH3OH')
+def modfunc(xarr, vcen, width, tex, column):
+    return generate_model(xarr, vcen, width, tex, column, freqs=freqs, aij=aij,
+                          deg=deg, EU=EU, partfunc=partfunc)
+
+fitter = generate_fitter(modfunc, name="CH3OH")
+"""
+
+def generate_fitter(model_func, name):
+    """
+    Generator for hnco fitter class
+    """
+
+    myclass = SpectralModel(model_func, 4,
+            parnames=['shift','width','tex','column'],
+            parlimited=[(False,False),(True,False),(True,False),(True,False)],
+            parlimits=[(0,0), (0,0), (0,0),(0,0)],
+            shortvarnames=(r'\Delta x',r'\sigma','T_{ex}','N'),
+            centroid_par='shift',
+            )
+    myclass.__name__ = name
+    
+    return myclass
+
 
 # url = 'http://cdms.ph1.uni-koeln.de/cdms/tap/'
 # rslt = requests.post(url+"/sync", data={'REQUEST':"doQuery", 'LANG': 'VSS2', 'FORMAT':'XSAMS', 'QUERY':"SELECT SPECIES WHERE MoleculeStoichiometricFormula='CH2O'"})               
