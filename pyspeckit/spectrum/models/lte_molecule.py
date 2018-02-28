@@ -108,6 +108,7 @@ class lte_line_model_generator(object):
 def get_molecular_parameters(molecule_name,
                              molecule_name_vamdc=None,
                              tex=50, fmin=1*u.GHz, fmax=1*u.THz,
+                             line_lists=['SLAIM'],
                              chem_re_flags=0, **kwargs):
     """
     Get the molecular parameters for a molecule from the CDMS database using
@@ -144,9 +145,9 @@ def get_molecular_parameters(molecule_name,
 
     # do this here, before trying to compute the partition function, because
     # this query could fail
-    slaim = Splatalogue.query_lines(fmin, fmax, chemical_name=molecule_name,
-                                    line_lists=['SLAIM'],
-                                    show_upper_degeneracy=True, **kwargs)
+    tbl = Splatalogue.query_lines(fmin, fmax, chemical_name=molecule_name,
+                                  line_lists=line_lists,
+                                  show_upper_degeneracy=True, **kwargs)
      
     nl = nodes.Nodelist()
     nl.findnode('cdms')
@@ -165,10 +166,10 @@ def get_molecular_parameters(molecule_name,
         return Q
 
 
-    freqs = np.array(slaim['Freq-GHz'])*u.GHz
-    aij = slaim['Log<sub>10</sub> (A<sub>ij</sub>)']
-    deg = slaim['Upper State Degeneracy']
-    EU = (np.array(slaim['E_U (K)'])*u.K*constants.k_B).to(u.erg).value
+    freqs = np.array(tbl['Freq-GHz'])*u.GHz
+    aij = tbl['Log<sub>10</sub> (A<sub>ij</sub>)']
+    deg = tbl['Upper State Degeneracy']
+    EU = (np.array(tbl['E_U (K)'])*u.K*constants.k_B).to(u.erg).value
 
     return freqs, aij, deg, EU, partfunc
 
