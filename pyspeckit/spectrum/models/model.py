@@ -3,6 +3,9 @@
 Generic SpectralModel wrapper
 =============================
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+
+Module API
+^^^^^^^^^^
 """
 import numpy as np
 from pyspeckit.mpfit import mpfit,mpfitException

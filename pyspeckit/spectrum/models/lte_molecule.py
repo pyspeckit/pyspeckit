@@ -1,3 +1,15 @@
+"""
+LTE Molecule Modeling Tool
+==========================
+
+Uses astroquery & vamdclib to obtain molecular parameters.
+http://astroquery.readthedocs.io/en/latest/splatalogue/splatalogue.html
+
+Equations are based on Mangum & Shirley 2015 (2015PASP..127..266M)
+
+Module API
+^^^^^^^^^^
+"""
 from __future__ import print_function
 import numpy as np
 from astropy import units as u

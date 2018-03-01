@@ -3,6 +3,9 @@
 Generalized hyperfine component fitter
 ======================================
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+
+Module API
+^^^^^^^^^^
 """
 import numpy as np
 from astropy import units as u

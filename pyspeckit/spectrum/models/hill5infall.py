@@ -9,6 +9,9 @@ https://bitbucket.org/devries/analytic_infall/overview
 
 Original source:
 http://adsabs.harvard.edu/abs/2005ApJ...620..800D
+
+Module API
+^^^^^^^^^^
 """
 import numpy as np
 from . import model

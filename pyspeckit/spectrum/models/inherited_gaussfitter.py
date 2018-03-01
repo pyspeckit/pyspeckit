@@ -10,6 +10,8 @@ gaussfitter.py code.  Now, this is a great example of how to make your own
 model!  Just make a function like gaussian and plug it into the SpectralModel
 class.
 
+Module API
+^^^^^^^^^^
 """
 import numpy as np
 import warnings
