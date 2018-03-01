@@ -60,16 +60,6 @@ try:
     import numpy
 except ImportError:
     print "Failed to import numpy"
-#try:
-#    import numpydoc
-#except ImportError:
-#    print "Failed to import numpydoc"
-
-try:
-    import numpy
-    print "Succeeded in mocking"
-except ImportError:
-    print "Failed to mock numpy"
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -144,8 +134,7 @@ class Mock(object):
 
 MOCK_MODULES = {'matplotlib', 'matplotlib.pyplot', 'matplotlib.figure',
                 'matplotlib.widgets', 'matplotlib.cbook', 'pyfits', 'scipy',
-                'astropy',
-                'numpy', 'scipy', 'pyfits', 'astropy', 'pytest', 'astropy.wcs',
+                'scipy', 'pyfits', 'astropy', 'pytest', 'astropy.wcs',
                 'astropy.io', 'astropy.io.fits', 'astropy.nddata',
                 'scipy.interpolate', 'scipy.ndimage', 'pywcs', 'matplotlib',
                 'matplotlib.pyplot', 'numpy.ma', 'h5py', 'atpy','progressbar'}

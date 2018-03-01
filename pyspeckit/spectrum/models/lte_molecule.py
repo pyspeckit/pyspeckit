@@ -4,12 +4,18 @@ from astropy import units as u
 from astropy import constants
 from .model import SpectralModel
 
-kb_cgs = constants.k_B.cgs.value
-h_cgs = constants.h.cgs.value
-eightpicubed = 8 * np.pi**3
-threehc = 3 * constants.h.cgs * constants.c.cgs
-hoverk_cgs = (h_cgs/kb_cgs)
-c_cgs = constants.c.cgs.value
+try:
+    kb_cgs = constants.k_B.cgs.value
+    h_cgs = constants.h.cgs.value
+    eightpicubed = 8 * np.pi**3
+    threehc = 3 * constants.h.cgs * constants.c.cgs
+    hoverk_cgs = (h_cgs/kb_cgs)
+    c_cgs = constants.c.cgs.value
+except TypeError as ex:
+    # this should only ever happen if we're in a docs build with astropy/numpy
+    # mocked out
+    if 'Mock' not in str(ex):
+        raise ex
 
 
 def line_tau(tex, total_column, partition_function, degeneracy, frequency,
