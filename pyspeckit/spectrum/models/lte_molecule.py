@@ -14,6 +14,23 @@ c_cgs = constants.c.cgs.value
 
 def line_tau(tex, total_column, partition_function, degeneracy, frequency,
              energy_upper, einstein_A=None):
+    """
+    Given the excitation temperature of the state, total column density of the
+    molecule, the partition function, the degeneracy of the state, the
+    frequency of the state, and the upper-state energy level, return the optical
+    depth of that transition.
+
+    This is a helper function for the LTE molecule calculations.  It implements
+    the equations
+
+    .. math::
+
+        \\tau_\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u \\exp\left(
+                     \\frac{h \\nu}{k_B T_{ex}}\\right)
+        N_{u} = N_{tot} \\frac{g_u}{Q} \\exp\left(\\frac{-E_u}{k_B T_{ex}} \\right)
+
+    based on Equation 29 of Mangum & Shirley 2015 (2015PASP..127..266M)
+    """
     # don't use dipole moment, because there are extra hidden dependencies
 
     assert frequency.unit.is_equivalent(u.Hz)
@@ -33,32 +50,52 @@ def line_tau(tex, total_column, partition_function, degeneracy, frequency,
 
     return taudnu.decompose()
 
-def line_tau_nonquantum(tex, total_column, partition_function, degeneracy,
-                        frequency, energy_upper, SijMu2=None, molwt=None):
-
-    assert frequency.unit.is_equivalent(u.Hz)
-    assert energy_upper.unit.is_equivalent(u.erg)
-    assert total_column.unit.is_equivalent(u.cm**-2)
-    assert tex.unit.is_equivalent(u.K)
-
-    energy_lower = energy_upper - frequency*constants.h
-    #N_lower = (total_column * degeneracy / partition_function *
-    #           np.exp(-energy_lower / (constants.k_B * tex)))
-
-    # http://www.cv.nrao.edu/php/splat/OSU_Splat.html
-    assert SijMu2.unit.is_equivalent(u.debye**2)
-    amu = u.Da
-    assert molwt.unit.is_equivalent(amu)
-    C1 = 54.5953 * u.nm**2 * u.K**0.5 / amu**0.5 / u.debye**2
-    C2 = 4.799237e-5 * u.K / u.MHz
-    C3 = (1.43877506 * u.K / ((1*u.cm).to(u.Hz, u.spectral()) * constants.h)).to(u.K/u.erg)
-    #C3 = (constants.h / constants.k_B).to(u.K/u.erg)
-    tau = total_column/partition_function * C1 * (molwt/tex)**0.5 * (1-np.exp(-C2*frequency/tex)) * SijMu2 * np.exp(-C3*energy_lower/tex)
-
-    return tau.decompose()
+# Deprecated version of the above
+# def line_tau_nonquantum(tex, total_column, partition_function, degeneracy,
+#                         frequency, energy_upper, SijMu2=None, molwt=None):
+# 
+#     assert frequency.unit.is_equivalent(u.Hz)
+#     assert energy_upper.unit.is_equivalent(u.erg)
+#     assert total_column.unit.is_equivalent(u.cm**-2)
+#     assert tex.unit.is_equivalent(u.K)
+# 
+#     energy_lower = energy_upper - frequency*constants.h
+#     #N_lower = (total_column * degeneracy / partition_function *
+#     #           np.exp(-energy_lower / (constants.k_B * tex)))
+# 
+#     # http://www.cv.nrao.edu/php/splat/OSU_Splat.html
+#     assert SijMu2.unit.is_equivalent(u.debye**2)
+#     amu = u.Da
+#     assert molwt.unit.is_equivalent(amu)
+#     C1 = 54.5953 * u.nm**2 * u.K**0.5 / amu**0.5 / u.debye**2
+#     C2 = 4.799237e-5 * u.K / u.MHz
+#     C3 = (1.43877506 * u.K / ((1*u.cm).to(u.Hz, u.spectral()) * constants.h)).to(u.K/u.erg)
+#     #C3 = (constants.h / constants.k_B).to(u.K/u.erg)
+#     tau = total_column/partition_function * C1 * (molwt/tex)**0.5 * (1-np.exp(-C2*frequency/tex)) * SijMu2 * np.exp(-C3*energy_lower/tex)
+# 
+#     return tau.decompose()
 
 def line_tau_cgs(tex, total_column, partition_function, degeneracy, frequency,
                  energy_upper, einstein_A):
+    """
+    Given the excitation temperature of the state, total column density of the
+    molecule, the partition function, the degeneracy of the state, the
+    frequency of the state, and the upper-state energy level, return the optical
+    depth of that transition.
+
+    Unlike :func:`line_tau`, this function requires inputs in CGS units.
+
+    This is a helper function for the LTE molecule calculations.  It implements
+    the equations
+
+    .. math::
+
+        \\tau_\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u \\exp\left(
+                     \\frac{h \\nu}{k_B T_{ex}}\\right)
+        N_{u} = N_{tot} \\frac{g_u}{Q} \\exp\left(\\frac{-E_u}{k_B T_{ex}} \\right)
+
+    based on Equations 11 and 29 of Mangum & Shirley 2015 (2015PASP..127..266M)
+    """
 
     N_upper = (total_column * degeneracy / partition_function *
                np.exp(-energy_upper / (kb_cgs * tex)))
@@ -78,11 +115,11 @@ def line_tau_cgs(tex, total_column, partition_function, degeneracy, frequency,
     return taudnu
 
 def Jnu(nu, T):
-    """RJ equivalent temperature (eqn 24)"""
+    """RJ equivalent temperature (MS15 eqn 24)"""
     return constants.h*nu/constants.k_B / (np.exp(constants.h*nu/(constants.k_B*T))-1)
 
 def Jnu_cgs(nu, T):
-    """RJ equivalent temperature (eqn 24)
+    """RJ equivalent temperature (MS15 eqn 24)
     (use cgs constants for speed)
     """
     return hoverk_cgs*nu / (np.exp(hoverk_cgs*nu/T)-1)
@@ -96,13 +133,6 @@ def line_brightness(tex, dnu, frequency, tbg=2.73*u.K, *args, **kwargs):
 def line_brightness_cgs(tex, dnu, frequency, tbg=2.73, *args, **kwargs):
     tau = line_tau(tex=tex, frequency=frequency, *args, **kwargs) / dnu
     return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
-
-class lte_line_model_generator(object):
-    def __init__(self, molecule_name, **kwargs):
-        pass
-        
-    def line_profile(xarr,):
-        pass
 
 # requires vamdc branch of astroquery
 def get_molecular_parameters(molecule_name,
@@ -124,6 +154,16 @@ def get_molecular_parameters(molecule_name,
     tex : float
         Optional excitation temperature (basically checks if the partition
         function calculator works)
+    fmin : quantity with frequency units
+    fmax : quantity with frequency units
+        The minimum and maximum frequency to search over
+    line_lists : list
+        A list of Splatalogue line list catalogs to search.  Valid options
+        include SLAIM, CDMS, JPL.  Only a single catalog should be used to
+        avoid repetition of transitions and species
+    chem_re_flags : int
+        An integer flag to be passed to splatalogue's chemical name matching
+        tool
     """
     from astroquery.vamdc import load_species_table
     from astroquery.splatalogue import Splatalogue
@@ -177,6 +217,9 @@ def generate_model(xarr, vcen, width, tex, column,
                    freqs, aij, deg, EU, partfunc,
                    background=None, tbg=2.73,
                   ):
+    """
+    Model Generator
+    """
     
     if hasattr(tex,'unit'):
         tex = tex.value
