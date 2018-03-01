@@ -71,6 +71,8 @@ API Documentation for Models
     :members:
 .. automodule:: pyspeckit.spectrum.models.hydrogen
     :members:
+.. automodule:: pyspeckit.spectrum.models.lte_molecule
+    :members:
 
 Model Documentation Table of Contents
 -------------------------------------
