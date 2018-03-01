@@ -3,6 +3,9 @@
 Model Grid
 ==========
 Fit a line based on parameters output from a grid of models
+
+Module API
+^^^^^^^^^^
 """
 import numpy as np
 from pyspeckit.mpfit import mpfit

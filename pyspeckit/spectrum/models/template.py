@@ -1,3 +1,12 @@
+"""
+Spectral Template Fitter
+========================
+
+A tool to find the optimal shift and scaling for a given template model.
+
+Module API
+^^^^^^^^^^
+"""
 from ..interpolation import interp,_interp
 import numpy as np
 from . import model

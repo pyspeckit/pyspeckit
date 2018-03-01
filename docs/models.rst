@@ -42,40 +42,51 @@ fitting examples and the :doc:`parameters` documentation.
     Implement the gaussian-hermite profile described here:
     `<http://pipelinesandarchives.blogspot.com/2012/09/fit1d-new-smurf-command-for-acsis-data.html>`_
 
-API Documentation for Models
-----------------------------
 
-.. automodule:: pyspeckit.spectrum.models.model
-    :members:
-.. automodule:: pyspeckit.spectrum.models.ammonia
-    :members:
-.. automodule:: pyspeckit.spectrum.models.fitter
-    :members:
-.. automodule:: pyspeckit.spectrum.models.formaldehyde
-    :members:
-.. automodule:: pyspeckit.spectrum.models.inherited_gaussfitter
-    :members:
-.. automodule:: pyspeckit.spectrum.models.hcn
-    :members:
-.. automodule:: pyspeckit.spectrum.models.hill5infall
-    :members:
-.. automodule:: pyspeckit.spectrum.models.hyperfine
-    :members:
-.. automodule:: pyspeckit.spectrum.models.inherited_lorentzian
-    :members:
-.. automodule:: pyspeckit.spectrum.models.modelgrid
-    :members:
-.. automodule:: pyspeckit.spectrum.models.n2hp
-    :members:
-.. automodule:: pyspeckit.spectrum.models.inherited_voigtfitter
-    :members:
-.. automodule:: pyspeckit.spectrum.models.hydrogen
-    :members:
+Related Documents
+-----------------
 
-Model Documentation Table of Contents
--------------------------------------
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
    Parameters <parameters>
 
+Generic Models and Tools
+------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   Gaussian model <gaussian_model>
+   lorentzian_model
+   voigt_model
+   LTE Molecule Model <lte_molecule_model>
+   Hyperfine Line model <hyperfine_model>
+   modelgrid
+   template_model
+
+
+Specific Models
+---------------
+
+.. toctree::
+   :maxdepth: 1
+
+   Ammonia Temperature and Hyperfine model <ammonia_model>
+   Formaldehyde model <formaldehyde_model>
+   HCN model <hcn_model>
+   hill5infall_model
+   n2hp_model
+   hydrogen_model
+
+
+API Documentation for Models
+----------------------------
+
+We include the API documentation for the generic model and fitter wrappers here.
+
+.. automodule:: pyspeckit.spectrum.models.model
+    :members:
+
+.. automodule:: pyspeckit.spectrum.models.fitter
+    :members:

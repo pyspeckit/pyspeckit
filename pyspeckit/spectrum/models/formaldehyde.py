@@ -6,6 +6,9 @@ Formaldehyde cm-line fitter
 This is a formaldehyde 1_11-1_10 / 2_12-2_11 fitter.  It includes hyperfine
 components of the formaldehyde lines and has both LTE and RADEX LVG based
 models
+
+Module API
+^^^^^^^^^^
 """
 from __future__ import print_function
 import numpy as np

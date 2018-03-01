@@ -2,6 +2,9 @@
 ====================
 Voigt Profile Fitter
 ====================
+
+Module API
+^^^^^^^^^^
 """
 from . import model
 import numpy as np

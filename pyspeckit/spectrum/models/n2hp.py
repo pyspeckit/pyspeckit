@@ -11,6 +11,8 @@ http://adsabs.harvard.edu/abs/2005MNRAS.363.1083D
 
 Does not yet implement: http://adsabs.harvard.edu/abs/2010ApJ...716.1315K
 
+Module API
+^^^^^^^^^^
 """
 from __future__ import print_function
 import numpy as np

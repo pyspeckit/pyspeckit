@@ -515,29 +515,49 @@ class ammonia_model(model.SpectralModel):
         """
         Fit multiple nh3 profiles (multiple can be 1)
 
-        Inputs:
-           xax - x axis
-           data - y axis
-           npeaks - How many nh3 profiles to fit?  Default 1 (this could supersede onedgaussfit)
-           err - error corresponding to data
+        Parameters
+        ----------
+        xax : array
+            x axis
+        data : array
+            y axis
+        npeaks : int
+            How many nh3 profiles to fit?  Default 1 (this could supersede onedgaussfit)
+        err : array
+            error corresponding to data
+        params : list
+            Fit parameters: [trot, tex, ntot (or tau), width, offset, ortho fraction] * npeaks
+            If len(params) % 6 == 0, npeaks will be set to len(params) / 6.
+            These parameters (and the related fixed, limited, min/max, names
+            below) need to have length = 6*npeaks.  If npeaks > 1 and length =
+            6, they will be replicated npeaks times, otherwise they will be
+            reset to defaults:
+        fixed : list
+            Is parameter fixed?
+        limitedmin : list 
+        minpars : list
+            set lower limits on each parameter (default: width>0, Tex and trot > Tcmb)
+        limitedmax : list
+        maxpars : list
+            set upper limits on each parameter
+        parnames : list
+            default parameter names, important for setting kwargs in model
+            ['trot','tex','ntot','width','xoff_v','fortho']
+        quiet : bool
+            should MPFIT output each iteration?
+        shh : bool
+            output final parameters?
 
-         These parameters need to have length = 6*npeaks.  If npeaks > 1 and length = 6, they will
-         be replicated npeaks times, otherwise they will be reset to defaults:
-           params - Fit parameters: [trot, tex, ntot (or tau), width, offset, ortho fraction] * npeaks
-                  If len(params) % 6 == 0, npeaks will be set to len(params) / 6
-           fixed - Is parameter fixed?
-           limitedmin/minpars - set lower limits on each parameter (default: width>0, Tex and trot > Tcmb)
-           limitedmax/maxpars - set upper limits on each parameter
-           parnames - default parameter names, important for setting kwargs in model ['trot','tex','ntot','width','xoff_v','fortho']
-
-           quiet - should MPFIT output each iteration?
-           shh - output final parameters?
-
-        Returns:
-           Fit parameters
-           Model
-           Fit errors
-           chi2
+        Returns
+        -------
+        mpp : model parameter object
+            Fit parameters
+        model : array
+            The model array
+        errors : array
+            the fit errors
+        chi2 : float
+            the chi^2 value of the fit
         """
 
         if parinfo is None:

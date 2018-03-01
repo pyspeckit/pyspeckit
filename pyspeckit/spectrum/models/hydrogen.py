@@ -16,6 +16,10 @@ had to OCR and pull out by hand some of the coefficients.
 
 .. Hummer & Storey 1987: Recombination-line intensities for hydrogenic ions.  I - Case B calculations for H I and He II
 
+
+Module API
+^^^^^^^^^^
+
 """
 import numpy as np
 from astropy.extern.six import iteritems

@@ -14,6 +14,8 @@ L. Pagani, F. Daniel, and M. L. Dubernet A\%A 494, 719-727 (2009)
 DOI: 10.1051/0004-6361:200810570
 
 
+Module API
+^^^^^^^^^^
 """
 from . import hyperfine
 import astropy.units as u
