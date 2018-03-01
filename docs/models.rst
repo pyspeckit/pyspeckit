@@ -42,9 +42,20 @@ fitting examples and the :doc:`parameters` documentation.
     Implement the gaussian-hermite profile described here:
     `<http://pipelinesandarchives.blogspot.com/2012/09/fit1d-new-smurf-command-for-acsis-data.html>`_
 
+
+Model Documentation Table of Contents
+-------------------------------------
+.. toctree::
+   :maxdepth: 3
+
+   Parameters <parameters>
+
+
 API Documentation for Models
 ----------------------------
 
+.. automodule:: pyspeckit.spectrum.models.lte_molecule
+    :members:
 .. automodule:: pyspeckit.spectrum.models.model
     :members:
 .. automodule:: pyspeckit.spectrum.models.ammonia
@@ -71,13 +82,3 @@ API Documentation for Models
     :members:
 .. automodule:: pyspeckit.spectrum.models.hydrogen
     :members:
-.. automodule:: pyspeckit.spectrum.models.lte_molecule
-    :members:
-
-Model Documentation Table of Contents
--------------------------------------
-.. toctree::
-   :maxdepth: 3
-
-   Parameters <parameters>
-
