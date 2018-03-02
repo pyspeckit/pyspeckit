@@ -179,6 +179,16 @@ def get_molecular_parameters(molecule_name,
     chem_re_flags : int
         An integer flag to be passed to splatalogue's chemical name matching
         tool
+
+    Examples
+    --------
+    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters(molecule_name='CH2CHCN',
+    ...                                                          fmin=220*u.GHz,
+    ...                                                          fmax=222*u.GHz,
+    ...                                                          molecule_name_vamdc='C2H3CN')
+    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH3OH',
+    ...                                                          fmin=90*u.GHz,
+    ...                                                          fmax=100*u.GHz)
     """
     from astroquery.vamdc import load_species_table
     from astroquery.splatalogue import Splatalogue
