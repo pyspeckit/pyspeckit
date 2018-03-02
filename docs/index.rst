@@ -14,9 +14,9 @@ To cite pyspeckit, use http://adsabs.harvard.edu/abs/2011ascl.soft09001G.
 Downloads
 ^^^^^^^^^
 
- * `June 2016 version <https://github.com/pyspeckit/pyspeckit/archive/v0.1.19.tar.gz>`_
- * `latest commit from bitbucket <https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz>`_ (see :doc:`install`) 
+ * `April 2017 version <https://github.com/pyspeckit/pyspeckit/archive/v0.1.20.tar.gz>`_
  * `latest commit from github <https://github.com/pyspeckit/pyspeckit/archive/master.zip>`_ (same as above, or also :doc:`install_via_GitHub`)
+ * `latest commit from bitbucket <https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz>`_ (see :doc:`install`) 
  * `pypi entry <http://pypi.python.org/pypi/pyspeckit>`_.
 
 
