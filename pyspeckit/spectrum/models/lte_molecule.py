@@ -38,6 +38,8 @@ def line_tau(tex, total_column, partition_function, degeneracy, frequency,
 
         \\tau_\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u \\exp\left(
                      \\frac{h \\nu}{k_B T_{ex}}\\right)
+
+    .. math::
         N_{u} = N_{tot} \\frac{g_u}{Q} \\exp\left(\\frac{-E_u}{k_B T_{ex}} \\right)
 
     based on Equation 29 of Mangum & Shirley 2015 (2015PASP..127..266M)
@@ -103,6 +105,8 @@ def line_tau_cgs(tex, total_column, partition_function, degeneracy, frequency,
 
         \\tau_\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u \\exp\left(
                      \\frac{h \\nu}{k_B T_{ex}}\\right)
+
+    .. math::
         N_{u} = N_{tot} \\frac{g_u}{Q} \\exp\left(\\frac{-E_u}{k_B T_{ex}} \\right)
 
     based on Equations 11 and 29 of Mangum & Shirley 2015 (2015PASP..127..266M)
@@ -175,6 +179,16 @@ def get_molecular_parameters(molecule_name,
     chem_re_flags : int
         An integer flag to be passed to splatalogue's chemical name matching
         tool
+
+    Examples
+    --------
+    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters(molecule_name='CH2CHCN',
+    ...                                                          fmin=220*u.GHz,
+    ...                                                          fmax=222*u.GHz,
+    ...                                                          molecule_name_vamdc='C2H3CN')
+    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH3OH',
+    ...                                                          fmin=90*u.GHz,
+    ...                                                          fmax=100*u.GHz)
     """
     from astroquery.vamdc import load_species_table
     from astroquery.splatalogue import Splatalogue
