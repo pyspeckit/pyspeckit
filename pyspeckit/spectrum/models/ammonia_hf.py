@@ -26,8 +26,6 @@ from astropy import constants
 from astropy import units as u
 ckms = constants.c.to(u.km/u.s).value
 
-relative_strength_total_degeneracy = collections.defaultdict(lambda: 1)
-
 # sanity check:
 for linename in line_names:
     assert len(voff_lines_dict[linename]) == len(tau_wts_dict[linename])
