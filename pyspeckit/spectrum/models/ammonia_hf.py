@@ -41,7 +41,7 @@ nh3_vtau = {linename:
                                       enumerate(voff_lines_dict[linename])},
                                      {lineid:tauwt for lineid,tauwt in
                                       enumerate(tau_wts_dict[linename])},
-                                     {lineid:1 for lineid,voff in
+                                     {lineid:sum(tau_wts_dict[linename]) for lineid,voff in
                                       enumerate(voff_lines_dict[linename])},
                                     )
             for linename in line_names}
