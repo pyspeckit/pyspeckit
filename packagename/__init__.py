@@ -8,6 +8,7 @@ from ._astropy_init import *
 
 # Uncomment to enforce Python version check during package import.
 # This is the same check as the one at the top of setup.py
+#import sys
 #class UnsupportedPythonError(Exception):
 #    pass
 #__minimum_python_version__ = '3.5'
