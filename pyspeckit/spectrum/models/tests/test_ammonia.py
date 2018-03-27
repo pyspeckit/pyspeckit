@@ -205,14 +205,14 @@ def test_ammonia_guessing():
 
     mod = ammonia.ammonia_model()
 
-    rslt = mod.parse_3par_guesses(['amp', 'cen', 'wid'])
+    rslt = mod.parse_3par_guesses([1.0, 'cen', 'wid'])
 
-    assert rslt == ['ampamp', 'amp', 15, 'wid', 'cen', 0.5]
+    assert rslt == [3.73*2, 3.73, 15, 'wid', 'cen', 0.5]
 
-    rslt = mod.parse_3par_guesses(['amp1', 'cen1', 'wid1',
-                                   'amp2', 'cen2', 'wid2',
+    rslt = mod.parse_3par_guesses([1.0, 'cen1', 'wid1',
+                                   2.0, 'cen2', 'wid2',
                                   ])
 
-    assert rslt == ['amp1amp1', 'amp1', 15, 'wid1', 'cen1', 0.5,
-                    'amp2amp2', 'amp2', 15, 'wid2', 'cen2', 0.5,
+    assert rslt == [3.73*2, 3.73, 15, 'wid1', 'cen1', 0.5,
+                    4.73*2, 4.73, 15, 'wid2', 'cen2', 0.5,
                    ]
