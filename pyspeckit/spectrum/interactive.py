@@ -298,6 +298,8 @@ class Interactive(object):
             # just quit out; saves a tab...
             if debug or self._debug:
                 print("Didn't find a canvas, quitting.")
+            # just in case?  This should be *very* unreachable...
+            self.Spectrum.plotter._active_gui = None
             return
         for eventtype in ('button_press_event','key_press_event'):
             for key,val in iteritems(self.Spectrum.plotter.figure.canvas.callbacks.callbacks[eventtype]):
@@ -359,7 +361,7 @@ class Interactive(object):
         self.Spectrum.plotter._active_gui = self
 
 
-    def _check_connections(self):
+    def _check_connections(self, verbose=True):
         """
         Make sure the interactive session acepts user input
         """
@@ -373,10 +375,11 @@ class Interactive(object):
                 OKkey = True
         if self.keyclick == self.click:
             OKkey = False
-        if not OKkey:
+        if verbose and not OKkey:
             print("Interactive session failed to connect keyboard.  Key presses will not be accepted.")
-        if not OKclick:
+        if verbose and not OKclick:
             print("Interactive session failed to connect mouse.  Mouse clicks will not be accepted.")
+        return OKkey and OKclick
 
 
     def clear_highlights(self):

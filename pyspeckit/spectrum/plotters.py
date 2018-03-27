@@ -545,8 +545,16 @@ class Plotter(object):
                 print("\n\nFitter initiated from the interactive plotter.")
                 # extra optional text:
                 #  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
-                if self._active_gui == self.Spectrum.specfit:
+                if self._active_gui == self.Spectrum.specfit and self._active_gui._check_connections(verbose=False):
                     print("Fitter is already active.  Use 'q' to quit the fitter.")
+                elif self._active_gui == self.Spectrum.specfit and not self._active_gui._check_connections(verbose=False):
+                    # forcibly clear connections
+                    self._active_gui.clear_all_connections()
+                    # the 'clear_all_connections' code *explicitly* makes the
+                    # following line correct, except in the case that there is
+                    # no canvas...
+                    assert self._active_gui is None
+                    self.activate_interactive_fitter()
                 else:
                     self.activate_interactive_fitter()
 
