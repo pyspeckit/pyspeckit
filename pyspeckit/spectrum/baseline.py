@@ -172,11 +172,6 @@ class Baseline(interactive.Interactive):
 
             log.debug("kwargs to button2 action = {0}".format(kwargs))
 
-            log.debug("Before button2action, xmin, xmax = {0},{1}"
-                      " and viewlim={2}"
-                      .format(self.Spectrum.plotter.xmin,
-                              self.Spectrum.plotter.xmax,
-                              self.Spectrum.plotter.axis.viewLim))
 
             self.button2action(fit_original=fit_original,
                                baseline_fit_color=baseline_fit_color,
@@ -184,11 +179,7 @@ class Baseline(interactive.Interactive):
                                subtract=subtract,
                                LoudDebug=LoudDebug,
                                **kwargs)
-            log.debug("After button2action, xmin, xmax = {0},{1}"
-                      " and viewlim={2}"
-                      .format(self.Spectrum.plotter.xmin,
-                              self.Spectrum.plotter.xmax,
-                              self.Spectrum.plotter.axis.viewLim))
+
             if highlight_fitregion:
                 self.highlight_fitregion()
         if save:
