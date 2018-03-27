@@ -234,6 +234,18 @@ class Plotter(object):
         self.figure.canvas.mpl_disconnect(self.keyclick)
         self.keyclick = None
 
+    def disconnect(self):
+        """
+        Disconnect the matplotlib interactivity of this pyspeckit plotter.
+        """
+        self._mpl_disconnect()
+
+    def connect(self):
+        """
+        Connect to the matplotlib key-parsing interactivity
+        """
+        self._mpl_connect()
+
     def _mpl_reconnect(self):
         self._mpl_disconnect()
         self._mpl_connect()
@@ -347,6 +359,15 @@ class Plotter(object):
 
         if self.autorefresh and refresh:
             self.refresh()
+
+        # Maybe it's OK to call 'plot' when there is an active gui tool
+        # (e.g., baseline or specfit)?
+        #if self._active_gui:
+        #    self._active_gui = None
+        #    warn("An active GUI was found while initializing the "
+        #         "plot.  This is somewhat dangerous and may result "
+        #         "in broken interactivity.")
+
 
     def _stash_window_limits(self):
         self._window_limits = self.axis.get_xlim(),self.axis.get_ylim()
@@ -538,7 +559,21 @@ class Plotter(object):
                 print("\n\nFitter initiated from the interactive plotter.")
                 # extra optional text:
                 #  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
-                self.activate_interactive_fitter()
+                if self._active_gui == self.Spectrum.specfit and self._active_gui._check_connections(verbose=False):
+                    print("Fitter is already active.  Use 'q' to quit the fitter.")
+                elif self._active_gui == self.Spectrum.specfit and not self._active_gui._check_connections(verbose=False):
+                    # forcibly clear connections
+                    self._active_gui.clear_all_connections()
+                    # the 'clear_all_connections' code *explicitly* makes the
+                    # following line correct, except in the case that there is
+                    # no canvas...
+                    assert self._active_gui is None
+                    self.activate_interactive_fitter()
+                else:
+                    self.activate_interactive_fitter()
+
+                assert self._active_gui == self.Spectrum.specfit
+                assert self._active_gui._check_connections(verbose=False)
 
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
@@ -576,13 +611,13 @@ class Plotter(object):
         currently visible window (use this if you use the pan/zoom tools or
         manually change the limits) """
         if debug:
-            print("Changing x limits from %f,%f to %f,%f" % (self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1]))
-            print("Changing y limits from %f,%f to %f,%f" % (self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1]))
+            print("Changing x limits from {},{} to {},{}".format(self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1]))
+            print("Changing y limits from {},{} to {},{}".format(self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1]))
         self.xmin, self.xmax = self.axis.get_xlim()
         self.ymin, self.ymax = self.axis.get_ylim()
         if debug:
-            print("New x limits %f,%f == %f,%f" % (self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1]))
-            print("New y limits %f,%f == %f,%f" % (self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1]))
+            print("New x limits {},{} == {},{}".format(self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1]))
+            print("New y limits {},{} == {},{}".format(self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1]))
 
     def copy(self, parent=None):
         """
@@ -756,8 +791,10 @@ class Plotter(object):
             # This should not be reachable.  Clearing connections is the
             # "right" behavior if this becomes reachable, but I'd rather raise
             # an exception because I don't want to get here ever
+            gui_was = self._active_gui
             self._active_gui.clear_all_connections()
-            raise ValueError("GUI was active when 'b' key pressed")
+            raise ValueError("GUI {0} was active when 'b' key pressed"
+                             .format(gui_was))
 
         self._activate_interactive(self.Spectrum.baseline, interactive=True,
                                    **kwargs)
@@ -767,7 +804,7 @@ class Plotter(object):
 
         self._active_gui = object_to_activate
 
-        # actiavting the gui calls clear_all_connections, which disconnects the
+        # activating the gui calls clear_all_connections, which disconnects the
         # gui
         try:
             self._active_gui(**kwargs)

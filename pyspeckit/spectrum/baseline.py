@@ -171,12 +171,15 @@ class Baseline(interactive.Interactive):
                 #import pdb; pdb.set_trace()
 
             log.debug("kwargs to button2 action = {0}".format(kwargs))
+
+
             self.button2action(fit_original=fit_original,
                                baseline_fit_color=baseline_fit_color,
                                debug=debug,
                                subtract=subtract,
                                LoudDebug=LoudDebug,
                                **kwargs)
+
             if highlight_fitregion:
                 self.highlight_fitregion()
         if save:
@@ -368,6 +371,11 @@ class Baseline(interactive.Interactive):
         plotkwargs : dict
             Are passed to matplotlib's plot function
         """
+        log.debug("At the beginning of plotbaseline, xmin, xmax = {0},{1}"
+                  " and viewlim={2}"
+                  .format(self.Spectrum.plotter.xmin,
+                          self.Spectrum.plotter.xmax,
+                          self.Spectrum.plotter.axis.viewLim))
 
         # clear out the errorplot.  This should not be relevant...
         if self.Spectrum.plotter.errorplot is not None:
@@ -424,10 +432,20 @@ class Baseline(interactive.Interactive):
         if self.subtracted:
             self.Spectrum.data += self.basespec
             self.subtracted = False
+
             if replot and self.Spectrum.plotter.axis is not None:
                 kwargs = self.Spectrum.plotter.plotkwargs
                 kwargs.update({'use_window_limits':preserve_limits})
+                if preserve_limits:
+                    # need to manually stash the window limits because the plot
+                    # is going to be cleared, and we need it to be cleared
+                    self.Spectrum.plotter._stash_window_limits()
+                    window_limits = self.Spectrum.plotter._window_limits
                 self.Spectrum.plotter(**kwargs)
+
+                if preserve_limits:
+                    self.Spectrum.plotter._window_limits = window_limits
+                    self.Spectrum.plotter._reset_to_stashed_limits()
         else:
             print("Baseline wasn't subtracted; not unsubtracting.")
 
