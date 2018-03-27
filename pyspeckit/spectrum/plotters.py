@@ -348,6 +348,13 @@ class Plotter(object):
         if self.autorefresh and refresh:
             self.refresh()
 
+        if self._active_gui:
+            self._active_gui = None
+            warn("An active GUI was found while initializing the "
+                 "plot.  This is somewhat dangerous and may result "
+                 "in broken interactivity.")
+
+
     def _stash_window_limits(self):
         self._window_limits = self.axis.get_xlim(),self.axis.get_ylim()
         if self.debug:
@@ -538,7 +545,10 @@ class Plotter(object):
                 print("\n\nFitter initiated from the interactive plotter.")
                 # extra optional text:
                 #  Matplotlib shortcut keys ('g','l','p',etc.) are disabled.  Re-enable with 'r'"
-                self.activate_interactive_fitter()
+                if self._active_gui == self.Spectrum.specfit:
+                    print("Fitter is already active.  Use 'q' to quit the fitter.")
+                else:
+                    self.activate_interactive_fitter()
 
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)
