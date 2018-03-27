@@ -360,11 +360,13 @@ class Plotter(object):
         if self.autorefresh and refresh:
             self.refresh()
 
-        if self._active_gui:
-            self._active_gui = None
-            warn("An active GUI was found while initializing the "
-                 "plot.  This is somewhat dangerous and may result "
-                 "in broken interactivity.")
+        # Maybe it's OK to call 'plot' when there is an active gui tool
+        # (e.g., baseline or specfit)?
+        #if self._active_gui:
+        #    self._active_gui = None
+        #    warn("An active GUI was found while initializing the "
+        #         "plot.  This is somewhat dangerous and may result "
+        #         "in broken interactivity.")
 
 
     def _stash_window_limits(self):
@@ -609,13 +611,13 @@ class Plotter(object):
         currently visible window (use this if you use the pan/zoom tools or
         manually change the limits) """
         if debug:
-            print("Changing x limits from %f,%f to %f,%f" % (self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1]))
-            print("Changing y limits from %f,%f to %f,%f" % (self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1]))
+            print("Changing x limits from {},{} to {},{}".format(self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1]))
+            print("Changing y limits from {},{} to {},{}".format(self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1]))
         self.xmin, self.xmax = self.axis.get_xlim()
         self.ymin, self.ymax = self.axis.get_ylim()
         if debug:
-            print("New x limits %f,%f == %f,%f" % (self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1]))
-            print("New y limits %f,%f == %f,%f" % (self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1]))
+            print("New x limits {},{} == {},{}".format(self.xmin,self.xmax,self.axis.get_xlim()[0],self.axis.get_xlim()[1]))
+            print("New y limits {},{} == {},{}".format(self.ymin,self.ymax,self.axis.get_ylim()[0],self.axis.get_ylim()[1]))
 
     def copy(self, parent=None):
         """

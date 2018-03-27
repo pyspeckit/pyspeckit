@@ -528,6 +528,11 @@ class Interactive(object):
 
         self._update_xminmax()
 
+        if debug or self._debug:
+            log.debug("At the end of selectregion, xmin, xmax = {0},{1}"
+                      " and includemask.sum() == {2}"
+                      .format(self.xmin, self.xmax, self.includemask.sum()))
+
     def _update_xminmax(self):
         try:
             whinclude = numpy.where(self.includemask)

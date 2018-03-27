@@ -642,7 +642,7 @@ class SpectroscopicAxis(u.Quantity):
         Given an X-value assumed to be in the coordinate axes, return that
         value converted to xunit
         e.g.:
-        xarr.units = 'km/s'
+        xarr.unit = 'km/s'
         xarr.refX = 5.0
         xarr.refX_unit = GHz
         xarr.coord_to_x(6000,'GHz') == 5.1 # GHz
