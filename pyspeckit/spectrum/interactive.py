@@ -356,6 +356,8 @@ class Interactive(object):
         self._callbacks = self.Spectrum.plotter.figure.canvas.callbacks.callbacks
         self._check_connections()
 
+        self.Spectrum.plotter._active_gui = self
+
 
     def _check_connections(self):
         """

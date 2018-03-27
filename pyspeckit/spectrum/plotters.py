@@ -756,8 +756,10 @@ class Plotter(object):
             # This should not be reachable.  Clearing connections is the
             # "right" behavior if this becomes reachable, but I'd rather raise
             # an exception because I don't want to get here ever
+            gui_was = self._active_gui
             self._active_gui.clear_all_connections()
-            raise ValueError("GUI was active when 'b' key pressed")
+            raise ValueError("GUI {0} was active when 'b' key pressed"
+                             .format(gui_was))
 
         self._activate_interactive(self.Spectrum.baseline, interactive=True,
                                    **kwargs)
@@ -767,7 +769,7 @@ class Plotter(object):
 
         self._active_gui = object_to_activate
 
-        # actiavting the gui calls clear_all_connections, which disconnects the
+        # activating the gui calls clear_all_connections, which disconnects the
         # gui
         try:
             self._active_gui(**kwargs)
