@@ -234,6 +234,18 @@ class Plotter(object):
         self.figure.canvas.mpl_disconnect(self.keyclick)
         self.keyclick = None
 
+    def disconnect(self):
+        """
+        Disconnect the matplotlib interactivity of this pyspeckit plotter.
+        """
+        self._mpl_disconnect()
+
+    def connect(self):
+        """
+        Connect to the matplotlib key-parsing interactivity
+        """
+        self._mpl_connect()
+
     def _mpl_reconnect(self):
         self._mpl_disconnect()
         self._mpl_connect()
@@ -557,6 +569,9 @@ class Plotter(object):
                     self.activate_interactive_fitter()
                 else:
                     self.activate_interactive_fitter()
+
+                assert self._active_gui == self.Spectrum.specfit
+                assert self._active_gui._check_connections(verbose=False)
 
                 if not hasattr(self,'FitterTool') and self.automake_fitter_tool:
                     self.FitterTool = widgets.FitterTools(self.Spectrum.specfit, self.figure)

@@ -356,7 +356,8 @@ class Interactive(object):
         self.click    = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',click_manager)
         self.keyclick = self.Spectrum.plotter.axis.figure.canvas.mpl_connect('key_press_event',key_manager)
         self._callbacks = self.Spectrum.plotter.figure.canvas.callbacks.callbacks
-        self._check_connections()
+
+        assert self._check_connections()
 
         self.Spectrum.plotter._active_gui = self
 
