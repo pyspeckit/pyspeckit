@@ -843,7 +843,7 @@ class ammonia_model(model.SpectralModel):
         guesses appropriate to the model.
 
         For NH3 models, we add in several extra parameters:
-            tex = peak
+            tex = 2.73 * peak
             trot = tex * 2
             fortho = 0.5
             ntot = 15
@@ -851,6 +851,11 @@ class ammonia_model(model.SpectralModel):
         ntot is set to a constant ~10^15 because this results in optical depths
         near 1, so it forces the emission to be approximately significant.
         trot > tex so that we're in a physical regime to begin with.
+
+        We assume tex = peak + 2.73 because most spectra are shown
+        background-subtracted (single dish are always that way, interferometric
+        data are intrinsically that way...) and otherwise the guessing will
+        crash if you guess a number < 2.73.
         """
         gauss_npars = 3
         if len(guesses) % gauss_npars != 0:
@@ -865,8 +870,8 @@ class ammonia_model(model.SpectralModel):
             peak = guesses[ii * gauss_npars + 0]
             center = guesses[ii * gauss_npars + 1]
             width = guesses[ii * gauss_npars + 2]
-            new_guesses[ii*npars + 0] = peak * 2
-            new_guesses[ii*npars + 1] = peak
+            new_guesses[ii*npars + 0] = (2.73+peak) * 2
+            new_guesses[ii*npars + 1] = (2.73+peak)
             new_guesses[ii*npars + 3] = width
             new_guesses[ii*npars + 4] = center
 
