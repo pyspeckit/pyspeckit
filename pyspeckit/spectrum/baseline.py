@@ -418,12 +418,6 @@ class Baseline(interactive.Interactive):
         elif self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
 
-        log.debug("At the end of plotbaseline, xmin, xmax = {0},{1}"
-                  " and viewlim={2}"
-                  .format(self.Spectrum.plotter.xmin,
-                          self.Spectrum.plotter.xmax,
-                          self.Spectrum.plotter.axis.viewLim))
-
     def unsubtract(self, replot=True, preserve_limits=True):
         """
         Restore the spectrum to "pristine" state (un-subtract the baseline)
