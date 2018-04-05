@@ -151,9 +151,11 @@ class Cube(spectrum.Spectrum):
                 self.errorcube = errorcube.value
             else:
                 self.errorcube = errorcube
-            log.debug("XARR flags: {0}".format(xarr.flags))
+            if hasattr(xarr, 'flags'):
+                log.debug("XARR flags: {0}".format(xarr.flags))
             self.xarr = generate_xarr(xarr, unit=xunit)
-            log.debug("self.xarr flags: {0}".format(xarr.flags))
+            if hasattr(xarr, 'flags'):
+                log.debug("self.xarr flags: {0}".format(xarr.flags))
             self.header = header
             self.error = None
             if self.cube is not None:
@@ -784,6 +786,12 @@ class Cube(spectrum.Spectrum):
                              "This should not be possible and indicates a major error.")
         elif len(valid_pixels) == 0:
             raise ValueError("No valid pixels selected.")
+
+        if start_from_point not in valid_pixels:
+            raise ValueError("The starting fit position is not among the valid"
+                             " pixels.  Check your selection criteria to make "
+                             "sure you have not unintentionally excluded "
+                             "this first fit pixel.")
 
         if verbose_level > 0:
             log.debug("Number of valid pixels: %i" % len(valid_pixels))
