@@ -44,7 +44,7 @@ spectrum, waiting for user input after displaying, you can do something like::
     ax = pylab.gca()
     for sp in n2hp:
         sp.plotter(axis=ax)
-        raw_input("Waiting for input...")
+        input("Waiting for input...")
 
 You can also fit a line profile to *each* spectrum in the observation block using the 'fiteach'
 command.
