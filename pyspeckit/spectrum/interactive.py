@@ -502,7 +502,7 @@ class Interactive(object):
 
         # Exclude keyword-specified excludes.  Assumes exclusion in current X array units
         log.debug("Exclude: {0}".format(exclude))
-        if exclude == 'interactive':
+        if (isinstance(exclude, str) and (exclude == 'interactive')):
             self.start_interactive()
         elif exclude is not None and len(exclude) % 2 == 0:
             for x1,x2 in zip(exclude[::2],exclude[1::2]):

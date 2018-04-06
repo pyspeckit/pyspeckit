@@ -131,7 +131,7 @@ class Baseline(interactive.Interactive):
         self.order = order
         self.set_spectofit(fit_original=fit_original)
         self.OKmask = (self.spectofit==self.spectofit)
-        if exclude == 'interactive' or interactive:
+        if (isinstance(exclude, str) and (exclude == 'interactive')) or interactive:
             if np.all(self.includemask):
                 specwarnings.warn("Include mask was uniformly True.  \n"
                                   "This has the effect of making the 'baseline'"
