@@ -79,6 +79,7 @@ install:
 
 
 script:
+   - python -c "import os; print('This is the line before setup_cmd: {0}'.format(os.getenv('SETUP_CMD')))"
    - python setup.py $SETUP_CMD
    # some extras for future use
    # right now, run_tests is required
