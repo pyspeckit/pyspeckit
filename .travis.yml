@@ -48,6 +48,18 @@ matrix:
         - python: 3.6
           env: ASTROPY_VERSION=development SETUP_CMD='test'
 
+        # try with recent versions of mpl
+        - python: 3.5
+          env: ASTROPY_VERSION=development
+              SETUP_CMD='test'
+              NUMPY_VERSION=1.14
+              CONDA_DEPENDENCIES='matplotlib scipy'
+        - python: 3.6
+          env: ASTROPY_VERSION=development
+              SETUP_CMD='test'
+              NUMPY_VERSION=1.14
+              CONDA_DEPENDENCIES='matplotlib scipy'
+
         # Try with optional dependencies disabled
         - python: 2.7
           env: SETUP_CMD='test'
