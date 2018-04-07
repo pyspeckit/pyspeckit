@@ -12,6 +12,11 @@ addons:
             - texlive-latex-extra
             - dvipng
 
+# https://github.com/matplotlib/matplotlib/issues/5836#issuecomment-212052820
+cache:
+    directories:
+        - $HOME/.cache/matplotlib
+
 python:
     - 2.7
     - 3.5
@@ -92,6 +97,7 @@ install:
 
 script:
    #- python -c "import os; print('This is the line before setup_cmd: {0}'.format(os.getenv('SETUP_CMD')))"
+   - python -c 'import matplotlib.pyplot' # as recommended here https://github.com/matplotlib/matplotlib/issues/5836#issuecomment-212052820
    - echo "This is the line before setup_cmd $SETUP_CMD"
    - python setup.py $SETUP_CMD
    # some extras for future use
