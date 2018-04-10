@@ -8,6 +8,8 @@ be copied over manually if desired.
 1.1.3 (unreleased)
 ------------------
 
+- Updated the Travis configuration to not include Python 3.4 and Numpy<1.10.
+
 - Updated the setup.cfg to include the version number. [#129]
 
 - Removed Python 2.6 tests from travis.yml file as astropy 1.2 no longer supports Python 2.6 [#183]
