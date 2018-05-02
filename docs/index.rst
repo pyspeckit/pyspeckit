@@ -86,8 +86,8 @@ Features
 
    Index <self>
    install
-   Plotting <plotting>
    Models & Fitting <models>
+   plotting
    Class Features <features>
    File Readers <readers>
    High-Level Wrappers <wrappers>
