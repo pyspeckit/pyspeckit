@@ -4,7 +4,7 @@ Basic Plotting Guide
 The plotting tool in pyspeckit is intended to make publication-quality plots
 straightforward to produce.
 
-For details on the various plotting tools, please see the <examples> and the
+For details on the various plotting tools, please see the `examples` and the
 `plotter documentation <pyspeckit.spectrum.plotters.Plotter>`.
 
 A few basic examples are shown in the snippet below, with comments describing
