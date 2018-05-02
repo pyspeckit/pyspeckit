@@ -11,7 +11,8 @@ A few basic examples are shown in the snippet below, with comments describing
 the various steps:
 
 
-.. include:: basic_plot.py
+.. literalinclude:: basic_plot.py
+   :language: python
 
 .. figure:: images/basic_plot_example.png
         :figwidth: 800
