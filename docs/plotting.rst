@@ -14,21 +14,33 @@ the various steps:
 .. literalinclude:: basic_plot.py
    :language: python
 
+
 .. figure:: images/basic_plot_example.png
-        :figwidth: 800
-        :width: 800
-.. figure:: images/basic_plot_example_withfit_no_annotation.png
-        :figwidth: 800
-        :width: 800
+	:alt: Basic plot example
+    :figwidth: 800
+    :width: 800
+
 .. figure:: images/basic_plot_example_withfit.png
+	:alt: Basic plot example with a fit and an annotation (default)
         :figwidth: 800
         :width: 800
-.. figure:: images/basic_plot_example_with_second_spectrum_overlaid_in_green_wider_limits.png
+
+.. figure:: images/basic_plot_example_withfit_no_annotation.png
+	:alt: Basic plot example with a fit, but with no annotation
         :figwidth: 800
         :width: 800
+
 .. figure:: images/basic_plot_example_with_second_spectrum_overlaid_in_green.png
+	:alt: Basic plot example with a second spectrum overlaid in green
         :figwidth: 800
         :width: 800
+
+.. figure:: images/basic_plot_example_with_second_spectrum_overlaid_in_green_wider_limits.png
+	:alt: Basic plot example with a second spectrum overlaid in green plus adjusted limits
+        :figwidth: 800
+        :width: 800
+
 .. figure:: images/basic_plot_example_with_second_spectrum_offset_overlaid_in_red.png
+	:alt: Basic plot example with a second spectrum offset and overlaid in red, again with adjusted limits
         :figwidth: 800
         :width: 800
