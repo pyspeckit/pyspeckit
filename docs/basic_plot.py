@@ -15,7 +15,7 @@ data = noise+synth_data
 
 # this will give a "blank header" warning, which is fine
 sp = pyspeckit.Spectrum(data=data, error=error, xarr=xaxis,
-                       unit=u.erg/u.s/u.cm**2/u.AA)
+                        unit=u.erg/u.s/u.cm**2/u.AA)
 
 sp.plotter()
 sp.plotter.savefig('basic_plot_example.png')
