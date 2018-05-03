@@ -1,29 +1,21 @@
-Astropy package template
-========================
+Astropy Package Template
+------------------------
 
 .. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
     :target: http://www.astropy.org
     :alt: Powered by Astropy Badge
 
-This is a package template provided by the Astropy project.
+This is a rendered version of the cookiecutter Astropy package template, which
+you can find `here <https://github.com/astropy/package-template>`_. You can
+also read the `documentation <http://docs.astropy.org/projects/package-
+template>`_ for more details.
 
-Using this template, packages can make use of the setup, installation, and documentation
-infrastructure developed for the ``astropy`` core and affiliated packages.
-
-For more information, see:
-
-* `Detailed instructions for using this template <http://docs.astropy.org/en/latest/development/astropy-package-template.html>`_
-* `The Affiliated Packages section of the Astropy web site <http://affiliated.astropy.org>`_
-* `This template's Github code repository <https://github.com/astropy/package-template>`_
-
-Status reports for developers
------------------------------
-
-.. image:: https://travis-ci.org/astropy/package-template.svg
-    :target: https://travis-ci.org/astropy/package-template
-    :alt: Travis Status
 
 License
 -------
 
-This project is Copyright (c) Astropy Developers and licensed under the terms of the BSD 3-Clause license. See the licenses folder for more information.
+This project is Copyright (c) Astropy Developers and licensed under
+the terms of the Other license. This package is based upon
+the [Astropy package template](https://github.com/astropy/package-template)
+which is licensed under the BSD 3-clause licence. See the licenses folder for
+more information.

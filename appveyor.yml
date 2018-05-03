@@ -11,10 +11,12 @@ environment:
                         # of 32 bit and 64 bit builds are needed, move this
                         # to the matrix section.
 
+      
       # For this package-template, we include examples of Cython modules,
       # so Cython is required for testing. If your package does not include
-      # Cython code, you can set CONDA_DEPENDENCIES=''
+      # Cython code, you can set CONDA_DEPENDENCIES: ""
       CONDA_DEPENDENCIES: "Cython"
+      
 
       # Conda packages for affiliated packages are hosted in channel
       # "astropy" while builds for astropy LTS with recent numpy versions
@@ -27,7 +29,6 @@ environment:
 
       # We test Python 2.7 and 3.6 because 2.7 is the supported Python 2
       # release of Astropy and Python 3.6 is the latest Python 3 release.
-
       - PYTHON_VERSION: "2.7"
         ASTROPY_VERSION: "stable"
         NUMPY_VERSION: "stable"

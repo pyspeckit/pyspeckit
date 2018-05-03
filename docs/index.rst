@@ -2,7 +2,10 @@ Documentation
 =============
 
 This is the documentation for packagename.
-
+This is a rendered version of the cookiecutter Astropy package template, which
+you can find `here <https://github.com/astropy/package-template>`_. You can
+also read the `documentation <http://docs.astropy.org/projects/package-
+template>`_ for more details.
 
 .. toctree::
   :maxdepth: 2

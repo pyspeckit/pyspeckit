@@ -5,15 +5,31 @@ import glob
 import os
 import sys
 
-# Uncomment to enforce Python version check during package import.
-# Also uncomment python_requires below in setup().
-# Replace "packagename" in error message with your package name.
-# This is the same check as packagename/__init__.py but this one has to
-# happen before importing ah_bootstrap.
-#__minimum_python_version__ = '3.5'
-#if sys.version_info < tuple((int(val) for val in __minimum_python_version__.split('.'))):
-#    sys.stderr.write("ERROR: packagename requires Python {} or later\n".format(__minimum_python_version__))
-#    sys.exit(1)
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
+
+# Get some values from the setup.cfg
+conf = ConfigParser()
+conf.read(['setup.cfg'])
+metadata = dict(conf.items('metadata'))
+
+PACKAGENAME = metadata.get('package_name', 'packagename')
+DESCRIPTION = metadata.get('description', 'Astropy Package Template')
+AUTHOR = metadata.get('author', 'Astropy Developers')
+AUTHOR_EMAIL = metadata.get('author_email', '')
+LICENSE = metadata.get('license', 'unknown')
+URL = metadata.get('url', 'http://astropy.org')
+__minimum_python_version__ = metadata.get("minimum_python_version", "2.7")
+
+# Enforce Python version check - this is the same check as in __init__.py but
+# this one has to happen before importing ah_bootstrap.
+if sys.version_info < tuple((int(val) for val in __minimum_python_version__.split('.'))):
+    sys.stderr.write("ERROR: packagename requires Python {} or later\n".format(__minimum_python_version__))
+    sys.exit(1)
+
+# Import ah_bootstrap after the python version validation
 
 import ah_bootstrap
 from setuptools import setup
@@ -30,22 +46,6 @@ from astropy_helpers.setup_helpers import (register_commands, get_debug_option,
 from astropy_helpers.git_helpers import get_git_devstr
 from astropy_helpers.version_helpers import generate_version_py
 
-# Get some values from the setup.cfg
-try:
-    from ConfigParser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser
-
-conf = ConfigParser()
-conf.read(['setup.cfg'])
-metadata = dict(conf.items('metadata'))
-
-PACKAGENAME = metadata.get('package_name', 'packagename')
-DESCRIPTION = metadata.get('description', 'packagename')
-AUTHOR = metadata.get('author', 'Astropy Developers')
-AUTHOR_EMAIL = metadata.get('author_email', '')
-LICENSE = metadata.get('license', 'unknown')
-URL = metadata.get('url', 'http://astropy.org')
 
 # order of priority for long_description:
 #   (1) set in setup.cfg,
@@ -146,6 +146,6 @@ setup(name=PACKAGENAME,
       zip_safe=False,
       use_2to3=False,
       entry_points=entry_points,
-#     python_requires='>=' + __minimum_python_version__,
+      python_requires='>={}'.format(__minimum_python_version__),
       **package_info
 )
