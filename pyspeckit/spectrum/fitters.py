@@ -178,6 +178,20 @@ class Specfit(interactive.Interactive):
         self.EQW_plots = []
         #self.seterrspec()
 
+    @property
+    def fitter(self):
+        if hasattr(self, '_fitter'):
+            return self._fitter
+        else:
+            raise AttributeError("The 'specfit' object has no 'fitter' yet.  "
+                                 "This means you haven't yet run a fit.  The "
+                                 "fitter is not accessible until after a fit "
+                                 "has been run.")
+
+    @fitter.setter
+    def fitter(self, value):
+        self._fitter = value
+
     @cfgdec
     def __call__(self, interactive=False, usemoments=True,
                  fittype=None,
