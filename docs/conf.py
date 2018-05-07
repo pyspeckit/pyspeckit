@@ -82,7 +82,7 @@ print "rootpath: ",rootpath
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions += ['flickr', 'edit_on_github', 'edit_on_bitbucket']
+extensions += ['edit_on_github', 'edit_on_bitbucket']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -101,7 +101,7 @@ html_sidebars = {'**':['globaltoc.html', 'localtoc.html', 'relations.html',
 
 # General information about the project.
 project = u'pyspeckit'
-copyright = u'2011, Adam Ginsburg and Jordan Mirocha'
+copyright = u'2011, Adam Ginsburg and coauthors'
 # This does not *have* to match the package name, but typically does
 project = setup_cfg['package_name']
 author = setup_cfg['author']
@@ -300,7 +300,7 @@ htmlhelp_basename = project + 'doc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'pyspeckit.tex', u'pyspeckit Documentation',
-   u'Adam Ginsburg and Jordan Mirocha', 'manual'),
+   u'Adam Ginsburg and coauthors', 'manual'),
 ]
 latex_documents = [('index', project + '.tex', project + u' Documentation',
                     author, 'manual')]
