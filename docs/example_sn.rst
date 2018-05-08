@@ -9,8 +9,8 @@ Complicated H-alpha Line Fitting
 ::
 
     """
-    Example demonstrating how to fit a complex H-alpha profile after subtracting off a satellite line 
-    (in this case, He I 6678.151704)
+    Example demonstrating how to fit a complex H-alpha profile after
+    subtracting off a satellite line (in this case, He I 6678.151704)
     """
     import pyspeckit
 
@@ -21,7 +21,8 @@ Complicated H-alpha Line Fitting
 
     # the baseline (continuum) fit will be 2nd order, and excludes "bad"
     # parts of the spectrum
-    # The exclusion zone was selected interatively (i.e., cursor hovering over the spectrum)
+    # The exclusion zone was selected interatively
+    # (i.e., cursor hovering over the spectrum)
     sp.baseline(xmin=6100, xmax=7000,
             exclude=[6450,6746,6815,6884,7003,7126,7506,7674,8142,8231],
             subtract=False, reset_selection=True, highlight_fitregion=True,
@@ -35,9 +36,11 @@ Complicated H-alpha Line Fitting
                         fittype='voigt')
 
     # Now overplot the fitted components with an offset so we can see them
-    # the add_baseline=True bit means that each component will be displayed with the "Continuum" added
+    # the add_baseline=True bit means that each component will be displayed
+    # with the "Continuum" added
     # If this was off, the components would be displayed at y=0
-    # the component_yoffset is the offset to add to the continuum for plotting only (a constant)
+    # the component_yoffset is the offset to add to the continuum for plotting
+    # only (a constant)
     sp.specfit.plot_components(add_baseline=True,component_yoffset=-0.2)
 
     # Now overplot the residuals on the same graph by specifying which axis to overplot it on
@@ -58,8 +61,10 @@ Complicated H-alpha Line Fitting
 
     # print the fit results in table form
     # This includes getting the equivalent width for each component using sp.specfit.EQW
-    print " ".join(["%15s %15s" % (s,s+"err") for s in sp.specfit.parinfo.parnames])," ".join(["%15s" % ("EQW"+str(i)) for i,w in enumerate(sp.specfit.EQW(components=True))])
-    print " ".join(["%15g %15g" % (par.value,par.error) for par in sp.specfit.parinfo])," ".join(["%15g" % w for w in sp.specfit.EQW(components=True)])
+    print(" ".join(["%15s %15s" % (s,s+"err") for s in sp.specfit.parinfo.parnames]),
+          " ".join(["%15s" % ("EQW"+str(i)) for i,w in enumerate(sp.specfit.EQW(components=True))]))
+    print(" ".join(["%15g %15g" % (par.value,par.error) for par in sp.specfit.parinfo]),
+          " ".join(["%15g" % w for w in sp.specfit.EQW(components=True)]))
 
     # zoom in further for a detailed view of the profile fit
     sp.plotter.axis.set_xlim(6562-150,6562+150)
@@ -103,7 +108,8 @@ Complicated H-alpha Line Fitting
 
     # overplot the components and residuals again
     just_halpha.specfit.plot_components(add_baseline=False,component_yoffset=-0.1)
-    just_halpha.specfit.plotresiduals(axis=just_halpha.plotter.axis,clear=False,yoffset=-0.20,label=False)
+    just_halpha.specfit.plotresiduals(axis=just_halpha.plotter.axis,
+                                      clear=False, yoffset=-0.20, label=False)
 
     # The "optimal chi^2" isn't a real statistical concept, it's something I made up
     # However, I think it makes sense (but post an issue if you disagree!):
@@ -154,7 +160,8 @@ Complicated H-alpha Line Fitting
                         0.53985149324131965, 6564.3460908526877, 19.443226155616617,  1],
                         fittype='voigt')
     just_halpha.specfit.plot_components(add_baseline=False,component_yoffset=-0.1)
-    just_halpha.specfit.plotresiduals(axis=just_halpha.plotter.axis,clear=False,yoffset=-0.20,label=False)
+    just_halpha.specfit.plotresiduals(axis=just_halpha.plotter.axis,
+                                      clear=False, yoffset=-0.20,label=False)
     just_halpha.specfit.annotate(chi2='optimal')
     just_halpha.plotter.savefig("SN2009ip_UT121002_Halpha_voigt_twocomp.png")
 
