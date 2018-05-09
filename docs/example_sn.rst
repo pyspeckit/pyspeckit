@@ -4,8 +4,8 @@ Complicated H-alpha Line Fitting
 .. include:: <isogrk3.txt>
 
 `Source code for this example <https://github.com/pyspeckit/pyspeckit/blob/master/examples/sn_example.py>`_
-`Example spectrum (required to run this example) <https://github.com/pyspeckit/pyspeckit/blob/master/examples/sample_sdss.txt>`_
 
+`FITS file for this example <https://github.com/pyspeckit/pyspeckit/blob/master/examples/sn2009ip_halpha.fits>`_
 
 ::
 
