@@ -5,6 +5,8 @@ from operator import itemgetter
 import pyspeckit
 import scipy.stats
 
+from astropy.utils.console import ProgressBar
+
 from pyspeckit.spectrum.models import ammonia, ammonia_constants
 
 import pylab as pl
@@ -14,30 +16,45 @@ pl.figure(1).clf()
 oneonefreq = ammonia_constants.freq_dict['oneone']
 twotwofreq = ammonia_constants.freq_dict['twotwo']
 # create an axis that covers the 1-1 and 2-2 inversion lines
-xaxis = pyspeckit.units.SpectroscopicAxis(np.linspace(oneonefreq*(1-50/3e5),
-                                                      twotwofreq*(1+50/3e5),
-                                                      1000.),
-                                          unit=u.Hz)
+xaxis1 = pyspeckit.units.SpectroscopicAxis(np.linspace(oneonefreq*(1-50/3e5),
+                                                       oneonefreq*(1+50/3e5),
+                                                       80.), unit=u.Hz,
+                                           velocity_convention='radio',
+                                           refX=oneonefreq*u.Hz)
+xaxis2 = pyspeckit.units.SpectroscopicAxis(np.linspace(twotwofreq*(1-50/3e5),
+                                                       twotwofreq*(1+50/3e5),
+                                                       80.), unit=u.Hz,
+                                           velocity_convention='radio',
+                                           refX=twotwofreq*u.Hz)
+
 sigma = 2.
 center = 0.
 trot = 35.
-ntot = 15.
+ntot = 15.5
 tex = 35. # Adopting an LTE model
-synth_data = ammonia.ammonia(xaxis, trot=trot, tex=tex, width=sigma,
-                             xoff_v=center, ntot=ntot)
+synth_data1 = ammonia.ammonia(xaxis1, trot=trot, tex=tex, width=sigma,
+                              xoff_v=center, ntot=ntot)
+synth_data2 = ammonia.ammonia(xaxis2, trot=trot, tex=tex, width=sigma,
+                              xoff_v=center, ntot=ntot)
 
 # Add noise
-stddev = 0.1
-noise = np.random.randn(xaxis.size)*stddev
-error = stddev*np.ones_like(synth_data)
-data = noise+synth_data
+stddev = 0.4
+noise = np.random.randn(xaxis1.size)*stddev
+error = stddev*np.ones_like(synth_data1)
+data1 = noise+synth_data1
+noise = np.random.randn(xaxis2.size)*stddev
+data2 = noise+synth_data2
 
 # this will give a "blank header" warning, which is fine
-sp = pyspeckit.Spectrum(data=data, error=error, xarr=xaxis,
-                        xarrkwargs={'unit':'km/s'},
-                        unit=u.K)
+sp1 = pyspeckit.Spectrum(data=data1, error=error, xarr=xaxis1,
+                         xarrkwargs={'unit':'km/s', 'refX': oneonefreq*u.Hz,},
+                         unit=u.K)
+sp2 = pyspeckit.Spectrum(data=data2, error=error, xarr=xaxis2,
+                         xarrkwargs={'unit':'km/s', 'refX': twotwofreq*u.Hz,},
+                         unit=u.K)
+sp = pyspeckit.Spectra([sp1,sp2])
 
-sp.plotter(figure=pl.figure(1), errstyle='fill')
+#sp.plotter(figure=pl.figure(1), errstyle='fill')
 
 # fit with some vague initial guesses and a fixed ortho/para
 # fraction of 1 (it is unconstrained in our data)
@@ -53,9 +70,13 @@ sp.specfit(fittype='ammonia',
            fixed=[False,False,False,False,False,True])
 
 
-sp.plotter(errstyle='fill')
-sp.specfit.plot_fit()
+pyspeckit.wrappers.fitnh3.plot_nh3({'oneone':sp1, 'twotwo': sp2}, sp,
+                                  show_hyperfine_components=False,
+                                  errstyle='fill')
+#sp.plotter(errstyle='fill')
+#sp.specfit.plot_fit()
 
+sp.plotter.figure.subplots_adjust(hspace=0.1)
 
 sp.plotter.savefig('oned_ammonia_LTE_fit_example.pdf')
 
@@ -66,6 +87,7 @@ def chi2(sp, pars):
     """
     Given a spectrum and some parameters, calculate the chi^2 value
     """
+    pars = list(pars) + [0]
     return ((sp.specfit.get_model_frompars(sp.xarr, pars) -
              sp.specfit.spectofit)**2 /
             (sp.specfit.errspec**2)
@@ -79,6 +101,19 @@ def replace(lst, eltid, value):
     lstcopy[eltid] = value
     return lstcopy
 
+nsteps = {'width0': 7, 'tex0': 15, 'trot0': 14, 'xoff_v0': 5,  'ntot0': 11}
+par_edges = [np.linspace(par.value-par.error*2,
+                         par.value+par.error*2,
+                         nsteps[par.parname])
+             for par in sp.specfit.parinfo
+             if not par.fixed and not par.tied
+            ]
+par_cube = np.meshgrid(*par_edges, indexing='ij')
+params = np.array(list(zip(map(np.ravel, par_cube)))).squeeze().T
+
+par_like_cube = np.array([chi2(sp, pars) for pars in
+                          ProgressBar(params)]).reshape(par_cube[0].shape)
+
 
 fig = pl.figure(2, figsize=(12,12))
 fig.clf()
@@ -86,12 +121,10 @@ fig.clf()
 for ii,par in enumerate(sp.specfit.parinfo):
     if par.fixed:
         continue
-    par_vals = np.linspace(par.value - par.error * 2,
-                           par.value + par.error * 2,
-                           10)
 
-    par_likes = np.array([chi2(sp, replace(sp.specfit.parinfo.values, ii, val))
-                          for val in par_vals])
+    other_axes = tuple([x for x in (0,1,2,3,4) if x != ii])
+    par_likes = par_like_cube.min(axis=other_axes)
+    par_vals = par_edges[ii]
 
     pct68 = scipy.stats.chi2.cdf(1, 1)
 
@@ -123,39 +156,27 @@ nsigma_range = 2
 nsteps = 15.
 
 plotinds = {0:6, 1:11, 2:12, 3:16, 4:17, 5:18, 6:21, 7:22, 8:23, 9:24}
-for ii,(par1,par2) in enumerate(itertools.combinations(sp.specfit.parinfo[:5],2)):
+plotinds = {(0,1): 6,
+            (0,2): 11,
+            (1,2): 12,
+            (0,3): 16,
+            (1,3): 17,
+            (2,3): 18,
+            (0,4): 21,
+            (1,4): 22,
+            (2,4): 23,
+            (3,4): 24,
+           }
 
-    if par1.limited[0] and par1.value-par1.error*nsigma_range < par1.limits[0]:
-        start1 = par1.limits[0]+par1.limits[0]*1e-3
-    else:
-        start1 = par1.value - par1.error*nsigma_range
-    if par1.limited[1] and par1.value+par1.error*nsigma_range > par1.limits[1]:
-        end1 = par1.limits[1]-par1.limits[1]*1e-3
-    else:
-        end1 = par1.value + par1.error*nsigma_range
+for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,3,4], 2),
+                                                  itertools.combinations(sp.specfit.parinfo[:5], 2)
+                                                 )):
 
-    step1 = (end1 - start1) / nsteps
+    other_axis = tuple({0,1,2,3,4} - {ind1,ind2})
 
-    if par2.limited[0] and par2.value-par2.error*nsigma_range < par2.limits[0]:
-        start2 = par2.limits[0]+par2.limits[0]*1e-3
-    else:
-        start2 = par2.value - par2.error*nsigma_range
-    if par2.limited[1] and par2.value+par2.error*nsigma_range > par2.limits[1]:
-        end2 = par2.limits[1]-par2.limits[1]*1e-3
-    else:
-        end2 = par2.value + par2.error*nsigma_range
-
-    step2 = (end2 - start2) / nsteps
-
-    assert end1 > start1
-    assert end2 > start2
-
-    p1vals, p2vals = np.mgrid[start1:end1:step1,
-                              start2:end2:step2]
-
-
-    par_likes = np.array([chi2(sp, replace(replace(sp.specfit.parinfo.values, par1.n, val1), par2.n, val2))
-                          for val1,val2 in zip(p1vals.ravel(), p2vals.ravel())]).reshape(p1vals.shape)
+    par_likes = par_like_cube.min(axis=other_axis)
+    p1vals = par_edges[ind1]
+    p2vals = par_edges[ind2]
 
     pct68 = 1-scipy.stats.norm.sf(1)*2
     pct95 = 1-scipy.stats.norm.sf(2)*2
@@ -166,8 +187,8 @@ for ii,(par1,par2) in enumerate(itertools.combinations(sp.specfit.parinfo[:5],2)
     delta_chi2_95 = scipy.stats.chi2.ppf(pct95, 2)
     delta_chi2_997 = scipy.stats.chi2.ppf(pct997, 2)
 
-    ax = fig.add_subplot(5,5,plotinds[ii])
-    ax.contour(p1vals, p2vals, par_likes,
+    ax = fig.add_subplot(5,5,plotinds[(ind1,ind2)])
+    ax.contour(p1vals, p2vals, par_likes.T,
                levels=[par_likes.min()+delta_chi2_68,
                        par_likes.min()+delta_chi2_95,
                        par_likes.min()+delta_chi2_997])
@@ -223,26 +244,48 @@ def replace(lst, eltid, value):
     return lstcopy
 
 
+nsteps = {'width0': 7, 'delta0': 12, 'trot0': 13, 'xoff_v0': 5,  'ntot0': 11}
+par_edges = [np.linspace(0, 10/nsteps[par.parname], nsteps[par.parname])
+             if par.parname == 'delta0' else
+             np.linspace(par.value-par.error*2,
+                         par.value+par.error*2,
+                         nsteps[par.parname])
+             for par in sp.specfit.parinfo
+             if not par.fixed and not par.tied
+            ]
+par_cube = np.meshgrid(*par_edges, indexing='ij')
+assert par_cube[0].shape == (nsteps['trot0'], nsteps['ntot0'],
+                             nsteps['width0'], nsteps['xoff_v0'],
+                             nsteps['delta0'])
+params = list(map(list, zip(*map(list, map(np.ravel, par_cube)))))
+
+par_like_cube = np.array([chi2(sp,
+                               pars[0:1] + [pars[0]+pars[-1]] + pars[1:4] + [0] + pars[4:])
+                          for pars in
+                          ProgressBar(params)]).reshape(par_cube[0].shape)
+
+
+pl.close(2)
+# this will fail in ugly ways if run on a small screen (everything will be squished)
 fig = pl.figure(2, figsize=(12,12))
 fig.clf()
 
-nsteps = 10
 dd = 0
 for ii,par in enumerate(sp.specfit.parinfo):
     if par.fixed or par.tied:
-        dd = dd + 1
         continue
-    par_vals = np.linspace(par.value - par.error * 2,
-                           par.value + par.error * 2,
-                           nsteps)
 
-    if par.parname == 'delta0':
-        maxdelta = 10
-        start, step, end = 0, maxdelta/nsteps, maxdelta
-        par_vals = np.linspace(start, end, nsteps)
+    other_axes = tuple([x for x in (0,1,2,3,4) if x != dd])
+    par_likes = par_like_cube.min(axis=other_axes)
+    par_vals = par_edges[dd]
 
-    par_likes = np.array([chi2(sp, replace(sp.specfit.parinfo.values, ii, val))
-                          for val in par_vals])
+    #if par.parname == 'delta0':
+    #    maxdelta = 10
+    #    start, step, end = 0, maxdelta/nsteps, maxdelta
+    #    par_vals = np.linspace(start, end, nsteps)
+
+    #par_likes = np.array([chi2(sp, replace(sp.specfit.parinfo.values, ii, val))
+    #                      for val in par_vals])
 
     pct68 = scipy.stats.chi2.cdf(1, 1)
 
@@ -253,7 +296,7 @@ for ii,par in enumerate(sp.specfit.parinfo):
     # marginalizing over the other parameters
     delta_chi2 = scipy.stats.chi2.ppf(pct68, 1)
 
-    ax = fig.add_subplot(5,5,1+(ii-dd)*6)
+    ax = fig.add_subplot(5,5,1+(dd)*6)
     ax.plot(par_vals, par_likes)
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
@@ -267,6 +310,8 @@ for ii,par in enumerate(sp.specfit.parinfo):
     ax.set_xlim(xmin, xmax,)
     ax.set_ylim(ymin, ymax,)
 
+    dd += 1
+
 fig.tight_layout()
 
 
@@ -275,44 +320,52 @@ nsteps = 15.
 
 
 plotinds = {0:6, 1:11, 2:12, 3:16, 4:17, 5:18, 6:21, 7:22, 8:23, 9:24}
-for ii,(par1,par2) in enumerate(itertools.combinations(itemgetter(0,2,3,4,6)(sp.specfit.parinfo),2)):
+for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,3,4], 2),
+                                                  itertools.combinations(itemgetter(0,2,3,4,6)(sp.specfit.parinfo),2)
+                                                 )):
 
-    if par1.limited[0] and par1.value-par1.error*nsigma_range < par1.limits[0]:
-        start1 = par1.limits[0]+par1.limits[0]*1e-3
-    else:
-        start1 = par1.value - par1.error*nsigma_range
-    if par1.limited[1] and par1.value+par1.error*nsigma_range > par1.limits[1]:
-        end1 = par1.limits[1]-par1.limits[1]*1e-3
-    else:
-        end1 = par1.value + par1.error*nsigma_range
+    #if par1.limited[0] and par1.value-par1.error*nsigma_range < par1.limits[0]:
+    #    start1 = par1.limits[0]+par1.limits[0]*1e-3
+    #else:
+    #    start1 = par1.value - par1.error*nsigma_range
+    #if par1.limited[1] and par1.value+par1.error*nsigma_range > par1.limits[1]:
+    #    end1 = par1.limits[1]-par1.limits[1]*1e-3
+    #else:
+    #    end1 = par1.value + par1.error*nsigma_range
 
-    step1 = (end1 - start1) / nsteps
+    #step1 = (end1 - start1) / nsteps
 
-    if par2.limited[0] and par2.value-par2.error*nsigma_range < par2.limits[0]:
-        start2 = par2.limits[0]+par2.limits[0]*1e-3
-    else:
-        start2 = par2.value - par2.error*nsigma_range
-    if par2.limited[1] and par2.value+par2.error*nsigma_range > par2.limits[1]:
-        end2 = par2.limits[1]-par2.limits[1]*1e-3
-    else:
-        end2 = par2.value + par2.error*nsigma_range
+    #if par2.limited[0] and par2.value-par2.error*nsigma_range < par2.limits[0]:
+    #    start2 = par2.limits[0]+par2.limits[0]*1e-3
+    #else:
+    #    start2 = par2.value - par2.error*nsigma_range
+    #if par2.limited[1] and par2.value+par2.error*nsigma_range > par2.limits[1]:
+    #    end2 = par2.limits[1]-par2.limits[1]*1e-3
+    #else:
+    #    end2 = par2.value + par2.error*nsigma_range
 
-    step2 = (end2 - start2) / nsteps
+    #step2 = (end2 - start2) / nsteps
 
-    if par1.parname == 'delta0':
-        start1, step1, end1 = 0, maxdelta/nsteps, maxdelta
-    if par2.parname == 'delta0':
-        start2, step2, end2 = 0, maxdelta/nsteps, maxdelta
+    #if par1.parname == 'delta0':
+    #    start1, step1, end1 = 0, maxdelta/nsteps, maxdelta
+    #if par2.parname == 'delta0':
+    #    start2, step2, end2 = 0, maxdelta/nsteps, maxdelta
 
-    assert end1 > start1
-    assert end2 > start2
+    #assert end1 > start1
+    #assert end2 > start2
 
-    p1vals, p2vals = np.mgrid[start1:end1:step1,
-                              start2:end2:step2]
+    #p1vals, p2vals = np.mgrid[start1:end1:step1,
+    #                          start2:end2:step2]
 
 
-    par_likes = np.array([chi2(sp, replace(replace(sp.specfit.parinfo.values, par1.n, val1), par2.n, val2))
-                          for val1,val2 in zip(p1vals.ravel(), p2vals.ravel())]).reshape(p1vals.shape)
+    #par_likes = np.array([chi2(sp, replace(replace(sp.specfit.parinfo.values, par1.n, val1), par2.n, val2))
+    #                      for val1,val2 in zip(p1vals.ravel(), p2vals.ravel())]).reshape(p1vals.shape)
+    other_axis = tuple({0,1,2,3,4} - {ind1,ind2})
+
+    par_likes = par_like_cube.min(axis=other_axis)
+    p1vals = par_edges[ind1]
+    p2vals = par_edges[ind2]
+
 
     pct68 = 1-scipy.stats.norm.sf(1)*2
     pct95 = 1-scipy.stats.norm.sf(2)*2
@@ -324,7 +377,7 @@ for ii,(par1,par2) in enumerate(itertools.combinations(itemgetter(0,2,3,4,6)(sp.
     delta_chi2_997 = scipy.stats.chi2.ppf(pct997, 2)
 
     ax = fig.add_subplot(5,5,plotinds[ii])
-    ax.contour(p1vals, p2vals, par_likes,
+    ax.contour(p1vals, p2vals, par_likes.T,
                levels=[par_likes.min()+delta_chi2_68,
                        par_likes.min()+delta_chi2_95,
                        par_likes.min()+delta_chi2_997])
