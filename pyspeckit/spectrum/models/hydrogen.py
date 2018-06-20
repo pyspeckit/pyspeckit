@@ -16,6 +16,10 @@ had to OCR and pull out by hand some of the coefficients.
 
 .. Hummer & Storey 1987: Recombination-line intensities for hydrogenic ions.  I - Case B calculations for H I and He II
 
+
+Module API
+^^^^^^^^^^
+
 """
 import numpy as np
 from astropy.extern.six import iteritems
@@ -314,7 +318,7 @@ def add_to_registry(sp):
             parnames=['amplitude','width','velocity','extinction'],
             parlimited=[(True,False),(True,False),(False,False), (True,False)], 
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
-            fitunits='micron')
+            fitunit='micron')
 
     sp.Registry.add_fitter('hydrogen', extincted_hydrogen_emission,
             extincted_hydrogen_emission.npars)

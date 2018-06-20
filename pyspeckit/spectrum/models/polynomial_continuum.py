@@ -7,6 +7,8 @@ A simple polynomial (or linear, lines are polynomials) continuum model
 You can access this same model through baseline, but it's here in case the
 continuum is what you're really trying to measure.
 
+Module API
+^^^^^^^^^^
 """
 from astropy.extern.six.moves import xrange
 from . import model

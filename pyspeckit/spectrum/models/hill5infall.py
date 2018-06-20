@@ -1,6 +1,6 @@
 """
 ===========================
-Hill5 analytic infall model 
+Hill5 analytic infall model
 ===========================
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 
@@ -9,6 +9,9 @@ https://bitbucket.org/devries/analytic_infall/overview
 
 Original source:
 http://adsabs.harvard.edu/abs/2005ApJ...620..800D
+
+Module API
+^^^^^^^^^^
 """
 import numpy as np
 from . import model
@@ -36,10 +39,10 @@ def hill5_model(xarr, tau, v_lsr,  v_infall,  sigma,  tpeak, TBG=2.73):
     TBG : float
         The background temperature
     """
-  
+
     vf = v_lsr+v_infall
     vr = v_lsr-v_infall
-  
+
     velocity_array = np.array(xarr.as_unit('km/s'))
     tauf = tau*np.exp(-((velocity_array-vf)/sigma)**2 / 2.0 )
     taur = tau*np.exp(-((velocity_array-vr)/sigma)**2 / 2.0 )
@@ -48,7 +51,7 @@ def hill5_model(xarr, tau, v_lsr,  v_infall,  sigma,  tpeak, TBG=2.73):
     subr = ((1-np.exp(-taur))/taur * (taur>1e-4) + (taur < 1e-4))
     subf[subf != subf] = 1.0
     subr[subr != subr] = 1.0
-  
+
     frequency = np.array(xarr.as_unit('Hz'))
     hill_array =(jfunc(tpeak,frequency)-jfunc(TBG,frequency))*(subf-np.exp(-tauf)*subr)
 
@@ -70,13 +73,15 @@ def jfunc(t, nu):
 
     # I think this is only necessary for C
     #if(nu<1.0e-6) return t
-    
+
     to = H*nu/K
     return to/(np.exp(to/t)-1.0)
 
 hill5_fitter = model.SpectralModel(hill5_model, 5,
-        parnames=['tau', 'v_lsr',  'v_infall',  'sigma', 'tpeak'], 
-        parlimited=[(True,False),(False,False),(True,False),(True,False), (True,False)], 
-        parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
-        shortvarnames=("\\tau","v_{lsr}","v_{infall}","\\sigma","T_{peak}"), # specify the parameter names (TeX is OK)
-        fitunits='km/s' )
+    parnames=['tau', 'v_lsr',  'v_infall',  'sigma', 'tpeak'],
+    parlimited=[(True,False),(False,False),(True,False),(True,False), (True,False)],
+    parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
+    shortvarnames=("\\tau","v_{lsr}","v_{infall}","\\sigma","T_{peak}"), # specify the parameter names (TeX is OK)
+    fitunit='km/s',
+    guess_types=[1.0, 'center', 1.0, 'width', 'amplitude'],
+   )

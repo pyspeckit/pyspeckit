@@ -363,15 +363,15 @@ class SpectroscopicAxis(u.Quantity):
         subarr.wcshead = {}
         subarr.velocity_convention = velocity_convention
 
-        if not center_frequency:
-            if refX:
+        if center_frequency is None:
+            if refX is not None:
                 center_frequency = refX
-        if not center_frequency_unit:
-            if refX_unit:
+        if center_frequency_unit is None:
+            if refX_unit is not None:
                 center_frequency_unit = refX_unit
             else:
                 center_frequency_unit = unit
-        if center_frequency:
+        if center_frequency is not None:
             subarr.center_frequency = u.Quantity(center_frequency, center_frequency_unit)
         else:
             subarr.center_frequency = None
@@ -542,7 +542,7 @@ class SpectroscopicAxis(u.Quantity):
                 unit = u.dimensionless_unscaled
             elif unit == 'unknown':
                 unit = u.dimensionless_unscaled
-            elif unit == 'angstroms':
+            elif unit in ('angstroms','Angstroms'):
                 unit = 'angstrom'
             unit = u.Unit(unit)
         except ValueError:
@@ -585,15 +585,20 @@ class SpectroscopicAxis(u.Quantity):
         else:
             return self.min()
 
-    def x_to_pix(self, xval, xval_units=None, equivalencies=None):
+    def x_to_pix(self, xval, xval_unit=None, xval_units=None,
+                 equivalencies=None):
         """
         Given an X coordinate in SpectroscopicAxis' units, return the corresponding pixel number
         """
-        if xval_units in pixel_dict:
+        if xval_units is not None and xval_unit is None:
+            # todo: deprecate
+            xval_unit = xval_units
+
+        if xval_unit in pixel_dict:
             return xval
         else:
             if not hasattr(xval, 'unit'):
-                xval = u.Quantity(xval, xval_units or self.unit)
+                xval = u.Quantity(xval, xval_unit or self.unit)
 
             if equivalencies is None:
                 equivalencies = self.equivalencies
@@ -637,7 +642,7 @@ class SpectroscopicAxis(u.Quantity):
         Given an X-value assumed to be in the coordinate axes, return that
         value converted to xunit
         e.g.:
-        xarr.units = 'km/s'
+        xarr.unit = 'km/s'
         xarr.refX = 5.0
         xarr.refX_unit = GHz
         xarr.coord_to_x(6000,'GHz') == 5.1 # GHz
@@ -843,7 +848,7 @@ class SpectroscopicAxis(u.Quantity):
             (from_unit, to_unit, forward, backward)
             forward and backward are functions that convert values between those units
         """
-        if velocity_convention and center_frequency:
+        if velocity_convention is not None and center_frequency is not None:
             new_equivalencies = velocity_conventions[velocity_convention](center_frequency)
             return center_frequency, merge_equivalencies(new_equivalencies,
                                                          equivalencies)
@@ -1028,7 +1033,7 @@ class EchelleAxes(SpectroscopicAxis):
 
         return subarr
 
-def velocity_to_frequency(velocities, input_units, center_frequency=None,
+def velocity_to_frequency(velocities, input_unit, center_frequency=None,
                           center_frequency_units=None, frequency_units='Hz',
                           convention='radio'):
     """
@@ -1037,7 +1042,7 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
     ----------
     velocities : np.ndarray
         An array of velocity values
-    inpput_units : str
+    input_unit : str
         A string representing the units of the velocities array
     center_frequency : float
         The reference frequency (i.e., the 0-m/s freq)
@@ -1054,15 +1059,15 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
         * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c)
 
     """
-    if input_units in frequency_dict:
-        #print("Already in frequency units (%s)" % input_units)
+    if input_unit in frequency_dict:
+        #print("Already in frequency units (%s)" % input_unit)
         return velocities
     if center_frequency is None:
         raise ValueError("Cannot convert velocity to frequency without specifying a central frequency.")
     if frequency_units not in frequency_dict:
         raise ValueError("Bad frequency units: %s" % (frequency_units))
 
-    velocity_ms = velocities / velocity_dict['m/s'] * velocity_dict[input_units]
+    velocity_ms = velocities / velocity_dict['m/s'] * velocity_dict[input_unit]
     if convention == 'radio':
         freq = (velocity_ms / speedoflight_ms - 1.0) * center_frequency * -1
     elif convention == 'optical':
@@ -1074,7 +1079,7 @@ def velocity_to_frequency(velocities, input_units, center_frequency=None,
     frequencies = freq / frequency_dict[frequency_units] * frequency_dict[center_frequency_units]
     return frequencies
 
-def frequency_to_velocity(frequencies, input_units, center_frequency=None,
+def frequency_to_velocity(frequencies, input_unit, center_frequency=None,
                           center_frequency_units=None, velocity_units='m/s',
                           convention='radio'):
     """
@@ -1086,8 +1091,8 @@ def frequency_to_velocity(frequencies, input_units, center_frequency=None,
      * Redshift 	z = (f0 - f)/f 	f(V) = f0 ( 1 + z )-1
      * Relativistic 	V = c (f02 - f 2)/(f02 + f 2) 	f(V) = f0 { 1 - (V/c)2}1/2/(1+V/c)
     """
-    if input_units in velocity_dict:
-        print("Already in velocity units (%s)" % input_units)
+    if input_unit in velocity_dict:
+        print("Already in velocity units (%s)" % input_unit)
         return frequencies
     if center_frequency is None:
         raise ValueError("Cannot convert frequency to velocity without specifying a central frequency.")
@@ -1096,7 +1101,7 @@ def frequency_to_velocity(frequencies, input_units, center_frequency=None,
     if velocity_units not in velocity_dict:
         raise ValueError("Bad velocity units: %s" % (velocity_units))
 
-    frequency_hz = frequencies / frequency_dict['Hz'] * frequency_dict[input_units]
+    frequency_hz = frequencies / frequency_dict['Hz'] * frequency_dict[input_unit]
     center_frequency_hz = center_frequency / frequency_dict['Hz'] * frequency_dict[center_frequency_units]
 
     # the order is very ugly because otherwise, if scalar, the spectroscopic axis attributes won't be inherited
@@ -1112,43 +1117,43 @@ def frequency_to_velocity(frequencies, input_units, center_frequency=None,
 
     return velocities
 
-def frequency_to_wavelength(frequencies, input_units, wavelength_units='um'):
+def frequency_to_wavelength(frequencies, input_unit, wavelength_units='um'):
     """
     Simple conversion from frequency to wavelength:
     lambda = c / nu
     """
-    if input_units in wavelength_dict:
-        print("Already in wavelength units (%s)" % input_units)
+    if input_unit in wavelength_dict:
+        print("Already in wavelength units (%s)" % input_unit)
         return
     if wavelength_units not in length_dict:
         raise ValueError("Wavelength units %s not valid" % wavelength_units)
 
-    if input_units not in frequency_dict:
+    if input_unit not in frequency_dict:
         raise AttributeError("Cannot convert from frequency unless units are already frequency.")
 
-    wavelengths = speedoflight_ms / ( frequencies * frequency_dict[input_units] ) / length_dict[wavelength_units]
+    wavelengths = speedoflight_ms / ( frequencies * frequency_dict[input_unit] ) / length_dict[wavelength_units]
 
     return wavelengths
 
-def wavelength_to_frequency(wavelengths, input_units, frequency_units='GHz'):
+def wavelength_to_frequency(wavelengths, input_unit, frequency_units='GHz'):
     """
     Simple conversion from frequency to wavelength:
     nu = c / lambda
     """
-    if input_units in frequency_dict:
-        #print "Already in frequency units (%s)" % input_units
+    if input_unit in frequency_dict:
+        #print "Already in frequency units (%s)" % input_unit
         return wavelengths
     if frequency_units not in frequency_dict:
         raise ValueError("Frequency units %s not valid" % frequency_units)
 
-    if input_units not in length_dict:
+    if input_unit not in length_dict:
         raise AttributeError("Cannot convert from wavelength unless units are already wavelength.")
 
-    frequencies = speedoflight_ms / ( wavelengths * length_dict[input_units] ) / frequency_dict[frequency_units]
+    frequencies = speedoflight_ms / ( wavelengths * length_dict[input_unit] ) / frequency_dict[frequency_units]
 
     return frequencies
 
-def velocity_to_wavelength(velocities, input_units, center_wavelength=None,
+def velocity_to_wavelength(velocities, input_unit, center_wavelength=None,
                            center_wavelength_units=None,
                            wavelength_units='meter', convention='optical'):
     """
@@ -1160,15 +1165,15 @@ def velocity_to_wavelength(velocities, input_units, center_wavelength=None,
      * Redshift 	z = ((c/l0) - (c/l))/(c/l) 	f(V) = (c/l0) ( 1 + z )-1
      * Relativistic 	V = c ((c/l0)^2 - (c/l)^2)/((c/l0)^2 + (c/l)^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c)
     """
-    if input_units in wavelength_dict:
-        print("Already in wavelength units (%s)" % input_units)
+    if input_unit in wavelength_dict:
+        print("Already in wavelength units (%s)" % input_unit)
         return velocities
     if center_wavelength is None:
         raise ValueError("Cannot convert velocity to wavelength without specifying a central wavelength.")
     if wavelength_units not in wavelength_dict:
         raise ValueError("Bad wavelength units: %s" % (wavelength_units))
 
-    velocity_ms = velocities / velocity_dict['m/s'] * velocity_dict[input_units]
+    velocity_ms = velocities / velocity_dict['m/s'] * velocity_dict[input_unit]
     center_frequency = speedoflight_ms / center_wavelength
     if convention == 'radio':
         wav = (velocity_ms / speedoflight_ms - 1.0) * center_frequency * -1
@@ -1181,7 +1186,7 @@ def velocity_to_wavelength(velocities, input_units, center_wavelength=None,
     wavelengths = wav / wavelength_dict[wavelength_units] * wavelength_dict[center_wavelength_units]
     return wavelengths
 
-def wavelength_to_velocity(wavelengths, input_units, center_wavelength=None,
+def wavelength_to_velocity(wavelengths, input_unit, center_wavelength=None,
         center_wavelength_units=None, velocity_units='m/s',
         convention='optical'):
     """
@@ -1193,8 +1198,8 @@ def wavelength_to_velocity(wavelengths, input_units, center_wavelength=None,
      * Redshift 	z = ((c/l0) - f)/f 	f(V) = (c/l0) ( 1 + z )-1
      * Relativistic 	V = c ((c/l0)^2 - f^2)/((c/l0)^2 + f^2) 	f(V) = (c/l0) { 1 - (V/c)2}1/2/(1+V/c)
     """
-    if input_units in velocity_dict:
-        print("Already in velocity units (%s)" % input_units)
+    if input_unit in velocity_dict:
+        print("Already in velocity units (%s)" % input_unit)
         return wavelengths
     if center_wavelength is None:
         raise ValueError("Cannot convert wavelength to velocity without specifying a central wavelength.")
@@ -1203,7 +1208,7 @@ def wavelength_to_velocity(wavelengths, input_units, center_wavelength=None,
     if velocity_units not in velocity_dict:
         raise ValueError("Bad velocity units: %s" % (velocity_units))
 
-    wavelength_m = wavelengths / wavelength_dict['meter'] * wavelength_dict[input_units]
+    wavelength_m = wavelengths / wavelength_dict['meter'] * wavelength_dict[input_unit]
     center_wavelength_m = center_wavelength / wavelength_dict['meter'] * wavelength_dict[center_wavelength_units]
     frequency_hz = speedoflight_ms / wavelength_m
     center_frequency_hz = speedoflight_ms / center_wavelength_m

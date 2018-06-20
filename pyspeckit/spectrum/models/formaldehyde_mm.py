@@ -3,8 +3,11 @@
 Formaldehyde mm-line fitter
 ===========================
 
-This is a formaldehyde 3_03-2_02 / 3_22-221 and 3_03-2_02/3_21-2_20 fitter.  
+This is a formaldehyde 3_03-2_02 / 3_22-221 and 3_03-2_02/3_21-2_20 fitter.
 It is based entirely on RADEX models.
+
+Module API
+^^^^^^^^^^
 """
 from __future__ import print_function
 import numpy as np
@@ -36,7 +39,7 @@ line_names = ['threeohthree','threetwotwo','threetwoone']
 
 # http://adsabs.harvard.edu/abs/1971ApJ...169..429T has the most accurate freqs
 # http://adsabs.harvard.edu/abs/1972ApJ...174..463T [twotwo]
-central_freq_dict = { 
+central_freq_dict = {
         'threeohthree': 218.222192e9,
         'threetwotwo': 218.475632e9,
         'threetwoone': 218.760066e9,
@@ -51,7 +54,7 @@ relative_strength_total_degeneracy={
         'threetwotwo': 1.,
         'threetwoone': 1.,
         }
-freq_dict = central_freq_dict 
+freq_dict = central_freq_dict
 aval_dict = {
         'threeohthree': 2.818e-4,
         'threetwotwo': 1.571e-4,
@@ -77,7 +80,7 @@ def build_despotic_grids(gridfile='ph2co_grid_despotic.fits', ph2coAbund=1e-8,
                          nDv=5, DvLower=1.0, DvUpper=5.0):
     """
     Generates grids of p-H2CO line intensities using Despotic.  Outputs a astropy Table.
-    
+
     Parameters
     ----------
     gridfile : string
@@ -114,7 +117,7 @@ def build_despotic_grids(gridfile='ph2co_grid_despotic.fits', ph2coAbund=1e-8,
     if Democracy:
         raise Exception("No despotic install found.  Cannot build grids")
 
-    
+
     core = cloud(fileName="protostellarCore.desp", verbose=True)
 
     nlower = logDensLower
@@ -197,13 +200,13 @@ def formaldehyde_mm_despotic_functions(gridtable):
     GridData_Tex_322_221 = np.zeros((len(DensArr), len(ColArr),
                                      len(TempArr), len(DvArr))) + np.nan
     GridData_Tex_321_220 = np.zeros((len(DensArr), len(ColArr),
-                                     len(TempArr), len(DvArr))) + np.nan    
+                                     len(TempArr), len(DvArr))) + np.nan
     GridData_tau_303_202 = np.zeros((len(DensArr), len(ColArr),
                                      len(TempArr), len(DvArr))) + np.nan
     GridData_tau_322_221 = np.zeros((len(DensArr), len(ColArr),
                                      len(TempArr), len(DvArr))) + np.nan
     GridData_tau_321_220 = np.zeros((len(DensArr), len(ColArr),
-                                     len(TempArr), len(DvArr))) + np.nan    
+                                     len(TempArr), len(DvArr))) + np.nan
 
     ii = np.interp(gridtable['nH2'], DensArr, np.arange(len(DensArr))).astype(np.int)
     jj = np.interp(gridtable['Column'], ColArr, np.arange(len(ColArr))).astype(np.int)
@@ -253,12 +256,12 @@ def formaldehyde_mm_despotic_functions(gridtable):
         return (Tex, tau)
     return (h2co_303_202, h2co_322_221, h2co_321_220)
 
-def formaldehyde_mm_despotic(xarr, 
+def formaldehyde_mm_despotic(xarr,
                              temperature=25,
                              column=13,
                              density=4,
                              xoff_v=0.0,
-                             width=1.0, 
+                             width=1.0,
                              grid_vwidth=1.0,
                              h2co_303_202=None,
                              h2co_322_221=None,
@@ -267,16 +270,16 @@ def formaldehyde_mm_despotic(xarr,
                              verbose=False,
                              **kwargs):
     """
-    Fitter to p-H2CO using despotic grids.  Requires building grids and passing in 
-    functions for interpolating the h2co transition optical depth and 
-    excitation temperatures. 
+    Fitter to p-H2CO using despotic grids.  Requires building grids and passing in
+    functions for interpolating the h2co transition optical depth and
+    excitation temperatures.
     """
-    
+
     Tex303_202, tau303_202 = h2co_303_202(logdensity=density,
                                           logcolumn=column,
                                           temperature=temperature,
                                           sigmav=width)
-    
+
     Tex322_221, tau322_221 = h2co_322_221(logdensity=density,
                                           logcolumn=column,
                                           temperature=temperature,
@@ -294,18 +297,18 @@ def formaldehyde_mm_despotic(xarr,
     spec = np.sum([
         (formaldehyde_mm_vtau(xarr, Tex=float(tex[ii]), tau=float(tau[ii]),
                               xoff_v=xoff_v, width=width, **kwargs)
-         * (xarr.as_unit('GHz').value>minfreq[ii]) * 
+         * (xarr.as_unit('GHz').value>minfreq[ii]) *
          (xarr.as_unit('GHz').value<maxfreq[ii])) for ii in xrange(len(tex))],
                   axis=0)
     return spec
 
-    
-def formaldehyde_mm_radex(xarr, 
+
+def formaldehyde_mm_radex(xarr,
         temperature=25,
         column=13,
         density=4,
         xoff_v=0.0,
-        width=1.0, 
+        width=1.0,
         grid_vwidth=1.0,
         texgrid=None,
         taugrid=None,
@@ -330,7 +333,7 @@ def formaldehyde_mm_radex(xarr,
     ----------
     grid_vwidth : float
         the velocity assumed when computing the grid in km/s
-        this is important because tau = modeltau / width (see, e.g., 
+        this is important because tau = modeltau / width (see, e.g.,
         Draine 2011 textbook pgs 219-230)
     density : float
         Density!
@@ -370,7 +373,7 @@ def formaldehyde_mm_radex(xarr,
         temparr    = (zinds+hdr['CRPIX3']-1)*hdr['CDELT3']+hdr['CRVAL3'] # lin temperature
     else:
         raise Exception
-    
+
     # Convert X-units to frequency in GHz
     xarr = xarr.as_unit('Hz', quiet=True)
 
@@ -409,14 +412,14 @@ def formaldehyde_mm_radex(xarr,
     spec = np.sum([
         (formaldehyde_mm_vtau(xarr, Tex=float(tex[ii]), tau=float(tau[ii]),
             xoff_v=xoff_v, width=width, **kwargs)
-        * (xarr.as_unit('GHz').value>minfreq[ii]) * 
+        * (xarr.as_unit('GHz').value>minfreq[ii]) *
          (xarr.as_unit('GHz').value<maxfreq[ii])) for ii in xrange(len(tex))],
                 axis=0)
-  
+
     return spec
 
 
-def formaldehyde_mm(xarr, amp=1.0, xoff_v=0.0, width=1.0, 
+def formaldehyde_mm(xarr, amp=1.0, xoff_v=0.0, width=1.0,
         return_components=False ):
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters
@@ -446,18 +449,18 @@ class formaldehyde_mm_model(model.SpectralModel):
     pass
 
 formaldehyde_mm_fitter = formaldehyde_mm_model(formaldehyde_mm, 3,
-        parnames=['amp','center','width'], 
-        parlimited=[(False,False),(False,False), (True,False)], 
+        parnames=['amp','center','width'],
+        parlimited=[(False,False),(False,False), (True,False)],
         parlimits=[(0,0), (0,0), (0,0)],
         shortvarnames=("A","v","\\sigma"), # specify the parameter names (TeX is OK)
-        fitunits='Hz' )
+        fitunit='Hz' )
 
 formaldehyde_mm_vheight_fitter = formaldehyde_mm_model(fitter.vheightmodel(formaldehyde_mm), 4,
-        parnames=['height','amp','center','width'], 
-        parlimited=[(False,False),(False,False),(False,False), (True,False)], 
+        parnames=['height','amp','center','width'],
+        parlimited=[(False,False),(False,False),(False,False), (True,False)],
         parlimits=[(0,0), (0,0), (0,0), (0,0)],
         shortvarnames=("H","A","v","\\sigma"), # specify the parameter names (TeX is OK)
-        fitunits='Hz' )
+        fitunit='Hz' )
 
 
 try:

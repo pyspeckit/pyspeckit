@@ -5,9 +5,9 @@ PySpecKit Spectroscopic Toolkit
    :alt: Join the chat at https://gitter.im/pyspeckit/pyspeckit
    :target: https://gitter.im/pyspeckit/pyspeckit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
- * Documentation: `<http://pyspeckit.readthedocs.org/en/latest/>`_
- * Homepage: `<http://pyspeckit.bitbucket.org>`_
- * Source pages: `<https://github.com/pyspeckit/pyspeckit>`_ and `<https://bitbucket.org/pyspeckit/pyspeckit>`_
+* Documentation: `<http://pyspeckit.readthedocs.org/en/latest/>`_ and/or `<http://pyspeckit.readthedocs.io/en/latest/>`_
+* Homepage: `<http://pyspeckit.bitbucket.org>`_
+* Source pages: `<https://github.com/pyspeckit/pyspeckit>`_ and `<https://bitbucket.org/pyspeckit/pyspeckit>`_
 
 This is a code framework designed to allow for analysis of spectroscopic data
 from a wide variety of astronomical instruments.  It is motivated by the lack

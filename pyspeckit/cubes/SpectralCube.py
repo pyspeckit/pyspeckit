@@ -151,9 +151,11 @@ class Cube(spectrum.Spectrum):
                 self.errorcube = errorcube.value
             else:
                 self.errorcube = errorcube
-            log.debug("XARR flags: {0}".format(xarr.flags))
+            if hasattr(xarr, 'flags'):
+                log.debug("XARR flags: {0}".format(xarr.flags))
             self.xarr = generate_xarr(xarr, unit=xunit)
-            log.debug("self.xarr flags: {0}".format(xarr.flags))
+            if hasattr(xarr, 'flags'):
+                log.debug("self.xarr flags: {0}".format(xarr.flags))
             self.header = header
             self.error = None
             if self.cube is not None:
@@ -785,6 +787,12 @@ class Cube(spectrum.Spectrum):
         elif len(valid_pixels) == 0:
             raise ValueError("No valid pixels selected.")
 
+        if start_from_point not in valid_pixels:
+            raise ValueError("The starting fit position is not among the valid"
+                             " pixels.  Check your selection criteria to make "
+                             "sure you have not unintentionally excluded "
+                             "this first fit pixel.")
+
         if verbose_level > 0:
             log.debug("Number of valid pixels: %i" % len(valid_pixels))
 
@@ -816,6 +824,8 @@ class Cube(spectrum.Spectrum):
         self.has_fit = np.zeros(self.mapplot.plane.shape, dtype='bool')
 
         self._counter = 0
+
+        self._tracebacks = {}
 
         t0 = time.time()
 
@@ -931,6 +941,7 @@ class Cube(spectrum.Spectrum):
                     success = True
                 except Exception as ex:
                     exc_traceback = sys.exc_info()[2]
+                    self.tracebacks[(ii,x,y)] = exc_traceback
                     log.exception("Fit number %i at %i,%i failed on error %s" % (ii,x,y, str(ex)))
                     log.exception("Failure was in file {0} at line {1}".format(
                         exc_traceback.tb_frame.f_code.co_filename,
@@ -983,7 +994,10 @@ class Cube(spectrum.Spectrum):
         # This test block is to make sure you don't run a 30 hour fitting
         # session that's just going to crash at the end.
         # try a first fit for exception-catching
-        try0 = fit_a_pixel((0,valid_pixels[0][0],valid_pixels[0][1]))
+        if len(start_from_point) == 2:
+            try0 = fit_a_pixel((0,start_from_point[0], start_from_point[1]))
+        else:
+            try0 = fit_a_pixel((0,valid_pixels[0][0],valid_pixels[0][1]))
         try:
             len_guesses = len(self.momentcube) if (usemomentcube or
                                 guesses_are_moments) else len(guesses)

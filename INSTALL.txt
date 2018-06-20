@@ -1,9 +1,9 @@
 Installation is the same as any python package, e.g.:
 
-wget --no-check-certificate https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz
-tar -xzf pyspeckit-pyspeckit.bitbucket.org-tip.tar.gz 
-cd pyspeckit-pyspeckit.bitbucket.org-tip
+wget --no-check-certificate https://github.com/pyspeckit/pyspeckit/archive/master.zip
+unzip master.zip
+cd pyspeckit
 python setup.py install
 
 or if you have pip:
-pip install https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/get/tip.tar.gz
+pip install https://github.com/pyspeckit/pyspeckit/archive/master.zip

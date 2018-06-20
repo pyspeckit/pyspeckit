@@ -2,11 +2,10 @@ Installation and Requirements
 =============================
 
 .. hint::
-    You can *easy_install* or *pip_install* pyspeckit to get the latest release version: ::
+    You can *pip_install* pyspeckit to get the latest release version: ::
 
 
         pip install pyspeckit
-        easy_install pyspeckit
 
 
 
@@ -33,8 +32,9 @@ If you have pip (see http://pypi.python.org/pypi/pyspeckit), you can install wit
 
     pip install pyspeckit
 
-Or the most recent version::
+Or the most recent version with either of these commands::
 
+    pip install https://github.com/pyspeckit/pyspeckit/archive/master.zip
     pip install https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz
 
 You can acquire the code with this clone command (see also :doc:`install_via_GitHub`)::
@@ -52,7 +52,7 @@ then extract and install using the standard python method (but the pip install v
     python setup.py install
 
 
-You can also check out the `source code <https://bitbucket.org/pyspeckit/pyspeckit/src>`_
+You can also check out the `source code <https://github.com/pyspeckit/pyspeckit>`_
 
 .. note ::
     If you use `easy_install pyspeckit` with the Enthought Python Distribution, you will
@@ -62,3 +62,6 @@ You can also check out the `source code <https://bitbucket.org/pyspeckit/pyspeck
 .. note ::
    pyspeckit is hosted on both bitbucket and github.  Both versions are kept up
    to date, so it should not matter which one you choose to install.
+
+.. toctree::
+   install_via_GitHub

@@ -3,6 +3,9 @@
 Generalized hyperfine component fitter
 ======================================
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+
+Module API
+^^^^^^^^^^
 """
 import numpy as np
 from astropy import units as u
@@ -56,18 +59,19 @@ class hyperfinemodel(object):
             parlimits=[(0,0), (0,0), (0,0), (0,0)],
             # specify the parameter names (LaTeX is OK)
             shortvarnames=("T_{ex}","\\tau","v","\\sigma"),
-            fitunits='Hz' )
+            guess_types=['amplitude+2.73', 1.0, 'center', 'width'],
+            fitunit='Hz')
 
         self.nlines = len(line_names)
 
         self.varyhf_fitter = model.SpectralModel(self.hyperfine_varyhf,3+self.nlines,
             parnames=['Tex','center','width']+['tau%s' % k for k in self.line_names],
             parlimited=[(False,False), (False,False), (True,False)]
-                                                 + [(True,False),]*self.nlines, 
+                                                 + [(True,False),]*self.nlines,
             parlimits=[(0,0), (0,0), (0,0)]+[(0,0),]*self.nlines,
             shortvarnames=("T_{ex}","v","\\sigma") +
                            tuple(("\\tau(\\mathrm{%s})" % k for k in self.line_names)),
-            fitunits='Hz')
+            fitunit='Hz')
 
         self.varyhf_amp_fitter = model.SpectralModel(self.hyperfine_varyhf_amp, 2+self.nlines,
             parnames=['center','width']+['amp%s' % k for k in self.line_names],
@@ -75,59 +79,64 @@ class hyperfinemodel(object):
             parlimits=[(0,0), (0,0)]+[(0,0),]*self.nlines,
             shortvarnames=("v","\\sigma") +
                            tuple(("amp(\\mathrm{%s})" % k for k in self.line_names)),
-            fitunits='Hz')
+            fitunit='Hz')
 
         self.varyhf_amp_width_fitter = model.SpectralModel(self.hyperfine_varyhf_amp_width,1+self.nlines*2,
-            parnames=['center']+['amp%s' % k for k in self.line_names]+['width%s' % k for k in self.line_names], 
-            parlimited=[(False,False)] + [(True,False),]*self.nlines + [(True,False)]*self.nlines, 
+            parnames=['center']+['amp%s' % k for k in self.line_names]+['width%s' % k for k in self.line_names],
+            parlimited=[(False,False)] + [(True,False),]*self.nlines + [(True,False)]*self.nlines,
             parlimits=[(0,0)]+[(0,0),]*self.nlines*2,
             shortvarnames=(("v",) +
-                           tuple(("amp(\\mathrm{%s})" % k for k in self.line_names)) + 
-                           tuple(("\\sigma(\\mathrm{%s})" % k for k in self.line_names))), 
+                           tuple(("amp(\\mathrm{%s})" % k for k in self.line_names)) +
+                           tuple(("\\sigma(\\mathrm{%s})" % k for k in self.line_names))),
             # specify the parameter names (TeX is OK)
-            fitunits='Hz' )
+            fitunit='Hz' )
 
         self.vheight_fitter = model.SpectralModel(fitter.vheightmodel(self),5,
             parnames=['height','Tex','tau','center','width'],
-            parlimited=[(False,False), (False,False), (True,False), (False,False), (True,False)], 
+            parlimited=[(False,False), (False,False), (True,False), (False,False), (True,False)],
             parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
             shortvarnames=("H","T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz' )
+            guess_types=[0.0, 'amplitude+2.73', 1.0, 'center', 'width'],
+            fitunit='Hz' )
 
         self.background_fitter = model.SpectralModel(self.hyperfine_addbackground,5,
             parnames=['Tbackground','Tex','tau','center','width'],
-            parlimited=[(True,False), (False,False), (False,False), (True,False), (False,False), (True,False)], 
+            parlimited=[(True,False), (False,False), (False,False), (True,False), (False,False), (True,False)],
             parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
             shortvarnames=('T_{BG}',"T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz')
+            guess_types=[2.73, 'amplitude+2.73', 1.0, 'center', 'width'],
+            fitunit='Hz')
 
         self.background_contsub_fitter = model.SpectralModel(self.hyperfine_background,5,
             parnames=['Tbackground','Tex','tau','center','width'],
-            parlimited=[(True,False), (False,False), (False,False), (True,False), (False,False), (True,False)], 
+            parlimited=[(True,False), (False,False), (False,False), (True,False), (False,False), (True,False)],
             parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
             shortvarnames=('T_{BG}',"T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz')
+            guess_types=[0.0, 'amplitude+2.73', 1.0, 'center', 'width'],
+            fitunit='Hz')
 
         self.ampfitter = model.SpectralModel(self.hyperfine_amp,3,
-            parnames=['amp','center','width'], 
-            parlimited=[(False,False), (False,False), (True,False)], 
+            parnames=['amp','center','width'],
+            parlimited=[(False,False), (False,False), (True,False)],
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=("amp","v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz' )
+            fitunit='Hz' )
 
         self.taufitter = model.SpectralModel(self.hyperfine_tau,3,
-            parnames=['tau','center','width'], 
-            parlimited=[(True,False), (False,False), (True,False)], 
+            parnames=['tau','center','width'],
+            parlimited=[(True,False), (False,False), (True,False)],
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=(r'\tau',"v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz')
+            guess_types=[1.0, 'center', 'width'],
+            fitunit='Hz')
 
         self.totaltaufitter = model.SpectralModel(self.hyperfine_tau_total,3,
-            parnames=['tau','center','width'], 
-            parlimited=[(True,False), (False,False), (True,False)], 
+            parnames=['tau','center','width'],
+            parlimited=[(True,False), (False,False), (True,False)],
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=(r'\tau',"v","\\sigma"), # specify the parameter names (TeX is OK)
-            fitunits='Hz')
+            guess_types=[1.0, 'center', 'width'],
+            fitunit='Hz')
 
     def __copy__(self):
         # http://stackoverflow.com/questions/1500718/what-is-the-right-way-to-override-the-copy-deepcopy-operations-on-an-object-in-p
@@ -152,12 +161,12 @@ class hyperfinemodel(object):
         """
         return self.hyperfine(*args,**kwargs)
 
-    def hyperfine_amp(self, xarr, amp=None, xoff_v=0.0, width=1.0, 
+    def hyperfine_amp(self, xarr, amp=None, xoff_v=0.0, width=1.0,
                       return_hyperfine_components=False, Tbackground=2.73,
                       Tex=5.0, tau=0.1):
         """
         wrapper of self.hyperfine with order of arguments changed
-        """ 
+        """
         return self.hyperfine(xarr, amp=amp, Tex=Tex, tau=tau, xoff_v=xoff_v,
                 width=width, return_hyperfine_components=return_hyperfine_components,
                 Tbackground=Tbackground)
@@ -291,7 +300,7 @@ class hyperfinemodel(object):
         components =[]
         for linename in self.line_names:
             voff_lines = np.array(self.voff_lines_dict[linename])
-      
+
             lines = (1-voff_lines/ckms)*self.freq_dict[linename]
             if not vary_hyperfine_width and width == 0:
                 tau_nu = xarr*0
@@ -307,8 +316,8 @@ class hyperfinemodel(object):
                     # the total optical depth, which is being fitted, should be the sum of the components
                     tau_line = (tau * np.array(self.line_strength_dict[linename])/
                                 np.array(self.relative_strength_total_degeneracy[linename]))
-          
-                tau_nu = np.array(tau_line * 
+
+                tau_nu = np.array(tau_line *
                                   np.exp(-(xarr+nuoff-self.freq_dict[linename])**2 /
                                           (2.0*nuwidth**2)))
                 tau_nu[tau_nu!=tau_nu] = 0 # avoid nans
@@ -346,12 +355,12 @@ class hyperfinemodel(object):
             # this is the exact version of 15.29
             T0 = hoverk * xarr
             spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*T0*(1/(np.exp(T0/Tex)-1) - 1/(np.exp(T0/Tbackground)-1))
-            
+
             # This is the equation of radiative transfer using the RJ definitions
             # (eqn 1.37 in Rohlfs)
             # It is identical, except without T_background subtracted
             # spec = Tex+(np.exp(-np.array(tau_nu_cumul)))*(Tbackground-Tex)
-          
+
             if amp is None:
                 return spec
             else:

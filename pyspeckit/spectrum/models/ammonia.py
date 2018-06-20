@@ -26,6 +26,7 @@ from astropy.extern.six import iteritems
 from . import mpfit_messages
 import operator
 import string
+import warnings
 
 from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
                                 voff_lines_dict, tau_wts_dict)
@@ -108,6 +109,11 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
         for k in tex:
             assert k in line_names,"{0} not in line list".format(k)
         line_names = tex.keys()
+    elif tex > trot:
+        warnings.warn("tex > trot in the ammonia model.  "
+                      "This is unphysical and "
+                      "suggests that you may need to constrain tex.  See "
+                      "ammonia_model_restricted_tex.")
 
     from .ammonia_constants import line_name_indices, line_names as original_line_names
 
@@ -297,7 +303,9 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
     # "runspec" means "running spectrum": it is accumulated over a loop
     runspec = np.zeros(len(xarr))
 
-    components = []
+    if return_components:
+        components = []
+
     for linename in line_names:
         voff_lines = np.array(voff_lines_dict[linename])
         tau_wts = np.array(tau_wts_dict[linename])
@@ -310,10 +318,12 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
         # tau array
         tauprof = np.zeros(len(xarr))
         for kk,nuo in enumerate(nuoff):
-            tauprof += (tau_dict[linename] * tau_wts[kk] *
+            tauprof_ = (tau_dict[linename] * tau_wts[kk] *
                         np.exp(-(xarr.value+nuo-lines[kk])**2 /
                                (2.0*nuwidth[kk]**2)))
-            components.append(tauprof)
+            if return_components:
+                components.append(tauprof_)
+            tauprof += tauprof_
 
         T0 = (h*xarr.value*1e9/kb) # "temperature" of wavelength
 
@@ -340,6 +350,25 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
 
 
 class ammonia_model(model.SpectralModel):
+    """
+    The basic Ammonia (NH3) model with 6 free parameters:
+        Trot, Tex, ntot, width, xoff_v, and fortho
+
+    Trot is the rotational temperature.  It governs the relative populations of
+    the rotational states, i.e., the relative strength of different transitions
+
+    Tex is the excitation temperature.  It is assumed constant across all
+    states, which is not always a good assumption - a radiative transfer and
+    excitation model is required to constrain this, though.
+
+    ntot is the total column density of p-NH3 integrated over all states.
+
+    width is the linewidth
+
+    xoff_v is the velocity offset / line of sight velocity
+
+    fortho is the ortho fraction  (northo / (northo+npara))
+    """
 
     def __init__(self,npeaks=1,npars=6,
                  parnames=['trot','tex','ntot','width','xoff_v','fortho'],
@@ -391,7 +420,7 @@ class ammonia_model(model.SpectralModel):
         self.modelfunc_kwargs = kwargs
         # lower case? self.modelfunc_kwargs.update({'parnames':self.parinfo.parnames})
         self.use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else False
-        self.fitunits = 'GHz'
+        self.fitunit = 'GHz'
 
     def __call__(self,*args,**kwargs):
         return self.multinh3fit(*args,**kwargs)
@@ -449,7 +478,8 @@ class ammonia_model(model.SpectralModel):
             return v
         return L
 
-    def components(self, xarr, pars, hyperfine=False, **kwargs):
+    def components(self, xarr, pars, hyperfine=False,
+                   return_hyperfine_components=False, **kwargs):
         """
         Ammonia components don't follow the default, since in Galactic
         astronomy the hyperfine components should be well-separated.
@@ -459,7 +489,7 @@ class ammonia_model(model.SpectralModel):
 
         comps=[]
         for ii in range(self.npeaks):
-            if hyperfine:
+            if hyperfine or return_hyperfine_components:
                 modelkwargs = dict(zip(self.parnames[ii*self.npars:(ii+1)*self.npars],
                                        pars[ii*self.npars:(ii+1)*self.npars]))
                 comps.append(self.modelfunc(xarr, return_components=True,
@@ -485,29 +515,49 @@ class ammonia_model(model.SpectralModel):
         """
         Fit multiple nh3 profiles (multiple can be 1)
 
-        Inputs:
-           xax - x axis
-           data - y axis
-           npeaks - How many nh3 profiles to fit?  Default 1 (this could supersede onedgaussfit)
-           err - error corresponding to data
+        Parameters
+        ----------
+        xax : array
+            x axis
+        data : array
+            y axis
+        npeaks : int
+            How many nh3 profiles to fit?  Default 1 (this could supersede onedgaussfit)
+        err : array
+            error corresponding to data
+        params : list
+            Fit parameters: [trot, tex, ntot (or tau), width, offset, ortho fraction] * npeaks
+            If len(params) % 6 == 0, npeaks will be set to len(params) / 6.
+            These parameters (and the related fixed, limited, min/max, names
+            below) need to have length = 6*npeaks.  If npeaks > 1 and length =
+            6, they will be replicated npeaks times, otherwise they will be
+            reset to defaults:
+        fixed : list
+            Is parameter fixed?
+        limitedmin : list 
+        minpars : list
+            set lower limits on each parameter (default: width>0, Tex and trot > Tcmb)
+        limitedmax : list
+        maxpars : list
+            set upper limits on each parameter
+        parnames : list
+            default parameter names, important for setting kwargs in model
+            ['trot','tex','ntot','width','xoff_v','fortho']
+        quiet : bool
+            should MPFIT output each iteration?
+        shh : bool
+            output final parameters?
 
-         These parameters need to have length = 6*npeaks.  If npeaks > 1 and length = 6, they will
-         be replicated npeaks times, otherwise they will be reset to defaults:
-           params - Fit parameters: [trot, tex, ntot (or tau), width, offset, ortho fraction] * npeaks
-                  If len(params) % 6 == 0, npeaks will be set to len(params) / 6
-           fixed - Is parameter fixed?
-           limitedmin/minpars - set lower limits on each parameter (default: width>0, Tex and trot > Tcmb)
-           limitedmax/maxpars - set upper limits on each parameter
-           parnames - default parameter names, important for setting kwargs in model ['trot','tex','ntot','width','xoff_v','fortho']
-
-           quiet - should MPFIT output each iteration?
-           shh - output final parameters?
-
-        Returns:
-           Fit parameters
-           Model
-           Fit errors
-           chi2
+        Returns
+        -------
+        mpp : model parameter object
+            Fit parameters
+        model : array
+            The model array
+        errors : array
+            the fit errors
+        chi2 : float
+            the chi^2 value of the fit
         """
 
         if parinfo is None:
@@ -627,7 +677,7 @@ class ammonia_model(model.SpectralModel):
         tex_key = {'trot':'T_R', 'tkin': 'T_K', 'tex':'T_{ex}', 'ntot':'N',
                    'fortho':'F_o', 'width':'\\sigma', 'xoff_v':'v',
                    'fillingfraction':'FF', 'tau':'\\tau_{1-1}',
-                   'background_tb':'T_{BG}'}
+                   'background_tb':'T_{BG}', 'delta':'T_R-T_{ex}'}
         # small hack below: don't quantize if error > value.  We want to see the values.
         label_list = []
         for pinfo in self.parinfo:
@@ -786,6 +836,47 @@ class ammonia_model(model.SpectralModel):
                                          "at least {2} but it is set to {3}."
                                          .format(parname, ul, b, a))
 
+
+    def parse_3par_guesses(self, guesses):
+        """
+        Try to convert a set of interactive guesses (peak, center, width) into
+        guesses appropriate to the model.
+
+        For NH3 models, we add in several extra parameters:
+            tex = 2.73 * peak
+            trot = tex * 2
+            fortho = 0.5
+            ntot = 15
+
+        ntot is set to a constant ~10^15 because this results in optical depths
+        near 1, so it forces the emission to be approximately significant.
+        trot > tex so that we're in a physical regime to begin with.
+
+        We assume tex = peak + 2.73 because most spectra are shown
+        background-subtracted (single dish are always that way, interferometric
+        data are intrinsically that way...) and otherwise the guessing will
+        crash if you guess a number < 2.73.
+        """
+        gauss_npars = 3
+        if len(guesses) % gauss_npars != 0:
+            raise ValueError("Guesses passed to parse_3par_guesses must have "
+                             "length % 3 == 0")
+        npeaks = len(guesses) // gauss_npars
+        npars = 6
+
+        new_guesses = [-1, -1, 15, -1, -1, 0.5] * npeaks
+
+        for ii in range(npeaks):
+            peak = guesses[ii * gauss_npars + 0]
+            center = guesses[ii * gauss_npars + 1]
+            width = guesses[ii * gauss_npars + 2]
+            new_guesses[ii*npars + 0] = (2.73+peak) * 2
+            new_guesses[ii*npars + 1] = (2.73+peak)
+            new_guesses[ii*npars + 3] = width
+            new_guesses[ii*npars + 4] = center
+
+        return new_guesses
+
 class ammonia_model_vtau(ammonia_model):
     def __init__(self,
                  parnames=['trot', 'tex', 'tau', 'width', 'xoff_v', 'fortho'],
@@ -800,9 +891,6 @@ class ammonia_model_vtau(ammonia_model):
 
         # trot, TEX, ntot, width, center, ortho fraction
         return [20, 10, 10, 1.0, 0.0, 1.0]
-
-    def __call__(self,*args,**kwargs):
-        return self.multinh3fit(*args,**kwargs)
 
     def _validate_parinfo(self,
                           must_be_limited={'trot': [True,False],
@@ -919,13 +1007,6 @@ class ammonia_model_background(ammonia_model):
         # trot, TEX, ntot, width, center, ortho fraction
         return [20,10, 10, 1.0, 0.0, 1.0, TCMB]
 
-    def __call__(self,*args,**kwargs):
-        #if self.multisingle == 'single':
-        #    return self.onepeakammoniafit(*args,**kwargs)
-        #elif self.multisingle == 'multi':
-        #    # Why is tied 6 instead of 7?
-        return self.multinh3fit(*args,**kwargs)
-
     def make_parinfo(self, npeaks=1, err=None,
                      params=(20,20,14,1.0,0.0,0.5,TCMB), parnames=None,
                      fixed=(False,False,False,False,False,False,True),
@@ -988,6 +1069,94 @@ class cold_ammonia_model(ammonia_model):
         supes = super(cold_ammonia_model, self)
         return supes._validate_parinfo(must_be_limited=must_be_limited,
                                        required_limits=required_limits)
+
+class ammonia_model_restricted_tex(ammonia_model):
+    def __init__(self,
+                 parnames=['trot', 'tex', 'ntot', 'width', 'xoff_v', 'fortho',
+                           'delta'],
+                 **kwargs):
+        super(ammonia_model_restricted_tex, self).__init__(npars=7,
+                                                           parnames=parnames,
+                                                           **kwargs)
+        def ammonia_dtex(*args, **kwargs):
+            """
+            Strip out the 'delta' keyword
+            """
+            # for py2 compatibility, must strip out manually
+            delta = kwargs.pop('delta') if 'delta' in kwargs else None
+            np.testing.assert_allclose(kwargs['trot'] - kwargs['tex'],
+                                       delta)
+            return ammonia(*args, **kwargs)
+        self.modelfunc = ammonia_dtex
+
+    def n_ammonia(self, pars=None, parnames=None, **kwargs):
+        if parnames is not None:
+            for ii,pn in enumerate(parnames):
+                if ii % 7 == 1 and 'tex' not in pn:
+                    raise ValueError('bad parameter names')
+                if ii % 7 == 6 and 'delta' not in pn:
+                    raise ValueError('bad parameter names')
+        if pars is not None:
+            assert len(pars) % 7 == 0
+            for ii in range(int(len(pars)/7)):
+                try:
+                    # Case A: they're param objects
+                    # (setting the param directly can result in recursion errors)
+                    pars[1+ii*7].value = pars[0+ii*7].value - pars[6+ii*7].value
+                except AttributeError:
+                    # Case B: they're just lists of values
+                    pars[1+ii*7] = pars[0+ii*7] - pars[6+ii*7]
+
+        supes = super(ammonia_model_restricted_tex, self)
+        return supes.n_ammonia(pars=pars, parnames=parnames, **kwargs)
+
+
+    def _validate_parinfo(self,
+                          must_be_limited={'trot': [True,False],
+                                           'tex': [False,False],
+                                           'ntot': [True, False],
+                                           'width': [True, False],
+                                           'xoff_v': [False, False],
+                                           'fortho': [True, True],
+                                           'delta': [True, False],
+                                          },
+                          required_limits={'trot': [0, None],
+                                           'tex': [None,None],
+                                           'width': [0, None],
+                                           'ntot': [0, None],
+                                           'xoff_v': [None,None],
+                                           'fortho': [0,1],
+                                           'delta': [0, None],
+                                          }):
+        supes = super(ammonia_model_restricted_tex, self)
+        return supes._validate_parinfo(must_be_limited=must_be_limited,
+                                       required_limits=required_limits)
+
+    def make_parinfo(self,
+                     params=(20,20,0.5,1.0,0.0,0.5,0),
+                     fixed=(False,False,False,False,False,False,False),
+                     limitedmin=(True,True,True,True,False,True,True),
+                     limitedmax=(False,False,False,False,False,True,False),
+                     minpars=(TCMB,TCMB,0,0,0,0,0),
+                     maxpars=(0,0,0,0,0,1,0),
+                     tied=('','p[0]-p[6]','','','','',''),
+                     **kwargs
+                     ):
+        """
+        parnames=['trot', 'tex', 'ntot', 'width', 'xoff_v', 'fortho', 'delta']
+        
+        'delta' is the difference between tex and trot
+        """
+        supes = super(ammonia_model_restricted_tex, self)
+        return supes.make_parinfo(params=params, fixed=fixed,
+                                  limitedmax=limitedmax, limitedmin=limitedmin,
+                                  minpars=minpars, maxpars=maxpars, tied=tied,
+                                  **kwargs)
+
+
+
+
+
 
 def _increment_string_number(st, count):
     """

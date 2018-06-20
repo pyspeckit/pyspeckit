@@ -2,6 +2,9 @@
 ====================
 Voigt Profile Fitter
 ====================
+
+Module API
+^^^^^^^^^^
 """
 from . import model
 import numpy as np
@@ -93,14 +96,19 @@ def voigt_fitter():
     Generator for voigt fitter class
     """
 
-    myclass =  model.SpectralModel(voigt, 4,
-            parnames=['amplitude','shift','gwidth','lwidth'],
-            parlimited=[(False,False),(False,False),(True,False),(True,False)],
-            parlimits=[(0,0), (0,0), (0,0), (0,0)],
-            shortvarnames=('A',r'\Delta x',r'\sigma_G',r'\sigma_L'),
-            centroid_par='shift',
-            fwhm_func=voigt_fwhm,
-            fwhm_pars=['gwidth','lwidth'],
+    myclass = model.SpectralModel(voigt, 4,
+                                  parnames=['amplitude', 'shift', 'gwidth',
+                                            'lwidth'],
+                                  parlimited=[(False, False), (False, False),
+                                              (True, False), (True, False)],
+                                  parlimits=[(0, 0),  (0, 0),  (0, 0),  (0, 0)],
+                                  shortvarnames=('A', r'\Delta x',
+                                                 r'\sigma_G', r'\sigma_L'),
+                                  centroid_par='shift',
+                                  fwhm_func=voigt_fwhm,
+                                  fwhm_pars=['gwidth','lwidth'],
+                                  guess_types=['amplitude', 'center', 'width',
+                                               'width'],
             )
     myclass.__name__ = "voigt"
     try:

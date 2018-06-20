@@ -30,6 +30,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    :maxdepth: 3
 
    Build a spectrum from scratch (and fit a gaussian) <example_fromscratch>
+   Build a spectrum from scratch (and fit the continuum) <example_continuum_fromscratch>
    Minimal gaussian cube fitting <example_minimal_cube>
    Build a cube from scratch and fit many gaussians <example_cube_fromscratch>
    Radio H2CO <example_h2co>
@@ -49,6 +50,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    Optical MUSE Spectral Cube <example_MUSE>
    Template Fitting <example_template>
    Monte Carlo <example_pymc>
+   Monte Carlo for NH3 <example_pymc_ammonia>
 
 .. toctree::
    :maxdepth: 3

@@ -14,7 +14,7 @@ num_to_name = {0: 'zero',
                9: 'nine'}
 
 line_names = ['oneone','twotwo','threethree','fourfour', "fivefive", "sixsix",
-              "sevenseven", "eighteight",]
+              "sevenseven", "eighteight", 'ninenine']
 
 # indices of the level population array for ortho/para lines
 line_name_indices = {'oneone': 0,
@@ -39,6 +39,7 @@ line_labels = {'oneone': '1-1',
                'sixsix': '6-6',
                'sevenseven': '7-7',
                'eighteight': '8-8',
+               'ninenine': '9-9',
               }
 
 freq_dict = { 
@@ -52,7 +53,7 @@ freq_dict = {
     'sixsix': 25.05603e9,
     'sevenseven': 25.71518e9,
     'eighteight': 26.51898e9,
-    #'ninenine': 27.47794,
+    'ninenine': 27.477943e9,
     }
 aval_dict = {
     'oneone':     1.712e-7,  #64*!pi**4/(3*h*c**3)*nu11**3*mu0**2*(1/2.)
@@ -63,7 +64,7 @@ aval_dict = {
     'sixsix': 3.395797e-07,
     'sevenseven': 3.747560e-07,
     'eighteight': 4.175308e-07,
-    #'ninenine': xxx,
+    'ninenine': 2.602045278086488e-07,
     }
 ortho_dict = {
     'oneone':     False,
@@ -74,7 +75,7 @@ ortho_dict = {
     'sixsix':   True,
     'sevenseven':   False,
     'eighteight':   False,
-    #'ninenine':   True,
+    'ninenine':   True,
     }
 #n_ortho = np.arange(0,28,3) # 0..3..27
 #n_para = np.array([x for x in range(28) if x % 3 != 0])
@@ -100,7 +101,8 @@ voff_lines_dict = {
     'sixsix': [31.5872901302, 27.0406347326, 0.0, 0.0, 0.0, -26.9209859064, -31.4676413039],
     'sevenseven': [31.3605314845, 27.3967468359, 0.0, 0.0, 0.0, -27.5133287373, -31.477113386],
     'eighteight': [30.9752235915, 27.4707274918, 0.0, 0.0, 0.0, -27.5837757531, -30.9752235915],
-                      }
+    'ninenine': [0],
+}
 
 tau_wts_dict = {
     'oneone': [0.0740740, 0.148148, 0.0925930, 0.166667, 0.0185190, 0.0370370,
@@ -121,6 +123,7 @@ tau_wts_dict = {
     'sixsix': [0.0078350431801, 0.00784948916416, 0.317644539734, 0.274246689798, 0.376739705779, 0.00784948916416, 0.0078350431801],
     'sevenseven': [0.00589524944656, 0.00590204051181, 0.371879455317, 0.321515700951, 0.283010263815, 0.00590204051181, 0.00589524944656],
     'eighteight': [0.00459516014524, 0.00459939439378, 0.324116135075, 0.289534720829, 0.367960035019, 0.00459939439378, 0.00459516014524],
+    'ninenine': [1],
 }
 
 #ckms = 2.99792458e5
