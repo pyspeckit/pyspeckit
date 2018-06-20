@@ -253,8 +253,6 @@ def formaldehyde_mm_despotic_functions(gridtable, order=1):
         xvec.shape += (1,)
         Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_321_220, xvec, order=order)
         tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_321_220, xvec, order=order)
-        print("1D interp: {0}".format(s2-s1))
-        print("Mapcoords interp: {0}".format(s3-s2))
         return (Tex, tau)
     return (h2co_303_202, h2co_322_221, h2co_321_220)
 
