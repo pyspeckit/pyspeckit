@@ -76,7 +76,7 @@ pyspeckit.wrappers.fitnh3.plot_nh3({'oneone':sp1, 'twotwo': sp2}, sp,
 #sp.plotter(errstyle='fill')
 #sp.specfit.plot_fit()
 
-sp.plotter.figure.subplots_adjust(hspace=0.1)
+sp.plotter.figure.subplots_adjust(hspace=0.5)
 
 sp.plotter.savefig('oned_ammonia_LTE_fit_example.pdf')
 
@@ -115,8 +115,9 @@ par_like_cube = np.array([chi2(sp, pars) for pars in
                           ProgressBar(params)]).reshape(par_cube[0].shape)
 
 
-fig = pl.figure(2, figsize=(12,12))
+fig = pl.figure(2, figsize=(8,8))
 fig.clf()
+fontsize = 8
 
 for ii,par in enumerate(sp.specfit.parinfo):
     if par.fixed:
@@ -142,9 +143,10 @@ for ii,par in enumerate(sp.specfit.parinfo):
     ax.hlines(par_likes.min() + delta_chi2, xmin, xmax, 'k', '--')
     ax.vlines([par.value - par.error,
                par.value + par.error,], ymin, ymax, 'k', '--')
-    ax.set_ylabel("$\Delta \chi^2$")
-    ax.set_xlabel("{0} Value".format(par.parname))
-    pl.setp(ax.get_xticklabels(), rotation=90)
+    ax.set_ylabel("$\Delta \chi^2$", fontsize=fontsize)
+    ax.set_xlabel("{0} Value".format(par.parname), fontsize=fontsize)
+    pl.setp(ax.get_xticklabels(), rotation=90, fontsize=fontsize)
+    pl.setp(ax.get_yticklabels(), fontsize=fontsize)
 
     ax.set_xlim(xmin, xmax,)
     ax.set_ylim(ymin, ymax,)
@@ -199,14 +201,16 @@ for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,
                par2.value + par2.error,], xmin, xmax, 'k', '--')
     ax.vlines([par1.value - par1.error,
                par1.value + par1.error,], ymin, ymax, 'k', '--')
-    ax.set_xlabel("{0} Value".format(par1.parname))
-    ax.set_ylabel("{0} Value".format(par2.parname))
-    pl.setp(ax.get_xticklabels(), rotation=90)
+    ax.set_xlabel("{0} Value".format(par1.parname), fontsize=fontsize)
+    ax.set_ylabel("{0} Value".format(par2.parname), fontsize=fontsize)
+    pl.setp(ax.get_xticklabels(), rotation=90, fontsize=fontsize)
+    pl.setp(ax.get_yticklabels(), fontsize=fontsize)
 
     ax.set_xlim(xmin, xmax,)
     ax.set_ylim(ymin, ymax,)
 
 fig.tight_layout()
+fig.subplots_adjust(hspace=0.7, wspace=0.7)
 
 fig.savefig("ammonia_LTE_default_error_estimate_demonstration.pdf")
 
@@ -267,7 +271,8 @@ par_like_cube = np.array([chi2(sp,
 
 pl.close(2)
 # this will fail in ugly ways if run on a small screen (everything will be squished)
-fig = pl.figure(2, figsize=(12,12))
+fig = pl.figure(2, figsize=(8,8))
+fontsize = 8
 fig.clf()
 
 dd = 0
@@ -303,9 +308,10 @@ for ii,par in enumerate(sp.specfit.parinfo):
     ax.hlines(par_likes.min() + delta_chi2, xmin, xmax, 'k', '--')
     ax.vlines([par.value - par.error,
                par.value + par.error,], ymin, ymax, 'k', '--')
-    ax.set_ylabel("$\Delta \chi^2$")
-    ax.set_xlabel("{0} Value".format(par.parname))
-    pl.setp(ax.get_xticklabels(), rotation=90)
+    ax.set_ylabel("$\Delta \chi^2$", fontsize=fontsize)
+    ax.set_xlabel("{0} Value".format(par.parname), fontsize=fontsize)
+    pl.setp(ax.get_xticklabels(), rotation=90, fontsize=fontsize)
+    pl.setp(ax.get_yticklabels(), fontsize=fontsize)
 
     ax.set_xlim(xmin, xmax,)
     ax.set_ylim(ymin, ymax,)
@@ -320,46 +326,21 @@ nsteps = 15.
 
 
 plotinds = {0:6, 1:11, 2:12, 3:16, 4:17, 5:18, 6:21, 7:22, 8:23, 9:24}
+plotinds = {(0,1): 6,
+            (0,2): 11,
+            (1,2): 12,
+            (0,3): 16,
+            (1,3): 17,
+            (2,3): 18,
+            (0,4): 21,
+            (1,4): 22,
+            (2,4): 23,
+            (3,4): 24,
+           }
 for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,3,4], 2),
                                                   itertools.combinations(itemgetter(0,2,3,4,6)(sp.specfit.parinfo),2)
                                                  )):
 
-    #if par1.limited[0] and par1.value-par1.error*nsigma_range < par1.limits[0]:
-    #    start1 = par1.limits[0]+par1.limits[0]*1e-3
-    #else:
-    #    start1 = par1.value - par1.error*nsigma_range
-    #if par1.limited[1] and par1.value+par1.error*nsigma_range > par1.limits[1]:
-    #    end1 = par1.limits[1]-par1.limits[1]*1e-3
-    #else:
-    #    end1 = par1.value + par1.error*nsigma_range
-
-    #step1 = (end1 - start1) / nsteps
-
-    #if par2.limited[0] and par2.value-par2.error*nsigma_range < par2.limits[0]:
-    #    start2 = par2.limits[0]+par2.limits[0]*1e-3
-    #else:
-    #    start2 = par2.value - par2.error*nsigma_range
-    #if par2.limited[1] and par2.value+par2.error*nsigma_range > par2.limits[1]:
-    #    end2 = par2.limits[1]-par2.limits[1]*1e-3
-    #else:
-    #    end2 = par2.value + par2.error*nsigma_range
-
-    #step2 = (end2 - start2) / nsteps
-
-    #if par1.parname == 'delta0':
-    #    start1, step1, end1 = 0, maxdelta/nsteps, maxdelta
-    #if par2.parname == 'delta0':
-    #    start2, step2, end2 = 0, maxdelta/nsteps, maxdelta
-
-    #assert end1 > start1
-    #assert end2 > start2
-
-    #p1vals, p2vals = np.mgrid[start1:end1:step1,
-    #                          start2:end2:step2]
-
-
-    #par_likes = np.array([chi2(sp, replace(replace(sp.specfit.parinfo.values, par1.n, val1), par2.n, val2))
-    #                      for val1,val2 in zip(p1vals.ravel(), p2vals.ravel())]).reshape(p1vals.shape)
     other_axis = tuple({0,1,2,3,4} - {ind1,ind2})
 
     par_likes = par_like_cube.min(axis=other_axis)
@@ -376,7 +357,7 @@ for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,
     delta_chi2_95 = scipy.stats.chi2.ppf(pct95, 2)
     delta_chi2_997 = scipy.stats.chi2.ppf(pct997, 2)
 
-    ax = fig.add_subplot(5,5,plotinds[ii])
+    ax = fig.add_subplot(5,5,plotinds[(ind1,ind2)])
     ax.contour(p1vals, p2vals, par_likes.T,
                levels=[par_likes.min()+delta_chi2_68,
                        par_likes.min()+delta_chi2_95,
@@ -388,13 +369,15 @@ for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,
                par2.value + par2.error,], xmin, xmax, 'k', '--')
     ax.vlines([par1.value - par1.error,
                par1.value + par1.error,], ymin, ymax, 'k', '--')
-    ax.set_xlabel("{0} Value".format(par1.parname))
-    ax.set_ylabel("{0} Value".format(par2.parname))
-    pl.setp(ax.get_xticklabels(), rotation=90)
+    ax.set_xlabel("{0} Value".format(par1.parname), fontsize=fontsize)
+    ax.set_ylabel("{0} Value".format(par2.parname), fontsize=fontsize)
+    pl.setp(ax.get_xticklabels(), rotation=90, fontsize=fontsize)
+    pl.setp(ax.get_yticklabels(), fontsize=fontsize)
 
     ax.set_xlim(xmin, xmax,)
     ax.set_ylim(ymin, ymax,)
 
 fig.tight_layout()
 
+fig.subplots_adjust(hspace=0.7, wspace=0.7)
 fig.savefig("ammonia_LTE_restricteddelta_error_estimate_demonstration.pdf")
