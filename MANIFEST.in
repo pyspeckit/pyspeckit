@@ -1,7 +1,6 @@
 include README.rst
 include CHANGES.rst
 
-include ez_setup.py
 include ah_bootstrap.py
 include setup.cfg
 include packagename/tests/coveragerc
@@ -26,7 +25,6 @@ include astropy_helpers/CHANGES.rst
 include astropy_helpers/LICENSE.rst
 recursive-include astropy_helpers/licenses *
 
-include astropy_helpers/ez_setup.py
 include astropy_helpers/ah_bootstrap.py
 
 recursive-include astropy_helpers/astropy_helpers *.py *.pyx *.c *.h *.rst

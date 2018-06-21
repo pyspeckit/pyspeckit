@@ -32,7 +32,7 @@ if not _ASTROPY_SETUP_:  # noqa
         ConfigurationDefaultMissingWarning)
 
     # Create the test function for self test
-    from astropy.tests.helper import TestRunner
+    from astropy.tests.runner import TestRunner
     test = TestRunner.make_test_runner_in(os.path.dirname(__file__))
     __all__ += ['test']
 
