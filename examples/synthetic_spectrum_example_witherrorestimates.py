@@ -134,9 +134,13 @@ for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2]
 
     ax = fig.add_subplot(3,3,plotinds[ii])
     ax.contour(p1vals, p2vals, par_likes.T,
-               levels=[par_likes.min()+delta_chi2_68,
+               levels=[par_likes.min()+1,
+                       par_likes.min()+delta_chi2_68,
                        par_likes.min()+delta_chi2_95,
-                       par_likes.min()+delta_chi2_997])
+                       par_likes.min()+delta_chi2_997],
+               colors=['k', 'r', 'b', 'g'],
+               linestyles=['--', '-', ':', '-.'],
+              )
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
     ax.plot(par1.value, par2.value, 'kx')

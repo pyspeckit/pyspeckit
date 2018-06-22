@@ -80,6 +80,7 @@ sp.plotter.figure.subplots_adjust(hspace=0.5)
 
 sp.plotter.savefig('oned_ammonia_LTE_fit_example.pdf')
 
+sp.xarr.convert_to_unit(u.GHz)
 
 # do a deeper examination of the likelihood function
 
@@ -191,9 +192,13 @@ for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,
 
     ax = fig.add_subplot(5,5,plotinds[(ind1,ind2)])
     ax.contour(p1vals, p2vals, par_likes.T,
-               levels=[par_likes.min()+delta_chi2_68,
+               levels=[par_likes.min()+1,
+                       par_likes.min()+delta_chi2_68,
                        par_likes.min()+delta_chi2_95,
-                       par_likes.min()+delta_chi2_997])
+                       par_likes.min()+delta_chi2_997],
+               colors=['k', 'r', 'b', 'g'],
+               linestyles=['--', '-', ':', '-.'],
+              )
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
     ax.plot(par1.value, par2.value, 'kx')
@@ -359,9 +364,13 @@ for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,
 
     ax = fig.add_subplot(5,5,plotinds[(ind1,ind2)])
     ax.contour(p1vals, p2vals, par_likes.T,
-               levels=[par_likes.min()+delta_chi2_68,
+               levels=[par_likes.min()+1,
+                       par_likes.min()+delta_chi2_68,
                        par_likes.min()+delta_chi2_95,
-                       par_likes.min()+delta_chi2_997])
+                       par_likes.min()+delta_chi2_997],
+               colors=['k', 'r', 'b', 'g'],
+               linestyles=['--', '-', ':', '-.'],
+              )
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
     ax.plot(par1.value, par2.value, 'kx')
