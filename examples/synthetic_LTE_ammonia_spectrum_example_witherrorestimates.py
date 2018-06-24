@@ -102,18 +102,23 @@ def replace(lst, eltid, value):
     lstcopy[eltid] = value
     return lstcopy
 
-nsteps = {'width0': 7, 'tex0': 15, 'trot0': 14, 'xoff_v0': 5,  'ntot0': 11}
+nsteps = {'width0': 7, 'tex0': 21, 'trot0': 20, 'ntot0': 19}
 par_edges = [np.linspace(par.value-par.error*2,
                          par.value+par.error*2,
                          nsteps[par.parname])
              for par in sp.specfit.parinfo
              if not par.fixed and not par.tied
+             and not par.parname == 'xoff_v0'
             ]
 par_cube = np.meshgrid(*par_edges, indexing='ij')
 params = np.array(list(zip(map(np.ravel, par_cube)))).squeeze().T
 
-par_like_cube = np.array([chi2(sp, pars) for pars in
-                          ProgressBar(params)]).reshape(par_cube[0].shape)
+xoff_v0 = sp.specfit.parinfo['xoff_v0'].value
+
+if 'par_like_cube' not in locals():
+    # allow re-run of plot code without re-rerunning the chi^2 calculations
+    par_like_cube = np.array([chi2(sp, pars.tolist()+[xoff_v0]) for pars in
+                              ProgressBar(params)]).reshape(par_cube[0].shape)
 
 
 fig = pl.figure(2, figsize=(8,8))
@@ -121,10 +126,10 @@ fig.clf()
 fontsize = 8
 
 for ii,par in enumerate(sp.specfit.parinfo):
-    if par.fixed:
+    if par.fixed or par.parname == 'xoff_v0':
         continue
 
-    other_axes = tuple([x for x in (0,1,2,3,4) if x != ii])
+    other_axes = tuple([x for x in (0,1,2,3) if x != ii])
     par_likes = par_like_cube.min(axis=other_axes)
     par_vals = par_edges[ii]
 
@@ -137,7 +142,7 @@ for ii,par in enumerate(sp.specfit.parinfo):
     # marginalizing over the other parameters
     delta_chi2 = scipy.stats.chi2.ppf(pct68, 1)
 
-    ax = fig.add_subplot(5,5,1+ii*6)
+    ax = fig.add_subplot(4,4,1+ii*5)
     ax.plot(par_vals, par_likes)
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
@@ -159,23 +164,15 @@ nsigma_range = 2
 nsteps = 15.
 
 plotinds = {0:6, 1:11, 2:12, 3:16, 4:17, 5:18, 6:21, 7:22, 8:23, 9:24}
-plotinds = {(0,1): 6,
-            (0,2): 11,
-            (1,2): 12,
-            (0,3): 16,
-            (1,3): 17,
-            (2,3): 18,
-            (0,4): 21,
-            (1,4): 22,
-            (2,4): 23,
-            (3,4): 24,
-           }
+plotinds = {(0,1): 6, (0,2): 11, (1,2): 12, (0,3): 16, (1,3): 17, (2,3): 18,
+            (0,4): 21, (1,4): 22, (2,4): 23, (3,4): 24, }
+plotinds = {(0,1): 5, (0,2): 9, (1,2): 10, (0,3): 13, (1,3): 14, (2,3): 15}
 
-for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,3,4], 2),
-                                                  itertools.combinations(sp.specfit.parinfo[:5], 2)
+for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,3], 2),
+                                                  itertools.combinations(sp.specfit.parinfo[:4], 2)
                                                  )):
 
-    other_axis = tuple({0,1,2,3,4} - {ind1,ind2})
+    other_axis = tuple({0,1,2,3} - {ind1,ind2})
 
     par_likes = par_like_cube.min(axis=other_axis)
     p1vals = par_edges[ind1]
@@ -190,7 +187,7 @@ for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,
     delta_chi2_95 = scipy.stats.chi2.ppf(pct95, 2)
     delta_chi2_997 = scipy.stats.chi2.ppf(pct997, 2)
 
-    ax = fig.add_subplot(5,5,plotinds[(ind1,ind2)])
+    ax = fig.add_subplot(4,4,plotinds[(ind1,ind2)])
     ax.contour(p1vals, p2vals, par_likes.T,
                levels=[par_likes.min()+1,
                        par_likes.min()+delta_chi2_68,
@@ -253,7 +250,7 @@ def replace(lst, eltid, value):
     return lstcopy
 
 
-nsteps = {'width0': 7, 'delta0': 12, 'trot0': 13, 'xoff_v0': 5,  'ntot0': 11}
+nsteps = {'width0': 7, 'delta0': 21, 'trot0': 20, 'xoff_v0': 1,  'ntot0': 19}
 par_edges = [np.linspace(0, 10/nsteps[par.parname], nsteps[par.parname])
              if par.parname == 'delta0' else
              np.linspace(par.value-par.error*2,
@@ -261,17 +258,24 @@ par_edges = [np.linspace(0, 10/nsteps[par.parname], nsteps[par.parname])
                          nsteps[par.parname])
              for par in sp.specfit.parinfo
              if not par.fixed and not par.tied
+             and par.parname != 'xoff_v0'
             ]
 par_cube = np.meshgrid(*par_edges, indexing='ij')
 assert par_cube[0].shape == (nsteps['trot0'], nsteps['ntot0'],
-                             nsteps['width0'], nsteps['xoff_v0'],
+                             nsteps['width0'],
+                             #nsteps['xoff_v0'],
                              nsteps['delta0'])
 params = list(map(list, zip(*map(list, map(np.ravel, par_cube)))))
 
-par_like_cube = np.array([chi2(sp,
-                               pars[0:1] + [pars[0]+pars[-1]] + pars[1:4] + [0] + pars[4:])
-                          for pars in
-                          ProgressBar(params)]).reshape(par_cube[0].shape)
+xoff_v0 = sp.specfit.parinfo['xoff_v0'].value
+
+if 'par_like_cube_dtex' not in locals():
+    # allow re-run of plot code without re-rerunning the chi^2 calculations
+    par_like_cube_dtex = np.array([chi2(sp,
+                                   pars[0:1] + [pars[0]+pars[-1]] + pars[1:4] +
+                                   [0, xoff_v0] + pars[5:])
+                              for pars in
+                              ProgressBar(params)]).reshape(par_cube[0].shape)
 
 
 pl.close(2)
@@ -282,20 +286,12 @@ fig.clf()
 
 dd = 0
 for ii,par in enumerate(sp.specfit.parinfo):
-    if par.fixed or par.tied:
+    if par.fixed or par.tied or par.parname == 'xoff_v0':
         continue
 
-    other_axes = tuple([x for x in (0,1,2,3,4) if x != dd])
-    par_likes = par_like_cube.min(axis=other_axes)
+    other_axes = tuple([x for x in (0,1,2,3) if x != dd])
+    par_likes = par_like_cube_dtex.min(axis=other_axes)
     par_vals = par_edges[dd]
-
-    #if par.parname == 'delta0':
-    #    maxdelta = 10
-    #    start, step, end = 0, maxdelta/nsteps, maxdelta
-    #    par_vals = np.linspace(start, end, nsteps)
-
-    #par_likes = np.array([chi2(sp, replace(sp.specfit.parinfo.values, ii, val))
-    #                      for val in par_vals])
 
     pct68 = scipy.stats.chi2.cdf(1, 1)
 
@@ -306,7 +302,7 @@ for ii,par in enumerate(sp.specfit.parinfo):
     # marginalizing over the other parameters
     delta_chi2 = scipy.stats.chi2.ppf(pct68, 1)
 
-    ax = fig.add_subplot(5,5,1+(dd)*6)
+    ax = fig.add_subplot(4,4,1+(dd)*5)
     ax.plot(par_vals, par_likes)
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
@@ -331,24 +327,16 @@ nsteps = 15.
 
 
 plotinds = {0:6, 1:11, 2:12, 3:16, 4:17, 5:18, 6:21, 7:22, 8:23, 9:24}
-plotinds = {(0,1): 6,
-            (0,2): 11,
-            (1,2): 12,
-            (0,3): 16,
-            (1,3): 17,
-            (2,3): 18,
-            (0,4): 21,
-            (1,4): 22,
-            (2,4): 23,
-            (3,4): 24,
-           }
-for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,3,4], 2),
-                                                  itertools.combinations(itemgetter(0,2,3,4,6)(sp.specfit.parinfo),2)
+plotinds = {(0,1): 6, (0,2): 11, (1,2): 12, (0,3): 16, (1,3): 17, (2,3): 18,
+            (0,4): 21, (1,4): 22, (2,4): 23, (3,4): 24, }
+plotinds = {(0,1): 5, (0,2): 9, (1,2): 10, (0,3): 13, (1,3): 14, (2,3): 15}
+for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,3], 2),
+                                                  itertools.combinations(itemgetter(0,2,3,6)(sp.specfit.parinfo),2)
                                                  )):
 
-    other_axis = tuple({0,1,2,3,4} - {ind1,ind2})
+    other_axis = tuple({0,1,2,3} - {ind1,ind2})
 
-    par_likes = par_like_cube.min(axis=other_axis)
+    par_likes = par_like_cube_dtex.min(axis=other_axis)
     p1vals = par_edges[ind1]
     p2vals = par_edges[ind2]
 
@@ -362,7 +350,7 @@ for ii,((ind1,ind2),(par1,par2)) in enumerate(zip(itertools.combinations([0,1,2,
     delta_chi2_95 = scipy.stats.chi2.ppf(pct95, 2)
     delta_chi2_997 = scipy.stats.chi2.ppf(pct997, 2)
 
-    ax = fig.add_subplot(5,5,plotinds[(ind1,ind2)])
+    ax = fig.add_subplot(4,4,plotinds[(ind1,ind2)])
     ax.contour(p1vals, p2vals, par_likes.T,
                levels=[par_likes.min()+1,
                        par_likes.min()+delta_chi2_68,
