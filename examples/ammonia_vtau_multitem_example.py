@@ -29,7 +29,7 @@ synthspec = (ammonia.ammonia(xarr, trot=20, ntot=15, fortho=0.5, xoff_v=0.0,
                              width=1.0))
 
 # Create the Spectrum object
-spectrum = pyspeckit.Spectrum(xarr=xarr, data=synthspec)
+spectrum = pyspeckit.Spectrum(xarr=xarr, data=synthspec, header={})
 
 
 # Step 2.  You have a spectrum.
