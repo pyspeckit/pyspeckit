@@ -22,7 +22,9 @@ VF = inherited_voigtfitter.voigt_fitter()
 sp1 = pyspeckit.Spectrum(xarr=xarr,
                          data=(VF.n_modelfunc((1, 0, 2.5, 2.5))(xarr) +
                                np.random.randn(xarr.shape[0])/20.),
-                         error=np.ones(xarr.shape[0])/20.)
+                         error=np.ones(xarr.shape[0])/20.,
+                         header={},
+                        )
 sp1.plotter()
 sp1.specfit(fittype='gaussian', composite_fit_color='b', clear=False,
             annotate=False, guesses='moments')
@@ -33,7 +35,9 @@ sp1.specfit(fittype='voigt', composite_fit_color='r', clear=False,
 
 sp2 = pyspeckit.Spectrum(xarr=xarr, data=VF.n_modelfunc((1,0,2.5,5.0))(xarr) +
                          np.random.randn(xarr.shape[0])/20.,
-                         error=np.ones(xarr.shape[0])/20.)
+                         error=np.ones(xarr.shape[0])/20.,
+                         header={},
+                        )
 sp2.plotter()
 sp2.specfit(fittype='gaussian', composite_fit_color='b', clear=False,
             annotate=False, guesses='moments')
@@ -44,7 +48,9 @@ sp2.specfit(fittype='voigt', composite_fit_color='r', clear=False,
 
 sp3 = pyspeckit.Spectrum(xarr=xarr, data=VF.n_modelfunc((1,0,2.5,5.0))(xarr) +
                          np.random.randn(xarr.shape[0])/50.,
-                         error=np.ones(xarr.shape[0])/50.)
+                         error=np.ones(xarr.shape[0])/50.,
+                         header={},
+                        )
 sp3.plotter()
 sp3.specfit(fittype='gaussian', composite_fit_color='b', clear=False,
             annotate=False, guesses='moments')

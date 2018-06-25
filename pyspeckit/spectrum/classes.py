@@ -35,7 +35,7 @@ from . import fitters
 from . import history
 import copy
 from astropy import log
-from ..specwarnings import warn
+from ..specwarnings import warn, PyspeckitWarning
 try:
     import atpy
     atpyOK = True
@@ -184,7 +184,8 @@ class BaseSpectrum(object):
                 else:
                     self.header = header
             else: # set as blank
-                warn("WARNING: No header given.  Creating an empty one.")
+                warn("WARNING: No header given.  Creating an empty one.",
+                     PyspeckitWarning)
                 self.header = pyfits.Header()
             self.parse_header(self.header)
         else:

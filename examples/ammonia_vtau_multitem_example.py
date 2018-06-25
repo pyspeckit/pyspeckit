@@ -29,7 +29,7 @@ synthspec = (ammonia.ammonia(xarr, trot=20, ntot=15, fortho=0.5, xoff_v=0.0,
                              width=1.0))
 
 # Create the Spectrum object
-spectrum = pyspeckit.Spectrum(xarr=xarr, data=synthspec)
+spectrum = pyspeckit.Spectrum(xarr=xarr, data=synthspec, header={})
 
 
 # Step 2.  You have a spectrum.
@@ -86,7 +86,7 @@ synthspec = (ammonia.ammonia(xarr, trot=20, ntot=16, fortho=0.5, xoff_v=0.0,
                              width=1.0) +
              ammonia.ammonia(xarr, trot=50, ntot=15, fortho=0.5, xoff_v=0.0,
                              width=1.0))
-spectrum2 = pyspeckit.Spectrum(xarr=xarr, data=synthspec)
+spectrum2 = pyspeckit.Spectrum(xarr=xarr, data=synthspec, header={})
 spectrum2.plotter()
 spectrum2.specfit.Registry.add_fitter('nh3_vtau_123', fitter, fitter.npars)
 spectrum2.specfit(fittype='nh3_vtau_123', guesses=guesses)
