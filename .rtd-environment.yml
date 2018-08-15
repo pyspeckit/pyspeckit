@@ -9,5 +9,6 @@ dependencies:
     - Cython
     - matplotlib
     - numpy
+    - sphinx-astropy
 #   - pip:
 #       - dependency_from_pip
