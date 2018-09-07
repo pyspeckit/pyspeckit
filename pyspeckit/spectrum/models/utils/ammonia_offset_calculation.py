@@ -1,3 +1,4 @@
+from __future__ import print_function
 import re
 import numpy as np
 from astropy import units as u
@@ -46,7 +47,7 @@ for line in (1,2,3,4,5,6,7,8,9):
     tbls[line] = tbl[tbl['Linelist'] == 'TopModel']
 
 for par in ('tau_wts','voff_lines','aval','freq'):
-    print par
+    print(par)
     for line in (1,2,3,4,5,6,7,8): # 9 not available
 
         tbl = tbls[line]
@@ -63,14 +64,14 @@ for par in ('tau_wts','voff_lines','aval','freq'):
         weightline = intensityline/intensityline.sum()
 
         if par == 'freq':
-            print "'{n}{n}': {f},".format(n=numbers[line], f=centerline)
+            print("'{n}{n}': {f},".format(n=numbers[line], f=centerline))
         elif par == 'voff_lines':
-            print "'{n}{n}': [{v}],".format(n=numbers[line],
+            print("'{n}{n}': [{v}],".format(n=numbers[line],
                                             v=", ".join(str(x)
-                                                        for x in voff_linesline.to(u.km/u.s).value))
+                                                        for x in voff_linesline.to(u.km/u.s).value)))
         elif par == 'tau_wts':
             #print "'{n}{n}': {d},".format(n=numbers[line], d=np.array(degeneracyline))
-            print "'{n}{n}': [{d}],".format(n=numbers[line],
-                                            d=", ".join(str(x) for x in weightline))
+            print("'{n}{n}': [{d}],".format(n=numbers[line],
+                                            d=", ".join(str(x) for x in weightline)))
         elif par == 'aval':
-            print "'{n}{n}': {d:e},".format(n=numbers[line], d=aval)
+            print("'{n}{n}': {d:e},".format(n=numbers[line], d=aval))

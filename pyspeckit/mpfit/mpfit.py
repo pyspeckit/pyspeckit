@@ -1137,16 +1137,25 @@ class mpfit:
             # Form (q transpose)*fvec and store the first n components in qtf
             catch_msg = 'forming (q transpose)*fvec'
             wa4 = fvec.copy()
+            log.log(5, 'Before optimizing wa4, value is ={0}'.format(wa4))
+            try:
+                wa4._sharedmask = False # to deal with np1.11+ shared mask behavior: should not change anything
+            except AttributeError:
+                # apparently numpy won't let you write attributes it doesn't know about...
+                pass
             for j in range(n):
                 lj = ipvt[j]
                 temp3 = fjac[j,lj]
                 if temp3 != 0:
                     fj = fjac[j:,lj]
                     wj = wa4[j:]
+                    # vsokolov 21 Mar 2017: switched to numpy's sum(),
+                    #                       as both are numpy arrays.
                     # *** optimization wa4(j:*)
-                    wa4[j:] = wj - fj * sum(fj*wj) / temp3
+                    wa4[j:] = wj - fj * numpy.sum(fj*wj) / temp3
                 fjac[j,lj] = wa1[j]
                 qtf[j] = wa4[j]
+            log.log(5, 'After optimizing wa4, qtf={0}'.format(qtf))
             # From this point on, only the square matrix, consisting of the
             # triangle of R, is needed.
             fjac = fjac[0:n, 0:n]
@@ -1173,7 +1182,7 @@ class mpfit:
                         sum0 = sum(fjac[0:j+1,j]*qtf[0:j+1])/self.fnorm
                         gnorm = numpy.max([gnorm,numpy.abs(sum0/wa2[l])])
             if gnorm == 0.:
-                log.warn("gnorm=0.   wa2={0}".format(wa2))
+                log.warning("gnorm=0.   wa2={0}".format(wa2))
 
             # Test for convergence of the gradient norm
             if gnorm <= gtol:
@@ -1195,13 +1204,12 @@ class mpfit:
                 # Determine the levenberg-marquardt parameter
                 catch_msg = 'calculating LM parameter (MPFIT_)'
                 [fjac, par, wa1, wa2] = self.lmpar(fjac, ipvt, diag, qtf,
-                                                     delta, wa1, wa2, par=par)
+                                                   delta, wa1, wa2, par=par)
                 # Store the direction p and x+p. Calculate the norm of p
                 wa1 = -wa1
-                if debug:
-                    print("before parameter setting; wa1={0}".format(wa1))
-                    print("before parameter setting; wa2={0}".format(wa2))
-                    print("before parameter setting; params={0}".format(self.params))
+                log.log(5, "before parameter setting; wa1={0}".format(wa1))
+                log.log(5, "before parameter setting; wa2={0}".format(wa2))
+                log.log(5, "before parameter setting; params={0}".format(self.params))
 
                 if (qanylim == 0) and (qminmax == 0):
                     # No parameter limits, so just move to new position WA2
@@ -1219,15 +1227,14 @@ class mpfit:
                         # Do not allow any steps out of bounds
                         catch_msg = 'checking for a step out of bounds'
                         if nlpeg > 0:
-                            wa1[whlpeg] = numpy.clip( wa1[whlpeg], 0., numpy.max(wa1))
+                            wa1[whlpeg] = numpy.clip(wa1[whlpeg], 0., numpy.max(wa1))
                         if nupeg > 0:
                             wa1[whupeg] = numpy.clip(wa1[whupeg], numpy.min(wa1), 0.)
 
                         dwa1 = numpy.abs(wa1) > machep
                         whl = (numpy.nonzero(((dwa1!=0.) & qllim) & ((free_pars_x + wa1) < llim)))[0]
                         if len(whl) > 0:
-                            t = ((llim[whl] - free_pars_x[whl]) /
-                                  wa1[whl])
+                            t = ((llim[whl] - free_pars_x[whl]) / wa1[whl])
                             alpha = numpy.min([alpha, numpy.min(t)])
                         whu = (numpy.nonzero(((dwa1!=0.) & qulim) & ((free_pars_x + wa1) > ulim)))[0]
                         if len(whu) > 0:
@@ -1866,7 +1873,9 @@ class mpfit:
                     # *** Note optimization a(j:*,lk)
                     # (corrected 20 Jul 2000)
                     if a[j,lj] != 0:
-                        a[j:,lk] = ajk - ajj * sum(ajk*ajj)/a[j,lj]
+                        # vsokolov 21 Mar 2017: switched to numpy's sum(),
+                        #                       as both are numpy arrays.
+                        a[j:,lk] = ajk - ajj * numpy.sum(ajk*ajj)/a[j,lj]
                         if (pivot != 0) and (rdiag[k] != 0):
                             temp = a[j,lk]/rdiag[k]
                             rdiag[k] = rdiag[k] * numpy.sqrt(numpy.max([(1.-temp**2), 0.]))
@@ -1957,7 +1966,7 @@ class mpfit:
     #
 
     def qrsolv(self, r, ipvt, diag, qtb, sdiag):
-        log.log(5, 'Entering qrsolv...')
+        log.log(5, 'Entering qrsolv... r={0} ipvt={1} diag={2} qtb={3}'.format(r, ipvt, diag, qtb))
         sz = r.shape
         # not used m = sz[0]
         n = sz[1]
@@ -2128,7 +2137,7 @@ class mpfit:
 
     def lmpar(self, r, ipvt, diag, qtb, delta, x, sdiag, par=None):
 
-        log.log(5, 'Entering lmpar...')
+        log.log(5, 'Entering lmpar... delta={0} x={1} sdiag={2} qtb={3}'.format(delta, x, sdiag, qtb))
         dwarf = self.machar.minnum
         machep = self.machar.machep
         sz = r.shape

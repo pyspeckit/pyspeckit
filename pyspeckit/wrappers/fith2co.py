@@ -8,7 +8,6 @@ Wrapper to fit formaldehyde spectra.
 from __future__ import print_function
 from .. import spectrum
 from ..spectrum import units
-from matplotlib import pyplot
 import copy
 from astropy import units as u
 from astropy.extern.six import iteritems
@@ -26,6 +25,7 @@ def plot_h2co(spdict, spectra, fignum=1, show_components=False,
     """
     Plot the results from a multi-h2co fit
     """
+    from matplotlib import pyplot
     spectra.plotter.figure = pyplot.figure(fignum)
     spectra.plotter.axis = spectra.plotter.figure.gca()
     if clear:

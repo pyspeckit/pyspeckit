@@ -18,7 +18,7 @@ def open_1d_fits(filename, hdu=0, **kwargs):
     Inputs:
         wcstype - the suffix on the WCS type to get to
             velocity/frequency/whatever
-        specnum - Which # spectrum, along the y-axis, is 
+        specnum - Which # spectrum, along the y-axis, is
             the data?
         errspecnum - Which # spectrum, along the y-axis,
             is the error spectrum?
@@ -38,8 +38,9 @@ def open_1d_fits(filename, hdu=0, **kwargs):
 
 
 def open_1d_pyfits(pyfits_hdu, specnum=0, wcstype='', specaxis="1",
-        errspecnum=None, autofix=True, scale_keyword=None,
-        scale_action=operator.truediv, verbose=False, apnum=0, **kwargs):
+                   errspecnum=None, autofix=True, scale_keyword=None,
+                   scale_action=operator.truediv, verbose=False, apnum=0,
+                   **kwargs):
     """
     This is open_1d_fits but for a pyfits_hdu so you don't necessarily have to
     open a fits file
@@ -51,13 +52,15 @@ def open_1d_pyfits(pyfits_hdu, specnum=0, wcstype='', specaxis="1",
     specaxis = str(specaxis)
 
     hdr = pyfits_hdu._header
-    if autofix: 
+    if autofix:
         for card in hdr.cards:
             try:
-                if verbose: card.verify('fix')
-                else: card.verify('silentfix')
+                if verbose:
+                    card.verify('fix')
+                else:
+                    card.verify('silentfix')
             except pyfits.VerifyError:
-                hdr.__delitem__(card.key)
+                del hdr[card.keyword]
 
     data = pyfits_hdu.data
 
@@ -97,10 +100,10 @@ will run into errors.""")
                 "  Type: %s" %
                 str(type(specnum)))
         if errspecnum is not None:
-            # SDSS supplies weights, not errors.    
+            # SDSS supplies weights, not errors.
             if hdr.get('TELESCOP') == 'SDSS 2.5-M':
                 errspec = 1. / np.sqrt(ma.array(data[errspecnum,:]).squeeze())
-            else:       
+            else:
                 errspec = ma.array(data[errspecnum,:]).squeeze()
         else:
             errspec = spec*0 # set error spectrum to zero if it's not in the data
@@ -115,7 +118,7 @@ will run into errors.""")
                 if hdr.get('NAXIS%i' % ii) > 1 and (ii != int(specaxis)):
                     raise ValueError("Too many axes for open_1d_fits")
             spec = ma.array(data).squeeze()
-        if errspecnum is None: 
+        if errspecnum is None:
             errspec = spec*0 # set error spectrum to zero if it's not in the data
     else:
         spec = ma.array(data).squeeze()
@@ -180,7 +183,7 @@ will run into errors.""")
         else:
             xconv = lambda v: ((v-p3+1)*dv+v0)
             xarr = xconv(np.arange(len(spec)))
-    
+
     # need to do something with this...
     restfreq = hdr.get('RESTFREQ')
     if restfreq is None: restfreq= hdr.get('RESTFRQ')
@@ -226,21 +229,21 @@ def make_linear_axis(hdr, axsplit, WAT1_dict):
         warn("Treating as cropped echelle spectrum.")
     else:
         crpix = 0
-        
+
     if len(axsplit) > 9:
         functions = axsplit[9:]
         warn("Found but did not use functions %s" % str(functions))
-        
+
     if int(dtype) == 0:
         # Linear dispersion (eq 2, p.5 from Valdez, linked above)
         xax = ((float(crval) + float(cdelt) * (np.arange(int(naxis)) + 1 -
                                                crpix)) / (1.+float(z)))
     else: raise ValueError("Unrecognized LINEAR dispersion in IRAF Echelle specification")
-    
+
     headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt,'NAXIS1':naxis,
              'NAXIS':1, 'REDSHIFT':z, 'CTYPE1':'wavelength',
              'CUNIT1':WAT1_dict['units']}
-    
+
     return xax, naxis, headerkws
 
 def make_multispec_axis(hdr, axsplit, WAT1_dict):
@@ -253,11 +256,11 @@ def make_multispec_axis(hdr, axsplit, WAT1_dict):
         warn("Treating as cropped echelle spectrum.")
     else:
         crpix = 0
-    
+
     if len(axsplit) > 9:
         functions = axsplit[9:]
         warn("Found but did not use functions %s" % str(functions))
-        
+
     if int(dtype) == 0:
         # Linear dispersion (eq 11, p.9 from Valdez, linked above)
         xax = (float(crval) + float(cdelt) * (np.arange(int(naxis)))) / (1.+float(z))
@@ -269,17 +272,17 @@ def make_multispec_axis(hdr, axsplit, WAT1_dict):
     # elif int(dtype) == -1:
         # Data is not dispersion coords
     else: raise ValueError("Unrecognized MULTISPE dispersion in IRAF Echelle specification")
-    
+
     headerkws = {'CRPIX1':1, 'CRVAL1':crval, 'CDELT1':cdelt, 'NAXIS1':naxis,
                  'NAXIS':1, 'REDSHIFT':z, 'CTYPE1':'wavelength',
                  'CUNIT1':WAT1_dict['units']}
-    
+
     return xax, naxis, headerkws
 
 def read_echelle(pyfits_hdu):
     """
     Read an IRAF Echelle spectrum
-    
+
     http://iraf.noao.edu/iraf/ftp/iraf/docs/specwcs.ps.Z
     """
 
@@ -294,7 +297,7 @@ def read_echelle(pyfits_hdu):
         if specnum != int(axsplit[0]):
             raise ValueError("Mismatch in IRAF Echelle specification")
         num,beam,dtype,crval,cdelt,naxis,z,aplow,aphigh = axsplit[:9]
-        
+
         if hdr['CTYPE1'] == 'LINEAR':
             xax,naxis,headerkws = make_linear_axis(hdr, axsplit, WAT1_dict)
         elif hdr['CTYPE1'] == 'MULTISPE':
@@ -309,5 +312,5 @@ def read_echelle(pyfits_hdu):
     data = pyfits_hdu.data
     with np.errstate(invalid='ignore'):
         data[np.isnan(data)] = np.nan
-    
+
     return data, np.zeros_like(data), units.EchelleAxes(x_axes), hdr

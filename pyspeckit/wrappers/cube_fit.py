@@ -6,16 +6,14 @@ Complicated code for fitting of a whole data cube, pixel-by-pixel
 """
 from __future__ import print_function
 import pyspeckit
-try:
-    import astropy.io.fits as pyfits
-except ImportError:
-    import pyfits
+from astropy.io import fits
+import astropy
 import numpy as np
 import os
 
 def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
         vheight=False, verbose=False, signal_cut=3, verbose_level=2,
-        clobber=True, **kwargs):
+        overwrite=True, **kwargs):
     """
     Light-weight wrapper for cube fitting
 
@@ -47,13 +45,13 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
         T_A units and you want T_A*
     vheight: [ bool ]
         Is there a background to be fit?  Used in moment computation
-    verbose: [ bool ] 
+    verbose: [ bool ]
     verbose_level: [ int ]
         How loud will the fitting procedure be?  Passed to momenteach and fiteach
-    signal_cut: [ float ] 
+    signal_cut: [ float ]
         Signal-to-Noise ratio minimum.  Spectra with a peak below this S/N ratio
         will not be fit and will be left blank in the output fit parameter cube
-    clobber: [ bool ] 
+    overwrite: [ bool ]
         Overwrite parameter .fits cube if it exists?
 
     `kwargs` are passed to :class:`pyspeckit.Spectrum.specfit`
@@ -62,7 +60,7 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
     # Load the spectrum
     sp = pyspeckit.Cube(cubefilename,scale_keyword=scale_keyword)
     if os.path.exists(errfilename):
-        errmap = pyfits.getdata(errfilename)
+        errmap = fits.getdata(errfilename)
     else:
         # very simple error calculation... biased and bad, needs improvement
         # try using something from the cubes package
@@ -80,8 +78,8 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
                verbose=verbose, **kwargs)
 
     # steal the header from the error map
-    f = pyfits.open(cubefilename)
-    # start replacing components of the pyfits object
+    f = fits.open(cubefilename)
+    # start replacing components of the fits object
     f[0].data = np.concatenate([sp.parcube,sp.errcube,sp.integralmap])
     f[0].header['PLANE1'] = 'amplitude'
     f[0].header['PLANE2'] = 'velocity'
@@ -96,7 +94,10 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
     f[0].header['CRVAL3'] = 0
     f[0].header['CRPIX3'] = 1
     # save your work
-    f.writeto(outfilename, clobber=clobber)
+    if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+        f.writeto(outfilename, overwrite=overwrite)
+    else:
+        f.writeto(outfilename, clobber=overwrite)
 
     return sp
 

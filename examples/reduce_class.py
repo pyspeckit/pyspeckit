@@ -24,7 +24,7 @@ def fit_source(sp,debug=False,autorefresh=False,refit=False):
     sp.specfit(negamp=False,limitedmin=[True,True,False,True])
     print(sp.specfit.guesses,sp.specfit.modelpars,sp.specfit.modelerrs,sp.specfit.errspec.mean())
     if debug: pdb.set_trace()
-    #raw_input('Wait')
+
     if (sp.specfit.modelpars[0] <= 2*sp.specfit.modelerrs[0] 
         or sp.specfit.modelpars[2] > 10
         or (sp.specfit.modelpars[2] > 5 and 
@@ -48,7 +48,7 @@ def fit_source(sp,debug=False,autorefresh=False,refit=False):
         sp.plotter(ymax=sp.plotter.ymax*1.3,clear=False)
     print(sp.specfit.guesses,sp.specfit.modelpars,sp.specfit.modelerrs,sp.specfit.errspec.mean())
     if debug: pdb.set_trace()
-    #raw_input("Hold up")
+
     sp.plotter.refresh()
     savename = "%s_%s_gaussfit.png" % (sp.specname,sp.header['LINE'].strip().replace("+","p"))
     print("Saving fit in %s" % savename)

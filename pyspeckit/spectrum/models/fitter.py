@@ -3,6 +3,9 @@
 SimpleFitter wrapper 
 ====================
 Adds a variable height (background) component to any model
+
+Module API
+^^^^^^^^^^
 """
 import numpy
 from pyspeckit.mpfit import mpfit

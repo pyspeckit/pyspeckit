@@ -27,4 +27,7 @@ def load_IRAF_multispec(fitsfilename):
             header=header) 
         for ii in xrange(data.shape[0])]
 
+    # should be unnecessary, but I've seen warnings about unclosed files...
+    fitsfile.close()
+
     return speclist

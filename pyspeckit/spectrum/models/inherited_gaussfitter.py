@@ -10,31 +10,34 @@ gaussfitter.py code.  Now, this is a great example of how to make your own
 model!  Just make a function like gaussian and plug it into the SpectralModel
 class.
 
+Module API
+^^^^^^^^^^
 """
-import numpy
-import types
+import numpy as np
+import warnings
 from . import model
 from . import fitter
+from ...specwarnings import PyspeckitWarning
 
-def gaussian(x,A,dx,w, return_components=False, normalized=False,
+def gaussian(xarr, amplitude, dx, width, return_components=False, normalized=False,
              return_hyperfine_components=False):
     """
     Returns a 1-dimensional gaussian of form
-    A*numpy.exp(-(x-dx)**2/(2*w**2))
+    A*np.exp(-(x-dx)**2/(2*w**2))
 
     Area is sqrt(2*pi*sigma^2)*amplitude - i.e., this is NOT a normalized
     gaussian, unless normalized=True in which case A = Area
     
     Parameters
     ----------
-    x : np.ndarray
+    xarr : np.ndarray
         array of x values
-    A : float
+    amplitude : float
         Amplitude of the Gaussian, i.e. its peak value, unless
         normalized=True then A is the area of the gaussian
     dx : float
         Center or "shift" of the gaussian
-    w : float
+    width : float
         Width of the gaussian (sigma)
     return_components : bool
         dummy variable; return_components does nothing but is required by all
@@ -45,19 +48,25 @@ def gaussian(x,A,dx,w, return_components=False, normalized=False,
     normalized : bool
         Return a normalized Gaussian?
     """
-    x = numpy.array(x) # make sure xarr is no longer a spectroscopic axis
-    G = A*numpy.exp(-(x-dx)**2/(2.0*w**2))
+    if width == 0:
+        return np.nan
+    elif width < 0:
+        warnings.warn("Negative width in Gaussian: {0}.".format(width),
+                      PyspeckitWarning)
+
+    xarr = np.array(xarr) # make sure xarr is no longer a spectroscopic axis
+    model = amplitude*np.exp(-(xarr-dx)**2/(2.0*width**2))
     if normalized:
-        return G / (numpy.sqrt(2*numpy.pi) * w**2)
+        return model / (np.sqrt(2*np.pi) * width**2)
     else:
-        return G
+        return model
 
 def gaussian_fwhm(sigma):
-    return numpy.sqrt(8*numpy.log(2)) * sigma
+    return np.sqrt(8*np.log(2)) * sigma
 
 def gaussian_integral(amplitude, sigma):
     """ Integral of a Gaussian """
-    return amplitude * numpy.sqrt(2*numpy.pi*sigma**2)
+    return amplitude * np.sqrt(2*np.pi*sigma**2)
 
 def _integral_modelpars(modelpars=None):
     """ light wrapper to match requirements for model.analytic_integral """
@@ -70,9 +79,9 @@ def gaussian_fitter():
     Generator for Gaussian fitter class
     """
 
-    myclass =  model.SpectralModel(gaussian, 3,
-            parnames=['amplitude','shift','width'], 
-            parlimited=[(False,False),(False,False),(True,False)], 
+    myclass = model.SpectralModel(gaussian, 3,
+            parnames=['amplitude','shift','width'],
+            parlimited=[(False,False),(False,False),(True,False)],
             parlimits=[(0,0), (0,0), (0,0)],
             shortvarnames=('A',r'\Delta x',r'\sigma'),
             centroid_par='shift',
@@ -90,9 +99,9 @@ def gaussian_vheight_fitter():
     """
 
     vhg = fitter.vheightmodel(gaussian)
-    myclass =  model.SpectralModel(vhg, 4,
-            parnames=['height','amplitude','shift','width'], 
-            parlimited=[(False,False),(False,False),(False,False),(True,False)], 
+    myclass = model.SpectralModel(vhg, 4,
+            parnames=['height','amplitude','shift','width'],
+            parlimited=[(False,False),(False,False),(False,False),(True,False)],
             parlimits=[(0,0),(0,0), (0,0), (0,0)],
             shortvarnames=('B','A',r'\Delta x',r'\sigma'),
             centroid_par='shift',

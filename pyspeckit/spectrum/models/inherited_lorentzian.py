@@ -7,6 +7,8 @@ Until 12/23/2011, lorentzian fitting used the complicated and somewhat bloated
 gaussfitter.py code.  Now, this is a great example of how to make your own
 model!
 
+Module API
+^^^^^^^^^^
 """
 from . import model
 import numpy 

@@ -23,13 +23,13 @@ xarr = SpectroscopicAxes([xarr11,xarr22,xarr33])
 
 # Compute a synthetic model that is made of two temperature components with
 # identical velocities
-synthspec = (ammonia.ammonia(xarr, tkin=20, ntot=15, fortho=0.5, xoff_v=0.0,
+synthspec = (ammonia.ammonia(xarr, trot=20, ntot=15, fortho=0.5, xoff_v=0.0,
                              width=1.0) +
-             ammonia.ammonia(xarr, tkin=50, ntot=14, fortho=0.5, xoff_v=0.0,
+             ammonia.ammonia(xarr, trot=50, ntot=14, fortho=0.5, xoff_v=0.0,
                              width=1.0))
 
 # Create the Spectrum object
-spectrum = pyspeckit.Spectrum(xarr=xarr, data=synthspec)
+spectrum = pyspeckit.Spectrum(xarr=xarr, data=synthspec, header={})
 
 
 # Step 2.  You have a spectrum.
@@ -61,14 +61,14 @@ spectrum.specfit(fittype='nh3_vtau_123', guesses=guesses)
 # display the correct and fitted answers
 print("Low column version:")
 def printthings(ammonia=ammonia.ammonia, xarr=xarr):
-    print("Real optical depths of component 1: ",[ammonia(xarr, tkin=20,
+    print("Real optical depths of component 1: ",[ammonia(xarr, trot=20,
                                                           ntot=15, fortho=0.5,
                                                           xoff_v=0.0,
                                                           width=1.0,
                                                           return_tau=True)[x]
                                                   for x in ['oneone', 'twotwo',
                                                             'threethree']])
-    print("Real optical depths of component 2: ",[ammonia(xarr, tkin=50,
+    print("Real optical depths of component 2: ",[ammonia(xarr, trot=50,
                                                           ntot=14, fortho=0.5,
                                                           xoff_v=0.0,
                                                           width=1.0,
@@ -82,11 +82,11 @@ print("Fitted parameters: ",spectrum.specfit.parinfo)
 # It works, but the covariances between tex and tau are large.
 # So, another example with higher tau (and therefore... less degenerate?)
 
-synthspec = (ammonia.ammonia(xarr, tkin=20, ntot=16, fortho=0.5, xoff_v=0.0,
+synthspec = (ammonia.ammonia(xarr, trot=20, ntot=16, fortho=0.5, xoff_v=0.0,
                              width=1.0) +
-             ammonia.ammonia(xarr, tkin=50, ntot=15, fortho=0.5, xoff_v=0.0,
+             ammonia.ammonia(xarr, trot=50, ntot=15, fortho=0.5, xoff_v=0.0,
                              width=1.0))
-spectrum2 = pyspeckit.Spectrum(xarr=xarr, data=synthspec)
+spectrum2 = pyspeckit.Spectrum(xarr=xarr, data=synthspec, header={})
 spectrum2.plotter()
 spectrum2.specfit.Registry.add_fitter('nh3_vtau_123', fitter, fitter.npars)
 spectrum2.specfit(fittype='nh3_vtau_123', guesses=guesses)
@@ -94,14 +94,14 @@ spectrum2.specfit(fittype='nh3_vtau_123', guesses=guesses)
 # We can also examine what tau really should have been... kinda.
 print("High column version:")
 def printthings(ammonia=ammonia.ammonia, xarr=xarr):
-    print("Real optical depths of component 1: ",[ammonia(xarr, tkin=20,
+    print("Real optical depths of component 1: ",[ammonia(xarr, trot=20,
                                                           ntot=16, fortho=0.5,
                                                           xoff_v=0.0,
                                                           width=1.0,
                                                           return_tau=True)[x]
                                                   for x in ['oneone', 'twotwo',
                                                             'threethree']])
-    print("Real optical depths of component 2: ",[ammonia(xarr, tkin=50,
+    print("Real optical depths of component 2: ",[ammonia(xarr, trot=50,
                                                           ntot=15, fortho=0.5,
                                                           xoff_v=0.0,
                                                           width=1.0,

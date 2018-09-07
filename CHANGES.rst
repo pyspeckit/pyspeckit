@@ -1,10 +1,71 @@
 CHANGES
 *******
 
-Version 0.1.19 (unreleased)
+Version 0.1.20 (unreleased)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    * None yet
+    * Minor #210, #212: add cold_ammonia to the registry
+    * Bugfix #175: Fixed an error when indexing dxarr
+    * Minor #178: error message typo fixed
+    * Bugfix #159: Cube fitting was incorrectly ignoring some pixels.  Fixed.
+    * Bugfix #176: Force fits to operate on float64s because float32s were giving
+      gnorm=0 errors.
+    * Minor #180: In cube fitting, default to Integral=False
+    * Bugfix #135: Clear fits from plots each time a new one is made to avoid a
+      memory leak
+    * Bugfix #183: Fix the usage of the reference value in doppler convention
+      equivalency creation in line_ids
+    * Bugfix #185: Prevent divide-by-zero error in renormalization
+    * Minor #188,#189,#197,#200: Some py3 compatibility updates (especially for
+      CLASS)
+    * Minor #186,#191,#192,#195: fix links, badges
+    * Bugfix #194: fix an infinite loop bug in cube init
+    * Bugfix #182: fix cube copying
+    * Enhancement #196: updated cube tests
+    * Bugfix #202: Fix filling fraction definition
+    * Docs #203: Add contributors section
+    * Bugfix #205: Make a figure if no figure exists
+    * Bugfix #207: clobber->overwrite to handle upstream astropy changes
+    * Bugfix #206: Fix units in ``hydrogen.find_lines``
+    * Bugfix #209: have to index with integers in numpy >= 1.12
+    * Bugfix #211,#214: Fix rescaling for multi-component fits
+    * Bugfix #215: 	some text restructuring and fixes for default font sizes in
+      matplotlib  2.0.  An improved error message when units are pixels.
+      Some bug fixes related to 'reset' in fitting.  Documentation for hill5
+    * Bugfix #216: len(pars) division for python 3 fixed in ammonia code
+    * Bugfix #218,#219: fix return parsing of parallelized fits
+    * Enhancement #217: Parallelize get_modelcube
+    * Bugfix #223: fix lmfit parameter issue
+
+Version 0.1.19 (2016-06-12)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    * Enhancement #170: Added a ``cold_ammonia`` model, which uses a specific
+      set of approximations to fit the rotational temperature and retrieve the
+      kinetic temperature
+    * Bugfix #166: Spectrum objects should, and now do, inherit the registry
+      from their parents.  This is critical for fitting non-default models to
+      cubes
+    * Bugfix #163: Allow parameter cubes that have NaNs to be loaded
+    * Enhancement #161: Cleaned up moment-specified guesses for cubes
+    * Enhancement #160: Added multiply ionized RRLs to the RRL models
+    * Enhancement #156: NaN pixels are treated as though they were masked out
+      (previously, numpy masked arrays had to be used for this functionality)
+    * Bugfix #154: pyspeckit script upgraded to py3 compatible
+    * Bugfix #152: SpectroscopicAxis comparisons did not properly yield
+      booleans due to an inheritance error.
+    * Bugfix #147: Spectrum arithmetic was being allowed between spectrum
+      objects with different X-axes.  This has been disallowed, and a test has
+      been added.
+    * Enhancement #147: ``from_spectrum1d`` implemented to instantiate a
+      ``pyspeckit.Spectrum`` from a ``specutils.Spectrum1D`` object
+    * Bugfix #128: fiteach would try to measure an integral even if the
+      spectral fit failed
+    * MAJOR bugfix #136: There was an error in the equation used to create the
+      Ammonia model that would result in fits reporting incorrect values of the
+      column density.  The Ammonia model has been substantially refactored,
+      removing the ``thin`` option in favor of putting the thin approximation
+      into its own function.
 
 Version 0.1.18.1 (2015-12-10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -3,10 +3,13 @@
 Formaldehyde mm-line fitter
 ===========================
 
-This is a formaldehyde 3_03-2_02 / 3_22-221 and 3_03-2_02/3_21-2_20 fitter.  
+This is a formaldehyde 3_03-2_02 / 3_22-221 and 3_03-2_02/3_21-2_20 fitter.
 It is based entirely on RADEX models.
 
-This is the EWR fork of the fitter in pyspeckit.  
+This is the EWR fork of the fitter in pyspeckit.
+
+Module API
+^^^^^^^^^^
 """
 from __future__ import print_function
 import numpy as np
@@ -35,7 +38,7 @@ line_names = ['threeohthree','threetwotwo','threetwoone']
 
 # http://adsabs.harvard.edu/abs/1971ApJ...169..429T has the most accurate freqs
 # http://adsabs.harvard.edu/abs/1972ApJ...174..463T [twotwo]
-central_freq_dict = { 
+central_freq_dict = {
         'threeohthree': 218.222192e9,
         'threetwotwo': 218.475632e9,
         'threetwoone': 218.760066e9,
@@ -50,7 +53,7 @@ relative_strength_total_degeneracy={
         'threetwotwo': 1.,
         'threetwoone': 1.,
         }
-freq_dict = central_freq_dict 
+freq_dict = central_freq_dict
 aval_dict = {
         'threeohthree': 2.818e-4,
         'threetwotwo': 1.571e-4,
@@ -69,12 +72,12 @@ formaldehyde_mm_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict,
 formaldehyde_mm_vtau_fitter = formaldehyde_mm_vtau.fitter
 formaldehyde_mm_vtau_vheight_fitter = formaldehyde_mm_vtau.vheight_fitter
 
-def h2co_mm_radex(xarr, 
+def h2co_mm_radex(xarr,
         Temperature=25,
         logColumn=13,
         logDensity=4,
         xoff_v=0.0,
-        width=1.0, 
+        width=1.0,
         grid_vwidth=1.0,
         gridbundle = None,
         debug=False,
@@ -96,7 +99,7 @@ def h2co_mm_radex(xarr,
     ----------
     grid_vwidth : float
         the velocity assumed when computing the grid in km/s
-        this is important because tau = modeltau / width (see, e.g., 
+        this is important because tau = modeltau / width (see, e.g.,
         Draine 2011 textbook pgs 219-230)
     density : float
         Density!
@@ -128,7 +131,7 @@ def h2co_mm_radex(xarr,
 
 # here there be physics
     ckms = 2.99792458e5
-    freq_dict = { 
+    freq_dict = {
         '303': 218.222192e9,
         '322': 218.475632e9,
         '321': 218.760066e9,
@@ -144,21 +147,21 @@ def h2co_mm_radex(xarr,
 #    spec2 = np.zeros(len(xarr))
 #    for ii in range(len(nu0)):
 #        taunu = tau[ii]*np.exp(-(xarr+nuoff[ii]-nu0[ii])**2/(2.0*nuwidth[ii]**2))
-#        spec2 = spec2 + (1-np.exp(-taunu))*tex[ii] + Tbg*(np.exp(-taunu)-1)  #second term assumes an ON-OFF 
+#        spec2 = spec2 + (1-np.exp(-taunu))*tex[ii] + Tbg*(np.exp(-taunu)-1)  #second term assumes an ON-OFF
 
     spec = np.sum([
             (formaldehyde_mm_vtau(xarr, Tex=float(tex[ii]), tau=float(tau[ii]),
                                   xoff_v=xoff_v, width=width, **kwargs)
              * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
                   axis=0)
-#    import pdb 
+#    import pdb
 #    pdb.set_trace()
-        
+
 
     return spec
 
 
-def formaldehyde_mm(xarr, amp=1.0, xoff_v=0.0, width=1.0, 
+def formaldehyde_mm(xarr, amp=1.0, xoff_v=0.0, width=1.0,
         return_components=False ):
     """
     Generate a model Formaldehyde spectrum based on simple gaussian parameters
@@ -188,18 +191,18 @@ class formaldehyde_mm_model(model.SpectralModel):
     pass
 
 formaldehyde_mm_fitter = formaldehyde_mm_model(formaldehyde_mm, 3,
-        parnames=['amp','center','width'], 
-        parlimited=[(False,False),(False,False), (True,False)], 
+        parnames=['amp','center','width'],
+        parlimited=[(False,False),(False,False), (True,False)],
         parlimits=[(0,0), (0,0), (0,0)],
         shortvarnames=("A","v","\\sigma"), # specify the parameter names (TeX is OK)
-        fitunits='Hz' )
+        fitunit='Hz' )
 
 formaldehyde_mm_vheight_fitter = formaldehyde_mm_model(fitter.vheightmodel(formaldehyde_mm), 4,
-        parnames=['height','amp','center','width'], 
-        parlimited=[(False,False),(False,False),(False,False), (True,False)], 
+        parnames=['height','amp','center','width'],
+        parlimited=[(False,False),(False,False),(False,False), (True,False)],
         parlimits=[(0,0), (0,0), (0,0), (0,0)],
         shortvarnames=("H","A","v","\\sigma"), # specify the parameter names (TeX is OK)
-        fitunits='Hz' )
+        fitunit='Hz' )
 
 
 try:

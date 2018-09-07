@@ -3,10 +3,12 @@ import matplotlib
 import numpy as np
 import copy
 import re
-import itertools
+import warnings
+
 from astropy import log
 from astropy import units as u
 from astropy.extern.six.moves import xrange
+from astropy.extern.six import string_types
 
 from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec
@@ -36,10 +38,10 @@ class Registry(object):
 mnemonics.
 1. Left-click or hit 'p' (/p/ick) with the cursor over the plot at both of the
 two desired X-values to select a fitting range.  You can e/x/clude parts of the
-spectrum by hitting 'x' at two positions.  
+spectrum by hitting 'x' at two positions.
 2. Then /m/iddle-click or hit 'm' twice to select (/m/ark) a peak and width -
 the first mark should be on the peak of the line, the second should be at the
-approximate half-max point on the curve.  
+approximate half-max point on the curve.
 3. When you're done, right-click or hit 'd' to perform the fit and disconnect
 the mouse and keyboard (/d/isconnect because you're /d/one).  Any time before
 you're /d/one, you can select a different fitter (see below).
@@ -75,13 +77,13 @@ The default is gaussian ('g'), all options are listed below:
 
     def add_fitter(self, name, function, npars, override=False, key=None,
                    multisingle=None):
-        ''' 
+        '''
         Register a fitter function.
 
         Parameters
         ----------
         name: string
-            The fit function name. 
+            The fit function name.
         function: function
             The fitter function.  Single-fitters should take npars + 1 input
             parameters, where the +1 is for a 0th order baseline fit.  They
@@ -119,7 +121,7 @@ The default is gaussian ('g'), all options are listed below:
         Generate the interactive help message from the fitkeys
         """
         self.interactive_help_message = (
-                self._interactive_help_message_root + 
+                self._interactive_help_message_root +
                 "\n" +
                 "\n".join(["'%s' - select fitter %s" % (key,name) for key,name in self.fitkeys.items()]) +
                 "\n" # trailing \n so that users' input is on a fresh line
@@ -129,6 +131,7 @@ The default is gaussian ('g'), all options are listed below:
 # Declare default registry built in for all spectra
 default_Registry = Registry()
 default_Registry.add_fitter('ammonia',models.ammonia_model(),6,key='a')
+default_Registry.add_fitter('cold_ammonia',models.ammonia.cold_ammonia_model(),6)
 default_Registry.add_fitter('ammonia_tau',models.ammonia_model_vtau(),6)
 # not implemented default_Registry.add_fitter(Registry,'ammonia',models.ammonia_model( ),6, ,key='A')
 default_Registry.add_fitter('formaldehyde',models.formaldehyde_fitter,3,key='F') # CAN'T USE f!  reserved for fitting
@@ -174,9 +177,24 @@ class Specfit(interactive.Interactive):
         self.autoannotate = mycfg['autoannotate']
         self.EQW_plots = []
         #self.seterrspec()
-        
+
+    @property
+    def fitter(self):
+        if hasattr(self, '_fitter'):
+            return self._fitter
+        else:
+            raise AttributeError("The 'specfit' object has no 'fitter' yet.  "
+                                 "This means you haven't yet run a fit.  The "
+                                 "fitter is not accessible until after a fit "
+                                 "has been run.")
+
+    @fitter.setter
+    def fitter(self, value):
+        self._fitter = value
+
     @cfgdec
     def __call__(self, interactive=False, usemoments=True,
+                 fittype=None,
                  clear_all_connections=True, debug=False, guesses='moments',
                  parinfo=None, save=True, annotate=None, show_components=None,
                  use_lmfit=False, verbose=True, clear=True,
@@ -239,7 +257,7 @@ class Specfit(interactive.Interactive):
         clear : boolean
             Clear previous fitter plots before overplotting the fit?
 
-        
+
         Advanced Parameters
         -------------------
         clear_all_connections : boolean
@@ -261,24 +279,40 @@ class Specfit(interactive.Interactive):
             if None, defaults to self.vheight, otherwise overrides
             Determines whether a 0th order baseline will be fit along with the
             line
-        
+
         """
-        if clear: self.clear()
+        if clear:
+            self.clear()
         if reset_selection:
             self.selectregion(verbose=verbose, debug=debug,
                               fit_plotted_area=fit_plotted_area,
                               exclude=exclude,
                               use_window_limits=use_window_limits, **kwargs)
         for arg in ['xmin','xmax','xtype','reset']:
-            if arg in kwargs: kwargs.pop(arg)
+            if arg in kwargs:
+                kwargs.pop(arg)
+
+        if fittype is not None:
+            self.fittype = fittype
+            self.fitter = self.Registry.multifitters[self.fittype]
 
         if 'multifit' in kwargs:
             kwargs.pop('multifit')
-            log.warn("The multifit keyword is no longer required.  All fits "
-                     "allow for multiple components.", DeprecationWarning)
+            log.warning("The multifit keyword is no longer required.  All fits "
+                        "allow for multiple components.", DeprecationWarning)
+
+        if 'guess' in kwargs:
+            if guesses is None:
+                guesses = kwargs.pop('guess')
+                log.warning("The keyword 'guess' is nonstandard; please use 'guesses'")
+            else:
+                raise ValueError("Received keywords 'guess' and 'guesses'.  "
+                                 "Please only use 'guesses'")
 
         self.npeaks = 0
         self.fitkwargs = kwargs
+        log.debug("Additional keyword arguments passed to fitter are: {0}"
+                  .format(kwargs))
         if interactive:
             if self.Spectrum.plotter.axis is None:
                 raise Exception("Interactive fitting requires a plotter.")
@@ -302,24 +336,27 @@ class Specfit(interactive.Interactive):
                 self.multifit(show_components=show_components, verbose=verbose,
                               debug=debug, use_lmfit=use_lmfit,
                               annotate=annotate, parinfo=parinfo,
-                              guesses=guesses, **kwargs)
+                              guesses=None, **kwargs)
             elif guesses is not None:
+                if isinstance(guesses, tuple):
+                    guesses = list(guesses)
                 self.guesses = guesses
                 self.multifit(show_components=show_components, verbose=verbose,
                               debug=debug, use_lmfit=use_lmfit,
+                              fittype=fittype,
                               guesses=guesses, annotate=annotate, **kwargs)
             else:
                 raise ValueError("Guess and parinfo were somehow invalid.")
         else:
-            print("Can't fit with given fittype {0}:"
-                  " it is not Registered as a fitter.".format(self.fittype))
-            return
-        if save: self.savefit()
+            raise ValueError("Can't fit with given fittype {0}:"
+                             " it is not Registered as a fitter.".format(self.fittype))
+        if save:
+            self.savefit()
 
     def EQW(self, plot=False, plotcolor='g', fitted=True, continuum=None,
             components=False, annotate=False, alpha=0.5, loc='lower left',
-            xmin=None, xmax=None, xunits='pixel', continuum_as_baseline=False,
-            midpt_location='plot-center'):
+            xmin=None, xmax=None, xunits=None, continuum_as_baseline=False,
+            xunit='pixel', midpt_location='plot-center'):
         """
         Returns the equivalent width (integral of "baseline" or "continuum"
         minus the spectrum) over the selected range
@@ -348,7 +385,7 @@ class Specfit(interactive.Interactive):
         xmin : float
         xmax : float
             The range over which to compute the EQW
-        xunits : str
+        xunit : str
             The units of xmin/xmax
         midpt_location : 'fitted', 'plot-center'
             If 'plot' is set, this determines where the EQW will be drawn.  It
@@ -366,17 +403,21 @@ class Specfit(interactive.Interactive):
             elif np.median(self.Spectrum.baseline.basespec) < 0:
                 if mycfg.WARN: warn( "WARNING: Baseline / continuum is negative: equivalent width is poorly defined." )
 
+        if xunits is not None and xunit=='pixel':
+            # todo: deprecation warning
+            xunit = xunits
+
         # determine range to use
         if xmin is None:
             xmin = self.xmin #self.Spectrum.xarr.x_to_pix(self.xmin)
         else:
-            xmin = self.Spectrum.xarr.x_to_pix(xmin, xval_units=xunits)
+            xmin = self.Spectrum.xarr.x_to_pix(xmin, xval_units=xunit)
         if xmax is None:
             xmax = self.xmax #self.Spectrum.xarr.x_to_pix(self.xmax)
         else:
-            xmax = self.Spectrum.xarr.x_to_pix(xmax, xval_units=xunits)
+            xmax = self.Spectrum.xarr.x_to_pix(xmax, xval_units=xunit)
 
-        dx = np.abs(self.Spectrum.xarr[xmin:xmax].cdelt(approx=True))
+        dx = np.abs(self.Spectrum.xarr[xmin:xmax].cdelt(approx=True).value)
 
         log.debug("xmin={0} xmax={1} dx={2} continuum={3}"
                   .format(xmin, xmax, dx, continuum))
@@ -391,10 +432,11 @@ class Specfit(interactive.Interactive):
                     continuum = self.Spectrum.baseline.basespec[center_pix]
                 elif continuum_as_baseline:
                     integrals[-1] += -(self.Spectrum.baseline.basespec[xmin:xmax] - continuum).sum() * dx
-                eqw.append( -integ / continuum)
+                eqw.append(-integ / continuum)
             if plot:
                 plot = False
-                if mycfg.WARN: warn( "Cannot plot multiple Equivalent Widths" )
+                if mycfg.WARN:
+                    warn("Cannot plot multiple Equivalent Widths")
         elif fitted:
             model = self.get_model(self.Spectrum.xarr[xmin:xmax],
                                    add_baseline=False)
@@ -426,7 +468,7 @@ class Specfit(interactive.Interactive):
             eqw = sumofspec / continuum
         if plot and self.Spectrum.plotter.axis:
             if midpt_location == 'plot-center':
-                midpt_pixel = np.round((xmin+xmax)/2.0)
+                midpt_pixel = int(np.round((xmin+xmax)/2.0))
                 midpt       = self.Spectrum.xarr[midpt_pixel].value
             elif midpt_location == 'fitted':
                 try:
@@ -443,7 +485,7 @@ class Specfit(interactive.Interactive):
                 # centered on a fitted line other than the one measured for the
                 # eqw call, if there are more than one fitted lines within the
                 # window.
-                midpt_pixel = (xmin+xmax)/2
+                midpt_pixel = int((xmin+xmax)/2)
                 midval = self.Spectrum.xarr[midpt_pixel].value
                 midpt_index = np.argmin(np.abs(shifts-midval))
                 midpt = shifts[midpt_index]
@@ -465,7 +507,7 @@ class Specfit(interactive.Interactive):
             if annotate:
                 self.Spectrum.plotter.axis.legend(
                         [(matplotlib.collections.CircleCollection([0],facecolors=[plotcolor],edgecolors=[plotcolor]))],
-                        [('EQW: %0.3g' % eqw)], 
+                        [('EQW: %0.3g' % eqw)],
                         markerscale=0.01, borderpad=0.1, handlelength=0.1,
                         handletextpad=0.1, loc=loc)
             if self.Spectrum.plotter.autorefresh:
@@ -482,8 +524,8 @@ class Specfit(interactive.Interactive):
         self.Registry.add_fitter(*args,**kwargs)
 
     register_fitter.__doc__ += Registry.add_fitter.__doc__
-    
-    def seterrspec(self,usestd=None,useresiduals=True):
+
+    def seterrspec(self, usestd=None, useresiduals=True):
         """
         Simple wrapper function to set the error spectrum; will either use the
         input spectrum or determine the error using the RMS of the residuals,
@@ -491,8 +533,14 @@ class Specfit(interactive.Interactive):
         """
         if (self.Spectrum.error is not None) and not usestd:
             if (self.Spectrum.error == 0).all():
-                if self.residuals is not None and useresiduals: 
-                    self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
+                if self.residuals is not None and useresiduals:
+                    residuals_std = self.residuals.std()
+                    if residuals_std == 0:
+                        self.errspec = np.ones(self.spectofit.shape[0])
+                        warnings.warn("Residuals have 0 standard deviation.  "
+                                      "That's probably too good to be true.")
+                    else:
+                        self.errspec = np.ones(self.spectofit.shape[0]) * residuals_std
                 elif type(self.Spectrum.error) is np.ma.masked_array:
                     # force errspec to be a non-masked array of ones
                     self.errspec = self.Spectrum.error.data + 1
@@ -501,9 +549,10 @@ class Specfit(interactive.Interactive):
             else:
                 # this is the default behavior if spectrum.error is set
                 self.errspec = self.Spectrum.error.copy()
-        elif self.residuals is not None and useresiduals: 
+        elif self.residuals is not None and useresiduals:
             self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
-        else: self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
+        else:
+            self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
 
     def setfitspec(self):
         """
@@ -527,27 +576,51 @@ class Specfit(interactive.Interactive):
             assert np.all(self.Spectrum.data.mask == self.spectofit.mask)
         self._valid = True
         if hasattr(self.Spectrum,'baseline'):
-            if (self.Spectrum.baseline.subtracted is False 
-                    and self.Spectrum.baseline.basespec is not None
-                    and len(self.spectofit) == len(self.Spectrum.baseline.basespec)):
+            if ((not self.Spectrum.baseline.subtracted and
+                 self.Spectrum.baseline.basespec is not None and
+                 len(self.spectofit) == len(self.Spectrum.baseline.basespec))):
                 self.spectofit -= self.Spectrum.baseline.basespec
-        OKmask = (self.spectofit==self.spectofit)
-        self.spectofit[~OKmask] = 0
+        OKmask = np.isfinite(self.spectofit)
+
+        with warnings.catch_warnings():
+            # catch a specific np1.7 futurewarning relating to masks
+            warnings.simplefilter("ignore")
+            self.spectofit[~OKmask] = 0
+
         self.seterrspec()
+
+        # the "OK" mask is just checking that the values are finite
         self.errspec[~OKmask] = 1e10
-        if self.includemask is not None and (self.includemask.shape == self.errspec.shape):
+
+        # if an includemask is set *and* there are some included values, "mask out" the rest
+        # otherwise, if *all* data are excluded, we should assume that means the includemask
+        # simply hasn't been initialized
+        if self.includemask is not None and (self.includemask.shape == self.errspec.shape) and any(self.includemask):
             self.errspec[~self.includemask] = 1e10*self.errspec.max()
 
     @property
     def mask(self):
         """ Mask: True means "exclude" """
-        if (hasattr(self.spectofit, 'mask') and
-            self.spectofit.shape==self.spectofit.mask.shape):
+        if ((hasattr(self.spectofit, 'mask') and
+             self.spectofit.shape==self.spectofit.mask.shape)):
             mask = self.spectofit.mask
         else:
             mask = np.zeros_like(self.spectofit, dtype='bool')
 
         return mask
+
+    @property
+    def dof(self):
+        """ degrees of freedom in fit """
+        if not hasattr(self, 'npix_fitted'):
+            raise AttributeError('No fit has been run, so npix_fitted is not '
+                                 'defined and dof cannot be computed.')
+        return (self.npix_fitted - self.vheight - self.npeaks *
+                self.Registry.npars[self.fittype] + np.sum(self.parinfo.fixed) +
+                np.sum([x != '' for x in self.parinfo.tied]))
+
+        #self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight+np.sum(self.parinfo.fixed)
+
 
     @property
     def mask_sliced(self):
@@ -589,13 +662,20 @@ class Specfit(interactive.Interactive):
             if kw in self.fitkwargs:
                 del self.fitkwargs[kw]
 
-        if guesses is None:
-            guesses = self.guesses
-        elif guesses in ('moment','moments'):
-            guesses = self.moments(vheight=False, **kwargs)
+        if guesses is not None and parinfo is not None:
+            raise ValueError("Both guesses and parinfo were specified, "
+                             "but only one of these is allowed.")
 
-        if parinfo is not None:
-            guesses = parinfo.values
+        if guesses is None:
+            if parinfo is not None:
+                guesses = list(parinfo.values)
+            else:
+                guesses = list(self.guesses)
+        elif isinstance(guesses, string_types) and guesses in ('moment', 'moments'):
+            guesses = self.moments(vheight=False, **kwargs)
+        else:
+            guesses = list(guesses) # needs to be mutable, but needs to be a copy!!
+
 
         if len(guesses) < self.Registry.npars[self.fittype]:
             raise ValueError("Too few parameters input.  Need at least %i for %s models" % (self.Registry.npars[self.fittype],self.fittype))
@@ -615,32 +695,64 @@ class Specfit(interactive.Interactive):
         self.fitkwargs.update(kwargs)
         if 'renormalize' in self.fitkwargs:
             del self.fitkwargs['renormalize']
-        
+
+        # if parinfo was specified, we use it and ignore guesses otherwise, we
+        # make a parinfo so we can test 'scaleable' below
+        if parinfo is not None:
+            pinf_for_scaling = parinfo
+        else:
+            pinf_for_scaling, _ = self.fitter._make_parinfo(parvalues=guesses,
+                                                            npeaks=self.npeaks,
+                                                            **self.fitkwargs)
+
         scalefactor = 1.0
         if renormalize in ('auto',True):
-            datarange = self.spectofit[self.xmin:self.xmax].max() - self.spectofit[self.xmin:self.xmax].min()
+            datarange = np.nanmax(self.spectofit[self.xmin:self.xmax]) - np.nanmin(self.spectofit[self.xmin:self.xmax])
             if abs(datarange) < 1e-9:
-                scalefactor = np.median(np.abs(self.spectofit))
+                scalefactor = np.nanmedian(np.abs(self.spectofit))
+                if not np.isfinite(scalefactor):
+                    raise ValueError("non-finite scalefactor = {0} encountered.".format(scalefactor))
+                elif scalefactor == 0:
+                    raise ValueError("scalefactor = {0} encountered, which will result "
+                                     "in divide-by-zero errors".format(scalefactor))
                 log.info("Renormalizing data by factor %e to improve fitting procedure"
                          % scalefactor)
                 self.spectofit /= scalefactor
-                self.errspec   /= scalefactor
+                self.errspec /= scalefactor
 
                 # this error should be unreachable, but is included as a sanity check
-                if self.fitter.npeaks * self.fitter.npars != len(self.fitter.parinfo):
-                    raise ValueError("Length of parinfo doesn't agree with npeaks * npars = %i" %
-                            (self.fitter.npeaks * self.fitter.npars))
+                if self.fitter.npeaks * self.fitter.npars != len(pinf_for_scaling):
+                    raise ValueError("Length of parinfo doesn't agree with "
+                                     " npeaks * npars = {0}"
+                                     .format(self.fitter.npeaks *
+                                             self.fitter.npars))
+                if len(guesses) != len(pinf_for_scaling):
+                    raise ValueError("Length of parinfo doens't match length of guesses")
 
                 # zip guesses with parinfo: truncates parinfo if len(parinfo) > len(guesses)
                 # actually not sure how/when/if this should happen; this might be a bad hack
                 # revisit with tests!!
-                for jj,(guess,par) in enumerate(zip(guesses,self.fitter.parinfo)):
+                for jj,(guess,par) in enumerate(zip(guesses,pinf_for_scaling)):
                     if par.scaleable:
                         guesses[jj] /= scalefactor
+                        # if parinfo was passed in, this will change it
+                        # if it was not, it will change only the placeholder
+                        # (becuase we are passing by reference above)
+                        par.value /= scalefactor
+                        par.limits = [lim / scalefactor for lim in par.limits]
 
-        xtofit = self.Spectrum.xarr[self.xmin:self.xmax][~self.mask_sliced]
-        spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced]
-        err = self.errspec[self.xmin:self.xmax][~self.mask_sliced]
+                log.debug("Rescaled guesses to {0}".format(guesses))
+
+        # all fit data must be float64, otherwise the optimizers may take steps
+        # less than the precision of the data and get stuck
+        xtofit = self.Spectrum.xarr[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
+        spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
+        err = self.errspec[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
+
+        if np.all(err == 0):
+            raise ValueError("Errors are all zero.  This should not occur and "
+                             "is a bug. (if you set the errors to all zero, "
+                             "they should be overridden and set to 1)")
 
         if parinfo is not None:
             self._validate_parinfo(parinfo, mode='fix')
@@ -668,7 +780,7 @@ class Specfit(interactive.Interactive):
                  "parameter limits.  DEBUG INFO: {0}".format(any_out_of_range))
 
         self.spectofit *= scalefactor
-        self.errspec   *= scalefactor
+        self.errspec *= scalefactor
 
         if hasattr(self.fitter.mp,'status'):
             self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
@@ -679,15 +791,14 @@ class Specfit(interactive.Interactive):
         self.model = model * scalefactor
         self.parinfo = self.fitter.parinfo
 
-        self.dof = (self.includemask.sum() - self.mask.sum() - self.npeaks *
-                    self.Registry.npars[self.fittype] +
-                    np.sum(self.parinfo.fixed))
-
         # rescale any scaleable parameters
         for par in self.parinfo:
             if par.scaleable:
-                par.value = par.value * scalefactor
-                par.error = par.error * scalefactor
+                par.value *= scalefactor
+                if par.error is not None:
+                    par.error *= scalefactor
+                if par.limits is not None:
+                    par.limits = [lim*scalefactor for lim in par.limits]
 
         self.modelpars = self.parinfo.values
         self.modelerrs = self.parinfo.errors
@@ -699,12 +810,13 @@ class Specfit(interactive.Interactive):
                           show_components=show_components,
                           use_window_limits=use_window_limits,
                           **kwargs)
-                
+
         # Re-organize modelerrs so that any parameters that are tied to others inherit the errors of the params they are tied to
         if 'tied' in self.fitkwargs:
             for ii, element in enumerate(self.fitkwargs['tied']):
-                if not element.strip(): continue
-                
+                if not element.strip():
+                    continue
+
                 if '[' in element and ']' in element:
                     i1 = element.index('[') + 1
                     i2 = element.index(']')
@@ -725,7 +837,13 @@ class Specfit(interactive.Interactive):
         # make sure the full model is populated
         self._full_model()
 
+        # calculate the number of pixels included in the fit.  This should
+        # *only* be done when fitting, not when selecting data.
+        # (see self.dof)
+        self.npix_fitted = self.includemask.sum() - self.mask.sum()
+
         self.history_fitpars()
+
 
     def refit(self, use_lmfit=False):
         """ Redo a fit using the current parinfo as input """
@@ -740,7 +858,7 @@ class Specfit(interactive.Interactive):
                                   (self.chi2, self.dof))
             for par in self.parinfo:
                 history.write_history(self.Spectrum.header, str(par))
-                
+
     def peakbgfit(self, usemoments=True, annotate=None, vheight=True, height=0,
                   negamp=None, fittype=None, renormalize='auto', color=None,
                   use_lmfit=False, show_components=None, debug=False,
@@ -761,13 +879,13 @@ class Specfit(interactive.Interactive):
         height : float
             initial guess for background
         negamp : bool
-            If True, assumes amplitude is negative.  If False, assumes positive.  If 
+            If True, assumes amplitude is negative.  If False, assumes positive.  If
             None, can be either.
         fittype : bool
             What function will be fit?  fittype must have been Registryed in the
             peakbgfitters dict
         renormalize : 'auto' or bool
-            if 'auto' or True, will attempt to rescale small data (<1e-9) to be 
+            if 'auto' or True, will attempt to rescale small data (<1e-9) to be
             closer to 1 (scales by the median) so that the fit converges better
         nsigcut_moments : bool
             pass to moment guesser; can do a sigma cut for moment guessing
@@ -828,9 +946,10 @@ class Specfit(interactive.Interactive):
                 log.info("Renormalizing data by factor %e to improve fitting procedure"
                          % scalefactor)
                 self.spectofit /= scalefactor
-                self.errspec   /= scalefactor
+                self.errspec /= scalefactor
                 self.guesses[0] /= scalefactor
-                if vheight: self.guesses[1] /= scalefactor
+                if vheight:
+                    self.guesses[1] /= scalefactor
 
         log.debug("Guesses before fit: {0}".format(self.guesses))
 
@@ -839,20 +958,16 @@ class Specfit(interactive.Interactive):
             del self.fitkwargs['debug']
 
         mpp,model,mpperr,chi2 = self.fitter(
-                self.Spectrum.xarr[self.xmin:self.xmax],
-                self.spectofit[self.xmin:self.xmax],
-                err=self.errspec[self.xmin:self.xmax],
-                vheight=vheight,
-                params=self.guesses,
-                parinfo=parinfo,
-                debug=debug,
-                use_lmfit=use_lmfit,
-                **self.fitkwargs)
+            self.Spectrum.xarr[self.xmin:self.xmax],
+            self.spectofit[self.xmin:self.xmax],
+            err=self.errspec[self.xmin:self.xmax], vheight=vheight,
+            params=self.guesses, parinfo=parinfo, debug=debug,
+            use_lmfit=use_lmfit, **self.fitkwargs)
         log.debug("1. Guesses, fits after: {0}, {1}".format(self.guesses, mpp))
 
         self.spectofit *= scalefactor
-        self.errspec   *= scalefactor
-        
+        self.errspec *= scalefactor
+
         if hasattr(self.fitter.mp,'status'):
             self.mpfit_status = models.mpfit_messages[self.fitter.mp.status]
         self.parinfo = self.fitter.parinfo
@@ -860,9 +975,8 @@ class Specfit(interactive.Interactive):
         if model is None:
             raise ValueError("Model was not set by fitter.  Examine your fitter.")
         self.chi2 = chi2
-        self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight+np.sum(self.parinfo.fixed)
         self.vheight=vheight
-        if vheight: 
+        if vheight:
             self.Spectrum.baseline.order = 0
             self.Spectrum.baseline.baselinepars = [mpp[0]*scalefactor] # first item in list form
             self.Spectrum.baseline.basespec = self.Spectrum.data*0 + mpp[0]*scalefactor
@@ -871,11 +985,12 @@ class Specfit(interactive.Interactive):
             # Need to figure out *WHY* anything would want an extra parameter
             if len(mpp) == self.fitter.npars+1:
                 mpp = mpp[1:]
-        else: self.model = model*scalefactor
+        else:
+            self.model = model*scalefactor
         self.residuals = self.spectofit[self.xmin:self.xmax] - self.model*scalefactor
         self.modelpars = mpp
         self.modelerrs = mpperr
-        
+
         # rescale any scaleable parameters
         for par in self.parinfo:
             if par.scaleable:
@@ -893,6 +1008,8 @@ class Specfit(interactive.Interactive):
         # make sure the full model is populated
         self._full_model(debug=debug)
 
+        self.npix_fitted = self.includemask.sum() - self.mask.sum()
+
         log.debug("2. Guesses, fits after vheight removal: {0},{1}"
                   .format(self.guesses, mpp))
         self.history_fitpars()
@@ -905,7 +1022,7 @@ class Specfit(interactive.Interactive):
         self.fullresiduals = self.Spectrum.data - self.fullmodel
 
     def get_full_model(self, debug=False,**kwargs):
-        """ compute the model over the full axis """ 
+        """ compute the model over the full axis """
         return self.get_model(self.Spectrum.xarr, debug=debug,**kwargs)
 
     def get_model(self, xarr, pars=None, debug=False, add_baseline=None):
@@ -919,11 +1036,13 @@ class Specfit(interactive.Interactive):
 
     def get_model_frompars(self, xarr, pars, debug=False, add_baseline=None):
         """ Compute the model over a given axis """
-        if ((add_baseline is None and (self.Spectrum.baseline.subtracted or self.vheight)) 
+        if ((add_baseline is None and (self.Spectrum.baseline.subtracted or self.vheight))
                 or add_baseline is False):
             return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr)
         else:
-            return self.fitter.n_modelfunc(pars,**self.fitter.modelfunc_kwargs)(xarr) + self.Spectrum.baseline.get_model(xarr)
+            return (self.fitter.n_modelfunc(pars,
+                                            **self.fitter.modelfunc_kwargs)(xarr)
+                    + self.Spectrum.baseline.get_model(np.arange(xarr.size)))
 
     def plot_model(self, pars, offset=0.0, annotate=False, clear=False, **kwargs):
         """
@@ -937,9 +1056,9 @@ class Specfit(interactive.Interactive):
         # not how I wrote it, so it will have to wait for a refactor
 
         if clear: self.clear()
-        
+
         return self.plot_fit(pars=pars, offset=offset, annotate=False, **kwargs)
-        
+
 
     #def assess_npeaks(self):
     #    """
@@ -958,15 +1077,15 @@ class Specfit(interactive.Interactive):
 
     #    chi2_without = [(self.spectofit[self.xmin:self.xmax] -
     #                     self.get_model_frompars(self.xarr, self.pars[ii*npars:
-                
+
     def plot_fit(self, xarr=None, annotate=None, show_components=None,
                  composite_fit_color='red',  lw=0.5,
                  composite_lw=0.75, pars=None, offset=None,
                  use_window_limits=None, show_hyperfine_components=None,
                  plotkwargs={}, **kwargs):
         """
-        Plot the fit.  Must have fitted something before calling this!  
-        
+        Plot the fit.  Must have fitted something before calling this!
+
         It will be automatically called whenever a spectrum is fit (assuming an
         axis for plotting exists)
 
@@ -987,7 +1106,7 @@ class Specfit(interactive.Interactive):
             If False, will reset the window to include the whole spectrum.  If
             True, leaves the window as is.  Defaults to self.use_window_limits
             if None.
-        pars : parinfo 
+        pars : parinfo
             A parinfo structure or list of model parameters.  If none, uses
             best-fit
         offset : None or float
@@ -1012,17 +1131,17 @@ class Specfit(interactive.Interactive):
             self._full_model()
             model = self.fullmodel
 
-        self.modelplot += self.Spectrum.plotter.axis.plot(
-                xarr,
-                model + plot_offset,
-                color=composite_fit_color, linewidth=lw,
-                **plotkwargs)
-        
+        self.modelplot += self.Spectrum.plotter.axis.plot(xarr,
+                                                          model + plot_offset,
+                                                          color=composite_fit_color,
+                                                          linewidth=lw,
+                                                          **plotkwargs)
+
         # Plot components
         if show_components or show_hyperfine_components:
             self.plot_components(xarr=xarr,
-                    show_hyperfine_components=show_hyperfine_components,
-                    pars=pars, plotkwargs=plotkwargs)
+                                 show_hyperfine_components=show_hyperfine_components,
+                                 pars=pars, plotkwargs=plotkwargs)
 
         uwl = use_window_limits if use_window_limits is not None else self.use_window_limits
         # plotter kwargs are kwargs for the Spectrum.plotter,
@@ -1041,7 +1160,7 @@ class Specfit(interactive.Interactive):
     def plot_components(self, xarr=None, show_hyperfine_components=None,
             component_yoffset=0.0, component_lw=0.75, pars=None,
             component_fit_color='blue', component_kwargs={},
-            add_baseline=False, plotkwargs={}, **kwargs): 
+            add_baseline=False, plotkwargs={}, **kwargs):
         """
         Overplot the individual components of a fit
 
@@ -1065,7 +1184,7 @@ class Specfit(interactive.Interactive):
         add_baseline : bool
             Add the fit to the components before plotting.  Makes sense to use
             if self.Spectrum.baseline.subtracted == False
-        pars : parinfo 
+        pars : parinfo
             A parinfo structure or list of model parameters.  If none, uses
             best-fit
         """
@@ -1082,7 +1201,7 @@ class Specfit(interactive.Interactive):
         if pars is None:
             pars = self.modelpars
 
-        self.modelcomponents = self.fitter.components(xarr, pars, **component_kwargs)
+        self.modelcomponents = self.fitter.components(xarr=xarr, pars=pars, **component_kwargs)
 
         yoffset = plot_offset + component_yoffset
         if add_baseline:
@@ -1099,12 +1218,12 @@ class Specfit(interactive.Interactive):
                 self._plotted_components += self.Spectrum.plotter.axis.plot(xarr,
                     data + yoffset,
                     color=component_fit_color, linewidth=component_lw, **plotkwargs)
-                
+
 
     def fullsizemodel(self):
         """
         If the model was fit to a sub-region of the spectrum, expand it (with
-        zeros wherever the model was not defined) to fill the spectrum.  
+        zeros wherever the model was not defined) to fill the spectrum.
 
         Examples
         --------
@@ -1190,6 +1309,7 @@ class Specfit(interactive.Interactive):
 
     def annotate(self,loc='upper right',labelspacing=0.25, markerscale=0.01,
                  borderpad=0.1, handlelength=0.1, handletextpad=0.1,
+                 fontsize=10,
                  frameon=False, chi2=None, optimal_chi2_kwargs={}, **kwargs):
         """
         Add a legend to the plot showing the fitted parameters
@@ -1197,7 +1317,7 @@ class Specfit(interactive.Interactive):
         _clearlegend() will remove the legend
 
         chi2 : {True or 'reduced' or 'optimal' or 'allthree'}
-        
+
         kwargs passed to legend
         """
         self._clearlegend()
@@ -1220,7 +1340,7 @@ class Specfit(interactive.Interactive):
         except AttributeError:
             unit_key = self.Spectrum.xarr.unit
             xchar = xcharconv[u.Unit(unit_key).physical_type]
-            
+
         self._annotation_labels = [L.replace('x',xchar) if L[1]=='x' else L for
                                    L in self._annotation_labels]
 
@@ -1245,7 +1365,7 @@ class Specfit(interactive.Interactive):
                 self._annotation_labels, loc=loc, markerscale=markerscale,
                 borderpad=borderpad, handlelength=handlelength,
                 handletextpad=handletextpad, labelspacing=labelspacing,
-                frameon=frameon, **kwargs)
+                frameon=frameon, fontsize=fontsize, **kwargs)
             self.Spectrum.plotter.axis.add_artist(self.fitleg)
             self.fitleg.draggable(True)
             if self.Spectrum.plotter.autorefresh:
@@ -1271,10 +1391,16 @@ class Specfit(interactive.Interactive):
         if self.Spectrum.plotter.axis is not None:
             for p in self.modelplot:
                 p.set_visible(False)
-            if legend: self._clearlegend()
-            if components: self._clearcomponents()
-            if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
-    
+            if legend:
+                self._clearlegend()
+            if components:
+                self._clearcomponents()
+            if self.Spectrum.plotter.autorefresh:
+                self.Spectrum.plotter.refresh()
+
+        # Empty the modelplot array to free memory
+        self.modelplot = []
+
         # remove residuals from self if they're there.
         if hasattr(self,'residualplot'):
             for L in self.residualplot:
@@ -1286,7 +1412,11 @@ class Specfit(interactive.Interactive):
             pc.set_visible(False)
             if pc in self.Spectrum.plotter.axis.lines:
                 self.Spectrum.plotter.axis.lines.remove(pc)
-        if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
+        if self.Spectrum.plotter.autorefresh:
+            self.Spectrum.plotter.refresh()
+
+        # Empty the plotted components array to free memory
+        self._plotted_components = []
 
     def _clearlegend(self):
         """
@@ -1302,7 +1432,7 @@ class Specfit(interactive.Interactive):
                 axis.artists.remove(self.fitleg)
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
-    
+
 
     def savefit(self):
         """
@@ -1357,18 +1487,18 @@ class Specfit(interactive.Interactive):
         Parameters
         ----------
         analytic : bool
-            Return the analytic integral of the fitted function?  
+            Return the analytic integral of the fitted function?
             .. WARNING:: This approach is only implemented for some models
             .. todo:: Implement error propagation for this approach
         direct : bool
             Return the integral of the *spectrum* (as opposed to the *fit*)
             over a range defined by the `integration_limits` if specified or
-            `threshold` otherwise 
+            `threshold` otherwise
         threshold : 'auto' or 'error' or float
             Determines what data to be included in the integral based off of where
             the model is greater than this number
             If 'auto', the threshold will be set to peak_fraction * the peak
-            model value.  
+            model value.
             If 'error', uses the error spectrum as the threshold
             See `self.get_model_xlimits` for details
         integration_limits : None or 2-tuple
@@ -1397,14 +1527,14 @@ class Specfit(interactive.Interactive):
                     for x in integration_limits]
 
         if xmax - xmin > 1: # can only get cdelt if there's more than 1 pixel
-            dx = self.Spectrum.xarr[xmin:xmax].cdelt()
+            dx = self.Spectrum.xarr[xmin:xmax].cdelt().value
         else:
             dx = None
         if dx is None:
             #dx = np.abs(np.concatenate([np.diff(self.Spectrum.xarr),[0]]))
             #warn("Irregular X-axis.  The last pixel is ignored.")
             self.Spectrum.xarr.make_dxarr()
-            dx = self.Spectrum.xarr.dxarr
+            dx = self.Spectrum.xarr.dxarr.value
         else:
             # shouldn't shape be a 'property'?
             dx = np.repeat(np.abs(dx), self.Spectrum.shape)
@@ -1430,18 +1560,19 @@ class Specfit(interactive.Interactive):
         else:
             if not hasattr(self.fitter,'integral'):
                 raise AttributeError("The fitter %s does not have an integral implemented" % self.fittype)
-            
+
             # the model considered here must NOT include the baseline!
             # if it does, you'll get the integral of the continuum
-            fullmodel = self.get_full_model(add_baseline=False)
+            #fullmodel = self.get_full_model(add_baseline=False)
 
             if self.Spectrum.xarr.cdelt() is not None:
                 dx = np.median(dx)
                 integ = self.fitter.integral(self.modelpars, dx=dx, **kwargs)
                 if return_error:
-                    if mycfg.WARN: print("WARNING: The computation of the error "
-                                         "on the integral is not obviously "
-                                         "correct or robust... it's just a guess.")
+                    if mycfg.WARN:
+                        warn("WARNING: The computation of the error "
+                             "on the integral is not obviously "
+                             "correct or robust... it's just a guess.")
                     OK = self.model_mask(threshold=threshold, add_baseline=False)
                     error = np.sqrt((self.errspec[OK]**2).sum()) * dx
                     #raise NotImplementedError("We haven't written up correct error estimation for integrals of fits")
@@ -1464,7 +1595,7 @@ class Specfit(interactive.Interactive):
         threshold : 'auto' or 'error' or float
             The threshold to compare the model values to for selecting the mask
             region.
-            
+
              * auto: uses `peak_fraction` times the model peak
              * error: use the spectrum error
              * float: any floating point number as an absolute threshold
@@ -1502,7 +1633,7 @@ class Specfit(interactive.Interactive):
         return OK
 
     def get_model_xlimits(self, threshold='auto', peak_fraction=0.01,
-                          add_baseline=False, units='pixels'):
+                          add_baseline=False, unit='pixels', units=None):
         """
         Return the x positions of the first and last points at which the model
         is above some threshold
@@ -1529,7 +1660,11 @@ class Specfit(interactive.Interactive):
         xpixmin = OK.argmax()
         xpixmax = len(OK) - OK[::-1].argmax() - 1
 
-        if units == 'pixels':
+        if units is not None and unit =='pixels':
+            # todo: deprecate
+            unit = units
+
+        if unit == 'pixels':
             return [xpixmin,xpixmax]
         else:
             return self.Spectrum.xarr[[xpixmin,xpixmax]].as_unit(units)
@@ -1550,10 +1685,10 @@ class Specfit(interactive.Interactive):
 
     def moments(self, fittype=None, **kwargs):
         """
-        Return the moments 
+        Return the moments
 
         see the :mod:`~pyspeckit.spectrum.moments` module
-        
+
         Parameters
         ----------
         fittype : None or str
@@ -1561,9 +1696,9 @@ class Specfit(interactive.Interactive):
         """
         if fittype is None:
             fittype = self.fittype
-        return self.Registry.multifitters[fittype].moments(
-                self.Spectrum.xarr[self.xmin:self.xmax],
-                self.spectofit[self.xmin:self.xmax],  **kwargs)
+        return list(self.Registry.multifitters[fittype].moments(
+            self.Spectrum.xarr[self.xmin:self.xmax],
+            self.spectofit[self.xmin:self.xmax],  **kwargs))
 
     def button3action(self, event, debug=False, nwidths=1):
         """
@@ -1571,36 +1706,59 @@ class Specfit(interactive.Interactive):
         Perform the fit (or die trying)
         Hide the guesses
         """
+        if self.nclicks_b1 == 0:
+            # there has been no selection
+            # therefore, we assume *everything* is selected
+            self.includemask[:] = True
+
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.click)
         self.Spectrum.plotter.figure.canvas.mpl_disconnect(self.keyclick)
-        npars = 2+nwidths
         if self.npeaks > 0:
+
+            if hasattr(self, 'fitter'):
+                self.guesses = self.fitter.parse_3par_guesses(self.guesses)
+            else:
+                # default fitter is a Gaussian, which has 3 parameters
+                if len(self.guesses) % 3 != 0:
+                    log.error("Default fitter is Gaussian, and there were "
+                              "{0} guess parameters, which is not a "
+                              "multiple of 3.".format(len(self.guesses)))
+
             log.info("{0} Guesses : {1}  X channel range: {2}-{3}"
-                     .format(len(self.guesses)/npars, self.guesses, self.xmin,
+                     .format(len(self.guesses), self.guesses, self.xmin,
                              self.xmax))
-            if len(self.guesses) % npars == 0:
-                self.multifit(use_window_limits=True)
-                for p in self.button2plot + self.button1plot:
-                    p.set_visible(False)
-            else: 
-                log.error("Wrong # of parameters")
+
+            self.multifit(use_window_limits=True)
+
+            for p in self.button2plot + self.button1plot:
+                p.set_visible(False)
 
         # disconnect interactive window (and more importantly, reconnect to
         # original interactive cmds)
         self.clear_all_connections()
 
-    def copy(self, parent=None):
+    def copy(self, parent=None, registry=None):
         """
         Create a copy of the spectral fit - includes copies of the _full_model,
         the registry, the fitter, parinfo, modelpars, modelerrs, model, npeaks
 
-        [ parent ] 
+        Parameters
+        ----------
+        parent : `pyspeckit.classes.Spectrum`
             A `~Spectrum` instance that is the parent of the specfit
             instance.  This needs to be specified at some point, but defaults
             to None to prevent overwriting a previous plot.
         """
 
-        newspecfit = Specfit(parent, copy.deepcopy(self.Registry))
+        if registry is None:
+            if hasattr(parent, 'Registry'):
+                registry = parent.Registry
+            else:
+                # only make a copy if we're not already given a specific registry
+                # to inherit
+                copy.deepcopy(self.Registry)
+
+        newspecfit = Specfit(parent, Registry=registry)
         newspecfit.parinfo = copy.deepcopy(self.parinfo)
         if newspecfit.parinfo is None:
             newspecfit.modelpars = None
@@ -1608,11 +1766,11 @@ class Specfit(interactive.Interactive):
         else:
             newspecfit.modelpars = newspecfit.parinfo.values
             newspecfit.modelerrs = newspecfit.parinfo.errors
-        newspecfit.includemask = self.includemask.copy() 
-        newspecfit.model = copy.copy( self.model )
+        newspecfit.includemask = self.includemask.copy()
+        newspecfit.model = copy.copy(self.model)
         newspecfit.npeaks = self.npeaks
         if hasattr(self,'fitter'):
-            newspecfit.fitter = copy.deepcopy( self.fitter )
+            newspecfit.fitter = copy.deepcopy(self.fitter)
             newspecfit.fitter.parinfo = newspecfit.parinfo
         if hasattr(self,'fullmodel'):
             newspecfit._full_model()
@@ -1717,10 +1875,7 @@ class Specfit(interactive.Interactive):
 
         if reduced:
             # vheight included here or not?  assuming it should be...
-            dof = (modelmask.sum() -
-                   self.fitter.npars - self.vheight +
-                   np.sum(self.parinfo.fixed))
-            return chi2/dof
+            return chi2/self.dof
         else:
             return chi2
 
@@ -1785,6 +1940,8 @@ class Specfit(interactive.Interactive):
         >>> p0 = emcee_ensemble.p0 * (np.random.randn(*emcee_ensemble.p0.shape) / 10. + 1.0)
         >>> pos,logprob,state = emcee_ensemble.run_mcmc(p0,100)
         """
+        import emcee
+
         if hasattr(self.fitter,'get_emcee_ensemblesampler'):
             nwalkers = (self.fitter.npars * self.fitter.npeaks + self.fitter.vheight) * 2
             emc = self.fitter.get_emcee_ensemblesampler(self.Spectrum.xarr,
@@ -1872,7 +2029,7 @@ class Specfit(interactive.Interactive):
             line_region[line_region.argmax()-1:line_region.argmax()+1] = True
             reverse_argmax = len(line_region) - line_region.argmax() - 1
             line_region[reverse_argmax-1:reverse_argmax+1] = True
-            log.warn("Fewer than {0} pixels were identified as part of the fit."
+            log.warning("Fewer than {0} pixels were identified as part of the fit."
                      " To enable statistical measurements, the range has been"
                      " expanded by 2 pixels including some regions below the"
                      " threshold.".format(grow_threshold))
@@ -1883,11 +2040,11 @@ class Specfit(interactive.Interactive):
         xarr = self.Spectrum.xarr[line_region]
         xarr.make_dxarr()
         cd = xarr.dxarr.min()
-        
+
         if interpolate_factor > 1:
-            newxarr = units.SpectroscopicAxis(np.arange(xarr.min().value-cd,
-                                                        xarr.max().value+cd,
-                                                        cd /
+            newxarr = units.SpectroscopicAxis(np.arange(xarr.min().value-cd.value,
+                                                        xarr.max().value+cd.value,
+                                                        cd.value /
                                                         float(interpolate_factor)
                                                        ),
                                               unit=xarr.unit,
@@ -1905,7 +2062,7 @@ class Specfit(interactive.Interactive):
 
         hm_left = np.argmin(np.abs(data[:peakloc]-peak/2.))
         hm_right = np.argmin(np.abs(data[peakloc:]-peak/2.)) + peakloc
-        
+
         deltax = xarr[hm_right]-xarr[hm_left]
 
         if plot:
@@ -1977,7 +2134,7 @@ class Specfit(interactive.Interactive):
                         any_out_of_range.append("gt:close")
                 else:
                     raise ValueError("{0} is greater than the upper limit {1}"
-                                     .format(param.value, param.limits[0]))
+                                     .format(param.value, param.limits[1]))
             elif mode == 'check':
                 any_out_of_range.append(False)
 

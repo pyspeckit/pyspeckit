@@ -26,8 +26,6 @@ from astropy import constants
 from astropy import units as u
 ckms = constants.c.to(u.km/u.s).value
 
-relative_strength_total_degeneracy = collections.defaultdict(lambda: 1)
-
 # sanity check:
 for linename in line_names:
     assert len(voff_lines_dict[linename]) == len(tau_wts_dict[linename])
@@ -43,7 +41,7 @@ nh3_vtau = {linename:
                                       enumerate(voff_lines_dict[linename])},
                                      {lineid:tauwt for lineid,tauwt in
                                       enumerate(tau_wts_dict[linename])},
-                                     {lineid:1 for lineid,voff in
+                                     {lineid:sum(tau_wts_dict[linename]) for lineid,voff in
                                       enumerate(voff_lines_dict[linename])},
                                     )
             for linename in line_names}
@@ -90,6 +88,6 @@ def nh3_vtau_multimodel_generator(linenames):
                                               ('T_{{ex}}({0})'.format(line_labels[ln]),
                                                '\\tau({0})'.format(line_labels[ln]))
                                              ],
-            fitunits='Hz')
+            fitunit='Hz')
 
     return mod

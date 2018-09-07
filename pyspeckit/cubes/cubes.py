@@ -21,6 +21,7 @@ import astropy.io.fits as fits
 import astropy.wcs as pywcs
 import tempfile
 import warnings
+import astropy
 from astropy import coordinates
 from astropy import log
 try:
@@ -36,7 +37,6 @@ except ImportError:
 
 from . import posang # agpy code
 from ..parallel_map import parallel_map
-from ..spectrum import smooth
 
 dtor = pi/180.0
 
@@ -700,10 +700,10 @@ def coords_in_image(fitsfile,lon,lat,system='galactic'):
     wcs = pywcs.WCS(flatten_header(fitsfile[0].header))
 
     if 'RA' in wcs.wcs.ctype[0]:
-        pos = coords.Position((lon,lat),system=system)
+        pos = coordinates.Position((lon,lat),system=system)
         lon,lat = pos.j2000()
     if 'GLON' in wcs.wcs.ctype[0]:
-        pos = coords.Position((lon,lat),system=system)
+        pos = coordinates.Position((lon,lat),system=system)
         lon,lat = pos.galactic()
 
     x,y = wcs.wcs_world2pix(lon,lat,0)
@@ -761,7 +761,7 @@ def plane_smooth(cube,cubedim=0,parallel=True,numcores=None,**kwargs):
 
     cubelist = [cube[ii,:,:] for ii in xrange(cube.shape[0])]
 
-    Psmooth = lambda C: smooth(C,**kwargs)
+    Psmooth = lambda C: smooth.smooth(C,**kwargs)
 
     if parallel:
         smoothcube = array(parallel_map(Psmooth,cubelist,numcores=numcores))
@@ -779,7 +779,7 @@ try:
 
     def rotcrop_cube(x1, y1, x2, y2, cubename, outname, xwidth=25, ywidth=25,
                      in_system='galactic',  out_system='equatorial',
-                     clobber=True, newheader=None, xcen=None, ycen=None):
+                     overwrite=True, newheader=None, xcen=None, ycen=None):
         """
         Crop a data cube and then rotate it with montage
 
@@ -788,14 +788,14 @@ try:
         cubefile = fits.open(cubename)
 
         if xcen is None and ycen is None:
-            pos1 = coords.Position([x1,y1],system=in_system)
-            pos2 = coords.Position([x2,y2],system=in_system)
+            pos1 = coordinates.Position([x1,y1],system=in_system)
+            pos2 = coordinates.Position([x2,y2],system=in_system)
 
             if cubefile[0].header.get('CTYPE1')[:2] == 'RA':
                 x1,y1 = pos1.j2000()
                 x2,y2 = pos2.j2000()
                 coord_system = 'celestial'
-            elif  cubefile[0].header.get('CTYPE1')[:4] == 'GLON':
+            elif cubefile[0].header.get('CTYPE1')[:4] == 'GLON':
                 x1,y1 = pos1.galactic()
                 x2,y2 = pos2.galactic()
                 coord_system = 'galactic'
@@ -838,7 +838,10 @@ try:
                     newheader2[key] = newheader.get(key)
             if newheader.get('CD3_3') and newheader2.get('CDELT3') is None:
                 newheader2['CDELT3'] = newheader.get('CD3_3')
-            newheader2.toTxtFile(tempheader,clobber=True)
+            if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+                newheader2.toTxtFile(tempheader,overwrite=True)
+            else:
+                newheader2.toTxtFile(tempheader,clobber=True)
             #if newheader2.get('CDELT3') is None:
             #    raise Exception("No CD3_3 or CDELT3 in header.")
         else:
@@ -846,10 +849,13 @@ try:
                 newheader2 = fits.Header()
                 newheader2.fromTxtFile(newheader)
             tempheader = tempfile.mktemp(suffix='.hdr')
-            newheader2.toTxtFile(tempheader,clobber=True)
+            if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+                newheader2.toTxtFile(tempheader,overwrite=True)
+            else:
+                newheader2.toTxtFile(tempheader,clobber=True)
 
 
-        montage.wrappers.reproject_cube(tempcube,outname,header=tempheader,clobber=clobber)
+        montage.wrappers.reproject_cube(tempcube,outname,header=tempheader,clobber=overwrite)
         #print "\n",outname
         #os.system('imhead %s | grep CDELT' % outname)
 
@@ -859,7 +865,10 @@ try:
         #if tempcube.header.get('CDELT3') is None:
         #    raise Exception("No CD3_3 or CDELT3 in header.")
         #print tempcube.header.get('CDELT3')
-        tempcube.writeto(outname,clobber=True)
+        if astropy.version.major >= 2 or (astropy.version.major==1 and astropy.version.minor>=3):
+            tempcube.writeto(outname,overwrite=True)
+        else:
+            tempcube.writeto(outname,clobber=True)
         #print tempcube.get('CDELT3')
         #print "\n",outname
         #os.system('imhead %s | grep CDELT' % outname)

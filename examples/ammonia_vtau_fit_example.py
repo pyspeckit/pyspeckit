@@ -106,7 +106,9 @@ sp.plotter.figure.savefig('nh3_ammonia_multifit_vtau_zoom.png')
 
 # compare to the 'thin' version
 # In the thin version, Tex = Tk by force
-sp.specfit.Registry.add_fitter('ammonia_tau_thin', pyspeckit.spectrum.models.ammonia.ammonia_model_vtau_thin(), 5)
+sp.specfit.Registry.add_fitter('ammonia_tau_thin',
+                               pyspeckit.spectrum.models.ammonia.ammonia_model_vtau_thin(),
+                               5)
 sp.specfit(fittype='ammonia_tau_thin',
            guesses=[7,4.5,0.68,97.3,0.5]+[7,4.5,0.52,95.8,0.5],
            fixed=[F,F,F,F,T]*2,

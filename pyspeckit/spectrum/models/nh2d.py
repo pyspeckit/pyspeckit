@@ -8,7 +8,7 @@ F. Daniel et al. (2016) line frequencies and line strengths.
 It includes HFS due to D
 
 """
-import hyperfine
+from . import hyperfine
 import astropy.units as u
 
 freq_dict_cen ={

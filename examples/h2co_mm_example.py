@@ -78,7 +78,8 @@ formaldehyde_radex_fitter_both = models.model.SpectralModel(
 
 if __name__ == "__main__":
 
-    sp = pyspeckit.readers.read_class.class_to_spectra('example_h2co_mm_spectrum.apex',apex=True)
+    import pyspeckit.spectrum.readers.read_class
+    sp = pyspeckit.readers.read_class.class_to_spectra('example_h2co_mm_spectrum.apex')
     sp.data *= 1/0.75 # T_A* -> T_MB
     sp.unit = "$T_{MB}$"
     # estimate the error from the data

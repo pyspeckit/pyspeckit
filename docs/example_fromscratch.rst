@@ -36,7 +36,7 @@ This example shows the initialization of a pyspeckit object from numpy arrays.
    # This approach uses the 0th, 1st, and 2nd moments
    amplitude_guess = data.max()
    center_guess = (data*xaxis).sum()/data.sum()
-   width_guess = data.sum() / amplitude_guess / np.sqrt(2*np.pi)
+   width_guess = (data.sum() / amplitude_guess / (2*np.pi))**0.5
    guesses = [amplitude_guess, center_guess, width_guess]
    sp.specfit(fittype='gaussian', guesses=guesses)
 
