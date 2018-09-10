@@ -8,15 +8,14 @@ import astropy.units as u
 if not os.path.exists('o-nh2d_spec.fits'):
     import astropy.utils.data as aud
     from astropy.io import fits
-    f = aud.download_file('ftp://cdsarc.u-strasbg.fr/pub/cats/J/A%2BA/472/519/fits/opha_n2h.fit')
+    f = aud.download_file('https://github.com/pyspeckit/pyspeckit-example-files/o-nh2d_spec.fits')
     with fits.open(f) as ff:
         ff.writeto('o-nh2d_spec.fits')
 
 # Load the spectrum 
 spec = pyspeckit.Spectrum('o-nh2d_spec.fits')
-# Determine rms from line free section
-# and load into cube
-rms= np.std(spec.data[10:370])
+# Determine rms from line free section and load into cube
+rms = np.std(spec.data[10:370])
 spec.error[:] = rms
 # setup spectral axis
 spec.xarr.refX = 85926.27e6*u.Hz

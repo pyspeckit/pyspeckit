@@ -6,6 +6,7 @@ Reference for line params:
 
 F. Daniel et al. (2016) line frequencies and line strengths.
 It includes HFS due to D
+http://adsabs.harvard.edu/abs/2016A%26A...586L...4D
 
 """
 from . import hyperfine
