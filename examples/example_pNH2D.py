@@ -8,7 +8,7 @@ import astropy.units as u
 if not os.path.exists('p-nh2d_spec.fits'):
     import astropy.utils.data as aud
     from astropy.io import fits
-    f = aud.download_file('https://github.com/pyspeckit/pyspeckit-example-files/p-nh2d_spec.fits')
+    f = aud.download_file('https://github.com/pyspeckit/pyspeckit-example-files/raw/master/p-nh2d_spec.fits')
     with fits.open(f) as ff:
         ff.writeto('p-nh2d_spec.fits')
 
