@@ -1,8 +1,8 @@
 
 .. include:: <isogrk3.txt>
 
-Radio Fitting: NH\ :sub:`2`\ D example
-======================================
+Radio Fitting: ortho-NH\ :sub:`2`\ D example
+============================================
 Example hyperfine line fitting for the ortho-NH\ :sub:`2`\ D line.
 
 .. literalinclude:: ../examples/example_oNH2D.py
