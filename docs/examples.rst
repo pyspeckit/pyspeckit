@@ -40,6 +40,8 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    Radio NH3 - fit N hyperfines with no temperature <nh3_tau>
    Radio N2H+ <example_n2hp>
    Radio N2H+ cube <example_n2hp_cube>
+   Radio ortho-NH2D <example_o-n2hp>
+   Radio para-NH2D <example_p-n2hp>
    Radio HCN: shows hyperfine with varying amplitude & width <example_hcn>
    Radio HCO+ <example_hcop>
    Near IR cube <example_NIR_cube>
