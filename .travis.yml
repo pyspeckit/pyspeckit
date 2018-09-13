@@ -56,21 +56,21 @@ matrix:
           env: ASTROPY_VERSION=development
               SETUP_CMD='test'
               NUMPY_VERSION=1.14
-              CONDA_DEPENDENCIES='matplotlib scipy'
+              CONDA_DEPENDENCIES='matplotlib scipy spectral-cube'
         - python: 3.6
           env: ASTROPY_VERSION=development
               SETUP_CMD='test'
               NUMPY_VERSION=1.14
-              CONDA_DEPENDENCIES='matplotlib scipy'
+              CONDA_DEPENDENCIES='matplotlib scipy spectral-cube'
 
         # Try with optional dependencies disabled
         - python: 2.7
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.5 scipy'
+               CONDA_DEPENDENCIES='matplotlib=1.5 scipy spectral-cube'
                PIP_DEPENDENCIES=''
         - python: 3.5
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.5 scipy'
+               CONDA_DEPENDENCIES='matplotlib=1.5 scipy spectral-cube'
                PIP_DEPENDENCIES=''
 
 install:
