@@ -66,11 +66,11 @@ matrix:
         # Try with optional dependencies disabled
         - python: 2.7
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.5'
+               CONDA_DEPENDENCIES='matplotlib=1.5 scipy'
                PIP_DEPENDENCIES=''
         - python: 3.5
           env: SETUP_CMD='test'
-               CONDA_DEPENDENCIES='matplotlib=1.5'
+               CONDA_DEPENDENCIES='matplotlib=1.5 scipy'
                PIP_DEPENDENCIES=''
 
 install:
