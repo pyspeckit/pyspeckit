@@ -29,7 +29,7 @@ env:
         # to repeat them for all configurations.
         - NUMPY_VERSION=stable
         - ASTROPY_VERSION=stable
-        - CONDA_DEPENDENCIES='matplotlib=1.5 scipy spectral-cube lmfit'
+        - CONDA_DEPENDENCIES='matplotlib scipy spectral-cube lmfit'
         - PIP_DEPENDENCIES='lineid-plot specutils'
         - SETUP_XVFB=True
 
