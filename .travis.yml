@@ -31,7 +31,7 @@ env:
         - NUMPY_VERSION=stable
         - ASTROPY_VERSION=stable
         - CONDA_DEPENDENCIES='matplotlib scipy spectral-cube lmfit'
-        - PIP_DEPENDENCIES='lineid-plot specutils'
+        - PIP_DEPENDENCIES='lineid-plot'
         - SETUP_XVFB=True
 
     matrix:
