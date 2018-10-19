@@ -21,6 +21,7 @@ python:
     - 2.7
     - 3.5
     - 3.6
+    - 3.7
 
 env:
     global:
@@ -56,12 +57,16 @@ matrix:
           env: ASTROPY_VERSION=development
               SETUP_CMD='test'
               NUMPY_VERSION=1.14
-              CONDA_DEPENDENCIES='matplotlib scipy spectral-cube'
+              CONDA_DEPENDENCIES='matplotlib=2 scipy spectral-cube'
         - python: 3.6
           env: ASTROPY_VERSION=development
               SETUP_CMD='test'
               NUMPY_VERSION=1.14
-              CONDA_DEPENDENCIES='matplotlib scipy spectral-cube'
+              CONDA_DEPENDENCIES='matplotlib=2 scipy spectral-cube'
+        - python: 3.7
+          env: ASTROPY_VERSION=development
+              SETUP_CMD='test'
+              CONDA_DEPENDENCIES='matplotlib=3 scipy spectral-cube'
 
         # Try with optional dependencies disabled
         - python: 2.7
