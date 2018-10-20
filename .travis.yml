@@ -67,6 +67,7 @@ matrix:
           env: ASTROPY_VERSION=development
               SETUP_CMD='test'
               CONDA_DEPENDENCIES='matplotlib=3 scipy spectral-cube'
+              PIP_DEPENDENCIES='matplotlib'
 
         # Try with optional dependencies disabled
         - python: 2.7
@@ -83,8 +84,9 @@ install:
     - source ci-helpers/travis/setup_conda_$TRAVIS_OS_NAME.sh
 
 script:
+   - if [[ $CONDA_DEPENDENCIES = *"matplotlib=3"* ]]; then conda install matplotlib=3; fi # HUGE HACK to test problem where matplotlib gets UNINSTALLED?!?!?
    #- python -c "import os; print('This is the line before setup_cmd: {0}'.format(os.getenv('SETUP_CMD')))"
-   - if [ $CONDA_DEPENDENCIES = *"matplotlib"* ]; then python -c 'import matplotlib.pyplot'; fi # as recommended here https://github.com/matplotlib/matplotlib/issues/5836#issuecomment-212052820
+   - if [[ $CONDA_DEPENDENCIES = *"matplotlib"* ]]; then python -c 'import matplotlib.pyplot'; fi # as recommended here https://github.com/matplotlib/matplotlib/issues/5836#issuecomment-212052820
    - echo "This is the line before setup_cmd $SETUP_CMD"
    - python setup.py $SETUP_CMD
    # some extras for future use
