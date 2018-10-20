@@ -74,7 +74,7 @@ matrix:
           env: SETUP_CMD='test'
                CONDA_DEPENDENCIES='matplotlib=1.5 scipy spectral-cube'
                PIP_DEPENDENCIES=''
-        - python: 3.5
+        - python: 3.6
           env: SETUP_CMD='test'
                CONDA_DEPENDENCIES='matplotlib=1.5 scipy spectral-cube'
                PIP_DEPENDENCIES=''
