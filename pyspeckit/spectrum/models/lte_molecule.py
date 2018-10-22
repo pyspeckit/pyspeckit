@@ -66,16 +66,16 @@ def line_tau(tex, total_column, partition_function, degeneracy, frequency,
 # Deprecated version of the above
 # def line_tau_nonquantum(tex, total_column, partition_function, degeneracy,
 #                         frequency, energy_upper, SijMu2=None, molwt=None):
-# 
+#
 #     assert frequency.unit.is_equivalent(u.Hz)
 #     assert energy_upper.unit.is_equivalent(u.erg)
 #     assert total_column.unit.is_equivalent(u.cm**-2)
 #     assert tex.unit.is_equivalent(u.K)
-# 
+#
 #     energy_lower = energy_upper - frequency*constants.h
 #     #N_lower = (total_column * degeneracy / partition_function *
 #     #           np.exp(-energy_lower / (constants.k_B * tex)))
-# 
+#
 #     # http://www.cv.nrao.edu/php/splat/OSU_Splat.html
 #     assert SijMu2.unit.is_equivalent(u.debye**2)
 #     amu = u.Da
@@ -85,7 +85,7 @@ def line_tau(tex, total_column, partition_function, degeneracy, frequency,
 #     C3 = (1.43877506 * u.K / ((1*u.cm).to(u.Hz, u.spectral()) * constants.h)).to(u.K/u.erg)
 #     #C3 = (constants.h / constants.k_B).to(u.K/u.erg)
 #     tau = total_column/partition_function * C1 * (molwt/tex)**0.5 * (1-np.exp(-C2*frequency/tex)) * SijMu2 * np.exp(-C3*energy_lower/tex)
-# 
+#
 #     return tau.decompose()
 
 def line_tau_cgs(tex, total_column, partition_function, degeneracy, frequency,
@@ -213,7 +213,7 @@ def get_molecular_parameters(molecule_name,
     tbl = Splatalogue.query_lines(fmin, fmax, chemical_name=molecule_name,
                                   line_lists=line_lists,
                                   show_upper_degeneracy=True, **kwargs)
-     
+
     nl = nodes.Nodelist()
     nl.findnode('cdms')
     cdms = nl.findnode('cdms')
@@ -222,16 +222,18 @@ def get_molecular_parameters(molecule_name,
     query_string = "SELECT ALL WHERE VAMDCSpeciesID='%s'" % species_id
     request.setquery(query_string)
     result = request.dorequest()
+    # run it once to test that it works
     Q = list(specmodel.calculate_partitionfunction(result.data['States'],
                                                    temperature=tex).values())[0]
-    
+
     def partfunc(tem):
         Q = list(specmodel.calculate_partitionfunction(result.data['States'],
                                                        temperature=tem).values())[0]
         return Q
 
 
-    freqs = np.array(tbl['Freq-GHz'])*u.GHz
+    freqs = (np.array(tbl['Freq-GHz'])*u.GHz if 'Freq-GHz' in tbl else
+             np.array(tbl['Freq-GHz(rest frame,redshifted)'])*u.GHz)
     aij = tbl['Log<sub>10</sub> (A<sub>ij</sub>)']
     deg = tbl['Upper State Degeneracy']
     EU = (np.array(tbl['E_U (K)'])*u.K*constants.k_B).to(u.erg).value
@@ -245,7 +247,7 @@ def generate_model(xarr, vcen, width, tex, column,
     """
     Model Generator
     """
-    
+
     if hasattr(tex,'unit'):
         tex = tex.value
     if hasattr(tbg,'unit'):
@@ -323,12 +325,12 @@ def generate_fitter(model_func, name):
             centroid_par='shift',
             )
     myclass.__name__ = name
-    
+
     return myclass
 
 
 # url = 'http://cdms.ph1.uni-koeln.de/cdms/tap/'
-# rslt = requests.post(url+"/sync", data={'REQUEST':"doQuery", 'LANG': 'VSS2', 'FORMAT':'XSAMS', 'QUERY':"SELECT SPECIES WHERE MoleculeStoichiometricFormula='CH2O'"})               
+# rslt = requests.post(url+"/sync", data={'REQUEST':"doQuery", 'LANG': 'VSS2', 'FORMAT':'XSAMS', 'QUERY':"SELECT SPECIES WHERE MoleculeStoichiometricFormula='CH2O'"})
 
 if __name__ == "__main__":
     # example
