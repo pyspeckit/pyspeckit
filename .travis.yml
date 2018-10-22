@@ -21,6 +21,7 @@ python:
     - 2.7
     - 3.5
     - 3.6
+      # not yet - 3.7
 
 env:
     global:
@@ -30,7 +31,7 @@ env:
         - NUMPY_VERSION=stable
         - ASTROPY_VERSION=stable
         - CONDA_DEPENDENCIES='matplotlib scipy spectral-cube lmfit'
-        - PIP_DEPENDENCIES='lineid-plot specutils'
+        - PIP_DEPENDENCIES='lineid-plot'
         - SETUP_XVFB=True
 
     matrix:
@@ -56,19 +57,24 @@ matrix:
           env: ASTROPY_VERSION=development
               SETUP_CMD='test'
               NUMPY_VERSION=1.14
-              CONDA_DEPENDENCIES='matplotlib scipy spectral-cube'
+              CONDA_DEPENDENCIES='matplotlib=2 scipy spectral-cube'
         - python: 3.6
           env: ASTROPY_VERSION=development
               SETUP_CMD='test'
               NUMPY_VERSION=1.14
-              CONDA_DEPENDENCIES='matplotlib scipy spectral-cube'
+              CONDA_DEPENDENCIES='matplotlib=2 scipy spectral-cube'
+        - python: 3.6
+          env: ASTROPY_VERSION=development
+              SETUP_CMD='test'
+              CONDA_DEPENDENCIES='matplotlib=3 scipy spectral-cube'
+              PIP_DEPENDENCIES='matplotlib==3'
 
         # Try with optional dependencies disabled
         - python: 2.7
           env: SETUP_CMD='test'
                CONDA_DEPENDENCIES='matplotlib=1.5 scipy spectral-cube'
                PIP_DEPENDENCIES=''
-        - python: 3.5
+        - python: 3.6
           env: SETUP_CMD='test'
                CONDA_DEPENDENCIES='matplotlib=1.5 scipy spectral-cube'
                PIP_DEPENDENCIES=''
@@ -79,7 +85,7 @@ install:
 
 script:
    #- python -c "import os; print('This is the line before setup_cmd: {0}'.format(os.getenv('SETUP_CMD')))"
-   - if [ $CONDA_DEPENDENCIES = *"matplotlib"* ]; then python -c 'import matplotlib.pyplot'; fi # as recommended here https://github.com/matplotlib/matplotlib/issues/5836#issuecomment-212052820
+   - if [[ $CONDA_DEPENDENCIES = *"matplotlib"* && $SETUP_CMD == 'test' ]]; then python -c 'import matplotlib.pyplot'; fi # as recommended here https://github.com/matplotlib/matplotlib/issues/5836#issuecomment-212052820
    - echo "This is the line before setup_cmd $SETUP_CMD"
    - python setup.py $SETUP_CMD
    # some extras for future use
