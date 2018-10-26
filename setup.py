@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
+# Note: This file needs to be Python 2 / <3.6 compatible, so that the nice
+# "This package only supports Python 3.x+" error prints without syntax errors etc.
 
 import glob
 import os
 import sys
-
 try:
     from configparser import ConfigParser
 except ImportError:
