@@ -1,8 +1,23 @@
 CHANGES
 *******
 
-Version 0.1.20 (unreleased)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Version 0.1.21 (November 4, 2018)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    * Compatibility #287: fix for mpl3
+    * Minor #283: fix incorrect use of _traceback variable in fiteach
+    * Enhancement #282: Allow instantiation from things with .hdus
+    * Enhancement #267: Improved NH3 fit defaults
+    * Bugfix #266: Fix an ammonia normalization issue
+    * Enhancement #257: Implement multi-component guessing for non-gaussian models
+    * Enhancement #256: New NH3 model
+    * Bugfix #249: Fix includemask initialization
+    * Bugfix #248: Prevent zero-width interactive guesses 
+    * Bugfix #245: Corrections to powerlaw baseline fitting
+    * Bugfix #244: Fix typo in array arithmetic
+    * Bugfix #233: Fix problem retrieving multicomponent NH3 models
+
+Version 0.1.20 (April 24, 2017)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     * Minor #210, #212: add cold_ammonia to the registry
     * Bugfix #175: Fixed an error when indexing dxarr
