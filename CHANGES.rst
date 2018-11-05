@@ -1,6 +1,10 @@
 CHANGES
 *******
 
+Version 0.1.22 (unreleased)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    * none yet
+
 Version 0.1.21 (November 4, 2018)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     * Compatibility #287: fix for mpl3
