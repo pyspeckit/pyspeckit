@@ -612,7 +612,7 @@ class SpectralModel(fitter.SimpleFitter):
             self.parinfo[i]['value'] = p
             # for consistency w/lmfit, and because it makes more sense, errors
             # of 0 will instead be None
-            self.parinfo[i]['error'] = e if e != 0 else None
+            self.parinfo[i]['error'] = e if (e != 0 or mp.status != 4) else None
 
         # sanity check: if status==4, errors could not be computed
         # Apparently some parameters can have errors estimated even if all can't?
