@@ -501,7 +501,8 @@ class SpectralModel(fitter.SimpleFitter):
         # Force consistency w/earlier versions of lmfit: if error == 0 exactly,
         # change it to None
         for par in self.LMParams:
-            if par.stderr == 0:
+            if hasattr(par, 'stderr') and par.stderr == 0:
+                #assert minimizer.ier == 4
                 par.stderr = None
 
         self.parinfo._from_Parameters(self.LMParams)
@@ -612,6 +613,12 @@ class SpectralModel(fitter.SimpleFitter):
             # for consistency w/lmfit, and because it makes more sense, errors
             # of 0 will instead be None
             self.parinfo[i]['error'] = e if e != 0 else None
+
+        # sanity check: if status==4, errors could not be computed
+        # Apparently some parameters can have errors estimated even if all can't?
+        #if mp.status == 4:
+        #    assert all([self.parinfo[ii]['error'] is None
+        #                for ii in range(len(mpp))])
 
         if veryverbose:
             log.info("Fit status: {0}".format(mp.status))
