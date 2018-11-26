@@ -667,17 +667,19 @@ class SpectralModel(fitter.SimpleFitter):
                       svn[ii+jj*self.npars],
                       self.parinfo.fixed[ii+jj*self.npars+self.vheight],
                       jj)
-                      for jj in range(self.npeaks) for ii in range(self.npars)]
+                     for jj in range(self.npeaks) for ii in range(self.npars)]
 
         label_list = []
         for (value, error, varname, fixed, varnumber) in loop_list:
             log.debug(", ".join([str(x) for x in (value, error, varname, fixed, varnumber)]))
-            if fixed or error==0:
-                label = ("$%s(%i)$=%8s" % (varname,varnumber,
-                        Decimal("%g" % value).quantize( Decimal("%0.6g" % (value)) )))
+            if None in (value, error):
+                label = "{0}({1})=None".format(varname, varnumber)
+            elif fixed or error==0:
+                label = ("$%s(%i)$=%8s" % (varname, varnumber,
+                        Decimal("%g" % value).quantize(Decimal("%0.6g" % (value)))))
             else:
-                label = ("$%s(%i)$=%8s $\\pm$ %8s" % (varname,varnumber,
-                    Decimal("%g" % value).quantize( Decimal("%0.2g" % (min(np.abs([value,error])))) ),
+                label = ("$%s(%i)$=%8s $\\pm$ %8s" % (varname, varnumber,
+                    Decimal("%g" % value).quantize(Decimal("%0.2g" % (min(np.abs([value,error]))))),
                     Decimal("%g" % error).quantize(Decimal("%0.2g" % (error))),))
             label_list.append(label)
 
