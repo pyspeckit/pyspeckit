@@ -153,6 +153,7 @@ class SpectralModel(fitter.SimpleFitter):
 
     def __call__(self, *args, **kwargs):
 
+        log.debug("Fitter called with args={0} and kwargs={1}".format(args, kwargs))
         use_lmfit = kwargs.pop('use_lmfit') if 'use_lmfit' in kwargs else self.use_lmfit
         if use_lmfit:
             return self.lmfitter(*args,**kwargs)
@@ -187,6 +188,7 @@ class SpectralModel(fitter.SimpleFitter):
         therefore must have values within parameter ranges)
 
         """
+        log.debug("BEGIN _make_parinfo")
 
         # for backwards compatibility - partied = tied, etc.
         locals_dict = locals()
@@ -451,7 +453,9 @@ class SpectralModel(fitter.SimpleFitter):
         try:
             import lmfit
         except ImportError as e:
-            raise ImportError( "Could not import lmfit, try using mpfit instead." )
+            raise ImportError("Could not import lmfit, try using mpfit instead.")
+
+        log.debug("lmfit called with parinfo=\n{0}".format(parinfo))
 
         self.xax = xax # the 'stored' xax is just a link to the original
         if hasattr(xax,'convert_to_unit') and self.fitunit is not None:
@@ -485,16 +489,26 @@ class SpectralModel(fitter.SimpleFitter):
         LMParams = parinfo.as_Parameters()
         log.debug("LMParams: "+"\n".join([repr(p) for p in list(LMParams.values())]))
         log.debug("parinfo:  {0}".format(parinfo))
+        log.debug("BEGIN MINIMIZER")
         minimizer = lmfit.minimize(self.lmfitfun(xax,np.array(data),err,debug=debug),LMParams,**kwargs)
+        log.debug("END MINIMIZER")
         if not quiet:
             log.info("There were %i function evaluations" % (minimizer.nfev))
         #modelpars = [p.value for p in parinfo.values()]
         #modelerrs = [p.stderr for p in parinfo.values() if p.stderr is not None else 0]
 
         self.LMParams = minimizer.params
+        # Force consistency w/earlier versions of lmfit: if error == 0 exactly,
+        # change it to None
+        for par in self.LMParams:
+            if hasattr(par, 'stderr') and par.stderr == 0:
+                #assert minimizer.ier == 4
+                par.stderr = None
+
         self.parinfo._from_Parameters(self.LMParams)
         log.debug("LMParams: {0}".format(self.LMParams))
         log.debug("parinfo: {0}".format(parinfo))
+
 
         self.mp = minimizer
         self.mpp = self.parinfo.values
@@ -511,7 +525,7 @@ class SpectralModel(fitter.SimpleFitter):
             except TypeError:
                 chi2 = ((data-self.model)**2).sum()
         if np.isnan(chi2):
-            warn( "Warning: chi^2 is nan" )
+            warn("Warning: chi^2 is nan")
 
         if hasattr(self.mp,'ier') and self.mp.ier not in [1,2,3,4]:
             log.warning("Fitter failed: %s, %s" % (self.mp.message, self.mp.lmdif_message))
@@ -583,18 +597,28 @@ class SpectralModel(fitter.SimpleFitter):
 
         mp = mpfit(self.mpfitfun(xax,data,err),parinfo=parinfo,quiet=quiet,debug=debug,**kwargs)
         mpp = mp.params
-        if mp.perror is not None: mpperr = mp.perror
-        else: mpperr = mpp*0
+        if mp.perror is not None:
+            mpperr = mp.perror
+        else:
+            mpperr = mpp*0
         chi2 = mp.fnorm
 
         if mp.status == 0:
             if "parameters are not within PARINFO limits" in mp.errmsg:
-                log.warning( parinfo )
+                log.warning(parinfo)
             raise mpfitException(mp.errmsg)
 
         for i,(p,e) in enumerate(zip(mpp,mpperr)):
             self.parinfo[i]['value'] = p
-            self.parinfo[i]['error'] = e
+            # for consistency w/lmfit, and because it makes more sense, errors
+            # of 0 will instead be None
+            self.parinfo[i]['error'] = e if (e != 0 or mp.status != 4) else None
+
+        # sanity check: if status==4, errors could not be computed
+        # Apparently some parameters can have errors estimated even if all can't?
+        #if mp.status == 4:
+        #    assert all([self.parinfo[ii]['error'] is None
+        #                for ii in range(len(mpp))])
 
         if veryverbose:
             log.info("Fit status: {0}".format(mp.status))

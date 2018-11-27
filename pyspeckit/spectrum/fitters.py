@@ -995,7 +995,8 @@ class Specfit(interactive.Interactive):
         for par in self.parinfo:
             if par.scaleable:
                 par.value = par.value * scalefactor
-                par.error = par.error * scalefactor
+                if par.error is not None:
+                    par.error = par.error * scalefactor
 
         if self.Spectrum.plotter.axis is not None and plot:
             if color is not None:
