@@ -68,3 +68,13 @@ Basic plot example with a second spectrum offset and overlaid in red, again with
         :alt: Basic plot example with a second spectrum offset and overlaid in red, again with adjusted limits
         :figwidth: 800
         :width: 800
+
+
+
+API Documentation for Plotting
+------------------------------
+
+We include the API documentation for the generic model and fitter wrappers here.
+
+.. automodule:: pyspeckit.spectrum.plotters
+    :members:
