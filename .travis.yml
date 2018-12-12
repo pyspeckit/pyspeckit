@@ -33,6 +33,7 @@ env:
         - CONDA_DEPENDENCIES='matplotlib scipy spectral-cube lmfit'
         - PIP_DEPENDENCIES='lineid-plot'
         - SETUP_XVFB=True
+        - MPLBACKEND=TkAgg
 
     matrix:
         # Make sure that egg_info works without dependencies
