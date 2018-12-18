@@ -3,18 +3,26 @@ import pyspeckit
 import os
 import astropy.units as u
 import warnings
+import socket
 from astropy import wcs
 
 if not os.path.exists('n2hp_cube.fit'):
     import astropy.utils.data as aud
     from astropy.io import fits
-    f = aud.download_file('ftp://cdsarc.u-strasbg.fr/pub/cats/J/A%2BA/472/519/fits/opha_n2h.fit')
-    with fits.open(f) as ff:
-        ff[0].header['CUNIT3'] = 'm/s'
-        for kw in ['CTYPE4','CRVAL4','CDELT4','CRPIX4','CROTA4']:
-            if kw in ff[0].header:
-                del ff[0].header[kw]
-        ff.writeto('n2hp_cube.fit')
+
+    # retry in case of timeouts
+    for ii in range(5):
+        try:
+            f = aud.download_file('ftp://cdsarc.u-strasbg.fr/pub/cats/J/A%2BA/472/519/fits/opha_n2h.fit')
+            with fits.open(f) as ff:
+                ff[0].header['CUNIT3'] = 'm/s'
+                for kw in ['CTYPE4','CRVAL4','CDELT4','CRPIX4','CROTA4']:
+                    if kw in ff[0].header:
+                        del ff[0].header[kw]
+                ff.writeto('n2hp_cube.fit')
+            break
+        except socket.timeout:
+            continue
 
 # Load the spectral cube cropped in the middle for efficiency
 with warnings.catch_warnings():
