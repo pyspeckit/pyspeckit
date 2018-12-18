@@ -10,10 +10,13 @@ if not os.path.exists('n2hp_cube.fit'):
     import astropy.utils.data as aud
     from astropy.io import fits
 
-    # f = aud.download_file('ftp://cdsarc.u-strasbg.fr/pub/cats/J/A%2BA/472/519/fits/opha_n2h.fit')
-    # travis-ci can't handle ftp:
-    # https://blog.travis-ci.com/2018-07-23-the-tale-of-ftp-at-travis-ci
-    f = aud.download_file('http://cdsarc.u-strasbg.fr//viz-bin/nph-Cat?-plus=-%2b&J/A%2bA/472/519/fits/opha_n2h.fit')
+    try:
+        f = aud.download_file('ftp://cdsarc.u-strasbg.fr/pub/cats/J/A%2BA/472/519/fits/opha_n2h.fit')
+    except socket.timeout as ex:
+        # travis-ci can't handle ftp:
+        # https://blog.travis-ci.com/2018-07-23-the-tale-of-ftp-at-travis-ci
+        print("Failed to download from ftp.  Exception was: {0}".format(ex))
+        f = aud.download_file('http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat?-plus=-%2b&J/A%2bA/472/519/fits/opha_n2h.fit')
 
     with fits.open(f) as ff:
         ff[0].header['CUNIT3'] = 'm/s'
