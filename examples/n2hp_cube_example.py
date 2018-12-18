@@ -21,7 +21,9 @@ if not os.path.exists('n2hp_cube.fit'):
                         del ff[0].header[kw]
                 ff.writeto('n2hp_cube.fit')
             break
-        except socket.timeout:
+        except socket.timeout as ex:
+            if ii == 4:
+                raise ex
             continue
 
 # Load the spectral cube cropped in the middle for efficiency
