@@ -3,7 +3,6 @@ import pyspeckit
 import os
 import astropy.units as u
 import warnings
-import socket
 from astropy import wcs
 
 if not os.path.exists('n2hp_cube.fit'):
@@ -12,7 +11,8 @@ if not os.path.exists('n2hp_cube.fit'):
 
     try:
         f = aud.download_file('ftp://cdsarc.u-strasbg.fr/pub/cats/J/A%2BA/472/519/fits/opha_n2h.fit')
-    except socket.timeout as ex:
+    except Exception as ex:
+        # this might be any number of different timeout errors (urllib2.URLError, socket.timeout, etc)
         # travis-ci can't handle ftp:
         # https://blog.travis-ci.com/2018-07-23-the-tale-of-ftp-at-travis-ci
         print("Failed to download from ftp.  Exception was: {0}".format(ex))
