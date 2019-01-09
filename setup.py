@@ -21,7 +21,7 @@ DESCRIPTION = metadata.get('description', 'Astropy Package Template')
 AUTHOR = metadata.get('author', 'Astropy Developers')
 AUTHOR_EMAIL = metadata.get('author_email', '')
 LICENSE = metadata.get('license', 'unknown')
-URL = metadata.get('url', 'http://astropy.org')
+URL = metadata.get('url', 'http://docs.astropy.org/projects/package-template/')
 __minimum_python_version__ = metadata.get("minimum_python_version", "2.7")
 
 # Enforce Python version check - this is the same check as in __init__.py but
