@@ -22,7 +22,7 @@ AUTHOR = metadata.get('author', 'Astropy Developers')
 AUTHOR_EMAIL = metadata.get('author_email', '')
 LICENSE = metadata.get('license', 'unknown')
 URL = metadata.get('url', 'http://docs.astropy.org/projects/package-template/')
-__minimum_python_version__ = metadata.get("minimum_python_version", "2.7")
+__minimum_python_version__ = metadata.get("minimum_python_version", "3.6")
 
 # Enforce Python version check - this is the same check as in __init__.py but
 # this one has to happen before importing ah_bootstrap.
@@ -35,11 +35,7 @@ if sys.version_info < tuple((int(val) for val in __minimum_python_version__.spli
 import ah_bootstrap
 from setuptools import setup
 
-# A dirty hack to get around some early import/configurations ambiguities
-if sys.version_info[0] >= 3:
-    import builtins
-else:
-    import __builtin__ as builtins
+import builtins
 builtins._ASTROPY_SETUP_ = True
 
 from astropy_helpers.setup_helpers import (register_commands, get_debug_option,

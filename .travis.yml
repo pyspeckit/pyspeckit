@@ -63,7 +63,6 @@ env:
 
     matrix:
         # Make sure that egg_info works without dependencies
-        - PYTHON_VERSION=2.7 SETUP_CMD='egg_info'
         - PYTHON_VERSION=3.7 SETUP_CMD='egg_info'
 
 
@@ -91,8 +90,6 @@ matrix:
         - os: linux
           env: ASTROPY_VERSION=development
                EVENT_TYPE='pull_request push cron'
-        - os: linux
-          env: PYTHON_VERSION=2.7 ASTROPY_VERSION=lts
         - os: linux
           env: ASTROPY_VERSION=lts
 
