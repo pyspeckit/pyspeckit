@@ -9,7 +9,7 @@ def test_hill5():
     xarr = units.SpectroscopicAxis(x, refX=5*u.GHz, velocity_convention='radio')
     y = hill5infall.hill5_model(xarr, 0.5, 1.0, 2.0, 1.0, 1.0)
 
-    sp = Spectrum(xarr=xarr, data=y)
+    sp = Spectrum(xarr=xarr, data=y, header={})
 
     sp.Registry.add_fitter('hill5_fitter', hill5infall.hill5_fitter, 5)
 

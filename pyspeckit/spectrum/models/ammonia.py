@@ -33,11 +33,10 @@ from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
 
 TCMB = 2.7315 # K
 
-def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
-            fortho=0.0, tau=None, fillingfraction=None, return_tau=False,
-            background_tb=TCMB,
-            verbose=False, return_components=False, debug=False,
-            line_names=line_names):
+def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
+            tau=None, fillingfraction=None, return_tau=False,
+            return_tau_profile=False, background_tb=TCMB, verbose=False,
+            return_components=False, debug=False, line_names=line_names):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
     gaussian parameters
@@ -74,6 +73,10 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
     return_tau: bool
         Return a dictionary of the optical depths in each line instead of a
         synthetic spectrum
+    return_tau_profile: bool
+        Return a dictionary of the optical depth profiles in each line, i.e.,
+        the optical depths that will be used in conjunction with T_ex to produce
+        the synthetic spectrum
     return_components: bool
         Return a list of arrays, one for each hyperfine component, instead of
         just one array
@@ -209,9 +212,11 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                                        fortho, line_names,
                                        background_tb=background_tb,
                                        fillingfraction=fillingfraction,
-                                       return_components=return_components)
+                                       return_components=return_components,
+                                       return_tau_profile=return_tau_profile
+                                      )
 
-    if model_spectrum.min() < 0 and background_tb == TCMB:
+    if not return_tau_profile and model_spectrum.min() < 0 and background_tb == TCMB:
         raise ValueError("Model dropped below zero.  That is not possible "
                          " normally.  Here are the input values: "+
                          ("tex: {0} ".format(tex)) +
@@ -288,7 +293,7 @@ def ammonia_thin(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
 
 def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
                       background_tb=TCMB, fillingfraction=None,
-                      return_components=False):
+                      return_components=False, return_tau_profile=False):
     """
     Helper function: given a dictionary of ammonia optical depths,
     an excitation tmeperature... etc, produce the spectrum
@@ -305,6 +310,9 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
 
     if return_components:
         components = []
+
+    if return_tau_profile:
+        tau_profile = {}
 
     for linename in line_names:
         voff_lines = np.array(voff_lines_dict[linename])
@@ -325,6 +333,9 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
                 components.append(tauprof_)
             tauprof += tauprof_
 
+        if return_tau_profile:
+            tau_profile[linename] = tauprof
+
         T0 = (h*xarr.value*1e9/kb) # "temperature" of wavelength
 
         if isinstance(tex, dict):
@@ -344,6 +355,8 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
         else:
             term1 = (T0/(np.exp(T0/tex)-1)-T0/(np.exp(T0/background_tb)-1))
         return term1*(1-np.exp(-1*np.array(components)))
+    elif return_tau_profile:
+        return tau_profile
     else:
         return runspec
 

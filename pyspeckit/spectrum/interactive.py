@@ -303,7 +303,7 @@ class Interactive(object):
             return
         for eventtype in ('button_press_event','key_press_event'):
             for key,val in iteritems(self.Spectrum.plotter.figure.canvas.callbacks.callbacks[eventtype]):
-                if "event_manager" in val.func.__name__:
+                if hasattr(val, 'func') and "event_manager" in val.func.__name__:
                     cids_to_remove.append(key)
                     if debug or self._debug: print("Removing CID #%i with attached function %s" % (key,val.func.__name__))
         for cid in cids_to_remove:

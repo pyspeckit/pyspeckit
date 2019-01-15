@@ -10,9 +10,11 @@ oneonemod = ammonia.ammonia(xarr.to(u.GHz, u.doppler_radio(ammonia.freq_dict['on
 twotwomod = ammonia.ammonia(xarr.to(u.GHz, u.doppler_radio(ammonia.freq_dict['twotwo']*u.Hz)),)
 
 sp11 = pyspeckit.Spectrum(xarr=xarr, data=oneonemod, unit=u.K,
-                          xarrkwargs={'refX': ammonia.freq_dict['oneone']*u.Hz})
+                          xarrkwargs={'refX': ammonia.freq_dict['oneone']*u.Hz},
+                          header={})
 sp22 = pyspeckit.Spectrum(xarr=xarr, data=twotwomod, unit=u.K,
-                          xarrkwargs={'refX': ammonia.freq_dict['twotwo']*u.Hz})
+                          xarrkwargs={'refX': ammonia.freq_dict['twotwo']*u.Hz},
+                          header={})
 
 
 input_dict={'oneone':sp11, 'twotwo':sp22,}

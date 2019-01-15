@@ -35,7 +35,7 @@ from . import fitters
 from . import history
 import copy
 from astropy import log
-from ..specwarnings import warn
+from ..specwarnings import warn, PyspeckitWarning
 try:
     import atpy
     atpyOK = True
@@ -64,9 +64,10 @@ class BaseSpectrum(object):
 
     from .interpolation import interpnans
 
-    def __init__(self, filename=None, filetype=None, xarr=None, data=None,
-                 error=None, header=None, doplot=False, maskdata=True,
-                 unit=None, plotkwargs={}, xarrkwargs={}, model_registry=None,
+    def __init__(self, filename_or_magic=None, filetype=None, xarr=None,
+                 data=None, error=None, header=None, doplot=False,
+                 maskdata=True, unit=None, plotkwargs={}, xarrkwargs={},
+                 model_registry=None, filename=None,
                  **kwargs):
         """
         Create a Spectrum object.
@@ -78,8 +79,8 @@ class BaseSpectrum(object):
 
         Parameters
         ----------
-        filename : string
-            The file to read the spectrum from.  If data, xarr, and error are
+        filename_or_magic : string or something else
+            The filename or something with an hdu attribute.  If data, xarr, and error are
             specified, leave filename blank.
         filetype : string
             Specify the file type (only needed if it cannot be automatically
@@ -107,6 +108,9 @@ class BaseSpectrum(object):
             (can be used in place of a header)
         unit : str
             The data unit
+        filename : string
+            The file to read the spectrum from.  If data, xarr, and error are
+            specified, leave filename blank.
 
         Examples
         --------
@@ -125,6 +129,13 @@ class BaseSpectrum(object):
         >>> # if you already have a simple fits file
         >>> sp = pyspeckit.Spectrum('test.fits')
         """
+        if filename_or_magic is not None:
+            if hasattr(filename_or_magic, 'hdu'):
+                return self.from_hdu(filename_or_magic.hdu)
+            elif filename is None:
+                filename = filename_or_magic
+            else:
+                raise ValueError("filename_or_magic was specified incorrectly")
         if filename:
             if error is not None:
                 raise ValueError("When reading from a file, you cannot specify"
@@ -184,7 +195,8 @@ class BaseSpectrum(object):
                 else:
                     self.header = header
             else: # set as blank
-                warn("WARNING: No header given.  Creating an empty one.")
+                warn("WARNING: No header given.  Creating an empty one.",
+                     PyspeckitWarning)
                 self.header = pyfits.Header()
             self.parse_header(self.header)
         else:

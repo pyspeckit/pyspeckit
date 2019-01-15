@@ -17,7 +17,14 @@ from astropy import log
 try:
     from matplotlib.cbook import BoundMethodProxy
 except ImportError:
-    from matplotlib.cbook import _BoundMethodProxy as BoundMethodProxy
+    try:
+        from matplotlib.cbook import _BoundMethodProxy as BoundMethodProxy
+    except ImportError:
+        from matplotlib.cbook import WeakMethod
+        class BoundMethodProxy(WeakMethod):
+            @property
+            def func(self):
+                return self()
 
 from . import widgets
 from ..specwarnings import warn

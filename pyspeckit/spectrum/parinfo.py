@@ -143,7 +143,7 @@ class ParinfoList(list):
         """
         if hasattr(value,'n') and value.n in self.n and renumber is not False:
             # indexed from 0, so len(self) = max(self.n)+1
-            value.n = len(self) 
+            value.n = len(self)
         super(ParinfoList, self).append(value)
         self._check_names()
         self._set_attributes()
@@ -156,11 +156,11 @@ class ParinfoList(list):
             P = Parameters()
             for par in self:
                 P.add(name=par.parname,
-                        value=par.value,
-                        vary=not(par.fixed),
-                        expr=par.tied if par.tied is not '' else None,
-                        min=par.limits[0] if par.limited[0] else None,
-                        max=par.limits[1] if par.limited[1] else None)
+                      value=par.value,
+                      vary=not(par.fixed),
+                      expr=par.tied if par.tied is not '' else None,
+                      min=par.limits[0] if par.limited[0] else None,
+                      max=par.limits[1] if par.limited[1] else None)
 
             return P
 
@@ -231,7 +231,7 @@ class Parinfo(dict):
         if limited
     limited: (bool, bool)
         Is the parameter value limited?
-    step: number 
+    step: number
         from MPFIT: the step size to be used in calculating the numerical
         derivatives.  If set to zero, then the step size is computed
         automatically.  Ignored when AUTODERIVATIVE=0.
@@ -247,8 +247,8 @@ class Parinfo(dict):
             parameter array P are permitted.  Example: if parameter 2 is always
             to be twice parameter 1 then use the following: parinfo(2).tied =
             '2 * p(1)'.  Since they are totally constrained, tied parameters
-            are considered to be fixed; no errors are computed for them.  
-            NOTE: the PARNAME can't be used in expressions. 
+            are considered to be fixed; no errors are computed for them.
+            NOTE: the PARNAME can't be used in expressions.
     parname: string
         The parameter name
     shortparname: string (tex)
@@ -270,7 +270,7 @@ class Parinfo(dict):
 
         if values is not None:
             self.update(values)
-        
+
         self.__dict__ = self
 
     def __repr__(self):
@@ -404,7 +404,7 @@ class Parinfo(dict):
         Perform an operation (addition, subtraction, mutiplication, division, etc.)
         """
 
-        def ofunc(self, other): 
+        def ofunc(self, other):
             """ Operation Function """
             intypes = type(other),type(self.value)
             try:
@@ -439,7 +439,7 @@ class Parinfo(dict):
     __pow__ = _operation_wrapper('pow')
     __rpow__ = _operation_wrapper('rpow')
 
-    try: 
+    try:
         def __array__(self):
             import numpy as np
             return np.array(self.value)
@@ -468,26 +468,26 @@ if __name__=="__main__":
         P.limits = value
 
     def check_index(key):
-        PL = ParinfoList([Parinfo({'parname':'HEIGHT'}), 
+        PL = ParinfoList([Parinfo({'parname':'HEIGHT'}),
                         Parinfo({'value':15,'parname':'AMPLITUDE'}),
                         Parinfo({'value':3,'parname':'WIDTH'}),
                         Parinfo({'value':4,'parname':'WIDTH'})])
         return PL[key]
 
     def check_set_list(values):
-        PL = ParinfoList([Parinfo({'parname':'HEIGHT'}), 
+        PL = ParinfoList([Parinfo({'parname':'HEIGHT'}),
                         Parinfo({'value':15,'parname':'AMPLITUDE'}),
                         Parinfo({'value':3,'parname':'WIDTH','limits':(0,5),'limited':(True,True)}),
                         Parinfo({'value':4,'parname':'WIDTH'})])
         PL.shortparnames = ['a','b','c','d']
         PL.values = values
         return PL.values
-    
+
     class MyTestCase(unittest.TestCase):
         def __init__(self, methodName='runTest', param=None):
             super(MyTestCase, self).__init__(methodName)
             self.param = param
-        
+
         def test_checks_value_fail(self):
             check_failure(0.5)
             self.assertRaises(ValueError, check_failure, 5)

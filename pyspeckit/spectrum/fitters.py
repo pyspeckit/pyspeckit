@@ -472,9 +472,9 @@ class Specfit(interactive.Interactive):
                 midpt       = self.Spectrum.xarr[midpt_pixel].value
             elif midpt_location == 'fitted':
                 try:
-                    shifts = [self.Spectrum.specfit.parinfo[x].value
-                              for x in self.Spectrum.specfit.parinfo.keys()
-                              if 'SHIFT' in x]
+                    shifts = np.array([self.Spectrum.specfit.parinfo[x].value
+                                       for x in self.Spectrum.specfit.parinfo.keys()
+                                       if 'SHIFT' in x])
                 except AttributeError:
                     raise AttributeError("Can only specify midpt_location="
                                          "fitted if there is a SHIFT parameter"
@@ -995,7 +995,8 @@ class Specfit(interactive.Interactive):
         for par in self.parinfo:
             if par.scaleable:
                 par.value = par.value * scalefactor
-                par.error = par.error * scalefactor
+                if par.error is not None:
+                    par.error = par.error * scalefactor
 
         if self.Spectrum.plotter.axis is not None and plot:
             if color is not None:

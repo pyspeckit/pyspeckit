@@ -12,7 +12,8 @@ VF = inherited_voigtfitter.voigt_fitter()
 nvoigt = VF.n_modelfunc
 
 synthdata = nvoigt([1,-30,6.5,0.5,0.5,35,1.5,6.5])(xarr) + np.random.randn(xarr.shape[0])/20.
-sp1 = pyspeckit.Spectrum(xarr=xarr, data=synthdata, error=np.ones(xarr.shape[0])/20.)
+sp1 = pyspeckit.Spectrum(xarr=xarr, data=synthdata,
+                         error=np.ones(xarr.shape[0])/20., header={},)
 sp1.plotter()
 sp1.specfit(fittype='gaussian', guesses=[0.5,-25,3,0.2,40,5],
             composite_fit_color='b', clear=False, annotate=False)

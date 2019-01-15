@@ -941,7 +941,7 @@ class Cube(spectrum.Spectrum):
                     success = True
                 except Exception as ex:
                     exc_traceback = sys.exc_info()[2]
-                    self.tracebacks[(ii,x,y)] = exc_traceback
+                    self._tracebacks[(ii,x,y)] = exc_traceback
                     log.exception("Fit number %i at %i,%i failed on error %s" % (ii,x,y, str(ex)))
                     log.exception("Failure was in file {0} at line {1}".format(
                         exc_traceback.tb_frame.f_code.co_filename,
