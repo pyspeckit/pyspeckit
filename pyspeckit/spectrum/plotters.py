@@ -14,13 +14,29 @@ import copy
 import inspect
 from astropy import log
 
+# this mess is to handle a nested hell of different versions of matplotlib
+# (>=1.3 has BoundMethodProxy somewhere, >=3 gets rid of it) and python
+# (python >=3.4 has WeakMethod, earlier versions don't)
 try:
     from matplotlib.cbook import BoundMethodProxy
 except ImportError:
     try:
         from matplotlib.cbook import _BoundMethodProxy as BoundMethodProxy
     except ImportError:
-        from matplotlib.cbook import WeakMethod
+        try:
+            from matplotlib.cbook import WeakMethod
+        except ImportError:
+            try:
+                from weakref import WeakMethod
+            except ImportError:
+                try:
+                    from weakrefmethod import WeakMethod
+                except ImportError:
+                    raise ImportError("Could not import WeakMethod from "
+                                      "anywhere.  Try installing the "
+                                      "weakrefmethod package or use a more "
+                                      "recent version of python or matplotlib")
+
         class BoundMethodProxy(WeakMethod):
             @property
             def func(self):
