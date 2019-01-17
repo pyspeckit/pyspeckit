@@ -47,8 +47,8 @@ process). Some of these contributions may be the most valuable to the project as
 a whole, because you're coming to the project with fresh eyes, so you can see
 the errors and assumptions that seasoned contributors have glossed over.
 
-*This disclaimer was originally written by
+Note: This disclaimer was originally written by
 `Adrienne Lowe <https://github.com/adriennefriend>`_ for a
 `PyCon talk <https://www.youtube.com/watch?v=6Uj746j9Heo>`_, and was adapted by
 packagename based on its use in the README file for the
-`MetPy project <https://github.com/Unidata/MetPy>`_.*
+`MetPy project <https://github.com/Unidata/MetPy>`_.
