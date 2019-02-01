@@ -52,6 +52,7 @@ matrix:
         # Try Astropy development version (which is no longer compatible with py2.7)
         - python: 3.6
           env: ASTROPY_VERSION=development SETUP_CMD='test'
+              PIP_DEPENDENCIES='pytest-astropy'
 
         # try with recent versions of mpl
         - python: 3.5
@@ -59,16 +60,20 @@ matrix:
               SETUP_CMD='test'
               NUMPY_VERSION=1.14
               CONDA_DEPENDENCIES='matplotlib=2 scipy spectral-cube'
+              PIP_DEPENDENCIES='pytest-astropy'
+
         - python: 3.6
           env: ASTROPY_VERSION=development
               SETUP_CMD='test'
               NUMPY_VERSION=1.14
               CONDA_DEPENDENCIES='matplotlib=2 scipy spectral-cube'
+              PIP_DEPENDENCIES='pytest-astropy'
+
         - python: 3.6
           env: ASTROPY_VERSION=development
               SETUP_CMD='test'
               CONDA_DEPENDENCIES='matplotlib=3 scipy spectral-cube'
-              PIP_DEPENDENCIES='matplotlib==3'
+              PIP_DEPENDENCIES='matplotlib==3 pytest-astropy'
 
         # Try with optional dependencies disabled
         - python: 2.7
