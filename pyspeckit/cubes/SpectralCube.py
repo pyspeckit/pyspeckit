@@ -1092,7 +1092,7 @@ class Cube(spectrum.Spectrum):
                     raise ValueError("There was a serious problem; modelpar and"
                                      " error shape don't match that of the "
                                      "parameter cubes")
-                if np.any(np.isnan(modelpars)) or np.any(np.isnan(modelerrs)):
+                if np.any(np.isnan(modelpars)) or all([x is None for x in modelerrs]) or np.any(np.isnan(modelerrs)):
                     self.parcube[:,int(y),int(x)] = np.nan
                     self.errcube[:,int(y),int(x)] = np.nan
                     self.has_fit[int(y),int(x)] = False
