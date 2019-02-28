@@ -927,7 +927,7 @@ class Cube(spectrum.Spectrum):
                                           (xpatch+x)[local_fits]], axis=1)
                 if np.any(~np.isfinite(gg)):
                     log.exception("Pixel {0},{1} neighbors had non-finite guess: {2}"
-                                  .format(x, y, self.parcube[:, nearest_y, nearest_x]))
+                                  .format(x, y, gg))
                     gg = guesses
             elif guesses_are_moments and usemomentcube is False:
                 raise ValueError("usemomentcube must be set to True")
