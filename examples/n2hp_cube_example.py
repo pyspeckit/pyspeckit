@@ -58,6 +58,8 @@ else:
                 signal_cut=3, # minimize the # of pixels fit for the example
                 start_from_point=(2,2), # start at a pixel with signal
                 errmap=errmap,
+                use_neighbor_as_guess=True,
+                multicore=4,
                 )
     # There are a huge number of parameters for the fiteach procedure.  See:
     # http://pyspeckit.readthedocs.org/en/latest/example_nh3_cube.html
@@ -71,8 +73,8 @@ else:
 # Save the fitted parameters to a FITS file, and overwrite one if one exists
 spc.write_fit('n2hp_fitted_parameters.fits', overwrite=True)
 
-# Show an integrated image
-spc.mapplot()
+# Show an image of the fitted tex
+spc.mapplot(estimator=1, vmin=0, vmax=10)
 # you can click on any pixel to see its spectrum & fit
 
 # plot one of the fitted spectra
