@@ -28,8 +28,7 @@ if not os.path.exists('n2hp_cube.fit'):
 # Load the spectral cube cropped in the middle for efficiency
 with warnings.catch_warnings():
     warnings.filterwarnings('ignore', category=wcs.FITSFixedWarning)
-    # include some bad pixels to test NaN rejection (regression test for #301)
-    spc = pyspeckit.Cube('n2hp_cube.fit')[:,1:10,17:20]
+    spc = pyspeckit.Cube('n2hp_cube.fit')[:,25:29,12:16]
 # Set the velocity convention: in the future, this may be read directly from
 # the file, but for now it cannot be.
 spc.xarr.refX = 93176265000.0*u.Hz
