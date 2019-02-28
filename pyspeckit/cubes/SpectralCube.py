@@ -361,9 +361,12 @@ class Cube(spectrum.Spectrum):
         the first dimension to slice on the xarr and the data
         """
 
-        return Cube(xarr=self.xarr.__getitem__(indx[0]), cube=self.cube[indx],
+        return Cube(xarr=self.xarr.__getitem__(indx[0]),
+                    cube=self.cube[indx],
                     errorcube=self.errorcube[indx] if self.errorcube else None,
-                    maskmap=self.maskmap[indx[1:]] if self.maskmap is not None else None)
+                    maskmap=self.maskmap[indx[1:]] if self.maskmap is not None else None,
+                    header=self.header
+                   )
 
     def set_spectrum(self, x, y):
         self.data = self.cube[:,int(y),int(x)]
@@ -507,28 +510,30 @@ class Cube(spectrum.Spectrum):
         sp.specfit.includemask = self.specfit.includemask.copy()
         sp.specfit.Spectrum = sp
 
-        if hasattr(self,'parcube'):
-            sp.specfit.modelpars = self.parcube[:,int(y),int(x)]
-            if hasattr(self.specfit,'parinfo') and self.specfit.parinfo is not None:
-                # set the parinfo values correctly for annotations
-                for pi,p,e in zip(sp.specfit.parinfo, sp.specfit.modelpars, self.errcube[:,int(y),int(x)]):
-                    try:
-                        pi['value'] = p
-                        pi['error'] = e
-                    except ValueError:
-                        pass
+        if hasattr(self, 'parcube'):
+            if self.has_fit[int(y),int(x)]:
+                # only set parameters if they're valid
+                sp.specfit.modelpars = self.parcube[:,int(y),int(x)]
+                if hasattr(self.specfit,'parinfo') and self.specfit.parinfo is not None:
+                    # set the parinfo values correctly for annotations
+                    for pi,p,e in zip(sp.specfit.parinfo, sp.specfit.modelpars, self.errcube[:,int(y),int(x)]):
+                        try:
+                            pi['value'] = p
+                            pi['error'] = e
+                        except ValueError:
+                            pass
 
-            if hasattr(self.specfit,'fitter') and self.specfit.fitter is not None:
-                sp.specfit.fitter.mpp = sp.specfit.modelpars # also for annotations (differs depending on which function... sigh... need to unify)
-                sp.specfit.npeaks = self.specfit.fitter.npeaks
-                sp.specfit.fitter.npeaks = len(sp.specfit.modelpars) / sp.specfit.fitter.npars
-                sp.specfit.fitter.parinfo = sp.specfit.parinfo
-                try:
-                    sp.specfit.model = sp.specfit.fitter.n_modelfunc(sp.specfit.modelpars,
-                                                                     **sp.specfit.fitter.modelfunc_kwargs)(sp.xarr)
-                except ValueError:
-                    # possibly invalid model parameters, just skip
-                    sp.specfit.model = np.zeros_like(sp.data)
+                if hasattr(self.specfit,'fitter') and self.specfit.fitter is not None:
+                    sp.specfit.fitter.mpp = sp.specfit.modelpars # also for annotations (differs depending on which function... sigh... need to unify)
+                    sp.specfit.npeaks = self.specfit.fitter.npeaks
+                    sp.specfit.fitter.npeaks = len(sp.specfit.modelpars) / sp.specfit.fitter.npars
+                    sp.specfit.fitter.parinfo = sp.specfit.parinfo
+                    try:
+                        sp.specfit.model = sp.specfit.fitter.n_modelfunc(sp.specfit.modelpars,
+                                                                         **sp.specfit.fitter.modelfunc_kwargs)(sp.xarr)
+                    except ValueError:
+                        # possibly invalid model parameters, just skip
+                        sp.specfit.model = np.zeros_like(sp.data)
 
         return sp
 
@@ -870,9 +875,11 @@ class Cube(spectrum.Spectrum):
                                 "not be possible.  Please raise an Issue.")
             if signal_cut > 0 and not all(sp.error == 0):
                 if continuum_map is not None:
-                    snr = (sp.data-continuum_map[int(y),int(x)]) / sp.error
+                    with np.errstate(divide='raise'):
+                        snr = (sp.data-continuum_map[int(y),int(x)]) / sp.error
                 else:
-                    snr = sp.data / sp.error
+                    with np.errstate(divide='raise'):
+                        snr = sp.data / sp.error
                 if absorption:
                     max_sn = np.nanmax(-1*snr)
                 else:
@@ -946,11 +953,18 @@ class Cube(spectrum.Spectrum):
 
             if np.all(np.isfinite(gg)):
                 try:
-                    sp.specfit(guesses=gg, quiet=verbose_level<=3,
-                               verbose=verbose_level>3, **fitkwargs)
+                    with np.errstate(divide='raise'):
+                        sp.specfit(guesses=gg, quiet=verbose_level<=3,
+                                   verbose=verbose_level>3, **fitkwargs)
                     self.parcube[:,int(y),int(x)] = sp.specfit.modelpars
                     self.errcube[:,int(y),int(x)] = sp.specfit.modelerrs
-                    success = True
+                    if np.any(~np.isfinite(sp.specfit.modelpars)):
+                        log.exception("Fit result included nan for pixel {0},{1}: "
+                                      "{2}".format(x, y, sp.specfit.modelpars))
+                        success = False
+                        raise KeyboardInterrupt
+                    else:
+                        success = True
                 except Exception as ex:
                     exc_traceback = sys.exc_info()[2]
                     self._tracebacks[(ii,x,y)] = exc_traceback
@@ -962,13 +976,13 @@ class Cube(spectrum.Spectrum):
                     log.exception("Guesses were: {0}".format(str(gg)))
                     log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
                     success = False
-                    if isinstance(ex,KeyboardInterrupt):
+                    if isinstance(ex, KeyboardInterrupt):
                         raise ex
 
                 # keep this out of the 'try' statement
                 if integral and success:
                     self.integralmap[:,int(y),int(x)] = sp.specfit.integral(direct=direct_integral,
-                                                                  return_error=True)
+                                                                            return_error=True)
                 self.has_fit[int(y),int(x)] = success
             else:
                 log.exception("Fit number {0} at {1},{2} had non-finite guesses {3}"
@@ -1062,7 +1076,8 @@ class Cube(spectrum.Spectrum):
 
         if multicore > 1:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
-            result = parallel_map(fit_a_pixel, sequence, numcores=multicore)
+            with np.errstate(divide='raise'):
+                result = parallel_map(fit_a_pixel, sequence, numcores=multicore)
             self._result = result # backup - don't want to lose data in the case of a failure
             # a lot of ugly hacking to deal with the way parallel_map returns
             # its results needs TWO levels of None-filtering, because any
@@ -1279,7 +1294,7 @@ class Cube(spectrum.Spectrum):
         if np.any(nanvals):
             warn("NaN or infinite values encountered in parameter cube.",
                  PyspeckitWarning)
-            
+
 
         # make sure params are within limits
         fitter = self.specfit.Registry.multifitters[fittype]
@@ -1307,6 +1322,8 @@ class Cube(spectrum.Spectrum):
         self.specfit.fitter = sp.specfit.fitter
         self.specfit.fittype = sp.specfit.fittype
         self.specfit.parinfo = sp.specfit.parinfo
+        self.has_fit = np.all((self.parcube != 0) &
+                              (np.isfinite(self.parcube)), axis=0)
 
     def smooth(self,factor,**kwargs):
         """
