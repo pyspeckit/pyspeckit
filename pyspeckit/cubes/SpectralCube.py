@@ -424,7 +424,15 @@ class Cube(spectrum.Spectrum):
             # this is already handled in plot_spectrum
             return
 
+        if not self.has_fit[int(y), int(x)]:
+            # no fit to plot
+            return
+
         self.specfit.modelpars = self.parcube[:,int(y),int(x)]
+        if np.any(np.isnan(self.specfit.modelpars)):
+            log.exception("Attempted to plot a model with NaN parameters.")
+            return
+
         self.specfit.npeaks = self.specfit.fitter.npeaks
         self.specfit.model = self.specfit.fitter.n_modelfunc(self.specfit.modelpars,
                                                              **self.specfit.fitter.modelfunc_kwargs)(self.xarr)
@@ -1300,6 +1308,9 @@ class Cube(spectrum.Spectrum):
         self.parcube = cube[:npars*npeaks,:,:]
         self.errcube = cube[npars*npeaks:npars*npeaks*2,:,:]
 
+        self.has_fit = np.all((self.parcube != 0) &
+                              (np.isfinite(self.parcube)), axis=0)
+
         nanvals = ~np.isfinite(self.parcube)
         nanvals_flat = np.any(nanvals, axis=0)
         if np.any(nanvals):
@@ -1333,8 +1344,6 @@ class Cube(spectrum.Spectrum):
         self.specfit.fitter = sp.specfit.fitter
         self.specfit.fittype = sp.specfit.fittype
         self.specfit.parinfo = sp.specfit.parinfo
-        self.has_fit = np.all((self.parcube != 0) &
-                              (np.isfinite(self.parcube)), axis=0)
 
     def smooth(self,factor,**kwargs):
         """
@@ -1408,7 +1417,7 @@ class Cube(spectrum.Spectrum):
                 fitcubefile.header[kw] = parname
             # set error parameters
             for jj,par in enumerate(self.specfit.parinfo):
-                kw = "PLANE%i" % (ii+jj)
+                kw = "PLANE%i" % (ii+jj+1)
                 parname = "e"+par['parname'].strip('0123456789')
                 fitcubefile.header[kw] = parname
 
