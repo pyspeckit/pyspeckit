@@ -904,12 +904,24 @@ class Cube(spectrum.Spectrum):
                 # If there's no fit, set its distance to be unreasonably large
                 nearest_ind = np.argmin(rolled_distance+1e10*(~self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
-                gg = self.parcube[:,nearest_y,nearest_x]
+                if np.all(np.isfinite(self.parcube[:,nearest_y,nearest_x])):
+                    gg = self.parcube[:,nearest_y,nearest_x]
+                else:
+                    log.exception("Pixel {0},{1} had a fit including a NaN: {2}"
+                                  " so it will not be used as a guess for {3},{4}"
+                                  .format(nearest_x, nearest_y, self.parcube[:, nearest_y, nearest_x],
+                                          x, y))
+                    gg = guesses
             elif use_neighbor_as_guess and np.any(local_fits):
                 # Array is N_guess X Nvalid_nbrs so averaging over
                 # Axis=1 is the axis of all valid neighbors
-                gg = np.mean(self.parcube[:, (ypatch+y)[local_fits],
+                gg = np.mean(self.parcube[:,
+                                          (ypatch+y)[local_fits],
                                           (xpatch+x)[local_fits]], axis=1)
+                if np.any(~np.isfinite(gg)):
+                    log.exception("Pixel {0},{1} neighbors had non-finite guess: {2}"
+                                  .format(x, y, self.parcube[:, nearest_y, nearest_x]))
+                    gg = guesses
             elif guesses_are_moments and usemomentcube is False:
                 raise ValueError("usemomentcube must be set to True")
             elif guesses_are_moments or (usemomentcube and len(guesses)):
@@ -959,6 +971,8 @@ class Cube(spectrum.Spectrum):
                                                                   return_error=True)
                 self.has_fit[int(y),int(x)] = success
             else:
+                log.exception("Fit number {0} at {1},{2} had non-finite guesses {3}"
+                              .format(ii, x, y, guesses))
                 self.has_fit[int(y),int(x)] = False
                 self.parcube[:,int(y),int(x)] = blank_value
                 self.errcube[:,int(y),int(x)] = blank_value
