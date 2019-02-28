@@ -711,8 +711,7 @@ class Cube(spectrum.Spectrum):
             Minimum signal-to-noise ratio to "cut" on (i.e., if peak in a given
             spectrum has s/n less than this value, ignore it)
         blank_value: float
-            Value to replace non-fitted locations with.  A good alternative is
-            numpy.nan
+            Value to replace non-fitted locations with.
         errmap: ndarray[naxis=2] or ndarray[naxis=3]
             A map of errors used for the individual pixels of the spectral
             cube. 2D errmap results in an equal weighting of each given
@@ -909,6 +908,7 @@ class Cube(spectrum.Spectrum):
                     log.info("Using nearest fit as guess")
                 rolled_distance = np.roll(np.roll(distance, x, 0), y, 1)
                 # If there's no fit, set its distance to be unreasonably large
+                # so it will be ignored by argmin
                 nearest_ind = np.argmin(rolled_distance+1e10*(~self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
                 if np.all(np.isfinite(self.parcube[:,nearest_y,nearest_x])):
@@ -962,6 +962,8 @@ class Cube(spectrum.Spectrum):
                         log.exception("Fit result included nan for pixel {0},{1}: "
                                       "{2}".format(x, y, sp.specfit.modelpars))
                         success = False
+                        # this is basically a debug statement to try to get the
+                        # code to crash here
                         raise KeyboardInterrupt
                     else:
                         success = True
@@ -1121,7 +1123,9 @@ class Cube(spectrum.Spectrum):
                     raise ValueError("There was a serious problem; modelpar and"
                                      " error shape don't match that of the "
                                      "parameter cubes")
-                if np.any(np.isnan(modelpars)) or all([x is None for x in modelerrs]) or np.any(np.isnan(modelerrs)):
+                if ((np.any(np.isnan(modelpars)) or
+                     all([x is None for x in modelerrs]) or
+                     np.any(np.isnan(modelerrs)))):
                     self.parcube[:,int(y),int(x)] = np.nan
                     self.errcube[:,int(y),int(x)] = np.nan
                     self.has_fit[int(y),int(x)] = False
@@ -1147,6 +1151,13 @@ class Cube(spectrum.Spectrum):
         if verbose:
             log.info("Finished final fit %i.  "
                      "Elapsed time was %0.1f seconds" % (len(valid_pixels), time.time()-t0))
+
+        pars_are_finite = np.all(np.isfinite(self.parcube), axis=0)
+
+        # if you see one of these exceptions, please try to produce a minimum
+        # working example and report it as a bug.
+        # all non-finite fit parameters should be has_fit=False
+        assert np.all(~self.has_fit[~pars_are_finite]), "Non-finite parameters found in fits"
 
 
     def momenteach(self, verbose=True, verbose_level=1, multicore=1, **kwargs):
