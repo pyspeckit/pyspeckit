@@ -2,7 +2,7 @@
 ===========
 N2H+ fitter
 ===========
-Reference for line params: 
+Reference for line params:
 Daniel, F., Dubernet, M.-L., Meuwly, M., Cernicharo, J., Pagani, L. 2005, MNRAS 363, 1083
 
 http://www.strw.leidenuniv.nl/~moldata/N2H+.html
@@ -121,7 +121,8 @@ ckms = units.speedoflight_ms / 1e3 #2.99792458e5
 voff_lines_dict = dict([(k,(v-93.176261e9)/93.176261e9*ckms) for k,v in iteritems(freq_dict)])
 
 n2hp_vtau = hyperfine.hyperfinemodel(line_names, voff_lines_dict, freq_dict,
-                                     line_strength_dict, relative_strength_total_degeneracy)
+                                     line_strength_dict,
+                                     relative_strength_total_degeneracy)
 n2hp_vtau_fitter = n2hp_vtau.fitter
 n2hp_vtau_vheight_fitter = n2hp_vtau.vheight_fitter
 
@@ -177,7 +178,7 @@ def n2hp_radex(xarr,
         columnarr  = (yinds+hdr['CRPIX2']-1)*hdr['CD2_2']+hdr['CRVAL2'] # log column
     else:
         raise Exception
-    
+
     # Convert X-units to frequency in GHz
     xarr = copy.copy(xarr)
     xarr.convert_to_unit('Hz', quiet=True)
