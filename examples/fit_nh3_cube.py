@@ -41,7 +41,7 @@ mask = np.isfinite(mask) * (mask > 0)
 # Load the data using a mask
 # Then calibrate the data (the data we're loading in this case are in Janskys,
 # but we want surface brightness in Kelvin for the fitting process)
-cube11 = pyspeckit.Cube('hotclump_11.cube_r0.5_rerun.image.fits', maskmap=mask)
+cube11 = pyspeckit.Cube('hotclump_11.cube_r0.5.image.fits', maskmap=mask)
 cube11.cube *= (13.6 * (300.0 /
     (pyspeckit.spectrum.models.ammonia.freq_dict['oneone']/1e9))**2 *
     1./cube11.header.get('BMAJ')/3600. * 1./cube11.header.get('BMIN')/3600. )

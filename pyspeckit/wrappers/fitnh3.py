@@ -178,18 +178,21 @@ def plot_nh3(spdict, spectra, fignum=1, show_components=False,
     if figure is None:
         spectra.plotter.figure = pyplot.figure(fignum)
         spectra.plotter.axis = spectra.plotter.figure.gca()
-       
+
     splist = spdict.values()
 
     for transition, sp in spdict.items():
         sp.xarr.convert_to_unit('km/s', velocity_convention='radio',
                                 refX=pyspeckit.spectrum.models.ammonia.freq_dict[transition]*u.Hz,
                                 quiet=True)
-        sp.specfit.fitter = copy.copy(spectra.specfit.fitter)
+        try:
+            sp.specfit.fitter = copy.copy(spectra.specfit.fitter)
+            sp.specfit.fitter.npeaks = spectra.specfit.npeaks
+        except AttributeError:
+            pass
         sp.specfit.modelpars = spectra.specfit.modelpars
         sp.specfit.parinfo = spectra.specfit.parinfo
         sp.specfit.npeaks = spectra.specfit.npeaks
-        sp.specfit.fitter.npeaks = spectra.specfit.npeaks
         if spectra.specfit.modelpars is not None:
             sp.specfit.model = sp.specfit.fitter.n_ammonia(pars=spectra.specfit.modelpars, parnames=spectra.specfit.fitter.parnames)(sp.xarr)
 
