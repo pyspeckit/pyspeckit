@@ -345,7 +345,11 @@ def plotter_override(sp, vrange=None, **kwargs):
     if len(spdict) > 4:
         raise ValueError("Too many lines ({0}) found.".format(len(spdict)))
     if len(spdict) not in (2, 3, 4):
-        raise ValueError("Not enough lines; don't need to use the NH3 plot wrapper")
+        raise ValueError("Not enough lines; don't need to use the NH3 plot "
+                         "wrapper.  If you think you are getting this message "
+                         "incorrectly, check the velocity range (vrange "
+                         "parameter) and make sure your spectrum overlaps with "
+                         " it.")
 
     plot_nh3(spdict, sp, **kwargs)
 
