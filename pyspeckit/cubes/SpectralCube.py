@@ -1312,8 +1312,14 @@ class Cube(spectrum.Spectrum):
         self.parcube = cube[:npars*npeaks,:,:]
         self.errcube = cube[npars*npeaks:npars*npeaks*2,:,:]
 
-        self.has_fit = np.all((self.parcube != 0) &
-                              (np.isfinite(self.parcube)), axis=0)
+        if np.any(np.all(self.parcube == 0, axis=(1,2))):
+            # there are some slices where all parameters are zero, we should
+            # ignore this when establishing whether there's a fit (some
+            # parameters, like fortho, can be locked to zero)
+            self.has_fit = np.all((np.isfinite(self.parcube)), axis=0)
+        else:
+            self.has_fit = np.all((self.parcube != 0) &
+                                  (np.isfinite(self.parcube)), axis=0)
 
         nanvals = ~np.isfinite(self.parcube)
         nanvals_flat = np.any(nanvals, axis=0)
