@@ -387,9 +387,10 @@ class Cube(spectrum.Spectrum):
             self.plotted_spectrum = self
         else:
             sp = self.get_spectrum(x,y)
-            sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
-            self._spdict = sp.plot_special(**dict(kwargs.items()+
-                                                  self.plot_special_kwargs.items()))
+            sp.plot_special = types.MethodType(self.plot_special, sp)
+            combined_kwargs = dict(kwargs.items())
+            combined_kwargs.update(self.plot_special_kwargs)
+            self._spdict = sp.plot_special(**combined_kwargs)
             self.plotted_spectrum = sp
             self.plotter = sp.plotter
             self.plotter.refresh = lambda: [spi.plotter.refresh()
@@ -484,8 +485,10 @@ class Cube(spectrum.Spectrum):
             #self.plot_special(reset_ylimits=reset_ylimits, **dict(kwargs.items()+self.plot_special_kwargs.items()))
 
             sp = self.get_apspec(aperture, coordsys=coordsys, wunit=wunit, method=method)
-            sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
-            sp.plot_special(reset_ylimits=reset_ylimits, **dict(kwargs.items()+self.plot_special_kwargs.items()))
+            sp.plot_special = types.MethodType(self.plot_special, sp)
+            combined_kwargs = dict(kwargs.items())
+            combined_kwargs.update(self.plot_special_kwargs)
+            sp.plot_special(reset_ylimits=reset_ylimits, **combined_kwargs)
 
     def get_spectrum(self, x, y):
         """
@@ -1309,8 +1312,14 @@ class Cube(spectrum.Spectrum):
         self.parcube = cube[:npars*npeaks,:,:]
         self.errcube = cube[npars*npeaks:npars*npeaks*2,:,:]
 
-        self.has_fit = np.all((self.parcube != 0) &
-                              (np.isfinite(self.parcube)), axis=0)
+        if np.any(np.all(self.parcube == 0, axis=(1,2))):
+            # there are some slices where all parameters are zero, we should
+            # ignore this when establishing whether there's a fit (some
+            # parameters, like fortho, can be locked to zero)
+            self.has_fit = np.all((np.isfinite(self.parcube)), axis=0)
+        else:
+            self.has_fit = np.all((self.parcube != 0) &
+                                  (np.isfinite(self.parcube)), axis=0)
 
         nanvals = ~np.isfinite(self.parcube)
         nanvals_flat = np.any(nanvals, axis=0)
