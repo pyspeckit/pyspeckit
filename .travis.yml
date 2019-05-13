@@ -6,9 +6,6 @@ language: c
 os:
     - linux
 
-# Setting sudo to false opts in to Travis-CI container-based builds.
-sudo: false
-
 # The apt packages below are needed for sphinx builds. A full list of packages
 # that can be included can be found here:
 #
