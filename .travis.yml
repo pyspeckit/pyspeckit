@@ -58,17 +58,17 @@ env:
         # - FLAKE8_OPT='--ignore=E501'
         - FLAKE8_OPT=''
 
-    matrix:
-        # Make sure that egg_info works without dependencies
-        - PYTHON_VERSION=3.7 SETUP_CMD='egg_info'
-
-
 matrix:
 
     # Don't wait for allowed failures
     fast_finish: true
 
     include:
+
+        # Make sure that egg_info works without dependencies
+        - os: linux
+          env: PYTHON_VERSION=3.7 SETUP_CMD='egg_info'
+
         # Try MacOS X
         - os: osx
           env: SETUP_CMD='test'
