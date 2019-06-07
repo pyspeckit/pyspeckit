@@ -6,7 +6,6 @@ __all__ = ['__version__', '__githash__']
 try:
     _ASTROPY_SETUP_
 except NameError:
-
     import builtins
     builtins._ASTROPY_SETUP_ = False
 
