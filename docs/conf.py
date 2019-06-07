@@ -25,9 +25,10 @@
 # Thus, any C-extensions that are needed to build the documentation will *not*
 # be accessible, and the documentation will not build correctly.
 
-import datetime
 import os
 import sys
+import datetime
+from importlib import import_module
 
 try:
     from sphinx_astropy.conf.v1 import *  # noqa
@@ -36,8 +37,7 @@ except ImportError:
     sys.exit(1)
 
 # Get configuration information from setup.cfg
-
-from configparser import ConfigParser    
+from configparser import ConfigParser
 conf = ConfigParser()
 
 conf.read([os.path.join(os.path.dirname(__file__), '..', 'setup.cfg')])
@@ -67,7 +67,7 @@ rst_epilog += """
 # -- Project information ------------------------------------------------------
 
 # This does not *have* to match the package name, but typically does
-project = setup_cfg['package_name']
+project = setup_cfg['name']
 author = setup_cfg['author']
 copyright = '{0}, {1}'.format(
     datetime.datetime.now().year, setup_cfg['author'])
@@ -76,8 +76,8 @@ copyright = '{0}, {1}'.format(
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-__import__(setup_cfg['package_name'])
-package = sys.modules[setup_cfg['package_name']]
+import_module(setup_cfg['name'])
+package = sys.modules[setup_cfg['name']]
 
 # The short X.Y version.
 version = package.__version__.split('-', 1)[0]
