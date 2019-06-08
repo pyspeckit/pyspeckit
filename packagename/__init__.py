@@ -3,21 +3,25 @@
 # Packages may add whatever they like to this file, but
 # should keep this content at the top.
 # ----------------------------------------------------------------------------
-from ._astropy_init import *
+from ._astropy_init import *   # noqa
 # ----------------------------------------------------------------------------
 
 # Enforce Python version check during package import.
 # This is the same check as the one at the top of setup.py
 import sys
+from distutils.version import LooseVersion
 
 __minimum_python_version__ = "3.6"
+
 
 class UnsupportedPythonError(Exception):
     pass
 
-if sys.version_info < tuple((int(val) for val in __minimum_python_version__.split('.'))):
-    raise UnsupportedPythonError("packagename does not support Python < {}".format(__minimum_python_version__))
 
-if not _ASTROPY_SETUP_:
+if LooseVersion(sys.version) < LooseVersion(__minimum_python_version__):
+    raise UnsupportedPythonError("packagename does not support Python < {}"
+                                 .format(__minimum_python_version__))
+
+if not _ASTROPY_SETUP_:   # noqa
     # For egg_info test builds to pass, put package imports here.
-    from .example_mod import *
+    from .example_mod import *   #noqa
