@@ -15,12 +15,22 @@ addons:
     apt:
         packages:
             - graphviz
-            - texlive-latex-extra
-            - dvipng
+
+
+stage: Comprehensive tests
+
+stages:
+   # Do the style check and a single test job, don't proceed if it fails
+   - name: Initial tests
+   # Test docs, astropy dev, and without optional dependencies
+   - name: Comprehensive tests
+   # These will only run when cron is opted in
+   - name: Cron tests
+     if: type = cron
+
 
 env:
     global:
-
         # The following versions are the 'default' for tests, unless
         # overridden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
@@ -47,7 +57,7 @@ env:
         # are in astropy-ci-extras. If your package uses either of these,
         # add the channels to CONDA_CHANNELS along with any other channels
         # you want to use.
-        - CONDA_CHANNELS='astropy-ci-extras astropy'
+        - CONDA_CHANNELS='astropy'
 
         # If there are matplotlib or other GUI tests, uncomment the following
         # line to use the X virtual framebuffer.
@@ -65,14 +75,18 @@ matrix:
 
     include:
         # Make sure that egg_info works without dependencies
-        - env: PYTHON_VERSION=3.7 SETUP_CMD='egg_info'
+        - stage: Initial tests
+          env: PYTHON_VERSION=3.7 SETUP_CMD='egg_info'
 
-        # Try MacOS X
+        # Try MacOS X, usually enough only to run from cron as hardly there are
+        # issues that are not picked up by a linux worker
         - os: osx
+          stage: Cron
           env: SETUP_CMD='test'
 
         # Do a coverage test.
         - os: linux
+          stage: Initial tests
           env: SETUP_CMD='test --coverage'
 
         # Check for sphinx doc build warnings - we do this first because it
@@ -86,7 +100,7 @@ matrix:
           env: ASTROPY_VERSION=development
                EVENT_TYPE='pull_request push cron'
         - os: linux
-          env: ASTROPY_VERSION=lts
+          env: ASTROPY_VERSION=lts NUMPY_VERSION=1.13
 
         # Try all python versions and Numpy versions. Since we can assume that
         # the Numpy developers have taken care of testing Numpy with different
@@ -94,26 +108,21 @@ matrix:
         # time.
 
         - os: linux
-          env: PYTHON_VERSION=3.5 NUMPY_VERSION=1.12
+          env: PYTHON_VERSION=3.6 NUMPY_VERSION=1.14
         - os: linux
-          env: PYTHON_VERSION=3.6 NUMPY_VERSION=1.13
-        - os: linux
-          env: NUMPY_VERSION=1.14
-
-        # Try numpy pre-release
-        - os: linux
-          env: NUMPY_VERSION=prerelease
-               EVENT_TYPE='pull_request push cron'
+          env: NUMPY_VERSION=1.15
 
         # Do a PEP8 test with flake8
         - os: linux
+          stage: Initial tests
           env: MAIN_CMD='flake8 packagename --count --show-source --statistics $FLAKE8_OPT' SETUP_CMD=''
 
     allow_failures:
         # Do a PEP8 test with flake8
-        # (allow to fail unless your code completely compliant)
-        - os: linux
-          env: MAIN_CMD='flake8 packagename --count --show-source --statistics $FLAKE8_OPT' SETUP_CMD=''
+        # (do allow to fail unless your code completely compliant)
+        # - os: linux
+        #   stage: Initial tests
+        #   env: MAIN_CMD='flake8 packagename --count --show-source --statistics $FLAKE8_OPT' SETUP_CMD=''
 
 install:
 
