@@ -81,8 +81,8 @@ matrix:
         # Try MacOS X, usually enough only to run from cron as hardly there are
         # issues that are not picked up by a linux worker
         - os: osx
-          stage: Cron
-          env: SETUP_CMD='test'
+          stage: Cron tests
+          env: SETUP_CMD='test' EVENT_TYPE='cron'
 
         # Do a coverage test.
         - os: linux
@@ -101,6 +101,14 @@ matrix:
                EVENT_TYPE='pull_request push cron'
         - os: linux
           env: PYTHON_VERSION=3.6 ASTROPY_VERSION=lts NUMPY_VERSION=1.13
+
+        # Add a job that runs from cron only and tests against astropy dev and
+        # numpy dev to give a change for early discovery of issues and feedback
+        # for both developer teams.
+        - os: linux
+          stage: Cron tests
+          env: ASTROPY_VERSION=development NUMPY_VERSION=development
+               EVENT_TYPE='cron'
 
         # Try all python versions and Numpy versions. Since we can assume that
         # the Numpy developers have taken care of testing Numpy with different
