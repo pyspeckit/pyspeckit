@@ -29,6 +29,10 @@ environment:
       CONDA_CHANNELS: "astropy-ci-extras astropy"
 
   matrix:
+      # We test Python 2.7 for Python 2 support.
+      - PYTHON_VERSION: "2.7"
+        ASTROPY_VERSION: "stable"
+        NUMPY_VERSION: "stable"
 
       # We test Python 3.7 for Python 3 support.
       - PYTHON_VERSION: "3.7"

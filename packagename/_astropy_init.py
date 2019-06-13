@@ -7,7 +7,11 @@ try:
     _ASTROPY_SETUP_
 except NameError:
 
-    import builtins
+    from sys import version_info
+    if version_info[0] >= 3:
+        import builtins
+    else:
+        import __builtin__ as builtins
     builtins._ASTROPY_SETUP_ = False
 
 try:

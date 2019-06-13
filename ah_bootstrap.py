@@ -48,7 +48,11 @@ import sys
 from distutils import log
 from distutils.debug import DEBUG
 
-from configparser import ConfigParser, RawConfigParser
+
+try:
+    from ConfigParser import ConfigParser, RawConfigParser
+except ImportError:
+    from configparser import ConfigParser, RawConfigParser
 
 import pkg_resources
 
@@ -56,12 +60,25 @@ from setuptools import Distribution
 from setuptools.package_index import PackageIndex
 
 # This is the minimum Python version required for astropy-helpers
-__minimum_python_version__ = (3, 5)
+__minimum_python_version__ = (2, 7)
+
+if sys.version_info[0] < 3:
+    _str_types = (str, unicode)
+    _text_type = unicode
+    PY3 = False
+else:
+    _str_types = (str, bytes)
+    _text_type = str
+    PY3 = True
 
 # TODO: Maybe enable checking for a specific version of astropy_helpers?
 DIST_NAME = 'astropy-helpers'
 PACKAGE_NAME = 'astropy_helpers'
-UPPER_VERSION_EXCLUSIVE = None
+
+if PY3:
+    UPPER_VERSION_EXCLUSIVE = None
+else:
+    UPPER_VERSION_EXCLUSIVE = '3'
 
 # Defaults for other options
 DOWNLOAD_IF_NEEDED = True
@@ -121,39 +138,35 @@ if SETUP_CFG.has_option('options', 'python_requires'):
     # allow pre-releases to count as 'new enough'
     if not req.specifier.contains(python_version, True):
         if parent_package is None:
-            message = "ERROR: Python {} is required by this package\n".format(req.specifier)
+            print("ERROR: Python {} is required by this package".format(req.specifier))
         else:
-            message = "ERROR: Python {} is required by {}\n".format(req.specifier, parent_package)
-        sys.stderr.write(message)
+            print("ERROR: Python {} is required by {}".format(req.specifier, parent_package))
         sys.exit(1)
 
 if sys.version_info < __minimum_python_version__:
 
     if parent_package is None:
-        message = "ERROR: Python {} or later is required by astropy-helpers\n".format(
-            __minimum_python_version__)
+        print("ERROR: Python {} or later is required by astropy-helpers".format(
+            __minimum_python_version__))
     else:
-        message = "ERROR: Python {} or later is required by astropy-helpers for {}\n".format(
-            __minimum_python_version__, parent_package)
+        print("ERROR: Python {} or later is required by astropy-helpers for {}".format(
+            __minimum_python_version__, parent_package))
 
-    sys.stderr.write(message)
     sys.exit(1)
-
-_str_types = (str, bytes)
 
 
 # What follows are several import statements meant to deal with install-time
 # issues with either missing or misbehaving pacakges (including making sure
 # setuptools itself is installed):
 
-# Check that setuptools 30.3 or later is present
+# Check that setuptools 1.0 or later is present
 from distutils.version import LooseVersion
 
 try:
     import setuptools
-    assert LooseVersion(setuptools.__version__) >= LooseVersion('30.3')
+    assert LooseVersion(setuptools.__version__) >= LooseVersion('1.0')
 except (ImportError, AssertionError):
-    sys.stderr.write("ERROR: setuptools 30.3 or later is required by astropy-helpers\n")
+    print("ERROR: setuptools 1.0 or later is required by astropy-helpers")
     sys.exit(1)
 
 # typing as a dependency for 1.6.1+ Sphinx causes issues when imported after
@@ -212,7 +225,7 @@ class _Bootstrapper(object):
         if not (isinstance(path, _str_types) or path is False):
             raise TypeError('path must be a string or False')
 
-        if not isinstance(path, str):
+        if PY3 and not isinstance(path, _text_type):
             fs_encoding = sys.getfilesystemencoding()
             path = path.decode(fs_encoding)  # path to unicode
 
@@ -839,9 +852,9 @@ def run_cmd(cmd):
         stdio_encoding = 'latin1'
 
     # Unlikely to fail at this point but even then let's be flexible
-    if not isinstance(stdout, str):
+    if not isinstance(stdout, _text_type):
         stdout = stdout.decode(stdio_encoding, 'replace')
-    if not isinstance(stderr, str):
+    if not isinstance(stderr, _text_type):
         stderr = stderr.decode(stdio_encoding, 'replace')
 
     return (p.returncode, stdout, stderr)

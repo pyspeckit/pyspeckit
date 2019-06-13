@@ -37,7 +37,10 @@ except ImportError:
 
 # Get configuration information from setup.cfg
 
-from configparser import ConfigParser    
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser    
 conf = ConfigParser()
 
 conf.read([os.path.join(os.path.dirname(__file__), '..', 'setup.cfg')])

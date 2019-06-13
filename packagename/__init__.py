@@ -10,7 +10,7 @@ from ._astropy_init import *
 # This is the same check as the one at the top of setup.py
 import sys
 
-__minimum_python_version__ = "3.6"
+__minimum_python_version__ = "2.7"
 
 class UnsupportedPythonError(Exception):
     pass

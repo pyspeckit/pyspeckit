@@ -74,6 +74,10 @@ matrix:
     fast_finish: true
 
     include:
+        # Make sure that egg_info works without dependencies
+        - os: linux
+          stage: Initial tests
+          env: PYTHON_VERSION=2.7 SETUP_CMD='egg_info'
 
         # Make sure that egg_info works without dependencies
         - os: linux
@@ -101,6 +105,8 @@ matrix:
         - os: linux
           env: ASTROPY_VERSION=development
                EVENT_TYPE='pull_request push cron'
+        - os: linux
+          env: PYTHON_VERSION=2.7 ASTROPY_VERSION=lts
         - os: linux
           env: ASTROPY_VERSION=lts NUMPY_VERSION=1.13
 
