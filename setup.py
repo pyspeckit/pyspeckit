@@ -16,13 +16,13 @@ conf = ConfigParser()
 conf.read(['setup.cfg'])
 metadata = dict(conf.items('metadata'))
 
-PACKAGENAME = metadata.get('package_name', 'packagename')
-DESCRIPTION = metadata.get('description', 'Astropy Package Template')
-AUTHOR = metadata.get('author', 'Astropy Developers')
-AUTHOR_EMAIL = metadata.get('author_email', '')
-LICENSE = metadata.get('license', 'unknown')
-URL = metadata.get('url', 'http://docs.astropy.org/projects/package-template/')
-__minimum_python_version__ = metadata.get("minimum_python_version", "2.7")
+PACKAGENAME = str(metadata.get('package_name', 'packagename'))
+DESCRIPTION = str(metadata.get('description', 'Astropy Package Template'))
+AUTHOR = str(metadata.get('author', 'Astropy Developers'))
+AUTHOR_EMAIL = str(metadata.get('author_email', ''))
+LICENSE = str(metadata.get('license', 'unknown'))
+URL = str(metadata.get('url', 'http://docs.astropy.org/projects/package-template/'))
+__minimum_python_version__ = str(metadata.get("minimum_python_version", "2.7"))
 
 # Enforce Python version check - this is the same check as in __init__.py but
 # this one has to happen before importing ah_bootstrap.
@@ -54,7 +54,7 @@ from astropy_helpers.version_helpers import generate_version_py
 #   (3) load README.rst,
 #   (4) package docstring
 readme_glob = 'README*'
-_cfg_long_description = metadata.get('long_description', '')
+_cfg_long_description = str(metadata.get('long_description', ''))
 if _cfg_long_description:
     LONG_DESCRIPTION = _cfg_long_description
 
@@ -77,7 +77,7 @@ else:
 builtins._ASTROPY_PACKAGE_NAME_ = PACKAGENAME
 
 # VERSION should be PEP440 compatible (http://www.python.org/dev/peps/pep-0440)
-VERSION = metadata.get('version', '0.0.dev')
+VERSION = str(metadata.get('version', '0.0.dev'))
 
 # Indicates if this version is a release version
 RELEASE = 'dev' not in VERSION
@@ -137,7 +137,7 @@ setup(name=PACKAGENAME,
       version=VERSION,
       description=DESCRIPTION,
       scripts=scripts,
-      install_requires=[s.strip() for s in metadata.get('install_requires', 'astropy').split(',')],
+      install_requires=[s.strip() for s in str(metadata.get('install_requires', 'astropy')).split(',')],
       author=AUTHOR,
       author_email=AUTHOR_EMAIL,
       license=LICENSE,
