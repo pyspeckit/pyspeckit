@@ -15,6 +15,7 @@ __minimum_python_version__ = "3.6"
 
 __all__ = []
 
+
 class UnsupportedPythonError(Exception):
     pass
 
@@ -27,6 +28,6 @@ if not _ASTROPY_SETUP_:   # noqa
     # For egg_info test builds to pass, put package imports here.
     from .example_mod import *   # noqa
     # Then you can be explicit to control what ends up in the namespace,
-    __all__ += ['do_primes']
+    __all__ += ['do_primes']   #  noqa
     # or you can keep everything from the subpackage with the following instead
     # __all__ += example_mod.__all__
