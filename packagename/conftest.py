@@ -1,5 +1,6 @@
 # This file is used to configure the behavior of pytest when using the Astropy
 # test infrastructure.
+import os
 
 from astropy.version import version as astropy_version
 if astropy_version < '3.0':
@@ -27,31 +28,20 @@ from astropy.tests.helper import enable_deprecations_as_exceptions
 ##     warnings_to_ignore_by_pyver={(MAJOR, MINOR): ['Message to ignore']}
 # enable_deprecations_as_exceptions()
 
-## Uncomment and customize the following lines to add/remove entries from
-## the list of packages for which version numbers are displayed when running
-## the tests. Making it pass for KeyError is essential in some cases when
-## the package uses other astropy affiliated packages.
-# try:
-#     PYTEST_HEADER_MODULES['Astropy'] = 'astropy'
-#     PYTEST_HEADER_MODULES['scikit-image'] = 'skimage'
-#     del PYTEST_HEADER_MODULES['h5py']
-# except (NameError, KeyError):  # NameError is needed to support Astropy < 1.0
-#     pass
+# Customize the following lines to add/remove entries from
+# the list of packages for which version numbers are displayed when running
+# the tests. Making it pass for KeyError is essential in some cases when
+# the package uses other astropy affiliated packages.
+try:
+    PYTEST_HEADER_MODULES['Astropy'] = 'astropy'
+    del PYTEST_HEADER_MODULES['h5py']
+except KeyError:
+    pass
 
-## Uncomment the following lines to display the version number of the
-## package rather than the version number of Astropy in the top line when
-## running the tests.
-# import os
-#
-## This is to figure out the package version, rather than
-## using Astropy's
-# try:
-#     from .version import version
-# except ImportError:
-#     version = 'dev'
-#
-# try:
-#     packagename = os.path.basename(os.path.dirname(__file__))
-#     TESTED_VERSIONS[packagename] = version
-# except NameError:   # Needed to support Astropy <= 1.0.0
-#     pass
+# This is to figure out the package version, rather than
+# using Astropy's
+from .version import version, astropy_helpers_version
+
+packagename = os.path.basename(os.path.dirname(__file__))
+TESTED_VERSIONS[packagename] = version
+TESTED_VERSIONS['astropy_helpers'] = astropy_helpers_version
