@@ -1361,14 +1361,21 @@ class Specfit(interactive.Interactive):
                 self._annotation_labels.append(chi2_label)
 
         if self.Spectrum.plotter.axis:
-            self.fitleg = self.Spectrum.plotter.axis.legend(
-                tuple([pl]*len(self._annotation_labels)),
-                self._annotation_labels, loc=loc, markerscale=markerscale,
-                borderpad=borderpad, handlelength=handlelength,
-                handletextpad=handletextpad, labelspacing=labelspacing,
-                frameon=frameon, fontsize=fontsize, **kwargs)
-            self.Spectrum.plotter.axis.add_artist(self.fitleg)
-            self.fitleg.draggable(True)
+            try:
+                self.fitleg = self.Spectrum.plotter.axis.legend(
+                    tuple([pl]*len(self._annotation_labels)),
+                    self._annotation_labels, loc=loc, markerscale=markerscale,
+                    borderpad=borderpad, handlelength=handlelength,
+                    handletextpad=handletextpad, labelspacing=labelspacing,
+                    frameon=frameon, fontsize=fontsize, **kwargs)
+                self.Spectrum.plotter.axis.add_artist(self.fitleg)
+            except TypeError as ex:
+                print("Error {0} was raised, which may indicate an outdated mpl version".format(ex))
+            try:
+                self.fitleg.draggable(True)
+            except AttributeError:
+                # wrong version and/or non-interactive backend
+                pass
             if self.Spectrum.plotter.autorefresh:
                 self.Spectrum.plotter.refresh()
 
