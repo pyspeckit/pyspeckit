@@ -39,7 +39,13 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
             return_components=False, debug=False, line_names=line_names):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
-    gaussian parameters
+    gaussian parameters.  The returned model will be in Kelvin (brightness
+    temperature) units.
+
+    Note that astropy units are not used internally for performance reasons.  A
+    wrapped version of this module including those units would be a good idea,
+    as it is definitely possible to implement this with unit support and good
+    performance.
 
     Parameters
     ----------
@@ -296,7 +302,15 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
                       return_components=False, return_tau_profile=False):
     """
     Helper function: given a dictionary of ammonia optical depths,
-    an excitation tmeperature... etc, produce the spectrum
+    an excitation tmeperature etc, produce the spectrum.
+
+    The default return units are brightness temperature in Kelvin.  If
+    ``return_tau_profile`` is specified, the returned "spectrum" will be
+    a spectrum of optical depths, not an intensity spectrum.
+
+    If ``return_components`` is specified, a list of spectra will be returned,
+    where each spectrum represents one of the hyperfine components of the
+    particular ammonia line being modeled.
     """
     from .ammonia_constants import (ckms, h, kb)
 
@@ -1157,7 +1171,7 @@ class ammonia_model_restricted_tex(ammonia_model):
                      ):
         """
         parnames=['trot', 'tex', 'ntot', 'width', 'xoff_v', 'fortho', 'delta']
-        
+
         'delta' is the difference between tex and trot
         """
         supes = super(ammonia_model_restricted_tex, self)

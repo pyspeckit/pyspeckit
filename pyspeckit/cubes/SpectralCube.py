@@ -678,7 +678,9 @@ class Cube(spectrum.Spectrum):
                 absorption=False, use_nearest_as_guess=False,
                 use_neighbor_as_guess=False, start_from_point=(0,0),
                 multicore=1, position_order=None, continuum_map=None,
-                prevalidate_guesses=False, maskmap=None, **fitkwargs):
+                prevalidate_guesses=False, maskmap=None,
+                skip_failed_fits=False,
+                **fitkwargs):
         """
         Fit a spectrum to each valid pixel in the cube
 
@@ -755,7 +757,16 @@ class Cube(spectrum.Spectrum):
         direct_integral : bool
             Return the integral of the *spectrum* (as opposed to the fitted
             model) over a range defined by the `integration_limits` if specified or
-            `threshold` otherwise 
+            `threshold` otherwise
+        skip_failed_fits : bool
+            Flag to forcibly skip failed fits that fail with "unknown error".
+            Generally, you do not want this on, but this is the
+            'finger-over-the-engine-light' approach that will allow these
+            incomprehensible failures to go by and just ignore them.  Keep
+            an eye on how many of these you get: if it's just one or two
+            out of hundreds, then maybe those are just pathological cases
+            that can be ignored.  If it's a significant fraction, you probably
+            want to take a different approach.
         """
         if 'multifit' in fitkwargs:
             warn("The multifit keyword is no longer required.  All fits "
@@ -1007,10 +1018,6 @@ class Cube(spectrum.Spectrum):
                     self.integralmap[:,int(y),int(x)] = blank_value
 
 
-            if blank_value != 0:
-                self.parcube[self.parcube == 0] = blank_value
-                self.errcube[self.parcube == 0] = blank_value
-
             self._counter += 1
             if verbose:
                 if ii % (min(10**(3-verbose_level),1)) == 0:
@@ -1022,9 +1029,32 @@ class Cube(spectrum.Spectrum):
 
             if sp.specfit.modelerrs is None:
                 log.exception("Fit number %i at %i,%i failed with no specific error." % (ii,x,y))
+                if hasattr(sp.specfit, 'mpfit_status'):
+                    log.exception("mpfit status is {0}".format(sp.specfit.mpfit_status))
+                log.exception("The problem is that the model errors were never set, "
+                              "which implies that the fit simply failed to finish.")
+                log.exception("The string representation of `sp.specfit.parinfo` is: {0}"
+                              .format(sp.specfit.parinfo))
+                log.exception("The string representation of `sp.specfit.fitter.parinfo` is: {0}"
+                              .format(sp.specfit.fitter.parinfo))
+                log.exception("modelpars is: {0}".format(str(sp.specfit.modelpars)))
+                log.exception("cube modelpars are: {0}".format(str(self.parcube[:,int(y),int(x)])))
+                log.exception("cube modelerrs are: {0}".format(str(self.errcube[:,int(y),int(x)])))
                 log.exception("Guesses were: {0}".format(str(gg)))
                 log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
-                raise TypeError("The fit never completed; something has gone wrong.")
+                if skip_failed_fits:
+                    # turn the flag into a count
+                    log.exception("The fit never completed; something has gone wrong.  Failed fits = {0}".format(int(skip_failed_fits)))
+                    skip_failed_fits = int(skip_failed_fits) + 1
+                else:
+                    raise TypeError("The fit never completed; something has gone wrong.")
+
+
+            # blank out the errors (and possibly the values) wherever they are zero = assumed bad
+            # this is done after the above exception to make sure we can inspect these values
+            if blank_value != 0:
+                self.parcube[self.parcube == 0] = blank_value
+                self.errcube[self.parcube == 0] = blank_value
 
             if integral:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs,

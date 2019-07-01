@@ -11,6 +11,8 @@ Note that there are two modules described here: the multi-rotational-transition
 fitter, which has its own set of custom functions, and a generic hyperfine-line
 fitting module meant to fit a single metastable (or non-metastable) transition.
 
+If you run into a problem, have a look at the `ammonia-tagged issues on github
+<https://github.com/pyspeckit/pyspeckit/issues?q=label%3Aammonia+>`__
 
 .. automodule:: pyspeckit.spectrum.models.ammonia
     :members:
