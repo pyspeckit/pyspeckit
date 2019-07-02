@@ -361,9 +361,12 @@ class Cube(spectrum.Spectrum):
         the first dimension to slice on the xarr and the data
         """
 
-        return Cube(xarr=self.xarr.__getitem__(indx[0]), cube=self.cube[indx],
+        return Cube(xarr=self.xarr.__getitem__(indx[0]),
+                    cube=self.cube[indx],
                     errorcube=self.errorcube[indx] if self.errorcube else None,
-                    maskmap=self.maskmap[indx[1:]] if self.maskmap is not None else None)
+                    maskmap=self.maskmap[indx[1:]] if self.maskmap is not None else None,
+                    header=self.header
+                   )
 
     def set_spectrum(self, x, y):
         self.data = self.cube[:,int(y),int(x)]
@@ -384,9 +387,10 @@ class Cube(spectrum.Spectrum):
             self.plotted_spectrum = self
         else:
             sp = self.get_spectrum(x,y)
-            sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
-            self._spdict = sp.plot_special(**dict(kwargs.items()+
-                                                  self.plot_special_kwargs.items()))
+            sp.plot_special = types.MethodType(self.plot_special, sp)
+            combined_kwargs = dict(kwargs.items())
+            combined_kwargs.update(self.plot_special_kwargs)
+            self._spdict = sp.plot_special(**combined_kwargs)
             self.plotted_spectrum = sp
             self.plotter = sp.plotter
             self.plotter.refresh = lambda: [spi.plotter.refresh()
@@ -421,7 +425,15 @@ class Cube(spectrum.Spectrum):
             # this is already handled in plot_spectrum
             return
 
+        if not self.has_fit[int(y), int(x)]:
+            # no fit to plot
+            return
+
         self.specfit.modelpars = self.parcube[:,int(y),int(x)]
+        if np.any(np.isnan(self.specfit.modelpars)):
+            log.exception("Attempted to plot a model with NaN parameters.")
+            return
+
         self.specfit.npeaks = self.specfit.fitter.npeaks
         self.specfit.model = self.specfit.fitter.n_modelfunc(self.specfit.modelpars,
                                                              **self.specfit.fitter.modelfunc_kwargs)(self.xarr)
@@ -473,8 +485,10 @@ class Cube(spectrum.Spectrum):
             #self.plot_special(reset_ylimits=reset_ylimits, **dict(kwargs.items()+self.plot_special_kwargs.items()))
 
             sp = self.get_apspec(aperture, coordsys=coordsys, wunit=wunit, method=method)
-            sp.plot_special = types.MethodType(self.plot_special, sp, sp.__class__)
-            sp.plot_special(reset_ylimits=reset_ylimits, **dict(kwargs.items()+self.plot_special_kwargs.items()))
+            sp.plot_special = types.MethodType(self.plot_special, sp)
+            combined_kwargs = dict(kwargs.items())
+            combined_kwargs.update(self.plot_special_kwargs)
+            sp.plot_special(reset_ylimits=reset_ylimits, **combined_kwargs)
 
     def get_spectrum(self, x, y):
         """
@@ -507,28 +521,30 @@ class Cube(spectrum.Spectrum):
         sp.specfit.includemask = self.specfit.includemask.copy()
         sp.specfit.Spectrum = sp
 
-        if hasattr(self,'parcube'):
-            sp.specfit.modelpars = self.parcube[:,int(y),int(x)]
-            if hasattr(self.specfit,'parinfo') and self.specfit.parinfo is not None:
-                # set the parinfo values correctly for annotations
-                for pi,p,e in zip(sp.specfit.parinfo, sp.specfit.modelpars, self.errcube[:,int(y),int(x)]):
-                    try:
-                        pi['value'] = p
-                        pi['error'] = e
-                    except ValueError:
-                        pass
+        if hasattr(self, 'parcube'):
+            if self.has_fit[int(y),int(x)]:
+                # only set parameters if they're valid
+                sp.specfit.modelpars = self.parcube[:,int(y),int(x)]
+                if hasattr(self.specfit,'parinfo') and self.specfit.parinfo is not None:
+                    # set the parinfo values correctly for annotations
+                    for pi,p,e in zip(sp.specfit.parinfo, sp.specfit.modelpars, self.errcube[:,int(y),int(x)]):
+                        try:
+                            pi['value'] = p
+                            pi['error'] = e
+                        except ValueError:
+                            pass
 
-            if hasattr(self.specfit,'fitter') and self.specfit.fitter is not None:
-                sp.specfit.fitter.mpp = sp.specfit.modelpars # also for annotations (differs depending on which function... sigh... need to unify)
-                sp.specfit.npeaks = self.specfit.fitter.npeaks
-                sp.specfit.fitter.npeaks = len(sp.specfit.modelpars) / sp.specfit.fitter.npars
-                sp.specfit.fitter.parinfo = sp.specfit.parinfo
-                try:
-                    sp.specfit.model = sp.specfit.fitter.n_modelfunc(sp.specfit.modelpars,
-                                                                     **sp.specfit.fitter.modelfunc_kwargs)(sp.xarr)
-                except ValueError:
-                    # possibly invalid model parameters, just skip
-                    sp.specfit.model = np.zeros_like(sp.data)
+                if hasattr(self.specfit,'fitter') and self.specfit.fitter is not None:
+                    sp.specfit.fitter.mpp = sp.specfit.modelpars # also for annotations (differs depending on which function... sigh... need to unify)
+                    sp.specfit.npeaks = self.specfit.fitter.npeaks
+                    sp.specfit.fitter.npeaks = len(sp.specfit.modelpars) / sp.specfit.fitter.npars
+                    sp.specfit.fitter.parinfo = sp.specfit.parinfo
+                    try:
+                        sp.specfit.model = sp.specfit.fitter.n_modelfunc(sp.specfit.modelpars,
+                                                                         **sp.specfit.fitter.modelfunc_kwargs)(sp.xarr)
+                    except ValueError:
+                        # possibly invalid model parameters, just skip
+                        sp.specfit.model = np.zeros_like(sp.data)
 
         return sp
 
@@ -706,8 +722,7 @@ class Cube(spectrum.Spectrum):
             Minimum signal-to-noise ratio to "cut" on (i.e., if peak in a given
             spectrum has s/n less than this value, ignore it)
         blank_value: float
-            Value to replace non-fitted locations with.  A good alternative is
-            numpy.nan
+            Value to replace non-fitted locations with.
         errmap: ndarray[naxis=2] or ndarray[naxis=3]
             A map of errors used for the individual pixels of the spectral
             cube. 2D errmap results in an equal weighting of each given
@@ -870,9 +885,11 @@ class Cube(spectrum.Spectrum):
                                 "not be possible.  Please raise an Issue.")
             if signal_cut > 0 and not all(sp.error == 0):
                 if continuum_map is not None:
-                    snr = (sp.data-continuum_map[int(y),int(x)]) / sp.error
+                    with np.errstate(divide='raise'):
+                        snr = (sp.data-continuum_map[int(y),int(x)]) / sp.error
                 else:
-                    snr = sp.data / sp.error
+                    with np.errstate(divide='raise'):
+                        snr = sp.data / sp.error
                 if absorption:
                     max_sn = np.nanmax(-1*snr)
                 else:
@@ -902,14 +919,27 @@ class Cube(spectrum.Spectrum):
                     log.info("Using nearest fit as guess")
                 rolled_distance = np.roll(np.roll(distance, x, 0), y, 1)
                 # If there's no fit, set its distance to be unreasonably large
+                # so it will be ignored by argmin
                 nearest_ind = np.argmin(rolled_distance+1e10*(~self.has_fit))
                 nearest_x, nearest_y = xx.flat[nearest_ind],yy.flat[nearest_ind]
-                gg = self.parcube[:,nearest_y,nearest_x]
+                if np.all(np.isfinite(self.parcube[:,nearest_y,nearest_x])):
+                    gg = self.parcube[:,nearest_y,nearest_x]
+                else:
+                    log.exception("Pixel {0},{1} had a fit including a NaN: {2}"
+                                  " so it will not be used as a guess for {3},{4}"
+                                  .format(nearest_x, nearest_y, self.parcube[:, nearest_y, nearest_x],
+                                          x, y))
+                    gg = guesses
             elif use_neighbor_as_guess and np.any(local_fits):
                 # Array is N_guess X Nvalid_nbrs so averaging over
                 # Axis=1 is the axis of all valid neighbors
-                gg = np.mean(self.parcube[:, (ypatch+y)[local_fits],
+                gg = np.mean(self.parcube[:,
+                                          (ypatch+y)[local_fits],
                                           (xpatch+x)[local_fits]], axis=1)
+                if np.any(~np.isfinite(gg)):
+                    log.exception("Pixel {0},{1} neighbors had non-finite guess: {2}"
+                                  .format(x, y, gg))
+                    gg = guesses
             elif guesses_are_moments and usemomentcube is False:
                 raise ValueError("usemomentcube must be set to True")
             elif guesses_are_moments or (usemomentcube and len(guesses)):
@@ -934,11 +964,20 @@ class Cube(spectrum.Spectrum):
 
             if np.all(np.isfinite(gg)):
                 try:
-                    sp.specfit(guesses=gg, quiet=verbose_level<=3,
-                               verbose=verbose_level>3, **fitkwargs)
+                    with np.errstate(divide='raise'):
+                        sp.specfit(guesses=gg, quiet=verbose_level<=3,
+                                   verbose=verbose_level>3, **fitkwargs)
                     self.parcube[:,int(y),int(x)] = sp.specfit.modelpars
                     self.errcube[:,int(y),int(x)] = sp.specfit.modelerrs
-                    success = True
+                    if np.any(~np.isfinite(sp.specfit.modelpars)):
+                        log.exception("Fit result included nan for pixel {0},{1}: "
+                                      "{2}".format(x, y, sp.specfit.modelpars))
+                        success = False
+                        # this is basically a debug statement to try to get the
+                        # code to crash here
+                        raise KeyboardInterrupt
+                    else:
+                        success = True
                 except Exception as ex:
                     exc_traceback = sys.exc_info()[2]
                     self._tracebacks[(ii,x,y)] = exc_traceback
@@ -950,15 +989,17 @@ class Cube(spectrum.Spectrum):
                     log.exception("Guesses were: {0}".format(str(gg)))
                     log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
                     success = False
-                    if isinstance(ex,KeyboardInterrupt):
+                    if isinstance(ex, KeyboardInterrupt):
                         raise ex
 
                 # keep this out of the 'try' statement
                 if integral and success:
                     self.integralmap[:,int(y),int(x)] = sp.specfit.integral(direct=direct_integral,
-                                                                  return_error=True)
+                                                                            return_error=True)
                 self.has_fit[int(y),int(x)] = success
             else:
+                log.exception("Fit number {0} at {1},{2} had non-finite guesses {3}"
+                              .format(ii, x, y, guesses))
                 self.has_fit[int(y),int(x)] = False
                 self.parcube[:,int(y),int(x)] = blank_value
                 self.errcube[:,int(y),int(x)] = blank_value
@@ -1048,7 +1089,8 @@ class Cube(spectrum.Spectrum):
 
         if multicore > 1:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
-            result = parallel_map(fit_a_pixel, sequence, numcores=multicore)
+            with np.errstate(divide='raise'):
+                result = parallel_map(fit_a_pixel, sequence, numcores=multicore)
             self._result = result # backup - don't want to lose data in the case of a failure
             # a lot of ugly hacking to deal with the way parallel_map returns
             # its results needs TWO levels of None-filtering, because any
@@ -1092,7 +1134,10 @@ class Cube(spectrum.Spectrum):
                     raise ValueError("There was a serious problem; modelpar and"
                                      " error shape don't match that of the "
                                      "parameter cubes")
-                if np.any(np.isnan(modelpars)) or np.any(np.isnan(modelerrs)):
+                if ((any([x is None for x in modelpars]) or
+                     np.any(np.isnan(modelpars)) or
+                     any([x is None for x in modelerrs]) or
+                     np.any(np.isnan(modelerrs)))):
                     self.parcube[:,int(y),int(x)] = np.nan
                     self.errcube[:,int(y),int(x)] = np.nan
                     self.has_fit[int(y),int(x)] = False
@@ -1118,6 +1163,13 @@ class Cube(spectrum.Spectrum):
         if verbose:
             log.info("Finished final fit %i.  "
                      "Elapsed time was %0.1f seconds" % (len(valid_pixels), time.time()-t0))
+
+        pars_are_finite = np.all(np.isfinite(self.parcube), axis=0)
+
+        # if you see one of these exceptions, please try to produce a minimum
+        # working example and report it as a bug.
+        # all non-finite fit parameters should be has_fit=False
+        assert np.all(~self.has_fit[~pars_are_finite]), "Non-finite parameters found in fits"
 
 
     def momenteach(self, verbose=True, verbose_level=1, multicore=1, **kwargs):
@@ -1260,12 +1312,21 @@ class Cube(spectrum.Spectrum):
         self.parcube = cube[:npars*npeaks,:,:]
         self.errcube = cube[npars*npeaks:npars*npeaks*2,:,:]
 
+        if np.any(np.all(self.parcube == 0, axis=(1,2))):
+            # there are some slices where all parameters are zero, we should
+            # ignore this when establishing whether there's a fit (some
+            # parameters, like fortho, can be locked to zero)
+            self.has_fit = np.all((np.isfinite(self.parcube)), axis=0)
+        else:
+            self.has_fit = np.all((self.parcube != 0) &
+                                  (np.isfinite(self.parcube)), axis=0)
+
         nanvals = ~np.isfinite(self.parcube)
         nanvals_flat = np.any(nanvals, axis=0)
         if np.any(nanvals):
             warn("NaN or infinite values encountered in parameter cube.",
                  PyspeckitWarning)
-            
+
 
         # make sure params are within limits
         fitter = self.specfit.Registry.multifitters[fittype]
@@ -1366,7 +1427,7 @@ class Cube(spectrum.Spectrum):
                 fitcubefile.header[kw] = parname
             # set error parameters
             for jj,par in enumerate(self.specfit.parinfo):
-                kw = "PLANE%i" % (ii+jj)
+                kw = "PLANE%i" % (ii+jj+1)
                 parname = "e"+par['parname'].strip('0123456789')
                 fitcubefile.header[kw] = parname
 

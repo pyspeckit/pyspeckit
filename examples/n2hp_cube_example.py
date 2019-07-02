@@ -28,7 +28,7 @@ if not os.path.exists('n2hp_cube.fit'):
 # Load the spectral cube cropped in the middle for efficiency
 with warnings.catch_warnings():
     warnings.filterwarnings('ignore', category=wcs.FITSFixedWarning)
-    spc = pyspeckit.Cube('n2hp_cube.fit')[:,25:28,12:15]
+    spc = pyspeckit.Cube('n2hp_cube.fit')[:,25:29,12:16]
 # Set the velocity convention: in the future, this may be read directly from
 # the file, but for now it cannot be.
 spc.xarr.refX = 93176265000.0*u.Hz
@@ -58,6 +58,8 @@ else:
                 signal_cut=3, # minimize the # of pixels fit for the example
                 start_from_point=(2,2), # start at a pixel with signal
                 errmap=errmap,
+                use_neighbor_as_guess=True,
+                multicore=4,
                 )
     # There are a huge number of parameters for the fiteach procedure.  See:
     # http://pyspeckit.readthedocs.org/en/latest/example_nh3_cube.html
@@ -71,8 +73,8 @@ else:
 # Save the fitted parameters to a FITS file, and overwrite one if one exists
 spc.write_fit('n2hp_fitted_parameters.fits', overwrite=True)
 
-# Show an integrated image
-spc.mapplot()
+# Show an image of the fitted tex
+spc.mapplot(estimator=1, vmin=0, vmax=10)
 # you can click on any pixel to see its spectrum & fit
 
 # plot one of the fitted spectra

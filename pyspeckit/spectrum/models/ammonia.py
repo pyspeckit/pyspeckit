@@ -58,7 +58,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
         Total log column density of NH3.  Can be specified as a float in the
         range 5-25
     width: float
-        Line width in km/s
+        Line width (Gaussian sigma) in km/s
     xoff_v: float
         Line offset in km/s
     fortho: float
@@ -376,7 +376,7 @@ class ammonia_model(model.SpectralModel):
 
     ntot is the total column density of p-NH3 integrated over all states.
 
-    width is the linewidth
+    width is the linewidth (the Gaussian sigma)
 
     xoff_v is the velocity offset / line of sight velocity
 

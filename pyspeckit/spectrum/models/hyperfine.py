@@ -55,8 +55,9 @@ class hyperfinemodel(object):
 
         self.fitter = model.SpectralModel(self,4,
             parnames=['Tex','tau','center','width'],
-            parlimited=[(False,False), (True,False), (False,False), (True,False)],
-            parlimits=[(0,0), (0,0), (0,0), (0,0)],
+            # T_ex = 0 results in an infinity
+            parlimited=[(True,False), (True,False), (False,False), (True,False)],
+            parlimits=[(1e-5,0), (0,0), (0,0), (0,0)],
             # specify the parameter names (LaTeX is OK)
             shortvarnames=("T_{ex}","\\tau","v","\\sigma"),
             guess_types=['amplitude+2.73', 1.0, 'center', 'width'],
@@ -66,9 +67,9 @@ class hyperfinemodel(object):
 
         self.varyhf_fitter = model.SpectralModel(self.hyperfine_varyhf,3+self.nlines,
             parnames=['Tex','center','width']+['tau%s' % k for k in self.line_names],
-            parlimited=[(False,False), (False,False), (True,False)]
+            parlimited=[(True,False), (False,False), (True,False)]
                                                  + [(True,False),]*self.nlines,
-            parlimits=[(0,0), (0,0), (0,0)]+[(0,0),]*self.nlines,
+            parlimits=[(1e-5,0), (0,0), (0,0)]+[(0,0),]*self.nlines,
             shortvarnames=("T_{ex}","v","\\sigma") +
                            tuple(("\\tau(\\mathrm{%s})" % k for k in self.line_names)),
             fitunit='Hz')
@@ -93,24 +94,24 @@ class hyperfinemodel(object):
 
         self.vheight_fitter = model.SpectralModel(fitter.vheightmodel(self),5,
             parnames=['height','Tex','tau','center','width'],
-            parlimited=[(False,False), (False,False), (True,False), (False,False), (True,False)],
-            parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0)],
+            parlimited=[(False,False), (True,False), (True,False), (False,False), (True,False)],
+            parlimits=[(0,0), (1e-5,0), (0,0), (0,0), (0,0)],
             shortvarnames=("H","T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
             guess_types=[0.0, 'amplitude+2.73', 1.0, 'center', 'width'],
             fitunit='Hz' )
 
         self.background_fitter = model.SpectralModel(self.hyperfine_addbackground,5,
             parnames=['Tbackground','Tex','tau','center','width'],
-            parlimited=[(True,False), (False,False), (False,False), (True,False), (False,False), (True,False)],
-            parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
+            parlimited=[(True,False), (True,False), (False,False), (True,False), (False,False), (True,False)],
+            parlimits=[(0,0), (1e-5,0), (0,0), (0,0), (0,0), (0,0)],
             shortvarnames=('T_{BG}',"T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
             guess_types=[2.73, 'amplitude+2.73', 1.0, 'center', 'width'],
             fitunit='Hz')
 
         self.background_contsub_fitter = model.SpectralModel(self.hyperfine_background,5,
             parnames=['Tbackground','Tex','tau','center','width'],
-            parlimited=[(True,False), (False,False), (False,False), (True,False), (False,False), (True,False)],
-            parlimits=[(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
+            parlimited=[(True,False), (True,False), (False,False), (True,False), (False,False), (True,False)],
+            parlimits=[(0,0), (1e-5,0), (0,0), (0,0), (0,0), (0,0)],
             shortvarnames=('T_{BG}',"T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
             guess_types=[0.0, 'amplitude+2.73', 1.0, 'center', 'width'],
             fitunit='Hz')
@@ -354,7 +355,17 @@ class hyperfinemodel(object):
 
             # this is the exact version of 15.29
             T0 = hoverk * xarr
-            spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*T0*(1/(np.exp(T0/Tex)-1) - 1/(np.exp(T0/Tbackground)-1))
+
+            # division by zero should raise an exception, but zero-background
+            # is allowed and just turns this term to zero=(exp(-inf))
+            if Tbackground > 0:
+                background_term = 1/(np.exp(T0/Tbackground)-1)
+            else:
+                background_term = 0
+
+            with np.errstate(divide='raise'):
+                # division by zero is disallowed and should raise an exception
+                spec = (1.0-np.exp(-np.array(tau_nu_cumul)))*T0*(1/(np.exp(T0/Tex)-1) - background_term)
 
             # This is the equation of radiative transfer using the RJ definitions
             # (eqn 1.37 in Rohlfs)
