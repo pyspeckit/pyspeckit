@@ -1106,9 +1106,15 @@ class cold_ammonia_model(ammonia_model):
                                        required_limits=required_limits)
 
 class ammonia_model_restricted_tex(ammonia_model):
+    """
+    Ammonia model with an explicitly restricted excitation temperature
+    such that tex >= trot, set by the "delta" parameter (tex = trot + delta)
+    with delta > 0
+    """
     def __init__(self,
                  parnames=['trot', 'tex', 'ntot', 'width', 'xoff_v', 'fortho',
                            'delta'],
+                 ammonia_func=ammonia,
                  **kwargs):
         super(ammonia_model_restricted_tex, self).__init__(npars=7,
                                                            parnames=parnames,
@@ -1121,7 +1127,7 @@ class ammonia_model_restricted_tex(ammonia_model):
             delta = kwargs.pop('delta') if 'delta' in kwargs else None
             np.testing.assert_allclose(kwargs['trot'] - kwargs['tex'],
                                        delta)
-            return ammonia(*args, **kwargs)
+            return ammonia_func(*args, **kwargs)
         self.modelfunc = ammonia_dtex
 
     def n_ammonia(self, pars=None, parnames=None, **kwargs):
