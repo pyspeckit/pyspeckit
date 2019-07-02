@@ -36,7 +36,8 @@ TCMB = 2.7315 # K
 def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
             tau=None, fillingfraction=None, return_tau=False,
             return_tau_profile=False, background_tb=TCMB, verbose=False,
-            return_components=False, debug=False, line_names=line_names):
+            return_components=False, debug=False, line_names=line_names,
+            ignore_neg_models=False):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
     gaussian parameters.  The returned model will be in Kelvin (brightness
@@ -88,6 +89,13 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
         just one array
     background_tb : float
         The background brightness temperature.  Defaults to TCMB.
+    ignore_neg_models: bool
+        Normally if background=TCMB and the model is negative, an exception
+        will be raised.  This parameter will simply skip that exception.  Use
+        with extreme caution: negative models (absorption spectra against the
+        CMB) are not physical!  You may want to allow this in some cases
+        because there can be numerical issues where the model goes negative
+        when it shouldn't.
     verbose: bool
         More messages
     debug: bool
@@ -222,7 +230,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
                                        return_tau_profile=return_tau_profile
                                       )
 
-    if not return_tau_profile and model_spectrum.min() < 0 and background_tb == TCMB:
+    if not return_tau_profile and model_spectrum.min() < 0 and background_tb == TCMB and not ignore_neg_models:
         raise ValueError("Model dropped below zero.  That is not possible "
                          " normally.  Here are the input values: "+
                          ("tex: {0} ".format(tex)) +
