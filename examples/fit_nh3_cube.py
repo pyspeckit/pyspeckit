@@ -11,7 +11,7 @@ able to modify this example and get something useful out.
 .. WARNING:: Cube fitting, particularly with a complicated line profile
 ammonia, can take a long time.  Test this on a small cube first!
 
-.. TODO:: Turn this example script into a function.  But customizing 
+.. TODO:: Turn this example script into a function.  But customizing
     the fit parameters will still require digging into the data manually
     (e.g., excluding bad velocities, or excluding the hyperfine lines from
     the initial guess)
@@ -30,7 +30,7 @@ from astropy.convolution import convolve_fft,Gaussian2DKernel
 F=False; T=True
 
 # Some optional parameters for the script
-# (if False, it will try to load an already-stored version 
+# (if False, it will try to load an already-stored version
 # of the file)
 fitcube = True
 
@@ -72,7 +72,7 @@ errmap11[errmap11 != errmap11] = convolve_fft(errmap11,
                                               interpolate_nan=True)[errmap11 != errmap11]
 
 # Stack the cubes into one big cube.  The X-axis is no longer linear: there
-# will be jumps from 1-1 to 2-2 to 4-4.  
+# will be jumps from 1-1 to 2-2 to 4-4.
 cubes = pyspeckit.CubeStack([cube11,cube22,cube44], maskmap=mask)
 cubes.unit = "K"
 
@@ -102,11 +102,11 @@ if os.path.exists(guessfn):
     guesses = guesscube[0].data
 else:
     guesses = np.zeros((6,)+cubes.cube.shape[1:])
-    guesses[0,:,:] = 20                    # Kinetic temperature 
+    guesses[0,:,:] = 20                    # Kinetic temperature
     guesses[1,:,:] = 5                     # Excitation  Temp
     guesses[2,:,:] = 14.5                  # log(column)
-    guesses[3,:,:] = momentcube[3,:,:] / 5 # Line width / 5 (the NH3 moment overestimates linewidth)                  
-    guesses[4,:,:] = momentcube[2,:,:]     # Line centroid              
+    guesses[3,:,:] = momentcube[3,:,:] / 5 # Line width / 5 (the NH3 moment overestimates linewidth)
+    guesses[4,:,:] = momentcube[2,:,:]     # Line centroid
     guesses[5,:,:] = 0.5                   # F(ortho) - ortho NH3 fraction (fixed)
 
     guesscube = pyfits.PrimaryHDU(data=guesses, header=cube11.header)
@@ -129,7 +129,7 @@ if fitcube:
     # set by the fitted parameters from the nearest pixel with a good fit
     # HOWEVER, because this fitting is done in parallel (multicore=12 means
     # 12 parallel fitting processes will run), this actually means that EACH
-    # core will have its own sub-set of the cube that it will search for good 
+    # core will have its own sub-set of the cube that it will search for good
     # fits. So if you REALLY want consistency, you need to do the fit in serial.
     cubes.fiteach(fittype='ammonia', multifit=None, guesses=guesses,
             integral=False, verbose_level=3, fixed=[F,F,F,F,F,T], signal_cut=3,
@@ -143,22 +143,22 @@ if fitcube:
 
     # Save the fitted parameters in a data cube
     fitcubefile = pyfits.PrimaryHDU(data=np.concatenate([cubes.parcube,cubes.errcube]), header=cubes.header)
-    fitcubefile.header.update('PLANE1','TKIN')
-    fitcubefile.header.update('PLANE2','TEX')
-    fitcubefile.header.update('PLANE3','COLUMN')
-    fitcubefile.header.update('PLANE4','SIGMA')
-    fitcubefile.header.update('PLANE5','VELOCITY')
-    fitcubefile.header.update('PLANE6','FORTHO')
-    fitcubefile.header.update('PLANE7','eTKIN')
-    fitcubefile.header.update('PLANE8','eTEX')
-    fitcubefile.header.update('PLANE9','eCOLUMN')
-    fitcubefile.header.update('PLANE10','eSIGMA')
-    fitcubefile.header.update('PLANE11','eVELOCITY')
-    fitcubefile.header.update('PLANE12','eFORTHO')
-    fitcubefile.header.update('CDELT3',1)
-    fitcubefile.header.update('CTYPE3','FITPAR')
-    fitcubefile.header.update('CRVAL3',0)
-    fitcubefile.header.update('CRPIX3',1)
+    fitcubefile.header['PLANE1'] = 'TKIN'
+    fitcubefile.header['PLANE2'] = 'TEX'
+    fitcubefile.header['PLANE3'] = 'COLUMN'
+    fitcubefile.header['PLANE4'] = 'SIGMA'
+    fitcubefile.header['PLANE5'] = 'VELOCITY'
+    fitcubefile.header['PLANE6'] = 'FORTHO'
+    fitcubefile.header['PLANE7'] = 'eTKIN'
+    fitcubefile.header['PLANE8'] = 'eTEX'
+    fitcubefile.header['PLANE9'] = 'eCOLUMN'
+    fitcubefile.header['PLANE10'] = 'eSIGMA'
+    fitcubefile.header['PLANE11'] = 'eVELOCITY'
+    fitcubefile.header['PLANE12'] = 'eFORTHO'
+    fitcubefile.header['CDELT3'] = 1
+    fitcubefile.header['CTYPE3'] = 'FITPAR'
+    fitcubefile.header['CRVAL3'] = 0
+    fitcubefile.header['CRPIX3'] = 1
     fitcubefile.writeto("hot_fitcube_try6.fits")
 else: # you can read in a fit you've already done!
     cubes.load_model_fit('hot_fitcube_try6.fits', 6, 'ammonia', _temp_fit_loc=(94,250))

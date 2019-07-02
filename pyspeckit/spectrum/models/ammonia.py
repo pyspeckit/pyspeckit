@@ -1112,7 +1112,7 @@ class cold_ammonia_model(ammonia_model):
 class ammonia_model_restricted_tex(ammonia_model):
     """
     Ammonia model with an explicitly restricted excitation temperature
-    such that tex >= trot, set by the "delta" parameter (tex = trot + delta)
+    such that tex <= trot, set by the "delta" parameter (tex = trot - delta)
     with delta > 0.  You can choose the ammonia funciton when you initialize
     it (e.g., ``ammonia_model_restricted_tex(ammonia_func=ammonia)`` or
     ``ammonia_model_restricted_tex(ammonia_func=cold_ammonia)``)

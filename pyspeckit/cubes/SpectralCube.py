@@ -1042,10 +1042,10 @@ class Cube(spectrum.Spectrum):
                 log.exception("cube modelerrs are: {0}".format(str(self.errcube[:,int(y),int(x)])))
                 log.exception("Guesses were: {0}".format(str(gg)))
                 log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
+
                 if skip_failed_fits:
                     # turn the flag into a count
                     log.exception("The fit never completed; something has gone wrong.  Failed fits = {0}".format(int(skip_failed_fits)))
-                    skip_failed_fits = int(skip_failed_fits) + 1
                 else:
                     raise TypeError("The fit never completed; something has gone wrong.")
 
