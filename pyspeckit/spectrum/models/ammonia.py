@@ -131,6 +131,10 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
                       "This is unphysical and "
                       "suggests that you may need to constrain tex.  See "
                       "ammonia_model_restricted_tex.")
+    if width < 0:
+        return np.zeros(xarr.size)*np.nan
+    elif width == 0:
+        return np.zeros(xarr.size)
 
     from .ammonia_constants import line_name_indices, line_names as original_line_names
 
