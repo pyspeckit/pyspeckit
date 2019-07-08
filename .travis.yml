@@ -35,6 +35,7 @@ env:
         - SETUP_XVFB=True
         - MPLBACKEND=TkAgg
         - PYTHON_VERSION=3.6
+        - SETUP_CMD='test'
 
     matrix:
         # Make sure that egg_info works without dependencies
