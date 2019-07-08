@@ -45,16 +45,17 @@ env:
 matrix:
     include:
 
+        # Check for sphinx doc build warnings - we do this first because it
+        # may run for a long time
+        # -wn is removed because I'm ignoring warnings
+        - env: SETUP_CMD='build_sphinx'
+               PYTHON_VERSION=3.6
+
         - env: PYTHON_VERSION=2.7
 
         - env: PYTHON_VERSION=3.6
 
         - env: PYTHON_VERSION=3.7
-
-        # Check for sphinx doc build warnings - we do this first because it
-        # may run for a long time
-        - env: SETUP_CMD='build_sphinx' # don't crash for warnings
-               PYTHON_VERSION=3.6
 
         # Try Astropy development version (which is no longer compatible with py2.7)
         - env: ASTROPY_VERSION=development SETUP_CMD='test'
