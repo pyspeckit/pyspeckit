@@ -51,6 +51,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
                fortho=0.66, tau=None, thin=False, quiet=False, doplot=True,
                fignum=1, guessfignum=2, smooth=False, scale_keyword=None,
                rebase=False, tkin=None, npeaks=1, guesses=None,
+               fittype='ammonia',
                guess_error=True, plotter_wrapper_kwargs={}, **kwargs):
     """
     Given a dictionary of filenames and lines, fit them together
@@ -78,6 +79,9 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
         Use the guess line to estimate the error in all spectra?
     plotter_wrapper_kwargs : dict
         Keyword arguments to pass to the plotter
+    fittype: 'ammonia' or 'cold_ammonia'
+        The fitter model to use.  This is overridden if `tau` is specified,
+        in which case one of the `ammonia_tau` models is used (see source code)
     """
     if tkin is not None:
         if trot == 20 or trot is None:
@@ -154,7 +158,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
                         fortho)]
         if thin:
             raise ValueError("'thin' keyword not supported for the generic ammonia model")
-        spectra.specfit(fittype='ammonia', quiet=quiet, guesses=guesses,
+        spectra.specfit(fittype=fittype, quiet=quiet, guesses=guesses,
                         **kwargs)
 
     if doplot:
@@ -259,7 +263,9 @@ def make_axdict(splist, spdict):
 
 
 def fitnh3(spectrum, vrange=[-100, 100], vrangeunit='km/s', quiet=False, Tex=20,
-           trot=15, column=1e15, fortho=1.0, tau=None, Tkin=None, spec_convert_kwargs={}):
+           trot=15, column=1e15, fortho=1.0, tau=None, Tkin=None,
+           fittype='ammonia',
+           spec_convert_kwargs={}):
 
     if Tkin is not None:
         if trot == 20 or trot is None:
@@ -276,7 +282,7 @@ def fitnh3(spectrum, vrange=[-100, 100], vrangeunit='km/s', quiet=False, Tex=20,
     ampguess, vguess, widthguess = spectrum.specfit.modelpars
 
     if tau is None:
-        spectrum.specfit(fittype='ammonia', quiet=quiet,
+        spectrum.specfit(fittype=fittype, quiet=quiet,
                          guesses=[Tex, trot, column, widthguess, vguess,
                                   fortho])
     else:
