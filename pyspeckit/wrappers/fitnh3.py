@@ -20,6 +20,18 @@ Example use:
     spf = pyspeckit.wrappers.fitnh3.fitnh3tkin(input_dict)
 
 
+Note that if you want to use the plotter wrapper with cubes, you need to do
+something like the following, where the ``plot_special`` method of the stacked
+``cubes`` object is set to the ``plotter_override`` function defined in the
+fitnh3_wrapper code:
+
+.. code:: python
+
+    cubes.plot_special = pyspeckit.wrappers.fitnh3.plotter_override
+    cubes.plot_special_kwargs = {'fignum':3, 'vrange':[55,135]}
+    cubes.plot_spectrum(160,99)
+
+
 """
 from __future__ import print_function
 import warnings
