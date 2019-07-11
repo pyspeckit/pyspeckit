@@ -321,7 +321,8 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
         else:
             freq_test_low = freq_test_high = freq
 
-        log.debug("freq test low, high: {0}, {1}".format(freq_test_low, freq_test_high))
+        log.debug("line {2}: freq test low, high: {0}, {1}"
+                  .format(freq_test_low, freq_test_high, linename))
         if (sp.xarr.as_unit('Hz').in_range(freq_test_low) or
                 sp.xarr.as_unit('Hz').in_range(freq_test_high)):
             spdict[linename] = sp.copy(deep=True)
