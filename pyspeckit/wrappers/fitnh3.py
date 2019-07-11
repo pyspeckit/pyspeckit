@@ -346,11 +346,25 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
                     log.debug("Successfully cropped {0} to {1}, freq = {2}, {3}"
                               .format(linename, vrange, freq,
                                       spdict[linename].xarr))
+                    if len(spdict[linename]) == 0:
+                        spdict.pop(linename)
+                        log.debug("Removed {0} from spdict".format(linename))
                 except IndexError:
                     # if the freq in range, but there's no data in range, remove
                     spdict.pop(linename)
+        else:
+            log.debug("Line {0} not in spectrum".format(linename))
 
-    log.debug(str(spdict))
+    # this shouldn't be reachable, but there are reported cases where spdict
+    # gets populated w/empty spectra, which leads to a failure in producing
+    # their repr.  Since that on its own isn't a very helpful error message,
+    # we'd rather return the bad spdict and see if the next function down the
+    # line can survive with a questionable spdict...
+    try:
+        log.debug(str(spdict))
+    except Exception as ex:
+        log.debug(str(ex))
+
     return spdict
 
 def plotter_override(sp, vrange=None, **kwargs):
