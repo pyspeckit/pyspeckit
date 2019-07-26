@@ -181,6 +181,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
 
         # for a complete discussion of these equations, please see
         # https://github.com/keflavich/pyspeckit/blob/ammonia_equations/examples/AmmoniaLevelPopulation.ipynb
+        # https://github.com/pyspeckit/pyspeckit/blob/master/examples/AmmoniaLevelPopulation.ipynb
         # and
         # http://low-sky.github.io/ammoniacolumn/
         # and
