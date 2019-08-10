@@ -37,7 +37,7 @@ Once you have a model defined, you can fit it using the
 prepared yet, but you can learn most of the tricks by looking at the various
 fitting examples and the :doc:`parameters` documentation.
 
-See also :doc`Model Fitting`.
+See also :doc:`Model Fitting`.
 
 
 .. TODO::
