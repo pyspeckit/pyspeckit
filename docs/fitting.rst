@@ -1,5 +1,5 @@
 Model Fitting
--------------
+=============
 
 General documentation for model fitting is below.  There are several multi-component model fitting tools that have been developed based on pyspeckit:
 
