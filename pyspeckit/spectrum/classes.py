@@ -865,7 +865,7 @@ class SingleSpectrum(BaseSpectrum):
         >>> spectrum = specutils.io.fits.read_fits_spectrum1d('gbt_1d.fits')
         >>> sp = pyspeckit.Spectrum.from_spectrum1d(spectrum)
         """
-        xarr = units.SpectroscopicAxis(spec1d.dispersion)
+        xarr = units.SpectroscopicAxis(spec1d.spectral_axis)
 
         data = spec1d.flux
         error = spec1d.uncertainty
