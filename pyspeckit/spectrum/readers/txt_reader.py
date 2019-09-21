@@ -3,8 +3,8 @@
 PySpecKit ASCII Reader
 ==========================
 
-Routines for reading in ASCII format spectra.  If atpy is not installed,
-will use a very simple routine for reading in the data.
+Routines for reading in ASCII format spectra.  If astropy.io.ascii is not
+installed, will use a very simple routine for reading in the data.
 
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 .. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
@@ -25,7 +25,7 @@ def open_1d_txt(filename, xaxcol=0, datacol=1, errorcol=2,
 
     Reading can be done either with astropy.io.ascii or a 'simple' reader.  If
     you have an IPAC, CDS, or formally formatted table, you'll want to use
-    astropy.io.ascii and spceify a format.
+    astropy.io.ascii and specify a format.
 
     If you have a simply formatted file of the form, e.g.
     # name name
