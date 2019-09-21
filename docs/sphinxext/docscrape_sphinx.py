@@ -1,6 +1,6 @@
 import re, inspect, textwrap, pydoc
 from docscrape import NumpyDocString, FunctionDoc, ClassDoc
-from astropy.extern.six import iteritems
+from six import iteritems
 
 class SphinxDocString(NumpyDocString):
     # string conversion routines

@@ -35,8 +35,8 @@ fitnh3_wrapper code:
 """
 from __future__ import print_function
 import warnings
-from astropy.extern.six.moves import xrange
-from astropy.extern.six import iteritems
+from six.moves import xrange
+from six import iteritems
 import pyspeckit
 from .. import spectrum
 from ..spectrum.classes import Spectrum, Spectra

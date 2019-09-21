@@ -7,9 +7,9 @@ import inspect
 import textwrap
 import re
 import pydoc
-from astropy.extern.six import StringIO
+from six import StringIO
 from warnings import warn
-from astropy.extern.six import iteritems
+from six import iteritems
 
 class Reader(object):
     """A line-based string reader.

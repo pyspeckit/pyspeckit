@@ -5,7 +5,7 @@ except ImportError:
     import pyfits
 import numpy.ma as ma
 import numpy as np
-from astropy.extern.six import operator
+from six import operator
 
 from .. import units
 from . import make_axis

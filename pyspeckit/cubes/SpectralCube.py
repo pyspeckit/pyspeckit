@@ -31,7 +31,7 @@ from astropy import log
 from astropy import wcs
 from astropy import units
 from astropy.utils.console import ProgressBar
-from astropy.extern.six import iteritems, string_types
+from six import iteritems, string_types
 from functools import wraps
 
 # import parent package

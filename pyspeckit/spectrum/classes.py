@@ -16,7 +16,7 @@ different wavelengths/frequencies
 """
 from __future__ import print_function
 import numpy as np
-from astropy.extern.six import iteritems
+from six import iteritems
 try:
     import astropy.io.fits as pyfits
 except ImportError:

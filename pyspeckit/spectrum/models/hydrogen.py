@@ -22,7 +22,7 @@ Module API
 
 """
 import numpy as np
-from astropy.extern.six import iteritems
+from six import iteritems
 from . import model
 from .. import units
 

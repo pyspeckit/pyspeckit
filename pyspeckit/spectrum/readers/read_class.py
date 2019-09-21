@@ -6,8 +6,8 @@ GILDAS CLASS file reader
 Read a CLASS file into an :class:`pyspeckit.spectrum.ObsBlock`
 """
 from __future__ import print_function
-from astropy.extern.six.moves import xrange
-from astropy.extern.six import iteritems
+from six.moves import xrange
+from six import iteritems
 from astropy.extern import six
 import astropy.io.fits as pyfits
 import numpy
@@ -1428,7 +1428,7 @@ def read_class(filename, downsample_factor=None, sourcename=None,
     return spectra,headers,indexes
 
 def stringify_header(header):
-    from astropy.extern.six import string_types, integer_types
+    from six import string_types, integer_types
     import string
     FITS_allowed_types = (string_types + integer_types +
                           (float, complex, bool, np.floating, np.integer,

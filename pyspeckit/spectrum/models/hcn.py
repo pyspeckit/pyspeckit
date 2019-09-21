@@ -12,7 +12,7 @@ Module API
 """
 from __future__ import print_function
 import numpy as np
-from astropy.extern.six import iteritems
+from six import iteritems
 import matplotlib.cbook as mpcb
 import copy
 try:

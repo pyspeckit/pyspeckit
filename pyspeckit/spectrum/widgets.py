@@ -1,5 +1,5 @@
 from __future__ import print_function
-from astropy.extern.six.moves import xrange
+from six.moves import xrange
 from matplotlib.widgets import Widget,Button,Slider
 import matplotlib
 import warnings
