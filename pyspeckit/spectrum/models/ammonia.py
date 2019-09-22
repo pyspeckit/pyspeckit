@@ -4,7 +4,7 @@ Ammonia inversion transition TROT fitter
 ========================================
 
 Ammonia inversion transition TROT fitter translated from Erik Rosolowsky's
-http://svn.ok.ubc.ca/svn/signals/nh3fit/
+https://github.com/low-sky/nh3fit
 
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 
