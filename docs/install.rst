@@ -13,10 +13,10 @@ Installation and Requirements
 
 PySpecKit requires at least the basic scientific packages:
 
-* `numpy <http://numpy.scipy.org/>`_
+* `numpy <https://numpy.org/>`_
 * `matplotlib <http://matplotlib.sourceforge.net>`_
 * `mpfit is included <https://github.com/segasai/astrolibpy/tree/master/mpfit>`_
-* `scipy <http://www.scipy.org/>`_ is optional. It is  only required for RADEX
+* `scipy <https://www.scipy.org/>`_ is optional. It is  only required for RADEX
   grid interpolation and certain types of optimization
 * python2.7 or `ordereddict <http://pypi.python.org/pypi/ordereddict>`_ for model parameter storage
 
@@ -24,9 +24,8 @@ You'll most likely want at least one of the following packages
 to enable `file reading <readers>`_
 
 * astropy_ >=0.4
-* `pyfits <http://www.stsci.edu/resources/software_hardware/pyfits/Download>`_ >=2.4
 * `atpy <http://atpy.github.com/>`_ (which depends on `asciitable <http://cxc.harvard.edu/contrib/asciitable/>`_ [`github link <https://github.com/taldcroft/asciitable>`_] )
-* `hdf5 <http://www.pytables.org/moin>`_
+* `hdf5 <https://www.pytables.org/>`_
 
 If you have pip (see http://pypi.python.org/pypi/pyspeckit), you can install with::
 

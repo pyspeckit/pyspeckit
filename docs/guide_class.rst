@@ -17,7 +17,7 @@ but it has a few extra attributes built-in (e.g., spectral averaging).
 
 A file can be loaded as a named object.
 The data is filtered as it is read in.  The following line will ensure that the spectra in the
-`n2hp` ObsBlock contain only data from the F1M spectrometer with lines labeled 'N2HP(3-2)'
+``n2hp`` ObsBlock contain only data from the F1M spectrometer with lines labeled 'N2HP(3-2)'
 or 'N2H+(3-2)'::
     
     from pyspeckit.spectrum.readers.read_class import class_to_obsblocks
@@ -46,15 +46,16 @@ spectrum, waiting for user input after displaying, you can do something like::
         sp.plotter(axis=ax)
         input("Waiting for input...")
 
-You can also fit a line profile to *each* spectrum in the observation block using the 'fiteach'
-command.
+You can also fit a line profile to *each* spectrum in the observation block
+using the ``fiteach`` command.
 
 Selecting Spectra
 ~~~~~~~~~~~~~~~~~
 
 There are 3 keywords that can be used to select spectra when reading in a file.  The
-`line` and `telescope` keywords are required in order to make an observation block, otherwise
-the spectral axes will not be common to all spectra.::
+``line`` and ``telescope`` keywords are required in order to make an
+observation block, otherwise the spectral axes will not be common to all
+spectra::
 
     n2hp = class_to_obsblocks(filename, 
         telescope=['SMT-F1M-HU','SMT-F1M-VU'],

@@ -12,7 +12,7 @@ are available on the `pyspeckit bitbucket download page <https://bitbucket.org/p
 
     import pyspeckit
     import numpy as np
-    import pyfits
+    import astropy.io.fits as pyfits
     from pyspeckit.spectrum import models
 
     # create the Formaldehyde Radex fitter
