@@ -10,7 +10,7 @@ continuum is what you're really trying to measure.
 Module API
 ^^^^^^^^^^
 """
-from astropy.extern.six.moves import xrange
+from six.moves import xrange
 from . import model
 import numpy 
 

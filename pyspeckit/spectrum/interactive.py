@@ -10,8 +10,8 @@ from __future__ import print_function
 import numpy
 from . import units
 from astropy import log
-from astropy.extern.six.moves import xrange
-from astropy.extern.six import iteritems
+from six.moves import xrange
+from six import iteritems
 
 class Interactive(object):
 

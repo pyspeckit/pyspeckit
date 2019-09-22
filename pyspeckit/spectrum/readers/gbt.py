@@ -8,7 +8,7 @@ supported, frequency switching is not.
 
 """
 from __future__ import print_function
-from astropy.extern.six import iteritems
+from six import iteritems
 try:
     import astropy.io.fits as pyfits
 except ImportError:

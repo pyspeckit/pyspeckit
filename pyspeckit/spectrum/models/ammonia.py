@@ -22,7 +22,7 @@ from . import model
 import matplotlib.cbook as mpcb
 import copy
 from astropy import log
-from astropy.extern.six import iteritems
+from six import iteritems
 from . import mpfit_messages
 import operator
 import string

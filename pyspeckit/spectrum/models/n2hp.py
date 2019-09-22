@@ -18,7 +18,7 @@ from __future__ import print_function
 import numpy as np
 import matplotlib.cbook as mpcb
 import copy
-from astropy.extern.six import iteritems
+from six import iteritems
 try:
     from astropy.io import fits as pyfits
 except ImportError:

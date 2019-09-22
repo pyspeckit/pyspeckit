@@ -18,7 +18,7 @@ from . import mpfit_messages
 from pyspeckit.specwarnings import warn
 import itertools
 import operator
-from astropy.extern import six
+import six
 try:
     from collections import OrderedDict
 except ImportError:
