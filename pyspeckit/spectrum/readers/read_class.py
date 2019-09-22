@@ -8,7 +8,7 @@ Read a CLASS file into an :class:`pyspeckit.spectrum.ObsBlock`
 from __future__ import print_function
 from six.moves import xrange
 from six import iteritems
-from astropy.extern import six
+import six
 import astropy.io.fits as pyfits
 import numpy
 import numpy as np
