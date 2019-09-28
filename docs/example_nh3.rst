@@ -30,9 +30,9 @@ Radio Fitting: NH\ :sub:`3` example
     The 2-2 transition is used to guess the central velocity and width via gaussian fitting because its hyperfine lines are weaker
 
 .. figure:: images/nh3_multiline_fit.png
-    :alt: Then all 4 lines are simultaneously fit.  Even upper limits on the 4-4 line can provide helpful contraints on the model
+    :alt: Then all 4 lines are simultaneously fit.  Even upper limits on the 4-4 line can provide helpful constraints on the model
     :figwidth: 800
     :width: 800
 
-    Then all 4 lines are simultaneously fit.  Even upper limits on the 4-4 line can provide helpful contraints on the model
+    Then all 4 lines are simultaneously fit.  Even upper limits on the 4-4 line can provide helpful constraints on the model
 

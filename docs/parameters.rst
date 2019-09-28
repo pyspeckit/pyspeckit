@@ -23,7 +23,7 @@ the `limits` and `limited` parameters.
         limited=[(F,T), (F,F), (T,F), (T,F),  (F,F), (T,F)])
 
 In this example, there are two gaussian components being fitted because a
-Gaussian takes 3 parameters, an amplitude, a center, anda  width, and there are
+Gaussian takes 3 parameters, an amplitude, a center, and a width, and there are
 6 parameters in the input guesses.
 
 The first line is forced to be an absorption line: its limits are `(0,0)` but

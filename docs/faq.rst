@@ -32,6 +32,6 @@ especially
 For details on the accepted FITS ``CTYPE`` keywords, see `FITS Paper III`_.
 In particular, their
 `table 1 <http://www.aanda.org/articles/aa/full/2006/05/aa3818-05/aa3818-05.html>`_
-speciefies all valid spectral coordinate type codes.
+specifies all valid spectral coordinate type codes.
 
 .. _FITS Paper III: http://adsabs.harvard.edu/abs/2006A%26A...446..747G

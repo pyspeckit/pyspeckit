@@ -88,7 +88,7 @@ This is where you start the line-fitter:
         :width: 800
 
 .. figure:: images/interactive_example_hr2421_secondclick_highlight.png
-	:alt: Results of the second click (highight the fit region)
+	:alt: Results of the second click (highlight the fit region)
         :figwidth: 800
         :width: 800
 
