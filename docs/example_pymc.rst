@@ -4,8 +4,8 @@
 Monte Carlo examples
 ~~~~~~~~~~~~~~~~~~~~
 There are (at least) two packages implementing Monte Carlo sampling available
-in python: `pymc <http://code.google.com/p/pymc/>`_ and `emcee
-<http://danfm.ca/emcee/>`_.  `pyspeckit` includes interfaces to both.  With
+in python: `pymc <https://github.com/pymc-devs/pymc>`_ and `emcee
+<https://emcee.readthedocs.io/en/stable/>`_.  `pyspeckit` includes interfaces to both.  With
 the pymc interface, it is possible to define priors that strictly limit the
 parameter space.  So far that is not possible with emcee.
 

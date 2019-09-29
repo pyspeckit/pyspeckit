@@ -12,7 +12,7 @@ module is probably the best way to access CLASS data.
 The `CLASS file specification
 <http://iram.fr/IRAMFR/GILDAS/doc/html/class-html/node56.html>`_ is incomplete,
 so much of the data reading is hacked together.  The code style is based off of
-Tom Robitaille's `idlsave <http://idlsave.sourceforge.net/>`_ package.
+Tom Robitaille's `idlsave <http://astrofrog.github.io/idlsave/>`_ package.
 
 An example usage.  Note that ``telescope`` and ``line`` are NOT optional keyword arguments,
 they are just specified as such for clarity ::

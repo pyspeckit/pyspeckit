@@ -18,7 +18,7 @@ PySpecKit requires at least the basic scientific packages:
 * `mpfit is included <https://github.com/segasai/astrolibpy/tree/master/mpfit>`_
 * `scipy <https://www.scipy.org/>`_ is optional. It is  only required for RADEX
   grid interpolation and certain types of optimization
-* python2.7 or `ordereddict <http://pypi.python.org/pypi/ordereddict>`_ for model parameter storage
+* python2.7 or `ordereddict <https://pypi.org/project/ordereddict>`_ for model parameter storage
 
 You'll most likely want at least one of the following packages
 to enable `file reading <readers>`_
@@ -27,7 +27,7 @@ to enable `file reading <readers>`_
 * `atpy <http://atpy.github.com/>`_ (which depends on `asciitable <http://cxc.harvard.edu/contrib/asciitable/>`_ [`github link <https://github.com/taldcroft/asciitable>`_] )
 * `hdf5 <https://www.pytables.org/>`_
 
-If you have pip (see http://pypi.python.org/pypi/pyspeckit), you can install with::
+If you have pip (see https://pypi.org/project/pyspeckit), you can install with::
 
     pip install pyspeckit
 
