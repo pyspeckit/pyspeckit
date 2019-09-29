@@ -166,7 +166,7 @@ Release 0.1.15 (2014-11-09)
               http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.flags.html
     * Baseline: add a `fit` method that is independent from `button2action` to
       make masking and fitting independent processes
-    * Added `astropy <http://astropy.org>`_ as a dependency
+    * Added `astropy <https://www.astropy.org>`_ as a dependency
     * Converted to astropy-helper template for setup
     * Changed 'units' -> 'unit' in Spectrum
     * Baseline: add spline fitting

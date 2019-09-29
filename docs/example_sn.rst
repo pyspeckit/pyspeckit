@@ -22,7 +22,7 @@ Complicated H-alpha Line Fitting
 
     # the baseline (continuum) fit will be 2nd order, and excludes "bad"
     # parts of the spectrum
-    # The exclusion zone was selected interatively
+    # The exclusion zone was selected interactively
     # (i.e., cursor hovering over the spectrum)
     sp.baseline(xmin=6100, xmax=7000,
             exclude=[6450,6746,6815,6884,7003,7126,7506,7674,8142,8231],
