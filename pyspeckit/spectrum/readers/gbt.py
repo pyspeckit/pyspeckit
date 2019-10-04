@@ -9,6 +9,7 @@ supported, frequency switching is not.
 """
 from __future__ import print_function
 from six import iteritems
+from astropy import units as u
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -73,6 +74,10 @@ def list_targets(sdfitsfile, doprint=True):
 def read_gbt_scan(sdfitsfile, obsnumber=0):
     """
     Read a single scan from a GBTIDL SDFITS file
+    
+    obsnumber: 0 up to count_integrations()
+    
+    Returns a Spectrum
     """
 
     bintable = _get_bintable(sdfitsfile)
@@ -98,9 +103,17 @@ def read_gbt_scan(sdfitsfile, obsnumber=0):
     # Convert xarr to LSR units
     #sp.xarr.convert_to_unit('m/s')
     obsfreq = header['OBSFREQ']
-    centerfreq = pyspeckit.spectrum.units.SpectroscopicAxis(np.float(obsfreq),'Hz',refX=obsfreq,refX_unit='Hz')
-    delta_freq = (centerfreq.as_unit('m/s') + header['VFRAME']).as_unit(centerfreq.units) - centerfreq
-    sp.xarr -= delta_freq
+    
+    # some creative abuse how a S.A. stores and converts units, just in order to convert VFRAME in m/s to a delta_freq in Hz
+    c1 = pyspeckit.spectrum.units.SpectroscopicAxis(obsfreq,'Hz',velocity_convention='radio',
+                                                    refX=obsfreq, refX_unit=sp.xarr.unit)
+    v1 = (c1.as_unit('m/s') + u.Quantity(header['VFRAME'],'m/s')).value
+    c2 = pyspeckit.spectrum.units.SpectroscopicAxis(v1,'m/s',    velocity_convention='radio',
+                                                    refX=obsfreq, refX_unit=sp.xarr.unit)
+    delta_freq = c2.as_unit("Hz") - c1
+    #print("VFRAME=%g km/s gives delta_freq=%s at obsfreq=%g GHz" % (header['VFRAME']/1000.0,delta_freq,obsfreq/1e9))
+    #sp.xarr -= delta_freq    
+    sp.xarr = sp.xarr - delta_freq
 
     return sp
 
@@ -114,7 +127,7 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
     whobject = bintable.data['OBJECT'] == objectname
     if verbose:
         print("Number of individual scans for Object %s: %i" % (objectname,whobject.sum()))
-
+        
     calON = bintable.data['CAL'] == 'T'
     # HACK: apparently bintable.data can sometimes treat itself as scalar...
     if np.isscalar(calON):
@@ -129,7 +142,8 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
         for nod in nods:
             whnod = bintable.data['PROCSEQN'] == nod
             for onoff in ('ON','OFF'):
-                calOK = (calON - (onoff=='OFF'))
+                # calOK = (calON - (onoff=='OFF'))
+                calOK = np.bitwise_xor(calON, onoff=='OFF')
                 whOK = (whobject*whsampler*calOK*whnod)
                 if whOK.sum() == 0:
                     continue
@@ -180,18 +194,18 @@ def reduce_nod(blocks, verbose=False, average=True, fdid=(1,2)):
 
     # for each pair...
     for sampname in nodpairs:
-        on1 = sampname+"ON1"
+        on1  = sampname+"ON1"
         off1 = sampname+"OFF1"
-        on2 = sampname+"ON2"
+        on2  = sampname+"ON2"
         off2 = sampname+"OFF2"
 
         feednumber = blocks[on1].header.get('FEED')
         # don't need this - if feednumber is 1, ref feed should be 2, and vice-versa
         reference_feednumber = blocks[on1].header.get('SRFEED')
         
-        on1avg = blocks[on1].average()
+        on1avg  = blocks[on1].average()
         off1avg = blocks[off1].average()
-        on2avg = blocks[on2].average()
+        on2avg  = blocks[on2].average()
         off2avg = blocks[off2].average()
 
         # first find TSYS
@@ -232,14 +246,14 @@ def reduce_totalpower(blocks, verbose=False, average=True, fdid=1):
 
     # for each pair...
     for sampname in ids:
-        on1 = sampname+"ON1"
+        on1  = sampname+"ON1"
         off1 = sampname+"OFF1"
 
         feednumber = blocks[on1].header.get('FEED')
         # don't need this - if feednumber is 1, ref feed should be 2, and vice-versa
         reference_feednumber = blocks[on1].header.get('SRFEED')
         
-        on1avg = blocks[on1].average()
+        on1avg  = blocks[on1].average()
         off1avg = blocks[off1].average()
 
         # first find TSYS
@@ -275,7 +289,7 @@ def _get_bintable(sdfitsfile):
 
 def dcmeantsys(calon,caloff,tcal,debug=False):
     """
-    from GBTIDL's dcmeantsys.py
+    from GBTIDL's dcmeantsys.pro
     ;  mean_tsys = tcal * mean(nocal) / (mean(withcal-nocal)) + tcal/2.0
     """
 
@@ -284,9 +298,9 @@ def dcmeantsys(calon,caloff,tcal,debug=False):
     pct10 = nchans/10
     pct90 = nchans - pct10
 
-    meanoff = np.mean(caloff.slice(pct10,pct90,units='pixels').data)
+    meanoff  = np.mean(caloff.slice(pct10,pct90,units='pixels').data)
     meandiff = np.mean(calon.slice(pct10,pct90,units='pixels').data - 
-                        caloff.slice(pct10,pct90,units='pixels').data)
+                       caloff.slice(pct10,pct90,units='pixels').data)
 
     meanTsys = ( meanoff / meandiff * tcal + tcal/2.0 )
     if debug:
@@ -326,7 +340,7 @@ def sigref(nod1, nod2, tsys_nod2):
     """
     Signal-Reference ('nod') calibration
     ; ((dcsig-dcref)/dcref) * dcref.tsys 
-    see GBTIDL's dosigref
+    see GBTIDL's dosigref.pro
     """
 
     return (nod1-nod2)/nod2*tsys_nod2
