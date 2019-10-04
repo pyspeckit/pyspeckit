@@ -6,6 +6,20 @@ GBTIDL SDFITS files representing GBT observing sessions can be read into
 pyspeckit.  Additional documentation is needed.  Nodding reduction is
 supported, frequency switching is not.
 
+@todo  There is also position switching, in addition to nodding. GBTIDL differentiates
+       between them
+
+@todo  Would be good to explain obsnumber, scan, target (=source name, or the FITS OBJECT)
+
+@todo  I've encountered some SDFITS files that crash on not having TRGTLONG/TRGTLAT.
+       The GBTIDL Users' Guide uses 3 examples: ngc5291.fits, W3OH.fits, and IC1481.fits
+       All of these eventually report a missing FREQRES, but just printing the session
+       will report that missing TRGTLONG/TRGTLAT.
+       Parkes_GASS.fits reports a missing OBSERVER (it's in the primary keywords), not in bintable
+       TREG_091209.cal.acs.fits is ok.
+       These two from the SDFITS nasa website https://fits.gsfc.nasa.gov/registry/sdfits.html
+       3C286.fits (from test_3c286.py) is ok - correlate() not working yet
+       AGBT11B_029_01.raw.acs.fits (from jd_test.py) is missing
 """
 from __future__ import print_function
 from six import iteritems
@@ -27,7 +41,7 @@ def unique_targets(sdfitsfile):
 
 def count_integrations(sdfitsfile, target):
     """
-    Return the number of integrations for a given target
+    Return the number of integrations for a given target (the object name)
     (uses one sampler; assumes same number for all samplers)
     """
     bintable = _get_bintable(sdfitsfile)
@@ -142,7 +156,6 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
         for nod in nods:
             whnod = bintable.data['PROCSEQN'] == nod
             for onoff in ('ON','OFF'):
-                # calOK = (calON - (onoff=='OFF'))
                 calOK = np.bitwise_xor(calON, onoff=='OFF')
                 whOK = (whobject*whsampler*calOK*whnod)
                 if whOK.sum() == 0:
