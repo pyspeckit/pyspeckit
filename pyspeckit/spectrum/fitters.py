@@ -1372,7 +1372,7 @@ class Specfit(interactive.Interactive):
             except TypeError as ex:
                 print("Error {0} was raised, which may indicate an outdated mpl version".format(ex))
             try:
-                self.fitleg.draggable(True)
+                self.fitleg.set_draggable(True)
             except AttributeError:
                 # wrong version and/or non-interactive backend
                 pass
