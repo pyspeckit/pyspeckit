@@ -9,7 +9,7 @@ from numpy.ma import median
 from numpy import pi
 from ...mpfit import mpfit
 from . import fitter
-from astropy.extern.six.moves import xrange
+from six.moves import xrange
 
 class LorentzianFitter(fitter.SimpleFitter):
 

@@ -16,7 +16,7 @@ different wavelengths/frequencies
 """
 from __future__ import print_function
 import numpy as np
-from astropy.extern.six import iteritems
+from six import iteritems
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -865,7 +865,7 @@ class SingleSpectrum(BaseSpectrum):
         >>> spectrum = specutils.io.fits.read_fits_spectrum1d('gbt_1d.fits')
         >>> sp = pyspeckit.Spectrum.from_spectrum1d(spectrum)
         """
-        xarr = units.SpectroscopicAxis(spec1d.dispersion)
+        xarr = units.SpectroscopicAxis(spec1d.spectral_axis)
 
         data = spec1d.flux
         error = spec1d.uncertainty

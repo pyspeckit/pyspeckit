@@ -5,7 +5,7 @@ Model parameters are very flexible, and can be accessed and modified in many
 parallel ways.
 
 The `parinfo` class is built on top of `lmfit-py's parameters
-<https://github.com/newville/lmfit-py/blob/master/doc/parameters.rst>`_ for compatibility
+<https://github.com/lmfit/lmfit-py/blob/master/doc/parameters.rst>`_ for compatibility
 with lmfit-py, but it builds on that.  The code for the parameter overloading is in
 `parinfo.py <https://bitbucket.org/pyspeckit/pyspeckit.bitbucket.org/src/tip/pyspeckit/spectrum/parinfo.py>`_.
 
@@ -23,7 +23,7 @@ the `limits` and `limited` parameters.
         limited=[(F,T), (F,F), (T,F), (T,F),  (F,F), (T,F)])
 
 In this example, there are two gaussian components being fitted because a
-Gaussian takes 3 parameters, an amplitude, a center, anda  width, and there are
+Gaussian takes 3 parameters, an amplitude, a center, and a width, and there are
 6 parameters in the input guesses.
 
 The first line is forced to be an absorption line: its limits are `(0,0)` but
@@ -37,7 +37,7 @@ Both lines have their *widths* forced to be positive, which is true by default:
 there is no meaning to a negative width, since the width enters into the
 equation for a gaussian as :math:`\sigma^2`.
 
-Note that the need to limit parameters is the main reason for the existence of `lmfit-py <https://github.com/newville/lmfit-py>`_
+Note that the need to limit parameters is the main reason for the existence of `lmfit-py <https://github.com/lmfit/lmfit-py>`_
 and `mpfit <https://github.com/segasai/astrolibpy/blob/4993aa4e7c1001efe7c00048ec2b9d5ccac83ff7/mpfit/mpfit.py>`_. 
 
 Tying Parameters
@@ -53,7 +53,7 @@ use `tied`:
         tied=['','','','','p[1]',''])
 
 If you use `lmfit-py` by specifying `use_lmfit=True`, you can use the more advanced `mathematical constraints
-<http://newville.github.com/lmfit-py/constraints.html>`_ permitted by lmfit-py.
+<http://lmfit.github.com/lmfit-py/constraints.html>`_ permitted by lmfit-py.
 
 :doc:`example_sdss` shows a more complete example using `tied`.
 

@@ -4,7 +4,7 @@ Ammonia inversion transition TROT fitter
 ========================================
 
 Ammonia inversion transition TROT fitter translated from Erik Rosolowsky's
-http://svn.ok.ubc.ca/svn/signals/nh3fit/
+https://github.com/low-sky/nh3fit
 
 .. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
 
@@ -22,7 +22,7 @@ from . import model
 import matplotlib.cbook as mpcb
 import copy
 from astropy import log
-from astropy.extern.six import iteritems
+from six import iteritems
 from . import mpfit_messages
 import operator
 import string
@@ -36,10 +36,17 @@ TCMB = 2.7315 # K
 def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
             tau=None, fillingfraction=None, return_tau=False,
             return_tau_profile=False, background_tb=TCMB, verbose=False,
-            return_components=False, debug=False, line_names=line_names):
+            return_components=False, debug=False, line_names=line_names,
+            ignore_neg_models=False):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
-    gaussian parameters
+    gaussian parameters.  The returned model will be in Kelvin (brightness
+    temperature) units.
+
+    Note that astropy units are not used internally for performance reasons.  A
+    wrapped version of this module including those units would be a good idea,
+    as it is definitely possible to implement this with unit support and good
+    performance.
 
     Parameters
     ----------
@@ -82,6 +89,13 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
         just one array
     background_tb : float
         The background brightness temperature.  Defaults to TCMB.
+    ignore_neg_models: bool
+        Normally if background=TCMB and the model is negative, an exception
+        will be raised.  This parameter will simply skip that exception.  Use
+        with extreme caution: negative models (absorption spectra against the
+        CMB) are not physical!  You may want to allow this in some cases
+        because there can be numerical issues where the model goes negative
+        when it shouldn't.
     verbose: bool
         More messages
     debug: bool
@@ -117,6 +131,10 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
                       "This is unphysical and "
                       "suggests that you may need to constrain tex.  See "
                       "ammonia_model_restricted_tex.")
+    if width < 0:
+        return np.zeros(xarr.size)*np.nan
+    elif width == 0:
+        return np.zeros(xarr.size)
 
     from .ammonia_constants import line_name_indices, line_names as original_line_names
 
@@ -163,6 +181,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
 
         # for a complete discussion of these equations, please see
         # https://github.com/keflavich/pyspeckit/blob/ammonia_equations/examples/AmmoniaLevelPopulation.ipynb
+        # https://github.com/pyspeckit/pyspeckit/blob/master/examples/AmmoniaLevelPopulation.ipynb
         # and
         # http://low-sky.github.io/ammoniacolumn/
         # and
@@ -216,7 +235,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
                                        return_tau_profile=return_tau_profile
                                       )
 
-    if not return_tau_profile and model_spectrum.min() < 0 and background_tb == TCMB:
+    if not return_tau_profile and model_spectrum.min() < 0 and background_tb == TCMB and not ignore_neg_models:
         raise ValueError("Model dropped below zero.  That is not possible "
                          " normally.  Here are the input values: "+
                          ("tex: {0} ".format(tex)) +
@@ -296,7 +315,15 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
                       return_components=False, return_tau_profile=False):
     """
     Helper function: given a dictionary of ammonia optical depths,
-    an excitation tmeperature... etc, produce the spectrum
+    an excitation tmeperature etc, produce the spectrum.
+
+    The default return units are brightness temperature in Kelvin.  If
+    ``return_tau_profile`` is specified, the returned "spectrum" will be
+    a spectrum of optical depths, not an intensity spectrum.
+
+    If ``return_components`` is specified, a list of spectra will be returned,
+    where each spectrum represents one of the hyperfine components of the
+    particular ammonia line being modeled.
     """
     from .ammonia_constants import (ckms, h, kb)
 
@@ -1084,9 +1111,17 @@ class cold_ammonia_model(ammonia_model):
                                        required_limits=required_limits)
 
 class ammonia_model_restricted_tex(ammonia_model):
+    """
+    Ammonia model with an explicitly restricted excitation temperature
+    such that tex <= trot, set by the "delta" parameter (tex = trot - delta)
+    with delta > 0.  You can choose the ammonia funciton when you initialize
+    it (e.g., ``ammonia_model_restricted_tex(ammonia_func=ammonia)`` or
+    ``ammonia_model_restricted_tex(ammonia_func=cold_ammonia)``)
+    """
     def __init__(self,
                  parnames=['trot', 'tex', 'ntot', 'width', 'xoff_v', 'fortho',
                            'delta'],
+                 ammonia_func=ammonia,
                  **kwargs):
         super(ammonia_model_restricted_tex, self).__init__(npars=7,
                                                            parnames=parnames,
@@ -1099,7 +1134,7 @@ class ammonia_model_restricted_tex(ammonia_model):
             delta = kwargs.pop('delta') if 'delta' in kwargs else None
             np.testing.assert_allclose(kwargs['trot'] - kwargs['tex'],
                                        delta)
-            return ammonia(*args, **kwargs)
+            return ammonia_func(*args, **kwargs)
         self.modelfunc = ammonia_dtex
 
     def n_ammonia(self, pars=None, parnames=None, **kwargs):
@@ -1157,7 +1192,7 @@ class ammonia_model_restricted_tex(ammonia_model):
                      ):
         """
         parnames=['trot', 'tex', 'ntot', 'width', 'xoff_v', 'fortho', 'delta']
-        
+
         'delta' is the difference between tex and trot
         """
         supes = super(ammonia_model_restricted_tex, self)

@@ -13,7 +13,7 @@ from __future__ import print_function
 import numpy as np
 from . import hyperfine
 from . import fitter,model#,modelgrid
-from astropy.extern.six.moves import xrange
+from six.moves import xrange
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:

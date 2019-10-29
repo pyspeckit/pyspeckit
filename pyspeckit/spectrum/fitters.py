@@ -7,8 +7,8 @@ import warnings
 
 from astropy import log
 from astropy import units as u
-from astropy.extern.six.moves import xrange
-from astropy.extern.six import string_types
+from six.moves import xrange
+from six import string_types
 
 from ..config import mycfg
 from ..config import ConfigDescriptor as cfgdec

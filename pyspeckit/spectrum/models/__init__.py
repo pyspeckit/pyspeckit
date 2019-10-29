@@ -1,4 +1,4 @@
-from astropy.extern.six.moves import xrange
+from six.moves import xrange
 
 mpfit_messages={
 -16:"""A parameter or function value has become infinite or an undefined

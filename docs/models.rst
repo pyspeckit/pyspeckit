@@ -30,12 +30,14 @@ Here are some examples of how to make your own fitters::
 Then you can `register <registration.html>`_ these fitters.
 
 Fitting
-=======
+-------
 
 Once you have a model defined, you can fit it using the
 `pyspeckit.Spectrum.specfit` module.  Documents on fitting have not been
 prepared yet, but you can learn most of the tricks by looking at the various
 fitting examples and the :doc:`parameters` documentation.
+
+See also :doc:`fitting`.
 
 
 .. TODO::

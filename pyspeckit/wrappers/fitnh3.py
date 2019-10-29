@@ -20,11 +20,23 @@ Example use:
     spf = pyspeckit.wrappers.fitnh3.fitnh3tkin(input_dict)
 
 
+Note that if you want to use the plotter wrapper with cubes, you need to do
+something like the following, where the ``plot_special`` method of the stacked
+``cubes`` object is set to the ``plotter_override`` function defined in the
+fitnh3_wrapper code:
+
+.. code:: python
+
+    cubes.plot_special = pyspeckit.wrappers.fitnh3.plotter_override
+    cubes.plot_special_kwargs = {'fignum':3, 'vrange':[55,135]}
+    cubes.plot_spectrum(160,99)
+
+
 """
 from __future__ import print_function
 import warnings
-from astropy.extern.six.moves import xrange
-from astropy.extern.six import iteritems
+from six.moves import xrange
+from six import iteritems
 import pyspeckit
 from .. import spectrum
 from ..spectrum.classes import Spectrum, Spectra
@@ -51,6 +63,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
                fortho=0.66, tau=None, thin=False, quiet=False, doplot=True,
                fignum=1, guessfignum=2, smooth=False, scale_keyword=None,
                rebase=False, tkin=None, npeaks=1, guesses=None,
+               fittype='ammonia',
                guess_error=True, plotter_wrapper_kwargs={}, **kwargs):
     """
     Given a dictionary of filenames and lines, fit them together
@@ -78,6 +91,9 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
         Use the guess line to estimate the error in all spectra?
     plotter_wrapper_kwargs : dict
         Keyword arguments to pass to the plotter
+    fittype: 'ammonia' or 'cold_ammonia'
+        The fitter model to use.  This is overridden if `tau` is specified,
+        in which case one of the `ammonia_tau` models is used (see source code)
     """
     if tkin is not None:
         if trot == 20 or trot is None:
@@ -154,7 +170,7 @@ def fitnh3tkin(input_dict, dobaseline=True, baselinekwargs={}, crop=False,
                         fortho)]
         if thin:
             raise ValueError("'thin' keyword not supported for the generic ammonia model")
-        spectra.specfit(fittype='ammonia', quiet=quiet, guesses=guesses,
+        spectra.specfit(fittype=fittype, quiet=quiet, guesses=guesses,
                         **kwargs)
 
     if doplot:
@@ -259,7 +275,9 @@ def make_axdict(splist, spdict):
 
 
 def fitnh3(spectrum, vrange=[-100, 100], vrangeunit='km/s', quiet=False, Tex=20,
-           trot=15, column=1e15, fortho=1.0, tau=None, Tkin=None, spec_convert_kwargs={}):
+           trot=15, column=1e15, fortho=1.0, tau=None, Tkin=None,
+           fittype='ammonia',
+           spec_convert_kwargs={}):
 
     if Tkin is not None:
         if trot == 20 or trot is None:
@@ -276,7 +294,7 @@ def fitnh3(spectrum, vrange=[-100, 100], vrangeunit='km/s', quiet=False, Tex=20,
     ampguess, vguess, widthguess = spectrum.specfit.modelpars
 
     if tau is None:
-        spectrum.specfit(fittype='ammonia', quiet=quiet,
+        spectrum.specfit(fittype=fittype, quiet=quiet,
                          guesses=[Tex, trot, column, widthguess, vguess,
                                   fortho])
     else:
@@ -303,7 +321,8 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
         else:
             freq_test_low = freq_test_high = freq
 
-        log.debug("freq test low, high: {0}, {1}".format(freq_test_low, freq_test_high))
+        log.debug("line {2}: freq test low, high: {0}, {1}"
+                  .format(freq_test_low, freq_test_high, linename))
         if (sp.xarr.as_unit('Hz').in_range(freq_test_low) or
                 sp.xarr.as_unit('Hz').in_range(freq_test_high)):
             spdict[linename] = sp.copy(deep=True)
@@ -327,11 +346,25 @@ def BigSpectrum_to_NH3dict(sp, vrange=None):
                     log.debug("Successfully cropped {0} to {1}, freq = {2}, {3}"
                               .format(linename, vrange, freq,
                                       spdict[linename].xarr))
+                    if len(spdict[linename]) == 0:
+                        spdict.pop(linename)
+                        log.debug("Removed {0} from spdict".format(linename))
                 except IndexError:
                     # if the freq in range, but there's no data in range, remove
                     spdict.pop(linename)
+        else:
+            log.debug("Line {0} not in spectrum".format(linename))
 
-    log.debug(str(spdict))
+    # this shouldn't be reachable, but there are reported cases where spdict
+    # gets populated w/empty spectra, which leads to a failure in producing
+    # their repr.  Since that on its own isn't a very helpful error message,
+    # we'd rather return the bad spdict and see if the next function down the
+    # line can survive with a questionable spdict...
+    try:
+        log.debug(str(spdict))
+    except Exception as ex:
+        log.debug(str(ex))
+
     return spdict
 
 def plotter_override(sp, vrange=None, **kwargs):

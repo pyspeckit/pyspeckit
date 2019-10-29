@@ -21,7 +21,7 @@ import matplotlib.figure
 import numpy as np
 import copy
 import itertools
-from astropy.extern import six
+import six
 try:
     import astropy.wcs as pywcs
     import astropy.io.fits as pyfits

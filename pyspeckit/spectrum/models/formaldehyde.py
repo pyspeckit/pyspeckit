@@ -19,7 +19,7 @@ import matplotlib.cbook as mpcb
 import copy
 from . import hyperfine
 from ...specwarnings import warn
-from astropy.extern.six.moves import xrange
+from six.moves import xrange
 try: # for model grid reading
     import astropy.io.fits as pyfits
 except ImportError:

@@ -10,7 +10,7 @@ from .. import spectrum
 from ..spectrum import units
 import copy
 from astropy import units as u
-from astropy.extern.six import iteritems
+from six import iteritems
 
 title_dict = {'oneone':'H$_2$CO 1$_{11}$-1$_{10}$',
               'twotwo':'H$_2$CO 2$_{12}$-2$_{11}$',

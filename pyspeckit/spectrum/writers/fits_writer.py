@@ -1,5 +1,5 @@
 from __future__ import print_function
-from astropy.extern.six import iteritems
+from six import iteritems
 import astropy
 import numpy as np
 from . import Writer

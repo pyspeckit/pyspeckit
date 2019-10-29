@@ -30,16 +30,11 @@ import os
 import sys
 
 try:
-    import astropy_helpers
+    from sphinx_astropy.conf.v1 import *  # noqa
 except ImportError:
-    # Building from inside the docs/ directory?
-    if os.path.basename(os.getcwd()) == 'docs':
-        a_h_path = os.path.abspath(os.path.join('..', 'astropy_helpers'))
-        if os.path.isdir(a_h_path):
-            sys.path.insert(1, a_h_path)
-
-# Load all of the global Astropy configuration
-from astropy_helpers.sphinx.conf import *
+    print('ERROR: the documentation requires the sphinx-astropy package to be'
+          ' installed')
+    sys.exit(1)
 
 # Get configuration information from setup.cfg
 try:
@@ -59,7 +54,7 @@ setup_cfg = dict(conf.items('metadata'))
 try:
     import numpy
 except ImportError:
-    print "Failed to import numpy"
+    print("Failed to import numpy")
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -72,7 +67,7 @@ sys.path.insert(0, rootpath)
 sys.path.insert(0, rootpath+"/docs/sphinxext/")
 sys.path.append(os.path.abspath('sphinxext'))
 sys.path.append(os.path.abspath('.'))
-print "rootpath: ",rootpath
+print("rootpath: ",rootpath)
 
 # -- General configuration -----------------------------------------------------
 
@@ -100,8 +95,8 @@ html_sidebars = {'**':['globaltoc.html', 'localtoc.html', 'relations.html',
                       'sourcelink.html', 'searchbox.html']}
 
 # General information about the project.
-project = u'pyspeckit'
-copyright = u'2011, Adam Ginsburg and coauthors'
+project = 'pyspeckit'
+copyright = '2011, Adam Ginsburg and coauthors'
 # This does not *have* to match the package name, but typically does
 project = setup_cfg['package_name']
 author = setup_cfg['author']
@@ -299,10 +294,10 @@ htmlhelp_basename = project + 'doc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'pyspeckit.tex', u'pyspeckit Documentation',
-   u'Adam Ginsburg and coauthors', 'manual'),
+  ('index', 'pyspeckit.tex', 'pyspeckit Documentation',
+   'Adam Ginsburg and coauthors', 'manual'),
 ]
-latex_documents = [('index', project + '.tex', project + u' Documentation',
+latex_documents = [('index', project + '.tex', project + ' Documentation',
                     author, 'manual')]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -335,7 +330,7 @@ autoclass_content = 'both'
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [('index', project.lower(), project + u' Documentation',
+man_pages = [('index', project.lower(), project + ' Documentation',
               [author], 1)]
 
 

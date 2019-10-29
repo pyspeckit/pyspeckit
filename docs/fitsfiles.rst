@@ -1,5 +1,5 @@
 FITS
--------------------------------------
+----
 
 A minimal header should look like this::
 
