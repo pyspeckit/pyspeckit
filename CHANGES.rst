@@ -1,9 +1,12 @@
 CHANGES
 *******
-
-Version 0.1.22 (unreleased)
+Version 0.1.23 (unreleased)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    * none yet
+    * none
+
+Version 0.1.22 (Feb 4, 2019)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    * Virtually nothing, just compatibility stuff
 
 Version 0.1.21 (November 4, 2018)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
