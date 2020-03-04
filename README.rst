@@ -1,13 +1,8 @@
 PySpecKit Spectroscopic Toolkit
 -------------------------------
 
-.. image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/pyspeckit/pyspeckit
-   :target: https://gitter.im/pyspeckit/pyspeckit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-
-* Documentation: `<http://pyspeckit.readthedocs.org/en/latest/>`_ and/or `<http://pyspeckit.readthedocs.io/en/latest/>`_
-* Homepage: `<http://pyspeckit.bitbucket.org>`_
-* Source pages: `<https://github.com/pyspeckit/pyspeckit>`_ and `<https://bitbucket.org/pyspeckit/pyspeckit>`_
+* Documentation: `https://pyspeckit.readthedocs.io/en/latest/`_
+* Source pages: `<https://github.com/pyspeckit/pyspeckit>`_
 
 This is a code framework designed to allow for analysis of spectroscopic data
 from a wide variety of astronomical instruments.  It is motivated by the lack
@@ -32,20 +27,20 @@ and different methods of fit plotting.
 
 We're also looking for more users to give us more use cases!  Contact us
 at pyspeckit@gmail.com or post `issues
-<https://bitbucket.org/pyspeckit/pyspeckit/issues>`_
+<https://github.com/pyspeckit/pyspeckit/issues>`_
 
 
 Requirements:
 `astropy <http://www.astropy.org>`_
-`matplotlib <http://matplotlib.sourceforge.net/>`_
-`numpy <http://numpy.scipy.org/>`_
+`matplotlib <http://matplotlib.org/>`_
+`numpy <http://numpy.org/>`_
 
 Optional:
 `atpy <http://atpy.readthedocs.org/>`_
 `scipy <http://www.scipy.org/>`_
 `lmfit <https://github.com/lmfit/lmfit-py>`_
-`lineid_plot <http://packages.python.org/lineid_plot/>`_
-`spectral-cube <http://spectral-cube.readthedocs.org/>`_
+`lineid_plot <https://pythonhosted.org/lineid_plot/>`_
+`spectral-cube <http://spectral-cube.readthedocs.io/>`_
 
 Authors:
 `Adam Ginsburg <adam.g.ginsburg@gmail.com>`_
