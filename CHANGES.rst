@@ -1,8 +1,8 @@
 CHANGES
 *******
-Version 0.1.23 (unreleased)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    * none
+Version 0.1.23 (March 3, 2020)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    * Very minor fix - just change pyspeckit.__doc__
 
 Version 0.1.22 (Feb 4, 2019)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
