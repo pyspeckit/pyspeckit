@@ -563,7 +563,7 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
         raise ValueError("Invalid column/density")
 
     if scipyOK:
-        slices = [temperature_gridnumber] + [slice(np.floor(gv),np.floor(gv)+2) for gv in (gridval2,gridval1)]
+        slices = [temperature_gridnumber] + [slice(int(np.floor(gv)),int(np.floor(gv))+2) for gv in (gridval2,gridval1)]
         tau = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval2%1],[gridval1%1]]),order=1) for tg in taugrid]
         tex = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval2%1],[gridval1%1]]),order=1) for tg in texgrid]
     else:

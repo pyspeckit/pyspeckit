@@ -13,6 +13,7 @@ http://adsabs.harvard.edu/abs/2004A%26A...413.1177D
 L. Pagani, F. Daniel, and M. L. Dubernet A\%A 494, 719-727 (2009)
 DOI: 10.1051/0004-6361:200810570
 
+In this version added N2H+(1-0). Data taken from the articles above.
 
 Module API
 ^^^^^^^^^^
@@ -24,12 +25,28 @@ import astropy.units as u
 # line_names = ['J2-1', 'J3-2',]
 
 freq_dict_cen ={
-                # 'J1-0':  77109.2697e6,
+                'J1-0':  77109.6162e6,
                 'J2-1': 154217.1805e6,
                 'J3-2': 231321.9119e6,
                }
 
 voff_lines_dict={
+    ####### J 1-0
+    'J1-0_01': -9.6730,
+    'J1-0_02': -9.6730,
+    'J1-0_03': -9.6730,
+    'J1-0_04': -0.7537,
+    'J1-0_05': -0.7537,
+    'J1-0_06': -0.7537,
+    'J1-0_07': 0.0000,
+    'J1-0_08': 1.1314,
+    'J1-0_09': 1.1314,
+    'J1-0_10': 6.6519,
+    'J1-0_11': 6.6519,
+    'J1-0_12': 6.6519,
+    'J1-0_13': 7.1766,
+    'J1-0_14': 7.1766,
+    'J1-0_15': 8.3080,
     ####### J 2-1
     'J2-1_01': -5.6031,
     'J2-1_02': -5.5332,
@@ -119,6 +136,22 @@ voff_lines_dict={
     }
 
 line_strength_dict = {
+    ####### J 1-0
+    'J1-0_01': 0.026018,
+    'J1-0_02': 0.065408,
+    'J1-0_03': 0.019683,
+    'J1-0_04': 0.004390,
+    'J1-0_05': 0.035006,
+    'J1-0_06': 0.071714,
+    'J1-0_07': 0.259259,
+    'J1-0_08': 0.156212,
+    'J1-0_09': 0.028973,
+    'J1-0_10': 0.041311,
+    'J1-0_11': 0.013379,
+    'J1-0_12': 0.056422,
+    'J1-0_13': 0.156214,
+    'J1-0_14': 0.028973,
+    'J1-0_15': 0.037038,
     ####### J 2-1
     'J2-1_01': 0.008262,
     'J2-1_02': 0.005907,
@@ -213,11 +246,15 @@ line_strength_dict = {
 # }
 
 # Get frequency dictionary in Hz based on the offset velocity and rest frequency
+conv_J10=u.doppler_radio(freq_dict_cen['J1-0']*u.Hz)
 conv_J21=u.doppler_radio(freq_dict_cen['J2-1']*u.Hz)
 conv_J32=u.doppler_radio(freq_dict_cen['J3-2']*u.Hz)
 freq_dict = {
-    name: ((voff_lines_dict[name]*u.km/u.s).to(u.Hz, equivalencies=conv_J21).value) for name in voff_lines_dict.keys() if "J2-1" in name
+    name: ((voff_lines_dict[name]*u.km/u.s).to(u.Hz, equivalencies=conv_J10).value) for name in voff_lines_dict.keys() if "J1-0" in name
     }
+freq_dict.update({
+    name: ((voff_lines_dict[name]*u.km/u.s).to(u.Hz, equivalencies=conv_J21).value) for name in voff_lines_dict.keys() if "J2-1" in name
+    })
 freq_dict.update({
     name: ((voff_lines_dict[name]*u.km/u.s).to(u.Hz, equivalencies=conv_J32).value) for name in voff_lines_dict.keys() if "J3-2" in name
     })
@@ -227,11 +264,15 @@ freq_dict.update({
 # for a given line; it gives the relative weights between the J=2-1 and J=3-2
 # lines, for example (the hyperfine weights are treated as normalized within
 # one rotational transition)
+w10 = sum(val for name,val in line_strength_dict.items() if 'J1-0' in name)
 w21 = sum(val for name,val in line_strength_dict.items() if 'J2-1' in name)
 w32 = sum(val for name,val in line_strength_dict.items() if 'J3-2' in name)
 relative_strength_total_degeneracy = {
-    name : w21 for name  in line_strength_dict.keys() if "J2-1" in name
+    name : w10 for name  in line_strength_dict.keys() if "J1-0" in name
     }
+relative_strength_total_degeneracy.update ({
+    name : w21 for name  in line_strength_dict.keys() if "J2-1" in name
+    })
 relative_strength_total_degeneracy.update({
     name : w32 for name  in line_strength_dict.keys() if "J3-2" in name
     })

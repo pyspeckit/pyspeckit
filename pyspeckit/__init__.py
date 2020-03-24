@@ -1,6 +1,7 @@
 """
-:Author: Adam Ginsburg <adam.g.ginsburg@gmail.com> and Jordan Mirocha <mirochaj@gmail.com>
-.. moduleauthor:: Adam Ginsburg <adam.g.ginsburg@gmail.com>
+pyspeckit is a package for spectrum plotting, fitting, and analysis
+
+For details, see https://pyspeckit.readthedocs.io/
 """
 from ._astropy_init import *
 
