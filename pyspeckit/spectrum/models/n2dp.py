@@ -13,7 +13,7 @@ http://adsabs.harvard.edu/abs/2004A%26A...413.1177D
 L. Pagani, F. Daniel, and M. L. Dubernet A\%A 494, 719-727 (2009)
 DOI: 10.1051/0004-6361:200810570
 
-In this version added N2H+(1-0). Data taken from the articles above.
+In this version added N2D+(1-0). Data taken from the articles above.
 
 Module API
 ^^^^^^^^^^
