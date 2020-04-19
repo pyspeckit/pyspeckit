@@ -259,7 +259,7 @@ freq_dict = {
     name: ((voff_lines_dict[name]*u.km/u.s).to(u.Hz, equivalencies=conv_J10).value) for name in voff_lines_dict.keys() if "J1-0" in name
     }
 freq_dict.update({
-    name: ((voff_lines_dict[name]*u.km/u.s).to(u.Hz, equivalencies=conv_J32).value) for name in voff_lines_dict.keys() if "J2-1" in name
+    name: ((voff_lines_dict[name]*u.km/u.s).to(u.Hz, equivalencies=conv_J21).value) for name in voff_lines_dict.keys() if "J2-1" in name
     })
 freq_dict.update({
     name: ((voff_lines_dict[name]*u.km/u.s).to(u.Hz, equivalencies=conv_J32).value) for name in voff_lines_dict.keys() if "J3-2" in name
@@ -275,9 +275,9 @@ w32 = sum(val for name,val in line_strength_dict.items() if 'J3-2' in name)
 relative_strength_total_degeneracy = {
     name : w10 for name  in line_strength_dict.keys() if "J1-0" in name
     }
-relative_strength_total_degeneracy = {
-    name : w10 for name  in line_strength_dict.keys() if "J2-1" in name
-    }
+relative_strength_total_degeneracy.update({
+    name : w21 for name  in line_strength_dict.keys() if "J2-1" in name
+    })
 relative_strength_total_degeneracy.update({
     name : w32 for name  in line_strength_dict.keys() if "J3-2" in name
     })
