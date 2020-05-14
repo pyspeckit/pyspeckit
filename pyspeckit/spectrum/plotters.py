@@ -276,7 +276,7 @@ class Plotter(object):
         self._pyplot.rcParams['keymap.fullscreen'] = 'ctrl+f'
         self._pyplot.rcParams['keymap.grid'] = 'ctrl+g'
 
-    def plot(self, offset=0.0, xoffset=0.0, color='k', linestyle='steps-mid',
+    def plot(self, offset=0.0, xoffset=0.0, color='k', drawstyle='steps-mid',
              linewidth=0.5, errstyle=None, erralpha=0.2, errcolor=None,
              silent=None, reset=True, refresh=True, use_window_limits=None,
              useOffset=False, **kwargs):
@@ -295,7 +295,7 @@ class Plotter(object):
             An x-axis shift.  I don't know why you'd want this...
         color : str
             default to plotting spectrum in black
-        linestyle : 'steps-mid' or str
+        drawstyle : 'steps-mid' or str
             'steps-mid' for histogram-style plotting.  See matplotlib's plot
             for more information
         linewidth : float
@@ -366,7 +366,7 @@ class Plotter(object):
         self._spectrumplot = self.axis.plot(self.Spectrum.xarr.value[inds]+xoffset,
                                             self.Spectrum.data[inds]*self.plotscale+self.offset,
                                             color=color,
-                                            linestyle=linestyle,
+                                            drawstyle=drawstyle,
                                             linewidth=linewidth, **kwargs)
 
         self.axis.ticklabel_format(useOffset=useOffset)
