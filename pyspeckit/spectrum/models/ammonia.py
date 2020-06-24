@@ -27,10 +27,11 @@ from . import mpfit_messages
 import operator
 import string
 import warnings
+from functools import partial
 
 from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
                                 voff_lines_dict, tau_wts_dict)
-
+from .ammonia_grids import ammonia_grids, parbounds
 TCMB = 2.7315 # K
 
 def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
@@ -278,6 +279,37 @@ def cold_ammonia(xarr, tkin, **kwargs):
     log.debug("Cold ammonia turned T_K = {0} into T_rot = {1}".format(tkin,trot))
 
     return ammonia(xarr, trot=trot, **kwargs)
+
+def ammonia_radex(xarr, tkin=20,
+                  ntot=14, logdens=4, width=1.0, xoff_v=0.0, fortho=0.0,
+                  interpolator=None,
+                  **kwargs):
+    """
+    Generate a model Ammonia spectrum based on input temperatures, column, and
+    gaussian parameters
+
+    Parameters
+    ----------
+    xarr: `pyspeckit.spectrum.units.SpectroscopicAxis`
+        Array of wavelength/frequency values
+    """
+
+    dix = interpolator(logdens=4,
+                       tkin=15,
+                       ntot=14,
+                       fortho=0.0,
+                       sigma=0.5)
+    import pdb; pdb.set_trace()
+
+    # ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
+    #         tau=None, fillingfraction=None, return_tau=False,
+    #         return_tau_profile=False, background_tb=TCMB, verbose=False,
+    #         return_components=False, debug=False, line_names=line_names,
+    #         ignore_neg_models=False):
+
+    return ammonia(xarr, **kwargs)
+
+
 
 def ammonia_thin(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
                  fortho=0.0, tau=None, return_tau=False, **kwargs):
@@ -837,7 +869,6 @@ class ammonia_model(model.SpectralModel):
         #parnames = [p['parname'] for p in parinfo]
         # not OK self.npars = len(parinfo)/self.npeaks
         parinfo = ParinfoList([Parinfo(p) for p in parinfo], preserve_order=True)
-        #import pdb; pdb.set_trace()
         return parinfo
 
     def _validate_parinfo(self,
@@ -1201,10 +1232,89 @@ class ammonia_model_restricted_tex(ammonia_model):
                                   minpars=minpars, maxpars=maxpars, tied=tied,
                                   **kwargs)
 
+    
+class ammonia_model_radex(ammonia_model):
 
+    def __init__(self,
+                 filename=None,
+                 parnames=['tkin', 'ntot', 'logdens', 'width', 'xoff_v', 'fortho'],
+                 **kwargs):
+        # Grid file interpolation
+        super().__init__(filename=filename,
+                         parnames=parnames, **kwargs)
+        self.gridfile = filename
+        self.grid_interpolator = ammonia_grids(filename=self.gridfile)
+        self.grid_bounds = parbounds(filename=self.gridfile)
+        self.modelfunc = partial(ammonia_radex, interpolator=self.grid_interpolator)
 
+        #harmonize sigmav vs FWHM
+    def _validate_parinfo(self,
+                          must_be_limited={'tkin': [True,False],
+                                           'ntot': [True, False],
+                                           'logdens':[True, True],
+                                           'width': [True, False],
+                                           'xoff_v': [False, False],
+                                           'fortho': [True, True],
+                          },
+                          required_limits={'tkin': [0, None],
+                                           'ntot': [0, None],
+                                           'logdens':[0, 10],
+                                           'width': [0, None],
+                                           'xoff_v': [None,None],
+                                           'fortho': [0,1],
+                          }):
+        
+        if (required_limits is None
+            and must_be_limited is None
+            and self.grid_bounds is not None):
+            must_be_limited = {'tkin': [True, True],
+                               'ntot': [True, True],
+                               'logdens': [True, True],
+                               'width': [True, True],
+                               'xoff_v': [False, False],
+                               'fortho': [True, True]}
+            required_limits={'tkin': self.grid_bounds['tkin'],
+                             'ntot': self.grid_bounds['ntot'],
+                             'logdens':self.grid_bounds['logdens'],
+                             'width': self.grid_bounds['sigmav'],
+                             'xoff_v': [None,None],
+                             'fortho': [0,1]}
 
+        supes = super(ammonia_model_radex, self)
+        return supes._validate_parinfo(must_be_limited=must_be_limited,
+                                       required_limits=required_limits)
 
+    def make_parinfo(self, npeaks=1, err=None,
+                     params=(20, 14, 4, 0.5, 0.0, 0.0), parnames=None,
+                     fixed=(False,False,False,False,False,True),
+                     limitedmin=(True,True,True,True,False,True),
+                     limitedmax=(False,False,True,False,False,True),
+                     minpars=(TCMB,0,0,0,0,0), parinfo=None,
+                     maxpars=(0,0,10,0,0,1),
+                     tied=('',)*6,
+                     quiet=True, shh=True,
+                     veryverbose=False, **kwargs):
+
+        if self.grid_bounds is not None:
+            limitedmin = (self.grid_bounds['tkin'][0],
+                          self.grid_bounds['ntot'][0],
+                          self.grid_bounds['logdens'][0],
+                          self.grid_bounds['sigmav'][0],
+                          0, 0)
+            limitedmax = (self.grid_bounds['tkin'][1],
+                          self.grid_bounds['ntot'][1],
+                          self.grid_bounds['logdens'][1],
+                          self.grid_bounds['sigmav'][1],
+                          0, 1)
+
+        return super().make_parinfo(npeaks=npeaks, err=err, params=params,
+                                    parnames=parnames, fixed=fixed,
+                                    limitedmin=limitedmin,
+                                    limitedmax=limitedmax, minpars=minpars,
+                                    parinfo=parinfo, maxpars=maxpars,
+                                    tied=tied, quiet=quiet, shh=shh,
+                                    veryverbose=veryverbose, **kwargs)
+    
 
 def _increment_string_number(st, count):
     """

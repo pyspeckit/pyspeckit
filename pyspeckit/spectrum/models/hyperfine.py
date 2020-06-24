@@ -164,7 +164,7 @@ class hyperfinemodel(object):
 
     def hyperfine_amp(self, xarr, amp=None, xoff_v=0.0, width=1.0,
                       return_hyperfine_components=False, Tbackground=2.73,
-                      Tex=5.0, tau=0.1):
+                      Tex=5.0, tau=0.1, **kwargs):
         """
         wrapper of self.hyperfine with order of arguments changed
         """
