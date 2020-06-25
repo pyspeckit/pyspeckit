@@ -216,7 +216,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
 
             tau_i = population_rotstate * fracterm * expterm * widthterm
             tau_dict[linename] = tau_i
-
+            
             log.debug("Line {0}: tau={1}, expterm={2}, pop={3},"
                       " partition={4}"
                       .format(linename, tau_i, expterm, population_rotstate,
@@ -237,7 +237,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
             return tau_dict
     elif isinstance(tau, dict):
         tau_dict = tau
-
+        
     model_spectrum = _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v,
                                        fortho, line_names,
                                        background_tb=background_tb,
@@ -245,7 +245,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
                                        return_components=return_components,
                                        return_tau_profile=return_tau_profile,
                                       )
-
+    import pdb; pdb.set_trace()
     if not return_tau_profile and model_spectrum.min() < 0 and background_tb == TCMB and not ignore_neg_models:
         raise ValueError("Model dropped below zero.  That is not possible "
                          " normally.  Here are the input values: "+
@@ -304,11 +304,11 @@ def ammonia_radex(xarr, tkin=20,
         Array of wavelength/frequency values
     """
 
-    dix = interpolator(logdens=4,
-                       tkin=30,
-                       ntot=15,
-                       fortho=0.0,
-                       sigma=0.5)
+    dix = interpolator(logdens=logdense,
+                       tkin=tkin,
+                       ntot=ntot,
+                       fortho=fortho,
+                       sigma=width)
 
     tau_dict = {'oneone':dix['tau_11'],
                 'twotwo':dix['tau_22'],
@@ -322,7 +322,7 @@ def ammonia_radex(xarr, tkin=20,
     #         return_tau_profile=False, background_tb=TCMB, verbose=False,
     #         return_components=False, debug=False, line_names=line_names,
     #         ignore_neg_models=False):
-    spec = ammonia(xarr, tex=tex_dict, tau=tau_dict, **kwargs)
+    spec = ammonia(xarr, tex=tex_dict, tau=tau_dict, width=width, **kwargs)
     import pdb; pdb.set_trace()
     return spec
 
