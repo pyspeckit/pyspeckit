@@ -245,7 +245,7 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
                                        return_components=return_components,
                                        return_tau_profile=return_tau_profile,
                                       )
-    import pdb; pdb.set_trace()
+
     if not return_tau_profile and model_spectrum.min() < 0 and background_tb == TCMB and not ignore_neg_models:
         raise ValueError("Model dropped below zero.  That is not possible "
                          " normally.  Here are the input values: "+
@@ -292,7 +292,7 @@ def cold_ammonia(xarr, tkin, **kwargs):
 
 def ammonia_radex(xarr, tkin=20,
                   ntot=14, logdens=4, width=1.0, xoff_v=0.0, fortho=0.0,
-                  interpolator=None,filename=None,
+                  interpolator=None,gridfile=None,
                   **kwargs):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
@@ -304,26 +304,36 @@ def ammonia_radex(xarr, tkin=20,
         Array of wavelength/frequency values
     """
 
-    dix = interpolator(logdens=logdense,
+    dix = interpolator(logdens=logdens,
                        tkin=tkin,
                        ntot=ntot,
                        fortho=fortho,
                        sigma=width)
 
-    tau_dict = {'oneone':dix['tau_11'],
-                'twotwo':dix['tau_22'],
-                'fourfour':dix['tau_44']}
+    # THIS NEEDS TO BE VERIFIED
+    scalefac = np.zeros(3)
+    for i, line in enumerate(['oneone','twotwo','fourfour']):
+        scalefac[i] = 1 / np.array(tau_wts_dict[line]).max()
+    
+    
+    tau_dict = {'oneone':dix['tau_11'] * scalefac[0],
+                'twotwo':dix['tau_22'] * scalefac[1],
+                'fourfour':dix['tau_44'] * scalefac[2]}
     tex_dict = {'oneone':dix['Tex_11'],
                 'twotwo':dix['Tex_22'],
                 'fourfour':dix['Tex_44']}
+
+
+
     
     # ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
     #         tau=None, fillingfraction=None, return_tau=False,
     #         return_tau_profile=False, background_tb=TCMB, verbose=False,
     #         return_components=False, debug=False, line_names=line_names,
     #         ignore_neg_models=False):
-    spec = ammonia(xarr, tex=tex_dict, tau=tau_dict, width=width, **kwargs)
-    import pdb; pdb.set_trace()
+    spec = ammonia(xarr, tex=tex_dict, tau=tau_dict,
+                   width=width, xoff_v=xoff_v, **kwargs)
+
     return spec
 
 
@@ -396,7 +406,7 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
         tau_wts = np.array(tau_wts_dict[linename])
 
         lines = (1-voff_lines/ckms)*freq_dict[linename]/1e9
-        tau_wts = tau_wts / (tau_wts).sum()
+
         nuwidth = np.abs(width/ckms*lines)
         nuoff = xoff_v/ckms*lines
 
@@ -423,7 +433,6 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
             runspec = ((T0/(np.exp(T0/tex)-1) -
                         T0/(np.exp(T0/background_tb)-1)) *
                        (1-np.exp(-tauprof)) * fillingfraction + runspec)
-
 
     if return_components:
         if isinstance(tex, dict):
@@ -1254,17 +1263,17 @@ class ammonia_model_restricted_tex(ammonia_model):
 class ammonia_model_radex(ammonia_model):
 
     def __init__(self,
-                 filename=None,
+                 gridfile=None,
                  parnames=['tkin', 'ntot', 'logdens', 'width', 'xoff_v', 'fortho'],
                  **kwargs):
         # Grid file interpolation
-        super().__init__(filename=filename,
+        super().__init__(gridfile=gridfile,
                          parnames=parnames, **kwargs)
-        self.gridfile = filename
-        self.grid_interpolator = ammonia_grids(filename=self.gridfile)
-        self.grid_bounds = parbounds(filename=self.gridfile)
+        self.gridfile = gridfile
+        self.grid_interpolator = ammonia_grids(gridfile=self.gridfile)
+        self.grid_bounds = parbounds(gridfile=self.gridfile)
         self.modelfunc = partial(ammonia_radex, interpolator=self.grid_interpolator)
-        
+        print(self.modelfunc)
         #harmonize sigmav vs FWHM
     def _validate_parinfo(self,
                           must_be_limited={'tkin': [True,False],
@@ -1333,6 +1342,9 @@ class ammonia_model_radex(ammonia_model):
                                     tied=tied, quiet=quiet, shh=shh,
                                     veryverbose=veryverbose, **kwargs)
     
+    def __call__(self,*args,**kwargs):
+        import pdb; pdb.set_trace()
+        return self.multinh3fit(*args, **kwargs)
 
 def _increment_string_number(st, count):
     """
