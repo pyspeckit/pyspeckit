@@ -11,7 +11,7 @@ def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
     Theory, from first principles (in the absence of noise):
     integral(gaussian) = sqrt(2*pi*sigma^2) * amp
     sigma = integral / amp / sqrt(2*pi)
-    
+
     In the presence of noise, this gets much more complicated.
     The noisy approach is inspired by `mpfit
     <http://cow.physics.wisc.edu/~craigm/idl/fitting.html>`_
@@ -69,7 +69,7 @@ def moments(Xax, data, vheight=True, estimator=np.mean, negamp=None,
         noise_estimate = data.std()
     height_cut_low = height-nsigcut*noise_estimate if nsigcut is not None else height
     height_cut_high = height+nsigcut*noise_estimate if nsigcut is not None else height
-    
+
     # try to figure out whether pos or neg based on the minimum width of the pos/neg peaks
     data_gt_low = data>height_cut_low
     data_lt_low = data<height_cut_low
