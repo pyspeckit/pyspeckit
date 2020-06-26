@@ -310,27 +310,13 @@ def ammonia_radex(xarr, tkin=20,
                        fortho=fortho,
                        sigma=width)
 
-    # THIS NEEDS TO BE VERIFIED
-    scalefac = np.zeros(3)
-    for i, line in enumerate(['oneone','twotwo','fourfour']):
-        scalefac[i] = 1 / np.array(tau_wts_dict[line]).max()
-    
-    
-    tau_dict = {'oneone':dix['tau_11'] * scalefac[0],
-                'twotwo':dix['tau_22'] * scalefac[1],
-                'fourfour':dix['tau_44'] * scalefac[2]}
+    tau_dict = {'oneone':dix['tau_11'],
+                'twotwo':dix['tau_22'],
+                'fourfour':dix['tau_44']}
     tex_dict = {'oneone':dix['Tex_11'],
                 'twotwo':dix['Tex_22'],
                 'fourfour':dix['Tex_44']}
-
-
-
     
-    # ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
-    #         tau=None, fillingfraction=None, return_tau=False,
-    #         return_tau_profile=False, background_tb=TCMB, verbose=False,
-    #         return_components=False, debug=False, line_names=line_names,
-    #         ignore_neg_models=False):
     spec = ammonia(xarr, tex=tex_dict, tau=tau_dict,
                    width=width, xoff_v=xoff_v, **kwargs)
 
@@ -775,6 +761,7 @@ class ammonia_model(model.SpectralModel):
         from decimal import Decimal # for formatting
         tex_key = {'trot':'T_R', 'tkin': 'T_K', 'tex':'T_{ex}', 'ntot':'N',
                    'fortho':'F_o', 'width':'\\sigma', 'xoff_v':'v',
+                   'logdens':'\\log_{10} n',
                    'fillingfraction':'FF', 'tau':'\\tau_{1-1}',
                    'background_tb':'T_{BG}', 'delta':'T_R-T_{ex}'}
         # small hack below: don't quantize if error > value.  We want to see the values.
@@ -1264,7 +1251,8 @@ class ammonia_model_radex(ammonia_model):
 
     def __init__(self,
                  gridfile=None,
-                 parnames=['tkin', 'ntot', 'logdens', 'width', 'xoff_v', 'fortho'],
+                 parnames=['tkin', 'ntot', 'logdens', 'width',
+                           'xoff_v', 'fortho'],
                  **kwargs):
         # Grid file interpolation
         super().__init__(gridfile=gridfile,
@@ -1272,8 +1260,9 @@ class ammonia_model_radex(ammonia_model):
         self.gridfile = gridfile
         self.grid_interpolator = ammonia_grids(gridfile=self.gridfile)
         self.grid_bounds = parbounds(gridfile=self.gridfile)
-        self.modelfunc = partial(ammonia_radex, interpolator=self.grid_interpolator)
-        print(self.modelfunc)
+        self.modelfunc = partial(ammonia_radex,
+                                 interpolator=self.grid_interpolator)
+
         #harmonize sigmav vs FWHM
     def _validate_parinfo(self,
                           must_be_limited={'tkin': [True,False],
@@ -1323,17 +1312,19 @@ class ammonia_model_radex(ammonia_model):
                      veryverbose=False, **kwargs):
 
         if self.grid_bounds is not None:
-            limitedmin = (self.grid_bounds['tkin'][0],
-                          self.grid_bounds['ntot'][0],
-                          self.grid_bounds['logdens'][0],
-                          self.grid_bounds['sigmav'][0],
-                          0, 0)
-            limitedmax = (self.grid_bounds['tkin'][1],
-                          self.grid_bounds['ntot'][1],
-                          self.grid_bounds['logdens'][1],
-                          self.grid_bounds['sigmav'][1],
-                          0, 1)
-
+            minpars = (self.grid_bounds['tkin'][0],
+                       self.grid_bounds['ntot'][0],
+                       self.grid_bounds['logdens'][0],
+                       self.grid_bounds['sigmav'][0],
+                       0, 0)
+            maxpars = (self.grid_bounds['tkin'][1],
+                       self.grid_bounds['ntot'][1],
+                       self.grid_bounds['logdens'][1],
+                       self.grid_bounds['sigmav'][1],
+                       0, 1)
+            limitedmin = (True, True, True, True, False, True)
+            limitedmax = (True, True, True, True, False, True)
+            
         return super().make_parinfo(npeaks=npeaks, err=err, params=params,
                                     parnames=parnames, fixed=fixed,
                                     limitedmin=limitedmin,
@@ -1343,7 +1334,6 @@ class ammonia_model_radex(ammonia_model):
                                     veryverbose=veryverbose, **kwargs)
     
     def __call__(self,*args,**kwargs):
-        import pdb; pdb.set_trace()
         return self.multinh3fit(*args, **kwargs)
 
 def _increment_string_number(st, count):

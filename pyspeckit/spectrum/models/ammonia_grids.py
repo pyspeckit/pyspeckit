@@ -9,15 +9,26 @@ import pdb
 default_filename = None
 sig2fwhm = np.sqrt(8 * np.log(2))
 
-loglogdict = {'oneone': [ 8.18673698e-01,  3.34381710e-01],
-              'twotwo': [ 9.73003156e-01,  1.11981158e-01],
-              'threethree': [ 9.73165993e-01,  6.72730044e-02],
-              'fourfour': [ 9.99921029e-01,  2.91441632e-02],
-              'fivefive': [ 9.99967484e-01,  1.93889654e-02],
-              'sixsix':  [ 9.99982315e-01,  1.38318044e-02],
-              'sevenseven': [ 9.99988168e-01,  1.03632255e-02],
-              'eighteight': [ 9.99990665e-01,  8.05543087e-03],
-              'ninenine': [ 1.00000000e+00, -6.21849276e-17]}
+# loglogdict = {'oneone':    [ 8.18673698e-01,  3.34381710e-01],
+#               'twotwo':    [ 9.73003156e-01,  1.11981158e-01],
+#               'threethree': [ 9.73165993e-01,  6.72730044e-02],
+#               'fourfour': [ 9.99921029e-01,  2.91441632e-02],
+#               'fivefive': [ 9.99967484e-01,  1.93889654e-02],
+#               'sixsix':  [ 9.99982315e-01,  1.38318044e-02],
+#               'sevenseven': [ 9.99988168e-01,  1.03632255e-02],
+#               'eighteight': [ 9.99990665e-01,  8.05543087e-03],
+#               'ninenine': [ 1.00000000e+00, -6.21849276e-17]}
+
+
+loglogdict = {'oneone': [-1.81326302e-01,  3.34381710e-01],
+              'twotwo': [-2.69968439e-02,  1.11981158e-01],
+              'threethree': [-2.68340072e-02,  6.72730044e-02],
+              'fourfour': [-7.89713752e-05,  2.91441632e-02],
+              'fivefive': [-3.25164539e-05,  1.93889654e-02],
+              'sixsix': [-1.76846051e-05,  1.38318044e-02],
+              'sevenseven': [-1.18320819e-05,  1.03632255e-02],
+              'eighteight': [-9.33491439e-06,  8.05543087e-03],
+              'ninenine': [ 0.00000000e+00,  0.00000000e+00]}
 
 
 def line_scaling_function(sigmav, linename, method='loglogfit'):
@@ -27,8 +38,9 @@ def line_scaling_function(sigmav, linename, method='loglogfit'):
         return(sigmav)
     if method == 'loglogfit':
         coeffs = loglogdict[linename]
-        return(1e1**(np.log10(sigmav) * coeffs[0] + coeffs[1]))
-        
+        return(1e1**(np.log10(sigmav) * coeffs[0] + coeffs[1]) * sigmav)
+    
+    
 def parbounds(gridfile=None):
     # Return boundaries of grid
     
@@ -46,8 +58,8 @@ def parbounds(gridfile=None):
                               np.nanmax(np.log10(density_values))],
                   'tkin':[np.nanmin(temperature_values),
                           np.nanmax(temperature_values)],
-                  'ntot':[np.nanmin(np.log10(density_values)),
-                          np.nanmax(np.log10(density_values))],
+                  'ntot':[np.nanmin(np.log10(column_values)),
+                          np.nanmax(np.log10(column_values))],
                   'sigmav':[np.nanmin(fwhm_values) / sig2fwhm,
                             np.nanmax(fwhm_values) / sig2fwhm]}
     return(bound_dict)
@@ -103,9 +115,8 @@ def ammonia_grids(gridfile=None):
                         fortho=0.0,
                         sigma=0.3,
                         order=2):
-
+        
         fwhm = sig2fwhm * line_scaling_function(sigma, linename)
-
         param_interps = (np.array(np.c_[0,f1(logdens+np.log10(1-fortho)),
                                        f2(np.log10(tkin)),
                                        f3(ntot),
