@@ -309,7 +309,7 @@ def ammonia_radex(xarr, tkin=20,
                        ntot=ntot,
                        fortho=fortho,
                        sigma=width)
-
+]
     tau_dict = {'oneone':dix['tau_11'],
                 'twotwo':dix['tau_22'],
                 'fourfour':dix['tau_44']}
