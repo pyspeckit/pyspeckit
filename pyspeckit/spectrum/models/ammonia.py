@@ -290,38 +290,55 @@ def cold_ammonia(xarr, tkin, **kwargs):
 
     return ammonia(xarr, trot=trot, **kwargs)
 
+
 def ammonia_radex(xarr, tkin=20,
                   ntot=14, logdens=4, width=1.0, xoff_v=0.0, fortho=0.0,
-                  interpolator=None,gridfile=None,
+                  interpolator=None, gridfile=None,
+                  scaling_method='loglogfit',
                   **kwargs):
     """
-    Generate a model Ammonia spectrum based on input temperatures, column, and
-    gaussian parameters
+    Generate a model Ammonia spectrum based on input temperatures,
+    column, and gaussian parameters.  Samples a user-provided grid of
+    radiation temperatures and opacities derived from RADEX.
 
     Parameters
     ----------
     xarr: `pyspeckit.spectrum.units.SpectroscopicAxis`
         Array of wavelength/frequency values
+
     """
 
     dix = interpolator(logdens=logdens,
                        tkin=tkin,
                        ntot=ntot,
                        fortho=fortho,
-                       sigma=width)
-]
-    tau_dict = {'oneone':dix['tau_11'],
-                'twotwo':dix['tau_22'],
-                'fourfour':dix['tau_44']}
-    tex_dict = {'oneone':dix['Tex_11'],
-                'twotwo':dix['Tex_22'],
-                'fourfour':dix['Tex_44']}
+                       sigma=width,
+                       scaling_method=scaling_method)
+
+    tau_dict = {
+        'oneone':dix['tau_11'],
+        'twotwo':dix['tau_22'],
+        'fourfour':dix['tau_44'],
+        'fivefive':dix['tau_55'],
+    }
+
+    tex_dict = {
+        'oneone':dix['Tex_11'],
+        'twotwo':dix['Tex_22'],
+        'fourfour':dix['Tex_44'],
+        'fivefive':dix['Tex_55'],
+    }
+
+    if fortho > 0:
+        tau_dict['threethree'] = dix['tau_33']
+        tau_dict['sixsix'] = dix['tau_66']
+        tex_dict['threethree'] = dix['Tex_33']
+        tex_dict['sixsix'] = dix['Tex_66']
     
     spec = ammonia(xarr, tex=tex_dict, tau=tau_dict,
                    width=width, xoff_v=xoff_v, **kwargs)
 
     return spec
-
 
 
 def ammonia_thin(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
@@ -1251,19 +1268,22 @@ class ammonia_model_radex(ammonia_model):
 
     def __init__(self,
                  gridfile=None,
+                 scaling_method='loglogfit',
                  parnames=['tkin', 'ntot', 'logdens', 'width',
                            'xoff_v', 'fortho'],
                  **kwargs):
-        # Grid file interpolation
+
         super().__init__(gridfile=gridfile,
+                         scaling_method=scaling_method,
                          parnames=parnames, **kwargs)
         self.gridfile = gridfile
         self.grid_interpolator = ammonia_grids(gridfile=self.gridfile)
         self.grid_bounds = parbounds(gridfile=self.gridfile)
         self.modelfunc = partial(ammonia_radex,
-                                 interpolator=self.grid_interpolator)
+                                 interpolator=self.grid_interpolator,
+                                 scaling_method=scaling_method)
 
-        #harmonize sigmav vs FWHM
+
     def _validate_parinfo(self,
                           must_be_limited={'tkin': [True,False],
                                            'ntot': [True, False],

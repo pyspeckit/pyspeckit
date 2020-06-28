@@ -5,20 +5,8 @@ import scipy.interpolate as interp
 import numpy as np
 import pdb
 
-
 default_filename = None
 sig2fwhm = np.sqrt(8 * np.log(2))
-
-# loglogdict = {'oneone':    [ 8.18673698e-01,  3.34381710e-01],
-#               'twotwo':    [ 9.73003156e-01,  1.11981158e-01],
-#               'threethree': [ 9.73165993e-01,  6.72730044e-02],
-#               'fourfour': [ 9.99921029e-01,  2.91441632e-02],
-#               'fivefive': [ 9.99967484e-01,  1.93889654e-02],
-#               'sixsix':  [ 9.99982315e-01,  1.38318044e-02],
-#               'sevenseven': [ 9.99988168e-01,  1.03632255e-02],
-#               'eighteight': [ 9.99990665e-01,  8.05543087e-03],
-#               'ninenine': [ 1.00000000e+00, -6.21849276e-17]}
-
 
 loglogdict = {'oneone': [-1.81326302e-01,  3.34381710e-01],
               'twotwo': [-2.69968439e-02,  1.11981158e-01],
@@ -32,17 +20,24 @@ loglogdict = {'oneone': [-1.81326302e-01,  3.34381710e-01],
 
 
 def line_scaling_function(sigmav, linename, method='loglogfit'):
-    # Scaling of intrinsic line width to Gaussian equivalent line width for use in RADEX
+
+    # Scaling of intrinsic line width to Gaussian equivalent line
+    # width for use in RADEX
     
     if method == 'none':
         return(sigmav)
+
+    if method == 'sig2fwhm':
+        return(sigmav * sig2fwhm)
+    
     if method == 'loglogfit':
         coeffs = loglogdict[linename]
-        return(1e1**(np.log10(sigmav) * coeffs[0] + coeffs[1]) * sigmav)
+        return(sigmav *  1e1**(np.log10(sigmav)
+                               * coeffs[0] + coeffs[1]))
     
     
 def parbounds(gridfile=None):
-    # Return boundaries of grid
+    # Return boundaries of grid to bound fit parameters
     
     if gridfile is None:
         return(None)
@@ -53,15 +48,15 @@ def parbounds(gridfile=None):
     density_values = np.unique(t['nH2'].data)
     temperature_values = np.unique(t['Temperature'].data)
     column_values = np.unique(t['Column'].data)
-    fwhm_values = np.unique(t['FWHM'].data)
+    sigmav_values = np.unique(t['sigmav'].data)
     bound_dict = {'logdens': [np.nanmin(np.log10(density_values)),
                               np.nanmax(np.log10(density_values))],
                   'tkin':[np.nanmin(temperature_values),
                           np.nanmax(temperature_values)],
                   'ntot':[np.nanmin(np.log10(column_values)),
                           np.nanmax(np.log10(column_values))],
-                  'sigmav':[np.nanmin(fwhm_values) / sig2fwhm,
-                            np.nanmax(fwhm_values) / sig2fwhm]}
+                  'sigmav':[np.nanmin(sigmav_values),
+                            np.nanmax(sigmav_values)]}
     return(bound_dict)
 
     
@@ -81,15 +76,15 @@ def ammonia_grids(gridfile=None):
     density_values = np.unique(t['nH2'].data)
     temperature_values = np.unique(t['Temperature'].data)
     column_values = np.unique(t['Column'].data)
-    fwhm_values = np.unique(t['FWHM'].data)
+    sigmav_values = np.unique(t['sigmav'].data)
 
     # Should this be initialized to NaNs instead?  Could be risky.
     grid = np.zeros((nOutputs,density_values.size,temperature_values.size,
-                     column_values.size,fwhm_values.size))
+                     column_values.size,sigmav_values.size))
     idx1 = np.digitize(t['nH2'].data,density_values)-1
     idx2 = np.digitize(t['Temperature'].data,temperature_values)-1
     idx3 = np.digitize(t['Column'].data,column_values)-1
-    idx4 = np.digitize(t['FWHM'].data,fwhm_values)-1
+    idx4 = np.digitize(t['sigmav'].data,sigmav_values)-1
 
     f1 = interp.interp1d(np.log10(density_values),
                          np.arange(density_values.size),
@@ -100,8 +95,8 @@ def ammonia_grids(gridfile=None):
     f3 = interp.interp1d(np.log10(column_values),
                          np.arange(column_values.size),
                          bounds_error=False)
-    f4 = interp.interp1d(np.log10(fwhm_values),
-                         np.arange(fwhm_values.size),
+    f4 = interp.interp1d(np.log10(sigmav_values),
+                         np.arange(sigmav_values.size),
                          bounds_error = False)
 
     # Pack that grid
@@ -114,13 +109,16 @@ def ammonia_grids(gridfile=None):
                         ntot=14,
                         fortho=0.0,
                         sigma=0.3,
-                        order=2):
+                        order=2,
+                        scaling_method='loglogfit'):
         
-        fwhm = sig2fwhm * line_scaling_function(sigma, linename)
+        dV = line_scaling_function(sigma, linename,
+                                   method=scaling_method)
+
         param_interps = (np.array(np.c_[0,f1(logdens+np.log10(1-fortho)),
                                        f2(np.log10(tkin)),
                                        f3(ntot),
-                                       f4(np.log10(fwhm))])
+                                       f4(np.log10(dV))])
                          * np.ones((nOutputs,1)))
 
         param_interps[:,0] = np.arange(nOutputs)
