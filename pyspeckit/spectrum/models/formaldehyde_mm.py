@@ -166,7 +166,7 @@ def build_despotic_grids(gridfile='ph2co_grid_despotic.fits', ph2coAbund=1e-8,
 
 
 
-def formaldehyde_mm_despotic_functions(gridtable, order=1):
+def formaldehyde_mm_despotic_functions(gridtable):
     """
     This builds interpolation functions for use in fitting.
 
@@ -228,9 +228,9 @@ def formaldehyde_mm_despotic_functions(gridtable, order=1):
         xvec = np.array([iidx, jidx, kidx, lidx])
         xvec.shape += (1,)
         Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_303_202,
-                                                          xvec, order=order)
+                                                          xvec)
         tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_303_202,
-                                                          xvec, order=order)
+                                                          xvec)
         return (Tex, tau)
 
     def h2co_322_221(logdensity=4, logcolumn=13, temperature=25, sigmav=2.0):
@@ -240,8 +240,8 @@ def formaldehyde_mm_despotic_functions(gridtable, order=1):
         lidx = np.interp(sigmav, DvArr, np.arange(len(DvArr)))
         xvec = np.array([iidx, jidx, kidx, lidx])
         xvec.shape += (1,)
-        Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_322_221, xvec, order=order)
-        tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_322_221, xvec, order=order)
+        Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_322_221, xvec)
+        tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_322_221, xvec)
         return (Tex, tau)
 
     def h2co_321_220(logdensity=4, logcolumn=13, temperature=25, sigmav=2.0):
@@ -251,8 +251,8 @@ def formaldehyde_mm_despotic_functions(gridtable, order=1):
         lidx = np.interp(sigmav, DvArr, np.arange(len(DvArr)))
         xvec = np.array([iidx, jidx, kidx, lidx])
         xvec.shape += (1,)
-        Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_321_220, xvec, order=order)
-        tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_321_220, xvec, order=order)
+        Tex = scipy.ndimage.interpolation.map_coordinates(GridData_Tex_321_220, xvec)
+        tau = scipy.ndimage.interpolation.map_coordinates(GridData_tau_321_220, xvec)
         return (Tex, tau)
     return (h2co_303_202, h2co_322_221, h2co_321_220)
 
@@ -274,6 +274,7 @@ def formaldehyde_mm_despotic(xarr,
     functions for interpolating the h2co transition optical depth and
     excitation temperatures.
     """
+
     Tex303_202, tau303_202 = h2co_303_202(logdensity=density,
                                           logcolumn=column,
                                           temperature=temperature,
@@ -288,6 +289,7 @@ def formaldehyde_mm_despotic(xarr,
                                           logcolumn=column,
                                           temperature=temperature,
                                           sigmav=width)
+
     tex = [Tex303_202, Tex322_221, Tex321_220]
     tau = [tau303_202, tau322_221, tau321_220]
     minfreq = [218.15, 218.40, 218.7]
