@@ -13,10 +13,8 @@ import shutil
 if not os.path.exists('ph2cogrid.fits'):
     if not os.path.exists('protostellarCore.desp'):
         despotic_install_path = (os.path.split(despotic.__file__))[0]
-        shutil.copy(despotic_install_path+'/cloudfiles/protostellarCore.desp',
-                    os.getcwd())
-    models.formaldehyde_mm.build_despotic_grids(gridfile='ph2cogrid.fits',
-                                                DvUpper=10)
+        shutil.copy(despotic_install_path+'/cloudfiles/protostellarCore.desp',os.getcwd())
+        models.formaldehyde_mm.build_despotic_grids(gridfile='ph2cogrid.fits', DvUpper=10)
 
 t = Table.read('ph2cogrid.fits')
 
