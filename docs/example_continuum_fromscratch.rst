@@ -17,7 +17,7 @@ accessible via the `pyspeckit.Spectrum.baseline` tools because they use
    import numpy as np
    import pyspeckit
 
-   xaxis = np.linspace(-50,150,100.)
+   xaxis = np.linspace(-50,150,100)
    sigma = 10.
    center = 50.
 

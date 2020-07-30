@@ -332,7 +332,10 @@ class Baseline(interactive.Interactive):
         if baselinepars is None: # still...
             return 0 # no baseline has been computed
         if self.powerlaw:
-            return (baselinepars[0]*(xarr)**(-baselinepars[1])).squeeze()
+            result = (baselinepars[0]*(xarr)**(-baselinepars[1])).squeeze()
+            if np.any(~np.isfinite(result)):
+                raise ValueError("Infinite value encountered in power-law model")
+            return result
         else:
             return np.poly1d(baselinepars)(xarr)
 
@@ -513,7 +516,8 @@ class Baseline(interactive.Interactive):
         #    xmax = spectrum.shape[-1]
 
         if xarr is None or xarr_fit_unit == 'pixels':
-            xarrconv = np.arange(spectrum.size)
+            # start at 1, not 0, for power-law in particular
+            xarrconv = np.arange(1, spectrum.size+1)
         elif xarr_fit_unit not in (None, 'native'):
             xarrconv = xarr.as_unit(xarr_fit_unit).value
         else:
@@ -556,24 +560,34 @@ class Baseline(interactive.Interactive):
         OK = ~masktoexclude
         if powerlaw:
             # for powerlaw fitting, only consider positive data
-            OK *= spectrum > 0
+            OK &= spectrum > 0
             if pguess is None:
                 pguess = [np.median(spectrum[OK]) * np.median(xarrconv[OK]), 1.0]
             if LoudDebug:
                 print("_baseline powerlaw Guesses: ",pguess)
-                
+
             parinfo = [{}, {'limited':(True, False), 'limits':(0,0)}]
+
+            if any(xarrconv == 0) or any(~np.isfinite(xarrconv)):
+                raise ValueError("Invalid value in x-axis being used for fitting.")
 
             def mpfitfun(data, err):
                 #def f(p,fjac=None): return [0,np.ravel(((p[0] * (xarrconv[OK]-p[2])**(-p[1]))-data)/err)]
                 # Logarithmic fitting:
-                def f(p,fjac=None):
+                def f(params, fjac=None):
+                    for pp in params:
+                        if not np.isfinite(pp):
+                            raise ValueError("Non-finite parameter value passed to baseine parameters")
                     #return [0,
                     #        np.ravel( (np.log10(data) - np.log10(p[0]) + p[1]*np.log10(xarrconv[OK]/p[2])) / (err/data) )
                     #        ]
-                    return [0, np.ravel(
-                        (data - self.get_model(xarr=xarrconv[OK],baselinepars=p)) /
-                        (err/data))]
+                    rslt = np.ravel((data -
+                                     self.get_model(xarr=xarrconv[OK],
+                                                    baselinepars=params))
+                                    / (err/data))
+                    if np.any(np.isnan(rslt)):
+                        raise ValueError("NaN in result")
+                    return [0, rslt]
                 return f
         else:
             pguess = [0]*(order+1)
@@ -604,7 +618,7 @@ class Baseline(interactive.Interactive):
                              "report it as an Issue: "
                              "https://github.com/pyspeckit/pyspeckit/issues")
 
-        mp = mpfit.mpfit(mpfitfun(spectrum[OK], err[OK]), xall=pguess,
+        mp = mpfit.mpfit(mpfitfun(np.array(spectrum[OK]), np.array(err[OK])), xall=pguess,
                          parinfo=parinfo,
                          quiet=quiet)
         if np.isnan(mp.fnorm):

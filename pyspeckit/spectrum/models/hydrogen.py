@@ -17,6 +17,10 @@ had to OCR and pull out by hand some of the coefficients.
 .. Hummer & Storey 1987: Recombination-line intensities for hydrogenic ions.  I - Case B calculations for H I and He II
 
 
+However, Storey & Hummer 1995 might be a better resource now?
+https://cdsarc.unistra.fr/viz-bin/cat/VI/64
+
+
 Module API
 ^^^^^^^^^^
 
@@ -62,7 +66,7 @@ alphaB=[[1.2,8.823],
 
 
 # the command to make this:
-# %s/\v.*\n?([0-9]\.[0-9]+).*jH(.+\n?|[^β]\n?[0-9]\.[0-9]+) ?([0-9]\.[0-9]+) ([0-9]\.[0-9]+) ([0-9]\.[0-9]+)/[\1, \3, \4, \5]\r/ 
+# %s/\v.*\n?([0-9]\.[0-9]+).*jH(.+\n?|[^β]\n?[0-9]\.[0-9]+) ?([0-9]\.[0-9]+) ([0-9]\.[0-9]+) ([0-9]\.[0-9]+)/[\1, \3, \4, \5]\r/
 # from this:
 # http://www.scribd.com/doc/70881169/Physics-of-the-Interstellar-and-Intergalactic-Medium
 # with some by-hand editing too
@@ -215,7 +219,8 @@ def find_lines(xarr):
     Given a :class:`pyspeckit.units.SpectrosopicAxis` instance, finds all the
     lines that are in bounds.  Returns a list of line names.
     """
-    return [linename for (linename,lam) in iteritems(wavelength) if xarr.as_unit('micron').in_range(lam)]
+    return [linename for (linename, lam) in iteritems(wavelength)
+            if xarr.as_unit('micron').in_range(lam)]
 
 def hydrogen_fitter(sp, temperature=10000, tiedwidth=False):
     """
@@ -226,7 +231,7 @@ def hydrogen_fitter(sp, temperature=10000, tiedwidth=False):
     *temperature* [ 5000, 10000, 20000 ]
         The case B coefficients are computed for 3 temperatures
 
-    *tiedwidth* [ bool ] 
+    *tiedwidth* [ bool ]
         Should the widths be tied?
 
     Returns a list of `tied` and `guesses` in the xarr's units
@@ -245,14 +250,15 @@ def hydrogen_fitter(sp, temperature=10000, tiedwidth=False):
 
     dx = np.median(sp.xarr.dxarr)
 
-    subguesses = [[ sp.data[sp.xarr.as_unit('micron').x_to_pix(wavelength[line])],
-        sp.xarr.x_to_coord(wavelength[line],'micron'),
-        dx*2.0 ] for line in lines]
+    subguesses = [[sp.data[sp.xarr.as_unit('micron').x_to_pix(wavelength[line])],
+        sp.xarr.x_to_coord(wavelength[line], 'micron'),
+        dx*2.0] for line in lines]
     guesses = [g for sublist in subguesses for g in sublist]
 
     return tied, guesses
 
-def hydrogen_model(xarr, amplitude=1.0, width=0.0, velocity=0.0, a_k=0.0, temperature=10000):
+def hydrogen_model(xarr, amplitude=1.0, width=0.0, velocity=0.0, a_k=0.0,
+                   temperature=10000):
     """
     Generate a set of parameters identifying the hydrogen lines in your
     spectrum.  These come in groups of 3 assuming you're fitting a gaussian to
@@ -295,10 +301,10 @@ def hydrogen_model(xarr, amplitude=1.0, width=0.0, velocity=0.0, a_k=0.0, temper
     model += amplitude * np.exp(-(xarr-center)**2 / (2.0*lw)**2)
 
     for line in lines[1:]:
-        relamp = (r_to_hbeta[line][tnum]/r_to_hbeta[reference_line][tnum]) 
+        relamp = (r_to_hbeta[line][tnum]/r_to_hbeta[reference_line][tnum])
         lw = width / units.speedoflight_kms * wavelength[line]
         center = wavelength[line]
-    
+
         model += amplitude * relamp * np.exp(-(xarr-center)**2 / (2.0*lw)**2)
 
     if a_k > 0:
@@ -313,13 +319,14 @@ def add_to_registry(sp):
     Add the Hydrogen model to the Spectrum's fitter registry
     """
     # can't have absorption in recombination case
-    extincted_hydrogen_emission = model.SpectralModel(hydrogen_model, 4, 
-            shortvarnames=('A','\\sigma','\\Delta x','A_K'),
-            parnames=['amplitude','width','velocity','extinction'],
-            parlimited=[(True,False),(True,False),(False,False), (True,False)], 
-            parlimits=[(0,0), (0,0), (0,0), (0,0)],
+    extincted_hydrogen_emission = model.SpectralModel(hydrogen_model, 4,
+                                                      shortvarnames=('A','\\sigma','\\Delta x','A_K'),
+                                                      parnames=['amplitude','width','velocity','extinction'],
+                                                      parlimited=[(True,False),(True,False),(False,False),
+                                                                  (True,False)],
+                                                      parlimits=[(0,0), (0,0),
+                                                                 (0,0), (0,0)],
             fitunit='micron')
 
     sp.Registry.add_fitter('hydrogen', extincted_hydrogen_emission,
-            extincted_hydrogen_emission.npars)
-
+                           extincted_hydrogen_emission.npars)
