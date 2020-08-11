@@ -211,6 +211,7 @@ def get_molecular_parameters(molecule_name,
         interpolate the partition function
         WARNING: this can be very wrong
         """
+        tem = u.Quantity(tem, u.K).value
         tems = jpltable.meta['Temperature (K)']
         logQs = jpltable['QLOG1 QLOG2 QLOG3 QLOG4 QLOG5 QLOG6 QLOG7'.split()]
         logQ = np.interp(tem, tems, list(logQs[0]))
