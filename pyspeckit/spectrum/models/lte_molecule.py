@@ -151,7 +151,7 @@ def line_brightness_cgs(tex, dnu, frequency, tbg=2.73, *args, **kwargs):
 
 # requires vamdc branch of astroquery
 def get_molecular_parameters(molecule_name,
-                             molecule_name_vamdc=None,
+                             molecule_name_jpl=None,
                              tex=50, fmin=1*u.GHz, fmax=1*u.THz,
                              line_lists=['SLAIM'],
                              chem_re_flags=0, **kwargs):
@@ -163,9 +163,9 @@ def get_molecular_parameters(molecule_name,
     ----------
     molecule_name : string
         The string name of the molecule (normal name, like CH3OH or CH3CH2OH)
-    molecule_name_vamdc : string or None
-        If specified, gives this name to vamdc instead of the normal name.
-        Needed for some molecules, like CH3CH2OH -> C2H5OH.
+    molecule_name_jpl : string or None
+        Default to molecule_name, but if jplspec doesn't have your molecule
+        by the right name, specify it here
     tex : float
         Optional excitation temperature (basically checks if the partition
         function calculator works)
@@ -185,28 +185,13 @@ def get_molecular_parameters(molecule_name,
     >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters(molecule_name='CH2CHCN',
     ...                                                          fmin=220*u.GHz,
     ...                                                          fmax=222*u.GHz,
-    ...                                                          molecule_name_vamdc='C2H3CN')
+                                                                )
     >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH3OH',
     ...                                                          fmin=90*u.GHz,
     ...                                                          fmax=100*u.GHz)
     """
-    from astroquery.vamdc import load_species_table
     from astroquery.splatalogue import Splatalogue
-
-    from vamdclib import nodes
-    from vamdclib import request
-    from vamdclib import specmodel
-
-    lut = load_species_table.species_lookuptable()
-    species_id_dict = lut.find(molecule_name_vamdc or molecule_name,
-                               flags=chem_re_flags)
-    if len(species_id_dict) == 1:
-        species_id = list(species_id_dict.values())[0]
-    elif len(species_id_dict) == 0:
-        raise ValueError("No matches for {0}".format(molecule_name))
-    else:
-        raise ValueError("Too many species matched: {0}"
-                         .format(species_id_dict))
+    from astroquery.jplspec import JPLSpec
 
     # do this here, before trying to compute the partition function, because
     # this query could fail
@@ -214,22 +199,22 @@ def get_molecular_parameters(molecule_name,
                                   line_lists=line_lists,
                                   show_upper_degeneracy=True, **kwargs)
 
-    nl = nodes.Nodelist()
-    nl.findnode('cdms')
-    cdms = nl.findnode('cdms')
+    if molecule_name_jpl is None:
+        molecule_name_jpl = molecule_name
 
-    request = request.Request(node=cdms)
-    query_string = "SELECT ALL WHERE VAMDCSpeciesID='%s'" % species_id
-    request.setquery(query_string)
-    result = request.dorequest()
-    # run it once to test that it works
-    Q = list(specmodel.calculate_partitionfunction(result.data['States'],
-                                                   temperature=tex).values())[0]
+    jpltable = JPLSpec.get_species_table()[JPLSpec.get_species_table()['NAME'] == molecule_name_jpl]
+    if len(jpltable) != 1:
+        raise ValueError(f"Too many or too few matches to {molecule_name_jpl}")
 
     def partfunc(tem):
-        Q = list(specmodel.calculate_partitionfunction(result.data['States'],
-                                                       temperature=tem).values())[0]
-        return Q
+        """
+        interpolate the partition function
+        WARNING: this can be very wrong
+        """
+        tems = jpltable.meta['Temperature (K)']
+        logQs = jpltable['QLOG1 QLOG2 QLOG3 QLOG4 QLOG5 QLOG6 QLOG7'.split()]
+        logQ = np.interp(tem, tems, list(logQs[0]))
+        return 10**logQ
 
 
     freqs = (np.array(tbl['Freq-GHz'])*u.GHz if 'Freq-GHz' in tbl else
@@ -328,6 +313,29 @@ def generate_fitter(model_func, name):
 
     return myclass
 
+
+def nupper_of_kkms(kkms, freq, Aul, degeneracy, replace_bad=None):
+    """ Reverse-modeling: get the column from the integrated intensity """
+
+    if replace_bad:
+        neg = kkms <= 0
+        kkms[neg] = replace_bad
+
+    freq = u.Quantity(freq, u.GHz)
+    Aul = u.Quantity(Aul, u.Hz)
+    kkms = u.Quantity(kkms, u.K*u.km/u.s)
+    #nline = 1.95e3 * freq**2 / Aul * kkms
+    nline = 8 * np.pi * freq * constants.k_B / constants.h / Aul / constants.c**2
+    # kelvin-hertz
+    Khz = (kkms * (freq/constants.c)).to(u.K * u.MHz)
+    return (nline * Khz / degeneracy).to(u.cm**-2)
+
+def ntot_of_nupper(nupper, eupper, tex, Q_rot degeneracy=1):
+    """ Given an N_upper, E_upper, tex, Q_rot, and degeneracy for a single state, give N_tot """
+
+    Ntot = nupper * (Q_rot/degen) * np.exp(eupper / (constants.k_B*tex))
+
+    return Ntot
 
 # url = 'http://cdms.ph1.uni-koeln.de/cdms/tap/'
 # rslt = requests.post(url+"/sync", data={'REQUEST':"doQuery", 'LANG': 'VSS2', 'FORMAT':'XSAMS', 'QUERY':"SELECT SPECIES WHERE MoleculeStoichiometricFormula='CH2O'"})
