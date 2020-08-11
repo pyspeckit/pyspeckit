@@ -330,8 +330,17 @@ def nupper_of_kkms(kkms, freq, Aul, degeneracy, replace_bad=None):
     Khz = (kkms * (freq/constants.c)).to(u.K * u.MHz)
     return (nline * Khz / degeneracy).to(u.cm**-2)
 
-def ntot_of_nupper(nupper, eupper, tex, Q_rot degeneracy=1):
-    """ Given an N_upper, E_upper, tex, Q_rot, and degeneracy for a single state, give N_tot """
+def ntot_of_nupper(nupper, eupper, tex, Q_rot, degeneracy=1):
+    """ Given an N_upper, E_upper, tex, Q_rot, and degeneracy for a single state, give N_tot
+
+    Example:
+        >>> tex = 50*u.K
+        >>> kkms = 100*u.K*u.km/u.s
+        >>> from pyspeckit.spectrum.models import lte_molecule
+        >>> freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters(molecule_name='HNCO', fmin=87*u.GHz, fmax=88*u.GHz)
+        >>> nupper = lte_molecule.nupper_of_kkms(kkms, freqs, aij, deg)
+        >>> ntot = ntot_of_upper(nupper, EU, tex, Q_rot=partfunc(tex), degeneracy=deg)
+    """
 
     Ntot = nupper * (Q_rot/degen) * np.exp(eupper / (constants.k_B*tex))
 
