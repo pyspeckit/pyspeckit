@@ -337,12 +337,12 @@ def ntot_of_nupper(nupper, eupper, tex, Q_rot, degeneracy=1):
         >>> tex = 50*u.K
         >>> kkms = 100*u.K*u.km/u.s
         >>> from pyspeckit.spectrum.models import lte_molecule
-        >>> freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters(molecule_name='HNCO', fmin=87*u.GHz, fmax=88*u.GHz)
+        >>> freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters(molecule_name='HNCO v=0', molecule_name_jpl='HNCO', fmin=87*u.GHz, fmax=88*u.GHz)
         >>> nupper = lte_molecule.nupper_of_kkms(kkms, freqs, aij, deg)
-        >>> ntot = ntot_of_upper(nupper, EU, tex, Q_rot=partfunc(tex), degeneracy=deg)
+        >>> ntot = lte_molecule.ntot_of_nupper(nupper, EU*u.erg, tex, Q_rot=partfunc(tex), degeneracy=deg)
     """
 
-    Ntot = nupper * (Q_rot/degen) * np.exp(eupper / (constants.k_B*tex))
+    Ntot = nupper * (Q_rot/degeneracy) * np.exp(eupper / (constants.k_B*tex))
 
     return Ntot
 
