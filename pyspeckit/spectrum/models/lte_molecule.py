@@ -220,7 +220,7 @@ def get_molecular_parameters(molecule_name,
         return 10**logQ
 
 
-    freqs = (np.array(tbl['Freq-GHz'])*u.GHz if 'Freq-GHz' in tbl else
+    freqs = (np.array(tbl['Freq-GHz'])*u.GHz if 'Freq-GHz' in tbl.colnames else
              np.array(tbl['Freq-GHz(rest frame,redshifted)'])*u.GHz)
     aij = tbl['Log<sub>10</sub> (A<sub>ij</sub>)']
     deg = tbl['Upper State Degeneracy']
@@ -400,7 +400,7 @@ def ntot_of_nupper(nupper, eupper, tex, Q_rot, degeneracy=1):
         >>> kkms = 100*u.K*u.km/u.s
         >>> from pyspeckit.spectrum.models import lte_molecule
         >>> freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters(molecule_name='HNCO v=0', molecule_name_jpl='HNCO', fmin=87*u.GHz, fmax=88*u.GHz)
-        >>> nupper = lte_molecule.nupper_of_kkms(kkms, freqs, 10**aij, deg)
+        >>> nupper = lte_molecule.nupper_of_kkms(kkms, freqs, 10**aij)
         >>> ntot = lte_molecule.ntot_of_nupper(nupper, EU*u.erg, tex, Q_rot=partfunc(tex), degeneracy=deg)
     """
 
