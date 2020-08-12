@@ -317,7 +317,7 @@ def generate_fitter(model_func, name):
     return myclass
 
 
-def nupper_of_kkms(kkms, freq, Aul, degeneracies, replace_bad=None):
+def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
     """
     Mangum & Shirley 2015 eqn 82 gives, for the optically thin, Rayleigh-Jeans,
     negligible background approximation:
@@ -387,10 +387,13 @@ def nupper_of_kkms(kkms, freq, Aul, degeneracies, replace_bad=None):
     # kelvin-hertz
     Khz = (kkms * (freq/constants.c)).to(u.K * u.MHz)
 
-    return (nline * Khz / degeneracies).to(u.cm**-2)
+    return (nline * Khz).to(u.cm**-2)
 
 def ntot_of_nupper(nupper, eupper, tex, Q_rot, degeneracy=1):
     """ Given an N_upper, E_upper, tex, Q_rot, and degeneracy for a single state, give N_tot
+
+    Mangum & Shirley 2015 eqn 31
+    Ntot/Nu = Q_rot / gu exp(E_u/k Tex)
 
     Example:
         >>> tex = 50*u.K
