@@ -389,9 +389,9 @@ def formaldehyde_mm_radex(xarr,
         # this is mostly a trick for speed: slice so you only have two thin layers to interpolate
         # between
         #slices = [density_gridnumber] + [slice(np.floor(gv),np.floor(gv)+2) for gv in (gridval2,gridval1)]
-        slices = [slice(np.floor(gridval3),np.floor(gridval3)+2),
-                  slice(np.floor(gridval2),np.floor(gridval2)+2),
-                  slice(np.floor(gridval1),np.floor(gridval1)+2)
+        slices = [slice(int(np.floor(gridval3)), int(np.floor(gridval3))+2),
+                  slice(int(np.floor(gridval2)), int(np.floor(gridval2))+2),
+                  slice(int(np.floor(gridval1)), int(np.floor(gridval1))+2)
                   ]
         tau = [scipy.ndimage.map_coordinates(tg[slices],
             np.array([[gridval3%1],[gridval2%1],[gridval1%1]]),order=1) for tg in taugrid]
@@ -404,6 +404,7 @@ def formaldehyde_mm_radex(xarr,
 
     if verbose:
         for ta,tk in zip(tau,tex):
+            print((density, temperature, column, ta, tk))
             print("density %20.12g temperature %20.12g column %20.12g: tau %20.12g tex %20.12g" % (density, temperature, column, ta, tk))
 
     if debug:
