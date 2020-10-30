@@ -103,28 +103,41 @@ def ammonia_grids(gridfile=None):
     for idx,key in enumerate(modelkeys):
                          grid[idx,idx1,idx2,idx3,idx4] = t[key].data
     
-    def ammonia_sampler(linename='oneone',
-                        logdens=4,
+    def ammonia_sampler(logdens=4,
                         tkin=15,
                         ntot=14,
                         fortho=0.0,
                         sigma=0.3,
                         order=2,
                         scaling_method='loglogfit'):
-        
-        dV = line_scaling_function(sigma, linename,
-                                   method=scaling_method)
+        outputdict = {}
 
-        param_interps = (np.array(np.c_[0,f1(logdens+np.log10(1-fortho)),
+        param_interps = np.zeros((12, 5))
+        for linename, idx in zip(['oneone','twotwo',
+                                  'fourfour','fivefive'],
+                                 [0, 1, 2, 3]):
+            dV = line_scaling_function(sigma, linename,
+                                       method=scaling_method)
+            thisarray = np.array(np.c_[0,f1(logdens),
                                        f2(np.log10(tkin)),
-                                       f3(ntot),
+                                       f3(ntot + np.log10(1-fortho)),
                                        f4(np.log10(dV))])
-                         * np.ones((nOutputs,1)))
-
+            param_interps[idx, :] = thisarray
+            param_interps[idx + 6, :] = thisarray
+            
+        for linename, idx in zip(['threethree', 'sixsix'],
+                                 [4, 5]):
+            dV = line_scaling_function(sigma, linename,
+                                       method=scaling_method)
+            thisarray = np.array(np.c_[0,f1(logdens),
+                                       f2(np.log10(tkin)),
+                                       f3(ntot + np.log10(fortho)),
+                                       f4(np.log10(dV))])
+            param_interps[idx, :] = thisarray
+            param_interps[idx + 6, :] = thisarray
         param_interps[:,0] = np.arange(nOutputs)
         interp_params = ndinterp.map_coordinates(grid, param_interps.T,
-                                               order=order,cval=np.nan)
-        outputdict = {}
+                                                 order=order,cval=np.nan)
         for idx,key in enumerate(modelkeys):
             outputdict[key] = interp_params[idx]
 
