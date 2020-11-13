@@ -113,28 +113,31 @@ def ammonia_grids(gridfile=None):
         outputdict = {}
 
         param_interps = np.zeros((12, 5))
-        for linename, idx in zip(['oneone','twotwo',
-                                  'fourfour','fivefive'],
-                                 [0, 1, 3, 4]):
-            dV = line_scaling_function(sigma, linename,
-                                       method=scaling_method)
-            thisarray = np.array(np.c_[0,f1(logdens),
-                                       f2(np.log10(tkin)),
-                                       f3(ntot + np.log10(1-fortho)),
-                                       f4(np.log10(dV))])
-            param_interps[idx, :] = thisarray
-            param_interps[idx + 6, :] = thisarray
-            
-        for linename, idx in zip(['threethree', 'sixsix'],
-                                 [2, 5]):
-            dV = line_scaling_function(sigma, linename,
-                                       method=scaling_method)
-            thisarray = np.array(np.c_[0,f1(logdens),
-                                       f2(np.log10(tkin)),
-                                       f3(ntot + np.log10(fortho)),
-                                       f4(np.log10(dV))])
-            param_interps[idx, :] = thisarray
-            param_interps[idx + 6, :] = thisarray
+        if fortho != 1:
+            for linename, idx in zip(['oneone','twotwo',
+                                      'fourfour','fivefive'],
+                                     [0, 1, 3, 4]):
+                dV = line_scaling_function(sigma, linename,
+                                           method=scaling_method)
+                thisarray = np.array(np.c_[0,f1(logdens),
+                                           f2(np.log10(tkin)),
+                                           f3(ntot + np.log10(1-fortho)),
+                                           f4(np.log10(dV))])
+                param_interps[idx, :] = thisarray
+                param_interps[idx + 6, :] = thisarray
+
+        if fortho != 0:
+            for linename, idx in zip(['threethree', 'sixsix'],
+                                     [2, 5]):
+                dV = line_scaling_function(sigma, linename,
+                                           method=scaling_method)
+                
+                thisarray = np.array(np.c_[0,f1(logdens),
+                                           f2(np.log10(tkin)),
+                                           f3(ntot + np.log10(fortho)),
+                                           f4(np.log10(dV))])
+                param_interps[idx, :] = thisarray
+                param_interps[idx + 6, :] = thisarray
         param_interps[:,0] = np.arange(nOutputs)
         interp_params = ndinterp.map_coordinates(grid, param_interps.T,
                                                  order=order,
@@ -142,6 +145,15 @@ def ammonia_grids(gridfile=None):
                                                  cval=np.nan)
         for idx,key in enumerate(modelkeys):
             outputdict[key] = interp_params[idx]
+
+        if fortho == 0:
+            for key in ['tau_33', 'tau_66',
+                        'Tex_33', 'Tex_66']:
+                outputdict[key] = 0.0
+        if fortho == 1:
+            for key in ['tau_11', 'tau_22', 'tau_44', 'tau_55',
+                        'Tex_11', 'Tex_22', 'Tex_44', 'Tex_55']:
+                outputdict[key] = 0.0
 
         return outputdict
 

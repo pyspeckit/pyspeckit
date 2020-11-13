@@ -294,7 +294,7 @@ def cold_ammonia(xarr, tkin, **kwargs):
 def ammonia_radex(xarr, tkin=20,
                   ntot=14, logdens=4, width=1.0, xoff_v=0.0, fortho=0.0,
                   interpolator=None, gridfile=None,
-                  scaling_method='loglogfit',
+                  scaling_method='loglogfit', line_names=line_names,
                   **kwargs):
     """
     Generate a model Ammonia spectrum based on input temperatures,
@@ -315,27 +315,35 @@ def ammonia_radex(xarr, tkin=20,
                        sigma=width,
                        scaling_method=scaling_method)
 
-    tau_dict = {
-        'oneone':dix['tau_11'],
-        'twotwo':dix['tau_22'],
-        'fourfour':dix['tau_44'],
-        'fivefive':dix['tau_55'],
-    }
+    tau_dict = {}
+    tex_dict = {}
+    if 'oneone' in line_names:
+        tau_dict['oneone'] = dix['tau_11']
+        tex_dict['oneone'] = dix['Tex_11']
 
-    tex_dict = {
-        'oneone':dix['Tex_11'],
-        'twotwo':dix['Tex_22'],
-        'fourfour':dix['Tex_44'],
-        'fivefive':dix['Tex_55'],
-    }
+    if 'twotwo' in line_names:
+        tau_dict['twotwo'] = dix['tau_22']
+        tex_dict['twotwo'] = dix['Tex_22']
 
-    if fortho > 0:
+    if ('threethree' in line_names) and (fortho > 0):
         tau_dict['threethree'] = dix['tau_33']
-        tau_dict['sixsix'] = dix['tau_66']
         tex_dict['threethree'] = dix['Tex_33']
+        
+    if 'fourfour' in line_names:
+        tau_dict['fourfour'] = dix['tau_44']
+        tex_dict['fourfour'] = dix['Tex_44']
+    
+    if 'fivefive' in line_names:
+        tau_dict['fivefive'] = dix['tau_55']
+        tex_dict['fivefive'] = dix['Tex_55']
+
+    if ('sixsix' in line_names) and (fortho > 0):
+        tau_dict['sixsix'] = dix['tau_66']
         tex_dict['sixsix'] = dix['Tex_66']
+
     spec = ammonia(xarr, tex=tex_dict, tau=tau_dict,
-                   width=width, xoff_v=xoff_v, **kwargs)
+                   width=width, xoff_v=xoff_v,
+                   line_names=line_names, **kwargs)
 
     return spec
 
