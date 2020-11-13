@@ -334,7 +334,6 @@ def ammonia_radex(xarr, tkin=20,
         tau_dict['sixsix'] = dix['tau_66']
         tex_dict['threethree'] = dix['Tex_33']
         tex_dict['sixsix'] = dix['Tex_66']
-    
     spec = ammonia(xarr, tex=tex_dict, tau=tau_dict,
                    width=width, xoff_v=xoff_v, **kwargs)
 
@@ -409,7 +408,7 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
         tau_wts = np.array(tau_wts_dict[linename])
 
         lines = (1-voff_lines/ckms)*freq_dict[linename]/1e9
-        tau_wts /= tau_wts.sum()
+        tau_wts = tau_wts / tau_wts.sum()
         nuwidth = np.abs(width/ckms*lines)
         nuoff = xoff_v/ckms*lines
 

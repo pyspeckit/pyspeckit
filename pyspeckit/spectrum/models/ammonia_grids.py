@@ -102,20 +102,20 @@ def ammonia_grids(gridfile=None):
     # Pack that grid
     for idx,key in enumerate(modelkeys):
                          grid[idx,idx1,idx2,idx3,idx4] = t[key].data
-    
+
     def ammonia_sampler(logdens=4,
                         tkin=15,
                         ntot=14,
                         fortho=0.0,
                         sigma=0.3,
-                        order=2,
+                        order=1,
                         scaling_method='loglogfit'):
         outputdict = {}
 
         param_interps = np.zeros((12, 5))
         for linename, idx in zip(['oneone','twotwo',
                                   'fourfour','fivefive'],
-                                 [0, 1, 2, 3]):
+                                 [0, 1, 3, 4]):
             dV = line_scaling_function(sigma, linename,
                                        method=scaling_method)
             thisarray = np.array(np.c_[0,f1(logdens),
@@ -126,7 +126,7 @@ def ammonia_grids(gridfile=None):
             param_interps[idx + 6, :] = thisarray
             
         for linename, idx in zip(['threethree', 'sixsix'],
-                                 [4, 5]):
+                                 [2, 5]):
             dV = line_scaling_function(sigma, linename,
                                        method=scaling_method)
             thisarray = np.array(np.c_[0,f1(logdens),
@@ -137,7 +137,9 @@ def ammonia_grids(gridfile=None):
             param_interps[idx + 6, :] = thisarray
         param_interps[:,0] = np.arange(nOutputs)
         interp_params = ndinterp.map_coordinates(grid, param_interps.T,
-                                                 order=order,cval=np.nan)
+                                                 order=order,
+                                                 prefilter=False,
+                                                 cval=np.nan)
         for idx,key in enumerate(modelkeys):
             outputdict[key] = interp_params[idx]
 
