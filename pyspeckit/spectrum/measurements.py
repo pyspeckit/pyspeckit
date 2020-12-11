@@ -403,7 +403,7 @@ class Measurements(object):
             atol = 1e-4
             niter = (len(pars) / 3)
             pars2d = np.reshape(pars, (int(niter), 3))
-            start = zip(*pars2d)[1][0]                    # start at central wavelength of first component
+            start = list(zip(*pars2d))[1][0]                    # start at central wavelength of first component
 
             # If the centroids are exactly the same for all components, we know the peak, and peak position
             if np.allclose(zip(*pars2d)[1], atol):
