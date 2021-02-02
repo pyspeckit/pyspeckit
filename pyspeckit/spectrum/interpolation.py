@@ -22,6 +22,14 @@ def _interp(x, xp, fp, left=None, right=None):
     Overrides numpy's interp function, which fails to check for
     increasingness....
     """
+    if hasattr(x, 'unit'):
+        if hasattr(xp, 'unit'):
+            x = x.to_value(xp.unit)
+            xp = xp.value
+        else:
+            x = x.value
+    if hasattr(xp, 'unit'):
+        xp = xp.value
     indices = np.argsort(xp)
     xp = np.array(xp)[indices]
     fp = np.array(fp)[indices]
@@ -78,7 +86,7 @@ def interp_on_axes(spec1, xarr, left=0, right=0):
 
     xarr1 = spec1.xarr.as_unit(xarr.unit)
 
-    newdata = _interp(xarr,xarr1,spec1.data, left=left, right=right)
+    newdata = _interp(xarr, xarr1, spec1.data, left=left, right=right)
 
     if spec1.error is not None:
         if xarr1.cdelt() and xarr.cdelt():
