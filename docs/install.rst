@@ -34,19 +34,18 @@ If you have pip (see https://pypi.org/project/pyspeckit), you can install with::
 Or the most recent version with either of these commands::
 
     pip install https://github.com/pyspeckit/pyspeckit/archive/master.zip
-    pip install https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz
 
 You can acquire the code with this clone command (see also :doc:`install_via_GitHub`)::
 
-    git clone git@bitbucket.org:pyspeckit/pyspeckit.git pyspeckit
+    git clone git@github.com:pyspeckit/pyspeckit.git pyspeckit
     cd pyspeckit
     python setup.py install
 
-Or you can `Download the latest tarball version <https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz>`_, 
+Or you can `Download the latest zip version <https://github.com/pyspeckit/pyspeckit/archive/refs/heads/master.zip>`_, 
 then extract and install using the standard python method (but the pip install version of this is easier)::
 
-    wget --no-check-certificate https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz
-    tar -xzf master.tar.gz
+    wget --no-check-certificate https://github.com/pyspeckit/pyspeckit/archive/refs/heads/master.zip
+    unzip master.zip
     cd pyspeckit-pyspeckit-[commit]
     python setup.py install
 
@@ -57,10 +56,6 @@ You can also check out the `source code <https://github.com/pyspeckit/pyspeckit>
     If you use `easy_install pyspeckit` with the Enthought Python Distribution, you will
     most likely get a SandboxViolation error.  You can get around this by using `python
     setup.py install` or `pip install pyspeckit`.
-
-.. note ::
-   pyspeckit is hosted on both bitbucket and github.  Both versions are kept up
-   to date, so it should not matter which one you choose to install.
 
 .. toctree::
    install_via_GitHub
