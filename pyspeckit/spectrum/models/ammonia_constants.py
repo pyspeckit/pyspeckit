@@ -25,9 +25,10 @@ line_name_indices = {'oneone': 0,
                      'eighteight': 5,
                      'tenten': 6,
                      'eleveneleven': 7,
-                     'threethree': 0,
-                     'sixsix': 1,
-                     'ninenine': 2,
+                     'zerozero': 0,
+                     'threethree': 1,
+                     'sixsix': 2,
+                     'ninenine': 3,
                     }
 
               #'ninenine']
