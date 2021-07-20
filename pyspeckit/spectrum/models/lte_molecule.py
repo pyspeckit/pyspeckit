@@ -36,13 +36,37 @@ def line_tau(tex, total_column, partition_function, degeneracy, frequency,
 
     .. math::
 
-        \\tau_\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u \\exp\left(
-                     \\frac{h \\nu}{k_B T_{ex}}\\right)
+        \\int \\tau_\\nu d\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u
+                    \\left[ \\exp\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
+
+    or
+
+    .. math::
+
+        \\tau_\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u \\phi_\\nu
+                    \\left[ \\exp\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
+
+    where
 
     .. math::
         N_{u} = N_{tot} \\frac{g_u}{Q} \\exp\left(\\frac{-E_u}{k_B T_{ex}} \\right)
 
-    based on Equation 29 of Mangum & Shirley 2015 (2015PASP..127..266M)
+    based on Equations 11 and 29 of Mangum & Shirley 2015 (2015PASP..127..266M)
+
+    The return value is therefore
+
+    .. math::
+
+        \\tau_\\nu / \\phi_\\nu
+
+
+    The line profile function is, for a Gaussian, given by eqn A1:
+
+    .. math::
+
+        \\phi_\\nu = \\frac{1}{\\sqrt{2 \\pi} \\sigma}
+        \\exp \\left[ -\\frac{(\\nu-\\nu_0)^2}{2 \\sigma^2} \\right]
+
     """
     # don't use dipole moment, because there are extra hidden dependencies
 
@@ -103,13 +127,37 @@ def line_tau_cgs(tex, total_column, partition_function, degeneracy, frequency,
 
     .. math::
 
-        \\tau_\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u \\exp\left(
-                     \\frac{h \\nu}{k_B T_{ex}}\\right)
+        \\int \\tau_\\nu d\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u
+                    \\left[ \\exp\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
+
+    or
+
+    .. math::
+
+        \\tau_\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u \\phi_\\nu
+                    \\left[ \\exp\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
+
+    where
 
     .. math::
         N_{u} = N_{tot} \\frac{g_u}{Q} \\exp\left(\\frac{-E_u}{k_B T_{ex}} \\right)
 
     based on Equations 11 and 29 of Mangum & Shirley 2015 (2015PASP..127..266M)
+
+    The return value is therefore
+
+    .. math::
+
+        \\tau_\\nu / \\phi_\\nu
+
+
+    The line profile function is, for a Gaussian, given by eqn A1:
+
+    .. math::
+
+        \\phi_\\nu = \\frac{1}{\\sqrt{2 \\pi} \\sigma}
+        \\exp \\left[ -\\frac{(\\nu-\\nu_0)^2}{2 \\sigma^2} \\right]
+
     """
 
     N_upper = (total_column * degeneracy / partition_function *
@@ -271,19 +319,22 @@ def generate_model(xarr, vcen, width, tex, column,
 
     Q = partfunc(tex)
 
-    for A, g, nu, eu in zip(aij[OK], deg[OK], freqs_[OK], EU[OK]):
-        tau_per_dnu = line_tau_cgs(tex,
-                                   column,
-                                   Q,
-                                   g,
-                                   nu,
-                                   eu,
-                                   10**A)
-        width_dnu = width / ckms * nu
-        s = np.exp(-(freq-(1-vcen/ckms)*nu)**2/(2*width_dnu**2))*tau_per_dnu/channelwidth
-        jnu = (Jnu_cgs(nu, tex)-Jnu_cgs(nu, tbg))
+    for logA, gg, restfreq, eu in zip(aij[OK], deg[OK], freqs_[OK], EU[OK]):
+        tau_over_phi = line_tau_cgs(tex=tex, total_column=column,
+                                    partition_function=Q, degeneracy=gg,
+                                    frequency=restfreq, energy_upper=eu,
+                                    einstein_A=10**logA)
+        width_dnu = width / ckms * restfreq
 
-        model = model + jnu*(1-np.exp(-s))
+        phi_nu = (
+            ((2*np.pi)**0.5 * width_dnu)**-1 *
+            np.exp(-(freq-(1-vcen/ckms)*restfreq)**2/(2*width_dnu**2)))
+
+        tau_profile = (tau_over_phi * phi_nu)
+
+        jnu = (Jnu_cgs(restfreq, tex)-Jnu_cgs(restfreq, tbg))
+
+        model = model + jnu*(1-np.exp(-tau_profile))
 
     if background is not None:
         return background-model
