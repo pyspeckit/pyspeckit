@@ -202,6 +202,7 @@ def get_molecular_parameters(molecule_name,
                              molecule_name_jpl=None,
                              tex=50, fmin=1*u.GHz, fmax=1*u.THz,
                              line_lists=['SLAIM'],
+                             export_limit=1e5,
                              chem_re_flags=0, **kwargs):
     """
     Get the molecular parameters for a molecule from the CDMS database using
@@ -245,7 +246,9 @@ def get_molecular_parameters(molecule_name,
     # this query could fail
     tbl = Splatalogue.query_lines(fmin, fmax, chemical_name=molecule_name,
                                   line_lists=line_lists,
-                                  show_upper_degeneracy=True, **kwargs)
+                                  show_upper_degeneracy=True,
+                                  export_limit=export_limit,
+                                  **kwargs)
 
     if molecule_name_jpl is None:
         molecule_name_jpl = molecule_name
