@@ -331,24 +331,31 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
         logQ = np.interp(tem, tems[inds], logQs[inds])
         return 10**logQ
 
-
     freqs = jpltbl['FREQ'].quantity
-    deg = jpltbl['GUP']
+    freq_MHz = freqs.to(u.MHz).value
+    deg = jpltbl['GUP'].value
     EL = (jpltbl['ELO'].quantity.to(u.erg, u.spectral()) / constants.k_B).to(u.K)
     dE = (freqs.to(u.erg, u.spectral()) / constants.k_B).to(u.K)
     EU = EL + dE
 
+    # need elower, eupper in inverse centimeter units
+    elower_icm = jpltbl['ELO'].quantity.to(u.cm**-1).value
+    eupper_icm = elower_icm + (freqs.to(u.cm**-1, u.spectral()).value)
 
     # from Brett McGuire https://github.com/bmcguir2/simulate_lte/blob/1f3f7c666946bc88c8d83c53389556a4c75c2bbd/simulate_lte.py#L2580-L2587
 
     # LGINT: Base 10 logarithm of the integrated intensity in units of nm2 ·MHz at 300 K. (See Section 3 for conversions to other units.)
     CT = 300
-    logint = jpltbl['LGINT']
+    logint = jpltbl['LGINT'].value
     #from CDMS website
-    sijmu = (np.exp(np.float64(-(EL/0.695)/CT)) - np.exp(np.float64(-(EU/0.695)/CT)))**(-1) * ((10**logint)/freqs) * (24025.120666) * Q
+    sijmu = (np.exp(np.float64(-(elower_icm/0.695)/CT)) - np.exp(np.float64(-(eupper_icm/0.695)/CT)))**(-1) * ((10**logint)/freq_MHz) * (24025.120666) * partfunc(CT)
 
     #aij formula from CDMS.  Verfied it matched spalatalogue's values
-    aij = 1.16395 * 10**(-20) * freqs**3 * sijmu / deg
+    aij = 1.16395 * 10**(-20) * freq_MHz**3 * sijmu / deg
+
+    # we want logA for consistency with use in generate_model below
+    aij = np.log10(aij)
+    EU = EU.to(u.K).value
 
     return freqs, aij, deg, EU, partfunc
 
