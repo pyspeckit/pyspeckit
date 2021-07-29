@@ -35,11 +35,7 @@ offset = np.nanpercentile(sp.data.filled(np.nan), 20)
 # Be cautious! Not all line catalogs have all of these species, some species
 # can result in multiple matches from splatalogue, and definitely not all
 # species have the same column and excitation
-species_list = (' CH3OH ', 'HC3N v=0', ' H2CO ', ' CH3OCHO ', ' CH3OCH3 ', ' CH3CH2CN ',)
-
-species_jpl = [x.strip() for x in species_list]
-species_jpl[1] = 'HCCCN'
-species_jpl[5] = 'C2H5CN'
+species_list = ('CH3OH', 'HCCCN', 'H2CO', 'CH3OCHO', 'CH3OCH3', 'C2H5CN',)
 
 # make a set of subplots:
 import pylab as pl
@@ -49,9 +45,8 @@ pl.draw()
 
 from pyspeckit.spectrum.models import lte_molecule
 mods = []
-for species, species_jpl, axis in zip(species_list, species_jpl, axes):
-    freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters(species, fmin=200*u.GHz, fmax=250*u.GHz, export_limit=1e5, molecule_name_jpl=species_jpl,
-                                                                          line_lists=['SLAIM'])
+for species, axis in zip(species_list, axes):
+    freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters_JPL(species, fmin=200*u.GHz, fmax=250*u.GHz)
     mod = lte_molecule.generate_model(sp.xarr, 50*u.km/u.s, 3*u.km/u.s, 100*u.K, 1e17*u.cm**-2, freqs, aij, deg, EU, partfunc)
     mods.append(mod)
 
