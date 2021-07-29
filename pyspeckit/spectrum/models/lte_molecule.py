@@ -334,8 +334,8 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
     freqs = jpltbl['FREQ'].quantity
     freq_MHz = freqs.to(u.MHz).value
     deg = jpltbl['GUP'].value
-    EL = (jpltbl['ELO'].quantity.to(u.erg, u.spectral()) / constants.k_B).to(u.K)
-    dE = (freqs.to(u.erg, u.spectral()) / constants.k_B).to(u.K)
+    EL = jpltbl['ELO'].quantity.to(u.erg, u.spectral())
+    dE = freqs.to(u.erg, u.spectral())
     EU = EL + dE
 
     # need elower, eupper in inverse centimeter units
@@ -355,7 +355,7 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
 
     # we want logA for consistency with use in generate_model below
     aij = np.log10(aij)
-    EU = EU.to(u.K).value
+    EU = EU.to(u.erg).value
 
     return freqs, aij, deg, EU, partfunc
 
