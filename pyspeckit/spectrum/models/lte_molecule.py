@@ -333,7 +333,7 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
 
     freqs = jpltbl['FREQ'].quantity
     freq_MHz = freqs.to(u.MHz).value
-    deg = jpltbl['GUP'].value
+    deg = jpltbl['GUP']
     EL = jpltbl['ELO'].quantity.to(u.erg, u.spectral())
     dE = freqs.to(u.erg, u.spectral())
     EU = EL + dE

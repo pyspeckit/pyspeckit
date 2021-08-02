@@ -39,17 +39,21 @@ species_list = ('CH3OH', 'HCCCN', 'H2CO', 'CH3OCHO', 'CH3OCH3', 'C2H5CN',)
 
 # make a set of subplots:
 import pylab as pl
-pl.close(1)
 fig, axes = pl.subplots(len(species_list)+1, 1, figsize=(18,14), num=1)
 pl.draw()
 
 from pyspeckit.spectrum.models import lte_molecule
 mods = []
 for species, axis in zip(species_list, axes):
-    freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters_JPL(species, fmin=200*u.GHz, fmax=250*u.GHz)
-    #freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters(species, fmin=200*u.GHz, fmax=250*u.GHz, export_limit=1e5, molecule_name_jpl=species_jpl,
-    #                                                                      line_lists=['SLAIM'])
-    mod = lte_molecule.generate_model(sp.xarr, 50*u.km/u.s, 3*u.km/u.s, 100*u.K, 1e17*u.cm**-2, freqs, aij, deg, EU, partfunc)
+    freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters_JPL(species,
+                                                                              fmin=200*u.GHz,
+                                                                              fmax=250*u.GHz)
+
+    mod = lte_molecule.generate_model(xarr=sp.xarr, vcen=50*u.km/u.s,
+                                      width=3*u.km/u.s, tex=100*u.K,
+                                      column=1e17*u.cm**-2, freqs=freqs,
+                                      aij=aij, deg=deg, EU=EU,
+                                      partfunc=partfunc)
     mods.append(mod)
 
     sp.plotter(axis=axis, figure=fig, clear=False)
