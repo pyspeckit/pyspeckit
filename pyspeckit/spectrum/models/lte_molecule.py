@@ -202,6 +202,7 @@ def get_molecular_parameters(molecule_name,
                              molecule_name_jpl=None,
                              tex=50, fmin=1*u.GHz, fmax=1*u.THz,
                              line_lists=['SLAIM'],
+                             export_limit=1e5,
                              chem_re_flags=0, **kwargs):
     """
     Get the molecular parameters for a molecule from the CDMS database using
@@ -245,7 +246,9 @@ def get_molecular_parameters(molecule_name,
     # this query could fail
     tbl = Splatalogue.query_lines(fmin, fmax, chemical_name=molecule_name,
                                   line_lists=line_lists,
-                                  show_upper_degeneracy=True, **kwargs)
+                                  show_upper_degeneracy=True,
+                                  export_limit=export_limit,
+                                  **kwargs)
 
     if molecule_name_jpl is None:
         molecule_name_jpl = molecule_name
@@ -275,6 +278,88 @@ def get_molecular_parameters(molecule_name,
     EU = (np.array(tbl['E_U (K)'])*u.K*constants.k_B).to(u.erg).value
 
     return freqs, aij, deg, EU, partfunc
+
+
+def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
+                                 fmax=1*u.THz, **kwargs):
+    """
+    Get the molecular parameters for a molecule from the JPL catalog
+
+    (this version should, in principle, be entirely self-consistent)
+
+    Parameters
+    ----------
+    molecule_name : string
+        The string name of the molecule (normal name, like CH3OH or CH3CH2OH,
+        but it has to match the JPL catalog spec)
+    tex : float
+        Optional excitation temperature (basically checks if the partition
+        function calculator works)
+    fmin : quantity with frequency units
+    fmax : quantity with frequency units
+        The minimum and maximum frequency to search over
+
+    Examples
+    --------
+    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters(molecule_name='CH2CHCN',
+    ...                                                          fmin=220*u.GHz,
+    ...                                                          fmax=222*u.GHz,
+                                                                )
+    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH3OH',
+    ...                                                          fmin=90*u.GHz,
+    ...                                                          fmax=100*u.GHz)
+    """
+    from astroquery.jplspec import JPLSpec
+
+    jpltable = JPLSpec.get_species_table()[JPLSpec.get_species_table()['NAME'] == molecule_name_jpl]
+    if len(jpltable) != 1:
+        raise ValueError(f"Too many or too few matches to {molecule_name_jpl}")
+
+    jpltbl = JPLSpec.query_lines(fmin, fmax, molecule=molecule_name_jpl,
+                                 parse_name_locally=True)
+
+    def partfunc(tem):
+        """
+        interpolate the partition function
+        WARNING: this can be very wrong
+        """
+        tem = u.Quantity(tem, u.K).value
+        tems = np.array(jpltable.meta['Temperature (K)'])
+        logQs = jpltable['QLOG1 QLOG2 QLOG3 QLOG4 QLOG5 QLOG6 QLOG7'.split()]
+        logQs = np.array(list(logQs[0]))
+        inds = np.argsort(tems)
+        logQ = np.interp(tem, tems[inds], logQs[inds])
+        return 10**logQ
+
+    freqs = jpltbl['FREQ'].quantity
+    freq_MHz = freqs.to(u.MHz).value
+    deg = jpltbl['GUP']
+    EL = jpltbl['ELO'].quantity.to(u.erg, u.spectral())
+    dE = freqs.to(u.erg, u.spectral())
+    EU = EL + dE
+
+    # need elower, eupper in inverse centimeter units
+    elower_icm = jpltbl['ELO'].quantity.to(u.cm**-1).value
+    eupper_icm = elower_icm + (freqs.to(u.cm**-1, u.spectral()).value)
+
+    # from Brett McGuire https://github.com/bmcguir2/simulate_lte/blob/1f3f7c666946bc88c8d83c53389556a4c75c2bbd/simulate_lte.py#L2580-L2587
+
+    # LGINT: Base 10 logarithm of the integrated intensity in units of nm2 ·MHz at 300 K. (See Section 3 for conversions to other units.)
+    CT = 300
+    logint = jpltbl['LGINT'].value
+    #from CDMS website
+    sijmu = (np.exp(np.float64(-(elower_icm/0.695)/CT)) - np.exp(np.float64(-(eupper_icm/0.695)/CT)))**(-1) * ((10**logint)/freq_MHz) * (24025.120666) * partfunc(CT)
+
+    #aij formula from CDMS.  Verfied it matched spalatalogue's values
+    aij = 1.16395 * 10**(-20) * freq_MHz**3 * sijmu / deg
+
+    # we want logA for consistency with use in generate_model below
+    aij = np.log10(aij)
+    EU = EU.to(u.erg).value
+
+    return freqs, aij, deg, EU, partfunc
+
+
 
 def generate_model(xarr, vcen, width, tex, column,
                    freqs, aij, deg, EU, partfunc,
