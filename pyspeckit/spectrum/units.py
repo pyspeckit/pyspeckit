@@ -399,7 +399,7 @@ class SpectroscopicAxis(u.Quantity):
             return self._new_view(out)
 
     def __repr__(self):
-        if self.shape is ():
+        if self.shape == ():
             rep = ("SpectroscopicAxis([%r], unit=%r, refX=%r,"
                    " refX_unit=%r, frame=%r, redshift=%r, xtype=%r,"
                    " velocity convention=%r)" % (self.value, self.unit,

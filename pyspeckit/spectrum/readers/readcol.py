@@ -20,14 +20,15 @@ except ImportError:
 except ValueError:
     hasmode = False
 
-def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
-        fixedformat=None,asdict=False,comment='#',verbose=True,nullval=None,
-        asStruct=False,namecomment=True,removeblanks=False,header_badchars=None):
+def readcol(filename, skipline=0, skipafter=0, names=False, fsep=None,
+            twod=True, fixedformat=None, asdict=False, comment='#',
+            verbose=True, nullval=None, asStruct=False, namecomment=True,
+            removeblanks=False, header_badchars=None):
     """
     The default return is a two dimensional float array.  If you want a list of
     columns output instead of a 2D array, pass 'twod=False'.  In this case,
     each column's data type will be automatically detected.
-    
+
     Example usage:
     CASE 1) a table has the format:
      X    Y    Z
@@ -38,7 +39,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
     names,(x,y,z)=readcol("myfile.tbl",names=True,twod=False)
     or
     x,y,z=readcol("myfile.tbl",skipline=1,twod=False)
-    or 
+    or
     names,xx = readcol("myfile.tbl",names=True)
     or
     xxdict = readcol("myfile.tbl",asdict=True)
@@ -48,10 +49,10 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
     CASE 2) no title is contained into the table, then there is
     no need to skipline:
     x,y,z=readcol("myfile.tbl")
-    
+
     CASE 3) there is a names column and then more descriptive text:
      X      Y     Z
-    (deg) (deg) (km/s) 
+    (deg) (deg) (km/s)
     0.0    2.4   8.2
     1.0    3.4.  5.6
     ...
@@ -64,21 +65,21 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
         fsep - field separator, e.g. for comma separated value (csv) files
         skipline - number of lines to ignore at the start of the file
         names - read / don't read in the first line as a list of column names
-                can specify an integer line number too, though it will be 
+                can specify an integer line number too, though it will be
                 the line number after skipping lines
         twod - two dimensional or one dimensional output
         nullval - if specified, all instances of this value will be replaced
            with a floating NaN
-        asdict - zips names with data to create a dict with column headings 
+        asdict - zips names with data to create a dict with column headings
             tied to column data.  If asdict=True, names will be set to True
         asStruct - same as asdict, but returns a structure instead of a dictionary
             (i.e. you call struct.key instead of struct['key'])
-        fixedformat - if you have a fixed format file, this is a python list of 
+        fixedformat - if you have a fixed format file, this is a python list of
             column lengths.  e.g. the first table above would be [3,5,5].  Note
             that if you specify the wrong fixed format, you will get junk; if your
             format total is greater than the line length, the last entries will all
             be blank but readcol will not report an error.
-        namecomment - assumed that "Name" row is on a comment line.  If it is not - 
+        namecomment - assumed that "Name" row is on a comment line.  If it is not -
             e.g., it is the first non-comment line, change this to False
         removeblanks - remove all blank entries from split lines.  This can cause lost
             data if you have blank entries on some lines.
@@ -92,7 +93,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
     """
     with open(filename,'r') as ff:
         f = ff.readlines()
-    
+
     null=[f.pop(0) for i in range(skipline)]
 
     commentfilter = make_commentfilter(comment)
@@ -111,7 +112,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
                 raise Exception("No uncommented lines found.")
     else:
         if names or asdict or asStruct:
-            # can specify name line 
+            # can specify name line
             if type(names) == type(1):
                 nameline = f.pop(names)
             else:
@@ -124,7 +125,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
             nms=nameline.split(fsep)
 
     null=[f.pop(0) for i in range(skipafter)]
-    
+
     if fixedformat:
         myreadff = lambda x: readff(x,fixedformat)
         splitarr = map(myreadff,f)
@@ -139,7 +140,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
 
         splitarr = filter(commentfilter,splitarr)
 
-        # check to make sure each line has the same number of columns to avoid 
+        # check to make sure each line has the same number of columns to avoid
         # "ValueError: setting an array element with a sequence."
         nperline = map(len,splitarr)
         if hasmode:
@@ -155,7 +156,7 @@ def readcol(filename,skipline=0,skipafter=0,names=False,fsep=None,twod=True,
     try:
         x = numpy.asarray( splitarr , dtype='float')
     except ValueError:
-        if verbose: 
+        if verbose:
             print(("WARNING: reading as string array because %s array failed" % 'float'))
         try:
             x = numpy.asarray( splitarr , dtype='S')
@@ -213,12 +214,12 @@ class Struct(object):
     and turn it into a struct by removing special characters
     """
     def __init__(self,namedict):
-        R = re.compile('\W')  # find and remove all non-alphanumeric characters
+        R = re.compile('\\W')  # find and remove all non-alphanumeric characters
         for k in namedict.keys():
-            v = namedict.pop(k) 
+            v = namedict.pop(k)
             if k[0].isdigit():
                 k = 'n'+k
-            namedict[R.sub('',k)] = v  
+            namedict[R.sub('',k)] = v
         self.__dict__ = namedict
 
     def add_column(self,name,data):
@@ -231,22 +232,23 @@ class Struct(object):
 def readff(s,format):
     """
     Fixed-format reader
-    Pass in a single line string (s) and a format list, 
-    which needs to be a python list of string lengths 
+    Pass in a single line string (s) and a format list,
+    which needs to be a python list of string lengths
     """
 
     F = numpy.array([0]+format).cumsum()
     bothF = zip(F[:-1],F[1:])
-    strarr = [s[l:u] for l,u in bothF]
+    strarr = [s[ell:uu] for ell,uu in bothF]
 
     return strarr
 
 def make_commentfilter(comment):
     if comment is not None:
         def commentfilter(a):
-            try: return comment.find(a[0][0])
-            except: return -1
+            try:
+                return comment.find(a[0][0])
+            except:
+                return -1
         return commentfilter
-    else: # always return false 
+    else: # always return false
         return lambda x: -1
-

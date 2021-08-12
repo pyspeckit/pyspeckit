@@ -23,14 +23,12 @@ except ImportError:
 
 greekletterlist = ["Alpha","Nu","Beta","Xi","Gamma","Omicron","Delta","Pi","Epsilon","Rho","Zeta","Sigma","Eta","Tau","Theta","Upsilon","Iota","Phi","Kappa","Chi","Lambda","Psi","Mu","Omega"]
 greekletterlist += ["alpha","nu","beta","xi","gamma","omicron","delta","pi","epsilon","rho","zeta","sigma","eta","tau","theta","upsilon","iota","phi","kappa","chi","lambda","psi","mu","omega"]
-# regular expressions are complicated...
-greekletter2  = re.compile("([^\\\]%s)" % ("|[^\\\]".join(greekletterlist)))
 
 greekletter = re.compile("&([A-Za-z][a-z]*);?")
 sub = re.compile("<sub>(.*)</sub>")
 sup = re.compile("<sup>(.*)</sup>")
-junk =  re.compile("&([^a-zA-Z]*);?")
-R = re.compile('\W')  # find and remove all non-alphanumeric characters
+junk = re.compile("&([^a-zA-Z]*);?")
+R = re.compile('\\W')  # find and remove all non-alphanumeric characters
 
 import os
 selfpath = os.path.split(os.path.abspath(__file__))[0]
@@ -48,8 +46,6 @@ def LineName(species,qn):
     return name.replace(" ","")
 
 def LatexName(species,qn):
-    #while greekletter2.search(species) is not None:
-    #    species=greekletter2.sub(greekletter2.search(species).groups()[0][0]+"$\\"+greekletter2.search(species).groups()[0][1:]+"$",species)
     if greekletter.search(species) is not None:
         spn = greekletter.sub(r"$\\%s$" % greekletter.search(species).groups()[0],species)
         name = qn.replace("(","$_{").replace(")","}$").replace("&","$\\").replace(";","$")

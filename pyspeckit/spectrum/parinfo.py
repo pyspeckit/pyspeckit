@@ -158,7 +158,7 @@ class ParinfoList(list):
                 P.add(name=par.parname,
                       value=par.value,
                       vary=not(par.fixed),
-                      expr=par.tied if par.tied is not '' else None,
+                      expr=par.tied if par.tied != '' else None,
                       min=par.limits[0] if par.limited[0] else None,
                       max=par.limits[1] if par.limited[1] else None)
 
@@ -285,9 +285,9 @@ class Parinfo(dict):
                 uplim = "%g]" % self.limits[1] if self.limited[1] else "inf)"
                 myrange = lolim + uplim
                 reprint += "  Range:%10s" % myrange
-            if self.tied is not '':
+            if self.tied != '':
                 reprint += " Tied: %s" % self.tied
-            if self.shortparname is not '':
+            if self.shortparname != '':
                 reprint += " Shortparname: %s" % self.shortparname
 
             return reprint

@@ -507,7 +507,7 @@ class Plotter(object):
             self.title = title
         elif hasattr(self.Spectrum,'specname'):
             self.title = self.Spectrum.specname
-        if self.title is not "":
+        if self.title != "":
             self.axis.set_title(self.title)
 
         if xlabel is not None:
@@ -551,9 +551,9 @@ class Plotter(object):
             else:
                 label_units = self.Spectrum.unit.to_string(format='latex')
                 if 'mathring{A}' in label_units:
-                    label_units = label_units.replace('\mathring{A}', 'A')
-                if '\overset' in label_units:
-                    label_units = label_units.replace('\overset', '^')
+                    label_units = label_units.replace('\\mathring{A}', 'A')
+                if '\\overset' in label_units:
+                    label_units = label_units.replace('\\overset', '^')
                 self.axis.set_ylabel(label_units)
 
     @property
@@ -839,7 +839,7 @@ class Plotter(object):
 
 def parse_units(labelstring):
     import re
-    labelstring = re.sub("um","$\mu$m",labelstring)
+    labelstring = re.sub("um","$\\mu$m",labelstring)
     labelstring = re.sub("-1","$^{-1}$",labelstring)
     labelstring = re.sub("-2","$^{-2}$",labelstring)
     labelstring = re.sub("-3","$^{-3}$",labelstring)

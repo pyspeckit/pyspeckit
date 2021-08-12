@@ -36,20 +36,20 @@ def line_tau(tex, total_column, partition_function, degeneracy, frequency,
 
     .. math::
 
-        \\int \\tau_\\nu d\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u
-                    \\left[ \\exp\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
+        \\int \\tau_\\nu d\\nu = \\frac{c^2}{8 \\pi \\nu^2} A_{ij} N_u
+                    \\left[ \\exp\\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
 
     or
 
     .. math::
 
-        \\tau_\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u \\phi_\\nu
-                    \\left[ \\exp\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
+        \\tau_\\nu = \\frac{c^2}{8 \\pi \\nu^2} A_{ij} N_u \\phi_\\nu
+                    \\left[ \\exp\\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
 
     where
 
     .. math::
-        N_{u} = N_{tot} \\frac{g_u}{Q} \\exp\left(\\frac{-E_u}{k_B T_{ex}} \\right)
+        N_{u} = N_{tot} \\frac{g_u}{Q} \\exp\\left(\\frac{-E_u}{k_B T_{ex}} \\right)
 
     based on Equations 11 and 29 of Mangum & Shirley 2015 (2015PASP..127..266M)
 
@@ -127,20 +127,20 @@ def line_tau_cgs(tex, total_column, partition_function, degeneracy, frequency,
 
     .. math::
 
-        \\int \\tau_\\nu d\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u
-                    \\left[ \\exp\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
+        \\int \\tau_\\nu d\\nu = \\frac{c^2}{8 \\pi \\nu^2} A_{ij} N_u
+                    \\left[ \\exp\\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
 
     or
 
     .. math::
 
-        \\tau_\\nu = \\frac{c^2}{8 \pi \\nu^2} A_{ij} N_u \\phi_\\nu
-                    \\left[ \\exp\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
+        \\tau_\\nu = \\frac{c^2}{8 \\pi \\nu^2} A_{ij} N_u \\phi_\\nu
+                    \\left[ \\exp\\left( \\frac{h \\nu}{k_B T_{ex}} \\right)  - 1 \\right]
 
     where
 
     .. math::
-        N_{u} = N_{tot} \\frac{g_u}{Q} \\exp\left(\\frac{-E_u}{k_B T_{ex}} \\right)
+        N_{u} = N_{tot} \\frac{g_u}{Q} \\exp\\left(\\frac{-E_u}{k_B T_{ex}} \\right)
 
     based on Equations 11 and 29 of Mangum & Shirley 2015 (2015PASP..127..266M)
 
@@ -346,7 +346,7 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
 
     # LGINT: Base 10 logarithm of the integrated intensity in units of nm2 ·MHz at 300 K. (See Section 3 for conversions to other units.)
     CT = 300
-    logint = jpltbl['LGINT'].value
+    logint = np.array(jpltbl['LGINT']) # this should just be a number
     #from CDMS website
     sijmu = (np.exp(np.float64(-(elower_icm/0.695)/CT)) - np.exp(np.float64(-(eupper_icm/0.695)/CT)))**(-1) * ((10**logint)/freq_MHz) * (24025.120666) * partfunc(CT)
 

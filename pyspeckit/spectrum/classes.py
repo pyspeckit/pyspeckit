@@ -168,7 +168,7 @@ class BaseSpectrum(object):
             # these should probably be replaced with registerable function s...
             if filetype in ('fits','tspec','pyfits','sdss'):
                 self.parse_header(self.header)
-            elif filetype is 'txt':
+            elif filetype == 'txt':
                 self.parse_text_header(self.header)
             elif filetype in ('hdf5', 'h5'):
                 self.parse_hdf5_header(self.header)
@@ -1147,15 +1147,15 @@ class ObsBlock(Spectra):
         weighted_data_axsum = weighted_data.sum(axis=1)
         weight_axsum = wtarr.sum(axis=1)
         avgdata = weighted_data_axsum / weight_axsum
-        if error is 'scanrms':
+        if error == 'scanrms':
             # axis swapping is for projection... avgdata = 0'th axis
             errspec = np.sqrt((((data_nonan.swapaxes(0,1)-avgdata) *
                                 wtarr.swapaxes(0,1))**2 /
                                wtarr.swapaxes(0,1)**2).swapaxes(0,1).sum(axis=1)
                              )
-        elif error is 'erravg':
+        elif error == 'erravg':
             errspec = self.error.mean(axis=1)
-        elif error is 'erravgrtn':
+        elif error == 'erravgrtn':
             errspec = self.error.mean(axis=1) / np.sqrt(self.error.shape[1])
 
         spec = Spectrum(data=avgdata,error=errspec,xarr=self.xarr.copy(),header=self.header)

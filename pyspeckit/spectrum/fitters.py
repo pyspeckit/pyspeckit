@@ -1852,13 +1852,13 @@ class Specfit(interactive.Interactive):
 
     def optimal_chi2(self, reduced=True, threshold='error', **kwargs):
         """
-        Compute an "optimal" :math:`\chi^2` statistic, i.e. one in which only pixels in
+        Compute an "optimal" :math:`\\chi^2` statistic, i.e. one in which only pixels in
         which the model is statistically significant are included
 
         Parameters
         ----------
         reduced : bool
-            Return the reduced :math:`\chi^2`
+            Return the reduced :math:`\\chi^2`
         threshold : 'auto' or 'error' or float
             If 'auto', the threshold will be set to peak_fraction * the peak
             model value, where peak_fraction is a kwarg passed to
@@ -1871,10 +1871,10 @@ class Specfit(interactive.Interactive):
         Returns
         -------
         chi2 : float
-            :math:`\chi^2` statistic or reduced :math:`\chi^2` statistic (:math:`\chi^2/n`)
+            :math:`\\chi^2` statistic or reduced :math:`\\chi^2` statistic (:math:`\\chi^2/n`)
 
             .. math::
-                   \chi^2 = \sum( (d_i - m_i)^2 / e_i^2 )
+                   \\chi^2 = \\sum( (d_i - m_i)^2 / e_i^2 )
         """
 
         modelmask = self._compare_to_threshold(threshold=threshold, **kwargs)
