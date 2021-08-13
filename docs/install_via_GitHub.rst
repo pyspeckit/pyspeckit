@@ -56,7 +56,7 @@ and enter your username and password if it asks.
 
 Still in the ``pyspeckit/`` directory, type::
 
-  python setup.py develop
+  pip install -e .
 
 You're good to go!
 
