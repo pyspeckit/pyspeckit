@@ -197,7 +197,6 @@ def line_brightness_cgs(tex, dnu, frequency, tbg=2.73, *args, **kwargs):
     tau = line_tau(tex=tex, frequency=frequency, *args, **kwargs) / dnu
     return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
 
-# requires vamdc branch of astroquery
 def get_molecular_parameters(molecule_name,
                              molecule_name_jpl=None,
                              tex=50, fmin=1*u.GHz, fmax=1*u.THz,
@@ -205,8 +204,7 @@ def get_molecular_parameters(molecule_name,
                              export_limit=1e5,
                              chem_re_flags=0, **kwargs):
     """
-    Get the molecular parameters for a molecule from the CDMS database using
-    vamdclib
+    Get the molecular parameters for a molecule from splatalogue, then get the Q's from JPL
 
     Parameters
     ----------
@@ -239,6 +237,8 @@ def get_molecular_parameters(molecule_name,
     ...                                                          fmin=90*u.GHz,
     ...                                                          fmax=100*u.GHz)
     """
+    raise NotImplementedError("Use get_molecular_parameters_JPL instead;"
+                              " the approach adopted here is not self-consistent")
     from astroquery.splatalogue import Splatalogue
     from astroquery.jplspec import JPLSpec
 
