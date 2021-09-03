@@ -405,6 +405,8 @@ def generate_model(xarr, vcen, width, tex, column,
 
     Q = partfunc(tex)
 
+    model_tau = np.zeros_like(freq)
+
     for logA, gg, restfreq, eu in zip(aij[OK], deg[OK], freqs_[OK], EU[OK]):
         tau_over_phi = line_tau_cgs(tex=tex, total_column=column,
                                     partition_function=Q, degeneracy=gg,
@@ -418,9 +420,11 @@ def generate_model(xarr, vcen, width, tex, column,
 
         tau_profile = (tau_over_phi * phi_nu)
 
-        jnu = (Jnu_cgs(restfreq, tex)-Jnu_cgs(restfreq, tbg))
+        model_tau += tau_profile
 
-        model = model + jnu*(1-np.exp(-tau_profile))
+    jnu = (Jnu_cgs(freq, tex)-Jnu_cgs(freq, tbg))
+
+    model = jnu*(1-np.exp(-model_tau))
 
     if background is not None:
         return background-model
