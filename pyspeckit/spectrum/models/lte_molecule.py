@@ -372,10 +372,8 @@ def generate_model(xarr, vcen, width, tex, column,
 
     if hasattr(tex,'unit'):
         tex = tex.value
-    if np.isscalar(tex):
-        tex = np.ones(len(freqs), dtype='float') * tex
-    else:
-        assert len(tex) == len(freqs)
+    # to allow for multi-excitation-temperature, we need a multizone model
+    # the radiative transfer equation below is hard-coded to be single-zone
 
     if hasattr(column, 'unit'):
         column = column.value
@@ -415,14 +413,16 @@ def generate_model(xarr, vcen, width, tex, column,
 
     if callable(partfunc):
         Qs = partfunc(tex)
+        if np.isscalar(Qs):
+            Qs = np.ones(len(freqs), dtype='float') * Qs
     else:
         Qs = partfunc
         assert len(Qs) == len(freqs)
 
     model_tau = np.zeros_like(freq)
 
-    for logA, gg, restfreq, eu, tx, nt, Q in zip(aij[OK], deg[OK], freqs_[OK], EU[OK], tex, column, Qs):
-        tau_over_phi = line_tau_cgs(tex=tx, total_column=nt,
+    for logA, gg, restfreq, eu, nt, Q in zip(aij[OK], deg[OK], freqs_[OK], EU[OK], column, Qs):
+        tau_over_phi = line_tau_cgs(tex=tex, total_column=nt,
                                     partition_function=Q, degeneracy=gg,
                                     frequency=restfreq, energy_upper=eu,
                                     einstein_A=10**logA)
