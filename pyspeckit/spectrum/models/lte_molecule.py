@@ -372,12 +372,22 @@ def generate_model(xarr, vcen, width, tex, column,
 
     if hasattr(tex,'unit'):
         tex = tex.value
-    if hasattr(tbg,'unit'):
-        tbg = tbg.value
+    if np.isscalar(tex):
+        tex = np.ones(len(freqs), dtype='float') * tex
+    else:
+        assert len(tex) == len(freqs)
+
     if hasattr(column, 'unit'):
         column = column.value
-    if column < 25:
-        column = 10**column
+    if np.isscalar(column):
+        column = np.ones(len(freqs), dtype='float') * column
+    else:
+        assert len(column) == len(freqs)
+    # assume low numbers are meant to be exponents
+    column[column < 30] = 10**column[column < 30]
+
+    if hasattr(tbg,'unit'):
+        tbg = tbg.value
     if hasattr(vcen, 'unit'):
         vcen = vcen.value
     if hasattr(width, 'unit'):
@@ -403,12 +413,16 @@ def generate_model(xarr, vcen, width, tex, column,
 
     freqs_ = freqs.to(u.Hz).value
 
-    Q = partfunc(tex)
+    if callable(partfunc):
+        Qs = partfunc(tex)
+    else:
+        Qs = partfunc
+        assert len(Qs) == len(freqs)
 
     model_tau = np.zeros_like(freq)
 
-    for logA, gg, restfreq, eu in zip(aij[OK], deg[OK], freqs_[OK], EU[OK]):
-        tau_over_phi = line_tau_cgs(tex=tex, total_column=column,
+    for logA, gg, restfreq, eu, tx, nt, Q in zip(aij[OK], deg[OK], freqs_[OK], EU[OK], tex, column, Qs):
+        tau_over_phi = line_tau_cgs(tex=tx, total_column=nt,
                                     partition_function=Q, degeneracy=gg,
                                     frequency=restfreq, energy_upper=eu,
                                     einstein_A=10**logA)
