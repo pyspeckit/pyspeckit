@@ -197,94 +197,10 @@ def line_brightness_cgs(tex, dnu, frequency, tbg=2.73, *args, **kwargs):
     tau = line_tau(tex=tex, frequency=frequency, *args, **kwargs) / dnu
     return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
 
-def get_molecular_parameters(molecule_name,
-                             molecule_name_jpl=None,
-                             tex=50, fmin=1*u.GHz, fmax=1*u.THz,
-                             line_lists=['SLAIM'],
-                             export_limit=1e5,
-                             chem_re_flags=0, **kwargs):
+def get_molecular_parameters(molecule_name, tex=50, catalog='JPL',
+                             fmin=1*u.GHz, fmax=1*u.THz, **kwargs):
     """
-    Get the molecular parameters for a molecule from splatalogue, then get the Q's from JPL
-
-    Parameters
-    ----------
-    molecule_name : string
-        The string name of the molecule (normal name, like CH3OH or CH3CH2OH)
-    molecule_name_jpl : string or None
-        Default to molecule_name, but if jplspec doesn't have your molecule
-        by the right name, specify it here
-    tex : float
-        Optional excitation temperature (basically checks if the partition
-        function calculator works)
-    fmin : quantity with frequency units
-    fmax : quantity with frequency units
-        The minimum and maximum frequency to search over
-    line_lists : list
-        A list of Splatalogue line list catalogs to search.  Valid options
-        include SLAIM, CDMS, JPL.  Only a single catalog should be used to
-        avoid repetition of transitions and species
-    chem_re_flags : int
-        An integer flag to be passed to splatalogue's chemical name matching
-        tool
-
-    Examples
-    --------
-    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters(molecule_name='CH2CHCN',
-    ...                                                          fmin=220*u.GHz,
-    ...                                                          fmax=222*u.GHz,
-                                                                )
-    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH3OH',
-    ...                                                          fmin=90*u.GHz,
-    ...                                                          fmax=100*u.GHz)
-    """
-    raise NotImplementedError("Use get_molecular_parameters_JPL instead;"
-                              " the approach adopted here is not self-consistent")
-    from astroquery.splatalogue import Splatalogue
-    from astroquery.jplspec import JPLSpec
-
-    # do this here, before trying to compute the partition function, because
-    # this query could fail
-    tbl = Splatalogue.query_lines(fmin, fmax, chemical_name=molecule_name,
-                                  line_lists=line_lists,
-                                  show_upper_degeneracy=True,
-                                  export_limit=export_limit,
-                                  **kwargs)
-
-    if molecule_name_jpl is None:
-        molecule_name_jpl = molecule_name
-
-    jpltable = JPLSpec.get_species_table()[JPLSpec.get_species_table()['NAME'] == molecule_name_jpl]
-    if len(jpltable) != 1:
-        errmsg = f"Too many or too few matches to {molecule_name_jpl}"
-        raise ValueError(errmsg)
-
-    def partfunc(tem):
-        """
-        interpolate the partition function
-        WARNING: this can be very wrong
-        """
-        tem = u.Quantity(tem, u.K).value
-        tems = np.array(jpltable.meta['Temperature (K)'])
-        logQs = jpltable['QLOG1 QLOG2 QLOG3 QLOG4 QLOG5 QLOG6 QLOG7'.split()]
-        logQs = np.array(list(logQs[0]))
-        inds = np.argsort(tems)
-        logQ = np.interp(tem, tems[inds], logQs[inds])
-        return 10**logQ
-
-
-    freqs = (np.array(tbl['Freq-GHz'])*u.GHz if 'Freq-GHz' in tbl.colnames else
-             np.array(tbl['Freq-GHz(rest frame,redshifted)'])*u.GHz)
-    aij = tbl['Log<sub>10</sub> (A<sub>ij</sub>)']
-    deg = tbl['Upper State Degeneracy']
-    EU = (np.array(tbl['E_U (K)'])*u.K*constants.k_B).to(u.erg).value
-
-    return freqs, aij, deg, EU, partfunc
-
-
-def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
-                                 fmax=1*u.THz, **kwargs):
-    """
-    Get the molecular parameters for a molecule from the JPL catalog
+    Get the molecular parameters for a molecule from the JPL or CDMS catalog
 
     (this version should, in principle, be entirely self-consistent)
 
@@ -296,13 +212,15 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
     tex : float
         Optional excitation temperature (basically checks if the partition
         function calculator works)
+    catalog : 'JPL' or 'CDMS'
+        Which catalog to pull from
     fmin : quantity with frequency units
     fmax : quantity with frequency units
         The minimum and maximum frequency to search over
 
     Examples
     --------
-    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters(molecule_name='CH2CHCN',
+    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH2CHCN',
     ...                                                          fmin=220*u.GHz,
     ...                                                          fmax=222*u.GHz,
                                                                 )
@@ -310,14 +228,19 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
     ...                                                          fmin=90*u.GHz,
     ...                                                          fmax=100*u.GHz)
     """
-    from astroquery.jplspec import JPLSpec
+    if catalog == 'JPL':
+        from astroquery.jplspec import JPLSpec as QueryTool
+    elif catalog == 'CDMS':
+        from astroquery.cdms import CDMS as QueryTool
+    else:
+        raise ValueError("Invalid catalog specification")
 
-    jpltable = JPLSpec.get_species_table()[JPLSpec.get_species_table()['NAME'] == molecule_name_jpl]
+    jpltable = QueryTool.get_species_table()[QueryTool.get_species_table()['NAME'] == molecule_name]
     if len(jpltable) != 1:
-        raise ValueError(f"Too many or too few matches to {molecule_name_jpl}")
+        raise ValueError(f"Too many or too few matches to {molecule_name}")
 
-    jpltbl = JPLSpec.query_lines(fmin, fmax, molecule=molecule_name_jpl,
-                                 parse_name_locally=True)
+    jpltbl = QueryTool.query_lines(fmin, fmax, molecule=molecule_name,
+                                   parse_name_locally=True)
 
     def partfunc(tem):
         """
