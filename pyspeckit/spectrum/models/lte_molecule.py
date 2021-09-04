@@ -284,7 +284,7 @@ def get_molecular_parameters(molecule_name, tex=50, catalog='JPL',
 
     ok = np.isfinite(aij) & np.isfinite(EU) & np.isfinite(deg) & np.isfinite(freqs)
 
-    return freqs[ok], aij[ok], deg[ok], EU[ok], partfunc[ok]
+    return freqs[ok], aij[ok], deg[ok], EU[ok], partfunc
 
 
 
