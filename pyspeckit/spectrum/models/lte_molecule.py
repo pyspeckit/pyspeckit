@@ -249,7 +249,8 @@ def get_molecular_parameters(molecule_name, tex=50, catalog='JPL',
         """
         tem = u.Quantity(tem, u.K).value
         tems = np.array(jpltable.meta['Temperature (K)'])
-        logQs = jpltable['QLOG1 QLOG2 QLOG3 QLOG4 QLOG5 QLOG6 QLOG7'.split()]
+        keys = [k for k in jpltable if 'q' in k.lower()]
+        logQs = jpltable[keys]
         logQs = np.array(list(logQs[0]))
         inds = np.argsort(tems)
         logQ = np.interp(tem, tems[inds], logQs[inds])
