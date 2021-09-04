@@ -353,7 +353,7 @@ def generate_model(xarr, vcen, width, tex, column,
     model_tau = np.zeros_like(freq)
 
     for logA, gg, restfreq, eu, nt, Q in zip(aij[OK], deg[OK], freqs_[OK],
-                                             EU[OK], column, Qs):
+                                             EU[OK], column[OK], Qs[OK]):
         tau_over_phi = line_tau_cgs(tex=tex, total_column=nt,
                                     partition_function=Q, degeneracy=gg,
                                     frequency=restfreq, energy_upper=eu,
