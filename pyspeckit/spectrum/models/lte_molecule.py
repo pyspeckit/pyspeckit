@@ -197,8 +197,8 @@ def line_brightness_cgs(tex, dnu, frequency, tbg=2.73, *args, **kwargs):
     tau = line_tau(tex=tex, frequency=frequency, *args, **kwargs) / dnu
     return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
 
-def get_molecular_parameters(molecule_name, tex=50, catalog='JPL',
-                             fmin=1*u.GHz, fmax=1*u.THz, **kwargs):
+def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
+                             catalog='JPL',**kwargs):
     """
     Get the molecular parameters for a molecule from the JPL or CDMS catalog
 
@@ -235,7 +235,8 @@ def get_molecular_parameters(molecule_name, tex=50, catalog='JPL',
     else:
         raise ValueError("Invalid catalog specification")
 
-    jpltable = QueryTool.get_species_table()[QueryTool.get_species_table()['NAME'] == molecule_name]
+    speciestab = QueryTool.get_species_table()
+    jpltable = speciestab[speciestab['NAME'] == molecule_name]
     if len(jpltable) != 1:
         raise ValueError(f"Too many or too few matches to {molecule_name}")
 
@@ -258,7 +259,7 @@ def get_molecular_parameters(molecule_name, tex=50, catalog='JPL',
 
     freqs = jpltbl['FREQ'].quantity
     freq_MHz = freqs.to(u.MHz).value
-    deg = jpltbl['GUP']
+    deg = np.array(jpltbl['GUP'])
     EL = jpltbl['ELO'].quantity.to(u.erg, u.spectral())
     dE = freqs.to(u.erg, u.spectral())
     EU = EL + dE
@@ -276,7 +277,7 @@ def get_molecular_parameters(molecule_name, tex=50, catalog='JPL',
     sijmu = (np.exp(np.float64(-(elower_icm/0.695)/CT)) - np.exp(np.float64(-(eupper_icm/0.695)/CT)))**(-1) * ((10**logint)/freq_MHz) * (24025.120666) * partfunc(CT)
 
     #aij formula from CDMS.  Verfied it matched spalatalogue's values
-    aij = 1.16395 * 10**(-20) * freq_MHz**3 * sijmu / deg
+    aij = 1.16395 * 10**(-20) * freq_MHz**3 * sijmu
 
     # we want logA for consistency with use in generate_model below
     aij = np.log10(aij)
