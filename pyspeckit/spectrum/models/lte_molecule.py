@@ -310,8 +310,10 @@ def generate_model(xarr, vcen, width, tex, column,
         column = np.ones(len(freqs), dtype='float') * column
     else:
         assert len(column) == len(freqs)
+        column = column.copy() # we're doing inplace modification below
     # assume low numbers are meant to be exponents
-    column[column < 30] = 10**column[column < 30]
+    low_col = column < 30
+    column[low_col] = 10**column[low_col]
 
     if hasattr(tbg,'unit'):
         tbg = tbg.value
@@ -336,7 +338,7 @@ def generate_model(xarr, vcen, width, tex, column,
     model = np.zeros_like(xarr).value
 
     # splatalogue can report bad frequencies as zero
-    OK = freqs.value != 0
+    OK = (freqs.value != 0) & np.isfinite(aij) & np.isfinite(EU)
 
     freqs_ = freqs.to(u.Hz).value
 
@@ -350,7 +352,8 @@ def generate_model(xarr, vcen, width, tex, column,
 
     model_tau = np.zeros_like(freq)
 
-    for logA, gg, restfreq, eu, nt, Q in zip(aij[OK], deg[OK], freqs_[OK], EU[OK], column, Qs):
+    for logA, gg, restfreq, eu, nt, Q in zip(aij[OK], deg[OK], freqs_[OK],
+                                             EU[OK], column, Qs):
         tau_over_phi = line_tau_cgs(tex=tex, total_column=nt,
                                     partition_function=Q, degeneracy=gg,
                                     frequency=restfreq, energy_upper=eu,
