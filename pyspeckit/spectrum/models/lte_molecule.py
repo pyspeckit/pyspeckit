@@ -281,7 +281,7 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     sijmu = (np.exp(np.float64(-(elower_icm/0.695)/CT)) - np.exp(np.float64(-(eupper_icm/0.695)/CT)))**(-1) * ((10**logint)/freq_MHz) * (24025.120666) * partfunc(CT)
 
     #aij formula from CDMS.  Verfied it matched spalatalogue's values
-    aij = 1.16395 * 10**(-20) * freq_MHz**3 * sijmu
+    aij = 1.16395 * 10**(-20) * freq_MHz**3 * sijmu / deg
 
     # we want logA for consistency with use in generate_model below
     aij = np.log10(aij)
