@@ -517,14 +517,14 @@ class Plotter(object):
             try:
                 self.xlabel = xlabel_table[self._xunit.physical_type.lower()]
             except KeyError:
-                self.xlabel = self._xunit.physical_type.title()
+                self.xlabel = str(self._xunit.physical_type)
             # WAS: self.xlabel += " ("+u.Unit(self._xunit).to_string()+")"
             self.xlabel += " ({0})".format(self._xunit.to_string())
             log.debug("xunit is {1}. set xlabel={0}".format(self.xlabel,
                                                             self._xunit))
 
             if verbose_label:
-                self.xlabel = "%s %s" % (self.Spectrum.xarr.velocity_convention.title(),
+                self.xlabel = "%s %s" % (str(self.Spectrum.xarr.velocity_convention),
                                          self.xlabel)
         else:
             log.warn("Plotter: xlabel was not set")
