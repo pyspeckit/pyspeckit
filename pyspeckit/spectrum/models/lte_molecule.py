@@ -270,7 +270,9 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
 
     # from Brett McGuire https://github.com/bmcguir2/simulate_lte/blob/1f3f7c666946bc88c8d83c53389556a4c75c2bbd/simulate_lte.py#L2580-L2587
 
-    # LGINT: Base 10 logarithm of the integrated intensity in units of nm2 ·MHz at 300 K. (See Section 3 for conversions to other units.)
+    # LGINT: Base 10 logarithm of the integrated intensity in units of nm2 ·MHz at 300 K.
+    # (See Section 3 for conversions to other units.)
+    # see also https://cdms.astro.uni-koeln.de/classic/predictions/description.html#description
     CT = 300
     logint = np.array(jpltbl['LGINT']) # this should just be a number
     #from CDMS website
