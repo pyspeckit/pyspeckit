@@ -282,7 +282,9 @@ def get_molecular_parameters(molecule_name, tex=50, catalog='JPL',
     aij = np.log10(aij)
     EU = EU.to(u.erg).value
 
-    return freqs, aij, deg, EU, partfunc
+    ok = np.isfinite(aij) & np.isfinite(EU) & np.isfinite(deg) & np.isfinite(freqs)
+
+    return freqs[ok], aij[ok], deg[ok], EU[ok], partfunc[ok]
 
 
 
