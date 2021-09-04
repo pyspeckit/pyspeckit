@@ -515,7 +515,7 @@ class Plotter(object):
             self.xlabel = xlabel
         elif self._xunit:
             try:
-                self.xlabel = xlabel_table[self._xunit.physical_type.lower()]
+                self.xlabel = xlabel_table[str(self._xunit.physical_type).lower()]
             except KeyError:
                 self.xlabel = str(self._xunit.physical_type)
             # WAS: self.xlabel += " ("+u.Unit(self._xunit).to_string()+")"
