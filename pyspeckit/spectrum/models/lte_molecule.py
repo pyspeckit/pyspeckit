@@ -296,10 +296,51 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
 def generate_model(xarr, vcen, width, tex, column,
                    freqs, aij, deg, EU, partfunc,
                    background=None, tbg=2.73,
-                   get_tau=False
+                   get_tau=False,
+                   get_tau_sticks=False
                   ):
     """
     Model Generator
+
+    Parameters
+    ==========
+    xarr : Quantity array [Hz]
+        The X-axis (frequency)
+        
+    vcen : Quantity [km/s]
+        The central velocity
+    width : Quantity [km/s]
+        The 1-sigma Gaussian line width [not FWHM]
+    tex : Quantity [K]
+        Excitation temperature
+    column : Quantity [cm^-2]
+        The total column density of the molecule
+    freqs : Quantity array [Hz]
+        The central frequency of the lines to model.
+        Subsequent parameters, aij, deg, EU, must have
+        the same shape as `freqs`.
+    aij : array [log s^-1]
+        The Einstein A coefficients, assumed to be in units
+        of log10 of the rate in 1/s
+    deg : array
+        The transition degeneracy
+    EU : Quantity array [erg]
+        The upper state energy in ergs
+    partfunc : function
+        The partition function.  Can also be specified as an array of values in
+        Kelvin.
+    background : None
+        An additional background field to include in the radiative transfer
+        model.  Must be in Kelvin.
+        [Presently not correctly implemented]
+    tbg : Quantity [K]
+        The background brightness temperature, defaulting to 2.73 for the CMB
+        temperature.  This background will be treated as uniform with frequency
+        and subtracted.
+    get_tau : bool, default False
+        If specified, the optical depth in each frequency bin will be returned
+    get_tau_sticks : bool, default False
+        If specified, the optical depth in each transition will be returned
     """
 
     if hasattr(tex,'unit'):
@@ -345,6 +386,7 @@ def generate_model(xarr, vcen, width, tex, column,
         assert len(Qs) == len(freqs)
 
     model_tau = np.zeros_like(freq)
+    tau_sticks = []
 
     for logA, gg, restfreq, eu, nt, Q in zip(aij[OK], deg[OK], freqs_[OK],
                                              EU[OK], column[OK], Qs[OK]):
@@ -352,7 +394,7 @@ def generate_model(xarr, vcen, width, tex, column,
                                     partition_function=Q, degeneracy=gg,
                                     frequency=restfreq, energy_upper=eu,
                                     einstein_A=10**logA)
-        log.debug(f"A={logA}, g={gg}, nu={restfreq}, eu={eu}, col={nt}, Q={Q}, tau/phi={tau_over_phi}")
+        # commented out for performance log.debug(f"A={logA}, g={gg}, nu={restfreq}, eu={eu}, col={nt}, Q={Q}, tau/phi={tau_over_phi}")
         width_dnu = width / ckms * restfreq
 
         phi_nu = (
@@ -362,15 +404,19 @@ def generate_model(xarr, vcen, width, tex, column,
         tau_profile = (tau_over_phi * phi_nu)
 
         model_tau += tau_profile
+        tau_sticks.append(tau_over_phi)
 
     if get_tau:
         return model_tau
+    if get_tau_sticks:
+        return tau_sticks
 
     jnu = (Jnu_cgs(freq, tex)-Jnu_cgs(freq, tbg))
 
     model = jnu*(1-np.exp(-model_tau))
 
     if background is not None:
+        raise NotImplementedError
         return background-model
     return model
 
