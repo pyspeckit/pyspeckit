@@ -14,6 +14,7 @@ from __future__ import print_function
 import numpy as np
 from astropy import units as u
 from astropy import constants
+from astropy import log
 from .model import SpectralModel
 
 kb_cgs = constants.k_B.cgs.value
@@ -22,6 +23,7 @@ eightpicubed = 8 * np.pi**3
 threehc = 3 * constants.h.cgs * constants.c.cgs
 hoverk_cgs = (h_cgs/kb_cgs)
 c_cgs = constants.c.cgs.value
+ckms = constants.c.to(u.km/u.s).value
 
 def line_tau(tex, total_column, partition_function, degeneracy, frequency,
              energy_upper, einstein_A=None):
@@ -294,6 +296,7 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
 def generate_model(xarr, vcen, width, tex, column,
                    freqs, aij, deg, EU, partfunc,
                    background=None, tbg=2.73,
+                   get_tau=False
                   ):
     """
     Model Generator
@@ -313,7 +316,9 @@ def generate_model(xarr, vcen, width, tex, column,
         column = column.copy() # we're doing inplace modification below
     # assume low numbers are meant to be exponents
     low_col = column < 30
-    column[low_col] = 10**column[low_col]
+    log.debug(f"Found {low_col.sum()} entries that needed exponentiation")
+    if any(low_col):
+        column[low_col] = 10**column[low_col]
 
     if hasattr(tbg,'unit'):
         tbg = tbg.value
@@ -321,17 +326,6 @@ def generate_model(xarr, vcen, width, tex, column,
         vcen = vcen.value
     if hasattr(width, 'unit'):
         width = width.value
-
-    ckms = constants.c.to(u.km/u.s).value
-
-    # assume equal-width channels
-    #kwargs = dict(rest=ref_freq)
-    #equiv = u.doppler_radio(**kwargs)
-
-    # channelwidth array, with last element approximated
-    channelwidth = np.empty_like(xarr.value)
-    channelwidth[:-1] = np.abs(np.diff(xarr.to(u.Hz))).value
-    channelwidth[-1] = channelwidth[-2]
 
     #velo = xarr.to(u.km/u.s, equiv).value
     freq = xarr.to(u.Hz).value # same unit as nu below
@@ -358,6 +352,7 @@ def generate_model(xarr, vcen, width, tex, column,
                                     partition_function=Q, degeneracy=gg,
                                     frequency=restfreq, energy_upper=eu,
                                     einstein_A=10**logA)
+        log.debug(f"A={logA}, g={gg}, nu={restfreq}, eu={eu}, col={nt}, Q={Q}, tau/phi={tau_over_phi}")
         width_dnu = width / ckms * restfreq
 
         phi_nu = (
@@ -367,6 +362,9 @@ def generate_model(xarr, vcen, width, tex, column,
         tau_profile = (tau_over_phi * phi_nu)
 
         model_tau += tau_profile
+
+    if get_tau:
+        return model_tau
 
     jnu = (Jnu_cgs(freq, tex)-Jnu_cgs(freq, tbg))
 
