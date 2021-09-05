@@ -36,6 +36,7 @@ offset = np.nanpercentile(sp.data.filled(np.nan), 20)
 # can result in multiple matches from splatalogue, and definitely not all
 # species have the same column and excitation
 species_list = ('CH3OH', 'HCCCN', 'H2CO', 'CH3OCHO', 'CH3OCH3', 'C2H5CN',)
+# 'C2H3CN' is pretty definitely not here at the constant assumed column
 
 # make a set of subplots:
 import pylab as pl
@@ -46,9 +47,9 @@ from pyspeckit.spectrum.models import lte_molecule
 mods = []
 for species, axis in zip(species_list, axes):
     # search for lines within +/- 0.5 GHz of the min/max (to account for velocity offset, generously)
-    freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters_JPL(species,
-                                                                              fmin=sp.xarr.min()-0.5*u.GHz,
-                                                                              fmax=sp.xarr.max()+0.5*u.GHz)
+    freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters(species,
+                                                                          fmin=sp.xarr.min()-0.5*u.GHz,
+                                                                          fmax=sp.xarr.max()+0.5*u.GHz)
 
     mod = lte_molecule.generate_model(xarr=sp.xarr, vcen=50*u.km/u.s,
                                       width=3*u.km/u.s, tex=100*u.K,

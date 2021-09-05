@@ -3,12 +3,7 @@ LTE Molecule Model
 
 
 There is a tool for modeling the full LTE spectrum of a molecule.
-It uses the CDMS / VAMDC database
-(http://portal.vamdc.eu/vamdc_portal/home.seam) and the vamdclib
-(http://vamdclib.readthedocs.io) python library to compute the
-partition function of a molecule.  It uses astroquery.splatalogue
-(http://astroquery.readthedocs.io/en/latest/splatalogue/splatalogue.html)
-to identify the line frequencies and energy levels.
+It uses the JPL or CDMS databases through their astroquery interfaces.
 
 A very simple example looks like this:
 
@@ -23,8 +18,6 @@ A very simple example looks like this:
                              deg=deg, EU=EU, partfunc=partfunc)
 
    fitter = generate_fitter(modfunc, name="CH3OH")
-
-The molecular parameter lookup stage is often slow and may be a bottleneck.
 
 Details can be found in the API documentation:
 

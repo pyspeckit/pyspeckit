@@ -2,8 +2,7 @@
 LTE Molecule Modeling Tool
 ==========================
 
-Uses astroquery & vamdclib to obtain molecular parameters.
-http://astroquery.readthedocs.io/en/latest/splatalogue/splatalogue.html
+Uses astroquery to obtain molecular parameters.
 
 Equations are based on Mangum & Shirley 2015 (2015PASP..127..266M)
 
@@ -14,6 +13,7 @@ from __future__ import print_function
 import numpy as np
 from astropy import units as u
 from astropy import constants
+from astropy import log
 from .model import SpectralModel
 
 kb_cgs = constants.k_B.cgs.value
@@ -22,6 +22,7 @@ eightpicubed = 8 * np.pi**3
 threehc = 3 * constants.h.cgs * constants.c.cgs
 hoverk_cgs = (h_cgs/kb_cgs)
 c_cgs = constants.c.cgs.value
+ckms = constants.c.to(u.km/u.s).value
 
 def line_tau(tex, total_column, partition_function, degeneracy, frequency,
              energy_upper, einstein_A=None):
@@ -197,94 +198,10 @@ def line_brightness_cgs(tex, dnu, frequency, tbg=2.73, *args, **kwargs):
     tau = line_tau(tex=tex, frequency=frequency, *args, **kwargs) / dnu
     return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
 
-# requires vamdc branch of astroquery
-def get_molecular_parameters(molecule_name,
-                             molecule_name_jpl=None,
-                             tex=50, fmin=1*u.GHz, fmax=1*u.THz,
-                             line_lists=['SLAIM'],
-                             export_limit=1e5,
-                             chem_re_flags=0, **kwargs):
+def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
+                             catalog='JPL',**kwargs):
     """
-    Get the molecular parameters for a molecule from the CDMS database using
-    vamdclib
-
-    Parameters
-    ----------
-    molecule_name : string
-        The string name of the molecule (normal name, like CH3OH or CH3CH2OH)
-    molecule_name_jpl : string or None
-        Default to molecule_name, but if jplspec doesn't have your molecule
-        by the right name, specify it here
-    tex : float
-        Optional excitation temperature (basically checks if the partition
-        function calculator works)
-    fmin : quantity with frequency units
-    fmax : quantity with frequency units
-        The minimum and maximum frequency to search over
-    line_lists : list
-        A list of Splatalogue line list catalogs to search.  Valid options
-        include SLAIM, CDMS, JPL.  Only a single catalog should be used to
-        avoid repetition of transitions and species
-    chem_re_flags : int
-        An integer flag to be passed to splatalogue's chemical name matching
-        tool
-
-    Examples
-    --------
-    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters(molecule_name='CH2CHCN',
-    ...                                                          fmin=220*u.GHz,
-    ...                                                          fmax=222*u.GHz,
-                                                                )
-    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH3OH',
-    ...                                                          fmin=90*u.GHz,
-    ...                                                          fmax=100*u.GHz)
-    """
-    from astroquery.splatalogue import Splatalogue
-    from astroquery.jplspec import JPLSpec
-
-    # do this here, before trying to compute the partition function, because
-    # this query could fail
-    tbl = Splatalogue.query_lines(fmin, fmax, chemical_name=molecule_name,
-                                  line_lists=line_lists,
-                                  show_upper_degeneracy=True,
-                                  export_limit=export_limit,
-                                  **kwargs)
-
-    if molecule_name_jpl is None:
-        molecule_name_jpl = molecule_name
-
-    jpltable = JPLSpec.get_species_table()[JPLSpec.get_species_table()['NAME'] == molecule_name_jpl]
-    if len(jpltable) != 1:
-        errmsg = f"Too many or too few matches to {molecule_name_jpl}"
-        raise ValueError(errmsg)
-
-    def partfunc(tem):
-        """
-        interpolate the partition function
-        WARNING: this can be very wrong
-        """
-        tem = u.Quantity(tem, u.K).value
-        tems = np.array(jpltable.meta['Temperature (K)'])
-        logQs = jpltable['QLOG1 QLOG2 QLOG3 QLOG4 QLOG5 QLOG6 QLOG7'.split()]
-        logQs = np.array(list(logQs[0]))
-        inds = np.argsort(tems)
-        logQ = np.interp(tem, tems[inds], logQs[inds])
-        return 10**logQ
-
-
-    freqs = (np.array(tbl['Freq-GHz'])*u.GHz if 'Freq-GHz' in tbl.colnames else
-             np.array(tbl['Freq-GHz(rest frame,redshifted)'])*u.GHz)
-    aij = tbl['Log<sub>10</sub> (A<sub>ij</sub>)']
-    deg = tbl['Upper State Degeneracy']
-    EU = (np.array(tbl['E_U (K)'])*u.K*constants.k_B).to(u.erg).value
-
-    return freqs, aij, deg, EU, partfunc
-
-
-def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
-                                 fmax=1*u.THz, **kwargs):
-    """
-    Get the molecular parameters for a molecule from the JPL catalog
+    Get the molecular parameters for a molecule from the JPL or CDMS catalog
 
     (this version should, in principle, be entirely self-consistent)
 
@@ -296,13 +213,15 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
     tex : float
         Optional excitation temperature (basically checks if the partition
         function calculator works)
+    catalog : 'JPL' or 'CDMS'
+        Which catalog to pull from
     fmin : quantity with frequency units
     fmax : quantity with frequency units
         The minimum and maximum frequency to search over
 
     Examples
     --------
-    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters(molecule_name='CH2CHCN',
+    >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH2CHCN',
     ...                                                          fmin=220*u.GHz,
     ...                                                          fmax=222*u.GHz,
                                                                 )
@@ -310,14 +229,20 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
     ...                                                          fmin=90*u.GHz,
     ...                                                          fmax=100*u.GHz)
     """
-    from astroquery.jplspec import JPLSpec
+    if catalog == 'JPL':
+        from astroquery.jplspec import JPLSpec as QueryTool
+    elif catalog == 'CDMS':
+        from astroquery.cdms import CDMS as QueryTool
+    else:
+        raise ValueError("Invalid catalog specification")
 
-    jpltable = JPLSpec.get_species_table()[JPLSpec.get_species_table()['NAME'] == molecule_name_jpl]
+    speciestab = QueryTool.get_species_table()
+    jpltable = speciestab[speciestab['NAME'] == molecule_name]
     if len(jpltable) != 1:
-        raise ValueError(f"Too many or too few matches to {molecule_name_jpl}")
+        raise ValueError(f"Too many or too few matches to {molecule_name}")
 
-    jpltbl = JPLSpec.query_lines(fmin, fmax, molecule=molecule_name_jpl,
-                                 parse_name_locally=True)
+    jpltbl = QueryTool.query_lines(fmin, fmax, molecule=molecule_name,
+                                   parse_name_locally=True)
 
     def partfunc(tem):
         """
@@ -326,15 +251,22 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
         """
         tem = u.Quantity(tem, u.K).value
         tems = np.array(jpltable.meta['Temperature (K)'])
-        logQs = jpltable['QLOG1 QLOG2 QLOG3 QLOG4 QLOG5 QLOG6 QLOG7'.split()]
+        keys = [k for k in jpltable.keys() if 'q' in k.lower()]
+        logQs = jpltable[keys]
         logQs = np.array(list(logQs[0]))
         inds = np.argsort(tems)
-        logQ = np.interp(tem, tems[inds], logQs[inds])
-        return 10**logQ
+        #logQ = np.interp(tem, tems[inds], logQs[inds])
+        # linear interpolation is appropriate; Q is linear with T... for some cases...
+        # it's a safer interpolation, anyway.
+        # to get a better solution, you can fit a functional form as shown in the
+        # JPLSpec docs, but that is... left as an exercise.
+        # (we can test the degree of deviation there)
+        linQ = np.interp(tem, tems[inds], 10**logQs[inds])
+        return linQ
 
     freqs = jpltbl['FREQ'].quantity
     freq_MHz = freqs.to(u.MHz).value
-    deg = jpltbl['GUP']
+    deg = np.array(jpltbl['GUP'])
     EL = jpltbl['ELO'].quantity.to(u.erg, u.spectral())
     dE = freqs.to(u.erg, u.spectral())
     EU = EL + dE
@@ -345,7 +277,9 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
 
     # from Brett McGuire https://github.com/bmcguir2/simulate_lte/blob/1f3f7c666946bc88c8d83c53389556a4c75c2bbd/simulate_lte.py#L2580-L2587
 
-    # LGINT: Base 10 logarithm of the integrated intensity in units of nm2 ·MHz at 300 K. (See Section 3 for conversions to other units.)
+    # LGINT: Base 10 logarithm of the integrated intensity in units of nm2 ·MHz at 300 K.
+    # (See Section 3 for conversions to other units.)
+    # see also https://cdms.astro.uni-koeln.de/classic/predictions/description.html#description
     CT = 300
     logint = np.array(jpltbl['LGINT']) # this should just be a number
     #from CDMS website
@@ -358,58 +292,115 @@ def get_molecular_parameters_JPL(molecule_name_jpl, tex=50, fmin=1*u.GHz,
     aij = np.log10(aij)
     EU = EU.to(u.erg).value
 
-    return freqs, aij, deg, EU, partfunc
+    ok = np.isfinite(aij) & np.isfinite(EU) & np.isfinite(deg) & np.isfinite(freqs)
+
+    return freqs[ok], aij[ok], deg[ok], EU[ok], partfunc
 
 
 
 def generate_model(xarr, vcen, width, tex, column,
                    freqs, aij, deg, EU, partfunc,
                    background=None, tbg=2.73,
+                   get_tau=False,
+                   get_tau_sticks=False
                   ):
     """
     Model Generator
+
+    Parameters
+    ==========
+    xarr : Quantity array [Hz]
+        The X-axis (frequency)
+    vcen : Quantity [km/s]
+        The central velocity
+    width : Quantity [km/s]
+        The 1-sigma Gaussian line width [not FWHM]
+    tex : Quantity [K]
+        Excitation temperature
+    column : Quantity [cm^-2]
+        The total column density of the molecule.
+        If specified as a value < 30, it will be assumed to be the log10 of the
+        column density.
+    freqs : Quantity array [Hz]
+        The central frequency of the lines to model.
+        Subsequent parameters, aij, deg, EU, must have
+        the same shape as `freqs`.
+    aij : array [log s^-1]
+        The Einstein A coefficients, assumed to be in units
+        of log10 of the rate in 1/s
+    deg : array
+        The transition degeneracy
+    EU : Quantity array [erg]
+        The upper state energy in ergs
+    partfunc : function
+        The partition function.  Can also be specified as an array of values in
+        Kelvin.
+    background : None
+        An additional background field to include in the radiative transfer
+        model.  Must be in Kelvin.
+        [Presently not correctly implemented]
+    tbg : Quantity [K]
+        The background brightness temperature, defaulting to 2.73 for the CMB
+        temperature.  This background will be treated as uniform with frequency
+        and subtracted.
+    get_tau : bool, default False
+        If specified, the optical depth in each frequency bin will be returned
+    get_tau_sticks : bool, default False
+        If specified, the optical depth in each transition will be returned
     """
 
     if hasattr(tex,'unit'):
         tex = tex.value
-    if hasattr(tbg,'unit'):
-        tbg = tbg.value
+    # to allow for multi-excitation-temperature, we need a multizone model
+    # the radiative transfer equation below is hard-coded to be single-zone
+
     if hasattr(column, 'unit'):
         column = column.value
-    if column < 25:
-        column = 10**column
+    if np.isscalar(column):
+        column = np.ones(len(freqs), dtype='float') * column
+    else:
+        assert len(column) == len(freqs)
+        column = column.copy() # we're doing inplace modification below
+    # assume low numbers are meant to be exponents
+    low_col = column < 30
+    log.debug(f"Found {low_col.sum()} entries that needed exponentiation")
+    if any(low_col):
+        column[low_col] = 10**column[low_col]
+
+    if hasattr(tbg,'unit'):
+        tbg = tbg.to(u.K).value
     if hasattr(vcen, 'unit'):
-        vcen = vcen.value
+        vcen = vcen.to(u.km/u.s).value
     if hasattr(width, 'unit'):
-        width = width.value
-
-    ckms = constants.c.to(u.km/u.s).value
-
-    # assume equal-width channels
-    #kwargs = dict(rest=ref_freq)
-    #equiv = u.doppler_radio(**kwargs)
-
-    # channelwidth array, with last element approximated
-    channelwidth = np.empty_like(xarr.value)
-    channelwidth[:-1] = np.abs(np.diff(xarr.to(u.Hz))).value
-    channelwidth[-1] = channelwidth[-2]
+        width = width.to(u.km/u.s).value
 
     #velo = xarr.to(u.km/u.s, equiv).value
     freq = xarr.to(u.Hz).value # same unit as nu below
     model = np.zeros_like(xarr).value
 
     # splatalogue can report bad frequencies as zero
-    OK = freqs.value != 0
+    OK = (freqs.value != 0) & np.isfinite(aij) & np.isfinite(EU)
 
     freqs_ = freqs.to(u.Hz).value
 
-    Q = partfunc(tex)
+    if callable(partfunc):
+        Qs = partfunc(tex)
+        if np.isscalar(Qs):
+            Qs = np.ones(len(freqs), dtype='float') * Qs
+    else:
+        Qs = partfunc
+        assert len(Qs) == len(freqs)
 
-    for logA, gg, restfreq, eu in zip(aij[OK], deg[OK], freqs_[OK], EU[OK]):
-        tau_over_phi = line_tau_cgs(tex=tex, total_column=column,
+    model_tau = np.zeros_like(freq)
+    tau_sticks = []
+
+    for logA, gg, restfreq, eu, nt, Q in zip(aij[OK], deg[OK], freqs_[OK],
+                                             EU[OK], column[OK], Qs[OK]):
+        tau_over_phi = line_tau_cgs(tex=tex, total_column=nt,
                                     partition_function=Q, degeneracy=gg,
                                     frequency=restfreq, energy_upper=eu,
                                     einstein_A=10**logA)
+        # commented out for performance log.debug(f"A={logA}, g={gg}, nu={restfreq}, eu={eu}, col={nt}, Q={Q}, tau/phi={tau_over_phi}")
         width_dnu = width / ckms * restfreq
 
         phi_nu = (
@@ -418,11 +409,20 @@ def generate_model(xarr, vcen, width, tex, column,
 
         tau_profile = (tau_over_phi * phi_nu)
 
-        jnu = (Jnu_cgs(restfreq, tex)-Jnu_cgs(restfreq, tbg))
+        model_tau += tau_profile
+        tau_sticks.append(tau_over_phi)
 
-        model = model + jnu*(1-np.exp(-tau_profile))
+    if get_tau:
+        return model_tau
+    if get_tau_sticks:
+        return tau_sticks
+
+    jnu = (Jnu_cgs(freq, tex)-Jnu_cgs(freq, tbg))
+
+    model = jnu*(1-np.exp(-model_tau))
 
     if background is not None:
+        raise NotImplementedError
         return background-model
     return model
 
@@ -459,9 +459,13 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
     Mangum & Shirley 2015 eqn 82 gives, for the optically thin, Rayleigh-Jeans,
     negligible background approximation:
 
+    .. math::
+
         Ntot = (3 k) / (8 pi^3 nu S mu^2 R_i)   (Q/g) exp(E_u/k Tex) integ(T_R/f dv)
 
     Eqn 31:
+
+    .. math::
 
         Ntot/Nu = Q_rot / gu exp(E_u/k Tex)
 
@@ -470,17 +474,26 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
 
     To get Nu of an observed line, then:
 
+    .. math::
+
         Nu Q_rot / gu exp(E_u/k Tex) = (3 k) / (8 pi^3 nu S mu^2 R_i)   (Q/g) exp(E_u/k Tex) integ(T_R/f dv)
 
     This term cancels:
+
+    .. math::
         Q_rot / gu exp(E_u/k Tex)
 
     Leaving:
+
+    .. math::
 
         Nu = (3 k) / (8 pi^3 nu S mu^2 R_i)   integ(T_R/f dv)
 
     integ(T_R/f dv) is the optically thin integrated intensity in K km/s
     dnu/nu = dv/c [doppler eqn], so to get integ(T_R dnu), sub in dv = c/nu dnu
+
+    .. math::
+
 
         Nu = (3 k c) / (8 pi^3 nu^2  S mu^2 R_i)   integ(T_R/f dnu)
 
@@ -490,9 +503,13 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
     degeneracy; eqn 75)
     Equation 11:
 
+    .. math::
+
         A_ul = 64 pi^4 nu^3 / (3 h c^3) |mu_ul|^2
 
     Equation 62:
+
+    .. math::
 
         |mu_ul|^2 = S mu^2
 
@@ -500,12 +517,16 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
 
     Plugging that in gives
 
+    .. math::
+
         Nu = (3 k c) / (8 pi^3 nu^2  ((3 h c^3 Aul) / (64 pi^4 nu^3)))   integ(T_R/f dnu)
            = (3 k c 64 pi^4 nu^3) / (8 pi^3 nu^2 3 h c^3 Aul)            integ(T_R/f dnu)
            = (8 pi nu k / (Aul c^2 h)) integ(T_R/f dnu)
 
     which is the equation implemented below.  We could also have left this in
     dv units by substituting du = nu/c dv:
+
+    .. math::
 
            = (8 pi nu^2 k / (Aul c^3 h)) integ(T_R/f dv)
 
