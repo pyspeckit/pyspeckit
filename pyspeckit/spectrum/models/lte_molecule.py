@@ -368,11 +368,11 @@ def generate_model(xarr, vcen, width, tex, column,
         column[low_col] = 10**column[low_col]
 
     if hasattr(tbg,'unit'):
-        tbg = tbg.value
+        tbg = tbg.to(u.K).value
     if hasattr(vcen, 'unit'):
-        vcen = vcen.value
+        vcen = vcen.to(u.km/u.s).value
     if hasattr(width, 'unit'):
-        width = width.value
+        width = width.to(u.km/u.s).value
 
     #velo = xarr.to(u.km/u.s, equiv).value
     freq = xarr.to(u.Hz).value # same unit as nu below
