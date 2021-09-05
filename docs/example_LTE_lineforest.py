@@ -36,6 +36,7 @@ offset = np.nanpercentile(sp.data.filled(np.nan), 20)
 # can result in multiple matches from splatalogue, and definitely not all
 # species have the same column and excitation
 species_list = ('CH3OH', 'HCCCN', 'H2CO', 'CH3OCHO', 'CH3OCH3', 'C2H5CN',)
+# 'C2H3CN' is pretty definitely not here at the constant assumed column
 
 # make a set of subplots:
 import pylab as pl
