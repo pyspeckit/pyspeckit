@@ -5,3 +5,4 @@ astropy-helpers
 astropy
 ordereddict
 spectral-cube
+sphinx-astropy
