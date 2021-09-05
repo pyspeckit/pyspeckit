@@ -306,7 +306,6 @@ def generate_model(xarr, vcen, width, tex, column,
     ==========
     xarr : Quantity array [Hz]
         The X-axis (frequency)
-        
     vcen : Quantity [km/s]
         The central velocity
     width : Quantity [km/s]
@@ -314,7 +313,9 @@ def generate_model(xarr, vcen, width, tex, column,
     tex : Quantity [K]
         Excitation temperature
     column : Quantity [cm^-2]
-        The total column density of the molecule
+        The total column density of the molecule.
+        If specified as a value < 30, it will be assumed to be the log10 of the
+        column density.
     freqs : Quantity array [Hz]
         The central frequency of the lines to model.
         Subsequent parameters, aij, deg, EU, must have
