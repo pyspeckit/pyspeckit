@@ -255,8 +255,14 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
         logQs = jpltable[keys]
         logQs = np.array(list(logQs[0]))
         inds = np.argsort(tems)
-        logQ = np.interp(tem, tems[inds], logQs[inds])
-        return 10**logQ
+        #logQ = np.interp(tem, tems[inds], logQs[inds])
+        # linear interpolation is appropriate; Q is linear with T... for some cases...
+        # it's a safer interpolation, anyway.
+        # to get a better solution, you can fit a functional form as shown in the
+        # JPLSpec docs, but that is... left as an exercise.
+        # (we can test the degree of deviation there)
+        linQ = np.interp(tem, tems[inds], 10**logQs[inds])
+        return linQ
 
     freqs = jpltbl['FREQ'].quantity
     freq_MHz = freqs.to(u.MHz).value
