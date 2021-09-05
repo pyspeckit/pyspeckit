@@ -44,6 +44,7 @@ Want your image or example included?  `E-mail us <mailto:pyspeckit@gmail.com>`_.
    Radio para-NH2D <example_p-nh2d>
    Radio HCN: shows hyperfine with varying amplitude & width <example_hcn>
    Radio HCO+ <example_hcop>
+   Radio LTE Line Forest model <example_LTE>
    Near IR cube <example_NIR_cube>
    Optical SDSS <example_sdss>
    Optical Vega Echelle <example_vega_echelle>

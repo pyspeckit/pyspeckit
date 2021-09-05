@@ -46,9 +46,9 @@ from pyspeckit.spectrum.models import lte_molecule
 mods = []
 for species, axis in zip(species_list, axes):
     # search for lines within +/- 0.5 GHz of the min/max (to account for velocity offset, generously)
-    freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters_JPL(species,
-                                                                              fmin=sp.xarr.min()-0.5*u.GHz,
-                                                                              fmax=sp.xarr.max()+0.5*u.GHz)
+    freqs, aij, deg, EU, partfunc = lte_molecule.get_molecular_parameters(species,
+                                                                          fmin=sp.xarr.min()-0.5*u.GHz,
+                                                                          fmax=sp.xarr.max()+0.5*u.GHz)
 
     mod = lte_molecule.generate_model(xarr=sp.xarr, vcen=50*u.km/u.s,
                                       width=3*u.km/u.s, tex=100*u.K,
