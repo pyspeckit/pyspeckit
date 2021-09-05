@@ -255,7 +255,8 @@ def get_molecular_parameters(molecule_name,
 
     jpltable = JPLSpec.get_species_table()[JPLSpec.get_species_table()['NAME'] == molecule_name_jpl]
     if len(jpltable) != 1:
-        raise ValueError(f"Too many or too few matches to {molecule_name_jpl}")
+        errmsg = f"Too many or too few matches to {molecule_name_jpl}"
+        raise ValueError(errmsg)
 
     def partfunc(tem):
         """
