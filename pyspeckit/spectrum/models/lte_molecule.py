@@ -2,8 +2,7 @@
 LTE Molecule Modeling Tool
 ==========================
 
-Uses astroquery & vamdclib to obtain molecular parameters.
-http://astroquery.readthedocs.io/en/latest/splatalogue/splatalogue.html
+Uses astroquery to obtain molecular parameters.
 
 Equations are based on Mangum & Shirley 2015 (2015PASP..127..266M)
 
@@ -454,9 +453,13 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
     Mangum & Shirley 2015 eqn 82 gives, for the optically thin, Rayleigh-Jeans,
     negligible background approximation:
 
+    .. math::
+
         Ntot = (3 k) / (8 pi^3 nu S mu^2 R_i)   (Q/g) exp(E_u/k Tex) integ(T_R/f dv)
 
     Eqn 31:
+
+    .. math::
 
         Ntot/Nu = Q_rot / gu exp(E_u/k Tex)
 
@@ -465,17 +468,26 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
 
     To get Nu of an observed line, then:
 
+    .. math::
+
         Nu Q_rot / gu exp(E_u/k Tex) = (3 k) / (8 pi^3 nu S mu^2 R_i)   (Q/g) exp(E_u/k Tex) integ(T_R/f dv)
 
     This term cancels:
+
+    .. math::
         Q_rot / gu exp(E_u/k Tex)
 
     Leaving:
+
+    .. math::
 
         Nu = (3 k) / (8 pi^3 nu S mu^2 R_i)   integ(T_R/f dv)
 
     integ(T_R/f dv) is the optically thin integrated intensity in K km/s
     dnu/nu = dv/c [doppler eqn], so to get integ(T_R dnu), sub in dv = c/nu dnu
+
+    .. math::
+
 
         Nu = (3 k c) / (8 pi^3 nu^2  S mu^2 R_i)   integ(T_R/f dnu)
 
@@ -485,9 +497,13 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
     degeneracy; eqn 75)
     Equation 11:
 
+    .. math::
+
         A_ul = 64 pi^4 nu^3 / (3 h c^3) |mu_ul|^2
 
     Equation 62:
+
+    .. math::
 
         |mu_ul|^2 = S mu^2
 
@@ -495,12 +511,16 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
 
     Plugging that in gives
 
+    .. math::
+
         Nu = (3 k c) / (8 pi^3 nu^2  ((3 h c^3 Aul) / (64 pi^4 nu^3)))   integ(T_R/f dnu)
            = (3 k c 64 pi^4 nu^3) / (8 pi^3 nu^2 3 h c^3 Aul)            integ(T_R/f dnu)
            = (8 pi nu k / (Aul c^2 h)) integ(T_R/f dnu)
 
     which is the equation implemented below.  We could also have left this in
     dv units by substituting du = nu/c dv:
+
+    .. math::
 
            = (8 pi nu^2 k / (Aul c^3 h)) integ(T_R/f dv)
 
