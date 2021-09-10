@@ -417,8 +417,13 @@ def generate_model(xarr, vcen, width, tex, column,
     if get_tau_sticks:
         return tau_sticks
 
-    jnu = (Jnu_cgs(freq, tex)-Jnu_cgs(freq, tbg))
+    jnu_line = Jnu_cgs(freq, tex)
+    jnu_bg = Jnu_cgs(freq, tbg)
+    jnu = (jnu_line-jnu_bg)
 
+    # this is the same as below, but laid out more explicitly.  This form of the
+    # equation implicity subtracts of a uniform-with-frequency background
+    # model = jnu_line*(1-np.exp(-model_tau)) + jnu_bg*(np.exp(-model_tau)) - jnu_bg
     model = jnu*(1-np.exp(-model_tau))
 
     if background is not None:
