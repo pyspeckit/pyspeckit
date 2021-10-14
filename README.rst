@@ -1,7 +1,7 @@
 PySpecKit Spectroscopic Toolkit
 -------------------------------
 
-* Documentation: `https://pyspeckit.readthedocs.io/en/latest/`_
+* Documentation: `<https://pyspeckit.readthedocs.io/en/latest/>`_
 * Source pages: `<https://github.com/pyspeckit/pyspeckit>`_
 
 This is a code framework designed to allow for analysis of spectroscopic data
