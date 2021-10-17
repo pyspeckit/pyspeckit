@@ -232,7 +232,7 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     if catalog == 'JPL':
         from astroquery.jplspec import JPLSpec as QueryTool
     elif catalog == 'CDMS':
-        from astroquery.cdms import CDMS as QueryTool
+        from astroquery.linelists.cdms import CDMS as QueryTool
     else:
         raise ValueError("Invalid catalog specification")
 
