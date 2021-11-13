@@ -221,6 +221,7 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
 
     Examples
     --------
+    >>> from pyspeckit.spectrum.models.lte_molecule import get_molecular_parameters
     >>> freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH2CHCN',
     ...                                                          fmin=220*u.GHz,
     ...                                                          fmax=222*u.GHz,
@@ -308,7 +309,7 @@ def generate_model(xarr, vcen, width, tex, column,
     Model Generator
 
     Parameters
-    ==========
+    ----------
     xarr : Quantity array [Hz]
         The X-axis (frequency)
     vcen : Quantity [km/s]
@@ -347,6 +348,18 @@ def generate_model(xarr, vcen, width, tex, column,
         If specified, the optical depth in each frequency bin will be returned
     get_tau_sticks : bool, default False
         If specified, the optical depth in each transition will be returned
+        
+    Examples
+    --------
+    Example case to produce a model::
+    
+        from pyspeckit.spectrum.models.lte_molecule import get_molecular_parameters, generate_model, generate_fitter
+        freqs, aij, deg, eu, partfunc = get_molecular_parameters('CH3OH')
+        def modfunc(xarr, vcen, width, tex, column):
+            return generate_model(xarr, vcen, width, tex, column, freqs=freqs, aij=aij,
+                                  deg=deg, EU=EU, partfunc=partfunc)
+        
+        fitter = generate_fitter(modfunc, name="CH3OH")
     """
 
     if hasattr(tex,'unit'):
@@ -431,16 +444,6 @@ def generate_model(xarr, vcen, width, tex, column,
         return background-model
     return model
 
-"""
-Example case to produce a model:
-
-freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH3OH')
-def modfunc(xarr, vcen, width, tex, column):
-    return generate_model(xarr, vcen, width, tex, column, freqs=freqs, aij=aij,
-                          deg=deg, EU=EU, partfunc=partfunc)
-
-fitter = generate_fitter(modfunc, name="CH3OH")
-"""
 
 def generate_fitter(model_func, name):
     """
@@ -466,33 +469,33 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
 
     .. math::
 
-        Ntot = (3 k) / (8 pi^3 nu S mu^2 R_i)   (Q/g) exp(E_u/k Tex) integ(T_R/f dv)
+        N_{tot} = (3 k) / (8 pi^3 nu S mu^2 R_i)   (Q/g) exp(E_u/k T_{ex}) integ(T_R/f dv)
 
     Eqn 31:
 
     .. math::
 
-        Ntot/Nu = Q_rot / gu exp(E_u/k Tex)
+        N_{tot}/N_u = Q_{rot} / g_u exp(E_u/k T_{ex})
 
-        -> Ntot = Nu Q_rot / gu exp(E_u/k Tex)
-        -> Nu = N_tot g / Qrot exp(-E_u / k Tex)
+        -> N_{tot} = N_u Q_{rot} / g_u exp(E_u/k T_{ex})
+        -> Nu = N_{tot} g / Q_{rot} exp(-E_u / k T_{ex})
 
     To get Nu of an observed line, then:
 
     .. math::
 
-        Nu Q_rot / gu exp(E_u/k Tex) = (3 k) / (8 pi^3 nu S mu^2 R_i)   (Q/g) exp(E_u/k Tex) integ(T_R/f dv)
+        Nu Q_{rot} / g_u exp(E_u/k T_{ex}) = (3 k) / (8 pi^3 nu S mu^2 R_i)   (Q/g) exp(E_u/k T_{ex}) integ(T_R/f dv)
 
     This term cancels:
 
     .. math::
-        Q_rot / gu exp(E_u/k Tex)
+        Q_{rot} / g_u exp(E_u/k T_{ex})
 
     Leaving:
 
     .. math::
 
-        Nu = (3 k) / (8 pi^3 nu S mu^2 R_i)   integ(T_R/f dv)
+        N_u = (3 k) / (8 pi^3 nu S mu^2 R_i)   integ(T_R/f dv)
 
     integ(T_R/f dv) is the optically thin integrated intensity in K km/s
     dnu/nu = dv/c [doppler eqn], so to get integ(T_R dnu), sub in dv = c/nu dnu
@@ -500,7 +503,7 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
     .. math::
 
 
-        Nu = (3 k c) / (8 pi^3 nu^2  S mu^2 R_i)   integ(T_R/f dnu)
+        N_u = (3 k c) / (8 pi^3 nu^2  S mu^2 R_i)   integ(T_R/f dnu)
 
 
     We then need to deal with the S mu^2 R_i term.  We assume R_i = 1, since we
@@ -556,9 +559,13 @@ def ntot_of_nupper(nupper, eupper, tex, Q_rot, degeneracy=1):
     """ Given an N_upper, E_upper, tex, Q_rot, and degeneracy for a single state, give N_tot
 
     Mangum & Shirley 2015 eqn 31
-    Ntot/Nu = Q_rot / gu exp(E_u/k Tex)
+    
+    .. math::
+        
+        N_{tot}/N_u = Q_{rot} / g_u exp(E_u/k T_{ex})
 
     Example:
+        >>> import astropy.units as u
         >>> tex = 50*u.K
         >>> kkms = 100*u.K*u.km/u.s
         >>> from pyspeckit.spectrum.models import lte_molecule

@@ -8,7 +8,9 @@ It uses the JPL or CDMS databases through their astroquery interfaces.
 A very simple example looks like this:
 
 .. code-block:: python
-
+    
+   import astropy.units as u
+   from pyspeckit.spectrum.models.lte_molecule import get_molecular_parameters, generate_fitter, generate_model
 
    freqs, aij, deg, EU, partfunc = get_molecular_parameters('CH3OH',
                                                             fmin=90*u.GHz,
