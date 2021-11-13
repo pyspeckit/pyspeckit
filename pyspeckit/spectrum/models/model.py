@@ -63,6 +63,8 @@ class SpectralModel(fitter.SimpleFitter):
             Returns an array with the same shape as the input X-axis
         npars : int
             number of parameters required by the model
+        use_lmfit: bool
+            Use lmfit instead of mpfit to do the fitting
         parnames : list (optional)
             a list or tuple of the parameter names
         parvalues : list (optional)
