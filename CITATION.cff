@@ -1,0 +1,10 @@
+cff-version: 0.1.24
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Ginsburg, Sokolov, de Val-Borro, Rosolowsky, Pineda, Sipőcz, Henshaw
+    given-names: Adam, Vlas, Miguel, Erik, Jaime, Brigitta, Jonathan
+    orcid: https://orcid.org/0000-0001-6431-9633
+title: pyspeckit/pyspeckit: 
+version: v0.1.24
+date-released: 2017-12-18
+            
