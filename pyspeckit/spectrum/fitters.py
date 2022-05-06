@@ -542,8 +542,8 @@ class Specfit(interactive.Interactive):
                     else:
                         self.errspec = np.ma.ones(self.spectofit.shape[0]) * residuals_std
                 elif type(self.Spectrum.error) is np.ma.masked_array:
-                    # force errspec to be a non-masked array of ones
-                    self.errspec = self.Spectrum.error.data + 1
+                    # force errspec to be a masked array of ones
+                    self.errspec = self.Spectrum.error + 1
                 else:
                     self.errspec = np.ma.copy(self.Spectrum.error) + 1
             else:
@@ -553,6 +553,8 @@ class Specfit(interactive.Interactive):
             self.errspec = np.ma.ones(self.spectofit.shape[0]) * self.residuals.std()
         else:
             self.errspec = np.ma.ones(self.spectofit.shape[0]) * self.spectofit.std()
+
+        assert hasattr(self.errspec, 'mask')
 
     def setfitspec(self):
         """
