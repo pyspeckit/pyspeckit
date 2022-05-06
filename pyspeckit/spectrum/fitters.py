@@ -536,11 +536,11 @@ class Specfit(interactive.Interactive):
                 if self.residuals is not None and useresiduals:
                     residuals_std = self.residuals.std()
                     if residuals_std == 0:
-                        self.errspec = np.ones(self.spectofit.shape[0])
+                        self.errspec = np.ma.ones(self.spectofit.shape[0])
                         warnings.warn("Residuals have 0 standard deviation.  "
                                       "That's probably too good to be true.")
                     else:
-                        self.errspec = np.ones(self.spectofit.shape[0]) * residuals_std
+                        self.errspec = np.ma.ones(self.spectofit.shape[0]) * residuals_std
                 elif type(self.Spectrum.error) is np.ma.masked_array:
                     # force errspec to be a non-masked array of ones
                     self.errspec = self.Spectrum.error.data + 1
@@ -548,11 +548,11 @@ class Specfit(interactive.Interactive):
                     self.errspec = self.Spectrum.error + 1
             else:
                 # this is the default behavior if spectrum.error is set
-                self.errspec = self.Spectrum.error.copy()
+                self.errspec = np.ma.copy(self.Spectrum.error)
         elif self.residuals is not None and useresiduals:
-            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
+            self.errspec = np.ma.ones(self.spectofit.shape[0]) * self.residuals.std()
         else:
-            self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
+            self.errspec = np.ma.ones(self.spectofit.shape[0]) * self.spectofit.std()
 
     def setfitspec(self):
         """
