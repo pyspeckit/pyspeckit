@@ -902,7 +902,7 @@ class mpfit:
         # In the case if the xall is not float or if is float but has less
         # than 64 bits we do convert it into double
         if xall.dtype.kind != 'f' or xall.dtype.itemsize<=4:
-            xall = xall.astype(numpy.float)
+            xall = xall.astype(float)
 
         npar = len(xall)
         self.fnorm  = -1.

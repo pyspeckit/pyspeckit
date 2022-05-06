@@ -536,23 +536,25 @@ class Specfit(interactive.Interactive):
                 if self.residuals is not None and useresiduals:
                     residuals_std = self.residuals.std()
                     if residuals_std == 0:
-                        self.errspec = np.ones(self.spectofit.shape[0])
+                        self.errspec = np.ma.ones(self.spectofit.shape[0])
                         warnings.warn("Residuals have 0 standard deviation.  "
                                       "That's probably too good to be true.")
                     else:
-                        self.errspec = np.ones(self.spectofit.shape[0]) * residuals_std
+                        self.errspec = np.ma.ones(self.spectofit.shape[0]) * residuals_std
                 elif type(self.Spectrum.error) is np.ma.masked_array:
-                    # force errspec to be a non-masked array of ones
-                    self.errspec = self.Spectrum.error.data + 1
-                else:
+                    # force errspec to be a masked array of ones
                     self.errspec = self.Spectrum.error + 1
+                else:
+                    self.errspec = np.ma.copy(self.Spectrum.error) + 1
             else:
                 # this is the default behavior if spectrum.error is set
-                self.errspec = self.Spectrum.error.copy()
+                self.errspec = np.ma.copy(self.Spectrum.error)
         elif self.residuals is not None and useresiduals:
-            self.errspec = np.ones(self.spectofit.shape[0]) * self.residuals.std()
+            self.errspec = np.ma.ones(self.spectofit.shape[0]) * self.residuals.std()
         else:
-            self.errspec = np.ones(self.spectofit.shape[0]) * self.spectofit.std()
+            self.errspec = np.ma.ones(self.spectofit.shape[0]) * self.spectofit.std()
+
+        assert hasattr(self.errspec, 'mask')
 
     def setfitspec(self):
         """
@@ -587,10 +589,13 @@ class Specfit(interactive.Interactive):
             warnings.simplefilter("ignore")
             self.spectofit[~OKmask] = 0
 
+        self.spectofit.mask = ~OKmask
+
         self.seterrspec()
 
         # the "OK" mask is just checking that the values are finite
         self.errspec[~OKmask] = 1e10
+        self.errspec.mask = ~OKmask
 
         # if an includemask is set *and* there are some included values, "mask out" the rest
         # otherwise, if *all* data are excluded, we should assume that means the includemask

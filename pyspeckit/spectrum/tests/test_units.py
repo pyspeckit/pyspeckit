@@ -186,7 +186,7 @@ class TestUnits(object):
 
         with pytest.raises(u.UnitConversionError) as ex:
             xarr.x_to_pix(120,u.GHz)
-        assert str(ex.value) == "'GHz' (frequency) and 'km / s' (speed) are not convertible"
+        assert str(ex.value) == "'GHz' (frequency) and 'km / s' (speed/velocity) are not convertible"
 
         xarr = pyspeckit.units.SpectroscopicAxis(np.linspace(-50,50)*u.km/u.s, refX=100*u.GHz,
                                                  velocity_convention='radio')
