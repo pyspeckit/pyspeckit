@@ -545,7 +545,7 @@ class Specfit(interactive.Interactive):
                     # force errspec to be a non-masked array of ones
                     self.errspec = self.Spectrum.error.data + 1
                 else:
-                    self.errspec = self.Spectrum.error + 1
+                    self.errspec = np.ma.copy(self.Spectrum.error) + 1
             else:
                 # this is the default behavior if spectrum.error is set
                 self.errspec = np.ma.copy(self.Spectrum.error)
