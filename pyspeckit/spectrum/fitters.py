@@ -587,10 +587,13 @@ class Specfit(interactive.Interactive):
             warnings.simplefilter("ignore")
             self.spectofit[~OKmask] = 0
 
+        self.spectofit.mask = ~OKmask
+
         self.seterrspec()
 
         # the "OK" mask is just checking that the values are finite
         self.errspec[~OKmask] = 1e10
+        self.errspec.mask = ~OKmask
 
         # if an includemask is set *and* there are some included values, "mask out" the rest
         # otherwise, if *all* data are excluded, we should assume that means the includemask
