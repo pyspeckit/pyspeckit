@@ -307,15 +307,14 @@ def extract_aperture(cube, ap, r_mask=False, wcs=None,
                         "elliptical aperture.")
 
     npixinmask = mask.sum()
-    mask3d = repeat(mask[newaxis,:,:],cube.shape[0],axis=0)
     if method == 'mean':
-        specsum = nansum(nansum((cube*mask3d),axis=2),axis=1)
+        specsum = nansum(cube[:, mask], axis=(1,2))
         spec = specsum / npixinmask
     elif method == 'error':
-        specsum = nansum(nansum((cube*mask3d)**2,axis=2),axis=1)
+        specsum = nansum(cube[:, mask]**2, axis=(1,2))
         spec = (specsum)**0.5 / npixinmask
     else:
-        spec = nansum(nansum((cube*mask3d),axis=2),axis=1)
+        specsum = nansum(cube[:, mask], axis=(1,2))
 
     if r_mask:
         return spec,mask
