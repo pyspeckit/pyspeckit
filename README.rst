@@ -3,6 +3,7 @@ PySpecKit Spectroscopic Toolkit
 
 * Documentation: `<https://pyspeckit.readthedocs.io/en/latest/>`_
 * Source pages: `<https://github.com/pyspeckit/pyspeckit>`_
+* ADS reference: https://ui.adsabs.harvard.edu/abs/2022AJ....163..291G/abstract
 
 This is a code framework designed to allow for analysis of spectroscopic data
 from a wide variety of astronomical instruments.  It is motivated by the lack
@@ -36,20 +37,18 @@ Requirements:
 `numpy <http://numpy.org/>`_
 
 Optional:
-`atpy <http://atpy.readthedocs.org/>`_
 `scipy <http://www.scipy.org/>`_
 `lmfit <https://github.com/lmfit/lmfit-py>`_
 `lineid_plot <https://pythonhosted.org/lineid_plot/>`_
 `spectral-cube <http://spectral-cube.readthedocs.io/>`_
 
 Authors:
-`Adam Ginsburg <adam.g.ginsburg@gmail.com>`_
-`Jordan Mirocha <mirochaj@gmail.com>`_
-(or both of us at pyspeckit@gmail.com)
+`Adam Ginsburg <adam.g.ginsburg@gmail.com>`_ and several others.
 
 Contributors: (see https://github.com/pyspeckit/pyspeckit/graphs/contributors)
 
  * Erik Rosolowsky (Ammonia models, RADEX-based models)
+ * Jordan Mirocha (optical line labeling)
  * Vlas Sokolov (cube fitting, ammonia and N2H+ modeling)
  * Miguel de Val-Borro (CLASS file reading, python3 compatibility, bugfixes)
  * Brigitta Sipocz (internals & logistics)
