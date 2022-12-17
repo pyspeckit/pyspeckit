@@ -1,6 +1,9 @@
 cff-version: 1.0.0
 message: "If you use this software, please cite it as below."
 authors:
+  - family-names: Ginsburg
+    given-names: Adam
+    orcid: https://orcid.org/0000-0001-6431-9633
   - family-names: Sokolov
     given-names: Vlas
     orcid: https://orcid.org/0000-0002-5327-4289
@@ -20,7 +23,7 @@ authors:
     given-names: Jonathan
     orcid: https://orcid.org/0000-0001-9656-7682
 title: pyspeckit/pyspeckit: 
-version: v1.0.0
+version: 1.0.0
 date-released: 2022-04-11
 url: https://ui.adsabs.harvard.edu/abs/2022AJ....163..291G/abstract
 doi: 10.3847/1538-3881/ac695a
