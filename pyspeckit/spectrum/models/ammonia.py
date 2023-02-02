@@ -37,6 +37,8 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
             tau=None, fillingfraction=None, return_tau=False,
             return_tau_profile=False, background_tb=TCMB, verbose=False,
             return_components=False, debug=False, line_names=line_names,
+            freq_dict=freq_dict, aval_dict=aval_dict, ortho_dict=ortho_dict,
+            voff_lines_dict=voff_lines_dict, tau_wts_dict=tau_wts_dict,
             ignore_neg_models=False):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
@@ -1031,7 +1033,7 @@ class ammonia_model_vtau_thin(ammonia_model_vtau):
 
 class ammonia_model_background(ammonia_model):
     def __init__(self,**kwargs):
-        super(ammonia_model_background,self).__init__(npars=7,
+        super(ammonia_model_background, self).__init__(npars=7,
                                                       parnames=['trot', 'tex',
                                                                 'ntot',
                                                                 'width',
