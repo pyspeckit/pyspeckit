@@ -1132,8 +1132,12 @@ class ammonia_model_restricted_tex(ammonia_model):
             """
             # for py2 compatibility, must strip out manually
             delta = kwargs.pop('delta') if 'delta' in kwargs else None
-            np.testing.assert_allclose(kwargs['trot'] - kwargs['tex'],
-                                       delta)
+            try:
+                np.testing.assert_allclose(kwargs['trot'] - kwargs['tex'],
+                                        delta)
+            except AssertionError:
+                raise ValueError('trot - tex != delta, even though that was specified.'
+                                 f"trot={kwargs['trot']}, tex={kwargs['tex']}, delta={delta}, trot-text={kwargs['trot']-kwargs['tex']}")
             return ammonia_func(*args, **kwargs)
         self.modelfunc = ammonia_dtex
 
