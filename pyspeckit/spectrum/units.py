@@ -856,7 +856,7 @@ class SpectroscopicAxis(u.Quantity):
                                                          u.spectral())
 
     # OVERRRIDE ASTROPY'S VERSION FOR min, max, etc.
-    def _new_view(self, obj, unit=None):
+    def _new_view(self, obj, unit=None, **kwargs):
         """
         Create a Quantity view of obj, and set the unit
 
