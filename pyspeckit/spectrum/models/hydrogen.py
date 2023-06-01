@@ -196,7 +196,17 @@ greek_num_map = {1: 'alpha',
                  5: 'epsilon',
                 }
 
-def retrieve_storey1995(temperature=10000):
+def retrieve_storey1995(temperature=10000, case='b'):
+    """
+    Retrieve the Hummer and Storey tables from Vizier:
+    https://cdsarc.cds.unistra.fr/viz-bin/cat/VI/64
+    
+    based on the temperature and recombination case.  
+    
+    
+    The data are parsed into a dictionary using the function
+    parse_storey1995 below
+    """
     
     import requests
     import gzip
@@ -207,7 +217,8 @@ def retrieve_storey1995(temperature=10000):
     # r: prefix. ?
     # 1: hydrogen
     # b: case b
-    filename = f'r1b{temval:04d}.d.gz'
+    assert case in ('a', 'b')
+    filename = f'r1{case}{temval:04d}.d.gz'
     resp = requests.get(f'https://cdsarc.cds.unistra.fr/ftp/VI/64/{filename}')
     zz = gzip.open(io.BytesIO(resp.content))
     data = zz.read().decode()
@@ -216,6 +227,24 @@ def retrieve_storey1995(temperature=10000):
     
     
 def parse_storey1995(data, e_or_r='E'):
+    """
+    Returns a dictionary with keys like:"
+    (100.0, 1, 1000.0, 'B', 2, 124)
+    
+    where the keys are
+    
+    dens, Z, temp, case, nmin, nc
+    
+    dens is the density in cm^-3, Z is the number of electrons,
+    temp is the temperature in K, case is case A or B recombination
+    (Case B, no transitions into n=1, no Lyman transitions, are included)
+    nmin and nc - I don't know what these are
+    
+    Each entry contains a mapping from [NU,NL] -> emissivity, where
+    the emissivity is in erg/s/cm^3 and NU, NL are the upper and lower
+    electronic levels
+    
+    """
     entries = {}
     next_defines_entry = False
     coefficient_reading = False
