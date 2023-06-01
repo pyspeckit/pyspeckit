@@ -181,6 +181,107 @@ for series,values in iteritems(table14dot2):
     for line in values:
         r_to_hbeta[series+line[0]] = np.array(line[2:]) * r_to_hbeta['balmer'+line[0]]
         wavelength[series+line[0]] = line[1]
+        
+name_num_map = {1: 'Lyman',
+                2: 'Balmer',
+                3: 'Paschen',
+                4: 'Brackett',
+                5: 'Pfund',
+                6: 'Humphreys',
+               }
+greek_num_map = {1: 'alpha',
+                 2: 'beta',
+                 3: 'gamma',
+                 4: 'delta',
+                 5: 'epsilon',
+                }
+
+def retrieve_storey1995(temperature=10000, case='b'):
+    """
+    Retrieve the Hummer and Storey tables from Vizier:
+    https://cdsarc.cds.unistra.fr/viz-bin/cat/VI/64
+    
+    based on the temperature and recombination case.  
+    
+    
+    The data are parsed into a dictionary using the function
+    parse_storey1995 below
+    """
+    
+    import requests
+    import gzip
+    import io
+    
+    # https://cdsarc.cds.unistra.fr/ftp/VI/64/r1b0010.d.gz
+    temval = int(temperature / 100)
+    # r: prefix. ?
+    # 1: hydrogen
+    # b: case b
+    assert case in ('a', 'b')
+    filename = f'r1{case}{temval:04d}.d.gz'
+    resp = requests.get(f'https://cdsarc.cds.unistra.fr/ftp/VI/64/{filename}')
+    zz = gzip.open(io.BytesIO(resp.content))
+    data = zz.read().decode()
+    
+    return parse_storey1995(data.split("\n"))
+    
+    
+def parse_storey1995(data, e_or_r='E'):
+    """
+    Returns a dictionary with keys like:"
+    (100.0, 1, 1000.0, 'B', 2, 124)
+    
+    where the keys are
+    
+    dens, Z, temp, case, nmin, nc
+    
+    dens is the density in cm^-3, Z is the number of electrons,
+    temp is the temperature in K, case is case A or B recombination
+    (Case B, no transitions into n=1, no Lyman transitions, are included)
+    nmin and nc - I don't know what these are
+    
+    Each entry contains a mapping from [NU,NL] -> emissivity, where
+    the emissivity is in erg/s/cm^3 and NU, NL are the upper and lower
+    electronic levels
+    
+    """
+    entries = {}
+    next_defines_entry = False
+    coefficient_reading = False
+    r_or_e = 'E' if e_or_r == 'R' else 'R'
+    for row in data:
+        if next_defines_entry:
+            #print('entry definition:', row)
+            dens, Z, temp, case, nmin, nc = row.split()
+            dens, temp = map(float, (dens, temp))
+            Z, nmin, nc = map(int, (Z, nmin, nc))
+            entries[(dens, Z, temp, case, nmin, nc)] = {}
+            next_defines_entry = False
+            continue
+
+        if row.startswith(f' {e_or_r}_NU'):
+            #print('row definition:', row)
+            NE = float(row.split("NE=")[-1].strip().split()[0])
+            TE = float(row.split("TE=")[-1].strip().split()[0])
+            E_NU = int(row.split(f"{e_or_r}_NU=")[-1].strip().split()[0])
+            coefficient_reading = True
+            continue
+
+        if row.startswith(f" {r_or_e}_NU"):
+            coefficient_reading = False
+            continue
+
+        if coefficient_reading:
+            sp = row.strip().split()
+            for nl, rate in zip(sp[:-1:2], sp[1::2]):
+                entries[(dens, Z, temp, case, nmin, nc)][(E_NU, int(nl))] = float(rate)
+
+        if row.startswith(' DENS'):
+            next_defines_entry = True
+            coefficient_reading = False
+            continue
+
+    return entries    
 
 
 # not used right now, but it could be so I'm listing it here
