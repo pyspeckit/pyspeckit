@@ -164,13 +164,13 @@ class hyperfinemodel(object):
 
     def hyperfine_amp(self, xarr, amp=None, xoff_v=0.0, width=1.0,
                       return_hyperfine_components=False, Tbackground=2.73,
-                      Tex=5.0, tau=0.1):
+                      Tex=5.0, tau=0.1, **kwargs):
         """
         wrapper of self.hyperfine with order of arguments changed
         """
         return self.hyperfine(xarr, amp=amp, Tex=Tex, tau=tau, xoff_v=xoff_v,
                 width=width, return_hyperfine_components=return_hyperfine_components,
-                Tbackground=Tbackground)
+                              Tbackground=Tbackground, **kwargs)
 
     def hyperfine_tau(self, xarr, tau, xoff_v, width, **kwargs):
         """ same as hyperfine, but with arguments in a different order, AND
@@ -247,7 +247,7 @@ class hyperfinemodel(object):
     def hyperfine(self, xarr, Tex=5.0, tau=0.1, xoff_v=0.0, width=1.0,
                   return_hyperfine_components=False, Tbackground=2.73, amp=None,
                   return_tau=False, tau_total=None, vary_hyperfine_tau=False,
-                  vary_hyperfine_width=False):
+                  vary_hyperfine_width=False, **kwargs):
         """
         Generate a model spectrum given an excitation temperature, optical
         depth, offset velocity, and velocity width.

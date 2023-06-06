@@ -25,7 +25,7 @@ for ii in xrange(-15,0):
        for the user functions and will not clash with MPFIT."""
 
 from . import ammonia_hf
-from .ammonia import ammonia_model,ammonia_model_vtau
+from .ammonia import ammonia_model,ammonia_model_vtau,ammonia_model_radex
 # old way from gaussfitter import gaussian_fitter
 from .inherited_gaussfitter import gaussian_fitter,gaussian_vheight_fitter
 from .inherited_lorentzian import lorentzian_fitter
