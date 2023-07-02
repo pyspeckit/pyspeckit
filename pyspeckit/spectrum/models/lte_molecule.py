@@ -238,7 +238,12 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
         raise ValueError("Invalid catalog specification")
 
     speciestab = QueryTool.get_species_table()
-    jpltable = speciestab[speciestab['NAME'] == molecule_name]
+    if 'NAME' in speciestab.colnames:
+        jpltable = speciestab[speciestab['NAME'] == molecule_name]
+    elif 'molecule' in speciestab.colnames:
+        jpltable = speciestab[speciestab['molecule'] == molecule_name]
+    else:
+        raise ValueError(f"Did not find NAME or molecule in table columns: {speciestab.colnames}")
     if len(jpltable) != 1:
         raise ValueError(f"Too many or too few matches to {molecule_name}")
 
