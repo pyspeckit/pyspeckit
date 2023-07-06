@@ -39,35 +39,34 @@ class SmartCaseNoSpaceDict(dict):
         try:
             return dict.__getitem__(self,key)
         except KeyError:
-            return dict.__getitem__(self, key.lower().replace(" ",""))
+            return dict.__getitem__(self, str(key).lower().replace(" ",""))
 
     def __setitem__(self, key, value):
         dict.__setitem__(self,key,value)
         # only set lower-case version if there isn't one there already
         # prevents overwriting mm with Mm.lower()
-        if hasattr(key,'lower'):
-            if key.lower().replace(" ","") not in self:
-                self.__setitem__(key.lower().replace(" ",""), value)
+        if str(key).lower().replace(" ","") not in self:
+            self.__setitem__(str(key).lower().replace(" ",""), value)
 
     def __contains__(self, key):
         cased = dict.__contains__(self,key)
-        if hasattr(key,'lower') and cased is False:
-            return dict.__contains__(self, key.lower().replace(" ",""))
+        if cased is False:
+            return dict.__contains__(self, str(key).lower().replace(" ",""))
         else:
             return cased
 
     def has_key(self, key):
         """ This is deprecated, but we're keeping it around """
         cased = dict.has_key__(self,key)
-        if hasattr(key,'lower') and cased is False:
-            return dict.has_key__(self, key.lower().replace(" ",""))
+        if cased is False:
+            return dict.has_key__(self, str(key).lower().replace(" ",""))
         else:
             return cased
 
     def get(self, key, def_val=None):
         cased = dict.get(self,key)
-        if hasattr(key,'lower') and cased is None:
-            return dict.get(self, key.lower().replace(" ",""),def_val)
+        if cased is None:
+            return dict.get(self, str(key).lower().replace(" ",""),def_val)
         else:
             return cased
 
@@ -77,8 +76,8 @@ class SmartCaseNoSpaceDict(dict):
         a value of default and return default. default defaults to None.
         """
         cased = dict.setdefault(self,key)
-        if hasattr(key,'lower') and cased is None:
-            return dict.setdefault(self, key.lower().replace(" ",""),def_val)
+        if cased is None:
+            return dict.setdefault(self, str(key).lower().replace(" ",""),def_val)
         else:
             return cased
 
@@ -95,8 +94,8 @@ class SmartCaseNoSpaceDict(dict):
 
     def pop(self, key, def_val=None):
         cased = dict.pop(self,key)
-        if hasattr(key,'lower') and cased is None:
-            return dict.pop(self, key.lower().replace(" ",""),def_val)
+        if cased is None:
+            return dict.pop(self, str(key).lower().replace(" ",""),def_val)
         else:
             return cased
 
@@ -857,7 +856,7 @@ class SpectroscopicAxis(u.Quantity):
                                                          u.spectral())
 
     # OVERRRIDE ASTROPY'S VERSION FOR min, max, etc.
-    def _new_view(self, obj, unit=None):
+    def _new_view(self, obj, unit=None, **kwargs):
         """
         Create a Quantity view of obj, and set the unit
 

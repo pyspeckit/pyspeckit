@@ -1,0 +1,61 @@
+cff-version: 1.0.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Ginsburg"
+  given-names: "Adam"
+  orcid: "https://orcid.org/0000-0001-6431-9633"
+- family-names: "Sokolov"
+  given-names: "Vlas"
+  orcid: "https://orcid.org/0000-0002-5327-4289"
+- family-names: "de Val-Borro"
+  given-names: "Miguel"
+  orcid: "https://orcid.org/0000-0002-0455-9384"
+- family-names: "Rosolowsky"
+  given-names: "Erik"
+  orcid: "https://orcid.org/0000-0002-5204-2259"
+- family-names: "Pineda"
+  given-names: "Jaime"
+  orcid: "https://orcid.org/0000-0002-3972-1978"
+- family-names: "Sipőcz"
+  given-names: "Brigitta"
+  orcid: "https://orcid.org/0000-0002-3713-6337"
+- family-names: "Henshaw"
+  given-names: "Jonathan"
+  orcid: "https://orcid.org/0000-0001-9656-7682"
+version: 1.0.0
+date-released: 2022-04-11
+url: "https://ui.adsabs.harvard.edu/abs/2011ascl.soft09001G/abstract"
+preferred-citation:
+  type: article
+  url: "https://ui.adsabs.harvard.edu/abs/2022AJ....163..291G/abstract"
+  doi: 10.3847/1538-3881/ac695a
+  journal: The Astronomical Journal
+  volume: 163
+  issue: 6
+  year: 2022
+  month: 6
+  start: 291
+  end: 302
+  authors:
+  - family-names: "Ginsburg"
+    given-names: "Adam"
+    orcid: "https://orcid.org/0000-0001-6431-9633"
+  - family-names: "Sokolov"
+    given-names: "Vlas"
+    orcid: "https://orcid.org/0000-0002-5327-4289"
+  - family-names: "de Val-Borro"
+    given-names: "Miguel"
+    orcid: "https://orcid.org/0000-0002-0455-9384"
+  - family-names: "Rosolowsky"
+    given-names: "Erik"
+    orcid: "https://orcid.org/0000-0002-5204-2259"
+  - family-names: "Pineda"
+    given-names: "Jaime"
+    orcid: "https://orcid.org/0000-0002-3972-1978"
+  - family-names: "Sipőcz"
+    given-names: "Brigitta"
+    orcid: "https://orcid.org/0000-0002-3713-6337"
+  - family-names: "Henshaw"
+    given-names: "Jonathan"
+    orcid: "https://orcid.org/0000-0001-9656-7682"
+  title: "Pyspeckit: A Spectroscopic Analysis and Plotting Package"

@@ -516,8 +516,11 @@ class Baseline(interactive.Interactive):
         #    xmax = spectrum.shape[-1]
 
         if xarr is None or xarr_fit_unit == 'pixels':
-            # start at 1, not 0, for power-law in particular
-            xarrconv = np.arange(1, spectrum.size+1)
+            if powerlaw:
+                # start at 1, not 0, for power-law in particular
+                xarrconv = np.arange(1, spectrum.size+1)
+            else:
+                xarrconv = np.arange(spectrum.size)
         elif xarr_fit_unit not in (None, 'native'):
             xarrconv = xarr.as_unit(xarr_fit_unit).value
         else:
@@ -529,20 +532,16 @@ class Baseline(interactive.Interactive):
         # A good alternate implementation of masking is to only pass mpfit the data
         # that is unmasked.  That would require some manipulation above...
         if err is None:
-            err = np.ones(spectrum.shape)
+            err = np.ma.ones(spectrum.shape)
         else:
             # don't overwrite error
-            err = err.copy()
-            try:
-                err._sharedmask = False # to deal with np1.11+ shared mask behavior: should not change anything
-            except AttributeError:
-                # apparently numpy won't let you write attributes it doesn't know about...
-                pass
+            err = np.ma.copy(err)
             # assume anything with 0 error is GOOD
             if zeroerr_is_OK:
                 err[err == 0] = 1.
             else: # flag it out!
                 err[err == 0] = 1e10
+                err.mask[err == 0] = True
 
 
         #err[:xmin] = 1e10
@@ -551,13 +550,14 @@ class Baseline(interactive.Interactive):
             if masktoexclude.dtype.name != 'bool':
                 masktoexclude = masktoexclude.astype('bool')
             err[masktoexclude] = 1e10
+            err.mask |= masktoexclude
             if LoudDebug:
                 print("In _baseline: %i points masked out" % masktoexclude.sum())
         if (spectrum!=spectrum).sum() > 0:
             print("There is an error in baseline: some values are NaN")
             import pdb; pdb.set_trace()
 
-        OK = ~masktoexclude
+        OK = (~masktoexclude) & (~err.mask)
         if powerlaw:
             # for powerlaw fitting, only consider positive data
             OK &= spectrum > 0

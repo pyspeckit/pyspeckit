@@ -9,12 +9,12 @@ An `extensible <registration.html>`_ spectroscopic analysis toolkit for astronom
 
 If you're just getting started, see the :doc:`examples page <examples>`.
 
-To cite pyspeckit, use http://adsabs.harvard.edu/abs/2011ascl.soft09001G.
+To cite pyspeckit, use https://ui.adsabs.harvard.edu/abs/2022AJ....163..291G/abstract and http://adsabs.harvard.edu/abs/2011ascl.soft09001G.
 
 Downloads
 ^^^^^^^^^
 
- * `April 2017 version <https://github.com/pyspeckit/pyspeckit/archive/v0.1.20.tar.gz>`_
+ * `v1.0.1 <https://github.com/pyspeckit/pyspeckit/releases/tag/v1.0.1>`_
  * `latest commit from github <https://github.com/pyspeckit/pyspeckit/archive/master.zip>`_ (same as above, or also :doc:`install_via_GitHub`)
  * `latest commit from bitbucket <https://bitbucket.org/pyspeckit/pyspeckit/get/master.tar.gz>`_ (see :doc:`install`) 
  * `pypi entry <https://pypi.org/project/pyspeckit>`_.

@@ -238,7 +238,12 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
         raise ValueError("Invalid catalog specification")
 
     speciestab = QueryTool.get_species_table()
-    jpltable = speciestab[speciestab['NAME'] == molecule_name]
+    if 'NAME' in speciestab.colnames:
+        jpltable = speciestab[speciestab['NAME'] == molecule_name]
+    elif 'molecule' in speciestab.colnames:
+        jpltable = speciestab[speciestab['molecule'] == molecule_name]
+    else:
+        raise ValueError(f"Did not find NAME or molecule in table columns: {speciestab.colnames}")
     if len(jpltable) != 1:
         raise ValueError(f"Too many or too few matches to {molecule_name}")
 
@@ -348,17 +353,17 @@ def generate_model(xarr, vcen, width, tex, column,
         If specified, the optical depth in each frequency bin will be returned
     get_tau_sticks : bool, default False
         If specified, the optical depth in each transition will be returned
-        
+
     Examples
     --------
     Example case to produce a model::
-    
+
         from pyspeckit.spectrum.models.lte_molecule import get_molecular_parameters, generate_model, generate_fitter
         freqs, aij, deg, eu, partfunc = get_molecular_parameters('CH3OH')
         def modfunc(xarr, vcen, width, tex, column):
             return generate_model(xarr, vcen, width, tex, column, freqs=freqs, aij=aij,
                                   deg=deg, EU=EU, partfunc=partfunc)
-        
+
         fitter = generate_fitter(modfunc, name="CH3OH")
     """
 
@@ -463,80 +468,80 @@ def generate_fitter(model_func, name):
 
 
 def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
-    """
+    r"""
     Mangum & Shirley 2015 eqn 82 gives, for the optically thin, Rayleigh-Jeans,
     negligible background approximation:
 
     .. math::
 
-        N_{tot} = (3 k) / (8 pi^3 nu S mu^2 R_i)   (Q/g) exp(E_u/k T_{ex}) integ(T_R/f dv)
+        N_{tot} = (3 k) / (8 \pi^3 \nu S \mu^2 R_i)   (Q/g) \exp(E_u/k T_{ex}) \int(T_R/f dv)
 
     Eqn 31:
 
     .. math::
 
-        N_{tot}/N_u = Q_{rot} / g_u exp(E_u/k T_{ex})
+        N_{tot}/N_u = Q_{rot} / g_u \exp(E_u/k T_{ex})
 
-        -> N_{tot} = N_u Q_{rot} / g_u exp(E_u/k T_{ex})
-        -> Nu = N_{tot} g / Q_{rot} exp(-E_u / k T_{ex})
+        -> N_{tot} = N_u Q_{rot} / g_u \exp(E_u/k T_{ex})
+        -> Nu = N_{tot} g / Q_{rot} \exp(-E_u / k T_{ex})
 
     To get Nu of an observed line, then:
 
     .. math::
 
-        Nu Q_{rot} / g_u exp(E_u/k T_{ex}) = (3 k) / (8 pi^3 nu S mu^2 R_i)   (Q/g) exp(E_u/k T_{ex}) integ(T_R/f dv)
+        Nu Q_{rot} / g_u \exp(E_u/k T_{ex}) = (3 k) / (8 \pi^3 \nu S \mu^2 R_i)   (Q/g) \exp(E_u/k T_{ex}) \int(T_R/f dv)
 
     This term cancels:
 
     .. math::
-        Q_{rot} / g_u exp(E_u/k T_{ex})
+        Q_{rot} / g_u \exp(E_u/k T_{ex})
 
     Leaving:
 
     .. math::
 
-        N_u = (3 k) / (8 pi^3 nu S mu^2 R_i)   integ(T_R/f dv)
+        N_u = (3 k) / (8 \pi^3 \nu S \mu^2 R_i)   integ(T_R/f dv)
 
-    integ(T_R/f dv) is the optically thin integrated intensity in K km/s
-    dnu/nu = dv/c [doppler eqn], so to get integ(T_R dnu), sub in dv = c/nu dnu
+    $\int(T_R/f dv)$ is the optically thin integrated intensity in K km/s
+    dnu/nu = dv/c [doppler eqn], so to get $\int(T_R dnu)$, sub in $dv = c/\nu d\nu$
 
     .. math::
 
 
-        N_u = (3 k c) / (8 pi^3 nu^2  S mu^2 R_i)   integ(T_R/f dnu)
+        N_u = (3 k c) / (8 \pi^3 \nu^2  S \mu^2 R_i)   integ(T_R/f d\nu)
 
 
-    We then need to deal with the S mu^2 R_i term.  We assume R_i = 1, since we
+    We then need to deal with the S \mu^2 R_i term.  We assume R_i = 1, since we
     are not measuring any hyperfine transitions (R_i is the hyperfine
     degeneracy; eqn 75)
     Equation 11:
 
     .. math::
 
-        A_ul = 64 pi^4 nu^3 / (3 h c^3) |mu_ul|^2
+        A_{ul} = 64 \pi^4 \nu^3 / (3 h c^3) |\mu_{ul}|^2
 
     Equation 62:
 
     .. math::
 
-        |mu_ul|^2 = S mu^2
+        |\mu_{ul}|^2 = S \mu^2
 
-        -> S mu^2 = (3 h c^3 Aul) / (64 pi^4 nu^3)
+        -> S \mu^2 = (3 h c^3 A_{ul}) / (64 \pi^4 \nu^3)
 
     Plugging that in gives
 
     .. math::
 
-        Nu = (3 k c) / (8 pi^3 nu^2  ((3 h c^3 Aul) / (64 pi^4 nu^3)))   integ(T_R/f dnu)
-           = (3 k c 64 pi^4 nu^3) / (8 pi^3 nu^2 3 h c^3 Aul)            integ(T_R/f dnu)
-           = (8 pi nu k / (Aul c^2 h)) integ(T_R/f dnu)
+        Nu = (3 k c) / (8 \pi^3 \nu^2  ((3 h c^3 A_{ul}) / (64 \pi^4 \nu^3)))   \int(T_R/f d\nu)
+           = (3 k c 64 \pi^4 \nu^3) / (8 \pi^3 \nu^2 3 h c^3 A_{ul})            \int(T_R/f d\nu)
+           = (8 \pi \nu k / (A_{ul} c^2 h)) \int(T_R/f d\nu)
 
     which is the equation implemented below.  We could also have left this in
     dv units by substituting du = nu/c dv:
 
     .. math::
 
-           = (8 pi nu^2 k / (Aul c^3 h)) integ(T_R/f dv)
+           = (8 \pi \nu^2 k / (A_{ul} c^3 h)) \int (T_R/f dv)
 
     """
 
@@ -559,10 +564,10 @@ def ntot_of_nupper(nupper, eupper, tex, Q_rot, degeneracy=1):
     """ Given an N_upper, E_upper, tex, Q_rot, and degeneracy for a single state, give N_tot
 
     Mangum & Shirley 2015 eqn 31
-    
+
     .. math::
-        
-        N_{tot}/N_u = Q_{rot} / g_u exp(E_u/k T_{ex})
+
+        N_{tot}/N_u = Q_{rot} / g_u \\exp(E_u/k T_{ex})
 
     Example:
         >>> import astropy.units as u

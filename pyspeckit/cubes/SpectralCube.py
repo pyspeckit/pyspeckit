@@ -109,11 +109,13 @@ class Cube(spectrum.Spectrum):
             A boolean mask map, where ``True`` implies that the data are good.
             This will be used for both plotting using `mapplot` and fitting
             using `fiteach`.
+        kwargs : dict
+            passed to `load_fits`, which are passed to `SpectralCube.read`
 
         """
 
         if filename is not None:
-            self.load_fits(filename)
+            self.load_fits(filename, **kwargs)
             return
         else:
             if hasattr(cube, 'spectral_axis'):
@@ -218,7 +220,7 @@ class Cube(spectrum.Spectrum):
 
         self.mapplot = mapplot.MapPlotter(self)
 
-    def load_fits(self, fitsfile):
+    def load_fits(self, fitsfile, **kwargs):
         try:
             from spectral_cube import SpectralCube
         except ImportError:
@@ -226,7 +228,7 @@ class Cube(spectrum.Spectrum):
                               " 0.17, spectral_cube is required for cube reading. "
                               "It can be pip installed or acquired from "
                               "spectral-cube.rtfd.org.")
-        mycube = SpectralCube.read(fitsfile)
+        mycube = SpectralCube.read(fitsfile, **kwargs)
         return self.load_spectral_cube(mycube)
 
     def load_spectral_cube(self, cube):
