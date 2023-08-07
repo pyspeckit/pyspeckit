@@ -500,7 +500,7 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
 
     .. math::
 
-        N_u = (3 k) / (8 \pi^3 \nu S \mu^2 R_i)   integ(T_R/f dv)
+        N_u = (3 k) / (8 \pi^3 \nu S \mu^2 R_i)   \int(T_R/f dv)
 
     $\int(T_R/f dv)$ is the optically thin integrated intensity in K km/s
     dnu/nu = dv/c [doppler eqn], so to get $\int(T_R dnu)$, sub in $dv = c/\nu d\nu$
@@ -508,7 +508,7 @@ def nupper_of_kkms(kkms, freq, Aul, replace_bad=None):
     .. math::
 
 
-        N_u = (3 k c) / (8 \pi^3 \nu^2  S \mu^2 R_i)   integ(T_R/f d\nu)
+        N_u = (3 k c) / (8 \pi^3 \nu^2  S \mu^2 R_i)   \int(T_R/f d\nu)
 
 
     We then need to deal with the S \mu^2 R_i term.  We assume R_i = 1, since we
