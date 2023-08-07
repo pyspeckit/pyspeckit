@@ -67,3 +67,6 @@ The PySpecKit logo uses the Voyager 1 image of Earth known as the "Pale Blue Dot
 .. image:: https://zenodo.org/badge/6116896.svg
    :target: https://zenodo.org/badge/latestdoi/6116896
 
+pyspeckit development has been supported by the NSF under grants AST 2008101 and CAREER 2142300
+
+.. image:: https://www.nsf.gov/policies/images/NSF_Official_logo_High_Res_1200ppi.png
