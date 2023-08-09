@@ -172,9 +172,14 @@ class Plotter(object):
             self.figure.canvas.callbacks.callbacks['key_press_event'].update(self._mpl_key_callbacks)
         elif self.figure is not None:
             mpl_keypress_handler = self.figure.canvas.manager.key_press_handler_id
-            bmp = BoundMethodProxy(self.figure.canvas.manager.key_press)
-            self.figure.canvas.callbacks.callbacks['key_press_event'].update({mpl_keypress_handler:
-                                                                              bmp})
+            try:
+                bmp = BoundMethodProxy(self.figure.canvas.manager.key_press)
+                self.figure.canvas.callbacks.callbacks['key_press_event'].update({mpl_keypress_handler:
+                                                                                  bmp})
+            except AttributeError as ex:
+                print(f"Error {ex} was raised when trying to connect the key_press handler.  "
+                      "Please file an issue on github.  You may try a different matplotlib backend "
+                      "as a temporary workaround")
 
     def __call__(self, figure=None, axis=None, clear=True, autorefresh=None,
                  plotscale=1.0, override_plotkwargs=False, **kwargs):

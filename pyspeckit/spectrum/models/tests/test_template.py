@@ -2,9 +2,8 @@
 Tests for template fitter
 """
 
-from .... import spectrum
-from ...classes import Spectrum
-from ... import models
+from pyspeckit import spectrum, models
+from pyspeckit.spectrum.classes import Spectrum
 import numpy as np
 
 def test_template():

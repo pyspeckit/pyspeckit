@@ -16,6 +16,7 @@ import matplotlib.cbook as mpcb
 from . import fitter
 from . import mpfit_messages
 from pyspeckit.specwarnings import warn
+from pyspeckit.spectrum.units import SpectroscopicAxis
 import itertools
 import operator
 import six
@@ -391,6 +392,8 @@ class SpectralModel(fitter.SimpleFitter):
 
         log.debug("pars to n_modelfunc: {0}, parvals:{1}".format(pars, parvals))
         def L(x):
+            if hasattr(x, 'value') and not hasattr(x, 'x_to_coord'):
+                x = SpectroscopicAxis(x)
             v = np.zeros(len(x))
             if self.vheight:
                 v += parvals[0]
@@ -399,15 +402,7 @@ class SpectralModel(fitter.SimpleFitter):
             for jj in range(int((len(parvals)-self.vheight)/self.npars)):
                 lower_parind = jj*self.npars+self.vheight
                 upper_parind = (jj+1)*self.npars+self.vheight
-                try:
-                    v += self.modelfunc(x, *parvals[lower_parind:upper_parind], **kwargs)
-                except TypeError as ex:
-                    # not all model functions are quantity-aware, so we strip quantities here
-                    if hasattr(x, 'value'):
-                        x = x.value
-                        v += self.modelfunc(x, *parvals[lower_parind:upper_parind], **kwargs)
-                    else:
-                        raise ex
+                v += self.modelfunc(x, *parvals[lower_parind:upper_parind], **kwargs)
 
             return v
         return L

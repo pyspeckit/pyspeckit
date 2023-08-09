@@ -19,6 +19,8 @@ from . import interactive
 from . import history
 from . import widgets
 
+from pyspeckit.spectrum.units import SpectroscopicAxis
+
 class Registry(object):
     """
     This class is a simple wrapper to prevent fitter properties from being globals
@@ -754,13 +756,8 @@ class Specfit(interactive.Interactive):
         spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
         err = self.errspec[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
 
-        # strip quantity properties before passing to fitter (fitters are not quantity-aware)
-        if hasattr(xtofit, 'value'):
-            xtofit = xtofit.value
-        if hasattr(spectofit, 'value'):
-            spectofit = spectofit.value
-        if hasattr(err, 'value'):
-            err = err.value
+        if hasattr(xtofit, 'value') and not hasattr(xtofit, 'x_to_coord'):
+            xtofit = SpectroscopicAxis(xtofit)
 
         if np.all(err == 0):
             raise ValueError("Errors are all zero.  This should not occur and "
@@ -1450,7 +1447,13 @@ class Specfit(interactive.Interactive):
             # don't remove fitleg unless it's in the current axis
             # self.fitleg.set_visible(False)
             if self.fitleg in axis.artists:
-                axis.artists.remove(self.fitleg)
+                try:
+                    axis.artists.remove(self.fitleg)
+                except AttributeError:
+                    try:
+                        self.fitleg.remove()
+                    except Exception as ex:
+                        pass
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
 

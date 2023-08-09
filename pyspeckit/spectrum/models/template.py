@@ -45,7 +45,7 @@ def spectral_template_generator(template_spectrum, xshift_units='km/s', left=0,
                                 left=left,
                                 right=right,
                                )
-        
+
         return model
 
     return spectral_template
@@ -83,5 +83,5 @@ def template_fitter(template_spectrum, xshift_units='km/s'):
                                    shortvarnames=('A',r'\Delta x'),
                                    centroid_par='shift',)
     myclass.__name__ = "spectral_template"
-    
+
     return myclass
