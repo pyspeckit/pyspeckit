@@ -1447,7 +1447,13 @@ class Specfit(interactive.Interactive):
             # don't remove fitleg unless it's in the current axis
             # self.fitleg.set_visible(False)
             if self.fitleg in axis.artists:
-                axis.artists.remove(self.fitleg)
+                try:
+                    axis.artists.remove(self.fitleg)
+                except AttributeError:
+                    try:
+                        self.fitleg.remove()
+                    except Exception as ex:
+                        pass
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
 
