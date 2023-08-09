@@ -1,7 +1,7 @@
 import numpy as np
 import warnings
 
-from .. import Spectrum
+from pyspeckit.spectrum import Spectrum
 
 
 def test_eqw():
