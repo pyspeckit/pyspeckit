@@ -14,7 +14,7 @@ try:
     # May raise ImportError
     import multiprocessing
     _multi=True
-   
+
     # May raise NotImplementedError
     _ncpus = multiprocessing.cpu_count()
 except Exception as ex:
@@ -24,6 +24,8 @@ except Exception as ex:
 
 __all__ = ('parallel_map',)
 
+# https://stackoverflow.com/a/70876951/814354
+multiprocessing.set_start_method('fork')
 
 def worker(f, ii, chunk, out_q, err_q, lock):
   """
@@ -40,7 +42,7 @@ def worker(f, ii, chunk, out_q, err_q, lock):
   """
   vals = []
 
-  # iterate over slice 
+  # iterate over slice
   for val in chunk:
     try:
       result = f(val)
@@ -103,13 +105,13 @@ def run_tasks(procs, err_q, out_q, num):
 def parallel_map(function, sequence, numcores=None):
   """
   A parallelized version of the native Python map function that
-  utilizes the Python multiprocessing module to divide and 
+  utilizes the Python multiprocessing module to divide and
   conquer sequence.
 
   parallel_map does not yet support multiple argument sequences.
 
   :param function: callable function that accepts argument from iterable
-  :param sequence: iterable sequence 
+  :param sequence: iterable sequence
   :param numcores: number of cores to use
   """
   if not callable(function):
@@ -131,7 +133,7 @@ def parallel_map(function, sequence, numcores=None):
   elif numcores is None:
     numcores = _ncpus
 
-  # Returns a started SyncManager object which can be used for sharing 
+  # Returns a started SyncManager object which can be used for sharing
   # objects between processes. The returned manager object corresponds
   # to a spawned child process and has methods which will create shared
   # objects and return corresponding proxies.
@@ -144,11 +146,11 @@ def parallel_map(function, sequence, numcores=None):
   err_q = manager.Queue()
   lock = manager.Lock()
 
-  # if sequence is less than numcores, only use len sequence number of 
+  # if sequence is less than numcores, only use len sequence number of
   # processes
   if size < numcores:
     log.info("Reduced number of cores to {0}".format(size))
-    numcores = size 
+    numcores = size
 
   # group sequence into numcores-worth of chunks
   sequence = numpy.array_split(sequence, numcores)
