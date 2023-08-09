@@ -10,7 +10,7 @@ import pylab as pl
 pl.close('all')
 pl.figure(1).clf()
 
-xaxis = np.linspace(-50,150,100.)
+xaxis = np.linspace(-50.,150.,100)
 sigma = 10.
 center = 50.
 synth_data = np.exp(-(xaxis-center)**2/(sigma**2 * 2.))
