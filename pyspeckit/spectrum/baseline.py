@@ -385,16 +385,34 @@ class Baseline(interactive.Interactive):
             for p in self.Spectrum.plotter.errorplot:
                 if isinstance(p,matplotlib.collections.PolyCollection):
                     if p in self.Spectrum.plotter.axis.collections:
-                        self.Spectrum.plotter.axis.collections.remove(p)
+                        try:
+                            self.Spectrum.plotter.axis.lines.remove(p)
+                        except AttributeError:
+                            try:
+                                p.remove()
+                            except Exception as ex:
+                                pass
                 if isinstance(p,matplotlib.lines.Line2D):
                     if p in self.Spectrum.plotter.axis.lines:
-                        self.Spectrum.plotter.axis.lines.remove(p)
+                        try:
+                            self.Spectrum.plotter.axis.lines.remove(p)
+                        except AttributeError:
+                            try:
+                                p.remove()
+                            except Exception as ex:
+                                pass
 
         # if we subtract the baseline, replot the now-subtracted data with rescaled Y axes
         if self.subtracted:
             if self.Spectrum.plotter.axis is not None:
                 for p in self.Spectrum.plotter.axis.lines:
-                    self.Spectrum.plotter.axis.lines.remove(p)
+                    try:
+                        self.Spectrum.plotter.axis.lines.remove(p)
+                    except AttributeError:
+                        try:
+                            p.remove()
+                        except Exception as ex:
+                            pass
             plotmask = self.OKmask*False # include nothing...
             plotmask[self.xmin:self.xmax] = self.OKmask[self.xmin:self.xmax] # then include everything OK in range
             self.Spectrum.plotter.ymin = abs(self.Spectrum.data[plotmask].min())*1.1*np.sign(self.Spectrum.data[plotmask].min())
@@ -407,7 +425,13 @@ class Baseline(interactive.Interactive):
             for p in self._plots:
                 # remove the old baseline plots
                 if p in self.Spectrum.plotter.axis.lines:
-                    self.Spectrum.plotter.axis.lines.remove(p)
+                    try:
+                        self.Spectrum.plotter.axis.lines.remove(p)
+                    except AttributeError:
+                        try:
+                            p.remove()
+                        except Exception as ex:
+                            pass
             self._plots += self.Spectrum.plotter.axis.plot(
                     self.Spectrum.xarr,
                     self.basespec,
