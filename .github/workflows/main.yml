@@ -35,10 +35,10 @@ jobs:
             python-version: 3.9
             name: Py3.9 dev
             toxenv: py39-test-dev
-          - os: ubuntu-18.04
-            python-version: 3.8
-            name: Py3.8 mindeps and CASA
-            toxenv: py38-test-casa
+          - os: ubuntu-latest
+            python-version: 3.11
+            name: Py3.11 dev
+            toxenv: py311-test-dev
           - os: ubuntu-latest
             python-version: 3.9
             name: Documentation
