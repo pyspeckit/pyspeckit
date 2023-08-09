@@ -7,7 +7,7 @@ import warnings
 class dictlist(list):
     def __init__(self, *args):
         list.__init__(self, *args)
-        
+
         self._dict = {}
         self._dict_index = {}
         for ii,value in enumerate(self):
@@ -104,9 +104,9 @@ class FitterSliders(Widget):
             matplotlib.rcParams['toolbar'] = 'None'
             self.toolfig = pyplot.figure(figsize=(6,3))
             if hasattr(targetfig.canvas.manager,'window'):
-                if hasattr(targetfig.canvas.manager.window, 'title'):
+                if hasattr(targetfig.canvas.manager.window, 'title') and hasattr(targetfig.canvas, 'set_window_title'):
                     self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.title())
-                elif hasattr(targetfig.canvas.manager.window, 'windowTitle'):
+                elif hasattr(targetfig.canvas.manager.window, 'windowTitle') and hasattr(targetfig.canvas, 'set_window_title'):
                     self.toolfig.canvas.set_window_title("Fit Sliders for "+targetfig.canvas.manager.window.windowTitle())
                 else:
                     warnings.warn("Only Qt4 and TkAgg support window titles (apparently)")
@@ -232,15 +232,15 @@ class FitterSliders(Widget):
             else:
                 vmax = 1
             try:
-                self.sliders[name] = ModifiableSlider(ax, 
+                self.sliders[name] = ModifiableSlider(ax,
                     name, vmin, vmax, valinit=value)
             except ValueError:
-                self.sliders[name] = ModifiableSlider(ax, 
+                self.sliders[name] = ModifiableSlider(ax,
                     name, vmin.value, vmax.value, valinit=value)
 
             self.sliders[-1].on_changed(update)
 
-        
+
 
     def get_values(self):
         return [s.val for s in self.sliders]
@@ -287,7 +287,8 @@ class FitterTools(Widget):
             tbar = matplotlib.rcParams['toolbar'] # turn off the navigation toolbar for the toolfig
             matplotlib.rcParams['toolbar'] = 'None'
             self.toolfig = pyplot.figure(figsize=(6,3))
-            self.toolfig.canvas.set_window_title("Fit Tools for "+targetfig.canvas.manager.window.title())
+            if hasattr(self.toolfig.canvas, 'set_window_title'):
+                self.toolfig.canvas.set_window_title("Fit Tools for "+targetfig.canvas.manager.window.title())
             self.toolfig.subplots_adjust(top=0.9,left=0.05,right=0.95)
             matplotlib.rcParams['toolbar'] = tbar
         else:
@@ -301,7 +302,7 @@ class FitterTools(Widget):
         # buttons ruin everything.
         # fax = self.toolfig.add_axes([0.1, 0.05, 0.15, 0.075])
         # self.buttonfit = Button(fax, 'Fit')
-        # 
+        #
         # resetax = self.toolfig.add_axes([0.7, 0.05, 0.15, 0.075])
         # self.buttonreset = Button(resetax, 'Reset')
 
@@ -369,7 +370,7 @@ class FitterTools(Widget):
         #menu = Menu(fig, menuitems)
 
 
-        self.axes = [self.toolfig.add_subplot(nsubplots,1,spnum, frame_on=False, navigate=False, xticks=[], yticks=[]) 
+        self.axes = [self.toolfig.add_subplot(nsubplots,1,spnum, frame_on=False, navigate=False, xticks=[], yticks=[])
                 for spnum in xrange(1,nsubplots+1)]
         #self.axes = self.toolfig.add_axes([0,0,1,1])
 
@@ -447,4 +448,4 @@ class FitterTools(Widget):
 #    """
 #    A class to manipulate individual parameter values
 #    """
-#    def __init__(self, 
+#    def __init__(self,
