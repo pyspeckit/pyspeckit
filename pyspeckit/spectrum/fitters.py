@@ -754,6 +754,14 @@ class Specfit(interactive.Interactive):
         spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
         err = self.errspec[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
 
+        # strip quantity properties before passing to fitter (fitters are not quantity-aware)
+        if hasattr(xtofit, 'value'):
+            xtofit = xtofit.value
+        if hasattr(spectofit, 'value'):
+            spectofit = spectofit.value
+        if hasattr(err, 'value'):
+            err = err.value
+
         if np.all(err == 0):
             raise ValueError("Errors are all zero.  This should not occur and "
                              "is a bug. (if you set the errors to all zero, "
