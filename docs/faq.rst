@@ -35,3 +35,31 @@ In particular, their
 specifies all valid spectral coordinate type codes.
 
 .. _FITS Paper III: http://adsabs.harvard.edu/abs/2006A%26A...446..747G
+
+
+No plot appears when I run plot commands
+----------------------------------------
+
+Plots appearing and not appearing depends on your global matplotlib
+configuration.
+
+If you are already in a python session, you can enable interactive plotting by
+doing:
+
+.. code:: python
+   from matplotlib import pyplot
+   pyplot.ion()
+   pyplot.show()
+
+The ``.ion()`` call turns interactive mode on.  If it wasn't on when you made
+the plot, you need to call ``.show()`` next.  If you call ``.ion()`` before
+calling any pyspeckit plot command, though, the ``.show()`` is not required.
+
+If you want to make sure this is enabled automatically on startup, you can
+start your python session with
+
+.. code:: bash
+   ipython --matplotlib
+
+(I tend to use ``ipython --pylab``, but it's `deprecated
+<https://github.com/ipython/ipython/pull/5593>`_)
