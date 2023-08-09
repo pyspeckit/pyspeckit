@@ -19,6 +19,8 @@ from . import interactive
 from . import history
 from . import widgets
 
+from pyspeckit.spectrum.units import SpectroscopicAxis
+
 class Registry(object):
     """
     This class is a simple wrapper to prevent fitter properties from being globals
@@ -753,6 +755,9 @@ class Specfit(interactive.Interactive):
         xtofit = self.Spectrum.xarr[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
         spectofit = self.spectofit[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
         err = self.errspec[self.xmin:self.xmax][~self.mask_sliced].astype('float64')
+
+        if hasattr(xtofit, 'value') and not hasattr(xtofit, 'x_to_coord'):
+            xtofit = SpectroscopicAxis(xtofit)
 
         if np.all(err == 0):
             raise ValueError("Errors are all zero.  This should not occur and "

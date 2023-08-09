@@ -21,7 +21,11 @@ def polymodel(x, *pars, **kwargs):
     *args = polynomial parameters
     **kwargs = just to catch extra junk; not passed
     """
-    return numpy.polyval(pars,x)
+    # polyval and astropy quantity are incompatible
+    if hasattr(x, 'value'):
+        x = x.value
+
+    return numpy.polyval(pars, x)
 
 polymodel.__doc__ += numpy.polyval.__doc__
 
