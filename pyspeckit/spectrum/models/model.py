@@ -399,7 +399,16 @@ class SpectralModel(fitter.SimpleFitter):
             for jj in range(int((len(parvals)-self.vheight)/self.npars)):
                 lower_parind = jj*self.npars+self.vheight
                 upper_parind = (jj+1)*self.npars+self.vheight
-                v += self.modelfunc(x, *parvals[lower_parind:upper_parind], **kwargs)
+                try:
+                    v += self.modelfunc(x, *parvals[lower_parind:upper_parind], **kwargs)
+                except TypeError as ex:
+                    # not all model functions are quantity-aware, so we strip quantities here
+                    if hasattr(x, 'value'):
+                        x = x.value
+                        v += self.modelfunc(x, *parvals[lower_parind:upper_parind], **kwargs)
+                    else:
+                        raise ex
+
             return v
         return L
 
