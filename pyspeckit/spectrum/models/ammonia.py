@@ -29,9 +29,9 @@ import string
 import warnings
 
 from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
+                                TCMB,
                                 voff_lines_dict, tau_wts_dict)
 
-TCMB = 2.7315 # K
 
 def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
             tau=None, fillingfraction=None, return_tau=False,

@@ -20,6 +20,7 @@ from . import hyperfine
 from . import radex_modelgrid
 from . import model
 from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
+                                TCMB,
                                 voff_lines_dict, tau_wts_dict, line_labels)
 
 from astropy import constants
@@ -80,9 +81,9 @@ def nh3_vtau_multimodel_generator(linenames):
                                            for x in ('tex{0}'.format(ln),
                                                      'tau{0}'.format(ln))
                                           ],
-            parlimited=[(False,False), (True,False),] + [(True, False),]*2*nlines, 
-            parlimits=[(0,0), ]*(2+2*nlines),
-            shortvarnames=["v","\\sigma",] + [x 
+            parlimited=[(False,False), (True,False),] + [(True, False),]*2*nlines,
+            parlimits=[(0,0), (0,0), ] + [(TCMB, 0), (0, 0)] * nlines,
+            shortvarnames=["v","\\sigma",] + [x
                                               for ln in linenames
                                               for x in
                                               ('T_{{ex}}({0})'.format(line_labels[ln]),

@@ -2,6 +2,8 @@ from astropy import constants
 from astropy import units as u
 import numpy as np
 
+TCMB = 2.7326 # K
+
 num_to_name = {0: 'zero',
                1: 'one',
                2: 'two',
