@@ -153,10 +153,11 @@ class FitterSliders(Widget):
         # during reset there can be a temporary invalid state
         # depending on the order of the reset so we turn off
         # validation for the resetting
-        validate = self.toolfig.subplotpars.validate
-        self.toolfig.subplotpars.validate = False
-        self.buttonreset.on_clicked(reset)
-        self.toolfig.subplotpars.validate = validate
+        if hasattr(self.toolfig.subplotpars, 'validate'):
+            validate = self.toolfig.subplotpars.validate
+            self.toolfig.subplotpars.validate = False
+            self.buttonreset.on_clicked(reset)
+            self.toolfig.subplotpars.validate = validate
 
 
     def clear_sliders(self):
