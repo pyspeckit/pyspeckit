@@ -61,7 +61,10 @@ class ModifiableSlider(Slider):
         if self.valinit < self.valmin:
             self.valinit = (self.valmax-self.valmin)/2. + self.valmin
             if self.vline in self.ax.lines:
-                self.ax.lines.remove(self.vline)
+                if hasattr(self.ax.lines, 'remove'):
+                    self.ax.lines.remove(self.vline)
+                else:
+                    self.vline.remove()
             self.vline = self.ax.axvline(self.valinit,0,1, color='r', lw=1)
 
     def set_valmax(self, valmax):
@@ -75,7 +78,10 @@ class ModifiableSlider(Slider):
         if self.valinit > self.valmax:
             self.valinit = (self.valmax-self.valmin)/2. + self.valmin
             if self.vline in self.ax.lines:
-                self.ax.lines.remove(self.vline)
+                if hasattr(self.ax.lines, 'remove'):
+                    self.ax.lines.remove(self.vline)
+                else:
+                    self.vline.remove()
             self.vline = self.ax.axvline(self.valinit,0,1, color='r', lw=1)
 
 class FitterSliders(Widget):
