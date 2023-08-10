@@ -505,7 +505,10 @@ class Baseline(interactive.Interactive):
         if self.blleg is not None:
             self.blleg.set_visible(False)
             if self.blleg in self.Spectrum.plotter.axis.artists:
-                self.Spectrum.plotter.axis.artists.remove(self.blleg)
+                if hasattr(self.Spectrum.plotter.axis.artists, 'remove'):
+                    self.Spectrum.plotter.axis.artists.remove(self.blleg)
+                else:
+                    self.blleg.remove()
         if self.Spectrum.plotter.autorefresh: self.Spectrum.plotter.refresh()
 
     def savefit(self):

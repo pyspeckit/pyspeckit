@@ -391,8 +391,11 @@ class Interactive(object):
         for p in self.button1plot:
             p.set_visible(False)
             if self.Spectrum.plotter.axis and p in self.Spectrum.plotter.axis.lines:
-                self.Spectrum.plotter.axis.lines.remove(p)
-        self.button1plot=[] # I should be able to just remove from the list... but it breaks the loop...
+                if hasattr(self.Spectrum.plotter.axis.lines, 'remove'):
+                    self.Spectrum.plotter.axis.lines.remove(p)
+                else:
+                    p.remove()
+        self.button1plot = [] # I should be able to just remove from the list... but it breaks the loop...
         self.Spectrum.plotter.refresh()
 
     def selectregion(self, xmin=None, xmax=None, xtype='wcs', highlight=False,
