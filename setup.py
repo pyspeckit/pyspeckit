@@ -92,6 +92,8 @@ for root, dirs, files in os.walk(PACKAGENAME):
                     os.path.relpath(root, PACKAGENAME), filename))
 package_info['package_data'][PACKAGENAME].extend(c_files)
 
+print("Running setup")
+
 setup(name=PACKAGENAME,
       version=VERSION,
       description=DESCRIPTION,
