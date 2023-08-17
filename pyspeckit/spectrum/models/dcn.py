@@ -4,7 +4,7 @@ DCN fitter:
 ===========
 Reference for line params:
 
-Line strength and frequencies taken from CDMS in Oct. 12th 2021:
+Line strength and frequencies taken from CDMS in Aug. 17th 2023:
 DCN v=0, tag: 28509
 
 """
@@ -13,11 +13,11 @@ import astropy.units as u
 
 freq_dict_cen = {
 '''
-Main component from HFS
+Frequency from CDMS without HFS
 '''
-                'J1-0': 72414.9330e6,
-                'J2-1': 144828.1106e6,
-                'J3-2': 217238.6120e6,
+                'J1-0': 72414.6936e6,
+                'J2-1': 144828.0015e6,
+                'J3-2': 217238.5378e6,
                 }
 
 freq_dict = {
