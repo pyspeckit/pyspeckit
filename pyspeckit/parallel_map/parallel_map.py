@@ -24,9 +24,6 @@ except Exception as ex:
 
 __all__ = ('parallel_map',)
 
-# https://stackoverflow.com/a/70876951/814354
-multiprocessing.set_start_method('fork')
-
 def worker(f, ii, chunk, out_q, err_q, lock):
   """
   A worker function that maps an input function over a
@@ -132,6 +129,10 @@ def parallel_map(function, sequence, numcores=None):
                     "number of available CPUs.")
   elif numcores is None:
     numcores = _ncpus
+
+  # https://stackoverflow.com/a/70876951/814354
+  # if this step fails, parallel_map won't work - it _must_ use forking, not spawning
+  multiprocessing.set_start_method('fork', force=True)
 
   # Returns a started SyncManager object which can be used for sharing
   # objects between processes. The returned manager object corresponds
