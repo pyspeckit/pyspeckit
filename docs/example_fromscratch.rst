@@ -10,7 +10,7 @@ This example shows the initialization of a pyspeckit object from numpy arrays.
    import numpy as np
    import pyspeckit
 
-   xaxis = np.linspace(-50,150,100.)
+   xaxis = np.linspace(-50,150,100)
    sigma = 10.
    center = 50.
    synth_data = np.exp(-(xaxis-center)**2/(sigma**2 * 2.))
