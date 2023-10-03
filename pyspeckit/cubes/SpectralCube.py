@@ -1394,7 +1394,7 @@ class Cube(spectrum.Spectrum):
         Documentation from the :mod:`cubes.spectral_smooth` module:
 
         """
-        factor = round(factor)
+        factor = int(round(factor))
         self.cube = cubes.spectral_smooth(self.cube,factor,**kwargs)
         self.xarr = self.xarr[::factor]
         if hasattr(self,'data'):
