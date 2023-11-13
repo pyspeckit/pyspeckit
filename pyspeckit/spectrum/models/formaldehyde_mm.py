@@ -208,10 +208,10 @@ def formaldehyde_mm_despotic_functions(gridtable):
     GridData_tau_321_220 = np.zeros((len(DensArr), len(ColArr),
                                      len(TempArr), len(DvArr))) + np.nan
 
-    ii = np.interp(gridtable['nH2'], DensArr, np.arange(len(DensArr))).astype(np.int)
-    jj = np.interp(gridtable['Column'], ColArr, np.arange(len(ColArr))).astype(np.int)
-    kk = np.interp(gridtable['Temperature'], TempArr, np.arange(len(TempArr))).astype(np.int)
-    ll = np.interp(gridtable['sigmaNT'], DvArr, np.arange(len(DvArr))).astype(np.int)
+    ii = np.interp(gridtable['nH2'], DensArr, np.arange(len(DensArr))).astype(int)
+    jj = np.interp(gridtable['Column'], ColArr, np.arange(len(ColArr))).astype(int)
+    kk = np.interp(gridtable['Temperature'], TempArr, np.arange(len(TempArr))).astype(int)
+    ll = np.interp(gridtable['sigmaNT'], DvArr, np.arange(len(DvArr))).astype(int)
 
     GridData_Tex_303_202[ii, jj, kk, ll] = gridtable['Tex_303_202']
     GridData_Tex_322_221[ii, jj, kk, ll] = gridtable['Tex_322_221']
