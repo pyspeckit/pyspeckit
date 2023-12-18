@@ -252,14 +252,16 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     if molecule_tag is not None:
         tagcol = 'tag' if 'tag' in speciestab.colnames else 'TAG'
         match = speciestab[tagcol] == molecule_tag
+        molecule_name = speciestab[match][molcol][0]
         if molecule_name is not None:
-            molecule_name = speciestab[match][molcol][0]
-            print("WARNING: molecule_tag overrides molecule_name.  New molecule_name={molecule_name}")
+            print(f"WARNING: molecule_tag overrides molecule_name.  New molecule_name={molecule_name}")
+        else:
+            print(f"molecule_name={molecule_name} for tag molecule_tag={molecule_tag}")
     else:
         match = speciestab[molcol] == molecule_name
         if match.sum() == 0:
             # retry using partial string matching
-            match = np.core.defchararray.find(tb[molcol], molecule_name) != -1
+            match = np.core.defchararray.find(speciestab[molcol], molecule_name) != -1
 
     if match.sum() != 1:
         raise ValueError(f"Too many or too few matches ({match.sum()}) to {molecule_name}")
