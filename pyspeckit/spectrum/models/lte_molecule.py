@@ -199,7 +199,10 @@ def line_brightness_cgs(tex, dnu, frequency, tbg=2.73, *args, **kwargs):
     return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
 
 def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
-                             catalog='JPL', molecule_tag=None, **kwargs):
+                             catalog='JPL', molecule_tag=None,
+                             parse_name_locally=True,
+                             flags=0,
+                             **kwargs):
     """
     Get the molecular parameters for a molecule from the JPL or CDMS catalog
 
@@ -222,6 +225,11 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     molecule_tag : int, optional
         If specified, this will override the molecule name.  You can specify
         molecules based on the 'TAG' column in the JPL table
+    parse_name_locally : bool
+        Option passed to the query tool to specify whether to use regex to
+        search for the molecule name
+    flags : int
+        Regular expression flags to pass to the regex search
 
     Examples
     --------
@@ -253,11 +261,17 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
         tagcol = 'tag' if 'tag' in speciestab.colnames else 'TAG'
         match = speciestab[tagcol] == molecule_tag
         molecule_name = speciestab[match][molcol][0]
-        if molecule_name is not None:
-            print(f"WARNING: molecule_tag overrides molecule_name.  New molecule_name={molecule_name}")
+        if catalog == 'CDMS':
+            molsearchname = f'{molecule_tag:06d} {molecule_name}'
         else:
-            print(f"molecule_name={molecule_name} for tag molecule_tag={molecule_tag}")
+            molsearchname = f'{molecule_tag} {molecule_name}'
+        parse_names_locally = False
+        if molecule_name is not None:
+            print(f"WARNING: molecule_tag overrides molecule_name.  New molecule_name={molecule_name}.  Searchname = {molsearchname}")
+        else:
+            print(f"molecule_name={molecule_name} for tag molecule_tag={molecule_tag}.  Searchname = {molsearchname}")
     else:
+        molsearchname = molecule_name
         match = speciestab[molcol] == molecule_name
         if match.sum() == 0:
             # retry using partial string matching
@@ -267,8 +281,8 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
         raise ValueError(f"Too many or too few matches ({match.sum()}) to {molecule_name}")
     jpltable = speciestab[match]
 
-    jpltbl = QueryTool.query_lines(fmin, fmax, molecule=molecule_name,
-                                   parse_name_locally=True)
+    jpltbl = QueryTool.query_lines(fmin, fmax, molecule=molsearchname,
+                                   parse_name_locally=parse_name_locally)
 
     def partfunc(tem):
         """
