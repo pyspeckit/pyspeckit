@@ -1228,7 +1228,7 @@ class Cube(spectrum.Spectrum):
         valid_pixels = zip(xx[OK],yy[OK])
 
         # run the moment process to find out how many elements are in a moment
-        _temp_moment = self.get_spectrum(yy[OK][0],xx[OK][0]).moments(**kwargs)
+        _temp_moment = self.get_spectrum(xx[OK][0], yy[OK][0]).moments(**kwargs)
 
         self.momentcube = np.zeros((len(_temp_moment),)+self.mapplot.plane.shape)
 
