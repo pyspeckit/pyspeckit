@@ -202,6 +202,7 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
                              catalog='JPL', molecule_tag=None,
                              parse_name_locally=True,
                              flags=0,
+                             return_table=False,
                              **kwargs):
     """
     Get the molecular parameters for a molecule from the JPL or CDMS catalog
@@ -230,6 +231,8 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
         search for the molecule name
     flags : int
         Regular expression flags to pass to the regex search
+    return_table : bool
+        Also return the parameter table?
 
     Examples
     --------
@@ -334,7 +337,10 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
 
     ok = np.isfinite(aij) & np.isfinite(EU) & np.isfinite(deg) & np.isfinite(freqs)
 
-    return freqs[ok], aij[ok], deg[ok], EU[ok], partfunc
+    if return_table:
+        return freqs[ok], aij[ok], deg[ok], EU[ok], partfunc, jpltbl[ok]
+    else:
+        return freqs[ok], aij[ok], deg[ok], EU[ok], partfunc
 
 
 
