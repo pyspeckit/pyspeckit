@@ -267,9 +267,9 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
             molsearchname = f'{molecule_tag} {molecule_name}'
         parse_names_locally = False
         if molecule_name is not None:
-            print(f"WARNING: molecule_tag overrides molecule_name.  New molecule_name={molecule_name}.  Searchname = {molsearchname}")
+            log.warn(f"molecule_tag overrides molecule_name.  New molecule_name={molecule_name}.  Searchname = {molsearchname}")
         else:
-            print(f"molecule_name={molecule_name} for tag molecule_tag={molecule_tag}.  Searchname = {molsearchname}")
+            log.info(f"molecule_name={molecule_name} for tag molecule_tag={molecule_tag}.  Searchname = {molsearchname}")
     else:
         molsearchname = molecule_name
         match = speciestab[molcol] == molecule_name
