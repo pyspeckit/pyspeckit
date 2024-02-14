@@ -36,7 +36,7 @@ at pyspeckit@gmail.com or post `issues
 Install
 -------------------------------
 
-Installation instructions found `here <https://github.com/brookecvinson/pyspeckit/blob/master/docs/install.rst>`_ and list of required packages found `here <https://github.com/brookecvinson/pyspeckit/blob/master/REQUIREMENTS>`_.
+Installation instructions found `here <https://github.com/brookecvinson/pyspeckit/blob/master/docs/install.rst>`_.
 
 **Requirements:**
 `astropy <http://www.astropy.org>`_
