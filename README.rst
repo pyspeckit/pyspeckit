@@ -5,6 +5,9 @@ PySpecKit Spectroscopic Toolkit
 * Source pages: `<https://github.com/pyspeckit/pyspeckit>`_
 * ADS reference: https://ui.adsabs.harvard.edu/abs/2022AJ....163..291G/abstract
 
+About
+-------------------------------
+
 This is a code framework designed to allow for analysis of spectroscopic data
 from a wide variety of astronomical instruments.  It is motivated by the lack
 of general spectroscopic analysis tools applicable at multiple wavelengths
@@ -30,22 +33,37 @@ We're also looking for more users to give us more use cases!  Contact us
 at pyspeckit@gmail.com or post `issues
 <https://github.com/pyspeckit/pyspeckit/issues>`_
 
+Install
+-------------------------------
 
-Requirements:
+Installation instructions found `here <https://github.com/brookecvinson/pyspeckit/blob/master/docs/install.rst>`_ and list of required packages found `here <https://github.com/brookecvinson/pyspeckit/blob/master/REQUIREMENTS>`_.
+
+**Requirements:**
 `astropy <http://www.astropy.org>`_
 `matplotlib <http://matplotlib.org/>`_
 `numpy <http://numpy.org/>`_
 
-Optional:
+**Optional:**
 `scipy <http://www.scipy.org/>`_
 `lmfit <https://github.com/lmfit/lmfit-py>`_
 `lineid_plot <https://pythonhosted.org/lineid_plot/>`_
 `spectral-cube <http://spectral-cube.readthedocs.io/>`_
 
-Authors:
+Features
+-------------------------------
+* `Baseline Fitting <https://pyspeckit.readthedocs.io/en/latest/baseline.html>`_
+* `Model Fitting <https://pyspeckit.readthedocs.io/en/latest/baseline.html>`_
+* `Measurements <https://pyspeckit.readthedocs.io/en/latest/measurements.html>`_
+* `Units <https://pyspeckit.readthedocs.io/en/latest/units.html>`_
+* `Registration <https://pyspeckit.readthedocs.io/en/latest/registration.html>`_
+
+Authors
+-------------------------------
 `Adam Ginsburg <adam.g.ginsburg@gmail.com>`_ and several others.
 
-Contributors: (see https://github.com/pyspeckit/pyspeckit/graphs/contributors)
+Contributors
+-------------------------------
+**(see https://github.com/pyspeckit/pyspeckit/graphs/contributors)**
 
  * Erik Rosolowsky (Ammonia models, RADEX-based models)
  * Jordan Mirocha (optical line labeling)
@@ -59,6 +77,9 @@ Contributors: (see https://github.com/pyspeckit/pyspeckit/graphs/contributors)
  * Mike Lum (EQW fitter)
  * Matt Craig, Erik Tollerud, Thomas Robitaille (minor - Astropy integration)
 
+License
+-------------------------------
+`LICENSE.rts <https://github.com/brookecvinson/pyspeckit/blob/master/licenses/LICENSE.rst>`_
 
 The PySpecKit logo uses the Voyager 1 image of Earth known as the "Pale Blue Dot"
 [ `original source <http://visibleearth.nasa.gov/view_rec.php?id=601>`_ |  `reprocessed image <http://instructors.dwrl.utexas.edu/mcginnis/sites/instructors.cwrl.utexas.edu.mcginnis/files/pale_blue_dot2.jpg>`_ ]
