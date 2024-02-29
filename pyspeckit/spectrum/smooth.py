@@ -15,19 +15,19 @@ def smooth(data, smooth, smoothtype='gaussian', downsample=True,
 
     Parameters
     ----------
-    smooth  :  float 
+    smooth  :  float
         Number of pixels to smooth by
     smoothtype : [ 'gaussian','hanning', or 'boxcar' ]
         type of smoothing kernel to use
-    downsample :  bool 
+    downsample :  bool
         Downsample the data?
-    downsample_factor  :  int 
+    downsample_factor  :  int
         Downsample by the smoothing factor, or something else?
     convmode : [ 'full','valid','same' ]
         see :mod:`numpy.convolve`.  'same' returns an array of the same length as
         'data' (assuming data is larger than the kernel)
     """
-    
+
     roundsmooth = int(round(smooth)) # can only downsample by integers
 
     if downsample_factor is None and downsample:
@@ -47,9 +47,9 @@ def smooth(data, smooth, smoothtype='gaussian', downsample=True,
         if len(kernel) > len(data):
             lengthdiff = len(kernel)-len(data)
             if lengthdiff % 2 == 0: # make kernel same size as data
-                kernel = kernel[lengthdiff/2:-lengthdiff/2]
+                kernel = kernel[int(lengthdiff/2):-int(lengthdiff/2)]
             else: # make kernel 1 pixel smaller than data but still symmetric
-                kernel = kernel[lengthdiff/2+1:-lengthdiff/2-1]
+                kernel = kernel[int(lengthdiff/2)+1:-int(lengthdiff/2)-1]
     elif smoothtype == 'boxcar':
         kernel = np.ones(roundsmooth)/float(roundsmooth)
 
