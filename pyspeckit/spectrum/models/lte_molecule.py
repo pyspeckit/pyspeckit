@@ -199,7 +199,11 @@ def line_brightness_cgs(tex, dnu, frequency, tbg=2.73, *args, **kwargs):
     return (Jnu(frequency, tex)-Jnu(frequency, tbg)) * (1 - np.exp(-tau))
 
 def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
-                             catalog='JPL',**kwargs):
+                             catalog='JPL', molecule_tag=None,
+                             parse_name_locally=True,
+                             flags=0,
+                             return_table=False,
+                             **kwargs):
     """
     Get the molecular parameters for a molecule from the JPL or CDMS catalog
 
@@ -209,7 +213,8 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     ----------
     molecule_name : string
         The string name of the molecule (normal name, like CH3OH or CH3CH2OH,
-        but it has to match the JPL catalog spec)
+        but it has to match the JPL catalog spec).  Will use partial string
+        matching if the full string name fails.
     tex : float
         Optional excitation temperature (basically checks if the partition
         function calculator works)
@@ -218,6 +223,16 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     fmin : quantity with frequency units
     fmax : quantity with frequency units
         The minimum and maximum frequency to search over
+    molecule_tag : int, optional
+        If specified, this will override the molecule name.  You can specify
+        molecules based on the 'TAG' column in the JPL table
+    parse_name_locally : bool
+        Option passed to the query tool to specify whether to use regex to
+        search for the molecule name
+    flags : int
+        Regular expression flags to pass to the regex search
+    return_table : bool
+        Also return the parameter table?
 
     Examples
     --------
@@ -239,16 +254,38 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
 
     speciestab = QueryTool.get_species_table()
     if 'NAME' in speciestab.colnames:
-        jpltable = speciestab[speciestab['NAME'] == molecule_name]
+        molcol = 'NAME'
     elif 'molecule' in speciestab.colnames:
-        jpltable = speciestab[speciestab['molecule'] == molecule_name]
+        molcol = 'molecule'
     else:
         raise ValueError(f"Did not find NAME or molecule in table columns: {speciestab.colnames}")
-    if len(jpltable) != 1:
-        raise ValueError(f"Too many or too few matches to {molecule_name}")
 
-    jpltbl = QueryTool.query_lines(fmin, fmax, molecule=molecule_name,
-                                   parse_name_locally=True)
+    if molecule_tag is not None:
+        tagcol = 'tag' if 'tag' in speciestab.colnames else 'TAG'
+        match = speciestab[tagcol] == molecule_tag
+        molecule_name = speciestab[match][molcol][0]
+        if catalog == 'CDMS':
+            molsearchname = f'{molecule_tag:06d} {molecule_name}'
+        else:
+            molsearchname = f'{molecule_tag} {molecule_name}'
+        parse_names_locally = False
+        if molecule_name is not None:
+            log.warn(f"molecule_tag overrides molecule_name.  New molecule_name={molecule_name}.  Searchname = {molsearchname}")
+        else:
+            log.info(f"molecule_name={molecule_name} for tag molecule_tag={molecule_tag}.  Searchname = {molsearchname}")
+    else:
+        molsearchname = molecule_name
+        match = speciestab[molcol] == molecule_name
+        if match.sum() == 0:
+            # retry using partial string matching
+            match = np.core.defchararray.find(speciestab[molcol], molecule_name) != -1
+
+    if match.sum() != 1:
+        raise ValueError(f"Too many or too few matches ({match.sum()}) to {molecule_name}")
+    jpltable = speciestab[match]
+
+    jpltbl = QueryTool.query_lines(fmin, fmax, molecule=molsearchname,
+                                   parse_name_locally=parse_name_locally)
 
     def partfunc(tem):
         """
@@ -300,7 +337,10 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
 
     ok = np.isfinite(aij) & np.isfinite(EU) & np.isfinite(deg) & np.isfinite(freqs)
 
-    return freqs[ok], aij[ok], deg[ok], EU[ok], partfunc
+    if return_table:
+        return freqs[ok], aij[ok], deg[ok], EU[ok], partfunc, jpltbl[ok]
+    else:
+        return freqs[ok], aij[ok], deg[ok], EU[ok], partfunc
 
 
 
@@ -440,7 +480,7 @@ def generate_model(xarr, vcen, width, tex, column,
     jnu = (jnu_line-jnu_bg)
 
     # this is the same as below, but laid out more explicitly.  This form of the
-    # equation implicity subtracts of a uniform-with-frequency background
+    # equation implicity subtracts off a uniform-with-frequency background
     # model = jnu_line*(1-np.exp(-model_tau)) + jnu_bg*(np.exp(-model_tau)) - jnu_bg
     model = jnu*(1-np.exp(-model_tau))
 
