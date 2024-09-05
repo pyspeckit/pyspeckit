@@ -297,7 +297,13 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
         keys = [k for k in jpltable.keys() if 'q' in k.lower()]
         logQs = jpltable[keys]
         logQs = np.array(list(logQs[0]))
+
+        # filter out NaNs (which occur for molecules with limited Q calculations)
+        tems = tems[np.isfinite(logQs)]
+        logQs = logQs[np.isfinite(logQs)]
+
         inds = np.argsort(tems)
+
         #logQ = np.interp(tem, tems[inds], logQs[inds])
         # linear interpolation is appropriate; Q is linear with T... for some cases...
         # it's a safer interpolation, anyway.

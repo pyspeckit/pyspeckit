@@ -14,6 +14,9 @@ from .wrappers import *
 from .cubes import *
 from .spectrum import *
 
+# added 20240905 because version somehow got dropped
+from .version import version as __version__
+
 try:
     from .tests import run_tests
 
