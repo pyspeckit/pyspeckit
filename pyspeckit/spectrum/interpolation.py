@@ -89,7 +89,7 @@ def interp_on_axes(spec1, xarr, left=0, right=0):
     newdata = _interp(xarr, xarr1, spec1.data, left=left, right=right)
 
     if spec1.error is not None:
-        if xarr1.cdelt() and xarr.cdelt():
+        if xarr1.cdelt() != xarr.cdelt():
             binsizeratio = xarr1.cdelt() / xarr.cdelt()
             # reduce errors by sqrt(binsize) if going from small to large bins
             # else increase errors by similar factor (WARNING!  THEY WILL BE CORRELATED!)

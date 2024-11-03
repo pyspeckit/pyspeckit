@@ -9,18 +9,46 @@ from . import units as units_module
 from . import classes
 from . import headers
 
-def correlate(spectrum1, spectrum2, range=None, unit=None, errorweight=False):
+def correlate(spectrum1, spectrum2, srange=None, unit=None, errorweight=False):
     """
     Cross-correlate spectrum1 with spectrum2
 
     """
+    def my_all(barr):
+        """ why does all on a boolean array not work???
+        
+            TypeError: 'bool' object is not iterable
 
-    if range is not None:
-        spectrum1 = spectrum1.slice(*range, unit=unit)
-        spectrum2 = spectrum2.slice(*range, unit=unit)
+        """
+        print("my_all:",type(barr))     # my_all: <class 'bool'>
+        for b in barr:
+            if not b: return False
+        return True
 
-    if not (spectrum1.xarr.shape == spectrum2.xarr.shape) or not all(spectrum1.xarr == spectrum2.xarr):
-        spectrum2 = interpolation.interp(spectrum2, spectrum1)
+    if srange is not None:
+        spectrum1 = spectrum1.slice(*srange, unit=unit)
+        spectrum2 = spectrum2.slice(*srange, unit=unit)
+
+    if True:
+        # the all() does not work anymore 
+        # PJT -> TypeError: 'bool' object is not iterable
+        print(spectrum1.xarr.shape)
+        print(spectrum2.xarr.shape)
+        print(spectrum1.xarr)
+        print(spectrum2.xarr)
+        is_1 = spectrum1.xarr.shape == spectrum2.xarr.shape
+        print(type(is_1),is_1)
+        is_2 = spectrum1.xarr == spectrum2.xarr
+        print(type(is_2),is_2)
+        is_3 = my_all(is_2)
+        #if not (spectrum1.xarr.shape == spectrum2.xarr.shape) or not all(spectrum1.xarr == spectrum2.xarr):
+        if not is_1 or not is_3:
+            spectrum2 = interpolation.interp(spectrum2, spectrum1)
+        else:
+            print("PJT: no interpolation needed")
+    else:
+        print("PJT: interpolation disabled")
+
 
     data1 = spectrum1.data
     data2 = spectrum2.data
