@@ -314,7 +314,7 @@ def extract_aperture(cube, ap, r_mask=False, wcs=None,
         specsum = nansum(cube[:, mask]**2, axis=1)
         spec = (specsum)**0.5 / npixinmask
     else:
-        specsum = nansum(cube[:, mask], axis=1)
+        spec = nansum(cube[:, mask], axis=1)
 
     if r_mask:
         return spec,mask
