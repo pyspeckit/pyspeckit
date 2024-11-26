@@ -1,4 +1,5 @@
 import pyspeckit
+from pyspeckit.spectrum.models import n2hp
 
 # Load the spectrum
 sp = pyspeckit.Spectrum('n2hp_opha_example.fits')
@@ -10,14 +11,16 @@ sp = pyspeckit.Spectrum('n2hp_opha_example.fits')
 # background will not automatically be fit 4 is the number of parameters in the
 # model (excitation temperature, optical depth, line center, and line width)
 sp.Registry.add_fitter('n2hp_vtau',pyspeckit.models.n2hp.n2hp_vtau_fitter,4)
+sp.xarr.refX = sp.header['REFFREQ'] 
 sp.xarr.velocity_convention = 'radio'
+sp.xarr.convert_to_unit('km/s')
 # Run the fitter
-sp.specfit(fittype='n2hp_vtau',multifit=None,guesses=[15,2,4,0.2])
+sp.specfit(fittype='n2hp_vtau', guesses=[5, 2, 4, 0.2])
 
 # Plot the results
 sp.plotter()
 # Re-run the fitter (to get proper error bars) and show the individual fit components
-sp.specfit(fittype='n2hp_vtau', multifit=None, guesses=[15, 2, 4, 0.2],
+sp.specfit(fittype='n2hp_vtau', guesses=[5, 2, 4, 0.2], 
            show_hyperfine_components=True)
 
 # Save the figure (this step is just so that an image can be included on the web page)
