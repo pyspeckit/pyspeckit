@@ -6,13 +6,29 @@ GBTIDL SDFITS files representing GBT observing sessions can be read into
 pyspeckit.  Additional documentation is needed.  Nodding reduction is
 supported, frequency switching is not.
 
+Some nomenclature
+
+session   -
+
+scan      -
+
+target    - same as source name, as position on the sky (OBJECT in the fits header)
+
+
+@todo  I've encountered some SDFITS files that crash on not having TRGTLONG/TRGTLAT.
+       The GBTIDL Users' Guide uses 3 examples: ngc5291.fits, W3OH.fits, and IC1481.fits
+       All of these eventually report a missing FREQRES, but just printing the session
+       will report that missing TRGTLONG/TRGTLAT.
+       Parkes_GASS.fits reports a missing OBSERVER (it's in the primary keywords), not in bintable
+       TREG_091209.cal.acs.fits is ok.
+       These two from the SDFITS nasa website https://fits.gsfc.nasa.gov/registry/sdfits.html
+       3C286.fits (from test_3c286.py) is ok - correlate() not working yet
+       AGBT11B_029_01.raw.acs.fits (from jd_test.py) is missing
 """
 from __future__ import print_function
 from six import iteritems
-try:
-    import astropy.io.fits as pyfits
-except ImportError:
-    import pyfits
+from astropy import units as u
+import astropy.io.fits as pyfits
 import pyspeckit
 import numpy as np
 try:
@@ -26,7 +42,7 @@ def unique_targets(sdfitsfile):
 
 def count_integrations(sdfitsfile, target):
     """
-    Return the number of integrations for a given target
+    Return the number of integrations for a given target (the object name)
     (uses one sampler; assumes same number for all samplers)
     """
     bintable = _get_bintable(sdfitsfile)
@@ -40,7 +56,7 @@ def count_integrations(sdfitsfile, target):
 
 def list_targets(sdfitsfile, doprint=True):
     """
-    List the targets, their location on the sky...
+    List the targets (source name), their location on the sky...
     """
     bintable = _get_bintable(sdfitsfile)
 
@@ -50,7 +66,13 @@ def list_targets(sdfitsfile, doprint=True):
     strings = [ "\n%18s  %10s %10s %26s%8s %9s %9s %9s" % ("Object Name","RA","DEC","%12s%14s"%("RA","DEC"),"N(ptgs)","Exp.Time","requested","n(ints)") ]
     for objectname in uniq(bintable.data['OBJECT']):
         whobject = bintable.data['OBJECT'] == objectname
-        RA,DEC = bintable.data['TRGTLONG'][whobject],bintable.data['TRGTLAT'][whobject]
+        if False:
+            RA,DEC = bintable.data['TRGTLONG'][whobject],bintable.data['TRGTLAT'][whobject]
+        else:
+            # RA,DEC = bintable.data['OBJ-RA'][whobject],bintable.data['OBJ-DEC'][whobject]
+            RA,DEC = bintable.data['CRVAL2'][whobject],bintable.data['CRVAL3'][whobject]
+            #print(RA)
+            #print(DEC)
         RADEC = zip(RA,DEC)
         midRA,midDEC = np.median(RA),np.median(DEC)
         npointings = len(set(RADEC))
@@ -58,10 +80,13 @@ def list_targets(sdfitsfile, doprint=True):
             sexagesimal = coords.Position((midRA,midDEC)).hmsdms()
         else:
             sexagesimal = ""
-        firstsampler = bintable.data['SAMPLER'][whobject][0]
+        firstsampler = bintable.data['SAMPLER'][whobject][0]                   # "Key 'SAMPLER' does not exist."
         whfirstsampler = bintable.data['SAMPLER'] == firstsampler
         exptime = bintable.data['EXPOSURE'][whobject*whfirstsampler].sum()
-        duration = bintable.data['DURATION'][whobject*whfirstsampler].sum()
+        if False:
+            duration = bintable.data['DURATION'][whobject*whfirstsampler].sum()
+        else:
+            duration = exptime
         n_ints = count_integrations(bintable, objectname)
         strings.append( "%18s  %10f %10f %26s%8i %9g %9g %9i" % (objectname,midRA,midDEC,sexagesimal, npointings, exptime, duration, n_ints) )
 
@@ -73,6 +98,10 @@ def list_targets(sdfitsfile, doprint=True):
 def read_gbt_scan(sdfitsfile, obsnumber=0):
     """
     Read a single scan from a GBTIDL SDFITS file
+    
+    obsnumber: 0 up to count_integrations()
+    
+    Returns a Spectrum1D
     """
 
     bintable = _get_bintable(sdfitsfile)
@@ -93,21 +122,44 @@ def read_gbt_scan(sdfitsfile, obsnumber=0):
 
     sp = pyspeckit.Spectrum(HDU,filetype='pyfits')
     #sp.xarr.frame = 'topo' # sp.header.get('VELDEF') #'topo'
+    #print("PJT hacking2")
 
     # HACK - temporary!
     # Convert xarr to LSR units
     #sp.xarr.convert_to_unit('m/s')
     obsfreq = header['OBSFREQ']
-    centerfreq = pyspeckit.spectrum.units.SpectroscopicAxis(np.float(obsfreq),'Hz',refX=obsfreq,refX_unit='Hz')
-    delta_freq = (centerfreq.as_unit('m/s') + header['VFRAME']).as_unit(centerfreq.units) - centerfreq
-    sp.xarr -= delta_freq
+    
+    # some creative abuse how a S.A. stores and converts units, just in order to convert VFRAME in m/s to a delta_freq in Hz
+    if False:
+        c1 = pyspeckit.spectrum.units.SpectroscopicAxis(obsfreq,'Hz',velocity_convention='radio',
+                                                        refX=obsfreq, refX_unit=sp.xarr.unit)
+        v1 = (c1.as_unit('m/s') + u.Quantity(header['VFRAME'],'m/s')).value
+        c2 = pyspeckit.spectrum.units.SpectroscopicAxis(v1,'m/s',    velocity_convention='radio',
+                                                        refX=obsfreq, refX_unit=sp.xarr.unit)
+        delta_freq = c2.as_unit("Hz") - c1
+    else:
+        centerfreq = u.Quantity(obsfreq, u.Hz)
+        delta_freq = u.Quantity(header['VFRAME'], u.m/u.s).to(u.Hz, u.doppler_radio(centerfreq)) - centerfreq
+
+    #Gaussian chi^2: 661.799  chi^2/n: 1.61022
+    #Optimal chi^2: 274.423  chi^2/n: 0.667696
+    #Voigt   chi^2: 544.831  chi^2/n: 1.32886
+    #Optimal chi^2: 238.888  chi^2/n: 0.582653
+
+    
+    #print("VFRAME=%g km/s gives delta_freq=%s at obsfreq=%g GHz" % (header['VFRAME']/1000.0,delta_freq,obsfreq/1e9))
+    #sp.xarr -= delta_freq    
+    sp.xarr = sp.xarr - delta_freq
 
     return sp
 
 def read_gbt_target(sdfitsfile, objectname, verbose=False):
     """
     Give an object name, get all observations of that object as an 'obsblock'
+    Returns this in a dictionary 'blocks' named 'A13ON1' etc.
+    This function can take while for large data.
     """
+
 
     bintable = _get_bintable(sdfitsfile)
 
@@ -115,21 +167,28 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
     if verbose:
         print("Number of individual scans for Object %s: %i" % (objectname,whobject.sum()))
 
+
+    # cal = bintable.data['CAL']
     calON = bintable.data['CAL'] == 'T'
     # HACK: apparently bintable.data can sometimes treat itself as scalar...
     if np.isscalar(calON):
+        print("scalar to vector")
         calON = np.array([(val in ['T',True]) for val in bintable.data['CAL']])
 
-    n_nods = np.unique(bintable.data['PROCSIZE'])
+    # this turns out to be not always true, but n_nods is actually never used
+    n_nods = np.unique(bintable.data['PROCSIZE'])[0]
 
     blocks = {}
     for sampler in np.unique(bintable.data[whobject]['SAMPLER']):
         whsampler = bintable.data['SAMPLER'] == sampler
-        nods = np.unique(bintable.data['PROCSEQN'][whsampler*whobject])
-        for nod in nods:
+        for nod in np.unique(bintable.data['PROCSEQN'][whsampler*whobject]):
             whnod = bintable.data['PROCSEQN'] == nod
-            for onoff in ('ON','OFF'):
-                calOK = (calON - (onoff=='OFF'))
+            for onoff in ['ON','OFF']:
+                # calOK = (calON - (onoff=='OFF'))
+                #    e.g. onoff='ON';  calON=[True, True, False, False]; np.bitwise_xor(calON, onoff=='OFF')
+                #    e.g. onoff='OFF'; calON=[True, True, False, False]; np.bitwise_xor(calON, onoff=='OFF')
+
+                calOK = np.bitwise_xor(calON, onoff=='OFF')
                 whOK = (whobject*whsampler*calOK*whnod)
                 if whOK.sum() == 0:
                     continue
@@ -140,26 +199,93 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
                     maxdiff = np.diff(crvals).max()
                 else:
                     maxdiff = 0
-                freqres = np.max(bintable.data[whOK]['FREQRES'])
+                if False:
+                    freqres = np.max(bintable.data[whOK]['FREQRES'])              # GBT ex1,2,3 don't have FREQRES
+                else:
+                    freqres = np.max(np.abs(bintable.data[whOK]['CDELT1']))       # GBT ex1,2,3 don't have FREQRES
                 if maxdiff < freqres:
                     splist = [read_gbt_scan(bintable,ii) for ii in np.where(whOK)[0]]
                     blocks[sampler+onoff+str(nod)] = pyspeckit.ObsBlock(splist,force=True)
                     blocks[sampler+onoff+str(nod)]._arithmetic_threshold = np.diff(blocks[sampler+onoff+str(nod)].xarr).min() / 5.
                 else:
                     print("Maximum frequency difference > frequency resolution: %f > %f" % (maxdiff, freqres))
-
     return blocks
 
 def reduce_gbt_target(sdfitsfile, objectname, nbeams, verbose=False):
     """
     Wrapper - read an SDFITS file, get an object, reduce it (assuming nodded) and return it
+    NEVER USED, use the class.reduce()
     """
     # for efficiency, this should be stored - how?
     blocks = read_gbt_target(sdfitsfile, objectname, verbose=verbose)
 
+    # for now, just NOD, but figure out from the pattern if there is PS or FS 
     reduced_nods = reduce_nod(blocks, nbeams)
 
     return reduced_nods
+
+def reduce_ps(blocks, verbose=False, average=True, fdid=1):
+    """
+    Do a position switching (ps) observation
+    feed2 is not used, nodding is the ON/OFF for PS
+    """
+
+    fd0 = fdid
+
+    # strip off trailing digit to define pairs
+    nodpairs = uniq([s[:-1].replace("ON","").replace("OFF","") for s in blocks])
+    if verbose:
+        print(nodpairs)
+    
+    reduced_nods = {}
+
+    # for each pair...
+    for sampname in nodpairs:
+        on1 = sampname+"ON1"
+        off1 = sampname+"OFF1"
+        on2 = sampname+"ON2"
+        off2 = sampname+"OFF2"
+
+        feednumber = blocks[on1].header.get('FEED')
+        # don't need this - if feednumber is 1, ref feed should be 2, and vice-versa
+        reference_feednumber = blocks[on1].header.get('SRFEED')
+        # if SRFEED is 0, there is no reference..... then it's probably not nodding
+        
+        on1avg = blocks[on1].average()
+        off1avg = blocks[off1].average()
+        on2avg = blocks[on2].average()
+        off2avg = blocks[off2].average()
+
+        # first find TSYS
+        tsys1 = dcmeantsys(on1avg,off1avg,on1avg.header.get('TCAL'))
+        tsys2 = dcmeantsys(on2avg,off2avg,on2avg.header.get('TCAL'))
+        if verbose:
+            print("Nod Pair %s (feed %i) has tsys1=%f tsys2=%f" % (sampname, feednumber, tsys1, tsys2))
+
+        # then get the total power
+        if average:
+            tp1 = totalpower(on1avg, off1avg, average=False)
+            tp2 = totalpower(on2avg, off2avg, average=False)
+        else:
+            tp1 = totalpower(blocks[on1], blocks[off1], average=False)
+            tp2 = totalpower(blocks[on2], blocks[off2], average=False)
+
+        # then do the signal-reference bit
+        if feednumber == fd0:
+            nod = sigref(tp1,tp2,tsys2)
+        else:
+            raise ValueError("Feed number %i is not understood. Is this a PD observation?" % feednumber)
+
+        reduced_nods[sampname] = nod
+
+    return reduced_nods
+
+def reduce_fs(blocks, verbose=False, average=True, fdid=(1,2)):
+    """
+    Do a frequency switching (fs) observation
+    """
+    print("Reducing FS not supported yet")
+    return {}
 
 def reduce_nod(blocks, verbose=False, average=True, fdid=(1,2)):
     """
@@ -174,6 +300,7 @@ def reduce_nod(blocks, verbose=False, average=True, fdid=(1,2)):
     fd0,fd1 = fdid
 
     # strip off trailing digit to define pairs
+    # print(nodpairs)
     nodpairs = uniq([s[:-1].replace("ON","").replace("OFF","") for s in blocks])
 
     reduced_nods = {}
@@ -188,6 +315,7 @@ def reduce_nod(blocks, verbose=False, average=True, fdid=(1,2)):
         feednumber = blocks[on1].header.get('FEED')
         # don't need this - if feednumber is 1, ref feed should be 2, and vice-versa
         reference_feednumber = blocks[on1].header.get('SRFEED')
+        # if SRFEED is 0, there is no reference..... then it's probably not nodding
         
         on1avg = blocks[on1].average()
         off1avg = blocks[off1].average()
@@ -220,13 +348,15 @@ def reduce_nod(blocks, verbose=False, average=True, fdid=(1,2)):
 
     return reduced_nods
 
-def reduce_totalpower(blocks, verbose=False, average=True, fdid=1):
+def reduce_tp(blocks, verbose=False, average=True, fdid=1):
     """
-    Reduce a total power observation
+    Reduce a total power (tp) observation
     """
 
     # strip off trailing digit to define pairs
     ids = uniq([s[:-1].replace("ON","").replace("OFF","") for s in blocks])
+    if verbose:
+        print("reduce_tp: ",ids)
 
     reduced_tps = {}
 
@@ -260,6 +390,7 @@ def reduce_totalpower(blocks, verbose=False, average=True, fdid=1):
 def _get_bintable(sdfitsfile):
     """
     Private function: given a filename, HDUlist, or bintable, return a bintable
+    Note any SDFITS file with more than one BINTABLE will only get the first
     """
 
     if isinstance(sdfitsfile, pyfits.HDUList):
@@ -273,20 +404,35 @@ def _get_bintable(sdfitsfile):
 
     return bintable
 
+def _get_bintables(sdfitsfile):
+    """
+    Private function: given a filename, return a list of bintables
+    No checking what extensions they are
+    """
+    hdu = pyfits.open(sdfitsfile)
+    return hdu[1:]
+
 def dcmeantsys(calon,caloff,tcal,debug=False):
     """
-    from GBTIDL's dcmeantsys.py
+    from GBTIDL's dcmeantsys.pro
     ;  mean_tsys = tcal * mean(nocal) / (mean(withcal-nocal)) + tcal/2.0
     """
 
     # Use the inner 80% of data to calculate mean Tsys
     nchans = calon.data.shape[0]
-    pct10 = nchans/10
+    pct10 = nchans//10
     pct90 = nchans - pct10
 
-    meanoff = np.mean(caloff.slice(pct10,pct90,units='pixels').data)
-    meandiff = np.mean(calon.slice(pct10,pct90,units='pixels').data - 
-                        caloff.slice(pct10,pct90,units='pixels').data)
+    #print(caloff.slice)
+
+    if False:
+        meanoff = np.mean(caloff.slice(pct10,pct90,units='pixels').data)
+        meandiff = np.mean(calon.slice(pct10,pct90,units='pixels').data - 
+                           caloff.slice(pct10,pct90,units='pixels').data)
+    else:
+        meanoff = np.mean(caloff.slice(pct10,pct90).data)
+        meandiff = np.mean(calon.slice(pct10,pct90).data - 
+                           caloff.slice(pct10,pct90).data)
 
     meanTsys = ( meanoff / meandiff * tcal + tcal/2.0 )
     if debug:
@@ -318,7 +464,18 @@ def totalpower(calon, caloff, average=True):
     else:
         OFF = caloff
 
-    TP = (ON+OFF)/2.
+    if False:
+        #TP = (ON+OFF)/(2.*u.dimensionless_unscaled )
+        #TP = (ON+OFF)*(0.5*u.dimensionless_unscaled )
+        import copy
+        TP = copy.deepcopy(ON)
+        TP.data = (TP.data+OFF.data)/2
+    else:
+        #TP = (ON+OFF)*0.5
+        TP = (ON+OFF)
+        TP.data = TP.data/2.0
+        #TP = TP/2.0
+        #TP = TP * (0.5*u.dimensionless_unscaled )        
 
     return TP
 
@@ -326,10 +483,14 @@ def sigref(nod1, nod2, tsys_nod2):
     """
     Signal-Reference ('nod') calibration
     ; ((dcsig-dcref)/dcref) * dcref.tsys 
-    see GBTIDL's dosigref
+    see GBTIDL's dosigref.pro
     """
 
-    return (nod1-nod2)/nod2*tsys_nod2
+    # stupid
+    new = nod1
+    new.data = (nod1.data - nod2.data) / nod2.data * tsys_nod2
+    return new
+    #return (nod1-nod2)/nod2*tsys_nod2
 
 def find_matched_freqs(reduced_blocks, debug=False):
     """
@@ -341,14 +502,15 @@ def find_matched_freqs(reduced_blocks, debug=False):
     # IF order 
     sampler_numbers = [int(name[1:]) for name in reduced_blocks.keys()]
     sorted_pairs = sorted(zip(sampler_numbers,reduced_blocks.keys()))
-    sorted_names = zip(*sorted_pairs)[1]
+    sorted_names = list(zip(*sorted_pairs))[1]    #py3
 
     # how many IFs?
     frequencies = dict((name,reduced_blocks[name].header.get('OBSFREQ')) for name in sorted_names)
     if debug: print(frequencies)
     round_frequencies = dict((name,
         round_to_resolution(reduced_blocks[name].header.get('OBSFREQ'),
-                            reduced_blocks[name].header.get('FREQRES')))
+                            reduced_blocks[name].header.get('CDELT1')))                            
+                            # reduced_blocks[name].header.get('FREQRES')))
                  for name in sorted_names)
     if debug: print(round_frequencies)
     unique_frequencies = uniq(round_frequencies.values()) # uniq is an order-preserving function
@@ -484,16 +646,37 @@ class GBTSession(object):
     def __init__(self, sdfitsfile):
         """
         Load an SDFITS file or a pre-loaded FITS file
+        Note the SDFITS file can only contain one BINTABLE 'SINGLE DISH' extension
+        but it is allowed to have multiple of those
         """
+        def grab(bintable,key):
+            """ Grab a keyword from the header, if it does not exist,
+                assume it is a column name, return that
+                By design, it ignores the primary header
+            """
+            if key in bintable.header:
+                return bintable.header[key]
+            return bintable.data[0][key]
+            # elementwise comparison failed; returning scalar instead, but in the future will perform elementwise comparison
+            if key in bintable.data[0]:       
+                return bintable.data[0][key]
+            return "UNKNOWN"
+        self.bintables= _get_bintables(sdfitsfile)        
         self.bintable = _get_bintable(sdfitsfile)
         self.targets = dict((target,None) for target in unique_targets(self.bintable))
-        self.print_header = "\n".join( ("Observer: " + self.bintable.data[0]['OBSERVER'],
-            "Project: %s" % self.bintable.header.get('PROJID'),
-            "Backend: %s" % self.bintable.header.get('BACKEND'),
-            "Telescope: %s" % self.bintable.header.get('TELESCOP'),
-            "Bandwidth: %s" % self.bintable.data[0]['BANDWID'],
-            "Date: %s" % self.bintable.data[0]['DATE-OBS']) )
+        self.print_header = "\n".join( (
+            "Observer: %s"  % grab(self.bintable,'OBSERVER'),
+            "Project: %s"   % grab(self.bintable,'PROJID'),
+            "Backend: %s"   % grab(self.bintable,'BACKEND'),      # Parkes missing this
+            "Telescope: %s" % grab(self.bintable,'TELESCOP'),
+            "Bandwidth: %s" % grab(self.bintable,'BANDWID'),
+            "Date: %s"      % grab(self.bintable,'DATE-OBS')) )   # seen one case of DATA_OBS !!
 
+        for bt in self.bintables:
+            print("%s  %s  %d x %d" %   (grab(bt,'EXTNAME'),
+                                         grab(bt,'OBJECT'),
+                                         grab(bt,'NAXIS1'),
+                                         grab(bt,'NAXIS2')))
     @property
     def nbeams(self):
         # caching:
@@ -535,7 +718,7 @@ class GBTSession(object):
 
     def reduce_target(self, target, **kwargs):
         """
-        Reduce the data for a given object name
+        Reduce the data for a given target (object) name
         """
         if self.targets[target] is None:
             self.load_target(target)
@@ -585,12 +768,19 @@ class GBTTarget(object):
 
     def reduce(self, obstype='nod', **kwargs):
         """
-        Reduce nodded observations (they should have been read in __init__)
+        Reduce observations (they should have been read in __init__)
+        obstype:    'nod', 'tp', 'ps', 'fs'
         """
+        print("REDUCE: beams=",self.beams)
+        
         if obstype == 'nod':
             self.reduced_scans = reduce_nod(self.blocks, fdid=self.beams, **kwargs)
         elif obstype == 'tp':
-            self.reduced_scans = reduce_totalpower(self.blocks, fdid=self.beams, **kwargs)
+            self.reduced_scans = reduce_tp(self.blocks, fdid=self.beams, **kwargs)
+        elif obstype == 'ps':
+            self.reduced_scans = reduce_ps(self.blocks, fdid=self.beams, **kwargs)
+        elif obstype == 'fs':
+            self.reduced_scans = reduce_fs(self.blocks, fdid=self.beams, **kwargs)
         else:
             raise NotImplementedError('Obstype {0} not implemented.'.format(obstype))
 
