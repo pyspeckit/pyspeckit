@@ -1905,7 +1905,8 @@ class Specfit(interactive.Interactive):
 
         if reduced:
             # vheight included here or not?  assuming it should be...
-            return chi2/self.dof
+            dof = modelmask.sum() - self.fitter.npars
+            return chi2 / dof
         else:
             return chi2
 
