@@ -341,11 +341,17 @@ man_pages = [('index', project.lower(), project + ' Documentation',
 if eval(setup_cfg.get('edit_on_github')):
     extensions += ['edit_on_github']
 
-    versionmod = __import__(setup_cfg['package_name'] + '.version')
-    edit_on_github_project = setup_cfg['github_project']
-    if versionmod.version.release:
-        edit_on_github_branch = "v" + versionmod.version.version
-    else:
+    try:
+        # Try to import the version module
+        versionmod = __import__(setup_cfg['package_name'] + '.version', fromlist=['version'])
+        edit_on_github_project = setup_cfg['github_project']
+        if hasattr(versionmod, 'version_info') and versionmod.version_info.release:
+            edit_on_github_branch = "v" + versionmod.version_info.version
+        else:
+            edit_on_github_branch = "master"
+    except ImportError:
+        # If version module is not available, use master branch
+        edit_on_github_project = setup_cfg['github_project']
         edit_on_github_branch = "master"
 
     edit_on_github_source_root = ""

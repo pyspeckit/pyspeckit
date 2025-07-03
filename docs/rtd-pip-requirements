@@ -5,7 +5,12 @@ sphinx-astropy>=1.6
 sphinx>=4.0
 ordereddict ; python_version<'3.7'
 spectral-cube
+<<<<<<< Updated upstream
 radio_beam
 six
 dask
 joblib
+=======
+sphinx-astropy
+setuptools_scm
+>>>>>>> Stashed changes

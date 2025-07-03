@@ -14,8 +14,12 @@ from .wrappers import *
 from .cubes import *
 from .spectrum import *
 
-# added 20240905 because version somehow got dropped
-__version__ = '1.0.4.dev'
+# Import version from version module
+try:
+    from .version import __version__
+except ImportError:
+    # Fallback version if version module is not available
+    __version__ = '1.0.5.dev'
 
 try:
     from .tests import run_tests
