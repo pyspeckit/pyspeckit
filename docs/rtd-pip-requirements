@@ -1,8 +1,7 @@
-numpy
-matplotlib
-Cython
-astropy-helpers
-astropy
-ordereddict
+numpy>=1.19
+matplotlib>=3.5
+astropy>=5.0
+sphinx-astropy>=1.6
+sphinx>=4.0
+ordereddict ; python_version<'3.7'
 spectral-cube
-sphinx-astropy

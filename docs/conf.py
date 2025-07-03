@@ -90,6 +90,8 @@ source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'index'
+# For newer Sphinx versions, also set root_doc
+root_doc = 'index'
 
 html_sidebars = {'**':['globaltoc.html', 'localtoc.html', 'relations.html',
                       'sourcelink.html', 'searchbox.html']}
