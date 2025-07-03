@@ -187,7 +187,7 @@ class NumpyDocString(object):
 
         return params
 
-    
+
     _name_rgx = re.compile(r"^\s*(:(?P<role>\w+):`(?P<name>[a-zA-Z0-9_.-]+)`|"
                            r" (?P<name2>[a-zA-Z0-9_.-]+))\s*", re.X)
     def _parse_see_also(self, content):
@@ -220,7 +220,7 @@ class NumpyDocString(object):
 
         current_func = None
         rest = []
-        
+
         for line in content:
             if not line.strip():
                 continue
@@ -263,7 +263,7 @@ class NumpyDocString(object):
             if len(line) > 2:
                 out[line[1]] = strip_each_in(line[2].split(','))
         return out
-    
+
     def _parse_summary(self):
         """Grab signature (if given) and summary"""
         if self._is_at_section():
@@ -280,7 +280,7 @@ class NumpyDocString(object):
 
         if not self._is_at_section():
             self['Extended Summary'] = self._read_to_next_section()
-    
+
     def _parse(self):
         self._doc.reset()
         self._parse_summary()
@@ -431,11 +431,33 @@ class FunctionDoc(NumpyDocString):
             func, func_name = self.get_func()
             try:
                 # try to read signature
-                argspec = inspect.getargspec(func)
-                argspec = inspect.formatargspec(*argspec)
+                try:
+                    # Modern Python (3.3+) approach using signature
+                    sig = inspect.signature(func)
+                    argspec = str(sig)
+                except (ValueError, TypeError, AttributeError):
+                    try:
+                        # Fallback for older Python versions or when signature fails
+                        if hasattr(inspect, 'getfullargspec'):
+                            # Python 3.0+ compatible version
+                            argspec_obj = inspect.getfullargspec(func)
+                            if hasattr(inspect, 'formatargspec'):
+                                argspec = inspect.formatargspec(*argspec_obj)
+                            else:
+                                # Manual formatting if formatargspec is not available
+                                argspec = '()'
+                        elif hasattr(inspect, 'getargspec'):
+                            # Very old Python versions
+                            argspec_obj = inspect.getargspec(func)
+                            argspec = inspect.formatargspec(*argspec_obj)
+                        else:
+                            argspec = '()'
+                    except (AttributeError, TypeError):
+                        argspec = '()'
+
                 argspec = argspec.replace('*','\*')
                 signature = '%s%s' % (func_name, argspec)
-            except TypeError as e:
+            except (TypeError, ValueError) as e:
                 signature = '%s()' % func_name
             self['Signature'] = signature
 
@@ -446,7 +468,7 @@ class FunctionDoc(NumpyDocString):
         else:
             func = self._f
         return func, func_name
-            
+
     def __str__(self):
         out = ''
 
