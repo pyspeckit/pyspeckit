@@ -284,7 +284,7 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
                 molsearchname = f'{molecule_tag} {molecule_name}'
             parse_names_locally = False
             if molecule_name is not None:
-                log.warn(f"molecule_tag overrides molecule_name.  New molecule_name={molecule_name}.  Searchname = {molsearchname}")
+                log.warning(f"molecule_tag overrides molecule_name.  New molecule_name={molecule_name}.  Searchname = {molsearchname}")
             else:
                 log.info(f"molecule_name={molecule_name} for tag molecule_tag={molecule_tag}.  Searchname = {molsearchname}")
         else:

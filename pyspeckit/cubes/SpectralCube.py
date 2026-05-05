@@ -957,8 +957,8 @@ class Cube(spectrum.Spectrum):
                 raise ValueError("usemomentcube must be set to True")
             elif guesses_are_moments or (usemomentcube and len(guesses)):
                 if not guesses_are_moments and ii == 0:
-                    log.warn("guesses will be ignored because usemomentcube "
-                             "was set to True.", PyspeckitWarning)
+                    log.warning("guesses will be ignored because usemomentcube "
+                                "was set to True.")
                 if verbose_level > 1 and ii == 0:
                     log.info("Using moment cube")
                 gg = self.momentcube[:,int(y),int(x)]

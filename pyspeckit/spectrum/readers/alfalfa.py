@@ -1,8 +1,15 @@
 """
 ALFAFA "source" .sav file
+
+``idlsave`` is no longer maintained; this module imports lazily so the
+rest of pyspeckit can be imported even when ``idlsave`` (or scipy.io's
+readsav) is not available.
 """
 from __future__ import print_function
-import idlsave
+try:
+    import idlsave
+except ImportError:
+    idlsave = None
 try:
     import astropy.io.fits as pyfits
 except ImportError:
@@ -10,10 +17,19 @@ except ImportError:
 import pyspeckit
 import numpy as np
 
+
+def _require_idlsave():
+    if idlsave is None:
+        raise ImportError(
+            "idlsave is required to read ALFALFA .sav files; "
+            "install it (or use scipy.io.readsav)."
+        )
+
 def read_alfalfa_file(filename):
     """
     Read the contents of a whole ALFALFA source file
     """
+    _require_idlsave()
     savfile = idlsave.read(filename)
 
     source_dict = dict([(name,read_alfalfa_source(savfile,ii)) for ii,name in
@@ -28,6 +44,7 @@ def read_alfalfa_source(savfile, sourcenumber=0):
     """
 
     if type(savfile) is str and ".src" in savfile:
+        _require_idlsave()
         savfile = idlsave.read(savfile)
     
     src = savfile.src[sourcenumber]

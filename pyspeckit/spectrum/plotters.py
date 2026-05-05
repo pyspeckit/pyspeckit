@@ -532,7 +532,7 @@ class Plotter(object):
                 self.xlabel = "%s %s" % (str(self.Spectrum.xarr.velocity_convention),
                                          self.xlabel)
         else:
-            log.warn("Plotter: xlabel was not set")
+            log.warning("Plotter: xlabel was not set")
 
         if self.xlabel is not None:
             self.axis.set_xlabel(self.xlabel)
@@ -735,8 +735,8 @@ class Plotter(object):
                 linenames_toplot.append(ln)
 
         if len(xvals) != len(line_xvals):
-            log.warn("Skipped {0} out-of-bounds lines when plotting line IDs."
-                     .format(len(line_xvals)-len(xvals)))
+            log.warning("Skipped {0} out-of-bounds lines when plotting line IDs."
+                        .format(len(line_xvals)-len(xvals)))
 
         if auto_yloc:
             yr = self.axis.get_ylim()

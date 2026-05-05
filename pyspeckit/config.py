@@ -23,6 +23,7 @@ To decorate a new __call__ method, do:
 
 import os
 import inspect
+import functools
 import warnings
 
 class dotdictify(dict):
@@ -54,7 +55,15 @@ class dotdictify(dict):
         return found
 
     __setattr__ = __setitem__
-    __getattr__ = __getitem__
+
+    def __getattr__(self, key):
+        # Don't auto-create missing dunder attributes; this confuses
+        # introspection tools (e.g. inspect.unwrap, doctest collection)
+        # because it makes every dunder lookup return a fresh, infinitely
+        # nested instance.
+        if key.startswith('__') and key.endswith('__'):
+            raise AttributeError(key)
+        return self.__getitem__(key)
 
 
 cfgDefaults = dotdictify(dict(
@@ -80,19 +89,19 @@ class ConfigParser:
         Initialize cfg dictionary.
         """
         if fn is not None:
-            f = open(fn)
             return_dict = cfgDefaults
-            for line in f:
-                if not line.strip(): continue
-                thisline = line.split()
+            with open(fn) as f:
+                for line in f:
+                    if not line.strip(): continue
+                    thisline = line.split()
 
-                if thisline[0][0] == '#': continue
+                    if thisline[0][0] == '#': continue
 
-                if thisline[2] in ['True', 1]: return_dict[thisline[0]] = True
-                elif thisline[2] in ['False', 0]: return_dict[thisline[0]] = False
-                elif thisline[2] == 'None': return_dict[thisline[0]] = None
-                elif thisline[2].isalpha(): return_dict[thisline[0]] = str(thisline[2])
-                else: return_dict[thisline[0]] = float(thisline[2])
+                    if thisline[2] in ['True', 1]: return_dict[thisline[0]] = True
+                    elif thisline[2] in ['False', 0]: return_dict[thisline[0]] = False
+                    elif thisline[2] == 'None': return_dict[thisline[0]] = None
+                    elif thisline[2].isalpha(): return_dict[thisline[0]] = str(thisline[2])
+                    else: return_dict[thisline[0]] = float(thisline[2])
 
             self.cfg = dotdictify(return_dict)
         else:
@@ -106,15 +115,11 @@ else:
 
 def ConfigDescriptor(f):
 
+    @functools.wraps(f)
     def decorator(self, *args, **kwargs):
         """
         This is our decorator function, used to modify the inputs of __call__
         methods to reflect preferences we set in config file.
-
-        Notes:
-        inspect.getargspec will tell us the names of all arguments and their default values.
-        Later we'll have to be more careful - all_defs only makes entries for arguments that actually
-        have default values
         """
 
         argspec = inspect.getfullargspec(f)
@@ -142,8 +147,4 @@ def ConfigDescriptor(f):
 
         f(self, *args, **new_kwargs)
 
-    # documentation should be passed on, else sphinx doesn't work and the user can't access the docs
-    decorator.__doc__ = f.__doc__
-    decorator.__defaults__ = f.__defaults__
-    decorator.__repr__ = f.__repr__
     return decorator
