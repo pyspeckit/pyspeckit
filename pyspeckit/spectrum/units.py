@@ -713,7 +713,7 @@ class SpectroscopicAxis(u.Quantity):
             else:
                 refX = center_frequency
         if refX_unit is None and not hasattr(refX, 'unit'):
-            if center_frequency_unit is None:
+            if center_frequency_unit is not None:
                 refX_unit = center_frequency_unit
             else:
                 refX_unit = self.refX_unit

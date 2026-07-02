@@ -300,8 +300,8 @@ class Specfit(interactive.Interactive):
 
         if 'multifit' in kwargs:
             kwargs.pop('multifit')
-            log.warning("The multifit keyword is no longer required.  All fits "
-                        "allow for multiple components.", DeprecationWarning)
+            warnings.warn("The multifit keyword is no longer required.  All fits "
+                          "allow for multiple components.", DeprecationWarning)
 
         if 'guess' in kwargs:
             if guesses is None:
@@ -687,7 +687,7 @@ class Specfit(interactive.Interactive):
         if len(guesses) < self.Registry.npars[self.fittype]:
             raise ValueError("Too few parameters input.  Need at least %i for %s models" % (self.Registry.npars[self.fittype],self.fittype))
 
-        self.npeaks = len(guesses)/self.Registry.npars[self.fittype]
+        self.npeaks = len(guesses)//self.Registry.npars[self.fittype]
         self.fitter = self.Registry.multifitters[self.fittype]
         self.vheight = False
         if self.fitter.vheight:
@@ -1697,7 +1697,7 @@ class Specfit(interactive.Interactive):
         if unit == 'pixels':
             return [xpixmin,xpixmax]
         else:
-            return self.Spectrum.xarr[[xpixmin,xpixmax]].as_unit(units)
+            return self.Spectrum.xarr[[xpixmin,xpixmax]].as_unit(unit)
 
     def shift_pars(self, frame=None):
         """

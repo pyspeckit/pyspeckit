@@ -988,10 +988,10 @@ class Spectra(BaseSpectrum):
         Adding "Spectra" together will concatenate them
         * WARNING * this will probably fail now that I've implemented direct __add__...
         """
-        if type(other) is Spectra or Spectrum:
+        if isinstance(other, Spectra):
             self.speclist += other.speclist
-        elif type(other) is Spectrum:
-            self.speclist += [other.speclist]
+        elif isinstance(other, Spectrum):
+            self.speclist += [other]
         if other.unit != self.unit:
             raise ValueError("Mismatched unit")
 
@@ -1002,6 +1002,8 @@ class Spectra(BaseSpectrum):
         self.data = np.concatenate([self.data,other.data])
         self.error = np.concatenate([self.error,other.error])
         self._sort()
+
+        return self
 
     def __getitem__(self,index):
         """
