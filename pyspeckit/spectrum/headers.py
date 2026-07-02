@@ -23,7 +23,7 @@ def intersection(header1, header2, if_conflict=None):
                 elif if_conflict in ('1',1,'Header1'):
                     newheader[key] = value
                 elif if_conflict in ('2',2,'Header2'):
-                    newheader[key] = Header2[key]
+                    newheader[key] = header2[key]
             except KeyError:
                 """ Assume pyfits doesn't want you to have that keyword
                 (because it shouldn't be possible to get here otherwise) """

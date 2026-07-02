@@ -713,7 +713,7 @@ class SpectroscopicAxis(u.Quantity):
             else:
                 refX = center_frequency
         if refX_unit is None and not hasattr(refX, 'unit'):
-            if center_frequency_unit is None:
+            if center_frequency_unit is not None:
                 refX_unit = center_frequency_unit
             else:
                 refX_unit = self.refX_unit
@@ -1109,7 +1109,7 @@ def frequency_to_velocity(frequencies, input_unit, center_frequency=None,
     elif convention == 'optical':
         velocity = ( frequency_hz - center_frequency_hz ) / frequency_hz * speedoflight_ms * -1
     elif convention == 'relativistic':
-        velocity = ( frequency_hz**2 - center_frequency_hz**2 ) / ( center_frequency_hz**2 + frequency_hz )**2 * speedoflight_ms * -1
+        velocity = ( frequency_hz**2 - center_frequency_hz**2 ) / ( center_frequency_hz**2 + frequency_hz**2 ) * speedoflight_ms * -1
     else:
         raise ValueError('Convention "%s" is not allowed.' % (convention))
     velocities = velocity * velocity_dict['m/s'] / velocity_dict[velocity_units]
@@ -1218,7 +1218,7 @@ def wavelength_to_velocity(wavelengths, input_unit, center_wavelength=None,
     elif convention == 'optical':
         velocity = ( frequency_hz - center_frequency_hz ) / frequency_hz * speedoflight_ms * -1
     elif convention == 'relativistic':
-        velocity = ( frequency_hz**2 - center_frequency_hz**2 ) / ( center_frequency_hz**2 + frequency_hz )**2 * speedoflight_ms * -1
+        velocity = ( frequency_hz**2 - center_frequency_hz**2 ) / ( center_frequency_hz**2 + frequency_hz**2 ) * speedoflight_ms * -1
     else:
         raise ValueError('Convention "%s" is not allowed.' % (convention))
     velocities = velocity * velocity_dict['m/s'] / velocity_dict[velocity_units]

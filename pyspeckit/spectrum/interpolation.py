@@ -112,14 +112,15 @@ def interpnans(spec):
     their neighbors using linear interpolation.
     """
 
-    if hasattr(spec.data,'mask'):
-        if type(spec.data.mask) is np.ndarray:
-            OK = True - spec.data.mask
-    if np.any(np.isnan(spec.data) + np.isinf(spec.data)):
-        OK = True - (np.isnan(spec.data) + np.isinf(spec.data))
+    OK = np.isfinite(np.ma.getdata(spec.data)) & ~np.ma.getmaskarray(spec.data)
+
+    if not OK.any():
+        raise ValueError("The spectrum contains no valid (finite, unmasked) "
+                         "data; cannot interpolate over the bad values.")
 
     newdata = _interp(spec.xarr,spec.xarr[OK],spec.data[OK])
-    spec.data.mask[:] = False
+    if hasattr(spec.data, 'mask') and isinstance(spec.data.mask, np.ndarray):
+        spec.data.mask[:] = False
     spec.data = newdata
 
     if spec.error is not None:

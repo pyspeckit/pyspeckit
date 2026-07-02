@@ -702,15 +702,19 @@ def _spline(data, xarr=None, masktofit=None, order=3, sampling=10,
             downsampler=np.median, append_endpoints=True):
     from scipy.interpolate import UnivariateSpline
 
-    assert masktofit.shape == data.shape
-
     if masktofit is None:
         masktofit = np.isfinite(data)
         if not any(masktofit):
             log.warning("All data was infinite or NaN")
 
+    assert masktofit.shape == data.shape
+
     if xarr is None:
         xarr = np.arange(data.size, dtype=data.dtype)
+    elif hasattr(xarr, 'value'):
+        # the spline is fit & evaluated on plain values; Quantity arrays
+        # cannot be .tolist()ed and are not accepted by UnivariateSpline
+        xarr = xarr.value
 
     if downsampler is not None:
         ngood = np.count_nonzero(masktofit)
@@ -721,7 +725,7 @@ def _spline(data, xarr=None, masktofit=None, order=3, sampling=10,
         endpoint = ngood - (ngood % sampling)
         yfit = downsampler([data[masktofit][ii:endpoint:sampling]
                             for ii in range(sampling)], axis=0)
-        xfit = xarr[masktofit][sampling/2:endpoint:sampling]
+        xfit = xarr[masktofit][sampling//2:endpoint:sampling]
         if append_endpoints:
             xfit = np.array([xarr[0]-(xarr[1]-xarr[0])] +
                             xfit.tolist() +
@@ -744,6 +748,5 @@ def _spline(data, xarr=None, masktofit=None, order=3, sampling=10,
     baseline_fitted = spl(xarr)
     if np.any(np.isnan(baseline_fitted)):
         log.error("NaNs in baseline.")
-        import ipdb; ipdb.set_trace()
     return baseline_fitted
 
