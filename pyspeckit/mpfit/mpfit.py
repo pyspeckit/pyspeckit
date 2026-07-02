@@ -1158,8 +1158,7 @@ class mpfit:
             log.log(5, 'After optimizing wa4, qtf={0}'.format(qtf))
             # From this point on, only the square matrix, consisting of the
             # triangle of R, is needed.
-            fjac = fjac[0:n, 0:n]
-            fjac.shape = [n, n]
+            fjac = fjac[0:n, 0:n].reshape(n, n)
             temp = fjac.copy()
             for i in range(n):
                 temp[:,i] = fjac[:, ipvt[i]]
@@ -1432,7 +1431,7 @@ class mpfit:
 
                 catch_msg = 'computing the covariance matrix'
                 cv = self.calc_covar(fjac[0:n,0:n], ipvt[0:n])
-                cv.shape = [n, n]
+                cv = cv.reshape(n, n)
                 nn = len(xall)
 
                 # Fill in actual covariance matrix, accounting for fixed
@@ -1602,13 +1601,12 @@ class mpfit:
 
             # This definition is consistent with CURVEFIT
             # Sign error found (thanks Jesus Fernandez <fernande@irm.chu-caen.fr>)
-            fjac.shape = [m,nall]
+            fjac = fjac.reshape(m, nall)
             fjac = -fjac
 
             # Select only the free parameters
             if len(ifree) < nall:
-                fjac = fjac[:,ifree]
-                fjac.shape = [m, n]
+                fjac = fjac[:,ifree].reshape(m, n)
                 return fjac
 
         fjac = numpy.zeros([m, n], dtype=float)
@@ -2346,8 +2344,7 @@ class mpfit:
 
         if ipvt is None:
             ipvt = numpy.arange(n)
-        r = rr.copy()
-        r.shape = [n,n]
+        r = rr.copy().reshape(n, n)
 
         # For the inverse of r in the full upper triangle of r
         l = -1

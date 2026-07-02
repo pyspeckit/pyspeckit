@@ -957,8 +957,8 @@ class Cube(spectrum.Spectrum):
                 raise ValueError("usemomentcube must be set to True")
             elif guesses_are_moments or (usemomentcube and len(guesses)):
                 if not guesses_are_moments and ii == 0:
-                    log.warn("guesses will be ignored because usemomentcube "
-                             "was set to True.", PyspeckitWarning)
+                    log.warning("guesses will be ignored because usemomentcube "
+                                "was set to True.")
                 if verbose_level > 1 and ii == 0:
                     log.info("Using moment cube")
                 gg = self.momentcube[:,int(y),int(x)]
@@ -1248,7 +1248,7 @@ class Cube(spectrum.Spectrum):
         if multicore > 1:
             sequence = [(ii,x,y) for ii,(x,y) in tuple(enumerate(valid_pixels))]
             result = parallel_map(moment_a_pixel, sequence, numcores=multicore)
-            merged_result = [core_result.tolist()
+            merged_result = [core_result
                              for core_result in result
                              if core_result is not None]
             for TEMP in merged_result:

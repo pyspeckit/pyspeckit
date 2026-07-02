@@ -15,6 +15,7 @@ different wavelengths/frequencies
 .. moduleauthor:: Jordan Mirocha <mirochaj@gmail.com>
 """
 from __future__ import print_function
+import warnings
 import numpy as np
 from six import iteritems
 try:
@@ -249,7 +250,7 @@ class BaseSpectrum(object):
 
     @property
     def units(self):
-        log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        warnings.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
         return self._unit
 
     @unit.setter
@@ -258,7 +259,7 @@ class BaseSpectrum(object):
 
     @units.setter
     def units(self, value):
-        log.warning("'units' is deprecated; please use 'unit'", DeprecationWarning)
+        warnings.warn("'units' is deprecated; please use 'unit'", DeprecationWarning)
         self._unit = value
 
     @property

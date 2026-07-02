@@ -1,6 +1,22 @@
+"""
+Splatalogue SLAP query helper (legacy).
+
+The original implementation depended on ``atpy`` and Python 2's
+``urllib2``; both are unavailable on modern stacks.  Imports are now
+lazy/optional so that the rest of pyspeckit can be imported without
+these.  For new code, prefer ``astroquery.splatalogue``.
+"""
 from __future__ import print_function
-import atpy
-import urllib,urllib2
+try:
+    import atpy
+except ImportError:
+    atpy = None
+try:
+    import urllib2
+    import urllib
+except ImportError:  # Python 3 has no urllib2
+    import urllib.request as urllib2
+    import urllib.parse as urllib
 import tempfile
 
 """

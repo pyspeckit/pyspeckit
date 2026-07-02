@@ -26,4 +26,4 @@ def test_momenteach(cubefile='momenttestcube.fits'):
     spc.momenteach(multicore=1)
     serial = spc.momentcube.copy()
 
-    assert all(serial == parallel)
+    assert np.array_equal(serial, parallel)

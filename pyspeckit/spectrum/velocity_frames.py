@@ -1,6 +1,6 @@
 from __future__ import print_function
 import numpy as np
-import units
+from . import units
 
 def header_to_vlsr(header,**kwargs):
     """

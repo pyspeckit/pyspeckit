@@ -80,6 +80,8 @@ def line_tau(tex, total_column, partition_function, degeneracy, frequency,
                np.exp(-energy_upper / (constants.k_B * tex)))
 
     # equation 29 in Mangum 2015
+    # third version, where we keep A_ul instead of converting to mu^2
+    # but then we integrate over \phi
     #taudnu = (eightpicubed * frequency * dipole_moment**2 / threehc *
     #             (np.exp(frequency*h_cgs/(kb_cgs*tex))-1) * N_upper)
     assert einstein_A.unit.is_equivalent(u.Hz)
@@ -203,6 +205,7 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
                              parse_name_locally=True,
                              flags=0,
                              return_table=False,
+                             use_get_molecule=True,
                              **kwargs):
     """
     Get the molecular parameters for a molecule from the JPL or CDMS catalog
@@ -260,32 +263,43 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     else:
         raise ValueError(f"Did not find NAME or molecule in table columns: {speciestab.colnames}")
 
-    if molecule_tag is not None:
-        tagcol = 'tag' if 'tag' in speciestab.colnames else 'TAG'
-        match = speciestab[tagcol] == molecule_tag
-        molecule_name = speciestab[match][molcol][0]
-        if catalog == 'CDMS':
-            molsearchname = f'{molecule_tag:06d} {molecule_name}'
+    if use_get_molecule:
+        if molecule_tag is not None:
+            jpltbl = QueryTool.get_molecule(molecule=molecule_tag, catalog=catalog)
         else:
-            molsearchname = f'{molecule_tag} {molecule_name}'
-        parse_names_locally = False
-        if molecule_name is not None:
-            log.warn(f"molecule_tag overrides molecule_name.  New molecule_name={molecule_name}.  Searchname = {molsearchname}")
-        else:
-            log.info(f"molecule_name={molecule_name} for tag molecule_tag={molecule_tag}.  Searchname = {molsearchname}")
+            jpltbl = QueryTool.get_molecule(molecule=molecule_name,
+                                            catalog=catalog,
+                                            parse_name_locally=parse_name_locally,
+                                            flags=flags)
+        molecule_name = jpltbl['name']
+
     else:
-        molsearchname = molecule_name
-        match = speciestab[molcol] == molecule_name
-        if match.sum() == 0:
-            # retry using partial string matching
-            match = np.core.defchararray.find(speciestab[molcol], molecule_name) != -1
+        if molecule_tag is not None:
+            tagcol = 'tag' if 'tag' in speciestab.colnames else 'TAG'
+            match = speciestab[tagcol] == molecule_tag
+            molecule_name = speciestab[match][molcol][0]
+            if catalog == 'CDMS':
+                molsearchname = f'{molecule_tag:06d} {molecule_name}'
+            else:
+                molsearchname = f'{molecule_tag} {molecule_name}'
+            parse_names_locally = False
+            if molecule_name is not None:
+                log.warning(f"molecule_tag overrides molecule_name.  New molecule_name={molecule_name}.  Searchname = {molsearchname}")
+            else:
+                log.info(f"molecule_name={molecule_name} for tag molecule_tag={molecule_tag}.  Searchname = {molsearchname}")
+        else:
+            molsearchname = molecule_name
+            match = speciestab[molcol] == molecule_name
+            if match.sum() == 0:
+                # retry using partial string matching
+                match = np.char.find(speciestab[molcol], molecule_name) != -1
 
-    if match.sum() != 1:
-        raise ValueError(f"Too many or too few matches ({match.sum()}) to {molecule_name}")
-    jpltable = speciestab[match]
+        if match.sum() != 1:
+            raise ValueError(f"Too many or too few matches ({match.sum()}) to {molecule_name}")
+        jpltable = speciestab[match]
 
-    jpltbl = QueryTool.query_lines(fmin, fmax, molecule=molsearchname,
-                                   parse_name_locally=parse_name_locally)
+        jpltbl = QueryTool.query_lines(fmin, fmax, molecule=molsearchname,
+                                    parse_name_locally=parse_name_locally, **kwargs)
 
     def partfunc(tem):
         """

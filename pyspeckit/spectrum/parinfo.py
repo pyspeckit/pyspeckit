@@ -1,10 +1,24 @@
 from __future__ import print_function
+import math
 from six.moves import xrange
 try:
     from lmfit import Parameters, Parameter
     LMFIT_PARAMETERS_INSTALLED = True
 except ImportError:
     LMFIT_PARAMETERS_INSTALLED = False
+
+
+def _lmfit_min_is_set(value):
+    """An lmfit Parameter min/max is "unset" if it's None, False, or +/-inf
+    (newer lmfit defaults to -inf/inf rather than None for unbounded)."""
+    if value is None or value is False:
+        return False
+    try:
+        if math.isinf(value):
+            return False
+    except TypeError:
+        pass
+    return True
 
 class ParinfoList(list):
     """
@@ -173,8 +187,11 @@ class ParinfoList(list):
             for P in lmpars.values():
                 self[P.name].value = P.value
                 self[P.name].error = P.stderr
-                self[P.name].limits = (P.min,P.max)
-                self[P.name].limited = (P.min is not None,P.max is not None)
+                pmin_set = _lmfit_min_is_set(P.min)
+                pmax_set = _lmfit_min_is_set(P.max)
+                self[P.name].limits = (P.min if pmin_set else 0,
+                                       P.max if pmax_set else 0)
+                self[P.name].limited = (pmin_set, pmax_set)
                 self[P.name].expr = '' if P.expr is None else P.expr
         else:
             for par in lmpars.values():
@@ -392,8 +409,11 @@ class Parinfo(dict):
         """
         Read a Parinfo instance from and lmfit Parameter
         """
-        self['limits'] = lmpar.min,lmpar.max
-        self['limited'] = (lmpar.min not in (None,False),lmpar.max not in (None,False))
+        pmin_set = _lmfit_min_is_set(lmpar.min)
+        pmax_set = _lmfit_min_is_set(lmpar.max)
+        self['limits'] = (lmpar.min if pmin_set else 0,
+                          lmpar.max if pmax_set else 0)
+        self['limited'] = (pmin_set, pmax_set)
         self['value'] = lmpar.value
         self['error'] = lmpar.stderr
         self['parname'] = lmpar.name

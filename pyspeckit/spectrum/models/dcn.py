@@ -11,10 +11,8 @@ DCN v=0, tag: 28509
 from . import hyperfine
 import astropy.units as u
 
+# Frequency from CDMS without HFS
 freq_dict_cen = {
-'''
-Frequency from CDMS without HFS
-'''
                 'J1-0': 72414.6936e6,
                 'J2-1': 144828.0015e6,
                 'J3-2': 217238.5378e6,
