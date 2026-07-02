@@ -36,8 +36,8 @@ from .ammonia_constants import (line_names, freq_dict, aval_dict, ortho_dict,
 def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
             tau=None, fillingfraction=None, return_tau=False,
             return_tau_profile=False, background_tb=TCMB, verbose=False,
-            return_components=False, debug=False, line_names=line_names,
-            ignore_neg_models=False):
+            return_components=False, debug=False, line_names=None,
+            ignore_neg_models=False, constants=None):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
     gaussian parameters.  The returned model will be in Kelvin (brightness
@@ -100,6 +100,15 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
         More messages
     debug: bool
         For debugging.
+    line_names: list or None
+        Which lines to model.  Defaults to all lines defined in ``constants``.
+    constants: module or None
+        The module of spectroscopic constants (line frequencies, hyperfine
+        offsets and weights, rotational constants) to use.  Defaults to
+        `pyspeckit.spectrum.models.ammonia_constants` (NH3); pass
+        `pyspeckit.spectrum.models.ammonia15n_constants` to model the
+        15N-bearing isotopologue instead (see
+        `~pyspeckit.spectrum.models.ammonia15n`).
 
     Returns
     -------
@@ -112,8 +121,20 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
         (if ``return_tau`` is set)
     """
 
-    from .ammonia_constants import (ckms, ccms, h, kb,
-                                    Jortho, Jpara, Brot, Crot)
+    from .ammonia_constants import ckms, ccms, h, kb
+
+    # the spectroscopic constants (line frequencies, weights, degeneracies)
+    # default to those of NH3 but can be swapped for an isotopologue's
+    # (e.g., ammonia15n_constants)
+    if constants is None:
+        from . import ammonia_constants as constants
+    freq_dict = constants.freq_dict
+    aval_dict = constants.aval_dict
+    ortho_dict = constants.ortho_dict
+    Jortho, Jpara = constants.Jortho, constants.Jpara
+    Brot, Crot = constants.Brot, constants.Crot
+    if line_names is None:
+        line_names = constants.line_names
 
     # Convert X-units to frequency in GHz
     if xarr.unit.to_string() != 'GHz':
@@ -136,7 +157,8 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
     elif width == 0:
         return np.zeros(xarr.size)
 
-    from .ammonia_constants import line_name_indices, line_names as original_line_names
+    line_name_indices = constants.line_name_indices
+    original_line_names = constants.line_names
 
     # recreate line_names keeping only lines with a specified tex
     # using this loop instead of tex.keys() preserves the order & data type
@@ -232,7 +254,8 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
                                        background_tb=background_tb,
                                        fillingfraction=fillingfraction,
                                        return_components=return_components,
-                                       return_tau_profile=return_tau_profile
+                                       return_tau_profile=return_tau_profile,
+                                       constants=constants,
                                       )
 
     if not return_tau_profile and model_spectrum.min() < 0 and background_tb == TCMB and not ignore_neg_models:
@@ -312,7 +335,8 @@ def ammonia_thin(xarr, tkin=20, tex=None, ntot=14, width=1, xoff_v=0.0,
 
 def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
                       background_tb=TCMB, fillingfraction=None,
-                      return_components=False, return_tau_profile=False):
+                      return_components=False, return_tau_profile=False,
+                      constants=None):
     """
     Helper function: given a dictionary of ammonia optical depths,
     an excitation tmeperature etc, produce the spectrum.
@@ -326,6 +350,12 @@ def _ammonia_spectrum(xarr, tex, tau_dict, width, xoff_v, fortho, line_names,
     particular ammonia line being modeled.
     """
     from .ammonia_constants import (ckms, h, kb)
+
+    if constants is None:
+        from . import ammonia_constants as constants
+    voff_lines_dict = constants.voff_lines_dict
+    tau_wts_dict = constants.tau_wts_dict
+    freq_dict = constants.freq_dict
 
     # fillingfraction is an arbitrary scaling for the data
     # The model will be (normal model) * fillingfraction
