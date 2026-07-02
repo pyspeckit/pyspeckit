@@ -59,7 +59,7 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
 
     # Load the spectrum
     sp = pyspeckit.Cube(cubefilename,scale_keyword=scale_keyword)
-    if os.path.exists(errfilename):
+    if errfilename is not None and os.path.exists(errfilename):
         errmap = fits.getdata(errfilename)
     else:
         # very simple error calculation... biased and bad, needs improvement
@@ -80,15 +80,20 @@ def cube_fit(cubefilename, outfilename, errfilename=None, scale_keyword=None,
     # steal the header from the error map
     f = fits.open(cubefilename)
     # start replacing components of the fits object
-    f[0].data = np.concatenate([sp.parcube,sp.errcube,sp.integralmap])
+    # sp.integralmap exists only if fiteach was run with integral=True
+    if hasattr(sp, 'integralmap'):
+        f[0].data = np.concatenate([sp.parcube,sp.errcube,sp.integralmap])
+    else:
+        f[0].data = np.concatenate([sp.parcube,sp.errcube])
     f[0].header['PLANE1'] = 'amplitude'
     f[0].header['PLANE2'] = 'velocity'
     f[0].header['PLANE3'] = 'sigma'
     f[0].header['PLANE4'] = 'err_amplitude'
     f[0].header['PLANE5'] = 'err_velocity'
     f[0].header['PLANE6'] = 'err_sigma'
-    f[0].header['PLANE7'] = 'integral'
-    f[0].header['PLANE8'] = 'integral_error'
+    if hasattr(sp, 'integralmap'):
+        f[0].header['PLANE7'] = 'integral'
+        f[0].header['PLANE8'] = 'integral_error'
     f[0].header['CDELT3'] = 1
     f[0].header['CTYPE3'] = 'FITPAR'
     f[0].header['CRVAL3'] = 0

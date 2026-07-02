@@ -8,6 +8,7 @@ import astropy
 import multiprocessing
 
 from .. import cubes, Cube, CubeStack
+from ...parallel_map import parallel_map
 from ...spectrum.models import n2hp, ammonia_constants
 from ...spectrum.models.ammonia import cold_ammonia_model
 
@@ -348,6 +349,78 @@ def test_copy_ids(cubefile='test.fits'):
     naxis_old = spc1.header['NAXIS1']
     spc2.header['NAXIS1'] += 1
     assert spc1.header['NAXIS1'] == naxis_old
+
+def test_getitem_with_errorcube(cubefile='test.fits'):
+    """
+    Regression test: slicing a Cube whose errorcube is set used to crash
+    because ``if self.errorcube`` evaluated the truth value of an array.
+    """
+    if not os.path.exists(cubefile):
+        make_test_cube((100,9,9), cubefile)
+
+    spc = Cube(cubefile)
+    spc.errorcube = np.ones_like(spc.cube)
+
+    subcube = spc[:, 1:3, 2:4]
+
+    assert subcube.cube.shape == (spc.cube.shape[0], 2, 2)
+    assert subcube.errorcube is not None
+    assert subcube.errorcube.shape == subcube.cube.shape
+
+def test_fiteach_start_from_center_even_dims():
+    """
+    Regression test: start_from_point='center' used to produce float
+    coordinates on even-dimension maps, which failed the valid-pixel
+    membership check.  Also exercises the (x, y) ordering of the
+    distance-from-start computation on a non-square map.
+    """
+    cubefile = 'test_even.fits'
+    make_test_cube((100,4,6), cubefile)
+    spc = Cube(cubefile)
+    map_rms = np.zeros_like(spc.cube[0]) + spc.header['RMSLVL']
+    spc.fiteach(fittype='gaussian',
+                guesses=[0.5,0.2,0.8],
+                start_from_point='center',
+                errmap=map_rms,
+                signal_cut=0)
+    assert np.all(spc.has_fit)
+
+def test_parallel_map_serial_returns_list():
+    """
+    Regression test: parallel_map with numcores=1 used to return a lazy
+    ``map`` object on python3; callers assume a list.
+    """
+    result = parallel_map(lambda x: x**2, [1, 2, 3], numcores=1)
+    assert isinstance(result, list)
+    assert result == [1, 4, 9]
+
+def test_fiteach_blank_value_nan():
+    """
+    Regression test: blank_value used to be applied per-pixel inside the
+    fitting function with a stale mask, so errcube was never blanked and
+    (under multicore) parcube blanking was lost in the forked children.
+    """
+    cubefile = 'test_blank.fits'
+    make_test_cube((100,9,9), cubefile)
+    spc = Cube(cubefile)
+    map_rms = np.zeros_like(spc.cube[0]) + spc.header['RMSLVL']
+    maskmap = np.ones(spc.cube.shape[1:], dtype='bool')
+    maskmap[:, :2] = False  # exclude the first two columns from fitting
+    spc.fiteach(fittype='gaussian',
+                guesses=[0.5,0.2,0.8],
+                start_from_point=(4,4),
+                errmap=map_rms,
+                signal_cut=0,
+                blank_value=np.nan,
+                maskmap=maskmap)
+    # excluded pixels must be NaN (not zero) in both parcube and errcube
+    assert np.all(np.isnan(spc.parcube[:, :, :2]))
+    assert np.all(np.isnan(spc.errcube[:, :, :2]))
+    assert not np.any(spc.has_fit[:, :2])
+    # pixels inside the mask were fit and should be finite
+    assert np.all(np.isfinite(spc.parcube[:, :, 2:]))
+    assert np.all(np.isfinite(spc.errcube[:, :, 2:]))
+    assert np.all(spc.has_fit[:, 2:])
 
 def make_nh3_cube(shape, pars, errs11, errs22, seed=42):
     """

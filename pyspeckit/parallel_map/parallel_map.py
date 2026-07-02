@@ -121,7 +121,7 @@ def parallel_map(function, sequence, numcores=None):
   size = len(sequence)
 
   if not _multi or size == 1 or numcores == 1:
-    return map(function, sequence)
+    return list(map(function, sequence))
 
   if numcores is not None and numcores > _ncpus:
       warnings.warn("Number of requested cores is greated than the "

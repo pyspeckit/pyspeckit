@@ -365,7 +365,7 @@ class Cube(spectrum.Spectrum):
 
         return Cube(xarr=self.xarr.__getitem__(indx[0]),
                     cube=self.cube[indx],
-                    errorcube=self.errorcube[indx] if self.errorcube else None,
+                    errorcube=self.errorcube[indx] if self.errorcube is not None else None,
                     maskmap=self.maskmap[indx[1:]] if self.maskmap is not None else None,
                     header=self.header
                    )
@@ -796,11 +796,11 @@ class Cube(spectrum.Spectrum):
         log.info("Fitting up to {0} spectra".format(OK.sum()))
 
         if start_from_point == 'center':
-            start_from_point = (xx.max()/2., yy.max()/2.)
+            start_from_point = (xx.max()//2, yy.max()//2)
         if hasattr(position_order,'shape') and position_order.shape == self.cube.shape[1:]:
             sort_distance = np.argsort(position_order.flat)
         else:
-            d_from_start = ((xx-start_from_point[1])**2 + (yy-start_from_point[0])**2)**0.5
+            d_from_start = ((xx-start_from_point[0])**2 + (yy-start_from_point[1])**2)**0.5
             sort_distance = np.argsort(d_from_start.flat)
 
         if use_neighbor_as_guess or use_nearest_as_guess:
@@ -930,7 +930,7 @@ class Cube(spectrum.Spectrum):
             if use_nearest_as_guess and self.has_fit.sum() > 0:
                 if verbose_level > 1 and ii == 0 or verbose_level > 4:
                     log.info("Using nearest fit as guess")
-                rolled_distance = np.roll(np.roll(distance, x, 0), y, 1)
+                rolled_distance = np.roll(np.roll(distance, y, 0), x, 1)
                 # If there's no fit, set its distance to be unreasonably large
                 # so it will be ignored by argmin
                 nearest_ind = np.argmin(rolled_distance+1e10*(~self.has_fit))
@@ -1013,6 +1013,7 @@ class Cube(spectrum.Spectrum):
             else:
                 log.exception("Fit number {0} at {1},{2} had non-finite guesses {3}"
                               .format(ii, x, y, guesses))
+                success = False
                 self.has_fit[int(y),int(x)] = False
                 self.parcube[:,int(y),int(x)] = blank_value
                 self.errcube[:,int(y),int(x)] = blank_value
@@ -1052,17 +1053,12 @@ class Cube(spectrum.Spectrum):
                     raise TypeError("The fit never completed; something has gone wrong.")
 
 
-            # blank out the errors (and possibly the values) wherever they are zero = assumed bad
-            # this is done after the above exception to make sure we can inspect these values
-            if blank_value != 0:
-                self.parcube[self.parcube == 0] = blank_value
-                self.errcube[self.parcube == 0] = blank_value
-
             if integral:
                 return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs,
-                        self.integralmap[:,int(y),int(x)])
+                        success, self.integralmap[:,int(y),int(x)])
             else:
-                return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs)
+                return ((x,y), sp.specfit.modelpars, sp.specfit.modelerrs,
+                        success)
         #### BEGIN TEST BLOCK ####
         # This test block is to make sure you don't run a 30 hour fitting
         # session that's just going to crash at the end.
@@ -1136,9 +1132,9 @@ class Cube(spectrum.Spectrum):
             # force it to maintain a sensible shape.
             try:
                 if integral:
-                    ((x,y), m1, m2, intgl) = merged_result[0]
+                    ((x,y), m1, m2, success, intgl) = merged_result[0]
                 else:
-                    ((x,y), m1, m2) = merged_result[0]
+                    ((x,y), m1, m2, success) = merged_result[0]
             except ValueError:
                 if verbose > 1:
                     log.exception("ERROR: merged_result[0] is {0} which has the"
@@ -1153,9 +1149,9 @@ class Cube(spectrum.Spectrum):
                     continue
                 try:
                     if integral:
-                        ((x,y), modelpars, modelerrs, intgl) = TEMP
+                        ((x,y), modelpars, modelerrs, success, intgl) = TEMP
                     else:
-                        ((x,y), modelpars, modelerrs) = TEMP
+                        ((x,y), modelpars, modelerrs, success) = TEMP
                 except TypeError:
                     # implies that TEMP does not have the shape ((a,b),c,d)
                     # as above, shouldn't be possible, but it happens...
@@ -1176,7 +1172,7 @@ class Cube(spectrum.Spectrum):
                 else:
                     self.parcube[:,int(y),int(x)] = modelpars
                     self.errcube[:,int(y),int(x)] = modelerrs
-                    self.has_fit[int(y),int(x)] = max(modelpars) > 0
+                    self.has_fit[int(y),int(x)] = success
                 if integral:
                     self.integralmap[:,int(y),int(x)] = intgl
         else:
@@ -1195,6 +1191,16 @@ class Cube(spectrum.Spectrum):
         if verbose:
             log.info("Finished final fit %i.  "
                      "Elapsed time was %0.1f seconds" % (len(valid_pixels), time.time()-t0))
+
+        # blank out the errors (and possibly the values) wherever they are
+        # zero = assumed bad.  This is done after the fitting loop completes
+        # (rather than per-pixel) so that it also applies when multicore > 1
+        # and so that the errcube mask is computed before parcube is
+        # overwritten.
+        if blank_value != 0:
+            bad = self.parcube == 0
+            self.parcube[bad] = blank_value
+            self.errcube[bad] = blank_value
 
         pars_are_finite = np.all(np.isfinite(self.parcube), axis=0)
 

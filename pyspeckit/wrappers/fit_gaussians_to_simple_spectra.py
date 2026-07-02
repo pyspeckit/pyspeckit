@@ -32,9 +32,9 @@ def fit_gaussians_to_simple_spectra(filename, unit='km/s', doplot=True,
 
     # load a FITS-compliant spectrum
     spec = Spectrum(filename)
-    if spec.xarr.unit != units:
+    if spec.xarr.unit != unit:
         spec.xarr.frequency_to_velocity()
-        spec.xarr.convert_to_unit(units)
+        spec.xarr.convert_to_unit(unit)
 
     if croprange is not None and len(croprange) == 2:
         spec.crop(*croprange)
