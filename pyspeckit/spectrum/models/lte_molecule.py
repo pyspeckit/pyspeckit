@@ -292,7 +292,7 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
             match = speciestab[molcol] == molecule_name
             if match.sum() == 0:
                 # retry using partial string matching
-                match = np.core.defchararray.find(speciestab[molcol], molecule_name) != -1
+                match = np.char.find(speciestab[molcol], molecule_name) != -1
 
         if match.sum() != 1:
             raise ValueError(f"Too many or too few matches ({match.sum()}) to {molecule_name}")
