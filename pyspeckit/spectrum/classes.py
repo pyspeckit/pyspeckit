@@ -847,6 +847,8 @@ class BaseSpectrum(object):
     __sub__ = _operation_wrapper(np.subtract)
     __mul__ = _operation_wrapper(np.multiply)
     __div__ = _operation_wrapper(np.divide)
+    # python 3 uses __truediv__; without this, Spectrum / x raises TypeError
+    __truediv__ = _operation_wrapper(np.divide)
 
 class SingleSpectrum(BaseSpectrum):
     __class_name__ = 'SingleSpectrum'
