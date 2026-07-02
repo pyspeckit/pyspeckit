@@ -216,7 +216,7 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
         raise ValueError("Invalid column/density")
 
     if scipyOK:
-        slices = [temperature_gridnumber] + [slice(int(np.floor(gv)),int(np.floor(gv))+2) for gv in (gridval2,gridval1)]
+        slices = tuple([temperature_gridnumber] + [slice(int(np.floor(gv)),int(np.floor(gv))+2) for gv in (gridval2,gridval1)])
         tau = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval2%1],[gridval1%1]]),order=1) for tg in taugrid]
         tex = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval2%1],[gridval1%1]]),order=1) for tg in texgrid]
     else:
@@ -231,7 +231,7 @@ def formaldehyde_radex(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
         import pdb; pdb.set_trace()
 
     spec = np.sum([(formaldehyde_vtau(xarr,Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)
-                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
+                * (xarr.as_unit('GHz').value>minfreq[ii]) * (xarr.as_unit('GHz').value<maxfreq[ii])) for ii in xrange(len(tex))],
                 axis=0)
 
     return spec
@@ -291,8 +291,8 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
         raise ValueError("Invalid column/density")
 
     if scipyOK:
-        slices = [slice(int(np.floor(gv)),int(np.floor(gv)+2))
-                  for gv in (gridval4,gridval3,gridval2,gridval1)]
+        slices = tuple(slice(int(np.floor(gv)),int(np.floor(gv)+2))
+                       for gv in (gridval4,gridval3,gridval2,gridval1))
         tau = [scipy.ndimage.map_coordinates(tg[slices],
                                              np.array([[gridval4 % 1],
                                                        [gridval3 % 1],
@@ -331,8 +331,8 @@ def formaldehyde_radex_orthopara_temp(xarr, density=4, column=13,
                                       Tex=float(tex[ii]), tau=float(tau[ii]),
                                       Tbackground=tbg[ii], xoff_v=xoff_v,
                                       width=width, **kwargs)
-                    * (xarr.as_unit('GHz')>minfreq[ii])
-                    * (xarr.as_unit('GHz')<maxfreq[ii]))
+                    * (xarr.as_unit('GHz').value>minfreq[ii])
+                    * (xarr.as_unit('GHz').value<maxfreq[ii]))
                    for ii in xrange(len(tex))],
                   axis=0)
 
@@ -394,7 +394,7 @@ def formaldehyde_pyradex(xarr, density=4, column=13, temperature=20,
                       tbackground=tbackground,)
 
     spec = np.sum([(formaldehyde_vtau(xarr,Tex=float(tex[ii]),tau=float(tau[ii]),xoff_v=xoff_v,width=width, **kwargs)
-                * (xarr.as_unit('GHz')>minfreq[ii]) * (xarr.as_unit('GHz')<maxfreq[ii])) for ii in xrange(len(tex))],
+                * (xarr.as_unit('GHz').value>minfreq[ii]) * (xarr.as_unit('GHz').value<maxfreq[ii])) for ii in xrange(len(tex))],
                 axis=0)
 
     return spec
@@ -498,7 +498,7 @@ def formaldehyde_radex_tau(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
         raise ValueError("Invalid column/density")
 
     if scipyOK:
-        slices = [temperature_gridnumber] + [slice(np.floor(gv),np.floor(gv)+2) for gv in (gridval2,gridval1)]
+        slices = tuple([temperature_gridnumber] + [slice(int(np.floor(gv)),int(np.floor(gv))+2) for gv in (gridval2,gridval1)])
         tau = [scipy.ndimage.map_coordinates(tg[slices],np.array([[gridval2%1],[gridval1%1]]),order=1) for tg in taugrid]
     else:
         raise ImportError("Couldn't import scipy, therefore cannot interpolate")
@@ -507,8 +507,8 @@ def formaldehyde_radex_tau(xarr, density=4, column=13, xoff_v=0.0, width=1.0,
     spec_components = [(formaldehyde_vtau(xarr.as_unit('Hz', quiet=True),
         tau=float(tau[ii]), xoff_v=xoff_v, width=width,
         return_tau=True, return_hyperfine_components=True, **kwargs) *
-            (xarr.as_unit('GHz')>minfreq[ii]) *
-            (xarr.as_unit('GHz')<maxfreq[ii]))
+            (xarr.as_unit('GHz').value>minfreq[ii]) *
+            (xarr.as_unit('GHz').value<maxfreq[ii]))
                 for ii in  xrange(len(tau))]
 
     # get an array of [n_lines, n_hyperfine, len(xarr)]

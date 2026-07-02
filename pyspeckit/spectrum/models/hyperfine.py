@@ -102,16 +102,16 @@ class hyperfinemodel(object):
 
         self.background_fitter = model.SpectralModel(self.hyperfine_addbackground,5,
             parnames=['Tbackground','Tex','tau','center','width'],
-            parlimited=[(True,False), (True,False), (False,False), (True,False), (False,False), (True,False)],
-            parlimits=[(0,0), (1e-5,0), (0,0), (0,0), (0,0), (0,0)],
+            parlimited=[(True,False), (True,False), (True,False), (False,False), (True,False)],
+            parlimits=[(0,0), (1e-5,0), (0,0), (0,0), (0,0)],
             shortvarnames=('T_{BG}',"T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
             guess_types=[2.73, 'amplitude+2.73', 1.0, 'center', 'width'],
             fitunit='Hz')
 
         self.background_contsub_fitter = model.SpectralModel(self.hyperfine_background,5,
             parnames=['Tbackground','Tex','tau','center','width'],
-            parlimited=[(True,False), (True,False), (False,False), (True,False), (False,False), (True,False)],
-            parlimits=[(0,0), (1e-5,0), (0,0), (0,0), (0,0), (0,0)],
+            parlimited=[(True,False), (True,False), (True,False), (False,False), (True,False)],
+            parlimits=[(0,0), (1e-5,0), (0,0), (0,0), (0,0)],
             shortvarnames=('T_{BG}',"T_{ex}","\\tau","v","\\sigma"), # specify the parameter names (TeX is OK)
             guess_types=[0.0, 'amplitude+2.73', 1.0, 'center', 'width'],
             fitunit='Hz')

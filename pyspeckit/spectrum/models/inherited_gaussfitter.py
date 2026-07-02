@@ -57,7 +57,7 @@ def gaussian(xarr, amplitude, dx, width, return_components=False, normalized=Fal
     xarr = np.array(xarr) # make sure xarr is no longer a spectroscopic axis
     model = amplitude*np.exp(-(xarr-dx)**2/(2.0*width**2))
     if normalized:
-        return model / (np.sqrt(2*np.pi) * width**2)
+        return model / (np.sqrt(2*np.pi) * width)
     else:
         return model
 

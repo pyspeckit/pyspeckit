@@ -784,7 +784,15 @@ class ammonia_model(model.SpectralModel):
                 # multiplied by npars to get to the right number of
                 # gaussians, it will just replicate
                 if len(parlist) == self.npars:
-                    partype_dict[partype] *= npeaks
+                    if partype == 'tied':
+                        # tied strings reference parameter indices (e.g.,
+                        # 'p[0]-p[6]'), so each peak's copy must have its
+                        # indices shifted by ii*npars
+                        partype_dict[partype] = [_increment_string_number(t, ii*self.npars)
+                                                 for ii in range(npeaks)
+                                                 for t in parlist]
+                    else:
+                        partype_dict[partype] *= npeaks
                 elif len(parlist) > self.npars:
                     # DANGER:  THIS SHOULD NOT HAPPEN!
                     log.warning("WARNING!  Input parameters were longer than allowed for variable {0}".format(parlist))
@@ -807,8 +815,8 @@ class ammonia_model(model.SpectralModel):
                     partype_dict[partype] = list(parnames) * self.npeaks
                 elif parlist==tied:
                     partype_dict[partype] = [_increment_string_number(t, ii*self.npars)
-                                             for t in tied
-                                             for ii in range(self.npeaks)]
+                                             for ii in range(self.npeaks)
+                                             for t in tied]
 
         if len(parnames) != len(partype_dict['params']):
             raise ValueError("Wrong array lengths AFTER fixing them")
@@ -1212,17 +1220,14 @@ class ammonia_model_restricted_tex(ammonia_model):
 
 def _increment_string_number(st, count):
     """
-    Increment a number in a string
+    Increment each parameter index in a 'tied' string by ``count``
 
-    Expects input of the form: p[6]
+    Expects input of the form: p[6] or p[0]-p[6]; each bracketed number is
+    incremented independently (e.g., 'p[0]-p[6]' + 7 -> 'p[7]-p[13]').
     """
 
     import re
-    dig = re.compile('[0-9]+')
 
-    if dig.search(st):
-        n = int(dig.search(st).group())
-        result = dig.sub(str(n+count), st)
-        return result
-    else:
-        return st
+    return re.sub(r'\[([0-9]+)\]',
+                  lambda m: '[{0}]'.format(int(m.group(1)) + count),
+                  st)

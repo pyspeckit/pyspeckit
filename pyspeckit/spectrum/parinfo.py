@@ -112,15 +112,33 @@ class ParinfoList(list):
 
     def __setitem__(self, key, val):
         """
-        DO NOT allow items to be replaced/overwritten,
-        instead use their own setters
+        Replace an existing item (by index or parameter name) with a new
+        Parinfo, keeping the name lookup dictionary in sync.
         """
-        # if key already exists, use its setter
-        if key in self._dict or (type(key) is int and key < len(self)):
-            self[key] = val
-        elif type(key) is int:
-            # can't set a new list element this way
-            raise IndexError("Index %i out of range" % key)
+        if type(key) is int:
+            if not (-len(self) <= key < len(self)):
+                # can't set a new list element this way
+                raise IndexError("Index %i out of range" % key)
+            if not isinstance(val, Parinfo):
+                raise TypeError("Can only add Parinfo items to ParinfoLists")
+            olditem = super(ParinfoList, self).__getitem__(key)
+            super(ParinfoList, self).__setitem__(key, val)
+            oldname = olditem['parname']
+            if self._dict.get(oldname) is olditem:
+                self._dict.pop(oldname)
+            if self.__dict__.get(oldname) is olditem:
+                self.__dict__.pop(oldname)
+            self._dict[val['parname']] = val
+            self.__dict__[val['parname']] = val
+        elif key in self._dict:
+            # replace the corresponding list element (by identity)
+            olditem = self._dict[key]
+            for index in xrange(len(self)):
+                if super(ParinfoList, self).__getitem__(index) is olditem:
+                    self.__setitem__(index, val)
+                    return
+            raise KeyError("Parameter {0} found in the name dictionary but "
+                           "not in the list".format(key))
         elif isinstance(val,Parinfo):
             # otherwise, add the item
             self.__dict__[key] = val
