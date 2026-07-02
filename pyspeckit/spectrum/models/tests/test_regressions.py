@@ -109,3 +109,78 @@ def test_parinfolist_setitem():
     import pytest
     with pytest.raises(IndexError):
         pl[5] = Parinfo({'n': 5, 'value': 1.0, 'parname': 'NOPE'})
+
+
+def test_formaldehyde_mm_radex_synthetic_grid():
+    """
+    formaldehyde_mm_radex indexed its (temperature, column, density) RADEX
+    grids with a *list* of slices whose bounds were np.float64; modern numpy
+    raises for both (list-of-slices fancy indexing and float slice bounds).
+    Feed it a small synthetic grid that is linear in the grid indices, so
+    the trilinear interpolation is exact, and compare against the
+    directly-evaluated vtau model.
+    """
+    import astropy.io.fits as pyfits
+    from astropy import units as u
+    from .. import formaldehyde_mm
+    from ...units import SpectroscopicAxis
+
+    ntemp, ncol, ndens = 5, 6, 7
+    hdr = pyfits.Header()
+    hdr['CRPIX1'], hdr['CRVAL1'], hdr['CDELT1'] = 1, 2.0, 0.5    # log density: 2-5
+    hdr['CRPIX2'], hdr['CRVAL2'], hdr['CDELT2'] = 1, 11.0, 0.5   # log column: 11-13.5
+    hdr['CRPIX3'], hdr['CRVAL3'], hdr['CDELT3'] = 1, 10.0, 10.0  # temperature: 10-50
+
+    zz, yy, xx = np.indices((ntemp, ncol, ndens), dtype=float)
+    taug = 0.01 * (1 + zz + 2 * yy + 3 * xx)
+    texg = 5.0 + zz + yy + xx
+
+    xarr = SpectroscopicAxis(np.linspace(218.1, 218.35, 200) * u.GHz)
+
+    # temperature=25 -> gridval3=1.5; column=13.25 -> gridval2=4.5;
+    # density=4.25 -> gridval1=4.5 -- all deliberately off-grid so the
+    # slice bounds are non-integer floats before conversion.
+    spec = formaldehyde_mm.formaldehyde_mm_radex(xarr,
+                                                 temperature=25,
+                                                 column=13.25,
+                                                 density=4.25,
+                                                 xoff_v=0.0, width=1.0,
+                                                 texgrid=((218., 219., texg),),
+                                                 taugrid=((218., 219., taug),),
+                                                 hdr=hdr)
+
+    # linear grids => exact trilinear interpolation values
+    expected_tau = 0.01 * (1 + 1.5 + 2 * 4.5 + 3 * 4.5)  # 0.25
+    expected_tex = 5.0 + 1.5 + 4.5 + 4.5                 # 15.5
+    direct = formaldehyde_mm.formaldehyde_mm_vtau(xarr, Tex=expected_tex,
+                                                  tau=expected_tau,
+                                                  xoff_v=0.0, width=1.0)
+    assert np.all(np.isfinite(spec))
+    assert spec.max() > 0
+    np.testing.assert_allclose(np.asarray(spec), np.asarray(direct),
+                               rtol=1e-10, atol=1e-12)
+
+
+def test_h2co_mm_radex_quantity_comparison():
+    """
+    h2co_mm_radex compared xarr.as_unit('GHz') (a Quantity) against plain
+    floats when masking each line's frequency range, which raises
+    UnitConversionError with modern astropy; the comparison must use .value.
+    """
+    from astropy import units as u
+    from .. import h2co_mm
+    from ...units import SpectroscopicAxis
+
+    xarr = SpectroscopicAxis(np.linspace(218.1, 218.9, 300) * u.GHz)
+    gridbundle = (lambda c, d, t: 12.0,   # Tex303
+                  lambda c, d, t: 10.0,   # Tex322
+                  lambda c, d, t: 9.0,    # Tex321
+                  lambda c, d, t: 0.5,    # tau303
+                  lambda c, d, t: 0.2,    # tau322
+                  lambda c, d, t: 0.1)    # tau321
+
+    spec = h2co_mm.h2co_mm_radex(xarr, Temperature=25, logColumn=13,
+                                 logDensity=4, xoff_v=0.0, width=1.0,
+                                 gridbundle=gridbundle)
+    assert np.all(np.isfinite(spec))
+    assert spec.max() > 0
