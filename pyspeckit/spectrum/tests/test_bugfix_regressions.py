@@ -98,6 +98,27 @@ def test_as_unit_center_frequency_unit():
     np.testing.assert_allclose(xnew.value.mean(), 23.7, rtol=1e-3)
 
 
+@pytest.mark.parametrize('convention', ['radio', 'optical', 'relativistic'])
+def test_frequency_to_velocity_conventions(convention):
+    # units.py: the relativistic-convention formula had a wrong denominator,
+    # (f0**2 + f)**2 instead of (f0**2 + f**2); cross-check every convention
+    # against astropy's doppler equivalencies
+    from astropy import units as u
+    from pyspeckit.spectrum.units import (frequency_to_velocity,
+                                          velocity_conventions)
+    restfreq = 23.7 * u.GHz
+    freqs = np.linspace(23.5, 23.9, 11)
+    expected = (freqs * u.GHz).to(
+        u.km / u.s, equivalencies=velocity_conventions[convention](restfreq))
+    result = frequency_to_velocity(freqs, 'GHz',
+                                   center_frequency=restfreq.value,
+                                   center_frequency_units='GHz',
+                                   velocity_units='km/s',
+                                   convention=convention)
+    np.testing.assert_allclose(np.asarray(result), expected.value,
+                               rtol=1e-10, atol=1e-6)
+
+
 def test_headers_intersection_conflict():
     # headers.py: NameError (Header2 vs header2) in the if_conflict=2 branch
     h1 = fits.Header()
