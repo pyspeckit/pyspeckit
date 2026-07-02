@@ -266,12 +266,24 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     if use_get_molecule:
         if molecule_tag is not None:
             jpltbl = QueryTool.get_molecule(molecule=molecule_tag, catalog=catalog)
+            tagcol = 'tag' if 'tag' in speciestab.colnames else 'TAG'
+            match = speciestab[tagcol] == molecule_tag
         else:
             jpltbl = QueryTool.get_molecule(molecule=molecule_name,
                                             catalog=catalog,
                                             parse_name_locally=parse_name_locally,
                                             flags=flags)
+            match = speciestab[molcol] == molecule_name
+            if match.sum() == 0:
+                # retry using partial string matching
+                match = np.core.defchararray.find(speciestab[molcol], molecule_name) != -1
         molecule_name = jpltbl['name']
+
+        if match.sum() != 1:
+            raise ValueError(f"Too many or too few matches ({match.sum()}) to {molecule_name}")
+        # jpltable (the species table row) holds the partition function
+        # metadata used by partfunc below
+        jpltable = speciestab[match]
 
     else:
         if molecule_tag is not None:

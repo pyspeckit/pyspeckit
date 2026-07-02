@@ -1287,7 +1287,7 @@ class mpfit:
                 catch_msg = 'calling '+str(fcn)
                 [self.status, wa4] = self.call(fcn, self.params, functkw)
                 if self.status < 0:
-                    self.errmsg = 'WARNING: premature termination by "'+fcn+'"'
+                    self.errmsg = 'WARNING: premature termination by "'+str(fcn)+'"'
                     log.log(5, self.errmsg)
                     return
                 fnorm1 = self.enorm(wa4)
