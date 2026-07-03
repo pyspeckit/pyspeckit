@@ -295,7 +295,8 @@ def formaldehyde_mm_despotic(xarr,
     minfreq = [218.15, 218.40, 218.7]
     maxfreq = [218.25, 218.55, 218.8]
     spec = np.sum([
-        (formaldehyde_mm_vtau(xarr, Tex=float(tex[ii]), tau=float(tau[ii]),
+        (formaldehyde_mm_vtau(xarr, Tex=float(np.squeeze(tex[ii])),
+                              tau=float(np.squeeze(tau[ii])),
                               xoff_v=xoff_v, width=width, **kwargs)
          * (xarr.as_unit('GHz').value>minfreq[ii]) *
          (xarr.as_unit('GHz').value<maxfreq[ii])) for ii in xrange(len(tex))],
@@ -389,10 +390,8 @@ def formaldehyde_mm_radex(xarr,
         # this is mostly a trick for speed: slice so you only have two thin layers to interpolate
         # between
         #slices = [density_gridnumber] + [slice(np.floor(gv),np.floor(gv)+2) for gv in (gridval2,gridval1)]
-        slices = [slice(np.floor(gridval3),np.floor(gridval3)+2),
-                  slice(np.floor(gridval2),np.floor(gridval2)+2),
-                  slice(np.floor(gridval1),np.floor(gridval1)+2)
-                  ]
+        slices = tuple(slice(int(np.floor(gv)), int(np.floor(gv))+2)
+                       for gv in (gridval3, gridval2, gridval1))
         tau = [scipy.ndimage.map_coordinates(tg[slices],
             np.array([[gridval3%1],[gridval2%1],[gridval1%1]]),order=1) for tg in taugrid]
         tex = [scipy.ndimage.map_coordinates(tg[slices],
@@ -410,7 +409,8 @@ def formaldehyde_mm_radex(xarr,
         import pdb; pdb.set_trace()
 
     spec = np.sum([
-        (formaldehyde_mm_vtau(xarr, Tex=float(tex[ii]), tau=float(tau[ii]),
+        (formaldehyde_mm_vtau(xarr, Tex=float(np.squeeze(tex[ii])),
+            tau=float(np.squeeze(tau[ii])),
             xoff_v=xoff_v, width=width, **kwargs)
         * (xarr.as_unit('GHz').value>minfreq[ii]) *
          (xarr.as_unit('GHz').value<maxfreq[ii])) for ii in xrange(len(tex))],
