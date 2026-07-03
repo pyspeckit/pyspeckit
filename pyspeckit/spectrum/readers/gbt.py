@@ -8,11 +8,10 @@ supported, frequency switching is not.
 
 """
 from __future__ import print_function
+from functools import reduce
 from six import iteritems
-try:
-    import astropy.io.fits as pyfits
-except ImportError:
-    import pyfits
+import astropy.io.fits as pyfits
+from astropy import units as u
 import pyspeckit
 import numpy as np
 try:
@@ -50,7 +49,12 @@ def list_targets(sdfitsfile, doprint=True):
     strings = [ "\n%18s  %10s %10s %26s%8s %9s %9s %9s" % ("Object Name","RA","DEC","%12s%14s"%("RA","DEC"),"N(ptgs)","Exp.Time","requested","n(ints)") ]
     for objectname in uniq(bintable.data['OBJECT']):
         whobject = bintable.data['OBJECT'] == objectname
-        RA,DEC = bintable.data['TRGTLONG'][whobject],bintable.data['TRGTLAT'][whobject]
+        # some SDFITS dialects (e.g., the examples in the GBTIDL Users'
+        # Guide) lack TRGTLONG/TRGTLAT; fall back to the WCS columns
+        if 'TRGTLONG' in bintable.data.names and 'TRGTLAT' in bintable.data.names:
+            RA,DEC = bintable.data['TRGTLONG'][whobject],bintable.data['TRGTLAT'][whobject]
+        else:
+            RA,DEC = bintable.data['CRVAL2'][whobject],bintable.data['CRVAL3'][whobject]
         RADEC = zip(RA,DEC)
         midRA,midDEC = np.median(RA),np.median(DEC)
         npointings = len(set(RADEC))
@@ -61,7 +65,10 @@ def list_targets(sdfitsfile, doprint=True):
         firstsampler = bintable.data['SAMPLER'][whobject][0]
         whfirstsampler = bintable.data['SAMPLER'] == firstsampler
         exptime = bintable.data['EXPOSURE'][whobject*whfirstsampler].sum()
-        duration = bintable.data['DURATION'][whobject*whfirstsampler].sum()
+        if 'DURATION' in bintable.data.names:
+            duration = bintable.data['DURATION'][whobject*whfirstsampler].sum()
+        else:
+            duration = exptime
         n_ints = count_integrations(bintable, objectname)
         strings.append( "%18s  %10f %10f %26s%8i %9g %9g %9i" % (objectname,midRA,midDEC,sexagesimal, npointings, exptime, duration, n_ints) )
 
@@ -94,13 +101,14 @@ def read_gbt_scan(sdfitsfile, obsnumber=0):
     sp = pyspeckit.Spectrum(HDU,filetype='pyfits')
     #sp.xarr.frame = 'topo' # sp.header.get('VELDEF') #'topo'
 
-    # HACK - temporary!
-    # Convert xarr to LSR units
-    #sp.xarr.convert_to_unit('m/s')
+    # Shift the topocentric frequency axis into the reference frame of the
+    # observation: VFRAME is the frame velocity (m/s), converted to a
+    # frequency offset via the radio convention at the observed frequency
     obsfreq = header['OBSFREQ']
-    centerfreq = pyspeckit.spectrum.units.SpectroscopicAxis(float(obsfreq),'Hz',refX=obsfreq,refX_unit='Hz')
-    delta_freq = (centerfreq.as_unit('m/s') + header['VFRAME']).as_unit(centerfreq.units) - centerfreq
-    sp.xarr -= delta_freq
+    centerfreq = u.Quantity(obsfreq, u.Hz)
+    delta_freq = u.Quantity(header['VFRAME'], u.m/u.s).to(
+        u.Hz, u.doppler_radio(centerfreq)) - centerfreq
+    sp.xarr = sp.xarr - delta_freq
 
     return sp
 
@@ -129,7 +137,9 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
         for nod in nods:
             whnod = bintable.data['PROCSEQN'] == nod
             for onoff in ('ON','OFF'):
-                calOK = (calON - (onoff=='OFF'))
+                # select rows with the cal diode on for 'ON', off for 'OFF'
+                # (python-2 numpy boolean subtraction was elementwise XOR)
+                calOK = (calON ^ (onoff=='OFF'))
                 whOK = (whobject*whsampler*calOK*whnod)
                 if whOK.sum() == 0:
                     continue
@@ -140,7 +150,12 @@ def read_gbt_target(sdfitsfile, objectname, verbose=False):
                     maxdiff = np.diff(crvals).max()
                 else:
                     maxdiff = 0
-                freqres = np.max(bintable.data[whOK]['FREQRES'])
+                if 'FREQRES' in bintable.data.names:
+                    freqres = np.max(bintable.data[whOK]['FREQRES'])
+                else:
+                    # some SDFITS dialects lack FREQRES; the channel width
+                    # is a reasonable stand-in
+                    freqres = np.max(np.abs(bintable.data[whOK]['CDELT1']))
                 if maxdiff < freqres:
                     splist = [read_gbt_scan(bintable,ii) for ii in np.where(whOK)[0]]
                     blocks[sampler+onoff+str(nod)] = pyspeckit.ObsBlock(splist,force=True)
@@ -281,19 +296,19 @@ def dcmeantsys(calon,caloff,tcal,debug=False):
 
     # Use the inner 80% of data to calculate mean Tsys
     nchans = calon.data.shape[0]
-    pct10 = nchans/10
+    pct10 = nchans//10
     pct90 = nchans - pct10
 
-    meanoff = np.mean(caloff.slice(pct10,pct90,units='pixels').data)
-    meandiff = np.mean(calon.slice(pct10,pct90,units='pixels').data - 
-                        caloff.slice(pct10,pct90,units='pixels').data)
+    meanoff = np.mean(caloff.slice(pct10,pct90,unit='pixel').data)
+    meandiff = np.mean(calon.slice(pct10,pct90,unit='pixel').data -
+                        caloff.slice(pct10,pct90,unit='pixel').data)
 
     meanTsys = ( meanoff / meandiff * tcal + tcal/2.0 )
     if debug:
         print(caloff)
-        print(caloff.slice(pct10,pct90,units='pixels'))
+        print(caloff.slice(pct10,pct90,unit='pixel'))
         print(calon)
-        print(calon.slice(pct10,pct90,units='pixels'))
+        print(calon.slice(pct10,pct90,unit='pixel'))
         print("pct10: %i  pct90: %i mean1: %f mean2: %f tcal: %f tsys: %f" % (pct10,pct90,meanoff,meandiff,tcal,meanTsys))
 
     return meanTsys
@@ -341,14 +356,15 @@ def find_matched_freqs(reduced_blocks, debug=False):
     # IF order 
     sampler_numbers = [int(name[1:]) for name in reduced_blocks.keys()]
     sorted_pairs = sorted(zip(sampler_numbers,reduced_blocks.keys()))
-    sorted_names = zip(*sorted_pairs)[1]
+    sorted_names = list(zip(*sorted_pairs))[1]
 
     # how many IFs?
     frequencies = dict((name,reduced_blocks[name].header.get('OBSFREQ')) for name in sorted_names)
     if debug: print(frequencies)
     round_frequencies = dict((name,
         round_to_resolution(reduced_blocks[name].header.get('OBSFREQ'),
-                            reduced_blocks[name].header.get('FREQRES')))
+                            reduced_blocks[name].header.get('FREQRES') or
+                            abs(reduced_blocks[name].header.get('CDELT1'))))
                  for name in sorted_names)
     if debug: print(round_frequencies)
     unique_frequencies = uniq(round_frequencies.values()) # uniq is an order-preserving function

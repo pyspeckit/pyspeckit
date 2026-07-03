@@ -19,7 +19,12 @@ def correlate(spectrum1, spectrum2, range=None, unit=None, errorweight=False):
         spectrum1 = spectrum1.slice(*range, unit=unit)
         spectrum2 = spectrum2.slice(*range, unit=unit)
 
-    if not (spectrum1.xarr.shape == spectrum2.xarr.shape) or not all(spectrum1.xarr == spectrum2.xarr):
+    # `all(xarr1 == xarr2)` fails when the shapes differ, because the
+    # comparison then evaluates to a scalar False, which is not iterable
+    if (spectrum1.xarr.shape != spectrum2.xarr.shape or
+            spectrum1.xarr.unit != spectrum2.xarr.unit or
+            not np.array_equal(np.asarray(spectrum1.xarr),
+                               np.asarray(spectrum2.xarr))):
         spectrum2 = interpolation.interp(spectrum2, spectrum1)
 
     data1 = spectrum1.data

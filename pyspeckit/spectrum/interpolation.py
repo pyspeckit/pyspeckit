@@ -89,13 +89,16 @@ def interp_on_axes(spec1, xarr, left=0, right=0):
     newdata = _interp(xarr, xarr1, spec1.data, left=left, right=right)
 
     if spec1.error is not None:
-        if xarr1.cdelt() and xarr.cdelt():
-            binsizeratio = xarr1.cdelt() / xarr.cdelt()
+        # cdelt() raises ValueError for non-linear axes, and the truthiness
+        # of the Quantity it returns is ambiguous on modern astropy
+        try:
+            binsizeratio = float((xarr1.cdelt() / xarr.cdelt()).decompose().value)
+        except ValueError:
+            newerror = _interp(xarr,xarr1,spec1.error)
+        else:
             # reduce errors by sqrt(binsize) if going from small to large bins
             # else increase errors by similar factor (WARNING!  THEY WILL BE CORRELATED!)
             newerror = _interp(xarr,xarr1,spec1.error) * binsizeratio**0.5
-        else:
-            newerror = _interp(xarr,xarr1,spec1.error)
     else:
         newerror = None
 
