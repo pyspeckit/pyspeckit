@@ -394,6 +394,46 @@ def test_parallel_map_serial_returns_list():
     assert isinstance(result, list)
     assert result == [1, 4, 9]
 
+def test_spectral_smooth(cubefile='test_smooth.fits'):
+    """
+    Regression test for #230: ``cubes.spectral_smooth`` referenced an
+    undefined ``smooth`` name (it collided with the optional AG_fft_tools
+    import), so ``Cube.smooth`` raised NameError/AttributeError.  Also
+    checks the python-3 serial (``map``) path and kwarg forwarding to
+    ``spectrum.smooth.smooth``.
+    """
+    make_test_cube((100,9,9), cubefile)
+
+    # serial path
+    spc = Cube(cubefile)
+    cdelt3 = spc.header['CDELT3']
+    spc.smooth(2, parallel=False)
+    assert spc.cube.shape == (50, 9, 9)
+    assert spc.xarr.size == 50
+    assert np.all(np.isfinite(spc.cube))
+    # header must track the downsampling
+    assert spc.header['CDELT3'] == cdelt3 * 2
+
+    # parallel path must give the same answer as the serial path
+    spc_par = Cube(cubefile)
+    spc_par.smooth(2, parallel=True, numcores=2)
+    assert spc_par.cube.shape == (50, 9, 9)
+    np.testing.assert_allclose(spc_par.cube, spc.cube)
+
+    # smoothtype kwarg is forwarded to spectrum.smooth.smooth, and
+    # parallel/numcores kwargs must not crash the 1D self.data smoothing
+    spc_box = Cube(cubefile)
+    spc_box.smooth(3, smoothtype='boxcar', parallel=False, numcores=1)
+    assert spc_box.cube.shape == (34, 9, 9)
+    assert spc_box.xarr.size == 34
+    assert np.all(np.isfinite(spc_box.cube))
+
+    # downsample=False keeps the spectral axis length
+    cube_ns = cubes.spectral_smooth(fits.getdata(cubefile), 2,
+                                    downsample=False, parallel=False)
+    assert cube_ns.shape == (100, 9, 9)
+    assert np.all(np.isfinite(cube_ns))
+
 def test_fiteach_blank_value_nan():
     """
     Regression test: blank_value used to be applied per-pixel inside the
