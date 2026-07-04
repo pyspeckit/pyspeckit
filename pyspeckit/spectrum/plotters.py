@@ -14,34 +14,6 @@ import copy
 import inspect
 from astropy import log
 
-# this mess is to handle a nested hell of different versions of matplotlib
-# (>=1.3 has BoundMethodProxy somewhere, >=3 gets rid of it) and python
-# (python >=3.4 has WeakMethod, earlier versions don't)
-try:
-    from matplotlib.cbook import BoundMethodProxy
-except ImportError:
-    try:
-        from matplotlib.cbook import _BoundMethodProxy as BoundMethodProxy
-    except ImportError:
-        try:
-            from matplotlib.cbook import WeakMethod
-        except ImportError:
-            try:
-                from weakref import WeakMethod
-            except ImportError:
-                try:
-                    from weakrefmethod import WeakMethod
-                except ImportError:
-                    raise ImportError("Could not import WeakMethod from "
-                                      "anywhere.  Try installing the "
-                                      "weakrefmethod package or use a more "
-                                      "recent version of python or matplotlib")
-
-        class BoundMethodProxy(WeakMethod):
-            @property
-            def func(self):
-                return self()
-
 from . import widgets
 from ..specwarnings import warn
 
@@ -149,37 +121,50 @@ class Plotter(object):
 
     def _disconnect_matplotlib_keys(self):
         """
-        Disconnected the matplotlib key-press callbacks
+        Disconnect matplotlib's built-in key-press handler (the one that
+        implements the default 'k', 'l', 'g', 's', ... shortcuts) so it does
+        not conflict with pyspeckit's interactive keys while an interactive
+        session is active.  The handler is restored by
+        `_reconnect_matplotlib_keys`.
         """
-        if self.figure is not None:
-            cbs = self.figure.canvas.callbacks.callbacks
-            # this may cause problems since the dict of key press events is a
-            # dict, i.e. not ordered, and we want to pop the first one...
-            mpl_keypress_handler = self.figure.canvas.manager.key_press_handler_id
-            try:
-                self._mpl_key_callbacks = {mpl_keypress_handler:
-                                           cbs['key_press_event'].pop(mpl_keypress_handler)}
-            except KeyError:
-                bmp = BoundMethodProxy(self.figure.canvas.manager.key_press)
-                self._mpl_key_callbacks = {mpl_keypress_handler:
-                                           bmp}
+        if self.figure is None:
+            return
+        canvas = self.figure.canvas
+        manager = getattr(canvas, 'manager', None)
+        handler_id = getattr(manager, 'key_press_handler_id', None)
+        if handler_id is not None:
+            # mpl_disconnect is a no-op if the callback id is stale, so this
+            # is safe even if something else already disconnected it
+            canvas.mpl_disconnect(handler_id)
+            manager.key_press_handler_id = None
+            self._mpl_keys_disconnected = True
 
     def _reconnect_matplotlib_keys(self):
         """
-        Reconnect the previously disconnected matplotlib keys
+        Reconnect the default matplotlib key-press handler that was
+        disconnected by `_disconnect_matplotlib_keys`.
         """
-        if self.figure is not None and hasattr(self,'_mpl_key_callbacks'):
-            self.figure.canvas.callbacks.callbacks['key_press_event'].update(self._mpl_key_callbacks)
-        elif self.figure is not None:
-            mpl_keypress_handler = self.figure.canvas.manager.key_press_handler_id
-            try:
-                bmp = BoundMethodProxy(self.figure.canvas.manager.key_press)
-                self.figure.canvas.callbacks.callbacks['key_press_event'].update({mpl_keypress_handler:
-                                                                                  bmp})
-            except AttributeError as ex:
-                print(f"Error {ex} was raised when trying to connect the key_press handler.  "
-                      "Please file an issue on github.  You may try a different matplotlib backend "
-                      "as a temporary workaround")
+        if self.figure is None or not getattr(self, '_mpl_keys_disconnected',
+                                              False):
+            return
+        canvas = self.figure.canvas
+        manager = getattr(canvas, 'manager', None)
+        if manager is None:
+            return
+        if manager.key_press_handler_id is None:
+            if hasattr(manager, 'key_press'):
+                # matplotlib < 3.8: the default handler is the manager's
+                # (bound) key_press method
+                callback = manager.key_press
+            else:
+                # matplotlib >= 3.8 removed FigureManagerBase.key_press; the
+                # default handler is the key_press_handler function, which
+                # pulls the canvas from the event
+                from matplotlib.backend_bases import key_press_handler
+                callback = key_press_handler
+            manager.key_press_handler_id = canvas.mpl_connect(
+                'key_press_event', callback)
+        self._mpl_keys_disconnected = False
 
     def __call__(self, figure=None, axis=None, clear=True, autorefresh=None,
                  plotscale=1.0, override_plotkwargs=False, **kwargs):
