@@ -234,6 +234,73 @@ class TestUnits(object):
         np.testing.assert_almost_equal(xarr2.cdelt().value, dx.value)
         assert len(xarr2) == len(xarr2.dxarr)
 
+    def test_refX_quantity_updates_refX_unit(self):
+        # regression test for issue 63: setting refX to a Quantity after
+        # initialization must synchronize refX_unit
+        xarr = SpectroscopicAxis(np.linspace(-100, 100, 100), unit='Hz')
+        xarr.refX = 4 * u.GHz
+        assert xarr.refX == 4 * u.GHz
+        assert u.Unit(xarr.refX_unit) == u.GHz
+
+        # and the new refX must actually be used for velocity conversion
+        xarr = SpectroscopicAxis(np.linspace(4e9 - 1e6, 4e9 + 1e6, 101),
+                                 unit='Hz')
+        xarr.refX = 4 * u.GHz
+        varr = xarr.as_unit('km/s', velocity_convention='radio')
+        np.testing.assert_almost_equal(varr[50].value, 0.0)
+
+    def test_refX_plain_float_keeps_refX_unit(self):
+        # issue 63: assigning a bare number to refX should be interpreted
+        # in the pre-existing refX_unit
+        xarr = SpectroscopicAxis(np.linspace(-100, 100, 100), unit='km/s',
+                                 refX=4.8, refX_unit='GHz',
+                                 velocity_convention='radio')
+        xarr.refX = 4.9
+        assert xarr.refX == 4.9 * u.GHz
+        assert u.Unit(xarr.refX_unit) == u.GHz
+
+        # a declared refX_unit must survive even if refX was not set at
+        # construction time (it used to be silently discarded)
+        xarr = SpectroscopicAxis(np.linspace(-100, 100, 100), unit='km/s',
+                                 refX_unit='GHz')
+        xarr.refX = 4.829
+        assert xarr.refX == 4.829 * u.GHz
+
+        # with no explicit refX_unit, a frequency axis defaults refX_unit
+        # to the axis unit, so a bare-number refX is interpretable
+        xarr = SpectroscopicAxis(np.linspace(4e9 - 1e6, 4e9 + 1e6, 101),
+                                 unit='Hz')
+        xarr.refX = 4e9
+        assert xarr.refX == 4e9 * u.Hz
+        varr = xarr.as_unit('km/s', velocity_convention='radio')
+        np.testing.assert_almost_equal(varr[50].value, 0.0)
+
+    def test_refX_construction_paths_unchanged(self):
+        # Quantity refX at construction
+        xarr = SpectroscopicAxis(np.linspace(-100, 100, 100), unit='km/s',
+                                 refX=4.829 * u.GHz,
+                                 velocity_convention='radio')
+        assert xarr.refX == 4.829 * u.GHz
+        assert u.Unit(xarr.refX_unit) == u.GHz
+
+        # float refX + string refX_unit at construction
+        xarr = SpectroscopicAxis(np.linspace(-100, 100, 100), unit='km/s',
+                                 refX=4.829, refX_unit='GHz',
+                                 velocity_convention='radio')
+        assert xarr.refX == 4.829 * u.GHz
+        assert u.Unit(xarr.refX_unit) == u.GHz
+
+        # refX/refX_unit survive slicing and copying
+        for xarr2 in (xarr[10:20], xarr.copy()):
+            assert xarr2.refX == 4.829 * u.GHz
+            assert u.Unit(xarr2.refX_unit) == u.GHz
+
+        # the documented set-refX-then-refX_unit pattern still works
+        xarr = SpectroscopicAxis(np.linspace(-100, 100, 100), unit='Hz')
+        xarr.refX = 5.0
+        xarr.refX_unit = 'GHz'
+        assert xarr.refX == 5.0 * u.GHz
+
 
 
 
