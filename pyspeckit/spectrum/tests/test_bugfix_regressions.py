@@ -119,6 +119,49 @@ def test_frequency_to_velocity_conventions(convention):
                                rtol=1e-10, atol=1e-6)
 
 
+def test_polynomial_continuum_fit():
+    # Regression test for issue #334: polynomial_continuum.polymodel called
+    # numpy.polyval directly on a SpectroscopicAxis, which raises
+    # "no implementation found for 'numpy.polyval'" because polyval is not
+    # supported through __array_function__ for Quantity subclasses.
+    # This is the documented workflow from
+    # docs/example_continuum_fromscratch.py ("Fitting a continuum model as a
+    # model").
+    xaxis = np.linspace(-50, 150, 100)
+    sigma = 10.
+    center = 50.
+    baseline = np.poly1d([0.1, 0.25])(xaxis)
+    synth_data = np.exp(-(xaxis - center)**2 / (sigma**2 * 2.)) + baseline
+    stddev = 0.1
+    noise = np.random.RandomState(42).randn(xaxis.size) * stddev
+    error = stddev * np.ones_like(synth_data)
+    data = noise + synth_data
+
+    sp = pyspeckit.Spectrum(data=data, error=error, xarr=xaxis,
+                            xarrkwargs={'unit': 'km/s'},
+                            unit='erg/s/cm^2/AA')
+    sp.specfit.Registry.add_fitter(
+        'polycontinuum',
+        pyspeckit.models.polynomial_continuum.poly_fitter(),
+        2)
+    sp.specfit(fittype='polycontinuum', guesses=(0, 0), exclude=[30, 70])
+
+    # recovered coefficients should be close to the input [0.1, 0.25]
+    np.testing.assert_allclose(sp.specfit.parinfo.values, [0.1, 0.25],
+                               atol=0.05)
+
+    # continuum subtraction (the second half of the documented workflow).
+    # The copy inherits the exclude=[30, 70] region selection; reset=True
+    # restores the full range before fitting the line that lives inside the
+    # previously-excluded window (the docs example achieves the same via the
+    # plotter's displayed limits).
+    sp_contsub = sp.copy()
+    sp_contsub.data -= sp.specfit.get_full_model()
+    sp_contsub.specfit(fittype='gaussian', guesses=[1, 50, 10], reset=True)
+    np.testing.assert_allclose(sp_contsub.specfit.parinfo.values,
+                               [1., 50., 10.], rtol=0.2)
+
+
 def test_headers_intersection_conflict():
     # headers.py: NameError (Header2 vs header2) in the if_conflict=2 branch
     h1 = fits.Header()
