@@ -1476,11 +1476,30 @@ class Cube(spectrum.Spectrum):
                 parname = "e"+par['parname'].strip('0123456789')
                 fitcubefile.header[kw] = parname
 
-            # overwrite the WCS
-            fitcubefile.header['CDELT3'] = 1
-            fitcubefile.header['CTYPE3'] = 'FITPAR'
-            fitcubefile.header['CRVAL3'] = 0
-            fitcubefile.header['CRPIX3'] = 1
+            # overwrite the WCS: the third axis is now the fit parameter
+            # plane index, so the spectral description of that axis
+            # inherited from the original cube's header no longer applies.
+            # (value, comment) tuples are used so that stale comments
+            # (e.g., "[m/s] Coordinate increment...") are also replaced.
+            fitcubefile.header['CDELT3'] = (1, 'Fit parameter plane index increment')
+            fitcubefile.header['CTYPE3'] = ('FITPAR', 'Fit parameter plane axis; see PLANE# keywords')
+            fitcubefile.header['CRVAL3'] = (0, 'Fit parameter plane index reference value')
+            fitcubefile.header['CRPIX3'] = (1, 'Fit parameter plane index reference pixel')
+            # remove leftover spectral-axis & spectral-frame keywords that
+            # would otherwise incorrectly describe the parameter axis
+            # (regression: issue #277)
+            for kw in ('CUNIT3', 'CROTA3', 'SPECSYS', 'SSYSOBS', 'SSYSSRC',
+                       'VELREF', 'VELOSYS', 'ZSOURCE', 'RESTFRQ', 'RESTFREQ',
+                       'RESTWAV', 'CD1_3', 'CD2_3', 'CD3_1', 'CD3_2',
+                       'PC1_3', 'PC2_3', 'PC3_1', 'PC3_2',
+                       'PC01_03', 'PC02_03', 'PC03_01', 'PC03_02'):
+                if kw in fitcubefile.header:
+                    del fitcubefile.header[kw]
+            # if a CD/PC matrix is used, its axis-3 diagonal element must be
+            # reset to unity to match CDELT3 = 1
+            for kw in ('CD3_3', 'PC3_3', 'PC03_03'):
+                if kw in fitcubefile.header:
+                    fitcubefile.header[kw] = 1
         except AttributeError:
             log.exception("Make sure you run the cube fitter first.")
             return

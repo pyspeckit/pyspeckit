@@ -176,6 +176,67 @@ def test_fiteach(save_cube=None, save_pars=None, show_plot=False):
     assert map_seed == 0
     assert err_frac == 0.34
 
+def test_write_fit_header(tmp_path):
+    """
+    Regression test for #277: the header written by Cube.write_fit must
+    describe the parameter cube correctly: one PLANE# keyword per plane
+    (including the last fitted parameter, which used to be overwritten by
+    the first error plane), and no stale spectral-axis descriptors (CUNIT3,
+    RESTFRQ, SPECSYS, ...) left over from the original cube.
+    """
+    cubefile = str(tmp_path / 'test_write_fit.fits')
+    parfile = str(tmp_path / 'test_write_fit_pars.fits')
+    make_test_cube((30, 3, 3), cubefile)
+    spc = Cube(cubefile)
+    spc.fiteach(fittype='gaussian', guesses=[1, 5, 1.0], multicore=1,
+                verbose_level=0, signal_cut=0)
+    spc.write_fit(parfile, overwrite=True)
+
+    with fits.open(parfile) as hdul:
+        hdu = hdul[0]
+        # the header must verify cleanly against the FITS standard
+        hdu.verify('exception')
+        header = hdu.header
+
+        # the third axis is the fit parameter plane index
+        assert header['CTYPE3'] == 'FITPAR'
+        assert header['CDELT3'] == 1
+        assert header['CRVAL3'] == 0
+        assert header['CRPIX3'] == 1
+
+        # no stale spectral-axis / spectral-frame descriptors may remain
+        for kw in ('CUNIT3', 'RESTFRQ', 'RESTFREQ', 'RESTWAV', 'SPECSYS',
+                   'VELREF', 'VELOSYS', 'SSYSOBS', 'SSYSSRC', 'ZSOURCE',
+                   'CD1_3', 'CD2_3', 'CD3_1', 'CD3_2',
+                   'PC1_3', 'PC2_3', 'PC3_1', 'PC3_2'):
+            assert kw not in header, "stale spectral keyword: " + kw
+
+        # the celestial WCS must be kept
+        assert header['CTYPE1'].startswith('RA--')
+        assert header['CTYPE2'].startswith('DEC-')
+
+        # exactly one PLANE# keyword per plane, in the documented order:
+        # all fitted parameters first, then all the errors (issue #277 had
+        # PLANE3='eTEX' where 'WIDTH' should have been)
+        nplanes = header['NAXIS3']
+        assert nplanes == 6
+        planes = [header['PLANE%i' % ii] for ii in range(nplanes)]
+        assert planes == ['AMPLITUDE', 'SHIFT', 'WIDTH',
+                          'eAMPLITUDE', 'eSHIFT', 'eWIDTH']
+        assert 'PLANE%i' % nplanes not in header
+
+        # the header should parse as a WCS without triggering FITS fixups
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', wcs.FITSFixedWarning)
+            wcs.WCS(header)
+
+    # and the file must round-trip through load_model_fit
+    spc2 = Cube(cubefile)
+    spc2.xarr.velocity_convention = 'radio'
+    spc2.load_model_fit(parfile, npars=3)
+    np.testing.assert_allclose(spc2.parcube, spc.parcube)
+    np.testing.assert_allclose(spc2.errcube, spc.errcube)
+
 def test_get_modelcube(cubefile=None, parfile=None, multicore=1):
     """
     Tests get_modelcube() method for Cube and CubeStack classes.
