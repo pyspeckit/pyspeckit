@@ -105,8 +105,9 @@ else:
     guesses[0,:,:] = 20                    # Kinetic temperature
     guesses[1,:,:] = 5                     # Excitation  Temp
     guesses[2,:,:] = 14.5                  # log(column)
-    guesses[3,:,:] = momentcube[3,:,:] / 5 # Line width / 5 (the NH3 moment overestimates linewidth)
-    guesses[4,:,:] = momentcube[2,:,:]     # Line centroid
+    # momenteach produces a 3-plane cube: [amplitude, centroid, width]
+    guesses[3,:,:] = momentcube[2,:,:] / 5 # Line width / 5 (the NH3 moment overestimates linewidth)
+    guesses[4,:,:] = momentcube[1,:,:]     # Line centroid
     guesses[5,:,:] = 0.5                   # F(ortho) - ortho NH3 fraction (fixed)
 
     guesscube = pyfits.PrimaryHDU(data=guesses, header=cube11.header)
