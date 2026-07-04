@@ -774,6 +774,17 @@ class Cube(spectrum.Spectrum):
             warn("The multifit keyword is no longer required.  All fits "
                  "allow for multiple components.", DeprecationWarning)
 
+        if (not use_nearest_as_guess and not usemomentcube and
+                guesses is not None and hasattr(guesses, '__len__') and
+                len(guesses) == 0):
+            # fail before the (potentially hours-long) loop rather than on
+            # every single pixel (issue #3)
+            raise ValueError("No guesses were specified.  Provide initial "
+                             "parameter guesses via the `guesses` keyword "
+                             "(a list of length npars, or a [npars, ny, nx] "
+                             "cube), or set usemomentcube=True or "
+                             "use_nearest_as_guess=True.")
+
         if not hasattr(self.mapplot,'plane'):
             self.mapplot.makeplane()
 

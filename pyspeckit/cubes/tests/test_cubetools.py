@@ -1,4 +1,5 @@
 import os
+import pytest
 import warnings
 import numpy as np
 from astropy.convolution import Gaussian1DKernel, Gaussian2DKernel
@@ -624,3 +625,13 @@ def test_nonuniform_chan_weights(shape=(1000, 1, 2), err11=0.01, err22=0.25,
 
     assert np.allclose(err_sigma, 9.696e-4, rtol=1e-3)
     assert np.allclose(err_Tkin, 1.5147, rtol=1e-3)
+
+
+def test_fiteach_no_guesses_fails_early(cubefile='test.fits'):
+    # regression test for issue 3: fiteach with no guesses must raise
+    # immediately instead of failing on every pixel
+    if not os.path.exists(cubefile):
+        make_test_cube((30, 3, 3), cubefile)
+    spc = Cube(cubefile)
+    with pytest.raises(ValueError, match="No guesses were specified"):
+        spc.fiteach(fittype='gaussian', signal_cut=0)
