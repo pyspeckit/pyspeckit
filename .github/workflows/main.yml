@@ -16,46 +16,37 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python-version: 3.9
-            name: Py3.9 mindeps
-            toxenv: py39-test
-          - os: ubuntu-latest
             python-version: '3.10'
-            name: Py3.10 mindeps
+            name: Py3.10
             toxenv: py310-test
           - os: ubuntu-latest
-            python-version: 3.11
-            name: Py3.11 mindeps
+            python-version: '3.11'
+            name: Py3.11
             toxenv: py311-test
           - os: ubuntu-latest
-            python-version: 3.8
-            name: Py3.8 mindeps
-            toxenv: py38-test
+            python-version: '3.12'
+            name: Py3.12
+            toxenv: py312-test
           - os: ubuntu-latest
-            python-version: 3.9
-            name: Py3.9 dev
-            toxenv: py39-test-dev
+            python-version: '3.13'
+            name: Py3.13
+            toxenv: py313-test
           - os: ubuntu-latest
-            python-version: 3.11
-            name: Py3.11 dev
-            toxenv: py311-test-dev
+            python-version: '3.12'
+            name: Py3.12 dev astropy
+            toxenv: py312-test-dev
           - os: ubuntu-latest
-            python-version: 3.9
+            python-version: '3.12'
             name: Documentation
             toxenv: build_docs
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install testing dependencies
-      run: python -m pip install tox codecov
+      run: python -m pip install tox
     - name: Run tests with ${{ matrix.name }}
       run: tox -v -e ${{ matrix.toxenv }}
-    - name: Upload coverage to codecov
-      if: ${{ contains(matrix.toxenv,'-cov') }}
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml

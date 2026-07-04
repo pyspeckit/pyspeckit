@@ -47,4 +47,5 @@ API
     :members:
 
 .. automodule:: pyspeckit.spectrum.fitters
+    :noindex:
     :members:

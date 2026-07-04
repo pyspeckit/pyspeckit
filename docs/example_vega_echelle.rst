@@ -3,7 +3,7 @@
 Optical Plotting - Echelle spectrum of Vega (in color!)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. import:: example_vega_echelle.py
+.. include:: example_vega_echelle.py
    :literal:
 
 
