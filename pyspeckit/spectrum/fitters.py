@@ -2062,9 +2062,13 @@ class Specfit(interactive.Interactive):
         if line_region.sum() == 0:
             raise ValueError("No valid data included in FWHM computation")
         if line_region.sum() <= grow_threshold:
-            line_region[line_region.argmax()-1:line_region.argmax()+1] = True
-            reverse_argmax = len(line_region) - line_region.argmax() - 1
-            line_region[reverse_argmax-1:reverse_argmax+1] = True
+            # grow the region by one pixel on each side, respecting the
+            # array boundaries.  ``argmax`` on a boolean array returns the
+            # first True index; the last True index is found by reversing.
+            first_true = line_region.argmax()
+            last_true = len(line_region) - 1 - line_region[::-1].argmax()
+            line_region[max(first_true - 1, 0):first_true + 1] = True
+            line_region[last_true:last_true + 2] = True
             log.warning("Fewer than {0} pixels were identified as part of the fit."
                      " To enable statistical measurements, the range has been"
                      " expanded by 2 pixels including some regions below the"
