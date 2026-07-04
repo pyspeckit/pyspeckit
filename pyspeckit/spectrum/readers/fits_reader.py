@@ -302,6 +302,16 @@ def read_echelle(pyfits_hdu):
             xax,naxis,headerkws = make_linear_axis(hdr, axsplit, WAT1_dict)
         elif hdr['CTYPE1'] == 'MULTISPE':
             xax,naxis,headerkws = make_multispec_axis(hdr, axsplit, WAT1_dict)
+        else:
+            raise ValueError("Header has IRAF multispec WAT keywords but "
+                             "CTYPE1={0!r}, which is not a recognized IRAF "
+                             "echelle dispersion type (expected 'LINEAR' or "
+                             "'MULTISPE').  If this file was written by an "
+                             "old version of pyspeckit, the multispec "
+                             "keywords are probably stale leftovers from the "
+                             "original echelle file; delete the WAT*_* "
+                             "keywords from the header to read it as a "
+                             "normal 1D spectrum.".format(hdr['CTYPE1']))
 
         cards = [pyfits.Card(k,v) for (k,v) in headerkws.items()]
         header = pyfits.Header(cards)
