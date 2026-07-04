@@ -18,7 +18,7 @@ from __future__ import print_function
 import numpy as np
 
 try:
-    from scipy.integrate import romberg
+    from scipy.integrate import quad
     scipyOK=True
 except:
     scipyOK=False
@@ -74,9 +74,9 @@ class Cosmology:
         Integrand = lambda z: (1.0 / (1.0 + z) / self.EvolutionFunction(z))
         
         if scipyOK:
-            return (romberg(Integrand, z_i, z_f) / self.HubbleParameterNow)    
-        else: 
-            return 0
+            return (quad(Integrand, z_i, z_f)[0] / self.HubbleParameterNow)
+        else:
+            raise ImportError("scipy is required to compute the lookback time.")
         
     def TimeToRedshiftConverter(self, z_i, dt):
         """
@@ -93,9 +93,9 @@ class Cosmology:
         
         integrand = lambda z: 1. / self.EvolutionFunction(z)
         if scipyOK:
-            return romberg(integrand, z_i, z_f) * c / self.HubbleParameterNow / cm_per_mpc
-        else: 
-            return 0
+            return quad(integrand, z_i, z_f)[0] * c / self.HubbleParameterNow / cm_per_mpc
+        else:
+            raise ImportError("scipy is required to compute the comoving radial distance.")
         
     def LuminosityDistance(self, z_f):
         """

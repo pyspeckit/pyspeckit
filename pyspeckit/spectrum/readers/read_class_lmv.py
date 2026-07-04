@@ -20,7 +20,7 @@ def read_lmv(fn):
     with open(fn,'rb') as lf:
         # lf for "LMV File"
         filetype = lf.read(12)
-        if filetype != 'GILDAS-IMAGE':
+        if filetype != b'GILDAS-IMAGE':
             raise TypeError("File is not a GILDAS Image file")
 
         # fmt probably matters!  Default is "r4", i.e. float32 data, but could be float64

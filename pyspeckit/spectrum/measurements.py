@@ -209,7 +209,7 @@ class Measurements(object):
 
         # If lines have multiple components (i.e. spacing much closer than ref lines),
         # delete them from ID list.
-        if np.any(self.odiff) < self.rdmin:
+        if np.any(self.odiff < self.rdmin):
             where = np.ravel(np.argwhere(self.odiff < self.rdmin))
             odiff = np.delete(self.odiff, where)
             multi = True
@@ -255,7 +255,7 @@ class Measurements(object):
                         self.IDresults.append(result)
 
         # Pick best solution
-        best = np.argmin(zip(*self.IDresults)[0])  # Location of best solution
+        best = np.argmin(list(zip(*self.IDresults))[0])  # Location of best solution
         ALLloc = []                                # x-values of best fit lines in reference dictionary
 
         # Determine indices of matched reference lines
@@ -278,14 +278,14 @@ class Measurements(object):
             mpars = self.modelpars.copy()
             merrs = self.modelerrs.copy()
             for line in self.lines:
-                wavelengths = zip(*mpars)[1]
-                i = np.argmin(np.abs(zip(*mpars)[1] - self.lines[line]['modelpars'][1]))
+                wavelengths = np.array(list(zip(*mpars))[1])
+                i = np.argmin(np.abs(wavelengths - self.lines[line]['modelpars'][1]))
                 mpars = np.delete(mpars, i, 0)
                 merrs = np.delete(merrs, i, 0)
 
             # Loop over unmatched modelpars/errs, find name of unmatched line, extend corresponding dict entry
             if self.miscline is None:
-                for i, x in enumerate(zip(*mpars)[1]):
+                for i, x in enumerate(list(zip(*mpars))[1]):
                     self.lines['unknown%i' % i] = {}
                     self.lines['unknown%i' % i]['modelpars'] = mpars[i]
                     self.lines['unknown%i' % i]['modelerrs'] = merrs[i]
@@ -294,7 +294,7 @@ class Measurements(object):
             else:
                 print(self.miscline)
                 for i, miscline in enumerate(self.miscline):
-                    for j, x in enumerate(zip(*mpars)[1]):
+                    for j, x in enumerate(list(zip(*mpars))[1]):
                         if abs(x - miscline['wavelength']) < self.misctol:
                             name = miscline['name']
                         else:
@@ -332,9 +332,9 @@ class Measurements(object):
             modpars = self.lines[key]['modelpars']
             moderrs = self.lines[key]['modelerrs']
             if len(modpars) > 3:
-                modpars2d = np.reshape(modpars, (len(modpars) / 3, 3))
-                moderrs2d = np.reshape(moderrs, (len(moderrs) / 3, 3))
-                sigma = zip(*modpars2d)[2]
+                modpars2d = np.reshape(modpars, (len(modpars) // 3, 3))
+                moderrs2d = np.reshape(moderrs, (len(moderrs) // 3, 3))
+                sigma = list(zip(*modpars2d))[2]
                 minsigma = min(np.abs(sigma))
                 i_narrow = list(np.abs(sigma)).index(minsigma)
             else:
@@ -385,10 +385,8 @@ class Measurements(object):
         Determine luminosity of line (need distance and flux units).
         """
 
-        lum = 0
-        niter = (len(pars) / 3)
-        for i in xrange(int(niter)):
-            lum += self.compute_flux(pars) * 4. * np.pi * self.d**2
+        # compute_flux already sums over all components
+        lum = self.compute_flux(pars) * 4. * np.pi * self.d**2
         return lum
 
     def compute_fwhm(self, pars):
@@ -406,8 +404,8 @@ class Measurements(object):
             start = list(zip(*pars2d))[1][0]                    # start at central wavelength of first component
 
             # If the centroids are exactly the same for all components, we know the peak, and peak position
-            if np.allclose(zip(*pars2d)[1], atol):
-                fmax = np.sum(zip(*pars2d)[0])
+            if np.allclose(list(zip(*pars2d))[1], atol):
+                fmax = np.sum(list(zip(*pars2d))[0])
 
             # Otherwise, we have to figure out where the multicomponent peak is
             else:

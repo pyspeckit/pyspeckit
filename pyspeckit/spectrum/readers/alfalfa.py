@@ -78,8 +78,8 @@ def read_alfalfa_source(savfile, sourcenumber=0):
         # There are multiple components in each Spectrum, but I think they are not indepedent
         sp.specfit.fittype = 'gaussian'
         sp.specfit.fitter = sp.specfit.Registry.multifitters['gaussian']
-        modelpars = zip(spectra['STON'],spectra['VCEN'],spectra['WIDTH']) 
-        modelerrs = zip(spectra['STON'],spectra['VCENERR_STAT'],spectra['WIDTHERR']) 
+        modelpars = list(zip(spectra['STON'],spectra['VCEN'],spectra['WIDTH']))
+        modelerrs = list(zip(spectra['STON'],spectra['VCENERR_STAT'],spectra['WIDTHERR']))
         sp.specfit.modelpars = modelpars[0] # only use the first fit
         sp.specfit.fitter.mpp = modelpars[0]
         sp.specfit.modelerrs = modelerrs[0]

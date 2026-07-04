@@ -962,7 +962,7 @@ def read_observation(f, obsid, file_description=None, indices=None,
         nchan = hdr['NCHAN']
     else:
         log.error("No NCHAN in header.  This is not a spectrum.")
-        import ipdb; ipdb.set_trace()
+        raise ValueError("No NCHAN in header.  This is not a spectrum.")
     # There may be a 1-channel offset?  CHECK!!!
     # (changed by 1 pixel - October 14, 2014)
     # (changed back - October 21, 2014 - I think the ends are just bad, but not
@@ -994,7 +994,7 @@ def _read_spectrum(f, position, nchan, my_memmap=None, memmap=True):
 
 def _spectrum_from_header(fileobj, header, memmap=None):
     return _read_spectrum(fileobj, position=header['DATASTART'],
-                          nchan=header['NCHAN'] if 'NCHAN' in hdr else hdr['NPOIN'],
+                          nchan=header['NCHAN'] if 'NCHAN' in header else header['NPOIN'],
                           my_memmap=memmap)
 
 def clean_header(header):
@@ -1327,7 +1327,7 @@ class ClassObject(object):
     def get_spectra(self, progressbar=True, **kwargs):
         selected_indices = self.select_spectra(**kwargs)
 
-        if not any(selected_indices):
+        if len(selected_indices) == 0:
             raise ValueError("Selection yielded empty.")
 
         self._spectra.load(selected_indices, progressbar=progressbar)
@@ -1565,6 +1565,10 @@ def class_to_obsblocks(filename, telescope, line, datatuple=None, source=None,
                     header=H,
                     data=sp))
 
+    # don't forget the last one
+    if spectrumlist is not None:
+        obslist.append(pyspeckit.ObsBlock(spectrumlist))
+
     return obslist
 
 class LazyItem(object):
@@ -1598,7 +1602,7 @@ class LazyItem(object):
             return self.sphdr[key]
         elif isinstance(key, slice):
             return [self[k] for k in xrange(key.start or 0,
-                                            key.end or len(self.parent.allind),
+                                            key.stop or len(self.parent.allind),
                                             key.step or 1)]
         else:
             sphd = read_observation(self.parent._file, key,
@@ -1612,11 +1616,8 @@ class LazyItem(object):
             return sphd
 
     def __iter__(self):
-        return self.next()
-
-    def __next__(self):
-        for k in self.spheader:
-            yield self.spheader[k]
+        for k in self.sphdr:
+            yield self.sphdr[k]
 
     def __contains__(self, key):
         return key in self.sphdr

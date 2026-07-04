@@ -57,11 +57,7 @@ class SmartCaseNoSpaceDict(dict):
 
     def has_key(self, key):
         """ This is deprecated, but we're keeping it around """
-        cased = dict.has_key__(self,key)
-        if cased is False:
-            return dict.has_key__(self, str(key).lower().replace(" ",""))
-        else:
-            return cased
+        return self.__contains__(key)
 
     def get(self, key, def_val=None):
         cased = dict.get(self,key)
@@ -75,29 +71,28 @@ class SmartCaseNoSpaceDict(dict):
         If key is in the dictionary, return its value. If not, insert key with
         a value of default and return default. default defaults to None.
         """
-        cased = dict.setdefault(self,key)
-        if cased is None:
-            return dict.setdefault(self, str(key).lower().replace(" ",""),def_val)
+        if key in self:
+            return self[key]
         else:
-            return cased
+            self[key] = def_val
+            return def_val
 
     def update(self, inputdict):
         for k,v in inputdict.items():
-            # let self.__setitem__ hand the low/upperness
-            self.__setitem__(self, k, v)
+            # let self.__setitem__ handle the low/upperness
+            self.__setitem__(k, v)
 
     def fromkeys(self, iterable, value=None):
         d = SmartCaseNoSpaceDict()
         for k in iterable:
-            self.__setitem__(d, k, value)
+            d[k] = value
         return d
 
     def pop(self, key, def_val=None):
-        cased = dict.pop(self,key)
-        if cased is None:
-            return dict.pop(self, str(key).lower().replace(" ",""),def_val)
-        else:
-            return cased
+        try:
+            return dict.pop(self, key)
+        except KeyError:
+            return dict.pop(self, str(key).lower().replace(" ",""), def_val)
 
 
 length_dict = {'meter':1.0,'m':1.0,

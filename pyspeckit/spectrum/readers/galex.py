@@ -42,11 +42,11 @@ def read_galex(fitsfilename, orderselection='obj'):
 
     # wavelength in angstroms
     wavelength = bintable.zero + np.arange(len(bintable.disp)) * bintable.disp
-    xaxis = units.SpectroscopicAxis(wavelength,units='angstroms')
+    xaxis = units.SpectroscopicAxis(wavelength,unit='angstrom')
 
-    splist = [Spectrum(data=bintable[orderselection][:,ii], error=bintable[orderselection+"err"][:,ii], xarr=xaxis, header=ff[1].header)
+    splist = [classes.Spectrum(data=bintable[orderselection][:,ii], error=bintable[orderselection+"err"][:,ii], xarr=xaxis, header=ff[1].header)
             for ii in xrange(bintable[orderselection].shape[1])]
 
-    galexblock = ObsBlock(splist)
+    galexblock = classes.ObsBlock(splist)
 
     return galexblock

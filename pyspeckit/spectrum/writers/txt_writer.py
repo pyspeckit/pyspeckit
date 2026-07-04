@@ -24,16 +24,23 @@ class write_txt(object):
             # Print header
             print("# Column 1: {0}".format("x-values"), file=f)
             print("# Column 2: {0}".format("model spectrum"), file=f)
-            for i, element in enumerate(self.Spectrum.specfit.modelcomponents):
+            modelcomponents = self.Spectrum.specfit.modelcomponents
+            if modelcomponents is None:
+                modelcomponents = []
+
+            i = -1
+            for i, element in enumerate(modelcomponents):
                 print("# Column {0}: model spectrum component {1}".format(i + 3, i + 1), file=f)
             print("# Column {0}: residuals".format(i + 4), file=f)
             print("", file=f)
 
-            components = zip(*self.Spectrum.specfit.modelcomponents)
+            components = list(zip(*modelcomponents))
             for i, element in enumerate(self.Spectrum.specfit.model):
-                line = "{0:10}{1:10}".format(self.Spectrum.xarr[self.Spectrum.specfit.gx1:self.Spectrum.specfit.gx2][i],
+                # specfit.xmin/xmax are the pixel indices of the fitted region
+                # (formerly named gx1/gx2)
+                line = "{0:10}{1:10}".format(self.Spectrum.xarr[self.Spectrum.specfit.xmin:self.Spectrum.specfit.xmax][i],
                     round(self.Spectrum.specfit.model[i], 5))
-                for j, component in enumerate(components[i]): line += "{0:10}".format(round(component, 5))
+                for j, component in enumerate(components[i] if components else ()): line += "{0:10}".format(round(component, 5))
                 line += "{0:10}".format(round(self.Spectrum.specfit.residuals[i], 5))
 
                 print(line, file=f)

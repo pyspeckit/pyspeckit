@@ -27,13 +27,13 @@ def open_hdf5(filename, xaxkey = 'xarr', datakey = 'data', errkey = 'error'):
 
     f = h5py.File(filename, 'r')
     
-    try: xarr = f[xaxkey].value
+    try: xarr = f[xaxkey][()]
     except KeyError: print('Dataset \'%s\' not found.' % xaxkey)
-    
-    try: data = f[datakey].value
+
+    try: data = f[datakey][()]
     except KeyError: print('Dataset \'%s\' not found.' % datakey)
 
-    try: error = f[errkey].value
+    try: error = f[errkey][()]
     except KeyError: 
         print('Dataset \'%s\' not found.  Assuming uniform errors.' % errkey)
         error = np.ones_like(data)
@@ -66,9 +66,11 @@ def open_hdf5(filename, xaxkey = 'xarr', datakey = 'data', errkey = 'error'):
     except KeyError: 
         ytype = datakey            
         
-    XAxis = units.SpectroscopicAxis(xarr, xunits)    
+    f.close()
+
+    XAxis = units.SpectroscopicAxis(xarr, xunits)
 
     header = {'xunits': xunits, 'xtype': xtype, 'yunits': yunits, 'ytype': ytype}
-    
+
     return data, error, XAxis, header
 
