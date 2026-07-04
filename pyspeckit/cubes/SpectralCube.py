@@ -1385,14 +1385,29 @@ class Cube(spectrum.Spectrum):
 
 
         # make sure params are within limits
+        if fittype not in self.specfit.Registry.multifitters:
+            raise KeyError("'{0}' is not a registered fittype.  The "
+                           "registered fittypes are: {1}.  If you are using "
+                           "a custom model, register it first with, e.g., "
+                           "cube.specfit.Registry.add_fitter('{0}', "
+                           "fitter_instance, npars)."
+                           .format(fittype,
+                                   sorted(self.specfit.Registry.multifitters)))
         fitter = self.specfit.Registry.multifitters[fittype]
         guesses,throwaway = fitter._make_parinfo(npeaks=npeaks)
 
+        # fit a single spectrum to initialize the specfit data structures.
+        # If this fails (e.g., because the stored parameters at the selected
+        # pixel violate the model's parameter limits), fall back to
+        # initializing the fitter directly from the registry below.
+        sp = None
+        fit_succeeded = False
         try:
             x,y = _temp_fit_loc
             sp = self.get_spectrum(x,y)
             guesses.values = self.parcube[:,int(y),int(x)]
             sp.specfit(fittype=fittype, guesses=guesses.values)
+            fit_succeeded = True
         except Exception as ex1:
             try:
                 OKmask = np.any(self.parcube, axis=0) & ~nanvals_flat
@@ -1401,15 +1416,34 @@ class Cube(spectrum.Spectrum):
                 sp = self.get_spectrum(x,y)
                 guesses.values = self.parcube[:,int(y),int(x)]
                 sp.specfit(fittype=fittype, guesses=guesses.values)
+                fit_succeeded = True
             except Exception as ex2:
                 log.error("Fitting the pixel at location {0} failed with error: {1}.  "
                           "Re-trying at location {2} failed with error {3}.  "
                           "Try setting _temp_fit_loc to a valid pixel".format(_temp_fit_loc, ex1,
                                                                               (x,y), ex2))
 
-        self.specfit.fitter = sp.specfit.fitter
-        self.specfit.fittype = sp.specfit.fittype
-        self.specfit.parinfo = sp.specfit.parinfo
+        if fit_succeeded and sp.specfit.parinfo is not None:
+            self.specfit.fitter = sp.specfit.fitter
+            self.specfit.fittype = sp.specfit.fittype
+            self.specfit.parinfo = sp.specfit.parinfo
+        else:
+            # The validation fit failed; initialize the fitter from the
+            # registry instead so that the loaded parameter cube remains
+            # usable (e.g., with get_modelcube).  See issue #210: previously
+            # this code path crashed with an unhelpful AttributeError or left
+            # specfit.parinfo set to None.
+            warn("The validation fit failed, so the parameter values could "
+                 "not be checked against the model limits.  The fitter has "
+                 "been initialized from the registry instead; parameter "
+                 "values in the cube may be invalid (e.g., out of the "
+                 "model's limits).", PyspeckitWarning)
+            fitter.npeaks = npeaks
+            if fitter.parinfo is None:
+                fitter.parinfo = guesses
+            self.specfit.fitter = fitter
+            self.specfit.fittype = fittype
+            self.specfit.parinfo = guesses
 
     def smooth(self,factor,**kwargs):
         """

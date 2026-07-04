@@ -7,9 +7,11 @@ from astropy.io import fits
 from astropy import wcs
 import astropy
 import multiprocessing
+import pytest
 
 from .. import cubes, Cube, CubeStack
 from ...parallel_map import parallel_map
+from ...specwarnings import PyspeckitWarning
 from ...spectrum.models import n2hp, ammonia_constants
 from ...spectrum.models.ammonia import cold_ammonia_model
 
@@ -696,3 +698,83 @@ def test_fiteach_no_guesses_fails_early(cubefile='test.fits'):
     spc = Cube(cubefile)
     with pytest.raises(ValueError, match="No guesses were specified"):
         spc.fiteach(fittype='gaussian', signal_cut=0)
+
+
+def test_load_model_fit_roundtrip(cubefile='test_i210_cube.fits',
+                                  parfile='test_i210_pars.fits'):
+    """
+    Regression test for #210: fiteach -> write_fit -> load_model_fit into a
+    fresh Cube should restore parcube, errcube, and has_fit, and leave the
+    specfit machinery (fitter, fittype, parinfo) properly initialized.
+    """
+    spc = do_fiteach(save_cube=cubefile, save_pars=parfile)
+
+    fresh = Cube(cubefile)
+    fresh.load_model_fit(parfile, npars=3, fittype='gaussian')
+
+    assert np.allclose(fresh.parcube, spc.parcube, equal_nan=True)
+    assert np.allclose(fresh.errcube, spc.errcube, equal_nan=True)
+    assert (fresh.has_fit == spc.has_fit).all()
+    # the fit machinery must be initialized (used by, e.g., get_modelcube
+    # and write_fit); accessing .fitter raises AttributeError if it is not
+    assert fresh.specfit.fittype == 'gaussian'
+    assert fresh.specfit.fitter is not None
+    assert fresh.specfit.parinfo is not None
+    assert len(fresh.specfit.parinfo) == 3
+
+
+def test_load_model_fit_cold_ammonia(cubefile='test_i210_cube_nh3.fits',
+                                     parfile='test_i210_pars_nh3.fits'):
+    """
+    Regression test for #210: load_model_fit(fittype='cold_ammonia') must
+    not raise a KeyError (cold_ammonia is registered by default), and a
+    parameter cube that is inconsistent with the model (e.g., parameter
+    values outside the model limits, so the validation fit fails) must not
+    crash with an AttributeError; instead a PyspeckitWarning is issued and
+    the fitter is initialized from the registry.
+    """
+    make_test_cube((30, 9, 9), cubefile)
+
+    # synthesize a cold_ammonia parameter cube (6 parameters + 6 errors)
+    # with tkin below the CMB temperature, which makes the per-pixel
+    # validation fit inside load_model_fit fail everywhere
+    pardata = np.zeros((12, 9, 9))
+    pardata[0] = 0.5    # tkin, below the 2.7315 K limit
+    pardata[1] = 5.0    # tex
+    pardata[2] = 14.0   # ntot
+    pardata[3] = 0.5    # width
+    pardata[4] = 0.0    # xoff_v
+    pardata[5] = 0.5    # fortho
+    pardata[6:] = 0.1   # errors
+    hdr = fits.getheader(cubefile)
+    fits.PrimaryHDU(data=pardata, header=hdr).writeto(parfile,
+                                                      overwrite=True)
+
+    spc = Cube(cubefile)
+    with pytest.warns(PyspeckitWarning, match='validation fit failed'):
+        spc.load_model_fit(parfile, npars=6, fittype='cold_ammonia')
+
+    assert spc.specfit.fittype == 'cold_ammonia'
+    assert isinstance(spc.specfit.fitter, cold_ammonia_model)
+    assert spc.specfit.parinfo is not None
+    assert len(spc.specfit.parinfo) == 6
+    assert np.allclose(spc.parcube, pardata[:6])
+    assert np.allclose(spc.errcube, pardata[6:])
+
+
+def test_load_model_fit_unregistered_fittype(
+        cubefile='test_i210_cube_unreg.fits',
+        parfile='test_i210_pars_unreg.fits'):
+    """
+    Regression test for #210: an unregistered fittype should raise a
+    KeyError with a helpful message rather than a bare KeyError.
+    """
+    make_test_cube((30, 9, 9), cubefile)
+    pardata = np.ones((6, 9, 9))
+    hdr = fits.getheader(cubefile)
+    fits.PrimaryHDU(data=pardata, header=hdr).writeto(parfile,
+                                                      overwrite=True)
+
+    spc = Cube(cubefile)
+    with pytest.raises(KeyError, match='not a registered fittype'):
+        spc.load_model_fit(parfile, npars=3, fittype='not_a_real_model')
