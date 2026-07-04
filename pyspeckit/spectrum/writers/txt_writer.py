@@ -1,10 +1,5 @@
 from __future__ import print_function
 import os
-try:
-    import atpy
-    atpyOK = True
-except ImportError:
-    atpyOK = False
 
 # rewrite this garbage
 

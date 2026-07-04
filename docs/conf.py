@@ -133,7 +133,7 @@ MOCK_MODULES = {'matplotlib', 'matplotlib.pyplot', 'matplotlib.figure',
                 'matplotlib.widgets', 'matplotlib.cbook', 'pyfits', 'scipy',
                 'scipy', 'pyfits', 'pytest',
                 'scipy.interpolate', 'scipy.ndimage', 'pywcs', 'matplotlib',
-                'matplotlib.pyplot', 'h5py', 'atpy','progressbar'}
+                'matplotlib.pyplot', 'h5py', 'progressbar'}
 for mod_name in MOCK_MODULES:
     if mod_name not in sys.modules:
         sys.modules[mod_name] = Mock()

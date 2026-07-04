@@ -37,11 +37,6 @@ from . import history
 import copy
 from astropy import log
 from ..specwarnings import warn, PyspeckitWarning
-try:
-    import atpy
-    atpyOK = True
-except ImportError:
-    atpyOK = False
 
 # specutils -> legacy specutils
 # try:
@@ -335,7 +330,7 @@ class BaseSpectrum(object):
         Grab relevant parameters from a table header (xaxis type, etc)
 
         This function should only exist for Spectrum objects created from
-        .txt or other atpy table type objects
+        .txt or other table-like objects
         """
         self.Table = Table
 
@@ -1041,15 +1036,15 @@ class Spectra(BaseSpectrum):
         for sp in self.speclist:
             sp.specfit(**kwargs)
 
-        if atpyOK:
-            self.fittable = atpy.Table()
-            self.fittable.add_column('name',[sp.specname for sp in self.speclist])
-            self.fittable.add_column('amplitude',[sp.specfit.modelpars[0] for sp in self.speclist],unit=self.unit)
-            self.fittable.add_column('center',[sp.specfit.modelpars[1] for sp in self.speclist],unit=self.xarr.unit)
-            self.fittable.add_column('width',[sp.specfit.modelpars[2] for sp in self.speclist],unit=self.xarr.unit)
-            self.fittable.add_column('amplitudeerr',[sp.specfit.modelerrs[0] for sp in self.speclist],unit=self.unit)
-            self.fittable.add_column('centererr',[sp.specfit.modelerrs[1] for sp in self.speclist],unit=self.xarr.unit)
-            self.fittable.add_column('widtherr',[sp.specfit.modelerrs[2] for sp in self.speclist],unit=self.xarr.unit)
+        from astropy.table import Table, Column
+        self.fittable = Table()
+        self.fittable.add_column(Column(name='name', data=[sp.specname for sp in self.speclist]))
+        self.fittable.add_column(Column(name='amplitude', data=[sp.specfit.modelpars[0] for sp in self.speclist], unit=self.unit))
+        self.fittable.add_column(Column(name='center', data=[sp.specfit.modelpars[1] for sp in self.speclist], unit=self.xarr.unit))
+        self.fittable.add_column(Column(name='width', data=[sp.specfit.modelpars[2] for sp in self.speclist], unit=self.xarr.unit))
+        self.fittable.add_column(Column(name='amplitudeerr', data=[sp.specfit.modelerrs[0] for sp in self.speclist], unit=self.unit))
+        self.fittable.add_column(Column(name='centererr', data=[sp.specfit.modelerrs[1] for sp in self.speclist], unit=self.xarr.unit))
+        self.fittable.add_column(Column(name='widtherr', data=[sp.specfit.modelerrs[2] for sp in self.speclist], unit=self.xarr.unit))
 
     def ploteach(self, xunit=None, inherit_fit=False, plot_fit=True, plotfitkwargs={}, **plotkwargs):
         """
