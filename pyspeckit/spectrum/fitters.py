@@ -639,6 +639,111 @@ class Specfit(interactive.Interactive):
 
         #self.dof  = self.includemask.sum()-self.npeaks*self.Registry.npars[self.fittype]-vheight+np.sum(self.parinfo.fixed)
 
+    @property
+    def n_free_parameters(self):
+        """
+        The number of *free* parameters in the most recent fit.
+
+        Parameters that are fixed (``parinfo[ii].fixed == True``) or tied to
+        other parameters (``parinfo[ii].tied != ''``) are totally constrained
+        and are therefore not counted as free.  This is the ``k`` used by the
+        information criteria (`AIC`, `AICc`, `BIC`).
+        """
+        if self.parinfo is None:
+            raise AttributeError("No fit has been performed, so the number "
+                                 "of free parameters is not defined.")
+        return int(sum((not par.fixed) and (par.tied.strip() == '')
+                       for par in self.parinfo))
+
+    @property
+    def logL(self):
+        """
+        The log-likelihood :math:`\\ln L` of the most recent fit, under the
+        assumption of Gaussian (normally-distributed) uncorrelated errors:
+
+        .. math::
+
+            \\ln L = -\\frac{1}{2}\\chi^2
+                     - \\sum_i \\ln\\left(\\sqrt{2\\pi}\\,\\sigma_i\\right)
+
+        where the sum is over the :math:`n =` ``npix_fitted`` pixels included
+        in the fit and :math:`\\sigma_i` is the error spectrum.
+
+        .. note::
+
+            If no error spectrum was provided (``Spectrum.error`` is None or
+            all zeros), the errors used here are estimated from the data
+            (see `seterrspec`), so the absolute value of the log-likelihood
+            is meaningful only up to an additive constant; a warning is
+            raised in this case.  Differences of information criteria
+            (`AIC`, `BIC`, etc.) between models evaluated with the *same*
+            error spectrum remain meaningful.
+        """
+        if self.model is None or not hasattr(self, 'npix_fitted'):
+            raise AttributeError("No fit has been performed, so the "
+                                 "log-likelihood is not defined.")
+        if self.Spectrum.error is None or np.all(self.Spectrum.error == 0):
+            warnings.warn("Spectrum.error was not specified, so the errors "
+                          "used to compute the log-likelihood were estimated "
+                          "from the data.  The log-likelihood (and any "
+                          "derived information criteria) is therefore only "
+                          "defined up to an additive constant.")
+        included = self.includemask & ~self.mask
+        errs = self.errspec[included]
+        return -0.5 * self.chi2 - np.sum(np.log(np.sqrt(2 * np.pi) * errs))
+
+    @property
+    def AIC(self):
+        """
+        The Akaike information criterion of the most recent fit,
+
+        .. math:: \\mathrm{AIC} = 2 k - 2 \\ln L
+
+        where :math:`k` is the number of free parameters
+        (`n_free_parameters`) and :math:`\\ln L` is the Gaussian
+        log-likelihood (`logL`).  Lower values indicate a preferred model;
+        see e.g. `astropy.stats.akaike_info_criterion`.
+        """
+        return 2 * self.n_free_parameters - 2 * self.logL
+
+    @property
+    def AICc(self):
+        """
+        The Akaike information criterion with the small-sample-size
+        correction,
+
+        .. math::
+
+            \\mathrm{AICc} = \\mathrm{AIC} + \\frac{2 k (k+1)}{n - k - 1}
+
+        where :math:`k` is the number of free parameters
+        (`n_free_parameters`) and :math:`n` is the number of pixels included
+        in the fit (``npix_fitted``).  The correction is generally
+        recommended when :math:`n / k \\lesssim 40`.
+        """
+        k = self.n_free_parameters
+        n = self.npix_fitted
+        if n - k - 1 <= 0:
+            raise ValueError("The AICc correction is undefined for "
+                             "n_samples - n_free_parameters - 1 <= 0 "
+                             "(n={0}, k={1}).".format(n, k))
+        return self.AIC + 2. * k * (k + 1) / (n - k - 1)
+
+    @property
+    def BIC(self):
+        """
+        The Bayesian information criterion of the most recent fit,
+
+        .. math:: \\mathrm{BIC} = k \\ln(n) - 2 \\ln L
+
+        where :math:`k` is the number of free parameters
+        (`n_free_parameters`), :math:`n` is the number of pixels included in
+        the fit (``npix_fitted``), and :math:`\\ln L` is the Gaussian
+        log-likelihood (`logL`).  Lower values indicate a preferred model;
+        see e.g. `astropy.stats.bayesian_info_criterion`.
+        """
+        return (self.n_free_parameters * np.log(self.npix_fitted)
+                - 2 * self.logL)
 
     @property
     def mask_sliced(self):
