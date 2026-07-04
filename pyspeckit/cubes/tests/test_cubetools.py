@@ -462,6 +462,99 @@ def test_fiteach_blank_value_nan():
     assert np.all(np.isfinite(spc.errcube[:, :, 2:]))
     assert np.all(spc.has_fit[:, 2:])
 
+def make_test_cube_2comp(shape=(60,6,6), outfile='test_2comp.fits', snr=30,
+                         sigma=None, seed=2):
+    """
+    Like `make_test_cube`, but with two Gaussian components along the
+    spectral axis (centered at 1/4 and 3/4 of the axis).  Adapted from the
+    reproducer in issue #347.
+    """
+    if sigma is None:
+        sigma1d, sigma2d = shape[0] / 10., np.mean(shape[1:]) / 5.
+    else:
+        sigma1d, sigma2d = sigma
+
+    from astropy.modeling.functional_models import Gaussian1D
+    gauss1d1 = Gaussian1D(mean=shape[0]/2 - shape[0]/4, stddev=sigma1d)
+    gauss1d2 = Gaussian1D(mean=shape[0]/2 + shape[0]/4, stddev=sigma1d)
+    x_arr = np.arange(shape[0])
+    gauss1d = gauss1d1(x_arr) + gauss1d2(x_arr)
+    gauss2d = Gaussian2DKernel(x_stddev=sigma2d, y_stddev=sigma2d,
+                               x_size=shape[1], y_size=shape[2])
+    signal_cube = gauss1d[:, None, None] * gauss2d.array
+    signal_cube = signal_cube / signal_cube.max()
+
+    np.random.seed(seed)
+    noise_std = signal_cube.max() / snr
+    noise_cube = np.random.normal(loc=0, scale=noise_std,
+                                  size=signal_cube.shape)
+    test_cube = signal_cube + noise_cube
+
+    cdelt1, cdelt2, cdelt3 = -(4e-3 + 1e-8), 4e-3 + 1e-8, -0.1
+    keylist = {'CTYPE1': 'RA---GLS', 'CTYPE2': 'DEC--GLS', 'CTYPE3': 'VRAD',
+               'CDELT1': cdelt1, 'CDELT2': cdelt2, 'CDELT3': cdelt3,
+               'CRVAL1': 0, 'CRVAL2': 0, 'CRVAL3': 5,
+               'CRPIX1': 9, 'CRPIX2': 0, 'CRPIX3': 5,
+               'CUNIT1': 'deg', 'CUNIT2': 'deg', 'CUNIT3': 'km s-1',
+               'BMAJ': cdelt2 * 3, 'BMIN': cdelt2 * 3, 'BPA': 0.0,
+               'BUNIT': 'K', 'EQUINOX': 2000.0, 'RESTFREQ': 300e9,
+               'RMSLVL': noise_std, 'SEED': seed}
+    test_header = fits.Header()
+    test_header.update(keylist)
+    test_hdu = fits.PrimaryHDU(data=test_cube, header=test_header)
+    test_hdu.writeto(outfile, overwrite=True, checksum=True)
+
+def test_fiteach_positive_constrained_twocomp():
+    """
+    Regression test for issue #347: fitting two positive-constrained
+    gaussian components over noise-dominated pixels used to trip the
+    "Non-finite parameters found in fits" assertion at the end of fiteach.
+
+    A noise-dominated pixel can converge with an amplitude pegged exactly at
+    the zero lower limit; the post-fit blanking step used to treat any
+    parameter equal to zero as "unfit" and replace it with blank_value (NaN),
+    leaving a pixel with has_fit=True but non-finite parameters.
+    """
+    cubefile = 'test_2comp.fits'
+    shape = (60, 6, 6)
+    make_test_cube_2comp(shape=shape, outfile=cubefile, snr=30, seed=2)
+
+    for multicore in (1, 2):
+        spc = Cube(cubefile)
+        rmsmap = np.zeros_like(spc.cube[0]) + spc.header['RMSLVL']
+        # velocity axis runs from ~5.4 down by 0.1 km/s per channel;
+        # the two components sit at channels shape[0]/4 and 3*shape[0]/4
+        v1 = 5 - 0.1 * (shape[0]/4 - 4)
+        v2 = 5 - 0.1 * (3*shape[0]/4 - 4)
+        guesses = [1, v1 + 0.5, 1, 1, v2 - 0.5, 1]
+        # amplitudes and widths constrained positive, centroids free
+        spc.fiteach(fittype='gaussian',
+                    guesses=guesses,
+                    errmap=rmsmap,
+                    parlimited=[(True, False), (False, False), (True, False)]*2,
+                    parlimits=[(0, 0)]*6,
+                    signal_cut=2,
+                    blank_value=np.nan,
+                    start_from_point=(shape[1]//2, shape[2]//2),
+                    multicore=multicore,
+                    verbose=False, verbose_level=0)
+
+        # the invariant fiteach asserts internally: every pixel with
+        # non-finite parameters must be flagged as not having a fit
+        pars_are_finite = np.all(np.isfinite(spc.parcube), axis=0)
+        assert np.all(~spc.has_fit[~pars_are_finite])
+        # equivalently: every pixel flagged as fit has all-finite parameters
+        assert np.all(np.isfinite(spc.parcube[:, spc.has_fit]))
+        assert np.all(np.isfinite(spc.errcube[:, spc.has_fit]))
+        # unfit pixels are blanked with blank_value=nan
+        assert np.all(np.isnan(spc.parcube[:, ~spc.has_fit]))
+        assert np.all(np.isnan(spc.errcube[:, ~spc.has_fit]))
+        # this seed produces at least one successful fit with an amplitude
+        # pegged exactly at the zero lower limit; it must be preserved
+        # (not blanked), otherwise this test is not exercising the
+        # regression scenario
+        assert np.any(spc.parcube[:, spc.has_fit] == 0)
+
 def make_nh3_cube(shape, pars, errs11, errs22, seed=42):
     """
     Tinkers with two test gaussian cubes, overwriting their spectra with NH3

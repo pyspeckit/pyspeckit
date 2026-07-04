@@ -980,16 +980,21 @@ class Cube(spectrum.Spectrum):
                     with np.errstate(divide='raise'):
                         sp.specfit(guesses=gg, quiet=verbose_level<=3,
                                    verbose=verbose_level>3, **fitkwargs)
-                    self.parcube[:,int(y),int(x)] = sp.specfit.modelpars
-                    self.errcube[:,int(y),int(x)] = sp.specfit.modelerrs
-                    if np.any(~np.isfinite(sp.specfit.modelpars)):
-                        log.exception("Fit result included nan for pixel {0},{1}: "
-                                      "{2}".format(x, y, sp.specfit.modelpars))
+                    if (np.any(~np.isfinite(sp.specfit.modelpars)) or
+                            np.any(~np.isfinite(sp.specfit.modelerrs))):
+                        # A fit that produced non-finite parameters or errors
+                        # is treated as a failed fit: blank it out and flag
+                        # it so `has_fit` stays False (issue #347)
+                        log.warning("Fit result included non-finite values for "
+                                    "pixel {0},{1}: pars={2} errs={3}"
+                                    .format(x, y, sp.specfit.modelpars,
+                                            sp.specfit.modelerrs))
+                        self.parcube[:,int(y),int(x)] = blank_value
+                        self.errcube[:,int(y),int(x)] = blank_value
                         success = False
-                        # this is basically a debug statement to try to get the
-                        # code to crash here
-                        raise KeyboardInterrupt
                     else:
+                        self.parcube[:,int(y),int(x)] = sp.specfit.modelpars
+                        self.errcube[:,int(y),int(x)] = sp.specfit.modelerrs
                         success = True
                 except Exception as ex:
                     exc_traceback = sys.exc_info()[2]
@@ -1002,8 +1007,6 @@ class Cube(spectrum.Spectrum):
                     log.exception("Guesses were: {0}".format(str(gg)))
                     log.exception("Fitkwargs were: {0}".format(str(fitkwargs)))
                     success = False
-                    if isinstance(ex, KeyboardInterrupt):
-                        raise ex
 
                 # keep this out of the 'try' statement
                 if integral and success:
@@ -1163,11 +1166,13 @@ class Cube(spectrum.Spectrum):
                                      " error shape don't match that of the "
                                      "parameter cubes")
                 if ((any([x is None for x in modelpars]) or
-                     np.any(np.isnan(modelpars)) or
+                     np.any(~np.isfinite(np.array(modelpars, dtype='float'))) or
                      any([x is None for x in modelerrs]) or
-                     np.any(np.isnan(modelerrs)))):
-                    self.parcube[:,int(y),int(x)] = np.nan
-                    self.errcube[:,int(y),int(x)] = np.nan
+                     np.any(~np.isfinite(np.array(modelerrs, dtype='float'))))):
+                    # non-finite parameters or errors mean the fit failed
+                    # (issue #347); blank the pixel and mark it as unfit
+                    self.parcube[:,int(y),int(x)] = blank_value
+                    self.errcube[:,int(y),int(x)] = blank_value
                     self.has_fit[int(y),int(x)] = False
                 else:
                     self.parcube[:,int(y),int(x)] = modelpars
@@ -1192,15 +1197,17 @@ class Cube(spectrum.Spectrum):
             log.info("Finished final fit %i.  "
                      "Elapsed time was %0.1f seconds" % (len(valid_pixels), time.time()-t0))
 
-        # blank out the errors (and possibly the values) wherever they are
-        # zero = assumed bad.  This is done after the fitting loop completes
-        # (rather than per-pixel) so that it also applies when multicore > 1
-        # and so that the errcube mask is computed before parcube is
-        # overwritten.
+        # blank out the parameters and errors of all pixels that do not have
+        # a successful fit (skipped by the signal cut, failed fits, or fits
+        # that produced non-finite values).  This is done after the fitting
+        # loop completes (rather than per-pixel) so that it also applies when
+        # multicore > 1.  Note that this must be keyed on ``has_fit`` rather
+        # than on ``parcube == 0``: a successful fit can legitimately include
+        # a parameter whose value is exactly zero (e.g., an amplitude pegged
+        # at a zero lower limit; see issue #347).
         if blank_value != 0:
-            bad = self.parcube == 0
-            self.parcube[bad] = blank_value
-            self.errcube[bad] = blank_value
+            self.parcube[:, ~self.has_fit] = blank_value
+            self.errcube[:, ~self.has_fit] = blank_value
 
         pars_are_finite = np.all(np.isfinite(self.parcube), axis=0)
 
