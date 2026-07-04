@@ -97,7 +97,7 @@ def doctree_read(app, doctree):
         path = url + doc_root + doc_path
         onlynode = addnodes.only(expr='html')
         onlynode += nodes.reference(
-            reftitle=app.config.edit_on_bitbucket_help_message, refuri=path)
+            reftitle=app.config.edit_on_github_help_message, refuri=path)
         onlynode[0] += nodes.inline(
             '', page_message, classes=['edit-on-github'])
         para = nodes.paragraph()
