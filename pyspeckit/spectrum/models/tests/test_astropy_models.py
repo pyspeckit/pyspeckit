@@ -11,12 +11,17 @@ except ImportError:
 def test_powerlaw(scale=5., alpha=2.):
     x = np.linspace(10,100)
     y = scale * (x)**(-alpha)
-    plm = powerlaws.PowerLaw1D(1,1,1)
+    plm = powerlaws.PowerLaw1D(amplitude=1, x_0=1, alpha=1)
+    # amplitude and x_0 are fully degenerate in PowerLaw1D
+    # (amplitude*(x/x_0)**-alpha), and letting both vary can drive the
+    # optimizer through x_0 <= 0 where the model is non-finite (which
+    # newer astropy fitters reject with NonFiniteValueError)
+    plm.x_0.fixed = True
     fitter = fitting.LevMarLSQFitter()
     result = fitter(plm, x, y)
-    print("Result: ",result)
-    print("plm.params: ",plm)
-    return plm
+    np.testing.assert_allclose(result.alpha.value, alpha, rtol=1e-6)
+    np.testing.assert_allclose(result.amplitude.value, scale, rtol=1e-6)
+    return result
 
 if __name__ == "__main__":
     scale,alpha = 5.,2.

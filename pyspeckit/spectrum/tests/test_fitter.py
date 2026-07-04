@@ -66,6 +66,7 @@ class TestFitter(object):
         """
         Regression test for #223: make sure lmfitter returns proper pars
         """
+        pytest.importorskip("lmfit")
         self.test_fitter(use_lmfit=True)
 
     def test_set_pars(self):

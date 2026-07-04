@@ -47,6 +47,7 @@ If you are already in a python session, you can enable interactive plotting by
 doing:
 
 .. code:: python
+
    from matplotlib import pyplot
    pyplot.ion()
    pyplot.show()
@@ -59,6 +60,7 @@ If you want to make sure this is enabled automatically on startup, you can
 start your python session with
 
 .. code:: bash
+
    ipython --matplotlib
 
 (I tend to use ``ipython --pylab``, but it's `deprecated
