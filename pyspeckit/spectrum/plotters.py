@@ -416,7 +416,12 @@ class Plotter(object):
                 self.silent = silent
 
             # if self.xmin and self.xmax:
-            if (reset_xlimits or self.Spectrum.xarr.min().value < self.xmin or self.Spectrum.xarr.max().value > self.xmax):
+            # self.xmin/self.xmax may be None or Quantity; compare plain values
+            xminval = getattr(self.xmin, 'value', self.xmin)
+            xmaxval = getattr(self.xmax, 'value', self.xmax)
+            if (reset_xlimits or xminval is None or xmaxval is None or
+                    self.Spectrum.xarr.min().value < xminval or
+                    self.Spectrum.xarr.max().value > xmaxval):
                 if not self.silent:
                     warn("Resetting X-axis min/max because the plot is out of bounds.")
                 self.xmin = None

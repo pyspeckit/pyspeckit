@@ -288,7 +288,9 @@ class MapPlotter(object):
                     self._remove_circle()
                     clear=True
                     color = 'k'
-                    linestyle = 'steps-mid'
+                    # 'steps-mid' is no longer a valid linestyle in matplotlib;
+                    # the plotter already defaults to drawstyle='steps-mid'
+                    linestyle = '-'
                 else:
                     color = next(self.overplot_colorcycle)
                     linestyle = self.overplot_linestyle

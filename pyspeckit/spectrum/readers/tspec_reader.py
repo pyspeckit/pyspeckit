@@ -40,6 +40,9 @@ def tspec_reader(filename, merged=True, specnum=0, **kwargs):
             header['CDELT1'] = dv
             xconv = lambda v: ((v-p3+1)*dv+v0)
             spec = ma.array(data[1,:],dtype='float64')
+            spec.mask = spec!=spec
+            # IRAF-reduced files carry no error spectrum
+            errspec = ma.masked_array(np.zeros_like(spec))
             xarr = xconv(np.arange(len(spec)))
             wat = dict([s.split("=") for s in header.get('WAT1_001').split()])
             xunits = wat['units']
@@ -66,6 +69,9 @@ def tspec_reader(filename, merged=True, specnum=0, **kwargs):
         header['BUNIT'] = unit
         xtype = 'wavelength'
         
-    XAxis = units.SpectroscopicAxis(xarr,xunits,xtype=xtype)
+    # IRAF WAT headers use plural unit names that modern astropy rejects
+    xunits = {'angstroms': 'angstrom', 'microns': 'micron',
+              'nanometers': 'nanometer'}.get(str(xunits).lower(), xunits)
+    XAxis = units.SpectroscopicAxis(xarr, unit=xunits)
 
     return spec,errspec,XAxis,header

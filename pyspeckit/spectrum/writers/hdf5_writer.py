@@ -32,6 +32,7 @@ class write_hdf5(Writer):
             while os.path.exists(fn):
                 fn = "{0}_fit({1}).hdf5".format(self.Spectrum.fileprefix, i)
                 i += 1
+            f = h5py.File(fn, 'w')
 
         # By default, write out x-array, spectrum, errors
         xarr = f.create_dataset('xarr', data=self.Spectrum.xarr)

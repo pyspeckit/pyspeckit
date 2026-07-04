@@ -11,7 +11,6 @@ import numpy
 from . import units
 from astropy import log
 from six.moves import xrange
-from six import iteritems
 
 class Interactive(object):
 
@@ -302,10 +301,21 @@ class Interactive(object):
             self.Spectrum.plotter._active_gui = None
             return
         for eventtype in ('button_press_event','key_press_event'):
-            for key,val in iteritems(self.Spectrum.plotter.figure.canvas.callbacks.callbacks[eventtype]):
-                if hasattr(val, 'func') and "event_manager" in val.func.__name__:
+            callbacks = self.Spectrum.plotter.figure.canvas.callbacks.callbacks.get(eventtype, {})
+            for key,val in list(callbacks.items()):
+                # modern matplotlib stores weakref-like objects
+                # (cbook._StrongRef / weakref.WeakMethod); calling them
+                # returns the underlying function.  Older matplotlib used
+                # proxies with a .func attribute.
+                if hasattr(val, 'func'):
+                    func = val.func
+                elif callable(val):
+                    func = val()
+                else:
+                    func = None
+                if func is not None and "event_manager" in getattr(func, '__name__', ''):
                     cids_to_remove.append(key)
-                    if debug or self._debug: print("Removing CID #%i with attached function %s" % (key,val.func.__name__))
+                    if debug or self._debug: print("Removing CID #%i with attached function %s" % (key,func.__name__))
         for cid in cids_to_remove:
             self.Spectrum.plotter.figure.canvas.mpl_disconnect(cid)
 
