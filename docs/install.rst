@@ -24,7 +24,6 @@ You'll most likely want at least one of the following packages
 to enable `file reading <readers>`_
 
 * astropy_ >=0.4
-* `atpy <http://atpy.github.com/>`_ (which depends on `asciitable <http://cxc.harvard.edu/contrib/asciitable/>`_ [`github link <https://github.com/taldcroft/asciitable>`_] )
 * `hdf5 <https://www.pytables.org/>`_
 
 If you have pip (see https://pypi.org/project/pyspeckit), you can install with::

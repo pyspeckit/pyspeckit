@@ -6,20 +6,9 @@ from __future__ import print_function
 import numpy as np
 import copy
 import re
+import warnings
+from astropy.table import Table
 from .. import units
-
-try:
-    import atpy
-    atpyOK = True
-except ImportError:
-    from ..readers import readcol
-    atpyOK = False
-
-try:
-    import query_splatalogue
-    webOK = True
-except ImportError:
-    webOK = False
 
 greekletterlist = ["Alpha","Nu","Beta","Xi","Gamma","Omicron","Delta","Pi","Epsilon","Rho","Zeta","Sigma","Eta","Tau","Theta","Upsilon","Iota","Phi","Kappa","Chi","Lambda","Psi","Mu","Omega"]
 greekletterlist += ["alpha","nu","beta","xi","gamma","omicron","delta","pi","epsilon","rho","zeta","sigma","eta","tau","theta","upsilon","iota","phi","kappa","chi","lambda","psi","mu","omega"]
@@ -74,15 +63,18 @@ def LatexName(species,qn):
 
 
 class radio_lines(object):
-    def __init__(self, spectrum, voff=0.0, webquery=True, **kwargs):
+    def __init__(self, spectrum, voff=0.0, webquery=False, **kwargs):
         """
         Initialize the radio lines class
-        Requires a spectrum object 
+        Requires a spectrum object
+
+        (webquery is deprecated and ignored; use astroquery.splatalogue to
+        query splatalogue directly)
         """
         self.Spectrum = spectrum
 
-        self.minfreq_GHz = self.Spectrum.xarr.umin(units='GHz')*(1+voff/units.speedoflight_kms)
-        self.maxfreq_GHz = self.Spectrum.xarr.umax(units='GHz')*(1+voff/units.speedoflight_kms)
+        self.minfreq_GHz = self.Spectrum.xarr.umin(unit='GHz')*(1+voff/units.speedoflight_kms)
+        self.maxfreq_GHz = self.Spectrum.xarr.umax(unit='GHz')*(1+voff/units.speedoflight_kms)
 
         self.table = get_splat_table(webquery=webquery, 
                 minwav=units.speedoflight_ms/self.maxfreq_GHz/1e9,
@@ -108,37 +100,45 @@ class radio_lines(object):
         self.hide()
         voff = self.voff if voff is None else voff
 
+        frequency = np.asarray(self.table['frequency'])
+
         mask = np.ones(len(self.table),dtype='bool')
-        mask *= ((self.table.frequency > self.Spectrum.xarr.umin(units='GHz')*(1+voff/units.speedoflight_kms)) * 
-                (self.table.frequency < self.Spectrum.xarr.umax(units='GHz')*(1+voff/units.speedoflight_kms)))
+        mask *= ((frequency > self.Spectrum.xarr.umin(unit='GHz')*(1+voff/units.speedoflight_kms)) *
+                (frequency < self.Spectrum.xarr.umax(unit='GHz')*(1+voff/units.speedoflight_kms)))
 
         if userecommended:
-            mask *= self.table.frequencyrecommended
+            if 'frequencyrecommended' in self.table.colnames:
+                mask *= np.asarray(self.table['frequencyrecommended'], dtype='bool')
+            else:
+                warnings.warn("Table has no 'frequencyrecommended' column; "
+                              "ignoring userecommended.")
         if maxupperstateenergy is not None:
-            mask *= (self.table.upperstateenergyK < maxupperstateenergy)
+            mask *= (np.asarray(self.table['upperstateenergyK']) < maxupperstateenergy)
         if minupperstateenergy is not None:
-            mask *= (self.table.upperstateenergyK > minupperstateenergy)
+            mask *= (np.asarray(self.table['upperstateenergyK']) > minupperstateenergy)
         if regexp is not None:
             import re
             reg = re.compile(regexp)
-            mask *= np.array([reg.search(sn) is not None for sn in self.table.Species])
+            mask *= np.array([reg.search(sn) is not None for sn in self.table['Species']])
 
-        freqoff = voff * 1e3 / units.speedoflight_ms * self.table.frequency[mask]
+        freqoff = voff * 1e3 / units.speedoflight_ms * frequency[mask]
 
         if mask.sum() > 0:
             if mask.sum() > 30 and not force:
                 print("WARNING: show() will plot %i lines!  Use force=True if you want this to happen anyway." % (mask.sum()))
                 return
             if verbose: print("Labeled %i lines." % mask.sum())
-            self._lines += [self.Spectrum.plotter.axis.vlines( 
-                    self.Spectrum.xarr.x_to_coord(self.table.frequency[mask]-freqoff, 'GHz'),
-                    ymin, ymax, color=color, **kwargs)]
+            xcoords = self.Spectrum.xarr.x_to_coord(frequency[mask]-freqoff, 'GHz')
+            # x_to_coord may return a Quantity; matplotlib needs plain floats
+            xcoords = np.atleast_1d(getattr(xcoords, 'value', xcoords))
+            self._lines += [self.Spectrum.plotter.axis.vlines(
+                    xcoords, ymin, ymax, color=color, **kwargs)]
             self._linenames += [self.Spectrum.plotter.axis.text(
-                    self.Spectrum.xarr.x_to_coord(FREQ, 'GHz'),
+                    XCOORD,
                     ymax*ymax_scale,
                     NAME,
                     rotation='vertical', color=color)
-                for FREQ,NAME in zip(self.table.frequency[mask]-freqoff,self.table.LatexName[mask])]
+                for XCOORD,NAME in zip(xcoords,self.table['LatexName'][mask])]
         else:
             if verbose: print("No lines found in range [%g, %g] GHz" % (self.minfreq_GHz, self.maxfreq_GHz))
 
@@ -161,45 +161,59 @@ class radio_lines(object):
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
  
-def get_splat_table(webquery=False, savename=None, **kwargs):
-    if webquery and webOK:
-        splat = query_splatalogue.query_splatalogue(**kwargs)
-        splat.describe()
-        splat.rename_column('frequency','FreqGHz')
-        splat.FreqGHz /= 1e3
-        splat.columns['FreqGHz'].unit = 'GHz'
-        splat.rename_column('molecular formula','Species')
-        splat.rename_column('quantum numbers','ResolvedQNs')
-        try:
-            splat.rename_column('chemicalname','ChemicalName')
-        except:
-            print("Failed to rename chemicalname.")
-    elif atpyOK:
-        splat = atpy.Table(selfpath+"/splatalogue.csv",type='ascii',delimiter=':')
-    else:
-        splat = readcol.readcol(selfpath+"/splatalogue.csv",fsep=":",asStruct=True)
+def get_splat_table(webquery=False, savename=None, filename=None, **kwargs):
+    """
+    Load a splatalogue line table (colon-delimited splatalogue.csv export)
+    into an `astropy.table.Table`.
 
-    for cn in splat.columns:
+    Parameters
+    ----------
+    webquery : bool
+        Deprecated & ignored.  The legacy SLAP web-query interface has been
+        removed; use `astroquery.splatalogue` to query splatalogue directly.
+    savename : str or None
+        If specified, write the resulting table to this filename.
+    filename : str or None
+        Path to a colon-delimited splatalogue CSV export.  Defaults to
+        ``splatalogue.csv`` in the ``pyspeckit/spectrum/speclines`` directory.
+    """
+    if webquery:
+        warnings.warn("pyspeckit's SLAP-based splatalogue web query has been "
+                      "removed; use astroquery.splatalogue instead.  Falling "
+                      "back to the local splatalogue.csv table.",
+                      DeprecationWarning)
+
+    if filename is None:
+        filename = os.path.join(selfpath, "splatalogue.csv")
+    if not os.path.exists(filename):
+        raise IOError("Splatalogue table file {0} not found.  Download a "
+                      "colon-delimited CSV export from splatalogue.online, or "
+                      "use astroquery.splatalogue to build a line table."
+                      .format(filename))
+
+    splat = Table.read(filename, format='ascii', delimiter=':', guess=False)
+
+    for cn in splat.colnames:
         if cn != R.sub('',cn):
             splat.rename_column(cn,R.sub('',cn))
 
-    if '' in splat.FreqGHz:
-        splat.FreqGHz[splat.FreqGHz == ''] = '-999'
-        splat.MeasFreqGHz[splat.MeasFreqGHz == ''] = '-999'
-        splat.rename_column('FreqGHz','FreqGHzTxt')
-        splat.add_column('FreqGHz',splat.FreqGHzTxt.astype('float'))
-        splat.remove_columns('FreqGHzTxt')
-        if 'MeasFreqGHz' in splat.columns:
-            splat.rename_column('MeasFreqGHz','MeasFreqGHzTxt')
-            splat.add_column('MeasFreqGHz',splat.MeasFreqGHzTxt.astype('float'))
-            splat.remove_columns('MeasFreqGHzTxt')
+    # entries with no computed (or measured) frequency are read as masked (or
+    # blank-string) values; coerce them to float columns filled with -999
+    for freqcol in ('FreqGHz', 'MeasFreqGHz'):
+        if freqcol in splat.colnames:
+            col = splat[freqcol]
+            if col.dtype.kind in 'SU':
+                data = np.array([x if x not in ('', None) else '-999'
+                                 for x in col], dtype='float')
+                splat[freqcol] = data
+            elif hasattr(col, 'filled'):
+                splat[freqcol] = col.filled(-999)
 
-    latex_names = [LatexName(species,qn) for species,qn in zip(splat.Species,splat.ResolvedQNs)]
-    line_names  = [LineName(species,qn) for species,qn in zip(splat.Species,splat.ResolvedQNs)]
-    if hasattr(splat,'add_column'):
-        splat.add_column("LineName",line_names)
-        splat.add_column("LatexName",latex_names)
-        splat.add_column('frequency',splat.FreqGHz)
+    latex_names = [LatexName(species,qn) for species,qn in zip(splat['Species'],splat['ResolvedQNs'])]
+    line_names  = [LineName(species,qn) for species,qn in zip(splat['Species'],splat['ResolvedQNs'])]
+    splat['LineName'] = line_names
+    splat['LatexName'] = latex_names
+    splat['frequency'] = splat['FreqGHz']
 
     if savename is not None:
         splat.write(savename)
