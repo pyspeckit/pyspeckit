@@ -35,6 +35,17 @@ You can also start the interactive fitter by pressing 'b' for baseline or 'f'
 for fit when a plot window is active, then press '?' to get help.  These
 commands will not work if you have the "zoom" or "pan" tools active, though!
 
+The interactive mode accepts both **mouse clicks and keystrokes** (the figure
+captions below say "click", but every action has a keyboard equivalent):
+
+* **left-click**, or press ``p``, ``i``, or ``a``: select the edges of a
+  region.  The first two selections set the fitting region; when fitting
+  lines, subsequent pairs of selections mark each line's peak and width.
+* press ``x`` or ``e``: *exclude* the region between the next two selections
+  (baseline mode).
+* **right-click**, or press ``d``: done -- perform the fit.
+* press ``?``: print the interactive-mode help to the terminal.
+
 .. figure:: images/interactive_example_hr2421_baseline_firstclick.png
 	:alt: First click fitting a baseline
         :figwidth: 800
@@ -61,12 +72,12 @@ commands will not work if you have the "zoom" or "pan" tools active, though!
         :width: 800
 
 .. figure:: images/interactive_example_hr2421_baseline_fourthclick_highlight.png
-	:alt: The results of the fourth click ("exclude")
+	:alt: The results of the fourth selection (the "x" keypress excludes a region)
         :figwidth: 800
         :width: 800
 
 .. figure:: images/interactive_example_hr2421_baseline_fifthclick_fit.png
-	:alt: Fifth click fitting a baseline (run the fit)
+	:alt: Fifth action fitting a baseline: run the fit by pressing "d" or right-clicking
         :figwidth: 800
         :width: 800
 
