@@ -205,7 +205,7 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
                              parse_name_locally=True,
                              flags=0,
                              return_table=False,
-                             use_get_molecule=True,
+                             use_get_molecule=None,
                              **kwargs):
     """
     Get the molecular parameters for a molecule from the JPL or CDMS catalog
@@ -230,12 +230,33 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
         If specified, this will override the molecule name.  You can specify
         molecules based on the 'TAG' column in the JPL table
     parse_name_locally : bool
-        Option passed to the query tool to specify whether to use regex to
-        search for the molecule name
+        If exact and substring matching of ``molecule_name`` against the
+        catalog species table both fail, treat ``molecule_name`` as a regular
+        expression and search the species table with it
     flags : int
         Regular expression flags to pass to the regex search
     return_table : bool
         Also return the parameter table?
+    use_get_molecule : bool or None
+        Use the astroquery ``get_molecule`` interface, which downloads the
+        full catalog file for the (resolved) species tag and selects the
+        lines in the requested frequency range locally, instead of the
+        ``query_lines`` web-form interface.  The default (None) selects
+        ``get_molecule`` for the JPL catalog (whose web form has been
+        unreliable; see pyspeckit issue #421) and ``query_lines`` for CDMS
+        (astroquery's CDMS catalog-file parser has an off-by-one column bug
+        that corrupts the GUP [upper-state degeneracy] column whenever
+        GUP >= 100; see the note below).
+
+    Notes
+    -----
+    As of astroquery 0.4.12.dev, ``CDMS.get_molecule`` misparses the
+    fixed-width catalog files: it uses column starts ELO=32, GUP=42 instead
+    of ELO=31, GUP=41, so the hundreds digit of GUP is appended to ELO as a
+    bogus fifth decimal digit (e.g. GUP=595 is read as 95) and letter-coded
+    GUP values (>=1000) make ELO a string column, which crashes downstream
+    unit conversion.  Until that is fixed upstream, ``use_get_molecule=True``
+    with ``catalog='CDMS'`` should not be trusted.
 
     Examples
     --------
@@ -249,7 +270,11 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     ...                                                          fmax=100*u.GHz)
     """
     if catalog == 'JPL':
-        from astroquery.jplspec import JPLSpec as QueryTool
+        try:
+            from astroquery.linelists.jplspec import JPLSpec as QueryTool
+        except ImportError:
+            # older astroquery
+            from astroquery.jplspec import JPLSpec as QueryTool
     elif catalog == 'CDMS':
         from astroquery.linelists.cdms import CDMS as QueryTool
     else:
@@ -263,55 +288,97 @@ def get_molecular_parameters(molecule_name, tex=50, fmin=1*u.GHz, fmax=1*u.THz,
     else:
         raise ValueError(f"Did not find NAME or molecule in table columns: {speciestab.colnames}")
 
-    if use_get_molecule:
-        if molecule_tag is not None:
-            jpltbl = QueryTool.get_molecule(molecule=molecule_tag, catalog=catalog)
-            tagcol = 'tag' if 'tag' in speciestab.colnames else 'TAG'
-            match = speciestab[tagcol] == molecule_tag
-        else:
-            jpltbl = QueryTool.get_molecule(molecule=molecule_name,
-                                            catalog=catalog,
-                                            parse_name_locally=parse_name_locally,
-                                            flags=flags)
-            match = speciestab[molcol] == molecule_name
-            if match.sum() == 0:
-                # retry using partial string matching
-                match = np.char.find(speciestab[molcol], molecule_name) != -1
-        molecule_name = jpltbl['name']
+    tagcol = 'TAG' if 'TAG' in speciestab.colnames else 'tag'
 
-        if match.sum() != 1:
-            raise ValueError(f"Too many or too few matches ({match.sum()}) to {molecule_name}")
-        # jpltable (the species table row) holds the partition function
-        # metadata used by partfunc below
-        jpltable = speciestab[match]
+    if use_get_molecule is None:
+        # default: use get_molecule for JPL (the JPL query_lines web form has
+        # been unreliable; pyspeckit issue #421), but query_lines for CDMS
+        # (astroquery's CDMS.get_molecule catalog-file parser has an
+        # off-by-one bug that corrupts GUP >= 100; see docstring Notes)
+        use_get_molecule = (catalog == 'JPL')
+    elif use_get_molecule and catalog == 'CDMS':
+        log.warning("use_get_molecule=True with catalog='CDMS' relies on "
+                    "astroquery's CDMS catalog-file parser, which corrupts "
+                    "the GUP (degeneracy) column for GUP >= 100.  "
+                    "The results may be incorrect.")
 
+    if use_get_molecule and not hasattr(QueryTool, 'get_molecule'):
+        # older versions of astroquery do not provide get_molecule
+        log.warning("The installed version of astroquery does not provide "
+                    "get_molecule; falling back to query_lines.")
+        use_get_molecule = False
+
+    # resolve the molecule name and tag from the species table
+    if molecule_tag is not None:
+        match = speciestab[tagcol] == molecule_tag
+        if molecule_name is not None:
+            log.warning(f"molecule_tag={molecule_tag} overrides molecule_name={molecule_name}.")
     else:
-        if molecule_tag is not None:
-            tagcol = 'tag' if 'tag' in speciestab.colnames else 'TAG'
-            match = speciestab[tagcol] == molecule_tag
-            molecule_name = speciestab[match][molcol][0]
-            if catalog == 'CDMS':
-                molsearchname = f'{molecule_tag:06d} {molecule_name}'
-            else:
-                molsearchname = f'{molecule_tag} {molecule_name}'
-            parse_names_locally = False
-            if molecule_name is not None:
-                log.warning(f"molecule_tag overrides molecule_name.  New molecule_name={molecule_name}.  Searchname = {molsearchname}")
-            else:
-                log.info(f"molecule_name={molecule_name} for tag molecule_tag={molecule_tag}.  Searchname = {molsearchname}")
-        else:
-            molsearchname = molecule_name
-            match = speciestab[molcol] == molecule_name
-            if match.sum() == 0:
-                # retry using partial string matching
-                match = np.char.find(speciestab[molcol], molecule_name) != -1
+        match = speciestab[molcol] == molecule_name
+        if match.sum() == 0:
+            # retry using partial string matching
+            match = np.char.find(speciestab[molcol], molecule_name) != -1
+        if match.sum() == 0 and parse_name_locally:
+            # retry using regular expression matching
+            import re
+            try:
+                match = np.array([re.search(molecule_name, str(nm), flags)
+                                  is not None
+                                  for nm in speciestab[molcol]], dtype=bool)
+            except re.error:
+                # molecule names like H2C(CN)2 are not valid regexes
+                pass
 
-        if match.sum() != 1:
-            raise ValueError(f"Too many or too few matches ({match.sum()}) to {molecule_name}")
-        jpltable = speciestab[match]
+    if match.sum() != 1:
+        matched_names = list(speciestab[molcol][match]) if 0 < match.sum() <= 25 else ''
+        raise ValueError(f"Too many or too few matches ({match.sum()}) to "
+                         f"molecule_name={molecule_name}, molecule_tag={molecule_tag} "
+                         f"in the {catalog} catalog. "
+                         f"{('Matched species: ' + str(matched_names)) if matched_names else ''}")
+
+    # jpltable (the species table row) holds the partition function
+    # metadata used by partfunc below
+    jpltable = speciestab[match]
+    molecule_tag = int(jpltable[tagcol][0])
+    molecule_name = str(jpltable[molcol][0])
+
+    if use_get_molecule:
+        # get_molecule retrieves the full catalog file for the species
+        # specified by its tag; frequency selection is done below
+        jpltbl = QueryTool.get_molecule(molecule_tag)
+    else:
+        # the tag has been resolved above, so we can query for it directly
+        # (exact tag-based queries are far more reliable than name matching)
+        if catalog == 'CDMS':
+            # the CDMS query tool expects "tag name", with the tag
+            # zero-padded to 6 digits
+            molsearchname = f'{molecule_tag:06d} {molecule_name}'
+        else:
+            # the JPL query tool accepts a bare tag
+            molsearchname = str(molecule_tag)
+        log.info(f"Searching for molecule name={molecule_name} tag={molecule_tag} "
+                 f"with search name '{molsearchname}'")
 
         jpltbl = QueryTool.query_lines(fmin, fmax, molecule=molsearchname,
-                                    parse_name_locally=parse_name_locally, **kwargs)
+                                       parse_name_locally=False, **kwargs)
+
+    if not np.issubdtype(jpltbl['ELO'].dtype, np.number):
+        raise ValueError("The ELO (lower-state energy) column was not parsed "
+                         "as a number; this is a known bug in astroquery's "
+                         "CDMS catalog-file parser for species with "
+                         "degeneracies >= 1000.  Try use_get_molecule=False.")
+
+    # select lines in the requested frequency range.  get_molecule retrieves
+    # the full catalog, and the JPL query_lines web form has been observed to
+    # ignore the requested limits, so this is enforced client-side for both.
+    fmin_MHz, fmax_MHz = sorted([fmin.to(u.MHz, u.spectral()),
+                                 fmax.to(u.MHz, u.spectral())])
+    inrange = ((jpltbl['FREQ'].quantity >= fmin_MHz) &
+               (jpltbl['FREQ'].quantity <= fmax_MHz))
+    jpltbl = jpltbl[inrange]
+    if len(jpltbl) == 0:
+        raise ValueError(f"No lines found for {molecule_name} "
+                         f"(tag={molecule_tag}) between {fmin} and {fmax}.")
 
     def partfunc(tem):
         """
