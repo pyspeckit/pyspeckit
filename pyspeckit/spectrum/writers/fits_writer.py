@@ -1,4 +1,5 @@
 from __future__ import print_function
+import re
 from six import iteritems
 import astropy
 import numpy as np
@@ -13,6 +14,45 @@ except ImportError:
     import pyfits
 except ImportError:
     fitscheck = False
+
+
+def strip_multispec_wcs(header):
+    """
+    Remove IRAF echelle/multispec WCS keywords from a header (in-place).
+
+    Spectra loaded from IRAF multispec (echelle) files - e.g., via
+    `pyspeckit.wrappers.load_IRAF_multispec` - inherit the original file's
+    multispec WCS keywords (``WATi_jjj``, ``CTYPEn = 'MULTISPE'``, etc.).
+    When a single order is written back out as a standard linear-WCS
+    spectrum, those keywords are stale and cause the file to be
+    mis-identified as an echelle spectrum when read back in.
+    """
+    if 'multispec' not in str(header.get('WAT0_001', '')):
+        return header
+
+    for key in list(header.keys()):
+        # WATi_jjj: the multispec dispersion specification itself
+        # CDi_j / LTMi_j: placeholder (identity) transforms in multispec
+        # files; if left in place they override the linear CRVAL/CDELT
+        # keywords when the file is read back in
+        if key and re.match(r'^(WAT[0-9]+_[0-9]+|CD[0-9]+_[0-9]+|LTM[0-9]+_[0-9]+|LTV[0-9]+)$',
+                            key):
+            del header[key]
+
+    for key in ('WCSDIM', 'WAXMAP01'):
+        if key in header:
+            del header[key]
+
+    # axis-2+ multispec keywords describe the order stacking, which no
+    # longer exists in a single written spectrum
+    for ii in range(2, 8):
+        if header.get('CTYPE%i' % ii) == 'MULTISPE':
+            for prefix in ('CTYPE', 'CUNIT', 'CRVAL', 'CRPIX', 'CDELT'):
+                if '%s%i' % (prefix, ii) in header:
+                    del header['%s%i' % (prefix, ii)]
+
+    return header
+
 
 class write_fits(Writer):
     def write_data(self, filename=None, newsuffix='out', overwrite=True,
@@ -29,7 +69,12 @@ class write_fits(Writer):
         else:
             fn = filename
 
-        header = self.Spectrum.header
+        # copy so that writing does not modify the spectrum's own header
+        # (multiple spectra - e.g. echelle orders - may share one header)
+        header = self.Spectrum.header.copy()
+        # remove stale IRAF multispec WCS keywords (e.g. for a single
+        # echelle order loaded with pyspeckit.wrappers.load_IRAF_multispec)
+        strip_multispec_wcs(header)
         header['ORIGIN'] = 'pyspeckit version %s' % pyspeckit.__version__
         header['OBJECT'] = self.Spectrum.specname
         unit = self.Spectrum.unit or self.Spectrum.header.get('BUNIT')
