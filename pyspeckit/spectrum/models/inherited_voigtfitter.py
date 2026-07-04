@@ -38,8 +38,10 @@ def voigt(xarr, amp, xcen, sigma, gamma, normalized=False):
 
     Parameters
     ----------
-    xarr : np.ndarray
-        The X values over which to compute the Voigt profile
+    xarr : np.ndarray, `~astropy.units.Quantity`, or `~pyspeckit.spectrum.units.SpectroscopicAxis`
+        The X values over which to compute the Voigt profile.  If a plain
+        (unitless) array is given, its values are assumed to be in the same
+        units as ``xcen``, ``sigma``, and ``gamma``.
     amp : float
         Amplitude of the voigt profile
         if normalized = True, amp is the AREA
@@ -55,7 +57,16 @@ def voigt(xarr, amp, xcen, sigma, gamma, normalized=False):
     """
 
     if scipyOK:
-        z = ((xarr.value-xcen) + 1j*gamma) / (sigma * np.sqrt(2))
+        if hasattr(xarr, 'value'):
+            # SpectroscopicAxis or astropy Quantity: strip the units
+            # (the pyspeckit fitting machinery converts xarr to the
+            # appropriate unit before calling this function)
+            xval = xarr.value
+        else:
+            # plain ndarray (or list): assume the values are already in the
+            # same units as xcen, sigma, and gamma
+            xval = np.asarray(xarr)
+        z = ((xval-xcen) + 1j*gamma) / (sigma * np.sqrt(2))
         V = amp * np.real(scipy.special.wofz(z))
         if normalized:
             return V / (sigma*np.sqrt(2*np.pi))
