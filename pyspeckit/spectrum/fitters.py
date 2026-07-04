@@ -1424,19 +1424,13 @@ class Specfit(interactive.Interactive):
         if hasattr(self,'residualplot'):
             for L in self.residualplot:
                 if L in self.Spectrum.plotter.axis.lines:
-                    if hasattr(self.Spectrum.plotter.axis.lines, 'remove'):
-                        self.Spectrum.plotter.axis.lines.remove(L)
-                    else:
-                        L.remove()
+                    L.remove()
 
     def _clearcomponents(self):
         for pc in self._plotted_components:
             pc.set_visible(False)
             if pc in self.Spectrum.plotter.axis.lines:
-                if hasattr(self.Spectrum.plotter.axis.lines, 'remove'):
-                    self.Spectrum.plotter.axis.lines.remove(pc)
-                else:
-                    pc.remove()
+                pc.remove()
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
 
