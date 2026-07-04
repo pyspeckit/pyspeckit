@@ -474,14 +474,24 @@ class Specfit(interactive.Interactive):
                 midpt_pixel = int(np.round((xmin+xmax)/2.0))
                 midpt       = self.Spectrum.xarr[midpt_pixel].value
             elif midpt_location == 'fitted':
-                try:
-                    shifts = np.array([self.Spectrum.specfit.parinfo[x].value
-                                       for x in self.Spectrum.specfit.parinfo.keys()
-                                       if 'SHIFT' in x])
-                except AttributeError:
+                if self.parinfo is None:
                     raise AttributeError("Can only specify midpt_location="
-                                         "fitted if there is a SHIFT parameter"
-                                         "for the fitted model")
+                                         "'fitted' after a fit has been "
+                                         "performed")
+                # the fitted line center is the SHIFT parameter (e.g., the
+                # gaussian fitter's parameters are AMPLITUDE0, SHIFT0, WIDTH0)
+                shifts = np.array([self.parinfo[x].value
+                                   for x in self.parinfo.keys()
+                                   if 'SHIFT' in x.upper()])
+                if shifts.size == 0 and getattr(self.fitter, 'centroid_par', None):
+                    # some models declare a centroid parameter with a
+                    # different name (e.g., XOFF_V)
+                    shifts = np.array(self.fitter.analytic_centroids())
+                if shifts.size == 0:
+                    raise AttributeError("Can only specify midpt_location="
+                                         "'fitted' if there is a SHIFT "
+                                         "parameter (or a declared centroid "
+                                         "parameter) for the fitted model")
                 # We choose to display the eqw fit at the center of the fitted
                 # line set, closest to the passed window.
                 # Note that this has the potential to show a eqw "rectangle"
