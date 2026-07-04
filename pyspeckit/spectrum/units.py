@@ -452,14 +452,25 @@ class SpectroscopicAxis(u.Quantity):
 
     @property
     def refX_unit(self):
+        # refX is stored as a Quantity, so its unit is authoritative
+        # (this keeps refX_unit synchronized when refX is assigned a
+        # Quantity after initialization; see issue 63)
         if hasattr(self.refX, 'unit'):
             return self.refX.unit
+        # if refX has not been set yet, fall back to the declared unit so
+        # that a later bare-number assignment to refX (e.g., ``xarr.refX =
+        # 5.0``) can be interpreted in that unit
+        return getattr(self, '_refX_unit', None)
 
     @refX_unit.setter
     def refX_unit(self, value):
-        if value is None or self.refX is None:
+        if value is None:
             return
-        if hasattr(self.refX, 'unit'):
+        if self.refX is None:
+            # remember the declared unit for later bare-number assignments
+            # to refX (previously this was silently discarded; issue 63)
+            self._refX_unit = value
+        elif hasattr(self.refX, 'unit'):
             self.refX = u.Quantity(self.refX.value, value)
         else:
             self.refX = u.Quantity(self.refX, value)
