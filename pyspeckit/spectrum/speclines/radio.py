@@ -151,14 +151,12 @@ class radio_lines(object):
         """
         for text in self._linenames:
             if text in self.Spectrum.plotter.axis.texts:
-                self.Spectrum.plotter.axis.texts.remove(text)
-        for text in self._linenames:
-            self._linenames.remove(text)
+                text.remove()
+        self._linenames = []
         for line in self._lines:
             if line in self.Spectrum.plotter.axis.collections:
-                self.Spectrum.plotter.axis.collections.remove(line)
-        for line in self._lines:
-            self._lines.remove(line)
+                line.remove()
+        self._lines = []
 
         if self.Spectrum.plotter.autorefresh:
             self.Spectrum.plotter.refresh()
