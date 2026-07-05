@@ -222,3 +222,95 @@ def test_ammonia_guessing():
     assert rslt == [3.73*2, 3.73, 15, 'wid1', 'cen1', 0.5,
                     4.73*2, 4.73, 15, 'wid2', 'cen2', 0.5,
                    ]
+
+
+def make_synthspec_cold_restricted(tkin=15., delta=3., column=14.5, width=0.5,
+                                   vcens=(0.0,), lines=('oneone', 'twotwo')):
+    """
+    Synthetic cold-ammonia spectrum with tex = trot(tkin) - delta
+    (regression data for github issues #368 / #307)
+    """
+    trot = ammonia.tkin_to_trot(tkin)
+    velo = u.Quantity(np.linspace(-25, 25, 501), u.km/u.s)
+
+    spectra_list = []
+    for line in lines:
+        cfrq = ammonia_constants.freq_dict[line]*u.Hz
+        frq = velo.to(u.GHz, u.doppler_radio(cfrq))
+        xarr = units.SpectroscopicAxis(frq, refX=cfrq)
+        data = np.zeros(xarr.size)
+        for vcen in vcens:
+            data = data + ammonia.ammonia(xarr, trot=trot, tex=trot-delta,
+                                          width=width, ntot=column,
+                                          xoff_v=vcen)
+        spectra_list.append(Spectrum(xarr=xarr, data=data))
+
+    return Spectra(spectra_list)
+
+
+def test_cold_ammonia_restricted_tex():
+    """
+    Regression test for github issue #368 (and #307): fitting a
+    restricted-tex (tex = trot - delta) model in terms of the kinetic
+    temperature requires the nonlinear Swift tkin->trot conversion inside
+    the tie; a linear 'p[0]-p[6]' tie cannot express it.
+    """
+    tkin, delta = 15., 3.
+    tex = ammonia.tkin_to_trot(tkin) - delta
+
+    spc = make_synthspec_cold_restricted(tkin=tkin, delta=delta)
+    spc.specfit(fittype='cold_ammonia_restricted_tex',
+                guesses=[12, 8, 14.0, 0.6, 0.5, 0.6, 2.0])
+
+    pv = spc.specfit.parinfo.values
+    assert np.isclose(pv[0], tkin, atol=0.05)   # tkin
+    assert np.isclose(pv[6], delta, atol=0.05)  # delta
+    # tex must equal trot(tkin) - delta, NOT tkin - delta
+    assert np.isclose(pv[1], tex, atol=0.05)
+    assert np.isclose(pv[1], ammonia.tkin_to_trot(pv[0]) - pv[6], atol=1e-6)
+
+    # the delta >= 0 limit (tex <= trot) must be in place
+    delta_par = spc.specfit.parinfo['delta0']
+    assert delta_par['limited'][0]
+    assert delta_par['limits'][0] == 0
+    assert delta_par['value'] >= 0
+
+
+def test_cold_ammonia_restricted_tex_twopeak():
+    """
+    Two-peak version of the issue #368 regression test: per-peak tied
+    strings must be re-indexed (p[0]->p[7], p[6]->p[13]) without mangling
+    the numeric constants of the Swift conversion.
+    """
+    tkin, delta = 15., 3.
+    tex = ammonia.tkin_to_trot(tkin) - delta
+
+    spc = make_synthspec_cold_restricted(tkin=tkin, delta=delta,
+                                         vcens=(0.0, 5.0))
+    spc.specfit(fittype='cold_ammonia_restricted_tex',
+                guesses=[12, 8, 14.0, 0.6, 0.5, 0.6, 2.0,
+                         12, 8, 14.0, 0.6, 5.5, 0.6, 2.0])
+
+    pv = spc.specfit.parinfo.values
+    for offset, vcen in zip((0, 7), (0.0, 5.0)):
+        assert np.isclose(pv[offset+0], tkin, atol=0.1)
+        assert np.isclose(pv[offset+6], delta, atol=0.1)
+        assert np.isclose(pv[offset+1], tex, atol=0.1)
+        assert np.isclose(pv[offset+4], vcen, atol=0.1)
+
+
+def test_cold_ammonia_restricted_tex_delta_zero():
+    """
+    A spectrum generated with tex = trot (delta = 0) must be recoverable
+    and the fitted delta must honor the delta >= 0 limit.
+    """
+    tkin = 15.
+
+    spc = make_synthspec_cold_restricted(tkin=tkin, delta=0.)
+    spc.specfit(fittype='cold_ammonia_restricted_tex',
+                guesses=[12, 10, 14.0, 0.6, 0.5, 0.6, 1.0])
+
+    pv = spc.specfit.parinfo.values
+    assert np.isclose(pv[0], tkin, atol=0.05)
+    assert pv[6] >= 0
+    assert np.isclose(pv[6], 0, atol=0.05)
