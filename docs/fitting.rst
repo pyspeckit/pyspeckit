@@ -1,6 +1,10 @@
 Model Fitting
 =============
 
+To constrain the fit parameters - impose limits (boundary conditions), hold
+parameters fixed, or tie parameters to one another - see
+:ref:`constraining-parameters` in the :doc:`parameters` documentation.
+
 General documentation for model fitting is below.  There are several multi-component model fitting tools that have been developed based on pyspeckit:
 
  * `Mike Chen's multi-vlsr <https://github.com/mcyc/multi_vlsr>`_
