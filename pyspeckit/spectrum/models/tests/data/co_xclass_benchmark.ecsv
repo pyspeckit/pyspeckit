@@ -1,0 +1,42 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: line_index, datatype: int64}
+# - {name: restfreq_MHz, datatype: float64}
+# - {name: fmin_MHz, datatype: float64}
+# - {name: fmax_MHz, datatype: float64}
+# - {name: xclass_sum_K, datatype: float64}
+# - {name: molsim_sum_K, datatype: float64}
+# - {name: pyspeckit_jpl_sum_K, datatype: float64}
+# - {name: pyspeckit_cdms_sum_K, datatype: float64}
+# - {name: pyspeckit_peak_tau, datatype: float64}
+# - {name: molsim_tau_ratio, datatype: float64}
+# - {name: molsim_aij_ratio, datatype: float64}
+# meta:
+#   column_notes: {'*_sum_K': sum of the background-subtracted brightness-temperature model over all 0.1-MHz channels in the window, fmin_MHz/fmax_MHz: 'per-line
+#       spectral windows, restfreq*(1 - 16/3e5) to restfreq*(1 + 14/3e5)', molsim_aij_ratio: molsim Einstein A (from co.cat) divided by
+#       10**aij computed by pyspeckit get_molecular_parameters from the CDMS LGINT, molsim_tau_ratio: molsim Simulation.spectrum.tau divided
+#       by the pyspeckit peak channel tau; the expected value is sqrt(2*pi/(8*ln2)) = 1.0644670 because molsim normalizes the line profile
+#       by the FWHM rather than by sqrt(2*pi)*sigma, pyspeckit_peak_tau: peak channel optical depth of the pyspeckit JPL model evaluated
+#       on the molsim frequency grid (0.1 MHz channels spanning all windows)}
+#   description: 'Reference values for benchmarking the pyspeckit LTE molecule model against XCLASS and molsim for CO v=0 (pyspeckit issue
+#     #357).'
+#   parameters: {Ntot_cm-2: 2.1061155735e+17, freqstep_MHz: 0.1, source_size_arcsec: 4335.0376922, tbg_K: 2.73, tkin_K: 79.842254347,
+#     vcen_kms: -1.1, vwidth_fwhm_kms: 4.2101396644}
+#   provenance: Transcribed from the stored outputs of https://github.com/pyspeckit/pyspeckit-tests/blob/master/xclass-benchmark/CO_Benchmark.ipynb
+#     (XCLASS run 2021-09-05, job directories job__05-09-2021__16-21-*; molsim from https://github.com/bmcguir2/molsim reading co.cat
+#     + co.qpart; pyspeckit models built from astroquery CDMS/JPL catalog queries for CO / CO,v=0).
+# schema: astropy-2.0
+line_index restfreq_MHz fmin_MHz fmax_MHz xclass_sum_K molsim_sum_K pyspeckit_jpl_sum_K pyspeckit_cdms_sum_K pyspeckit_peak_tau molsim_tau_ratio molsim_aij_ratio
+0 115271.2018 115265.05400257066 115276.58112275068 202.33428 214.59241 202.32447 202.32447 0.16290839757147008 1.06460807 1.00003129
+1 230538.0 230525.70463999998 230548.75844 1234.94028 1298.91052 1234.89464 1234.89464 0.5872691707431507 1.06459286 1.00001107
+2 345795.9899 345777.5474472053 345812.1270461953 2896.49106 3021.23215 2896.42951 2896.42951 1.1113539750547927 1.06461873 1.00002006
+3 461040.7682 461016.17935902934 461062.28343584936 4610.68894 4782.37688 4610.63669 4610.63669 1.5499773163414183 1.06459238 1.00001982
+4 576267.9305 576237.1962103733 576294.8230034234 6004.02934 6212.4179 6003.99567 6003.99567 1.773183717968348 1.06446158 1.00000811
+5 691473.0763 691436.1977359306 691505.3450435607 6880.04831 7121.0435 6880.66672 6880.0326 1.7440973277115002 1.06443014 1.00000899
+6 806651.806 806608.7845703466 806689.4497509467 7120.55014 7388.89383 7120.57082 7120.57082 1.513227246216555 1.06442582 1.00000086
+7 921799.7 921750.5373493333 921842.7173193333 6673.88968 6955.19448 6673.95582 6673.95582 1.175395427933255 1.0644456 0.99999152
+8 1036912.393 1036857.0910057067 1036960.7822450068 5620.60886 5888.15471 5620.7138 5620.7138 0.8255375191265136 1.06441193 0.99998784
+9 1151985.452 1151924.0127758933 1152039.2113210934 4213.12647 4436.35699 4213.27164 4213.27164 0.5276995208477956 1.06439849 0.99997709
+10 1267014.486 1266946.91189408 1267073.61334268 2799.62885 2960.3997 2799.75691 2799.75691 0.3085456495097195 1.06439272 0.99996649
+11 1381995.105 1381921.3985944 1382059.5981049 1653.44839 1753.59724 1653.55281 1653.55281 0.1655354077330334 1.06437528 0.99995679
