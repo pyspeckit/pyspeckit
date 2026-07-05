@@ -828,26 +828,22 @@ class ammonia_model(model.SpectralModel):
         return [20,10, 15, 1.0, 0.0, 1.0]
 
     def annotations(self):
-        from decimal import Decimal # for formatting
+        from ..annotation_format import format_mathtext_value
         tex_key = {'trot':'T_R', 'tkin': 'T_K', 'tex':'T_{ex}', 'ntot':'N',
                    'fortho':'F_o', 'width':'\\sigma', 'xoff_v':'v',
                    'logdens':'\\log_{10} n',
                    'fillingfraction':'FF', 'tau':'\\tau_{1-1}',
                    'background_tb':'T_{BG}', 'delta':'T_R-T_{ex}'}
-        # small hack below: don't quantize if error > value.  We want to see the values.
         label_list = []
         for pinfo in self.parinfo:
             parname = tex_key[pinfo['parname'].strip("0123456789").lower()]
             parnum = int(pinfo['parname'][-1])
             if pinfo['fixed']:
-                formatted_value = "%s" % pinfo['value']
-                pm = ""
-                formatted_error=""
+                formatted = format_mathtext_value(pinfo['value'])
             else:
-                formatted_value = Decimal("%g" % pinfo['value']).quantize(Decimal("%0.2g" % (min(pinfo['error'],pinfo['value']))))
-                pm = "$\\pm$"
-                formatted_error = Decimal("%g" % pinfo['error']).quantize(Decimal("%0.2g" % pinfo['error']))
-            label = "$%s(%i)$=%8s %s %8s" % (parname, parnum, formatted_value, pm, formatted_error)
+                formatted = format_mathtext_value(pinfo['value'],
+                                                  pinfo['error'])
+            label = "$%s(%i)$=$%s$" % (parname, parnum, formatted)
             label_list.append(label)
         labels = tuple(mpcb.flatten(label_list))
         return labels

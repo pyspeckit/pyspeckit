@@ -220,10 +220,11 @@ class gaussian_fitter(model.SpectralModel):
         return mpp,self.n_gaussian(pars=mpp)(xax),mpperr,chi2
 
     def annotations(self):
+        from ..annotation_format import format_mathtext_value
         label_list = [(
-                "$A(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[0+jj*self.npars],self.mpperr[0+jj*self.npars]),
-                "$x(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[1+jj*self.npars],self.mpperr[1+jj*self.npars]),
-                "$\\sigma(%i)$=%6.4g $\\pm$ %6.4g" % (jj,self.mpp[2+jj*self.npars],self.mpperr[2+jj*self.npars])
+                "$A(%i)$=$%s$" % (jj, format_mathtext_value(self.mpp[0+jj*self.npars], self.mpperr[0+jj*self.npars])),
+                "$x(%i)$=$%s$" % (jj, format_mathtext_value(self.mpp[1+jj*self.npars], self.mpperr[1+jj*self.npars])),
+                "$\\sigma(%i)$=$%s$" % (jj, format_mathtext_value(self.mpp[2+jj*self.npars], self.mpperr[2+jj*self.npars]))
                           ) for jj in range(self.npeaks)]
         labels = tuple(mpcb.flatten(label_list))
         return labels

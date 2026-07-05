@@ -18,6 +18,7 @@ from ..specwarnings import warn
 from . import interactive
 from . import history
 from . import widgets
+from .annotation_format import format_mathtext_value
 
 from pyspeckit.spectrum.units import SpectroscopicAxis
 
@@ -516,11 +517,11 @@ class Specfit(interactive.Interactive):
             self.EQW_plots.append(self.Spectrum.plotter.axis.fill_between(
                 [midpt-eqw/2.0,midpt+eqw/2.0], [0,0],
                 [midpt_level,midpt_level], color=plotcolor, alpha=alpha,
-                label='EQW: %0.3g' % eqw))
+                label='EQW: $%s$' % format_mathtext_value(eqw)))
             if annotate:
                 self.Spectrum.plotter.axis.legend(
                         [(matplotlib.collections.CircleCollection([0],facecolors=[plotcolor],edgecolors=[plotcolor]))],
-                        [('EQW: %0.3g' % eqw)],
+                        [('EQW: $%s$' % format_mathtext_value(eqw))],
                         markerscale=0.01, borderpad=0.1, handlelength=0.1,
                         handletextpad=0.1, loc=loc)
             if self.Spectrum.plotter.autorefresh:

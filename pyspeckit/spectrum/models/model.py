@@ -683,7 +683,7 @@ class SpectralModel(fitter.SimpleFitter):
         >>> # Annotate a Gaussian
         >>> sp.specfit.annotate(shortvarnames=['A','\\Delta x','\\sigma'])
         """
-        from decimal import Decimal # for formatting
+        from ..annotation_format import format_mathtext_value
         svn = self.shortvarnames if shortvarnames is None else shortvarnames
         # if pars need to be replicated....
         if len(svn) < self.npeaks*self.npars:
@@ -705,12 +705,11 @@ class SpectralModel(fitter.SimpleFitter):
             if None in (value, error):
                 label = "{0}({1})=None".format(varname, varnumber)
             elif fixed or error==0:
-                label = ("$%s(%i)$=%8s" % (varname, varnumber,
-                        Decimal("%g" % value).quantize(Decimal("%0.6g" % (value)))))
+                label = ("$%s(%i)$=$%s$" % (varname, varnumber,
+                                            format_mathtext_value(value)))
             else:
-                label = ("$%s(%i)$=%8s $\\pm$ %8s" % (varname, varnumber,
-                    Decimal("%g" % value).quantize(Decimal("%0.2g" % (min(np.abs([value,error]))))),
-                    Decimal("%g" % error).quantize(Decimal("%0.2g" % (error))),))
+                label = ("$%s(%i)$=$%s$" % (varname, varnumber,
+                                            format_mathtext_value(value, error)))
             label_list.append(label)
 
         labels = tuple(mpcb.flatten(label_list))
