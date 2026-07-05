@@ -70,6 +70,42 @@ def test_ammonia_restricted_tex_multipeak_tied():
     assert parinfo1.tied == ['', 'p[0]-p[6]', '', '', '', '', '']
 
 
+def test_cold_ammonia_restricted_tex_multipeak_tied():
+    """
+    Issue #368: the cold-ammonia restricted-tex tie encodes the nonlinear
+    Swift tkin->trot conversion, so its 'tied' string contains numeric
+    constants (41.18, 0.6, 15.7).  Multi-peak re-indexing must bump only
+    the bracketed parameter indices, not those constants.
+    """
+    tie0 = ammonia._cold_restricted_tex_tied
+    tie1 = ammonia._increment_string_number(tie0, 7)
+
+    mod = ammonia.cold_ammonia_model_restricted_tex()
+    parinfo = mod.make_parinfo(npeaks=2,
+                               params=(20, 20, 14, 1.0, 0.0, 0.5, 0)*2)
+    assert parinfo.tied == ['', tie0, '', '', '', '', '',
+                            '', tie1, '', '', '', '', '']
+
+    # the second peak ties tex1 to tkin1 (p[7]) and delta1 (p[13]) ...
+    assert 'p[7]' in tie1 and 'p[13]' in tie1
+    # ... and the Swift-conversion constants must be untouched
+    for constant in ('41.18', '0.6', '15.7'):
+        assert constant in tie1
+
+
+def test_ammonia_restricted_tex_rejects_cold_ammonia_func():
+    """
+    Issue #368: ammonia_model_restricted_tex(ammonia_func=cold_ammonia)
+    was advertised by the docstring but could never work (it crashed with
+    TypeError/KeyError deep in the fit); it must now fail up front with a
+    pointer to cold_ammonia_model_restricted_tex.
+    """
+    import pytest
+    with pytest.raises(ValueError) as ex:
+        ammonia.ammonia_model_restricted_tex(ammonia_func=ammonia.cold_ammonia)
+    assert 'cold_ammonia_model_restricted_tex' in str(ex.value)
+
+
 def test_normalized_gaussian_integral():
     """
     The normalized Gaussian used to divide by width**2 instead of width,

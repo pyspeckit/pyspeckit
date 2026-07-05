@@ -290,6 +290,19 @@ def ammonia(xarr, trot=20, tex=None, ntot=14, width=1, xoff_v=0.0, fortho=0.0,
 
     return model_spectrum
 
+def tkin_to_trot(tkin):
+    """
+    Convert kinetic temperature to (1,1)-(2,2) rotational temperature
+    following the scheme of Swift et al 2005
+    (http://esoads.eso.org/abs/2005ApJ...620..823S, eqn A6) and further
+    discussed in Equation 7 of Rosolowsky et al 2008
+    (http://adsabs.harvard.edu/abs/2008ApJS..175..509R)
+    """
+    dT0 = 41.18 # Energy difference between (2,2) and (1,1) in K
+    trot = tkin * (1 + (tkin/dT0)*np.log(1 + 0.6*np.exp(-15.7/tkin)))**-1
+    return trot
+
+
 def cold_ammonia(xarr, tkin, **kwargs):
     """
     Generate a model Ammonia spectrum based on input temperatures, column, and
@@ -307,8 +320,7 @@ def cold_ammonia(xarr, tkin, **kwargs):
         (http://adsabs.harvard.edu/abs/2008ApJS..175..509R)
     """
 
-    dT0 = 41.18 # Energy difference between (2,2) and (1,1) in K
-    trot = tkin * (1 + (tkin/dT0)*np.log(1 + 0.6*np.exp(-15.7/tkin)))**-1
+    trot = tkin_to_trot(tkin)
     log.debug("Cold ammonia turned T_K = {0} into T_rot = {1}".format(tkin,trot))
 
     return ammonia(xarr, trot=trot, **kwargs)
@@ -1238,15 +1250,28 @@ class ammonia_model_restricted_tex(ammonia_model):
     """
     Ammonia model with an explicitly restricted excitation temperature
     such that tex <= trot, set by the "delta" parameter (tex = trot - delta)
-    with delta > 0.  You can choose the ammonia funciton when you initialize
-    it (e.g., ``ammonia_model_restricted_tex(ammonia_func=ammonia)`` or
-    ``ammonia_model_restricted_tex(ammonia_func=cold_ammonia)``)
+    with delta > 0.
+
+    The restriction is enforced through the mpfit ``tied`` mechanism (the
+    default 'tied' string is ``p[0]-p[6]``, i.e., tex = trot - delta), which
+    only works because ``trot`` is itself a fit parameter.  For the
+    `cold_ammonia` variant, where the fitted parameter is the *kinetic*
+    temperature and trot is a nonlinear function of tkin, use
+    `cold_ammonia_model_restricted_tex` instead; passing
+    ``ammonia_func=cold_ammonia`` here will not work.
     """
     def __init__(self,
                  parnames=['trot', 'tex', 'ntot', 'width', 'xoff_v', 'fortho',
                            'delta'],
                  ammonia_func=ammonia,
                  **kwargs):
+        if ammonia_func is cold_ammonia:
+            raise ValueError("ammonia_model_restricted_tex does not support "
+                             "ammonia_func=cold_ammonia: the tex = trot - "
+                             "delta restriction must be applied to the "
+                             "rotational temperature derived (nonlinearly) "
+                             "from tkin.  Use "
+                             "cold_ammonia_model_restricted_tex instead.")
         super(ammonia_model_restricted_tex, self).__init__(npars=7,
                                                            parnames=parnames,
                                                            **kwargs)
@@ -1324,6 +1349,136 @@ class ammonia_model_restricted_tex(ammonia_model):
         'delta' is the difference between tex and trot
         """
         supes = super(ammonia_model_restricted_tex, self)
+        return supes.make_parinfo(params=params, fixed=fixed,
+                                  limitedmax=limitedmax, limitedmin=limitedmin,
+                                  minpars=minpars, maxpars=maxpars, tied=tied,
+                                  **kwargs)
+
+
+# 'tied' string enforcing tex = trot(tkin) - delta for
+# cold_ammonia_model_restricted_tex, where trot(tkin) is the Swift et al 2005
+# conversion (this must stay numerically identical to `tkin_to_trot`).
+# mpfit evaluates 'tied' strings with `exec` in a scope where the `numpy`
+# module is available.  Note that only the bracketed parameter indices
+# (p[0], p[6]) are re-indexed for multi-peak fits by
+# `_increment_string_number`; the numeric constants are left untouched.
+_cold_restricted_tex_tied = ('p[0] * (1 + (p[0]/41.18)'
+                             '*numpy.log(1 + 0.6*numpy.exp(-15.7/p[0])))**-1'
+                             ' - p[6]')
+
+
+class cold_ammonia_model_restricted_tex(ammonia_model):
+    """
+    Cold-ammonia model (kinetic temperature fit parameter, converted to
+    rotational temperature via the Swift et al 2005 approximation as in
+    `cold_ammonia`) with an explicitly restricted excitation temperature
+    such that tex <= trot, set by the "delta" parameter
+    (tex = trot(tkin) - delta) with delta >= 0.
+
+    Because trot is a nonlinear function of tkin, the restriction cannot be
+    expressed as the simple linear 'tied' string used by
+    `ammonia_model_restricted_tex`; instead the default 'tied' string
+    encodes the full tkin->trot conversion, and `n_ammonia` additionally
+    re-enforces tex = trot(tkin) - delta on every model evaluation.
+    (see https://github.com/pyspeckit/pyspeckit/issues/368 and
+    https://github.com/pyspeckit/pyspeckit/issues/307)
+
+    Note that ``tkin >= tkin_min`` and ``delta >= 0`` do not by themselves
+    guarantee ``tex >= TCMB``; if the fitter wanders into a corner of
+    parameter space where trot(tkin) - delta < TCMB, the underlying
+    `ammonia` model may raise an error about the model dropping below zero.
+    Setting an upper limit on delta (``limitedmax``/``maxpars``) such that
+    ``trot(tkin_min) - delta_max >= TCMB`` avoids that corner.
+    """
+    def __init__(self,
+                 parnames=['tkin', 'tex', 'ntot', 'width', 'xoff_v', 'fortho',
+                           'delta'],
+                 **kwargs):
+        super(cold_ammonia_model_restricted_tex, self).__init__(
+            npars=7, parnames=parnames, **kwargs)
+
+        def cold_ammonia_dtex(*args, **kwargs):
+            """
+            Strip out the 'delta' keyword and verify tex = trot(tkin) - delta
+            """
+            # for py2 compatibility, must strip out manually
+            delta = kwargs.pop('delta') if 'delta' in kwargs else None
+            trot = tkin_to_trot(kwargs['tkin'])
+            try:
+                np.testing.assert_allclose(trot - kwargs['tex'], delta)
+            except AssertionError:
+                raise ValueError(
+                    'trot(tkin) - tex != delta, even though that was '
+                    'specified.  If you overrode the default `tied` '
+                    'parameter setting, make sure it enforces '
+                    'tex = trot(tkin) - delta (a linear tie like '
+                    "'p[0]-p[6]' does NOT, because trot is a nonlinear "
+                    'function of tkin).  '
+                    f"tkin={kwargs['tkin']}, trot={trot}, "
+                    f"tex={kwargs['tex']}, delta={delta}, "
+                    f"trot-tex={trot - kwargs['tex']}")
+            return cold_ammonia(*args, **kwargs)
+        self.modelfunc = cold_ammonia_dtex
+
+    def n_ammonia(self, pars=None, parnames=None, **kwargs):
+        if parnames is not None:
+            for ii,pn in enumerate(parnames):
+                if ii % 7 == 1 and 'tex' not in pn:
+                    raise ValueError('bad parameter names')
+                if ii % 7 == 6 and 'delta' not in pn:
+                    raise ValueError('bad parameter names')
+        if pars is not None:
+            assert len(pars) % 7 == 0
+            for ii in range(int(len(pars)/7)):
+                try:
+                    # Case A: they're param objects
+                    # (setting the param directly can result in recursion errors)
+                    pars[1+ii*7].value = (tkin_to_trot(pars[0+ii*7].value)
+                                          - pars[6+ii*7].value)
+                except AttributeError:
+                    # Case B: they're just lists of values
+                    pars[1+ii*7] = tkin_to_trot(pars[0+ii*7]) - pars[6+ii*7]
+
+        supes = super(cold_ammonia_model_restricted_tex, self)
+        return supes.n_ammonia(pars=pars, parnames=parnames, **kwargs)
+
+    def _validate_parinfo(self,
+                          must_be_limited={'tkin': [True,False],
+                                           'tex': [False,False],
+                                           'ntot': [True, False],
+                                           'width': [True, False],
+                                           'xoff_v': [False, False],
+                                           'fortho': [True, True],
+                                           'delta': [True, False],
+                                          },
+                          required_limits={'tkin': [0, None],
+                                           'tex': [None,None],
+                                           'width': [0, None],
+                                           'ntot': [0, None],
+                                           'xoff_v': [None,None],
+                                           'fortho': [0,1],
+                                           'delta': [0, None],
+                                          }):
+        supes = super(cold_ammonia_model_restricted_tex, self)
+        return supes._validate_parinfo(must_be_limited=must_be_limited,
+                                       required_limits=required_limits)
+
+    def make_parinfo(self,
+                     params=(20,20,14,1.0,0.0,0.5,0),
+                     fixed=(False,False,False,False,False,False,False),
+                     limitedmin=(True,True,True,True,False,True,True),
+                     limitedmax=(False,False,False,False,False,True,False),
+                     minpars=(TCMB,TCMB,0,0,0,0,0),
+                     maxpars=(0,0,0,0,0,1,0),
+                     tied=('',_cold_restricted_tex_tied,'','','','',''),
+                     **kwargs
+                     ):
+        """
+        parnames=['tkin', 'tex', 'ntot', 'width', 'xoff_v', 'fortho', 'delta']
+
+        'delta' is the difference between trot (derived from tkin) and tex
+        """
+        supes = super(cold_ammonia_model_restricted_tex, self)
         return supes.make_parinfo(params=params, fixed=fixed,
                                   limitedmax=limitedmax, limitedmin=limitedmin,
                                   minpars=minpars, maxpars=maxpars, tied=tied,
