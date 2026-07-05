@@ -457,13 +457,19 @@ class Baseline(interactive.Interactive):
             print("Baseline wasn't subtracted; not unsubtracting.")
 
     def annotate(self, loc='upper left', fontsize=10):
+        from .annotation_format import format_mathtext_value
         if self.powerlaw:
-            bltext = "bl: $y=%6.3g\\times(x)^{-%6.3g}$" % (self.baselinepars[0],
-                                                           self.baselinepars[1])
+            bltext = "bl: $y=%s\\times(x)^{-%s}$" % (
+                format_mathtext_value(self.baselinepars[0]),
+                format_mathtext_value(self.baselinepars[1]))
         elif self.spline:
             bltext = "bl: spline"
         else:
-            bltext = "bl: $y=$"+"".join(["$%+6.3gx^{%i}$" % (f,self.order-i)
+            def _signed(v):
+                s = format_mathtext_value(v)
+                return s if s.startswith('-') else '+' + s
+            bltext = "bl: $y=$"+"".join(["$%sx^{%i}$" % (_signed(f),
+                                                         self.order-i)
                                          for i,f in
                                          enumerate(self.baselinepars)])
         #self.blleg = text(xloc,yloc     ,bltext,transform = self.Spectrum.plotter.axis.transAxes)
