@@ -65,3 +65,20 @@ start your python session with
 
 (I tend to use ``ipython --pylab``, but it's `deprecated
 <https://github.com/ipython/ipython/pull/5593>`_)
+
+
+How do I set limits (boundary conditions) on the fitted parameters?
+--------------------------------------------------------------------
+
+Use the ``limits`` and ``limited`` keywords to ``specfit`` (or the
+``minpars``/``maxpars``/``limitedmin``/``limitedmax`` variants), e.g.:
+
+.. code:: python
+
+   sp.specfit(fittype='gaussian', guesses=[1, 45, 5],
+              limited=[(True, True), (False, False), (True, False)],
+              limits=[(0, 3), (0, 0), (0, 0)])
+
+constrains the amplitude to the range 0-3 and the width to be positive.
+Parameters can also be held ``fixed`` or ``tied`` to one another.  See
+:ref:`constraining-parameters` for complete, runnable examples.
