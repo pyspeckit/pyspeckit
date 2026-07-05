@@ -207,6 +207,99 @@ spc5.plotter(axis=spc3.plotter.axis, color='r', clear=False)
 spc4.plotter(axis=spc3.plotter.axis, color='b', clear=False)
 """
 
+def make_2comp_synthspec():
+    kwargs = dict(lte=False, tkin=None, lines=('oneone', 'twotwo'))
+    redhot = dict(trot=25, tex=10, column=13, width=1, vcen=1)
+    bluecold = dict(trot=12, tex=7, column=13, width=.2, vcen=-1)
+    redhot.update(kwargs)
+    bluecold.update(kwargs)
+    sp_redhot = make_synthspec(**redhot)
+    sp_bluecold = make_synthspec(**bluecold)
+
+    sp = sp_redhot.copy()
+    sp.data = sp_redhot.data + sp_bluecold.data
+    return sp
+
+def test_ammonia_npeaks_kwarg_replicated_guesses():
+    """
+    Regression test: specfit(fittype='ammonia', npeaks=2, guesses=[...6...])
+    used to crash with "TypeError: _make_parinfo() got multiple values for
+    keyword argument 'npeaks'".  A single component's worth of guesses should
+    be replicated for each peak.
+    """
+    sp = make_2comp_synthspec()
+    sp.specfit(fittype='ammonia', npeaks=2, guesses=[23, 5, 13.1, 1, 0, 0.5],
+               fixed=[False, False, False, False, False, True])
+
+    assert sp.specfit.npeaks == 2
+    assert len(sp.specfit.parinfo) == 12
+    assert all(np.isfinite(sp.specfit.parinfo.values))
+
+def test_ammonia_npeaks_kwarg_full_guesses():
+    """
+    npeaks=2 with a full set of 2*6 guesses must also work and should recover
+    the two input components.
+    """
+    sp = make_2comp_synthspec()
+    sp.specfit(fittype='ammonia', npeaks=2,
+               guesses=[26, 9, 13.1, 0.9, 1.2, 0,
+                        13, 6, 13.1, 0.3, -1.2, 0],
+               fixed=[False, False, False, False, False, True])
+
+    assert sp.specfit.npeaks == 2
+    assert len(sp.specfit.parinfo) == 12
+    np.testing.assert_almost_equal(sp.specfit.parinfo['xoff_v0'].value, 1.0, 2)
+    np.testing.assert_almost_equal(sp.specfit.parinfo['xoff_v1'].value, -1.0, 2)
+    np.testing.assert_almost_equal(sp.specfit.parinfo['width0'].value, 1.0, 2)
+    np.testing.assert_almost_equal(sp.specfit.parinfo['width1'].value, 0.2, 2)
+
+def test_ammonia_npeaks_kwarg_single_peak():
+    """
+    An explicit (redundant) npeaks=1 must not change single-peak behavior.
+    """
+    spc = make_synthspec()
+    spc.specfit(fittype='ammonia', npeaks=1, guesses=[23, 22, 13.1, 1, 0.5, 0],
+                fixed=[False, False, False, False, False, True])
+
+    assert spc.specfit.npeaks == 1
+    assert len(spc.specfit.parinfo) == 6
+    np.testing.assert_almost_equal(spc.specfit.parinfo[0].value, 25, 6)
+    np.testing.assert_almost_equal(spc.specfit.parinfo[4].value, 0.0, 3)
+
+def test_ammonia_npeaks_kwarg_mismatch_raises():
+    """
+    npeaks inconsistent with the number of guesses should be a clear
+    ValueError, not a TypeError.
+    """
+    sp = make_2comp_synthspec()
+    with pytest.raises(ValueError) as ex:
+        sp.specfit(fittype='ammonia', npeaks=3,
+                   guesses=[23, 5, 13.1, 1, 0, 0.5,
+                            23, 5, 13.1, 1, 5, 0.5])
+    assert 'npeaks=3' in str(ex.value)
+
+def test_cold_ammonia_npeaks_kwarg():
+    sp = make_2comp_synthspec()
+    sp.specfit.Registry.add_fitter('cold_ammonia',
+                                   ammonia.cold_ammonia_model(), 6)
+    sp.specfit(fittype='cold_ammonia', npeaks=2,
+               guesses=[23, 5, 13.1, 1, 0, 0.5],
+               fixed=[False, False, False, False, False, True])
+
+    assert sp.specfit.npeaks == 2
+    assert len(sp.specfit.parinfo) == 12
+
+def test_ammonia_restricted_tex_npeaks_kwarg():
+    sp = make_2comp_synthspec()
+    sp.specfit.Registry.add_fitter('ammonia_restricted_tex',
+                                   ammonia.ammonia_model_restricted_tex(), 7)
+    sp.specfit(fittype='ammonia_restricted_tex', npeaks=2,
+               guesses=[23, 5, 13.1, 1, 0, 0.5, 18],
+               fixed=[False, False, False, False, False, True, False])
+
+    assert sp.specfit.npeaks == 2
+    assert len(sp.specfit.parinfo) == 14
+
 def test_ammonia_guessing():
 
     mod = ammonia.ammonia_model()

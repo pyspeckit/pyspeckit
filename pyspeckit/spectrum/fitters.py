@@ -716,7 +716,37 @@ class Specfit(interactive.Interactive):
         if len(guesses) < self.Registry.npars[self.fittype]:
             raise ValueError("Too few parameters input.  Need at least %i for %s models" % (self.Registry.npars[self.fittype],self.fittype))
 
-        self.npeaks = len(guesses)//self.Registry.npars[self.fittype]
+        # If npeaks was specified as a keyword, remove it from the kwarg dicts
+        # (it would otherwise be passed a second time - in addition to
+        # npeaks=self.npeaks - to _make_parinfo and the fitter below, raising
+        # a TypeError) and reconcile it with the number of guesses provided.
+        # Note that self.fitkwargs and kwargs may or may not be the same
+        # dictionary object depending on the call path, so both are cleaned.
+        npars = self.Registry.npars[self.fittype]
+        npeaks_kwarg = kwargs.pop('npeaks', None)
+        fitkwargs_npeaks = self.fitkwargs.pop('npeaks', None)
+        if npeaks_kwarg is None:
+            npeaks_kwarg = fitkwargs_npeaks
+
+        self.npeaks = len(guesses)//npars
+
+        if npeaks_kwarg is not None and int(npeaks_kwarg) != self.npeaks:
+            npeaks_kwarg = int(npeaks_kwarg)
+            if len(guesses) == npars and npeaks_kwarg > 1:
+                # a single component's worth of guesses was given; replicate
+                # them for each peak (consistent with the behavior of
+                # make_parinfo when npeaks > 1)
+                guesses = list(guesses) * npeaks_kwarg
+                self.npeaks = npeaks_kwarg
+            else:
+                raise ValueError("npeaks={0} was specified, but {1} guesses "
+                                 "were provided for a model with {2} "
+                                 "parameters per component.  Provide either "
+                                 "{2} guesses (they will be replicated for "
+                                 "each peak) or {2}*npeaks={3} guesses."
+                                 .format(npeaks_kwarg, len(guesses), npars,
+                                         npars*npeaks_kwarg))
+
         self.fitter = self.Registry.multifitters[self.fittype]
         self.vheight = False
         if self.fitter.vheight:
